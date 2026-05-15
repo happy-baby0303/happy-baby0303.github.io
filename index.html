@@ -3,387 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>육아 마스터 프로 | 가계부 · 해열제 · 원더윅스</title>
-    <meta name="description" content="대한민국 평균 육아비 비교, 안전한 해열제 계산기, 원더윅스 정밀 진단.">
+    <title>토실이 육아 마스터 | 누적 가계부 에디션</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <style>
-        :root { 
-            --primary: #4A90E2; 
-            --accent: #FF6B6B;
-            --text-m: #2D3436; 
-            --text-s: #636E72; 
-            --border: #E1E8ED;
-        }
+        :root { --primary: #4A90E2; --accent: #FF6B6B; --text-m: #2D3436; --text-s: #636E72; --border: #E1E8ED; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        /* 🌟 확 바뀐 배경: 코튼 캔디 (소프트 핑크 -> 소프트 블루) 그라데이션 */
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background: linear-gradient(135deg, #F3E7E9 0%, #E3EEFF 100%); 
-            color: var(--text-m); 
-            line-height: 1.6; 
-            padding-bottom: 100px;
-            min-height: 100vh;
-        }
-
+        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #F3E7E9 0%, #E3EEFF 100%); color: var(--text-m); line-height: 1.6; padding-bottom: 110px; min-height: 100vh; }
         .wrapper { max-width: 600px; margin: 0 auto; padding: 25px 15px; }
-        
-        .tab-content { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .tab-content { display: none; animation: slideUp 0.4s ease-out; }
         .tab-content.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 🌟 확 바뀐 카드 UI: 반투명 글래스모피즘(Glassmorphism) 효과 */
-        .app-box { 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 30px; 
-            padding: 35px 25px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
-            border: 1px solid rgba(255,255,255,0.6);
-            margin-bottom: 25px;
-        }
         
-        .app-title { font-size: 26px; font-weight: 900; letter-spacing: -0.8px; margin-bottom: 8px; color: var(--primary); }
-        .app-desc { font-size: 14.5px; color: var(--text-s); margin-bottom: 30px; line-height: 1.5; }
+        .app-box { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 30px; padding: 35px 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); margin-bottom: 25px; position: relative; }
+        
+        /* 상단 내역 확인 버튼 */
+        .history-btn { position: absolute; top: 30px; right: 25px; background: #FFF; border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .history-btn:hover { background: var(--primary); color: #FFF; }
 
+        .app-title { font-size: 24px; font-weight: 900; letter-spacing: -0.8px; margin-bottom: 8px; color: var(--primary); }
+        .app-desc { font-size: 14px; color: var(--text-s); margin-bottom: 30px; line-height: 1.5; }
+        
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 14px; font-weight: 700; color: #4E5968; margin-bottom: 8px; }
         .input-wrapper { position: relative; }
-        .input-wrapper input { 
-            width: 100%; padding: 18px 50px 18px 18px; font-size: 18px; font-weight: 700; 
-            border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; background: rgba(255,255,255,0.9); transition: 0.2s; text-align: right;
-        }
-        .input-wrapper input[type="date"] { text-align: left; padding: 18px; }
+        .input-wrapper input { width: 100%; padding: 18px 50px 18px 18px; font-size: 18px; font-weight: 700; border: 1px solid rgba(0,0,0,0.1); border-radius: 16px; background: rgba(255,255,255,0.9); transition: 0.2s; text-align: right; }
         .input-wrapper input:focus { border-color: var(--primary); outline: none; background: #FFF; box-shadow: 0 0 0 4px rgba(74,144,226,0.15); }
-        .unit-label { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 600; color: var(--text-sub); }
-
+        .unit-label { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 600; color: var(--text-sub); pointer-events: none; }
+        
         .btn-main { width: 100%; padding: 20px; background: var(--primary); color: white; border: none; border-radius: 18px; font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 8px 20px rgba(74,144,226,0.3); }
-        .btn-main:active { transform: scale(0.96); }
+        
+        /* 내역 모달/목록 */
+        #history-list-area { display: none; margin-top: 20px; background: #FFF; border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
+        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #F2F4F6; font-size: 14px; }
+        .history-item span:first-child { font-weight: 700; color: var(--text-s); }
+        .history-item span:last-child { font-weight: 800; color: var(--text-m); }
 
-        /* 결과 창 공통 */
-        #money-result, #fever-result, #growth-result { display: none; margin-top: 25px; border-top: 2px dashed rgba(0,0,0,0.1); padding-top: 25px; }
-        .result-card { background: rgba(255,255,255,0.9); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
+        .result-card { background: rgba(255,255,255,0.9); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid rgba(0,0,0,0.05); margin-top: 25px; display: none; }
         .stat-badge { display: inline-block; padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: 800; background: #E6F0FF; color: var(--primary); margin-bottom: 15px; }
-        
-        /* 해열제 UI */
-        .disclaimer-box { background: #FFF0F1; border: 1px solid #FFD1D4; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+
+        /* 공통 UI */
+        .disclaimer-box { background: #FFF0F1; border: 1px solid #FFD1D4; border-radius: 16px; padding: 15px; margin-bottom: 20px; font-size: 13px; color: #D32F2F; }
         .checkbox-area { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 15px; background: #FFF; border-radius: 16px; border: 1px solid rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .checkbox-area input { width: 22px; height: 22px; margin-top: 2px; accent-color: #D32F2F; }
         .pill-card { background: #FFF3F4; border: 1px solid #FFE0E2; border-radius: 16px; padding: 20px; margin-bottom: 15px; text-align: center; }
         .pill-card.blue { background: #F0F5FF; border: 1px solid #D6E4FF; }
-        .pill-title { font-size: 16px; font-weight: 800; margin-bottom: 5px; }
-        .pill-dose { font-size: 28px; font-weight: 900; color: var(--danger); letter-spacing: -1px; }
-        .pill-card.blue .pill-dose { color: var(--primary); }
-
-        /* 원더윅스 UI */
         .ww-status-box { background: #FFF9E6; border: 1px solid #FFE58F; border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 20px; }
-        .ww-status-title { font-size: 18px; font-weight: 800; color: #B78103; margin-bottom: 8px; }
         .ww-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
         .ww-table th, .ww-table td { padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.05); text-align: left; }
-        .ww-table th { color: var(--text-s); font-weight: 700; background: rgba(0,0,0,0.02); }
         .ww-table tr.active td { background: #FFF9E6; font-weight: 800; color: #B78103; }
 
-        /* 하단 탭 바 */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 12px 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; color: #B0B8C1; cursor: pointer; transition: 0.3s; }
-        .nav-item .icon { font-size: 24px; margin-bottom: 4px; display: block; filter: grayscale(100%); opacity: 0.6; }
-        .nav-item .label { font-size: 11px; font-weight: 800; }
+        .nav-item { flex: 1; text-align: center; color: #B0B8C1; cursor: pointer; }
         .nav-item.active { color: var(--primary); }
-        .nav-item.active .icon { filter: grayscale(0%); opacity: 1; transform: scale(1.15); }
-
-        /* SEO 컨텐츠 박스 (애드센스 방어용) */
-        .seo-box { background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); border-radius: 30px; padding: 40px 25px; margin-top: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.6); }
-        .seo-box h2 { font-size: 20px; font-weight: 900; margin-bottom: 20px; border-left: 5px solid var(--primary); padding-left: 15px; }
-        .seo-box h3 { font-size: 16.5px; font-weight: 800; margin: 25px 0 10px 0; color: #333; }
-        .seo-box p { font-size: 15px; color: #4E5968; margin-bottom: 15px; line-height: 1.8; word-break: keep-all; }
+        .nav-item .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+        .nav-item .label { font-size: 11px; font-weight: 800; }
+        .seo-box { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); border-radius: 30px; padding: 40px 25px; margin-top: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    
-    <!-- 탭 1: 가계부 (평균비교 + 커피값 환산) -->
+    <!-- 가계부 탭 -->
     <div id="tab-money" class="tab-content active">
         <div class="app-box">
-            <h1 class="app-title">📊 우리 집 육아 재무 관리</h1>
-            <p class="app-desc">항목별 지출을 입력하세요. 대한민국 평균 부모님들과 우리 집 소비 수준을 비교해 드립니다.</p>
+            <button class="history-btn" onclick="toggleHistory()">🔍 내역 확인</button>
+            <h1 class="app-title">📊 토실이 육아 가계부</h1>
+            <p class="app-desc">항목별 지출을 입력하세요. 지난달 데이터와 대한민국 평균치를 분석합니다.</p>
             
-            <div class="input-group">
-                <label>기저귀 및 위생용품 (한 달)</label>
-                <div class="input-wrapper">
-                    <input type="text" inputmode="numeric" id="v-diaper" placeholder="0" onkeyup="formatNum(this)">
-                    <span class="unit-label">원</span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>분유 및 식비 (이유식 포함)</label>
-                <div class="input-wrapper">
-                    <input type="text" inputmode="numeric" id="v-food" placeholder="0" onkeyup="formatNum(this)">
-                    <span class="unit-label">원</span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label>의류 및 육아 아이템 (기타)</label>
-                <div class="input-wrapper">
-                    <input type="text" inputmode="numeric" id="v-etc" placeholder="0" onkeyup="formatNum(this)">
-                    <span class="unit-label">원</span>
-                </div>
-            </div>
+            <!-- 입력창 -->
+            <div class="input-group"><label>기저귀/위생용품</label><div class="input-wrapper"><input type="text" inputmode="numeric" id="v-diaper" placeholder="0" onkeyup="formatNum(this)"><span class="unit-label">원</span></div></div>
+            <div class="input-group"><label>분유/식비</label><div class="input-wrapper"><input type="text" inputmode="numeric" id="v-food" placeholder="0" onkeyup="formatNum(this)"><span class="unit-label">원</span></div></div>
+            <div class="input-group"><label>기타(옷/병원/장난감)</label><div class="input-wrapper"><input type="text" inputmode="numeric" id="v-etc" placeholder="0" onkeyup="formatNum(this)"><span class="unit-label">원</span></div></div>
             
-            <button class="btn-main" onclick="analyzeMoney()">가계부 정밀 진단하기</button>
+            <button class="btn-main" onclick="analyzeMoney()">이번 달 지출 분석</button>
 
-            <div id="money-result">
-                <div id="capture-area" class="result-card">
-                    <div class="stat-badge">대한민국 평균 대비 분석 결과</div>
-                    <div id="money-total" style="font-size:38px; font-weight:900; letter-spacing:-1px;">0원</div>
-                    <div id="money-avg-percent" style="font-size:16px; font-weight:800; color:var(--primary); margin-bottom:20px;"></div>
-                    
-                    <div style="height:200px; margin-bottom:20px;"><canvas id="trendChart"></canvas></div>
-                    
-                    <div id="money-insight" style="text-align:left; font-size:14.5px; line-height:1.7; padding:20px; background:rgba(255,255,255,0.8); border-radius:16px; border:1px solid rgba(0,0,0,0.05);"></div>
-                </div>
-                <button class="btn-main" style="background:#2D3436; margin-top:10px;" onclick="downloadImg()">📸 이미지로 저장하여 단톡방 공유</button>
+            <!-- 누적 내역 보기 (평소엔 숨김) -->
+            <div id="history-list-area">
+                <h3 style="font-size:16px; margin-bottom:15px;">📅 전체 지출 내역</h3>
+                <div id="history-items"></div>
+                <button class="btn-main" style="background:#636E72; font-size:13px; padding:10px; margin-top:15px;" onclick="toggleHistory()">닫기</button>
+            </div>
+
+            <!-- 분석 결과 -->
+            <div id="money-result" class="result-card">
+                <div class="stat-badge">분석 리포트</div>
+                <div id="money-total" style="font-size:38px; font-weight:900; letter-spacing:-1px;">0원</div>
+                <div id="money-diff" style="font-size:16px; font-weight:800; margin-bottom:20px;"></div>
+                <div id="money-avg-percent" style="font-size:14px; font-weight:700; color:var(--primary); margin-bottom:15px;"></div>
+                <div style="height:180px; margin-bottom:20px;"><canvas id="trendChart"></canvas></div>
+                <div id="money-insight" style="text-align:left; font-size:14px; line-height:1.7; padding:15px; background:#FFF; border-radius:12px; border:1px solid #EEE;"></div>
             </div>
         </div>
     </div>
 
-    <!-- 탭 2: 해열제 (동의 체크박스 필수) -->
+    <!-- 해열제 탭 -->
     <div id="tab-fever" class="tab-content">
         <div class="app-box">
-            <h1 class="app-title">🌡️ 안전 해열제 도우미</h1>
-            <p class="app-desc">아이 몸무게에 따른 가장 안전한 복용 범위를 계산합니다.</p>
-            
-            <div class="disclaimer-box">
-                <p style="color:#D32F2F; font-size:14px; font-weight:800; margin-bottom:8px;">🚨 [법적 고지 및 의사 상담 필수]</p>
-                <p style="font-size:13px; color:#555; line-height:1.6;">
-                    본 계산기는 일반적인 소아 약전 기준(체중당 10~15mg)을 반영한 <strong>단순 참고용</strong>입니다. 예방접종 후 발생한 열 등 특수한 경우에는 <strong>반드시 소아과 의사의 개별 지시(예: 2시간 간격 복용 등)를 1순위로 따르세요.</strong> 본 사이트는 의료적 결과에 법적 책임을 지지 않습니다.
-                </p>
-            </div>
-
-            <div class="checkbox-area" onclick="toggleCheck(event)">
-                <input type="checkbox" id="agree-check">
-                <label for="agree-check" style="font-size:13.5px; font-weight:800; color:#D32F2F; line-height:1.5;">모든 주의사항을 확인했으며, 본인의 판단하에 참고용으로만 사용하겠습니다.</label>
-            </div>
-
-            <div class="input-group">
-                <label>아이 몸무게 (kg)</label>
-                <div class="input-wrapper">
-                    <input type="number" id="v-weight" placeholder="예: 12.5" step="0.1">
-                    <span class="unit-label">kg</span>
-                </div>
-            </div>
-            <button class="btn-main" onclick="calcFever()" style="background:var(--accent); box-shadow: 0 8px 20px rgba(255,107,107,0.3);">안전 복용량 범위 확인</button>
-
+            <h1 class="app-title">🌡️ 안전 해열제 계산기</h1>
+            <div class="disclaimer-box">🚨 [필독] 본 계산기는 참고용이며, 의사/약사의 지시가 항상 우선입니다. 특히 접종 후 열은 상담이 필수입니다.</div>
+            <div class="checkbox-area" onclick="document.getElementById('agree-check').click()"><input type="checkbox" id="agree-check" onclick="event.stopPropagation()"><label style="font-size:13px; font-weight:700; color:#D32F2F;">면책 조항에 동의합니다 (결과 확인 필수)</label></div>
+            <div class="input-group"><label>아이 몸무게 (kg)</label><div class="input-wrapper"><input type="number" id="v-weight" placeholder="12.5" step="0.1"><span class="unit-label">kg</span></div></div>
+            <button class="btn-main" onclick="calcFever()" style="background:var(--accent);">용량 확인</button>
             <div id="fever-result">
-                <div class="pill-card">
-                    <div class="pill-title">🔴 아세트아미노펜 계열</div>
-                    <div style="font-size:12.5px; color:var(--text-s); margin-bottom:10px;">(챔프 빨강, 타이레놀 등)</div>
-                    <div class="pill-dose"><span id="dose-red">0 ~ 0</span> <small style="font-size:16px;">ml</small></div>
-                </div>
-                <div class="pill-card blue">
-                    <div class="pill-title">🔵 이부프로펜 계열</div>
-                    <div style="font-size:12.5px; color:var(--text-s); margin-bottom:10px;">(챔프 파랑, 부루펜 등)</div>
-                    <div class="pill-dose"><span id="dose-blue">0 ~ 0</span> <small style="font-size:16px;">ml</small></div>
-                </div>
+                <div class="pill-card"><div class="pill-title">🔴 아세트아미노펜 (빨강)</div><div id="dose-red" class="pill-dose">0~0 ml</div></div>
+                <div class="pill-card blue"><div class="pill-title">🔵 이부프로펜 (파랑)</div><div id="dose-blue" class="pill-dose">0~0 ml</div></div>
             </div>
         </div>
     </div>
 
-    <!-- 탭 3: 원더윅스 (버그 완벽 수정 및 디데이 태그 복구) -->
+    <!-- 원더윅스 탭 -->
     <div id="tab-growth" class="tab-content">
         <div class="app-box">
-            <h1 class="app-title">🐣 원더윅스 & 성장 시기</h1>
-            <p class="app-desc">아이의 폭풍 성장기, 미리 알고 대처하면 마음이 편안해집니다.</p>
-            
-            <div class="input-group">
-                <label>출산 예정일 (정확도를 위해 예정일 권장)</label>
-                <div class="input-wrapper">
-                    <input type="date" id="v-birth">
-                </div>
-            </div>
-            <button class="btn-main" onclick="calcGrowth()" style="background:#0DB385; box-shadow: 0 8px 20px rgba(13,179,133,0.3);">우리아이 성장 분석</button>
-
-            <!-- 🌟 수정된 원더윅스 결과 영역 -->
-            <div id="growth-result">
-                <div style="text-align:center; margin-bottom:25px;">
-                    <div style="font-size:15px; color:var(--text-s); margin-bottom:5px; font-weight:600;">오늘은 태어난 지</div>
-                    <div style="font-size:42px; font-weight:900; color:#0DB385; letter-spacing:-1px; margin-bottom:15px;">D+<span id="res-dday">0</span>일</div>
-                    <div style="display:inline-block; background:#E6F7F2; padding:8px 18px; border-radius:12px; font-size:15px; font-weight:800; color:#0DB385;">생후 <span id="res-week">0</span>주 차</div>
-                </div>
-
-                <div class="ww-status-box" id="ww-status"></div>
-                
-                <div class="result-card" style="padding:20px 15px; background:rgba(255,255,255,0.6);">
-                    <h3 style="font-size:16px; margin-bottom:10px; color:var(--text-m); font-weight:800;">📅 전체 원더윅스 타임라인</h3>
-                    <table class="ww-table" id="ww-table"></table>
-                </div>
+            <h1 class="app-title">🐣 원더윅스 타이머</h1>
+            <div class="input-group"><label>출산 예정일</label><div class="input-wrapper"><input type="date" id="v-birth"></div></div>
+            <button class="btn-main" onclick="calcGrowth()" style="background:#0DB385;">분석하기</button>
+            <div id="growth-result" style="display:none; margin-top:20px; text-align:center;">
+                <div style="font-size:42px; font-weight:900; color:#0DB385;">D+<span id="res-dday">0</span></div>
+                <div class="stat-badge">생후 <span id="res-week">0</span>주 차</div>
+                <div id="ww-status" class="ww-status-box"></div>
+                <table class="ww-table" id="ww-table"></table>
             </div>
         </div>
     </div>
 
-    <!-- SEO 컨텐츠 박스 (애드센스 통과용) -->
+    <!-- SEO & Footer -->
     <div class="seo-box">
-        <h2>💡 2026 스마트 육아 경제 가이드</h2>
-        <p>현대 육아에서 가장 중요한 것은 정보력입니다. 기저귀 한 장, 분유 한 통을 살 때도 핫딜 단가를 계산하는 습관이 가계 경제의 기틀을 마련합니다. 본 도구는 대한민국 평균 부모들의 소모품 지출 데이터를 기반으로 하여 우리 집의 소비를 객관적으로 돌아볼 수 있게 설계되었습니다.</p>
-        
-        <h3>1. 대한민국 평균 육아 비용 분석</h3>
-        <p>보건사회연구원 및 최신 통계 데이터에 따르면, 영유아 1인당 필수 소모품 지출(기저귀, 분유, 위생용품)의 평균은 월 약 25만 원~32만 원 선입니다. 본 진단기에서 '평균'으로 잡은 기준은 28만 원입니다. 만약 이보다 높게 나오고 있다면 브랜드 등급을 낮추거나 대용량 구매를 통한 단가 절감이 필요합니다.</p>
-
-        <h3>2. 육아비 방어를 위한 '체감가' 계산법</h3>
-        <p>단순 총액만 보기보다 장당 단가(기저귀 300원 이하 등)를 계산하는 것이 유리합니다. 또한 정부에서 지원하는 부모급여나 아동수당 등을 단순 생활비로 쓰기보다 아이 이름의 적립식 펀드나 청약 통장으로 이체하는 '재무 격리 전략'을 적극 추천합니다.</p>
-
-        <h3>3. 해열제 복용 및 예방접종 후 관리</h3>
-        <p>예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜과 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
+        <h2>💡 토실이의 육아 경제 가이드</h2>
+        <p>대한민국 평균 육아비는 월 28만원 선입니다. 지출을 기록하고 비교하는 것만으로도 불필요한 지출을 20% 이상 줄일 수 있습니다. 해열제 복용 시에는 반드시 체중을 기준으로 용량을 결정하세요.</p>
     </div>
 
+    <div style="text-align: center; padding: 30px 20px 60px; font-size: 12px; color: #B0B8C1; line-height: 1.8;">
+        <strong>&copy; 2026. 토실이 육아 마스터. All rights reserved.</strong><br>
+        Created for <span style="color:#4A90E2; font-weight:800;">토실이네 육아 일기</span> by 든든한 남편
+    </div>
 </div>
 
-<!-- 하단 탭 바 -->
 <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('money', this)">
-        <span class="icon">💰</span><span class="label">가계부</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('fever', this)">
-        <span class="icon">🌡️</span><span class="label">해열제</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('growth', this)">
-        <span class="icon">🐣</span><span class="label">원더윅스</span>
-    </div>
+    <div class="nav-item active" onclick="switchTab('money', this)"><span class="icon">💰</span><span class="label">가계부</span></div>
+    <div class="nav-item" onclick="switchTab('fever', this)"><span class="icon">🌡️</span><span class="label">해열제</span></div>
+    <div class="nav-item" onclick="switchTab('growth', this)"><span class="icon">🐣</span><span class="label">원더윅스</span></div>
 </div>
 
 <script>
     let trendChart = null;
-
-    // 탭 전환
     function switchTab(id, el) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('tab-' + id).classList.add('active');
         el.classList.add('active');
     }
-
-    // 숫자 콤마
     function formatNum(el) {
         let v = el.value.replace(/[^0-9]/g, '');
         if(v) el.value = Number(v).toLocaleString();
     }
     function getV(id) { return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; }
 
-    // 가계부 분석 (평균비교 + 커피값 포함)
+    // [기능] 가계부 분석 & 비교
     function analyzeMoney() {
         const d = getV('v-diaper'), f = getV('v-food'), e = getV('v-etc');
         const total = d + f + e;
-        if(total === 0) return alert("금액을 정확히 입력해주세요.");
+        if(total === 0) return alert("금액을 입력하세요.");
 
-        const avgBase = 280000; 
-        const percent = Math.round((total / avgBase) * 100);
+        const date = new Date();
+        const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        const lastKey = `${date.getMonth() === 0 ? date.getFullYear()-1 : date.getFullYear()}-${date.getMonth() === 0 ? 12 : date.getMonth()}`;
+
+        let history = JSON.parse(localStorage.getItem('babyDataV3')) || {};
         
-        document.getElementById('money-total').innerText = total.toLocaleString() + "원";
-        document.getElementById('money-avg-percent').innerText = `대한민국 평균 대비 ${percent}% 수준`;
+        // 지난달과 비교 멘트 생성
+        let diffMsg = "";
+        if(history[lastKey]) {
+            const diff = total - history[lastKey];
+            if(diff > 0) diffMsg = `지난달보다 <span style="color:var(--accent)">${diff.toLocaleString()}원 더</span> 썼어요 📈`;
+            else if(diff < 0) diffMsg = `지난달보다 <span style="color:var(--primary)">${Math.abs(diff).toLocaleString()}원 절약</span>했어요 📉`;
+            else diffMsg = "지난달과 똑같이 썼어요! ⚖️";
+        } else {
+            diffMsg = "첫 기록입니다! 반가워요 ✨";
+        }
 
-        const history = JSON.parse(localStorage.getItem('finalBabyData')) || {};
-        const monthKey = new Date().getFullYear() + "-" + (new Date().getMonth() + 1);
         history[monthKey] = total;
-        localStorage.setItem('finalBabyData', JSON.stringify(history));
+        localStorage.setItem('babyDataV3', JSON.stringify(history));
 
-        // ☕ 커피값 환산 로직
+        // 결과 업데이트
+        document.getElementById('money-total').innerText = total.toLocaleString() + "원";
+        document.getElementById('money-diff').innerHTML = diffMsg;
+        const percent = Math.round((total / 280000) * 100);
+        document.getElementById('money-avg-percent').innerText = `대한민국 평균 대비 ${percent}% 수준`;
+        
         const coffee = Math.floor(total / 4500);
-        let msg = `☕ 이번 달 지출은 <strong>스타벅스 아메리카노 ${coffee}잔</strong>과 같습니다.<br><br>`;
-        
-        if(percent > 120) msg += "<span style='color:var(--danger)'>⚠️ 평균보다 지출이 꽤 많습니다!</span> 핫딜 알림을 꼭 확인하세요.<br><br>";
-        else if(percent < 80) msg += "<span style='color:var(--success)'>🌿 아주 알뜰한 육아!</span> 아낀 돈으로 부부 커피 한 잔 어떠세요?<br><br>";
-        else msg += "👍 대한민국 평균 수준의 건강하고 안정적인 지출입니다.<br><br>";
-        
-        let max = Math.max(d, f, e);
-        if(max === d && d > 0) msg += "👉 <strong>기저귀/위생용품</strong> 지출이 가장 큽니다.";
-        else if(max === f && f > 0) msg += "👉 <strong>식비/분유</strong> 지출이 큽니다. 아이가 쑥쑥 크는 증거네요!";
-        else if(max === e && e > 0) msg += "👉 <strong>장난감/의류</strong> 지출이 큽니다. 당근마켓을 활용해보세요!";
+        document.getElementById('money-insight').innerHTML = `☕ 이 돈이면 스벅 아메리카노 <strong>${coffee}잔</strong>입니다!<br>오늘도 육아하느라 고생한 토실이님, 커피 한 잔의 여유를 가지세요.`;
 
-        document.getElementById('money-insight').innerHTML = msg;
         document.getElementById('money-result').style.display = 'block';
-        setTimeout(() => drawChart(history), 100);
+        updateChart(history);
     }
 
-    function drawChart(history) {
-        const keys = Object.keys(history).sort();
-        const labels = keys.slice(-5).map(k => k.split('-')[1] + "월");
-        const vals = keys.slice(-5).map(k => history[k]);
+    // [기능] 내역 확인 토글
+    function toggleHistory() {
+        const area = document.getElementById('history-list-area');
+        if(area.style.display === 'block') {
+            area.style.display = 'none';
+        } else {
+            const history = JSON.parse(localStorage.getItem('babyDataV3')) || {};
+            const items = document.getElementById('history-items');
+            items.innerHTML = "";
+            const sortedKeys = Object.keys(history).sort().reverse();
+            if(sortedKeys.length === 0) items.innerHTML = "<p style='color:#aaa; text-align:center;'>아직 기록이 없습니다.</p>";
+            sortedKeys.forEach(k => {
+                items.innerHTML += `<div class="history-item"><span>${k.replace('-','년 ')}월</span><span>${history[k].toLocaleString()}원</span></div>`;
+            });
+            area.style.display = 'block';
+        }
+    }
+
+    function updateChart(history) {
         const ctx = document.getElementById('trendChart').getContext('2d');
+        const sortedKeys = Object.keys(history).sort();
+        const labels = sortedKeys.slice(-5).map(k => k.split('-')[1] + "월");
+        const vals = sortedKeys.slice(-5).map(k => history[k]);
         if(trendChart) trendChart.destroy();
         trendChart = new Chart(ctx, {
             type: 'bar',
-            data: { labels: labels, datasets: [{ data: vals, backgroundColor: '#4A90E2', borderRadius: 6, barPercentage: 0.5 }] },
+            data: { labels: labels, datasets: [{ data: vals, backgroundColor: '#4A90E2', borderRadius: 8 }] },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false } }, plugins: { legend: { display: false } } }
         });
     }
 
-    // 해열제 (동의 박스)
-    function toggleCheck(e) { 
-        if(e.target.tagName !== 'INPUT') {
-            const cb = document.getElementById('agree-check');
-            cb.checked = !cb.checked;
-        }
-    }
-
     function calcFever() {
-        if(!document.getElementById('agree-check').checked) return alert("⚠️ 안전을 위해 '면책 조항'에 동의(체크)하셔야 합니다.");
+        if(!document.getElementById('agree-check').checked) return alert("면책 조항에 동의해주세요.");
         const w = Number(document.getElementById('v-weight').value);
         if(!w) return alert("몸무게를 입력하세요.");
-        document.getElementById('dose-red').innerText = `${(w*0.3).toFixed(1)} ~ ${(w*0.38).toFixed(1)}`;
-        document.getElementById('dose-blue').innerText = `${(w*0.4).toFixed(1)} ~ ${(w*0.5).toFixed(1)}`;
+        document.getElementById('dose-red').innerText = `${(w*0.3).toFixed(1)} ~ ${(w*0.38).toFixed(1)} ml`;
+        document.getElementById('dose-blue').innerText = `${(w*0.4).toFixed(1)} ~ ${(w*0.5).toFixed(1)} ml`;
         document.getElementById('fever-result').style.display = 'block';
     }
 
-    // 🌟 원더윅스 완벽 복구
-    const wwList = [
-        {w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"},
-        {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"},
-        {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"},
-        {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"},
-        {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"},
-        {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"},
-        {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"},
-        {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"},
-        {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"},
-        {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}
-    ];
-
+    const wwList = [{w:5, t:"1차", d:"감각 발달"}, {w:8, t:"2차", d:"패턴 인지"}, {w:12, t:"3차", d:"움직임"}, {w:19, t:"4차", d:"수면퇴행"}, {w:26, t:"5차", d:"분리불안"}, {w:37, t:"6차", d:"저지레"}, {w:46, t:"7차", d:"조립"}, {w:55, t:"8차", d:"목적성"}, {w:64, t:"9차", d:"떼쓰기"}, {w:75, t:"10차", d:"자아형성"}];
     function calcGrowth() {
         const b = document.getElementById('v-birth').value;
-        if(!b) return alert("출산 예정일(또는 생일)을 선택하세요.");
+        if(!b) return alert("날짜 선택!");
         const diff = Math.ceil(Math.abs(new Date() - new Date(b)) / (1000*60*60*24));
         const week = Math.floor(diff / 7);
-        
-        // 🌟 누락됐던 D-day, 주차 변수 매핑 복구
         document.getElementById('res-dday').innerText = diff;
         document.getElementById('res-week').innerText = week;
-
         let cur = wwList.find(x => week >= x.w-1 && week <= x.w+1);
         let nxt = wwList.find(x => x.w > week);
-        
-        let st = document.getElementById('ww-status');
-        if(cur) {
-            st.innerHTML = `<div class="ww-status-title">🚨 현재 ${cur.t} 진행 중!</div><p style="font-size:14.5px; color:#5C4300; line-height:1.6;"><strong>특징:</strong> ${cur.d}.<br>아이가 평소보다 많이 보채더라도 성장의 과정이니 많이 안아주세요.</p>`;
-        } else {
-            st.innerHTML = `<div class="ww-status-title" style="color:#0DB385;">☀️ 평온한 시기입니다</div><p style="font-size:14.5px; color:#5C4300; line-height:1.6;">다행히 지금은 급성장기가 아닙니다.<br>${nxt ? '👉 <strong>다음 ' + nxt.t + '는 생후 ' + nxt.w + '주차</strong>에 시작됩니다. 미리 마음의 준비를 하세요!' : '모든 원더윅스를 졸업했습니다!'}</p>`;
-        }
-
-        let table = `<tr><th>주차</th><th>단계</th><th>특징</th></tr>`;
-        wwList.forEach(x => {
-            let active = (week >= x.w-1 && week <= x.w+1) ? 'class="active"' : '';
-            table += `<tr ${active}><td>${x.w-1}~${x.w+1}주</td><td>${x.t}</td><td>${x.d}</td></tr>`;
-        });
+        document.getElementById('ww-status').innerHTML = cur ? `🚨 현재 ${cur.t} 원더윅스! (${cur.d})` : `☀️ 평온기. 다음은 ${nxt ? nxt.w + '주차' : '졸업!'}`;
+        let table = `<tr><th>주차</th><th>단계</th></tr>`;
+        wwList.forEach(x => { table += `<tr ${week >= x.w-1 && week <= x.w+1 ? 'class="active"' : ''}><td>${x.w}주</td><td>${x.t}(${x.d})</td></tr>`; });
         document.getElementById('ww-table').innerHTML = table;
         document.getElementById('growth-result').style.display = 'block';
     }
-
     function downloadImg() {
-        html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#FFFFFF' }).then(c => {
+        html2canvas(document.getElementById('capture-area'), { scale: 2 }).then(c => {
             let l = document.createElement('a'); l.download = '육아결산.png'; l.href = c.toDataURL(); l.click();
         });
     }
