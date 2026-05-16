@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>토실이 육아 마스터 | 가계부 · 해열제 · 원더윅스</title>
-    <meta name="description" content="대한민국 평균 육아비 비교, 안전한 해열제 계산기, 원더윅스 정밀 진단.">
+    <title>토실이 육아 마스터 | 가계부 · 해열제 · 원더윅스 · 핫플</title>
+    <meta name="description" content="대한민국 평균 육아비 비교, 안전한 해열제 계산기, 원더윅스 정밀 진단, 경기 남부 예스키즈존.">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -48,7 +48,6 @@
             margin-bottom: 25px;
         }
         
-        /* 🌟 새로 추가된 내역 버튼 및 모달 리스트 디자인 */
         .history-btn { position: absolute; top: 30px; right: 25px; background: rgba(255,255,255,0.9); border: 1px solid var(--primary); color: var(--primary); padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(74,144,226,0.1); }
         .history-btn:hover { background: var(--primary); color: #FFF; }
         
@@ -97,6 +96,23 @@
         .ww-table th { color: var(--text-s); font-weight: 700; background: rgba(0,0,0,0.02); }
         .ww-table tr.active td { background: #FFF9E6; font-weight: 800; color: #B78103; }
 
+        /* 핫플 UI */
+        .filter-wrap { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
+        .filter-wrap::-webkit-scrollbar { display: none; }
+        .filter-btn { padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 800; border: 1px solid var(--border); background: #FFF; color: var(--text-s); cursor: pointer; white-space: nowrap; transition: all 0.3s ease; }
+        .filter-btn.active { background: var(--text-m); color: #FFF; border-color: var(--text-m); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+        .place-card { background: #FFF; border-radius: 20px; padding: 22px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 6px 16px rgba(0,0,0,0.04); text-align: left; transition: transform 0.2s ease; display: block; }
+        .place-title { font-size: 19px; font-weight: 900; color: var(--text-m); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.5px; }
+        .place-loc { font-size: 12px; color: var(--primary); font-weight: 800; background: #E6F0FF; padding: 4px 8px; border-radius: 8px; margin-right: 6px; vertical-align: middle; }
+        .place-desc { font-size: 14px; color: var(--text-s); margin-bottom: 15px; font-weight: 600; }
+        .place-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
+        .tag { font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 12px; }
+        .tag.blue { background: #E6F0FF; color: var(--primary); }
+        .tag.red { background: #FFF0F1; color: var(--danger); }
+        .tag.green { background: #E6F7F2; color: var(--success); }
+        .place-review { background: #F8F9FA; border-left: 4px solid var(--primary); padding: 16px; font-size: 14px; color: #4E5968; border-radius: 0 12px 12px 0; line-height: 1.6; font-weight: 500; }
+
         /* 하단 탭 바 */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 12px 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
         .nav-item { flex: 1; text-align: center; color: #B0B8C1; cursor: pointer; transition: 0.3s; }
@@ -119,7 +135,6 @@
     <!-- 탭 1: 가계부 -->
     <div id="tab-money" class="tab-content active">
         <div class="app-box">
-            <!-- 🌟 추가된 내역 확인 버튼 -->
             <button class="history-btn" onclick="toggleHistory()">🔍 전체 내역</button>
             <h1 class="app-title">📊 우리 집 육아 재무 관리</h1>
             <p class="app-desc">항목별 지출을 입력하세요. 대한민국 평균 부모님들과 우리 집 소비 수준을 비교해 드립니다.</p>
@@ -148,26 +163,19 @@
             
             <button class="btn-main" onclick="analyzeMoney()">가계부 정밀 진단하기</button>
 
-            <!-- 🌟 추가된 내역 리스트 영역 -->
             <div id="history-list-area">
                 <h3 style="font-size:16px; margin-bottom:15px; color:var(--text-m); font-weight:800;">📅 누적 지출 내역</h3>
                 <div id="history-items"></div>
                 <button class="btn-main" style="background:#636E72; font-size:14px; padding:12px; margin-top:15px; box-shadow:none;" onclick="toggleHistory()">닫기</button>
             </div>
 
-            <!-- 결과 영역 -->
             <div id="money-result">
                 <div id="capture-area" class="result-card">
                     <div class="stat-badge">대한민국 평균 대비 분석 결과</div>
                     <div id="money-total" style="font-size:38px; font-weight:900; letter-spacing:-1px;">0원</div>
-                    
-                    <!-- 🌟 지난달 비교 메시지가 뜰 공간 -->
                     <div id="money-diff" style="font-size:15.5px; font-weight:800; margin-top:5px; margin-bottom:10px;"></div>
-                    
                     <div id="money-avg-percent" style="font-size:16px; font-weight:800; color:var(--primary); margin-bottom:20px;"></div>
-                    
                     <div style="height:200px; margin-bottom:20px;"><canvas id="trendChart"></canvas></div>
-                    
                     <div id="money-insight" style="text-align:left; font-size:14.5px; line-height:1.7; padding:20px; background:rgba(255,255,255,0.8); border-radius:16px; border:1px solid rgba(0,0,0,0.05);"></div>
                 </div>
                 <button class="btn-main" style="background:#2D3436; margin-top:10px;" onclick="downloadImg()">📸 이미지로 저장하여 단톡방 공유</button>
@@ -175,7 +183,7 @@
         </div>
     </div>
 
-    <!-- 탭 2: 해열제 (기존 풀텍스트 유지) -->
+    <!-- 탭 2: 해열제 -->
     <div id="tab-fever" class="tab-content">
         <div class="app-box">
             <h1 class="app-title">🌡️ 안전 해열제 도우미</h1>
@@ -217,7 +225,7 @@
         </div>
     </div>
 
-    <!-- 탭 3: 원더윅스 (기존 풀텍스트 유지) -->
+    <!-- 탭 3: 원더윅스 -->
     <div id="tab-growth" class="tab-content">
         <div class="app-box">
             <h1 class="app-title">🐣 원더윅스 & 성장 시기</h1>
@@ -248,7 +256,36 @@
         </div>
     </div>
 
-    <!-- SEO 컨텐츠 박스 (기존 풀텍스트 유지) -->
+    <!-- 🌟 탭 4: 핫플 리스트 -->
+    <div id="tab-hotplace" class="tab-content">
+        <div class="app-box" style="padding-top:25px; padding-bottom:20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h1 class="app-title" style="margin:0; color:var(--text-m);">🗺️ 찐! 예스키즈존</h1>
+                <span style="font-size:11px; background:var(--accent); color:#FFF; padding:4px 10px; border-radius:12px; font-weight:800;">🦼 유모차 하이패스</span>
+            </div>
+            
+            <!-- 🚨 면책 방패 문구가 추가된 설명글 -->
+            <p class="app-desc" style="margin-bottom: 20px;">
+                맘카페와 리뷰를 샅샅이 뒤져 검증된 곳만 12곳 골랐습니다. 눈치 보지 말고 다녀오세요!<br>
+                <span style="color:var(--danger); font-weight:800; font-size:13px; margin-top:6px; display:inline-block;">(🚨 방문 전 '네이버 지도' 버튼을 눌러 임시 휴무 여부를 꼭 확인해 주세요!)</span>
+            </p>
+
+            <div class="filter-wrap">
+                <button class="filter-btn active" onclick="renderPlaces('all', this)">전체보기</button>
+                <button class="filter-btn" onclick="renderPlaces('dongtan', this)">동탄</button>
+                <button class="filter-btn" onclick="renderPlaces('suwon', this)">수원</button>
+                <button class="filter-btn" onclick="renderPlaces('yongin', this)">용인</button>
+            </div>
+            
+            <div id="hotplace-container"></div>
+
+            <button class="btn-main" style="background:var(--text-m); margin-top:10px; font-size:15.5px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="openGoogleForm()">
+                <span>📝 숨겨진 핫플 직접 제보하기</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- SEO 컨텐츠 박스 -->
     <div class="seo-box">
         <h2>💡 2026 스마트 육아 경제 가이드</h2>
         <p>현대 육아에서 가장 중요한 것은 정보력입니다. 기저귀 한 장, 분유 한 통을 살 때도 핫딜 단가를 계산하는 습관이 가계 경제의 기틀을 마련합니다. 본 도구는 대한민국 평균 부모들의 소모품 지출 데이터를 기반으로 하여 우리 집의 소비를 객관적으로 돌아볼 수 있게 설계되었습니다.</p>
@@ -267,12 +304,10 @@
         <div style="margin-bottom: 8px;">
             <strong style="color: #8B95A1; font-size: 13px;">&copy; 2026. 토실이 육아 마스터. All rights reserved.</strong>
         </div>
-        
         <div style="margin-bottom: 8px;">
             <a href="privacy.html" style="color: #B0B8C1; text-decoration: none; border-bottom: 1px solid #D1D6DB;">개인정보 처리방침</a> | 
             Created for <span style="color: #4A90E2; font-weight: 800;">토실이네 육아 일기</span> by 든든한 남편
         </div>
-
         <div style="font-size: 11px; color: #D1D6DB; margin-top: 5px; letter-spacing: -0.2px;">
             본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>
             무단 전재 및 상업적 도용 시 법적 책임을 물을 수 있습니다.
@@ -292,6 +327,9 @@
     <div class="nav-item" onclick="switchTab('growth', this)">
         <span class="icon">🐣</span><span class="label">원더윅스</span>
     </div>
+    <div class="nav-item" onclick="switchTab('hotplace', this)">
+        <span class="icon">🗺️</span><span class="label">핫플리스트</span>
+    </div>
 </div>
 
 <script>
@@ -310,7 +348,6 @@
     }
     function getV(id) { return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; }
 
-    // 🌟 내역 토글 기능
     function toggleHistory() {
         const area = document.getElementById('history-list-area');
         if(area.style.display === 'block') {
@@ -333,7 +370,6 @@
         }
     }
 
-    // 🌟 가계부 분석 (지난달 비교 로직 추가)
     function analyzeMoney() {
         const d = getV('v-diaper'), f = getV('v-food'), e = getV('v-etc');
         const total = d + f + e;
@@ -345,12 +381,10 @@
         const curM = date.getMonth() + 1;
         const monthKey = `${curY}-${curM}`;
         
-        // 지난달 계산
         const lastM = curM === 1 ? 12 : curM - 1;
         const lastY = curM === 1 ? curY - 1 : curY;
         const lastKey = `${lastY}-${lastM}`;
 
-        // 🌟 지난달 비교 멘트
         let diffMsg = "";
         if(history[lastKey]) {
             const diff = total - history[lastKey];
@@ -362,7 +396,6 @@
         }
         document.getElementById('money-diff').innerHTML = diffMsg;
 
-        // 데이터 저장
         history[monthKey] = total;
         localStorage.setItem('TosilBabyApp', JSON.stringify(history));
 
@@ -372,7 +405,6 @@
         document.getElementById('money-total').innerText = total.toLocaleString() + "원";
         document.getElementById('money-avg-percent').innerText = `대한민국 평균 대비 ${percent}% 수준`;
 
-        // 커피값 환산 로직
         const coffee = Math.floor(total / 4500);
         let msg = `☕ 이번 달 지출은 <strong>스타벅스 아메리카노 ${coffee}잔</strong>과 같습니다.<br><br>`;
         
@@ -419,7 +451,6 @@
         document.getElementById('fever-result').style.display = 'block';
     }
 
-    // 🌟 원더윅스 기존 풀텍스트 배열 유지
     const wwList = [
         {w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"},
         {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"},
@@ -466,6 +497,62 @@
             let l = document.createElement('a'); l.download = '육아결산.png'; l.href = c.toDataURL(); l.click();
         });
     }
+
+    /* 🌟 네이버 지도 자동 연결 + 팩트체크 완료된 핫플 리스트 */
+    const hotplacesData = [
+        { region: 'dongtan', locText: '동탄', title: '어반리st 동탄점', emoji: '🥐', desc: '유모차로 드리프트 가능한 초대형 태평양 카페', tags: [{c:'red', t:'🍼 수유실 완비'}, {c:'green', t:'🦼 유모차 쾌적'}, {c:'blue', t:'🪑 아기의자 많음'}], review: '애기 데리고 눈치 안 보고 빵 먹고 싶을 땐 무조건 여기! 유모차 부대 엄청 많아서 마음 편해요ㅎㅎ', query: '동탄 어반리st' },
+        { region: 'dongtan', locText: '동탄', title: '롯데백화점 (디에비뉴)', emoji: '🛍️', desc: '동탄 맘들의 영원한 피난처이자 오아시스', tags: [{c:'red', t:'🍼 S급 유아휴게실'}, {c:'green', t:'🌿 3층 야외정원'}, {c:'blue', t:'🦼 프리미엄 대여'}], review: '아직 아기 어릴 땐 백화점이 최고잖아요ㅠㅠ 이유식 데우기도 편하고 롯백 유아휴게실은 진짜 사랑입니다.', query: '동탄 롯데백화점' },
+        { region: 'dongtan', locText: '동탄', title: '라크드미엘', emoji: '🦢', desc: '동탄호수공원 뷰 맛집 대형 베이커리', tags: [{c:'red', t:'🍼 기저귀 교환대'}, {c:'blue', t:'🪑 아기의자'}, {c:'green', t:'🌳 호수공원 직결'}], review: '호수공원 산책하다가 유모차 끌고 엘베 타고 올라가기 딱 좋아요. 빵도 맛있고 뷰가 탁 트여서 엄마 힐링 제대로예요!', query: '동탄 라크드미엘' },
+        { region: 'dongtan', locText: '동탄', title: '타임테라스 & 챔피언더블랙벨트', emoji: '🎪', desc: '홈플러스 쇼핑부터 대형 실내 놀이터까지 원스톱 코스', tags: [{c:'red', t:'🍼 수유실 완비'}, {c:'green', t:'🏃‍♂️ 초대형 키즈카페'}, {c:'blue', t:'🚗 주차 초편리'}], review: '안전요원도 있고 시설이 쾌적해요! 아이는 땀 빼게 놀게 하고, 엄빠는 교대로 쇼핑하고 오면 주말 반나절 순삭입니다.', query: '동탄 타임테라스 챔피언더블랙벨트' },
+        
+        { region: 'suwon', locText: '수원', title: '스타필드 수원', emoji: '📚', desc: '수원 맘들의 새로운 성지, 유모차 메카', tags: [{c:'red', t:'🍼 S급 유아휴게실'}, {c:'blue', t:'👶 별마당 키즈'}, {c:'green', t:'🦼 대여 시스템 우수'}], review: '사람은 많지만 유모차 끌고 다니기 제일 쾌적해요. 3층 별마당 키즈에서 아기 책 보여주고 사진 찍어주기 최고!', query: '스타필드 수원' },
+        { region: 'suwon', locText: '수원', title: '타임빌라스 수원 (구 롯데몰)', emoji: '🛍️', desc: '대대적인 리뉴얼로 더 좋아진 완벽한 몰캉스', tags: [{c:'red', t:'🍼 유아휴게실 리뉴얼'}, {c:'green', t:'🍽️ 다이닝 애기친화'}, {c:'blue', t:'🚗 원스톱 쇼핑'}], review: '리뉴얼하고 나서 길도 넓어지고 휴게시설이 진짜 쾌적해졌어요. 문센 끝나고 엄마들끼리 밥 먹고 차 마시기 1티어입니다.', query: '타임빌라스 수원' },
+        { region: 'suwon', locText: '수원', title: '복합문화공간 111CM', emoji: '🏃‍♂️', desc: '정자동 핫플, 뛰어놀기 좋은 실내외 광장', tags: [{c:'red', t:'🍼 유아휴게실'}, {c:'green', t:'🌳 야외 잔디밭'}, {c:'blue', t:'☕ 내부 북카페'}], review: '에너지 넘치는 아기들 힘 빼기 딱 좋은 곳! 실내는 쾌적하고 밖엔 잔디밭이 있어서 걷기 시작한 아기들에게 강추해요.', query: '수원 111CM' },
+        { region: 'suwon', locText: '수원', title: '광교 앨리웨이 & 밀도', emoji: '🍞', desc: '이국적인 광장 뷰와 맛있는 빵의 조화', tags: [{c:'blue', t:'🎈 야외 광장(비눗방울)'}, {c:'green', t:'🌳 호수공원 산책'}, {c:'red', t:'🍼 수유실 있음'}], review: '날씨 좋은 날 앨리웨이 광장에서 아기들 뛰어놀게 하고 엄마들은 테라스에서 밀도 식빵에 커피 마시면 천국이 따로 없어요.', query: '광교 앨리웨이' },
+        
+        { region: 'yongin', locText: '용인', title: '경기도어린이박물관', emoji: '🎨', desc: '경기 남부 부모들의 필수 코스 (가성비 甲)', tags: [{c:'red', t:'🍼 수유실/의무실'}, {c:'green', t:'🏃‍♂️ 영유아 전용구역'}, {c:'blue', t:'🎫 사전예약 필수'}], review: '입장료도 엄청 싼데 시설은 키즈카페 압살해요! 영유아 전용 놀이터(자연놀이터)가 따로 있어서 돌쟁이 아기도 놀기 좋아요.', query: '경기도어린이박물관' },
+        { region: 'yongin', locText: '용인', title: '어로프슬라이스피스 (용인)', emoji: '🏕️', desc: '숲 속에 온 듯한 넓은 정원 대형 베이커리', tags: [{c:'green', t:'🌳 야외 정원(넓음)'}, {c:'blue', t:'🪑 아기의자'}, {c:'red', t:'🍼 기저귀 교환대'}], review: '부지가 워낙 넓어서 애들이 야외에서 돌아다니기 너무 좋아요. 밧줄빵도 맛있고 아기랑 사진 찍으면 숲속 요정처럼 나옵니다ㅎㅎ', query: '용인 어로프슬라이스피스' },
+        { region: 'yongin', locText: '용인', title: '칼리오페 (처인구)', emoji: '🏛️', desc: '그리스 신전 느낌의 초대형 베이커리', tags: [{c:'red', t:'🍼 기저귀 교환실'}, {c:'green', t:'🛗 엘리베이터'}, {c:'blue', t:'🌳 통창 자연 뷰'}], review: '건물 자체가 웅장하고 좌석 간격이 넓어서 아기가 조금 칭얼대도 소리가 묻혀요. 탁 트인 뷰 덕에 엄마 힐링은 덤!', query: '용인 칼리오페' },
+        { region: 'yongin', locText: '용인', title: '롯데몰 수지점', emoji: '🧸', desc: '수지구 엄마들의 방앗간, 만능 몰캉스 공간', tags: [{c:'red', t:'🍼 수유실 완비'}, {c:'green', t:'🚗 주차 초편리'}, {c:'blue', t:'👶 다양한 키즈카페'}], review: '동선이 아기 친화적으로 엄청 잘 짜여있어요. 문화센터 갔다가 밥 먹고 기저귀 갈고 쇼핑까지 한 큐에 끝내는 곳!', query: '수지 롯데몰' }
+    ];
+
+    function renderPlaces(region, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+        const container = document.getElementById('hotplace-container');
+        container.innerHTML = ''; 
+        hotplacesData.filter(p => region === 'all' || p.region === region).forEach(p => {
+            let tagsHTML = p.tags.map(tag => `<span class="tag ${tag.c}">${tag.t}</span>`).join('');
+            
+            let mapUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(p.query);
+            
+            let cardHTML = `
+            <div class="place-card" style="cursor:pointer;" onclick="window.open('${mapUrl}', '_blank')">
+                <div class="place-title">
+                    <div><span class="place-loc">${p.locText}</span>${p.title}</div>
+                    <span style="font-size:18px;">${p.emoji}</span>
+                </div>
+                <div class="place-desc">${p.desc}</div>
+                <div class="place-tags">${tagsHTML}</div>
+                <div class="place-review">
+                    <strong style="color:var(--text-m);">토실맘's 찐 후기:</strong><br>"${p.review}"
+                </div>
+                <div style="text-align:right; margin-top:12px; border-top:1px dashed rgba(0,0,0,0.05); padding-top:10px;">
+                    <span style="font-size:12.5px; color:var(--primary); font-weight:800;">📍 네이버 지도에서 상세보기 〉</span>
+                </div>
+            </div>`;
+            container.innerHTML += cardHTML;
+        });
+    }
+
+    // 🌟 구글 폼 링크
+    function openGoogleForm() {
+        const formLink = 'https://docs.google.com/forms/d/e/1FAIpQLSfP-hF4EEgnRgwgT6fuvXfWiIfiH9nJdkvJI2k5eNe9frxlDg/viewform?usp=dialog';
+        window.open(formLink, '_blank');
+    }
+
+    // 초기 화면에 전체 리스트 띄우기
+    window.onload = () => { renderPlaces('all', document.querySelector('.filter-btn.active')); };
 </script>
 </body>
 </html>
