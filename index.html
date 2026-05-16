@@ -132,7 +132,6 @@
 
 <div class="wrapper">
     
-    <!-- 탭 1: 가계부 -->
     <div id="tab-money" class="tab-content active">
         <div class="app-box">
             <button class="history-btn" onclick="toggleHistory()">🔍 전체 내역</button>
@@ -183,7 +182,6 @@
         </div>
     </div>
 
-    <!-- 탭 2: 해열제 -->
     <div id="tab-fever" class="tab-content">
         <div class="app-box">
             <h1 class="app-title">🌡️ 안전 해열제 도우미</h1>
@@ -225,7 +223,6 @@
         </div>
     </div>
 
-    <!-- 탭 3: 원더윅스 -->
     <div id="tab-growth" class="tab-content">
         <div class="app-box">
             <h1 class="app-title">🐣 원더윅스 & 성장 시기</h1>
@@ -256,7 +253,6 @@
         </div>
     </div>
 
-    <!-- 🌟 탭 4: 핫플 리스트 -->
     <div id="tab-hotplace" class="tab-content">
         <div class="app-box" style="padding-top:25px; padding-bottom:20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -264,7 +260,6 @@
                 <span style="font-size:11px; background:var(--accent); color:#FFF; padding:4px 10px; border-radius:12px; font-weight:800;">🦼 유모차 하이패스</span>
             </div>
             
-            <!-- 🚨 면책 방패 문구가 추가된 설명글 -->
             <p class="app-desc" style="margin-bottom: 20px;">
                 맘카페와 리뷰를 샅샅이 뒤져 검증된 곳만 12곳 골랐습니다. 눈치 보지 말고 다녀오세요!<br>
                 <span style="color:var(--danger); font-weight:800; font-size:13px; margin-top:6px; display:inline-block;">(🚨 방문 전 '네이버 지도' 버튼을 눌러 임시 휴무 여부를 꼭 확인해 주세요!)</span>
@@ -279,13 +274,22 @@
             
             <div id="hotplace-container"></div>
 
-            <button class="btn-main" style="background:var(--text-m); margin-top:10px; font-size:15.5px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="openGoogleForm()">
-                <span>📝 숨겨진 핫플 직접 제보하기</span>
+            <div style="background: #F8F9FA; border: 1px solid #E1E8ED; border-radius: 16px; padding: 18px; margin-top: 25px; margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-bottom: 8px;">
+                    📢 우리 동네 예스키즈존을 제보해 주세요!
+                </div>
+                <div style="font-size: 13px; color: #4E5968; line-height: 1.6; word-break: keep-all;">
+                    맘님들이 직접 겪은 좋은 장소들은 팩트 체크 후 <strong>주기적으로 업데이트</strong>하여 리스트에 올려드립니다.<br>
+                    <span style="color: var(--danger); font-weight: 800; margin-top: 4px; display: inline-block;">(⛔ 단, 업체의 광고/홍보 목적 제보는 칼같이 차단합니다.)</span>
+                </div>
+            </div>
+
+            <button class="btn-main" style="background:var(--text-m); font-size:15.5px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="openGoogleForm()">
+                <span>📝 찐 핫플 직접 제보하기 〉</span>
             </button>
         </div>
     </div>
 
-    <!-- SEO 컨텐츠 박스 -->
     <div class="seo-box">
         <h2>💡 2026 스마트 육아 경제 가이드</h2>
         <p>현대 육아에서 가장 중요한 것은 정보력입니다. 기저귀 한 장, 분유 한 통을 살 때도 핫딜 단가를 계산하는 습관이 가계 경제의 기틀을 마련합니다. 본 도구는 대한민국 평균 부모들의 소모품 지출 데이터를 기반으로 하여 우리 집의 소비를 객관적으로 돌아볼 수 있게 설계되었습니다.</p>
@@ -316,7 +320,6 @@
 
 </div>
 
-<!-- 하단 탭 바 -->
 <div class="bottom-nav">
     <div class="nav-item active" onclick="switchTab('money', this)">
         <span class="icon">💰</span><span class="label">가계부</span>
@@ -512,7 +515,7 @@
         
         { region: 'yongin', locText: '용인', title: '경기도어린이박물관', emoji: '🎨', desc: '경기 남부 부모들의 필수 코스 (가성비 甲)', tags: [{c:'red', t:'🍼 수유실/의무실'}, {c:'green', t:'🏃‍♂️ 영유아 전용구역'}, {c:'blue', t:'🎫 사전예약 필수'}], review: '입장료도 엄청 싼데 시설은 키즈카페 압살해요! 영유아 전용 놀이터(자연놀이터)가 따로 있어서 돌쟁이 아기도 놀기 좋아요.', query: '경기도어린이박물관' },
         { region: 'yongin', locText: '용인', title: '어로프슬라이스피스 (용인)', emoji: '🏕️', desc: '숲 속에 온 듯한 넓은 정원 대형 베이커리', tags: [{c:'green', t:'🌳 야외 정원(넓음)'}, {c:'blue', t:'🪑 아기의자'}, {c:'red', t:'🍼 기저귀 교환대'}], review: '부지가 워낙 넓어서 애들이 야외에서 돌아다니기 너무 좋아요. 밧줄빵도 맛있고 아기랑 사진 찍으면 숲속 요정처럼 나옵니다ㅎㅎ', query: '용인 어로프슬라이스피스' },
-        { region: 'yongin', locText: '용인', title: '칼리오페 (처인구)', emoji: '🏛️', desc: '그리스 신전 느낌의 초대형 베이커리', tags: [{c:'red', t:'🍼 기저귀 교환실'}, {c:'green', t:'🛗 엘리베이터'}, {c:'blue', t:'🌳 통창 자연 뷰'}], review: '건물 자체가 웅장하고 좌석 간격이 넓어서 아기가 조금 칭얼대도 소리가 묻혀요. 탁 트인 뷰 덕에 엄마 힐링은 덤!', query: '용인 칼리오페' },
+       { region: 'yongin', locText: '용인', title: '칼리오페 (처인구)', emoji: '🏛️', desc: '그리스 신전 느낌의 초대형 베이커리', tags: [{c:'red', t:'🍼 기저귀 교환실'}, {c:'green', t:'🛗 엘리베이터'}, {c:'blue', t:'🌳 통창 자연 뷰'}], review: '건물 자체가 웅장하고 좌석 간격이 넓어서 아기가 조금 칭얼대도 소리가 묻혀요. 탁 트인 뷰 덕에 엄마 힐링은 덤!', query: '용인 칼리오페' },
         { region: 'yongin', locText: '용인', title: '롯데몰 수지점', emoji: '🧸', desc: '수지구 엄마들의 방앗간, 만능 몰캉스 공간', tags: [{c:'red', t:'🍼 수유실 완비'}, {c:'green', t:'🚗 주차 초편리'}, {c:'blue', t:'👶 다양한 키즈카페'}], review: '동선이 아기 친화적으로 엄청 잘 짜여있어요. 문화센터 갔다가 밥 먹고 기저귀 갈고 쇼핑까지 한 큐에 끝내는 곳!', query: '수지 롯데몰' }
     ];
 
@@ -535,7 +538,7 @@
                 <div class="place-desc">${p.desc}</div>
                 <div class="place-tags">${tagsHTML}</div>
                 <div class="place-review">
-                   <strong style="color:var(--text-m);">지역 선배맘들의 찐 후기 요약:</strong><br>"${p.review}"
+                    <strong style="color:var(--text-m);">지역 선배맘들의 찐 후기 요약:</strong><br>"${p.review}"
                 </div>
                 <div style="text-align:right; margin-top:12px; border-top:1px dashed rgba(0,0,0,0.05); padding-top:10px;">
                     <span style="font-size:12.5px; color:var(--primary); font-weight:800;">📍 네이버 지도에서 상세보기 〉</span>
@@ -545,7 +548,7 @@
         });
     }
 
-    // 🌟 구글 폼 링크
+    // 구글 폼 링크
     function openGoogleForm() {
         const formLink = 'https://docs.google.com/forms/d/e/1FAIpQLSfP-hF4EEgnRgwgT6fuvXfWiIfiH9nJdkvJI2k5eNe9frxlDg/viewform?usp=dialog';
         window.open(formLink, '_blank');
