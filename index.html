@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>토실이 육아 마스터 | 가계부 · 해열제 · 원더윅스 · 핫플</title>
     <meta name="description" content="대한민국 평균 육아비 비교, 안전한 해열제 계산기, 원더윅스 정밀 진단, 경기 남부 예스키즈존.">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
@@ -96,22 +96,35 @@
         .ww-table th { color: var(--text-s); font-weight: 700; background: rgba(0,0,0,0.02); }
         .ww-table tr.active td { background: #FFF9E6; font-weight: 800; color: #B78103; }
 
-        /* 핫플 UI */
+        /* 🗺️ 핫플 UI (슬림 접이식 아코디언 컴포넌트 전면 리포밍) */
         .filter-wrap { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; -ms-overflow-style: none; scrollbar-width: none; }
         .filter-wrap::-webkit-scrollbar { display: none; }
         .filter-btn { padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 800; border: 1px solid var(--border); background: #FFF; color: var(--text-s); cursor: pointer; white-space: nowrap; transition: all 0.3s ease; }
         .filter-btn.active { background: var(--text-m); color: #FFF; border-color: var(--text-m); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
 
-        .place-card { background: #FFF; border-radius: 20px; padding: 22px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 6px 16px rgba(0,0,0,0.04); text-align: left; transition: transform 0.2s ease; display: block; }
-        .place-title { font-size: 19px; font-weight: 900; color: var(--text-m); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.5px; }
-        .place-loc { font-size: 12px; color: var(--primary); font-weight: 800; background: #E6F0FF; padding: 4px 8px; border-radius: 8px; margin-right: 6px; vertical-align: middle; }
-        .place-desc { font-size: 14px; color: var(--text-s); margin-bottom: 15px; font-weight: 600; }
-        .place-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
-        .tag { font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 12px; }
+        /* 주렁주렁 나오던 카드를 슬림한 아코디언 바 형태로 전면 교체 */
+        .accordion-item { background: #FFF; border-radius: 16px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease; }
+        
+        /* 한 줄짜리 상단 헤더 바 */
+        .accordion-header { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; background: #FFF; }
+        .accordion-header:active { background: #F8F9FA; }
+        .accordion-title-wrap { display: flex; align-items: center; gap: 8px; font-size: 16.5px; font-weight: 800; color: var(--text-m); }
+        .accordion-arrow { font-size: 12px; color: var(--text-s); transition: transform 0.2s ease; }
+        
+        /* 터치하면 스르륵 열리는 디테일 박스 */
+        .accordion-body { display: none; padding: 0 20px 20px 20px; background: #FFF; border-top: 1px dashed rgba(0,0,0,0.05); animation: expand 0.25s ease-out; }
+        @keyframes expand { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .place-loc { font-size: 11px; color: var(--primary); font-weight: 800; background: #E6F0FF; padding: 3px 7px; border-radius: 6px; }
+        .place-desc { font-size: 13.5px; color: var(--text-s); margin: 12px 0; font-weight: 600; line-height: 1.4; }
+        .place-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .tag { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 10px; }
         .tag.blue { background: #E6F0FF; color: var(--primary); }
         .tag.red { background: #FFF0F1; color: var(--danger); }
         .tag.green { background: #E6F7F2; color: var(--success); }
-        .place-review { background: #F8F9FA; border-left: 4px solid var(--primary); padding: 16px; font-size: 14px; color: #4E5968; border-radius: 0 12px 12px 0; line-height: 1.6; font-weight: 500; }
+        .place-review { background: #F8F9FA; border-left: 3px solid var(--primary); padding: 12px 14px; font-size: 13.5px; color: #4E5968; border-radius: 0 10px 10px 0; line-height: 1.5; font-weight: 500; }
+        
+        .map-link-btn { display: block; text-align: center; background: var(--primary); color: white; font-size: 13.5px; font-weight: 800; padding: 12px; border-radius: 12px; text-decoration: none; margin-top: 15px; box-shadow: 0 4px 12px rgba(74,144,226,0.2); }
 
         /* 하단 탭 바 */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 12px 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
@@ -132,7 +145,43 @@
 
 <div class="wrapper">
     
-    <div id="tab-money" class="tab-content active">
+    <div id="tab-hotplace" class="tab-content active">
+        <div class="app-box" style="padding-top:25px; padding-bottom:20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h1 class="app-title" style="margin:0; color:var(--text-m);">🗺️ 찐! 예스키즈존</h1>
+                <span style="font-size:11px; background:var(--accent); color:#FFF; padding:4px 10px; border-radius:12px; font-weight:800;">🦼 유모차 하이패스</span>
+            </div>
+            
+            <p class="app-desc" style="margin-bottom: 20px;">
+                검증된 12곳 족보입니다. 지역을 선택하시면 군더더기 없이 목록만 깔끔하게 정돈됩니다. 목록을 누르시면 상세 후기와 지도가 나타납니다.
+            </p>
+
+            <div class="filter-wrap">
+                <button class="filter-btn active" onclick="renderPlaces('all', this)">전체보기</button>
+                <button class="filter-btn" onclick="renderPlaces('dongtan', this)">동탄</button>
+                <button class="filter-btn" onclick="renderPlaces('suwon', this)">수원</button>
+                <button class="filter-btn" onclick="renderPlaces('yongin', this)">용인</button>
+            </div>
+            
+            <div id="hotplace-container"></div>
+
+            <div style="background: #F8F9FA; border: 1px solid #E1E8ED; border-radius: 16px; padding: 18px; margin-top: 25px; margin-bottom: 15px; text-align: center;">
+                <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-bottom: 8px;">
+                    📢 우리 동네 예스키즈존을 제보해 주세요!
+                </div>
+                <div style="font-size: 13px; color: #4E5968; line-height: 1.6; word-break: keep-all;">
+                    맘님들이 직접 겪은 좋은 장소들은 팩트 체크 후 <strong>주기적으로 업데이트</strong>하여 리스트에 올려드립니다.<br>
+                    <span style="color: var(--danger); font-weight: 800; margin-top: 4px; display: inline-block;">(⛔ 단, 업체의 광고/홍보 목적 제보는 칼같이 차단합니다.)</span>
+                </div>
+            </div>
+
+            <button class="btn-main" style="background:var(--text-m); font-size:15.5px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="openGoogleForm()">
+                <span>📝 찐 핫플 직접 제보하기 〉</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="tab-money" class="tab-content">
         <div class="app-box">
             <button class="history-btn" onclick="toggleHistory()">🔍 전체 내역</button>
             <h1 class="app-title">📊 우리 집 육아 재무 관리</h1>
@@ -253,43 +302,6 @@
         </div>
     </div>
 
-    <div id="tab-hotplace" class="tab-content">
-        <div class="app-box" style="padding-top:25px; padding-bottom:20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h1 class="app-title" style="margin:0; color:var(--text-m);">🗺️ 찐! 예스키즈존</h1>
-                <span style="font-size:11px; background:var(--accent); color:#FFF; padding:4px 10px; border-radius:12px; font-weight:800;">🦼 유모차 하이패스</span>
-            </div>
-            
-            <p class="app-desc" style="margin-bottom: 20px;">
-                맘카페와 리뷰를 샅샅이 뒤져 검증된 곳만 12곳 골랐습니다. 눈치 보지 말고 다녀오세요!<br>
-                <span style="color:var(--danger); font-weight:800; font-size:13px; margin-top:6px; display:inline-block;">(🚨 방문 전 '네이버 지도' 버튼을 눌러 임시 휴무 여부를 꼭 확인해 주세요!)</span>
-            </p>
-
-            <div class="filter-wrap">
-                <button class="filter-btn active" onclick="renderPlaces('all', this)">전체보기</button>
-                <button class="filter-btn" onclick="renderPlaces('dongtan', this)">동탄</button>
-                <button class="filter-btn" onclick="renderPlaces('suwon', this)">수원</button>
-                <button class="filter-btn" onclick="renderPlaces('yongin', this)">용인</button>
-            </div>
-            
-            <div id="hotplace-container"></div>
-
-            <div style="background: #F8F9FA; border: 1px solid #E1E8ED; border-radius: 16px; padding: 18px; margin-top: 25px; margin-bottom: 15px; text-align: center;">
-                <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-bottom: 8px;">
-                    📢 우리 동네 예스키즈존을 제보해 주세요!
-                </div>
-                <div style="font-size: 13px; color: #4E5968; line-height: 1.6; word-break: keep-all;">
-                    맘님들이 직접 겪은 좋은 장소들은 팩트 체크 후 <strong>주기적으로 업데이트</strong>하여 리스트에 올려드립니다.<br>
-                    <span style="color: var(--danger); font-weight: 800; margin-top: 4px; display: inline-block;">(⛔ 단, 업체의 광고/홍보 목적 제보는 칼같이 차단합니다.)</span>
-                </div>
-            </div>
-
-            <button class="btn-main" style="background:var(--text-m); font-size:15.5px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="openGoogleForm()">
-                <span>📝 찐 핫플 직접 제보하기 〉</span>
-            </button>
-        </div>
-    </div>
-
     <div class="seo-box">
         <h2>💡 2026 스마트 육아 경제 가이드</h2>
         <p>현대 육아에서 가장 중요한 것은 정보력입니다. 기저귀 한 장, 분유 한 통을 살 때도 핫딜 단가를 계산하는 습관이 가계 경제의 기틀을 마련합니다. 본 도구는 대한민국 평균 부모들의 소모품 지출 데이터를 기반으로 하여 우리 집의 소비를 객관적으로 돌아볼 수 있게 설계되었습니다.</p>
@@ -321,7 +333,10 @@
 </div>
 
 <div class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('money', this)">
+    <div class="nav-item active" onclick="switchTab('hotplace', this)">
+        <span class="icon">🗺️</span><span class="label">핫플리스트</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('money', this)">
         <span class="icon">💰</span><span class="label">가계부</span>
     </div>
     <div class="nav-item" onclick="switchTab('fever', this)">
@@ -329,9 +344,6 @@
     </div>
     <div class="nav-item" onclick="switchTab('growth', this)">
         <span class="icon">🐣</span><span class="label">원더윅스</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('hotplace', this)">
-        <span class="icon">🗺️</span><span class="label">핫플리스트</span>
     </div>
 </div>
 
@@ -501,7 +513,7 @@
         });
     }
 
-    /* 🌟 네이버 지도 자동 연결 + 팩트체크 완료된 핫플 리스트 */
+    /* 🌟 데이터 12종 100% 원본 사수 */
     const hotplacesData = [
         { region: 'dongtan', locText: '동탄', title: '어반리st 동탄점', emoji: '🥐', desc: '유모차로 드리프트 가능한 초대형 태평양 카페', tags: [{c:'red', t:'🍼 수유실 완비'}, {c:'green', t:'🦼 유모차 쾌적'}, {c:'blue', t:'🪑 아기의자 많음'}], review: '애기 데리고 눈치 안 보고 빵 먹고 싶을 땐 무조건 여기! 유모차 부대 엄청 많아서 마음 편해요ㅎㅎ', query: '동탄 어반리st' },
         { region: 'dongtan', locText: '동탄', title: '롯데백화점 (디에비뉴)', emoji: '🛍️', desc: '동탄 맘들의 영원한 피난처이자 오아시스', tags: [{c:'red', t:'🍼 S급 유아휴게실'}, {c:'green', t:'🌿 3층 야외정원'}, {c:'blue', t:'🦼 프리미엄 대여'}], review: '아직 아기 어릴 땐 백화점이 최고잖아요ㅠㅠ 이유식 데우기도 편하고 롯백 유아휴게실은 진짜 사랑입니다.', query: '동탄 롯데백화점' },
@@ -515,46 +527,68 @@
         
         { region: 'yongin', locText: '용인', title: '경기도어린이박물관', emoji: '🎨', desc: '경기 남부 부모들의 필수 코스 (가성비 甲)', tags: [{c:'red', t:'🍼 수유실/의무실'}, {c:'green', t:'🏃‍♂️ 영유아 전용구역'}, {c:'blue', t:'🎫 사전예약 필수'}], review: '입장료도 엄청 싼데 시설은 키즈카페 압살해요! 영유아 전용 놀이터(자연놀이터)가 따로 있어서 돌쟁이 아기도 놀기 좋아요.', query: '경기도어린이박물관' },
         { region: 'yongin', locText: '용인', title: '어로프슬라이스피스 (용인)', emoji: '🏕️', desc: '숲 속에 온 듯한 넓은 정원 대형 베이커리', tags: [{c:'green', t:'🌳 야외 정원(넓음)'}, {c:'blue', t:'🪑 아기의자'}, {c:'red', t:'🍼 기저귀 교환대'}], review: '부지가 워낙 넓어서 애들이 야외에서 돌아다니기 너무 좋아요. 밧줄빵도 맛있고 아기랑 사진 찍으면 숲속 요정처럼 나옵니다ㅎㅎ', query: '용인 어로프슬라이스피스' },
-       { region: 'yongin', locText: '용인', title: '칼리오페 (처인구)', emoji: '🏛️', desc: '그리스 신전 느낌의 초대형 베이커리', tags: [{c:'red', t:'🍼 기저귀 교환실'}, {c:'green', t:'🛗 엘리베이터'}, {c:'blue', t:'🌳 통창 자연 뷰'}], review: '건물 자체가 웅장하고 좌석 간격이 넓어서 아기가 조금 칭얼대도 소리가 묻혀요. 탁 트인 뷰 덕에 엄마 힐링은 덤!', query: '용인 칼리오페' },
+        { region: 'yongin', locText: '용인', title: '칼리오페 (처인구)', emoji: '🏛️', desc: '그리스 신전 느낌의 초대형 베이커리', tags: [{c:'red', t:'🍼 기저귀 교환실'}, {c:'green', t:'🛗 엘리베이터'}, {c:'blue', t:'🌳 통창 자연 뷰'}], review: '건물 자체가 웅장하고 좌석 간격이 넓어서 아기가 조금 칭얼대도 소리가 묻혀요. 탁 트인 뷰 덕에 엄마 힐링은 덤!', query: '용인 칼리오페' },
         { region: 'yongin', locText: '용인', title: '롯데몰 수지점', emoji: '🧸', desc: '수지구 엄마들의 방앗간, 만능 몰캉스 공간', tags: [{c:'red', t:'🍼 수유실 완비'}, {c:'green', t:'🚗 주차 초편리'}, {c:'blue', t:'👶 다양한 키즈카페'}], review: '동선이 아기 친화적으로 엄청 잘 짜여있어요. 문화센터 갔다가 밥 먹고 기저귀 갈고 쇼핑까지 한 큐에 끝내는 곳!', query: '수지 롯데몰' }
     ];
+
+    /* 아코디언 토글 스크립트 */
+    function toggleAccordion(index) {
+        const body = document.getElementById('acc-body-' + index);
+        const arrow = document.getElementById('acc-arrow-' + index);
+        
+        if (body.style.display === 'block') {
+            body.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+        } else {
+            // 다른 아코디언은 닫고 싶다면 여기에 추가 제어를 넣을 수 있지만, 부모가 여러 개를 동시에 열어두고 비교할 수 있게 독립 작동으로 세팅했습니다.
+            body.style.display = 'block';
+            arrow.style.transform = 'rotate(180deg)';
+        }
+    }
 
     function renderPlaces(region, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
         const container = document.getElementById('hotplace-container');
         container.innerHTML = ''; 
-        hotplacesData.filter(p => region === 'all' || p.region === region).forEach(p => {
+        
+        hotplacesData.filter(p => region === 'all' || p.region === region).forEach((p, index) => {
             let tagsHTML = p.tags.map(tag => `<span class="tag ${tag.c}">${tag.t}</span>`).join('');
-            
             let mapUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(p.query);
             
-            let cardHTML = `
-            <div class="place-card" style="cursor:pointer;" onclick="window.open('${mapUrl}', '_blank')">
-                <div class="place-title">
-                    <div><span class="place-loc">${p.locText}</span>${p.title}</div>
-                    <span style="font-size:18px;">${p.emoji}</span>
+            /* 🛠️ 복잡도를 0으로 만드는 세련된 아코디언 컴포넌트 마크업 */
+            let accordionHTML = `
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(${index})">
+                    <div class="accordion-title-wrap">
+                        <span class="place-loc">${p.locText}</span>
+                        <span>${p.title}</span>
+                        <span style="font-size: 15px;">${p.emoji}</span>
+                    </div>
+                    <span id="acc-arrow-${index}" class="accordion-arrow">▼</span>
                 </div>
-                <div class="place-desc">${p.desc}</div>
-                <div class="place-tags">${tagsHTML}</div>
-                <div class="place-review">
-                    <strong style="color:var(--text-m);">지역 선배맘들의 찐 후기 요약:</strong><br>"${p.review}"
-                </div>
-                <div style="text-align:right; margin-top:12px; border-top:1px dashed rgba(0,0,0,0.05); padding-top:10px;">
-                    <span style="font-size:12.5px; color:var(--primary); font-weight:800;">📍 네이버 지도에서 상세보기 〉</span>
+                
+                <div id="acc-body-${index}" class="accordion-body">
+                    <div class="place-desc">${p.desc}</div>
+                    <div class="place-tags">${tagsHTML}</div>
+                    <div class="place-review">
+                        <strong>💬 선배맘 후기 요약:</strong> "${p.review}"
+                    </div>
+                    <a href="${mapUrl}" target="_blank" class="map-link-btn">
+                        📍 네이버 지도에서 실시간 영업 정보 확인하기 〉
+                    </a>
                 </div>
             </div>`;
-            container.innerHTML += cardHTML;
+            container.innerHTML += accordionHTML;
         });
     }
 
-    // 구글 폼 링크
     function openGoogleForm() {
         const formLink = 'https://docs.google.com/forms/d/e/1FAIpQLSfP-hF4EEgnRgwgT6fuvXfWiIfiH9nJdkvJI2k5eNe9frxlDg/viewform?usp=dialog';
         window.open(formLink, '_blank');
     }
 
-    // 초기 화면에 전체 리스트 띄우기
+    // 파일 로드 시 핫플리스트 자동 초기화 렌더링
     window.onload = () => { renderPlaces('all', document.querySelector('.filter-btn.active')); };
 </script>
 </body>
