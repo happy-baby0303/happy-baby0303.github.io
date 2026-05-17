@@ -1,0 +1,33 @@
+name: 주말 무료 행사 자동 갱신 로봇
+
+on:
+  schedule:
+    # ⏰ 매주 목요일 밤 11시 (한국 시간 KST) 자동 실행 수식
+    - cron: '0 14 * * 4'
+  workflow_dispatch: # 내가 원할 때 언제든 수동으로 실행하는 버튼 활성화
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 깃허브 창고 코드 불러오기
+      uses: actions/checkout@v4
+
+    - name: 파이썬 환경 구축하기
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 필수 라이브러리 설치
+      run: |
+        pip install requests
+
+    - name: 공공데이터 수집 스크립트 실행
+      run: python update_events.py
+
+    - name: 새 데이터로 홈페이지 자동 업데이트 및 커밋
+      run: |
+        git config --global user.name "TosilRobot"
+        git config --global user.email "robot@tosil.com"
+        git add index.html
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [자동화] 이번주 주말 최신 행사 족보 갱신 완료" && git push)
