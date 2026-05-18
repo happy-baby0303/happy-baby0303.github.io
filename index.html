@@ -39,7 +39,6 @@
         .home-hero-tag { align-self: flex-start; background: var(--primary); font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px; }
         .home-hero-title { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
-        /* ✨ 홈 탭 대폭 세련화: 토스 스타일 대시보드 리모델링 */
         .home-menu-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
         .home-large-tile { background: #FFF; border-radius: 24px; padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid rgba(0,0,0,0.01); box-shadow: 0 4px 16px rgba(0,0,0,0.02); position: relative; }
         .home-large-tile:active, .home-sub-tile:active { transform: scale(0.98); background: #F8F9FA; }
@@ -71,7 +70,6 @@
         .filter-btn { padding: 10px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 700; border: 1px solid var(--border) !important; background: #FFF; color: var(--text-s); cursor: pointer; transition: 0.15s; }
         .filter-btn.active { background: var(--text-m) !important; color: #FFF !important; border-color: var(--text-m) !important; }
 
-        /* 📸 인스타 감성 2열 격자 레이아웃 (축제 전용) */
         .festival-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
         .fest-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.02); display: flex; flex-direction: column; cursor: pointer; position: relative; border: 1px solid var(--border); }
         .fest-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #f0ede6; }
@@ -81,7 +79,6 @@
         .fest-card-title { font-size: 13.5px; font-weight: 700; color: var(--text-m); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
         .fest-card-meta { font-size: 11.5px; color: var(--primary); font-weight: 700; }
         
-        /* 🗺️ 계층형 세부 시군구 필터 레이아웃 */
         #sub-filter-row { background: rgba(0,0,0,0.03); padding: 8px; border-radius: 14px; display: none; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px; }
 
         .accordion-item { background: #FFF; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
@@ -109,7 +106,6 @@
         .toolbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
         .tool-chip { background: #FFF; border: 1px solid var(--border); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; transition: 0.15s; }
         .tool-chip:active { background: #F8F9FA; }
-        .tool-chip .t-icon { font-size: 22px; display: block; margin-bottom: 6px; }
         .tool-chip .t-icon { font-size: 22px; display: block; margin-bottom: 6px; }
         .tool-chip .t-label { font-size: 12px; font-weight: 800; color: var(--text-s); letter-spacing: -0.5px; }
         .tool-chip.active { border-color: var(--primary); background: rgba(49, 130, 246, 0.05); }
@@ -157,11 +153,11 @@
         .seo-box h3 { font-size: 15px; font-weight: 800; margin: 24px 0 8px 0; color: #222; }
         .seo-box p { font-size: 14px; color: var(--text-s); margin-bottom: 14px; line-height: 1.65; word-break: keep-all; text-align: justify; }
 
-        /* 📱 ✨ NEW: 인스타 감성 바텀 시트 프리미엄 모달 시스템 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 4000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-        .modal-content { width: 100%; max-width: 500px; background: #FFF; border-radius: 28px 28px 0 0; padding: 24px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .modal-close-handle { width: 44px; height: 5px; background: #E5E8EB; border-radius: 3px; margin: 0 auto 24px auto; cursor: pointer; }
+        /* 📱 ✨ NEW: 바닥 탈출! 화면 중앙 부드러운 스케일 업 플로팅 모달 UI 개편 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 16px; }
+        .modal-content { width: 100%; max-width: 440px; background: #FFF; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-close-handle { width: 44px; height: 5px; background: #E5E8EB; border-radius: 3px; margin: 0 auto 20px auto; cursor: pointer; }
         .modal-header-wrap { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
         .modal-emoji { font-size: 32px; }
         .modal-title { font-size: 20px; font-weight: 800; color: #111; line-height: 1.4; letter-spacing: -0.5px; }
@@ -172,9 +168,14 @@
         .modal-meta-value { color: var(--text-m); font-weight: 600; }
         .modal-action-grid { display: grid; grid-template-columns: 1.2fr 2fr; gap: 10px; margin-top: 20px; }
         .modal-call-btn { background: #FFF !important; color: var(--text-m) !important; border: 1px solid var(--border) !important; font-size: 14.5px; font-weight: 800; padding: 16px; border-radius: 14px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .modal-navi-container { background: #F2F5F8; border-radius: 16px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-around; }
-        .modal-navi-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-s); font-size: 11px; font-weight: 800; cursor: pointer; }
-        .modal-navi-logo { width: 28px; height: 28px; border-radius: 8px; margin-bottom: 4px; object-fit: cover; }
+        .modal-navi-container { background: #F2F5F8; border-radius: 16px; padding: 12px; display: flex; align-items: center; justify-content: space-around; gap: 8px; }
+        .modal-navi-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-s); font-size: 10.5px; font-weight: 800; cursor: pointer; flex: 1; }
+        
+        /* 🎨 고화질 커스텀 벡터 내비 아이콘 배지 스타일 */
+        .navi-badge-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #FFF; margin-bottom: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .navi-badge-icon.naver { background: #03C75A; }
+        .navi-badge-icon.tmap { background: #1B2B54; font-size: 12px; }
+        .navi-badge-icon.kakao { background: #FEE500; color: #191919; }
     </style>
 </head>
 <body>
@@ -374,7 +375,7 @@
 
                     <div class="checkbox-area" style="display: flex; gap: 12px; align-items:flex-start; cursor: pointer; padding: 16px; background: #FFF; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 24px;" onclick="toggleCheck(event)">
                         <input type="checkbox" id="agree-check" style="width: 22px; height: 22px; accent-color: var(--danger); margin-top:2px;">
-                        <label style="font-size:13px; font-weight:800; color:var(--danger); line-height:1.455;">상기 기술된 의료 리스크 및 예외 고지를 완벽히 숙지하였으며, 본인 판단하에 참고용으로만 사용하겠습니다.</label>
+                        <label style="font-size:13px; font-weight:800; color:var(--danger); line-height:1.45;">상기 기술된 의료 리스크 및 예외 고지를 완벽히 숙지하였으며, 본인 판단하에 참고용으로만 사용하겠습니다.</label>
                     </div>
 
                     <div class="input-group">
@@ -465,12 +466,12 @@
             <p>단순 총액만 보기보다 장당 단가(기저귀 300원 이하 등)를 계산하는 것이 유리합니다. 또한 정부에서 지원하는 부모급여나 아동수당 등을 단순 생활비로 쓰기보다 아이 이름의 적립식 펀드나 청약 통장으로 이체하는 '재무 격리 전략'을 적극 추천합니다.</p>
 
             <h3>3. 해열제 복용 및 예방접종 후 관리</h3>
-            <p>예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜 bit 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
+            <p>예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜과 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
         </div>
 
        <footer style="text-align: center; padding: 35px 10px 20px 10px; font-size: 11.5px; color: var(--text-sub); line-height: 1.8; border-top: 1px solid var(--border); margin-top: 25px;">
             <div style="margin-bottom: 6px;">
-                <strong style="color: var(--text-s); font-size: 12.5px;">&copy; 2026. 토실이 육아 메이트. All rights reserved.</strong>
+                <strong style="color: var(--text-s); font-size: 12.5px;">© 2026. 토실이 육아 메이트. All rights reserved.</strong>
             </div>
             <div style="margin-bottom: 6px;">
                 <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 800;">📝 공식 블로그</a> | 
@@ -614,16 +615,15 @@
         filterPlaces();
     }
 
-    // 📱 ✨ NEW: 알림창 대신 바텀시트 모달을 열어주는 핵심 엔진
+    // 📱 🚗 ✨ NEW: 길찾기 튕김 전면 패치 및 불멸의 벡터 지도 로고 임베디드 적용
     function openFestivalModal(title, dateText, addr, tel, review, query, image) {
         const body = document.getElementById('modal-dynamic-body');
         
-        // 내비게이션 검색 링크 인덱싱
+        // 🛠️ 버그 전면 전술 수정: 모바일 앱 구동을 방해하지 않는 특수 딥링크 쿼리 정렬
         const naverUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(query);
         const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
-        const kakaoUrl = 'https://m.map.kakao.com/link/search/' + encodeURIComponent(query);
+        const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query); // [카카오내비 전면 수리 완료]
         
-        // 전화번호 방어막
         const telLink = tel && tel !== '정보없음' ? `<a href="tel:${tel}" class="modal-call-btn">📞 전화 문의</a>` : `<button class="modal-call-btn" disabled style="opacity:0.4;">📞 번호 없음</button>`;
         
         body.innerHTML = `
@@ -632,7 +632,7 @@
                 <div class="modal-title">${title}</div>
             </div>
             
-            ${image ? `<img src="${image}" style="width:100%; height:180px; object-fit:cover; border-radius:16px; margin-bottom:16px;" onerror="this.style.display='none'">` : ''}
+            ${image ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : ''}
 
             <div class="modal-meta-box">
                 <div class="modal-meta-row">
@@ -645,22 +645,22 @@
                 </div>
             </div>
 
-            <div class="place-review" style="margin-top:0; margin-bottom:20px; background:#F2F5F8;">
-                <strong>💬 토실이 한줄 팁:</strong> "${review || '공식 지자체 추천 영유아 동반 맞춤 행사입니다. 안전 마진 확보 완료!'}"
+            <div class="place-review" style="margin-top:0; margin-bottom:20px; background:#F2F5F8; border-radius:14px;">
+                <strong>💬 토실이 팩트 체크:</strong> "${review || '공식 지자체 엄선 아동 가족 맞춤형 주말 안전 인프라 축제입니다.'}"
             </div>
 
-            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">🚗 아기랑 스마트 길찾기 서비스</div>
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">🚗 원클릭 아기랑 모바일 길찾기 서비스</div>
             <div class="modal-navi-container">
                 <a href="${naverUrl}" target="_blank" class="modal-navi-item">
-                    <img src="https://blog.kakaocdn.net/dn/bHw7uN/btrQuW7pOnE/wK8bKkKkTkU889oK9wKJuk/img.png" class="modal-navi-logo" alt="네이버지도" onerror="this.src='https://via.placeholder.com/28?text=N'">
+                    <div class="navi-badge-icon naver">N</div>
                     <span>네이버 지도</span>
                 </a>
                 <a href="${tmapUrl}" target="_blank" class="modal-navi-item">
-                    <img src="https://play-lh.googleusercontent.com/orYfeZ_Bylf9f6p3yE-tG61L9PivL3vB1-T9M1I8A7A78L00p9bQ3L3w_fF5v4p8-g" class="modal-navi-logo" alt="티맵" onerror="this.src='https://via.placeholder.com/28?text=T'">
+                    <div class="navi-badge-icon tmap">TMAP</div>
                     <span>티맵(TMap)</span>
                 </a>
                 <a href="${kakaoUrl}" target="_blank" class="modal-navi-item">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Kakao_Main_Logo.png" class="modal-navi-logo" alt="카카오내비" onerror="this.src='https://via.placeholder.com/28?text=K'">
+                    <div class="navi-badge-icon kakao">K</div>
                     <span>카카오내비</span>
                 </a>
             </div>
@@ -866,6 +866,10 @@
     }
 
     const hotplacesData = [
+        // ⏱️ ✨ [시한폭탄 자동 삭제 기능 탑재] expiryDate가 지나면 굳이 삭제 안 해도 리스트에서 지 혼자 소멸합니다!
+        {"isEvent": true, "region": "jeolla", "locText": "전북 남원", "title": "제96회 남원춘향제 (토실이 강추)", "datetime": "2026.05.22(금) ~ 05.26(화)", "expiryDate": "2026-05-26", "emoji": "🏯", "desc": "이름은 한문학 같지만 사실상 거대한 어린이 전통 놀이 천국! 광한루원 야외 행사", "tags": [{"c": "green", "t": "🌳 광활한 잔디밭"}, {"c": "blue", "t": "🎫 축제 전면무료"}, {"c": "red", "t": "🍼 유모차 기동 원활"}], "review": "한복 체험이랑 전통 그네타기, 다리 밑 소원 등 띄우기에 아기들 환장합니다. 인스타 인생샷 무제한 추출기!", "query": "남원 광한루원"},
+        {"isEvent": true, "region": "jeolla", "locText": "전남 곡성", "title": "제16회 곡성세계장미축제", "datetime": "2026.05.23(토) ~ 06.07(일)", "expiryDate": "2026-06-07", "emoji": "🌹", "desc": "수억 송이 장미 바다와 섬진강 기차마을 놀이터가 결합된 5월 육아 끝판왕 성지", "tags": [{"c": "green", "t": "🚂 기차마을 팝업"}, {"c": "red", "t": "🍼 S급 유아휴게실"}, {"c": "blue", "t": "📸 대형 에어바운스"}], "review": "축제장 안에 미니 놀이공원, 동물농장, 레일바이크까지 있어서 하루 종일 에너자이저 아기들 힘 빼기 최적의 요새입니다.", "query": "곡성 섬진강기차마을"},
+
         {"isEvent": true, "region": "gyeonggi", "locText": "경기 수원", "title": "수원화성 미디어아트쇼", "datetime": "2026.05.23(토) ~ 05.24(일)", "emoji": "🎇", "desc": "수원시 주관 주말 야간 미디어아트 및 플리마켓", "tags": [{"c": "green", "t": "🌳 야외 행사"}], "review": "유모차 산책하기 아주 나이스합니다.", "query": "수원화성행궁"},
         {"isEvent": true, "region": "gyeonggi", "locText": "경기 화성", "title": "동탄 호수 루나쇼", "datetime": "2026.05.23(토)", "emoji": "⛲", "desc": "화성시 주관 음악분수쇼", "tags": [{"c": "green", "t": "🌳 호수공원"}], "review": "치킨 배달시켜서 돗자리 펴고 보면 꿀맛입니다.", "query": "동탄호수공원 루나쇼"},
         {"isEvent": true, "region": "seoul", "locText": "서울 시청", "title": "서울스퀘어 가족 축제", "datetime": "2026.05.23(토)", "emoji": "🎪", "desc": "영유아 잔디 정원 및 무료 놀이공간", "tags": [{"c": "blue", "t": "🎫 전면 무료"}], "review": "유모차 군단 대거 출격 예정지입니다.", "query": "서울광장"},
@@ -888,6 +892,9 @@
         const keyword = document.getElementById('spot-search').value.toLowerCase().trim();
         const container = document.getElementById('hotplace-container');
         container.innerHTML = ''; 
+        
+        // 오늘 날짜 계산 (기한 만료용 기준점)
+        const todayStr = new Date().toISOString().split('T')[0];
 
         if (currentSubTab === 'event') {
             let eventSource = apiFestivals.length > 0 ? apiFestivals : hotplacesData.filter(p => p.isEvent);
@@ -896,6 +903,9 @@
                 let addr = p.addr1 || p.addr || '';
                 let title = p.title || '';
                 
+                // ⏱️ ✨ [핵심 패치] 기한 만료일(expiryDate)이 지났으면 리스트에서 강제 생략!
+                if (p.expiryDate && todayStr > p.expiryDate) return false;
+
                 let matchesRegion = false;
                 if (currentRegion === 'all') {
                     matchesRegion = true;
@@ -939,8 +949,6 @@
 
                 const card = document.createElement('div');
                 card.className = 'fest-card';
-                
-                // 📱 ✨ NEW 패치: 무식한 alert 창 대신 세련된 바텀시트 모달 실행
                 card.onclick = () => openFestivalModal(title, dateText, addr, tel, review, title, imgUrl);
                 
                 card.innerHTML = `
@@ -959,6 +967,9 @@
 
         } else {
             const filteredPlaces = hotplacesData.filter(p => {
+                // ⏱️ ✨ [핵심 패치] 기한 만료일(expiryDate)이 지났으면 리스트에서 강제 생략!
+                if (p.expiryDate && todayStr > p.expiryDate) return false;
+
                 const matchesType = (p.isEvent === false);
                 const matchesRegion = (currentRegion === 'all' || p.region === currentRegion);
                 const tagString = p.tags.map(t => t.t).join(' ');
