@@ -426,7 +426,7 @@
 
                         <div class="health-card">
                             <div class="health-card-title"><span class="icon">💉</span> 이번 달 소아과 접종 스케줄</div>
-                            <div style="font-size:13px; color:var(--text-s); margin-bottom:10px;">질질병관리청 국가 필수예방접종 가이드라인 기준 (오차범위 ±1주)</div>
+                            <div style="font-size:13px; color:var(--text-s); margin-bottom:10px;">질병관리청 국가 필수예방접종 가이드라인 기준 (오차범위 ±1주)</div>
                             <div id="vaccine-info" class="vaccine-list"></div>
                         </div>
 
@@ -476,7 +476,7 @@
                 <a href="https://www.instagram.com/ggoom_e2?igsh=MWo0OXFpdzk3OGwzYg==" target="_blank" style="color: #E1306C; text-decoration: none; font-weight: 800;">📸 오피셜 인스타</a> | 
                 <span style="font-weight:600;">Made with 🤍</span>
             </div>
-            <p style="color: #C8D1DA; font-size:10.5px; word-break: keep-all; margin-top:8px;">본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을 물을 수 있습니다.</p>
+            <p style="color: #C8D1DA; font-size:10.5px; word-break: keep-all; margin-top:8px;">본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을물 수 있습니다.</p>
         </footer>
 
     </div>
@@ -505,6 +505,7 @@
     let currentRegion = 'all'; 
     let currentSubTab = 'event'; 
     let apiFestivals = []; 
+    let hotplacesData = []; // ⚡ NEW: 하윤이네 주소록 데이터도 외부 JSON 비동기 로딩 방식으로 전면 체질 개선!
     let currentSubRegion = 'all'; 
 
     function switchTab(id, el) {
@@ -554,18 +555,21 @@
     }
     function getV(id) { return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; }
 
-    async function loadApiFestivals() {
+    // ⚡ NEW: 찢어놓은 보물 상자 둘 다 부드럽게 가져오는 멀티 파이프라인 탑재
+    async function loadAllExternalData() {
         try {
-            const response = await fetch('festivals.json');
-            if (response.ok) {
-                apiFestivals = await response.json();
-                if (currentSubTab === 'event') {
-                    filterPlaces();
-                }
-            }
-        } catch (error) {
-            console.log("실시간 축제 보물상자 대기 중...", error);
-        }
+            // 1. 실시간 자동 수집 축제 연동
+            const resFest = await fetch('festivals.json');
+            if (resFest.ok) apiFestivals = await resFest.getJson || await resFest.json();
+        } catch (e) { console.log(e); }
+
+        try {
+            // 2. 파트너님 오피셜 고정 주소록 연동
+            const resPlaces = await fetch('places.json');
+            if (resPlaces.ok) hotplacesData = await resPlaces.json();
+        } catch (e) { console.log(e); }
+
+        filterPlaces();
     }
 
     function generateSubFilters(mainRegion) {
@@ -622,7 +626,6 @@
         
         const telLink = tel && tel !== '정보없음' ? `<a href="tel:${tel}" class="modal-call-btn">📞 전화 문의</a>` : `<button class="modal-call-btn" disabled style="opacity:0.4;">📞 번호 없음</button>`;
         
-        // 모달 전용 이미지 방어 패치 (인라인 그래픽일 때는 이미지 출력 안 함)
         const isGraphicPlaceholder = !image || image.startsWith('⚙️');
         const modalImgHtml = (!isGraphicPlaceholder && image) ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : '';
 
@@ -860,34 +863,6 @@
         document.getElementById('growth-result').style.display = 'block';
     }
 
-    function downloadImg() {
-        html2canvas(document.getElementById('capture-area'), { scale: 2, backgroundColor: '#FFFFFF' }).then(c => {
-            let l = document.createElement('a'); l.download = '국가표준_육아비진단서.png'; l.href = c.toDataURL(); l.click();
-        });
-    }
-
-    const hotplacesData = [
-        {"isEvent": true, "region": "jeolla", "locText": "전북 남원", "title": "제96회 남원춘향제 (토실이 강추)", "datetime": "2026.05.22(금) ~ 05.26(화)", "expiryDate": "2026-05-26", "emoji": "🏯", "desc": "이름은 한문학 같지만 사실상 거대한 어린이 전통 놀이 천국! 광한루원 야외 행사", "tags": [{"c": "green", "t": "🌳 광활한 잔디밭"}, {"c": "blue", "t": "🎫 축제 전면무료"}, {"c": "red", "t": "🍼 유모차 기동 원활"}], "review": "한복 체험이랑 전통 그네타기, 다리 밑 소원 등 띄우기에 아기들 환장합니다. 인스타 인생샷 무제한 추출기!", "query": "남원 광한루원"},
-        {"isEvent": true, "region": "jeolla", "locText": "전남 곡성", "title": "제16회 곡성세계장미축제", "datetime": "2026.05.23(토) ~ 06.07(일)", "expiryDate": "2026-06-07", "emoji": "🌹", "desc": "수억 송이 장미 바다와 섬진강 기차마을 놀이터가 결합된 5월 육아 끝판왕 성지", "tags": [{"c": "green", "t": "🚂 기차마을 팝업"}, {"c": "red", "t": "🍼 S급 유아휴게실"}, {"c": "blue", "t": "📸 대형 에어바운스"}], "review": "축제장 안에 미니 놀이공원, 동물농장, 레일바이크까지 있어서 하루 종일 에너자이저 아기들 힘 빼기 최적의 요새입니다.", "query": "곡성 섬진강기차마을"},
-
-        {"isEvent": true, "region": "gyeonggi", "locText": "경기 수원", "title": "수원화성 미디어아트쇼", "datetime": "2026.05.23(토) ~ 05.24(일)", "emoji": "🎇", "desc": "수원시 주관 주말 야간 미디어아트 및 플리마켓", "tags": [{"c": "green", "t": "🌳 야외 행사"}], "review": "유모차 산책하기 아주 나이스합니다.", "query": "수원화성행궁"},
-        {"isEvent": true, "region": "gyeonggi", "locText": "경기 화성", "title": "동탄 호수 루나쇼", "datetime": "2026.05.23(토)", "emoji": "⛲", "desc": "화성시 주관 음악분수쇼", "tags": [{"c": "green", "t": "🌳 호수공원"}], "review": "치킨 배달시켜서 돗자리 펴고 보면 꿀맛입니다.", "query": "동탄호수공원 루나쇼"},
-        {"isEvent": true, "region": "seoul", "locText": "서울 시청", "title": "서울스퀘어 가족 축제", "datetime": "2026.05.23(토)", "emoji": "🎪", "desc": "영유아 잔디 정원 및 무료 놀이공간", "tags": [{"c": "blue", "t": "🎫 전면 무료"}], "review": "유모차 군단 대거 출격 예정지입니다.", "query": "서울광장"},
-        
-        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "어반리st 동탄점", "datetime": "매일 10:00 ~ 22:00 (연중무휴)", "emoji": "🥐", "desc": "유모차 전 회전 반경 기동이 완벽 확보된 초대형 플래그십 카페", "tags": [{"c": "red", "t": "🍼 수유실 완비"}, {"c": "green", "t": "🦼 무단차 입구"}, {"c": "blue", "t": "🪑 아기의자 다량"}], "review": "유모차 동선 방해 요소가 전혀 없어 초보 맘 부대 안심 스테이 1티어 공간입니다.", "query": "동탄 어반리st"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "롯데백화점 (디에비뉴)", "datetime": "백화점 영업시간 동일 (10:30 ~ 20:00)", "emoji": "🛍️", "desc": "S급 유아 휴게 설비 및 프리미엄 수유 케어 센터 복합 인프라 몰", "tags": [{"c": "red", "t": "🍼 S급 휴게실"}, {"c": "green", "t": "🌿 오픈 테라스"}, {"c": "blue", "t": "🦼 하이엔드 대여"}], "review": "이유식 히팅 싱크대 인프라가 훌륭해 안심하고 장시간 가족 체류가 수월합니다.", "query": "동탄 롯데백화점"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "라크드미엘", "datetime": "매일 10:00 ~ 22:00", "emoji": "🦢", "desc": "동탄호수공원 조망권 보유 및전동 승강기 직결 통창 베이커리", "tags": [{"c": "red", "t": "🍼 기저귀 교환대"}, {"c": "blue", "t": "🪑 하이체어 가용"}, {"c": "green", "t": "🌳 공원 엘베 연계"}], "review": "산책로 보행 축선에서 끊김 없이 수직 상향 이동이 가능하여 엄마 리프레시에 제격입니다.", "query": "동탄 라크드미엘"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "타임테라스 & 챔피언 키즈존", "datetime": "매일 10:30 ~ 22:00 (마트 휴무일 확인 요망)", "emoji": "🎪", "desc": "이유식 구매부터 실내 주니어 활동까지 결합된 복합 놀이 광장", "tags": [{"c": "red", "t": "🍼 너싱룸 완비"}, {"c": "green", "t": "RUN 안전 키즈"}, {"c": "blue", "t": "🚗 광폭 주차 구역"}], "review": "내부 안전 요원 배치 배율이 높아 주말 패밀리 쇼핑 연계 동선으로 훌륭합니다.", "query": "동탄 타임테라스"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "스타필드 수원", "datetime": "매일 10:00 ~ 22:00 (연중무휴)", "emoji": "📚", "desc": "와이드 유모차 패스웨이 및 영유아 문화 아카이브 레이어가 결합된 성지", "tags": [{"c": "red", "t": "🍼 S급 수유센터"}, {"c": "blue", "t": "👶 별마당 키즈"}, {"c": "green", "t": "🦼 프리미엄 렌탈"}], "review": "3층 영유아 전용 도서 구역 퀄리티가 우수하여 교육 목적 체류 만족도가 매우 높습니다.", "query": "스타필드 수원"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "타임빌라스 수원 (구 롯데몰)", "datetime": "매일 10:30 ~ 22:00", "emoji": "🛍️", "desc": "공간 대개조 패킹을 통해 유모차 병렬 주행 마진을 확보한 신식 몰", "tags": [{"c": "red", "t": "🍼 휴게실 전면리뉴얼"}, {"c": "green", "t": "🍽️ 유아 친화 다이닝"}, {"c": "blue", "t": "🚗 층별 다이렉트"}], "review": "동선 유효 폭이 넓어져 문화센터 종료 후 유모차 부대 단체 이동이 가장 편합니다.", "query": "타임빌라스 수원"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "복합문화공간 111CM", "datetime": "화~일 10:00 ~ 18:00 (월요일 휴관)", "emoji": "🏃‍♂️", "desc": "정자동 랜드마크 복합 홀 및 에너지 발산형 광장 인프라", "tags": [{"c": "red", "t": "🍼 패밀리 케어룸"}, {"c": "green", "t": "🌳 잔디 조경광장"}, {"c": "blue", "t": "☕ 내부 북카페"}], "review": "걷기 시작한 영유아들의 안전한 실외 도보 야외 활동에 최적화된 잔디 광장입니다.", "query": "수원 111CM"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "광교 앨리웨이 & 밀도", "datetime": "매일 11:00 ~ 21:00 (매장별 상이)", "emoji": "🍞", "desc": "호수공원 산책 동선과 결합된 트렌디한 스트리트형 야외 몰", "tags": [{"c": "blue", "t": "🎈 차량 통제 광장"}, {"c": "green", "t": "🌳 수변 산책로 연계"}, {"c": "red", "t": "🍼 수유 전용 구역"}], "review": "광장 중앙 비눗방울 액티비티 구역이 잘 확보되어 야외 테라스에서 기분 전환하기 딱 좋습니다.", "query": "광교 앨리웨이"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "용인", "title": "경기도어린이박물관", "datetime": "화~일 10:00 ~ 18:00 (월요일 휴관)", "emoji": "🎨", "desc": "경기 예산 투입 인프라 중 영유아 자연놀이 격리 공간이 가장 뛰어난 곳", "tags": [{"c": "red", "t": "🍼 의무실/너싱룸"}, {"c": "green", "t": "🏃‍♂️ 토들러 전용구역"}, {"c": "blue", "t": "🎫 100% 사전 예약"}], "review": "자연놀이터 등 돌 전후 아기들만 따로 노는 세그먼트가 분리되어 치임 사고 리스크가 없습니다.", "query": "경기도어린이박물관"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "용인", "title": "어로프슬라이스피스", "datetime": "매일 10:00 ~ 20:00", "emoji": "🏕️", "desc": "방대한 부지의 숲속 자연 야외 정원과 시그니처 밧줄빵 팩토리", "tags": [{"c": "green", "t": "🌳 와이드 가든 야외석"}, {"c": "blue", "t": "🪑 아기 체어 가용"}, {"c": "red", "t": "🍼 전용 기저귀대"}], "review": "부지가 워낙 넓어서 애들이 야외에서 돌아다니기 너무 좋아요. 밧줄빵도 맛있고 아기랑 사진 찍으면 숲속 요정처럼 나옵니다ㅎㅎ", "query": "용인 어로프슬라이스피스"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "용인", "title": "칼리오페", "datetime": "매일 10:00 ~ 21:00", "emoji": "🏛️", "desc": "층고가 매우 높아 압도적인 개방감을 주는 신전형 보이드 카페", "tags": [{"c": "red", "t": "🍼 위생 기저귀 체인저"}, {"c": "green", "t": "🛗 승강기 완비"}, {"c": "blue", "t": "🌳 대형 글래스 뷰"}], "review": "테이블 마진 여백이 넓어 아기들의 일시적인 울음소리가 천장 공중에 자연 흡수 분산됩니다.", "query": "용인 칼리오페"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "용인", "title": "롯데몰 수지점", "datetime": "매일 10:30 ~ 22:00", "emoji": "🧸", "desc": "수지 권역 가족 단위 원스톱 쇼핑 동선 최적화 몰 인프라", "tags": [{"c": "red", "t": "🍼 수유실 완비"}, {"c": "green", "t": "🚗 광폭 주차 라인"}, {"c": "blue", "t": "👶 다채로운 키즈센터"}], "review": "주차장 진입 동선 및 수평 보행 축선 설계가 정석적인 유모차 프렌드 몰입니다.", "query": "수지 롯데몰"}
-    ];
-
     function filterPlaces() {
         const keyword = document.getElementById('spot-search').value.toLowerCase().trim();
         const container = document.getElementById('hotplace-container');
@@ -948,14 +923,13 @@
                 const card = document.createElement('div');
                 card.className = 'fest-card';
                 
-                // 📱 ✨ NEW 패치: 이미지가 없을 땐 뜬금없는 사진 대신, 깔끔한 앱 전용 일러스트 배경 그래픽으로 즉시 가동!
                 let imgHtml = '';
                 let modalImgParam = rawImg;
                 if (rawImg) {
                     imgHtml = `<img src="${rawImg}" alt="${title}" onerror="this.style.display='none'; this.parentNode.innerHTML += '<div style=\'width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;\'>🎈</div>';">`;
                 } else {
                     imgHtml = `<div style="width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
-                    modalImgParam = '⚙️GRAPHIC'; // 모달에도 엑박 유발 원천 방지용
+                    modalImgParam = '⚙️GRAPHIC'; 
                 }
 
                 card.onclick = () => openFestivalModal(title, dateText, addr, tel, review, title, modalImgParam);
@@ -1060,8 +1034,7 @@
     }
 
     window.onload = () => { 
-        loadApiFestivals(); 
-        filterPlaces(); 
+        loadAllExternalData(); // ⚡ NEW: 통합 비동기 주입 엔진 구동
     };
 </script>
 </body>
