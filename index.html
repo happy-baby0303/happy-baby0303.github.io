@@ -15,7 +15,7 @@
             --text-sub: #8B95A1; --border: #E5E8EB; --success: #00B37A; --danger: #F04452; 
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Pretendard', sans-serif; background: linear-gradient(135deg, #F2F5F8 0%, #E8EEF5 100%); color: var(--text-m); line-height: 1.5; padding-top: 60px; padding-bottom: 120px; min-height: 100vh; letter-spacing: -0.4px; }
+        body { font-family: 'Pretendard', sans-serif; background: #F2F5F8; color: var(--text-m); line-height: 1.5; padding-top: 60px; padding-bottom: 120px; min-height: 100vh; letter-spacing: -0.4px; }
         button, input[type="button"], input[type="submit"] { -webkit-appearance: none; -moz-appearance: none; appearance: none; border: none; outline: none; background: transparent; }
         .wrapper { max-width: 500px; margin: 0 auto; padding: 10px 16px; }
         
@@ -29,22 +29,34 @@
         .tab-content.active { display: block; }
         @keyframes appReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        .app-box { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-radius: 24px; padding: 28px 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.02); border: 1px solid rgba(255,255,255,0.7); margin-bottom: 20px; }
+        .app-box { background: #FFF; border-radius: 24px; padding: 24px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.01); margin-bottom: 20px; }
         .app-title { font-size: 22px; font-weight: 800; color: #111; letter-spacing: -0.6px; margin-bottom: 8px; }
         .app-desc { font-size: 13.5px; color: var(--text-s); margin-bottom: 24px; line-height: 1.5; word-break: keep-all; }
 
-        .home-hero-card { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); background-color: #E5E8EB; }
+        .home-hero-card { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 24px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); background-color: #E5E8EB; }
         .home-hero-img { width: 100%; height: 100%; object-fit: cover; }
-        .home-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.05) 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; color: #FFF; }
+        .home-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.02) 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; color: #FFF; }
         .home-hero-tag { align-self: flex-start; background: var(--primary); font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px; }
-        .home-hero-title { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .home-hero-title { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
-        .home-menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-        .home-tile { background: #FFF; border: 1px solid var(--border); border-radius: 18px; padding: 20px 16px; text-align: left; cursor: pointer; transition: 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .home-tile:active { transform: scale(0.96); background: #F8F9FA; }
-        .home-tile .t-emoji { font-size: 26px; display: block; margin-bottom: 8px; }
-        .home-tile .t-name { font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-bottom: 4px; }
-        .home-tile .t-sub { font-size: 12px; color: var(--text-sub); font-weight: 600; line-height: 1.3; }
+        /* ✨ 홈 탭 대폭 세련화: 토스 스타일 대시보드 리모델링 */
+        .home-menu-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+        .home-large-tile { background: #FFF; border-radius: 24px; padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid rgba(0,0,0,0.01); box-shadow: 0 4px 16px rgba(0,0,0,0.02); position: relative; }
+        .home-large-tile:active, .home-sub-tile:active { transform: scale(0.98); background: #F8F9FA; }
+        .home-tile-main-wrap { display: flex; align-items: center; gap: 16px; }
+        .home-tile-emoji { font-size: 34px; }
+        .home-tile-title { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 2px; }
+        .home-tile-sub { font-size: 13px; color: var(--text-sub); font-weight: 600; }
+        .home-tile-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; background: rgba(49, 130, 246, 0.08); color: var(--primary); }
+        .home-tile-badge.accent { background: rgba(253, 104, 104, 0.08); color: var(--accent); }
+        .home-tile-badge.success { background: rgba(0, 179, 122, 0.08); color: var(--success); }
+
+        .home-sub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+        .home-sub-tile { background: #FFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 130px; border: 1px solid rgba(0,0,0,0.01); box-shadow: 0 4px 16px rgba(0,0,0,0.02); }
+        .home-sub-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .home-sub-emoji { font-size: 26px; }
+        .home-sub-title { font-size: 14.5px; font-weight: 800; color: #111; margin-bottom: 3px; }
+        .home-sub-desc { font-size: 11.5px; color: var(--text-sub); font-weight: 600; line-height: 1.3; }
 
         .segment-control { display: flex; background: #E5E8EB; padding: 4px; border-radius: 14px; margin-bottom: 24px; }
         .segment-btn { flex: 1; padding: 12px; border: none !important; background: transparent; border-radius: 10px; font-size: 14px; font-weight: 800; color: var(--text-s); cursor: pointer; transition: 0.15s; }
@@ -98,6 +110,7 @@
         .tool-chip { background: #FFF; border: 1px solid var(--border); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; transition: 0.15s; }
         .tool-chip:active { background: #F8F9FA; }
         .tool-chip .t-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+        .tool-chip .t-icon { font-size: 22px; display: block; margin-bottom: 6px; }
         .tool-chip .t-label { font-size: 12px; font-weight: 800; color: var(--text-s); letter-spacing: -0.5px; }
         .tool-chip.active { border-color: var(--primary); background: rgba(49, 130, 246, 0.05); }
         .tool-chip.active .t-label { color: var(--primary); }
@@ -143,6 +156,25 @@
         .seo-box h2 { font-size: 18px; font-weight: 900; margin-bottom: 18px; color: #111; border-left: 4px solid var(--primary); padding-left: 12px; }
         .seo-box h3 { font-size: 15px; font-weight: 800; margin: 24px 0 8px 0; color: #222; }
         .seo-box p { font-size: 14px; color: var(--text-s); margin-bottom: 14px; line-height: 1.65; word-break: keep-all; text-align: justify; }
+
+        /* 📱 ✨ NEW: 인스타 감성 바텀 시트 프리미엄 모달 시스템 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 4000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        .modal-content { width: 100%; max-width: 500px; background: #FFF; border-radius: 28px 28px 0 0; padding: 24px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-close-handle { width: 44px; height: 5px; background: #E5E8EB; border-radius: 3px; margin: 0 auto 24px auto; cursor: pointer; }
+        .modal-header-wrap { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+        .modal-emoji { font-size: 32px; }
+        .modal-title { font-size: 20px; font-weight: 800; color: #111; line-height: 1.4; letter-spacing: -0.5px; }
+        .modal-meta-box { background: #F8F9FA; border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .modal-meta-row { display: flex; font-size: 13.5px; margin-bottom: 10px; line-height: 1.4; }
+        .modal-meta-row:last-child { margin-bottom: 0; }
+        .modal-meta-label { font-weight: 800; color: var(--text-s); width: 60px; flex-shrink: 0; }
+        .modal-meta-value { color: var(--text-m); font-weight: 600; }
+        .modal-action-grid { display: grid; grid-template-columns: 1.2fr 2fr; gap: 10px; margin-top: 20px; }
+        .modal-call-btn { background: #FFF !important; color: var(--text-m) !important; border: 1px solid var(--border) !important; font-size: 14.5px; font-weight: 800; padding: 16px; border-radius: 14px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .modal-navi-container { background: #F2F5F8; border-radius: 16px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-around; }
+        .modal-navi-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-s); font-size: 11px; font-weight: 800; cursor: pointer; }
+        .modal-navi-logo { width: 28px; height: 28px; border-radius: 8px; margin-bottom: 4px; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -165,34 +197,59 @@
                 </div>
             </div>
 
-            <div class="home-menu-grid">
-                <div class="home-tile" onclick="directGoToolbox('money')" style="grid-column: span 2; display: flex; align-items: center; gap: 16px; padding: 24px;">
-                    <span class="t-emoji" style="margin-bottom:0; font-size: 34px;">💰</span>
+            <div class="home-menu-list">
+                <div class="home-large-tile" onclick="directGoToolbox('money')">
+                    <div class="home-tile-main-wrap">
+                        <span class="home-tile-emoji">💰</span>
+                        <div>
+                            <div class="home-tile-title">우리집 육아 가계부</div>
+                            <div class="home-tile-sub">대한민국 평균 지출액 팩트 진단</div>
+                        </div>
+                    </div>
+                    <span class="home-tile-badge">AI 정밀 진단</span>
+                </div>
+            </div>
+
+            <div class="home-sub-grid">
+                <div class="home-sub-tile" onclick="directGoOuting('event')">
+                    <div class="home-sub-top">
+                        <span class="home-sub-emoji">📅</span>
+                        <span class="home-tile-badge success">실시간 수집</span>
+                    </div>
                     <div>
-                        <div class="t-name" style="font-size: 17px; margin-bottom: 2px;">우리집 육아 가계부</div>
-                        <div class="t-sub" style="font-size: 13px;">대한민국 평균 지출액 팩트 진단</div>
+                        <div class="home-sub-title">주말 공공 행사</div>
+                        <div class="home-sub-desc">이번 주 전국 무료 축제 족보</div>
                     </div>
                 </div>
-
-                <div class="home-tile" onclick="directGoOuting('event')">
-                    <span class="t-emoji">📅</span>
-                    <div class="t-name">주말 공공 행사</div>
-                    <div class="t-sub">이번주 전국 무료 축제</div>
+                <div class="home-sub-tile" onclick="directGoOuting('map')">
+                    <div class="home-sub-top">
+                        <span class="home-sub-emoji">📍</span>
+                        <span class="home-tile-badge">안심 스팟</span>
+                    </div>
+                    <div>
+                        <div class="home-sub-title">검증 육아지도</div>
+                        <div class="home-sub-desc">부모 추천 팩트 검증 완료 지점</div>
+                    </div>
                 </div>
-                <div class="home-tile" onclick="directGoOuting('map')">
-                    <span class="t-emoji">📍</span>
-                    <div class="t-name">검증 육아지도</div>
-                    <div class="t-sub">부모 추천 안심 스팟</div>
+                <div class="home-sub-tile" onclick="directGoToolbox('fever')">
+                    <div class="home-sub-top">
+                        <span class="home-sub-emoji">🌡️</span>
+                        <span class="home-tile-badge accent">비상용 연산</span>
+                    </div>
+                    <div>
+                        <div class="home-sub-title">해열제 계산기</div>
+                        <div class="home-sub-desc">체중별 안전 한계 용량 산출</div>
+                    </div>
                 </div>
-                <div class="home-tile" onclick="directGoToolbox('fever')">
-                    <span class="t-emoji">🌡️</span>
-                    <div class="t-name">해열제 계산기</div>
-                    <div class="t-sub">체중별 안전 가이드</div>
-                </div>
-                <div class="home-tile" onclick="directGoToolbox('growth')">
-                    <span class="t-emoji">📈</span>
-                    <div class="t-name">성장/건강 마스터</div>
-                    <div class="t-sub">체중/접종/발달 진단</div>
+                <div class="home-sub-tile" onclick="directGoToolbox('growth')">
+                    <div class="home-sub-top">
+                        <span class="home-sub-emoji">📈</span>
+                        <span class="home-tile-badge success">표준 매칭</span>
+                    </div>
+                    <div>
+                        <div class="home-sub-title">성장/건강 마스터</div>
+                        <div class="home-sub-desc">체중 · 접종 · 원더윅스 패키지</div>
+                    </div>
                 </div>
             </div>
 
@@ -317,7 +374,7 @@
 
                     <div class="checkbox-area" style="display: flex; gap: 12px; align-items:flex-start; cursor: pointer; padding: 16px; background: #FFF; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 24px;" onclick="toggleCheck(event)">
                         <input type="checkbox" id="agree-check" style="width: 22px; height: 22px; accent-color: var(--danger); margin-top:2px;">
-                        <label style="font-size:13px; font-weight:800; color:var(--danger); line-height:1.45;">상기 기술된 의료 리스크 및 예외 고지를 완벽히 숙지하였으며, 본인 판단하에 참고용으로만 사용하겠습니다.</label>
+                        <label style="font-size:13px; font-weight:800; color:var(--danger); line-height:1.455;">상기 기술된 의료 리스크 및 예외 고지를 완벽히 숙지하였으며, 본인 판단하에 참고용으로만 사용하겠습니다.</label>
                     </div>
 
                     <div class="input-group">
@@ -408,20 +465,20 @@
             <p>단순 총액만 보기보다 장당 단가(기저귀 300원 이하 등)를 계산하는 것이 유리합니다. 또한 정부에서 지원하는 부모급여나 아동수당 등을 단순 생활비로 쓰기보다 아이 이름의 적립식 펀드나 청약 통장으로 이체하는 '재무 격리 전략'을 적극 추천합니다.</p>
 
             <h3>3. 해열제 복용 및 예방접종 후 관리</h3>
-            <p>예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜과 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
+            <p>예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜 bit 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
         </div>
 
        <footer style="text-align: center; padding: 35px 10px 20px 10px; font-size: 11.5px; color: var(--text-sub); line-height: 1.8; border-top: 1px solid var(--border); margin-top: 25px;">
-    <div style="margin-bottom: 6px;">
-        <strong style="color: var(--text-s); font-size: 12.5px;">&copy; 2026. 토실이 육아 메이트. All rights reserved.</strong>
-    </div>
-    <div style="margin-bottom: 6px;">
-        <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 800;">📝 공식 블로그</a> | 
-        <a href="https://www.instagram.com/ggoom_e2?igsh=MWo0OXFpdzk3OGwzYg==" target="_blank" style="color: #E1306C; text-decoration: none; font-weight: 800;">📸 오피셜 인스타</a> | 
-        <span style="font-weight:600;">Made with 🤍</span>
-    </div>
-    <p style="color: #C8D1DA; font-size:10.5px; word-break: keep-all; margin-top:8px;">본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을 물을 수 있습니다.</p>
-</footer>
+            <div style="margin-bottom: 6px;">
+                <strong style="color: var(--text-s); font-size: 12.5px;">&copy; 2026. 토실이 육아 메이트. All rights reserved.</strong>
+            </div>
+            <div style="margin-bottom: 6px;">
+                <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 800;">📝 공식 블로그</a> | 
+                <a href="https://www.instagram.com/ggoom_e2?igsh=MWo0OXFpdzk3OGwzYg==" target="_blank" style="color: #E1306C; text-decoration: none; font-weight: 800;">📸 오피셜 인스타</a> | 
+                <span style="font-weight:600;">Made with 🤍</span>
+            </div>
+            <p style="color: #C8D1DA; font-size:10.5px; word-break: keep-all; margin-top:8px;">본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을 물을 수 있습니다.</p>
+        </footer>
 
     </div>
 
@@ -436,6 +493,13 @@
             <span class="icon">🧰</span><span class="label">육아툴박스</span>
         </div>
     </nav>
+
+    <div id="premium-modal" class="modal-overlay" onclick="closeFestivalModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-close-handle" onclick="closeFestivalModalForce()"></div>
+            <div id="modal-dynamic-body"></div>
+        </div>
+    </div>
 
 <script>
     let trendChart = null;
@@ -505,7 +569,6 @@
         }
     }
 
-    // 🗺 *업그레이드: 전북특별자치도, 충남/경남 등 모든 축약어 완벽 감지 필터 코어
     function generateSubFilters(mainRegion) {
         const subRow = document.getElementById('sub-filter-row');
         const subRegions = new Set();
@@ -550,6 +613,69 @@
         currentSubRegion = sub;
         filterPlaces();
     }
+
+    // 📱 ✨ NEW: 알림창 대신 바텀시트 모달을 열어주는 핵심 엔진
+    function openFestivalModal(title, dateText, addr, tel, review, query, image) {
+        const body = document.getElementById('modal-dynamic-body');
+        
+        // 내비게이션 검색 링크 인덱싱
+        const naverUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(query);
+        const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
+        const kakaoUrl = 'https://m.map.kakao.com/link/search/' + encodeURIComponent(query);
+        
+        // 전화번호 방어막
+        const telLink = tel && tel !== '정보없음' ? `<a href="tel:${tel}" class="modal-call-btn">📞 전화 문의</a>` : `<button class="modal-call-btn" disabled style="opacity:0.4;">📞 번호 없음</button>`;
+        
+        body.innerHTML = `
+            <div class="modal-header-wrap">
+                <span class="modal-emoji">🌲</span>
+                <div class="modal-title">${title}</div>
+            </div>
+            
+            ${image ? `<img src="${image}" style="width:100%; height:180px; object-fit:cover; border-radius:16px; margin-bottom:16px;" onerror="this.style.display='none'">` : ''}
+
+            <div class="modal-meta-box">
+                <div class="modal-meta-row">
+                    <span class="modal-meta-label">🗓️ 기간</span>
+                    <span class="modal-meta-value">${dateText}</span>
+                </div>
+                <div class="modal-meta-row">
+                    <span class="modal-meta-label">📍 장소</span>
+                    <span class="modal-meta-value">${addr}</span>
+                </div>
+            </div>
+
+            <div class="place-review" style="margin-top:0; margin-bottom:20px; background:#F2F5F8;">
+                <strong>💬 토실이 한줄 팁:</strong> "${review || '공식 지자체 추천 영유아 동반 맞춤 행사입니다. 안전 마진 확보 완료!'}"
+            </div>
+
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">🚗 아기랑 스마트 길찾기 서비스</div>
+            <div class="modal-navi-container">
+                <a href="${naverUrl}" target="_blank" class="modal-navi-item">
+                    <img src="https://blog.kakaocdn.net/dn/bHw7uN/btrQuW7pOnE/wK8bKkKkTkU889oK9wKJuk/img.png" class="modal-navi-logo" alt="네이버지도" onerror="this.src='https://via.placeholder.com/28?text=N'">
+                    <span>네이버 지도</span>
+                </a>
+                <a href="${tmapUrl}" target="_blank" class="modal-navi-item">
+                    <img src="https://play-lh.googleusercontent.com/orYfeZ_Bylf9f6p3yE-tG61L9PivL3vB1-T9M1I8A7A78L00p9bQ3L3w_fF5v4p8-g" class="modal-navi-logo" alt="티맵" onerror="this.src='https://via.placeholder.com/28?text=T'">
+                    <span>티맵(TMap)</span>
+                </a>
+                <a href="${kakaoUrl}" target="_blank" class="modal-navi-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/Kakao_Main_Logo.png" class="modal-navi-logo" alt="카카오내비" onerror="this.src='https://via.placeholder.com/28?text=K'">
+                    <span>카카오내비</span>
+                </a>
+            </div>
+
+            <div class="modal-action-grid">
+                ${telLink}
+                <button class="btn-main" style="margin-top:0; padding:16px; border-radius:14px; background:var(--text-m) !important;" onclick="closeFestivalModalForce()">확인 완료</button>
+            </div>
+        `;
+        
+        document.getElementById('premium-modal').style.display = 'flex';
+    }
+
+    function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
+    function closeFestivalModalForce() { document.getElementById('premium-modal').style.display = 'none'; }
 
     function toggleHistory() {
         const area = document.getElementById('history-list-area');
@@ -778,7 +904,6 @@
                     if (currentRegion === 'gyeonggi') matchesRegion = addr.includes('경기') || addr.includes('인천');
                     if (currentRegion === 'chungcheong') matchesRegion = addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종');
                     if (currentRegion === 'gangwon') matchesRegion = addr.includes('강원');
-                    // 🛡 *핵심 패치: '전북', '전남' 글자도 전라도 카테고리로 촘촘히 낚아챕니다!
                     if (currentRegion === 'jeolla') matchesRegion = addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주');
                     if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산');
                     if (currentRegion === 'jeju') matchesRegion = addr.includes('제주');
@@ -807,13 +932,16 @@
                 const endDate = item.eventenddate ? formatDate(item.eventenddate) : '';
                 const dateText = endDate ? `${startDate} ~ ${endDate}` : startDate;
                 const tel = item.tel || '정보없음';
+                const review = item.review || '';
 
                 const addrParts = addr.split(' ');
                 const shortAddr = `${addrParts[0] || ''} ${addrParts[1] || ''}`.replace('특별', '').replace('광역', '');
 
                 const card = document.createElement('div');
                 card.className = 'fest-card';
-                card.onclick = () => alert(`📌 [${title}]\n\n🗓️ 기간: ${dateText}\n📍 장소: ${addr}\n📞 문의: ${tel}`);
+                
+                // 📱 ✨ NEW 패치: 무식한 alert 창 대신 세련된 바텀시트 모달 실행
+                card.onclick = () => openFestivalModal(title, dateText, addr, tel, review, title, imgUrl);
                 
                 card.innerHTML = `
                     <div class="fest-card-img-wrap">
@@ -846,7 +974,6 @@
 
             filteredPlaces.forEach((p, index) => {
                 let tagsHTML = p.tags.map(tag => `<span class="tag ${tag.c}">${tag.t}</span>`).join('');
-                let mapUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(p.query);
                 let timeHTML = p.datetime ? `<div style="font-size: 12.5px; color: var(--primary); font-weight: 800; margin-bottom: 8px; background: rgba(49,130,246,0.06); padding: 6px 10px; border-radius: 8px; display: inline-block;">⏰ ${p.datetime}</div>` : '';
 
                 let accordionHTML = `
@@ -866,9 +993,10 @@
                         <div class="place-review">
                             <strong>💬 팩트 검증 피드:</strong> "${p.review}"
                         </div>
-                        <a href="${mapUrl}" target="_blank" class="map-link-btn">
-                            🗺️ 네이버 지도 실시간 동선 위치 조회 〉
-                        </a>
+                        
+                        <button class="btn-main" style="margin-top:16px; font-size:14px; padding:12px;" onclick="openFestivalModal('${p.title}', '${p.datetime || '상시 운영'}', '${p.locText}', '정보없음', '${p.review}', '${p.query}', '')">
+                            🚗 내비게이션 길찾기 및 상세 정보 열기 〉
+                        </button>
                     </div>
                 </div>`;
                 container.innerHTML += accordionHTML;
