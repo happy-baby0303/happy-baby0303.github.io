@@ -27,7 +27,7 @@ def download_filtered_festival_data():
         "_type": "json",
         "arrange": "A",
         "eventStartDate": today,
-        "numOfRows": "200",  
+        "numOfRows": "1000",  # 👈 기존 200에서 1000으로 늘려 전국 데이터 확보!
         "pageNo": "1"
     }
     
