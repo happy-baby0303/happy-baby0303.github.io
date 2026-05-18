@@ -72,7 +72,7 @@
 
         .festival-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
         .fest-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.02); display: flex; flex-direction: column; cursor: pointer; position: relative; border: 1px solid var(--border); }
-        .fest-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #f0ede6; }
+        .fest-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #EBF4FF; overflow: hidden; }
         .fest-card img { width: 100%; height: 100%; object-fit: cover; }
         .fest-dday-tag { position: absolute; top: 8px; left: 8px; background: rgba(25, 31, 40, 0.85); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; z-index: 10; }
         .fest-card-info { padding: 12px 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
@@ -153,7 +153,6 @@
         .seo-box h3 { font-size: 15px; font-weight: 800; margin: 24px 0 8px 0; color: #222; }
         .seo-box p { font-size: 14px; color: var(--text-s); margin-bottom: 14px; line-height: 1.65; word-break: keep-all; text-align: justify; }
 
-        /* 📱 ✨ NEW: 바닥 탈출! 화면 중앙 부드러운 스케일 업 플로팅 모달 UI 개편 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 16px; }
         .modal-content { width: 100%; max-width: 440px; background: #FFF; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
         @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -171,7 +170,6 @@
         .modal-navi-container { background: #F2F5F8; border-radius: 16px; padding: 12px; display: flex; align-items: center; justify-content: space-around; gap: 8px; }
         .modal-navi-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-s); font-size: 10.5px; font-weight: 800; cursor: pointer; flex: 1; }
         
-        /* 🎨 고화질 커스텀 벡터 내비 아이콘 배지 스타일 */
         .navi-badge-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #FFF; margin-bottom: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .navi-badge-icon.naver { background: #03C75A; }
         .navi-badge-icon.tmap { background: #1B2B54; font-size: 12px; }
@@ -428,7 +426,7 @@
 
                         <div class="health-card">
                             <div class="health-card-title"><span class="icon">💉</span> 이번 달 소아과 접종 스케줄</div>
-                            <div style="font-size:13px; color:var(--text-s); margin-bottom:10px;">질병관리청 국가 필수예방접종 가이드라인 기준 (오차범위 ±1주)</div>
+                            <div style="font-size:13px; color:var(--text-s); margin-bottom:10px;">질질병관리청 국가 필수예방접종 가이드라인 기준 (오차범위 ±1주)</div>
                             <div id="vaccine-info" class="vaccine-list"></div>
                         </div>
 
@@ -615,24 +613,26 @@
         filterPlaces();
     }
 
-    // 📱 🚗 ✨ NEW: 길찾기 튕김 전면 패치 및 불멸의 벡터 지도 로고 임베디드 적용
     function openFestivalModal(title, dateText, addr, tel, review, query, image) {
         const body = document.getElementById('modal-dynamic-body');
         
-        // 🛠️ 버그 전면 전술 수정: 모바일 앱 구동을 방해하지 않는 특수 딥링크 쿼리 정렬
         const naverUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(query);
         const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
-        const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query); // [카카오내비 전면 수리 완료]
+        const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query);
         
         const telLink = tel && tel !== '정보없음' ? `<a href="tel:${tel}" class="modal-call-btn">📞 전화 문의</a>` : `<button class="modal-call-btn" disabled style="opacity:0.4;">📞 번호 없음</button>`;
         
+        // 모달 전용 이미지 방어 패치 (인라인 그래픽일 때는 이미지 출력 안 함)
+        const isGraphicPlaceholder = !image || image.startsWith('⚙️');
+        const modalImgHtml = (!isGraphicPlaceholder && image) ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : '';
+
         body.innerHTML = `
             <div class="modal-header-wrap">
                 <span class="modal-emoji">🌲</span>
                 <div class="modal-title">${title}</div>
             </div>
             
-            ${image ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : ''}
+            ${modalImgHtml}
 
             <div class="modal-meta-box">
                 <div class="modal-meta-row">
@@ -751,12 +751,13 @@
         setTimeout(() => drawChart(history), 100);
     }
 
+    function deleteOldChart() { if(trendChart) trendChart.destroy(); }
     function drawChart(history) {
         const keys = Object.keys(history).sort();
         const labels = keys.slice(-5).map(k => k.split('-')[1] + "월");
         const vals = keys.slice(-5).map(k => history[k]);
         const ctx = document.getElementById('trendChart').getContext('2d');
-        if(trendChart) trendChart.destroy();
+        deleteOldChart();
         trendChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: labels, datasets: [{ data: vals, backgroundColor: '#3182F6', borderRadius: 6, barPercentage: 0.5 }] },
@@ -866,7 +867,6 @@
     }
 
     const hotplacesData = [
-        // ⏱️ ✨ [시한폭탄 자동 삭제 기능 탑재] expiryDate가 지나면 굳이 삭제 안 해도 리스트에서 지 혼자 소멸합니다!
         {"isEvent": true, "region": "jeolla", "locText": "전북 남원", "title": "제96회 남원춘향제 (토실이 강추)", "datetime": "2026.05.22(금) ~ 05.26(화)", "expiryDate": "2026-05-26", "emoji": "🏯", "desc": "이름은 한문학 같지만 사실상 거대한 어린이 전통 놀이 천국! 광한루원 야외 행사", "tags": [{"c": "green", "t": "🌳 광활한 잔디밭"}, {"c": "blue", "t": "🎫 축제 전면무료"}, {"c": "red", "t": "🍼 유모차 기동 원활"}], "review": "한복 체험이랑 전통 그네타기, 다리 밑 소원 등 띄우기에 아기들 환장합니다. 인스타 인생샷 무제한 추출기!", "query": "남원 광한루원"},
         {"isEvent": true, "region": "jeolla", "locText": "전남 곡성", "title": "제16회 곡성세계장미축제", "datetime": "2026.05.23(토) ~ 06.07(일)", "expiryDate": "2026-06-07", "emoji": "🌹", "desc": "수억 송이 장미 바다와 섬진강 기차마을 놀이터가 결합된 5월 육아 끝판왕 성지", "tags": [{"c": "green", "t": "🚂 기차마을 팝업"}, {"c": "red", "t": "🍼 S급 유아휴게실"}, {"c": "blue", "t": "📸 대형 에어바운스"}], "review": "축제장 안에 미니 놀이공원, 동물농장, 레일바이크까지 있어서 하루 종일 에너자이저 아기들 힘 빼기 최적의 요새입니다.", "query": "곡성 섬진강기차마을"},
 
@@ -876,7 +876,7 @@
         
         {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "어반리st 동탄점", "datetime": "매일 10:00 ~ 22:00 (연중무휴)", "emoji": "🥐", "desc": "유모차 전 회전 반경 기동이 완벽 확보된 초대형 플래그십 카페", "tags": [{"c": "red", "t": "🍼 수유실 완비"}, {"c": "green", "t": "🦼 무단차 입구"}, {"c": "blue", "t": "🪑 아기의자 다량"}], "review": "유모차 동선 방해 요소가 전혀 없어 초보 맘 부대 안심 스테이 1티어 공간입니다.", "query": "동탄 어반리st"},
         {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "롯데백화점 (디에비뉴)", "datetime": "백화점 영업시간 동일 (10:30 ~ 20:00)", "emoji": "🛍️", "desc": "S급 유아 휴게 설비 및 프리미엄 수유 케어 센터 복합 인프라 몰", "tags": [{"c": "red", "t": "🍼 S급 휴게실"}, {"c": "green", "t": "🌿 오픈 테라스"}, {"c": "blue", "t": "🦼 하이엔드 대여"}], "review": "이유식 히팅 싱크대 인프라가 훌륭해 안심하고 장시간 가족 체류가 수월합니다.", "query": "동탄 롯데백화점"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "라크드미엘", "datetime": "매일 10:00 ~ 22:00", "emoji": "🦢", "desc": "동탄호수공원 조망권 보유 및 전동 승강기 직결 통창 베이커리", "tags": [{"c": "red", "t": "🍼 기저귀 교환대"}, {"c": "blue", "t": "🪑 하이체어 가용"}, {"c": "green", "t": "🌳 공원 엘베 연계"}], "review": "산책로 보행 축선에서 끊김 없이 수직 상향 이동이 가능하여 엄마 리프레시에 제격입니다.", "query": "동탄 라크드미엘"},
+        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "라크드미엘", "datetime": "매일 10:00 ~ 22:00", "emoji": "🦢", "desc": "동탄호수공원 조망권 보유 및전동 승강기 직결 통창 베이커리", "tags": [{"c": "red", "t": "🍼 기저귀 교환대"}, {"c": "blue", "t": "🪑 하이체어 가용"}, {"c": "green", "t": "🌳 공원 엘베 연계"}], "review": "산책로 보행 축선에서 끊김 없이 수직 상향 이동이 가능하여 엄마 리프레시에 제격입니다.", "query": "동탄 라크드미엘"},
         {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "타임테라스 & 챔피언 키즈존", "datetime": "매일 10:30 ~ 22:00 (마트 휴무일 확인 요망)", "emoji": "🎪", "desc": "이유식 구매부터 실내 주니어 활동까지 결합된 복합 놀이 광장", "tags": [{"c": "red", "t": "🍼 너싱룸 완비"}, {"c": "green", "t": "RUN 안전 키즈"}, {"c": "blue", "t": "🚗 광폭 주차 구역"}], "review": "내부 안전 요원 배치 배율이 높아 주말 패밀리 쇼핑 연계 동선으로 훌륭합니다.", "query": "동탄 타임테라스"},
         {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "스타필드 수원", "datetime": "매일 10:00 ~ 22:00 (연중무휴)", "emoji": "📚", "desc": "와이드 유모차 패스웨이 및 영유아 문화 아카이브 레이어가 결합된 성지", "tags": [{"c": "red", "t": "🍼 S급 수유센터"}, {"c": "blue", "t": "👶 별마당 키즈"}, {"c": "green", "t": "🦼 프리미엄 렌탈"}], "review": "3층 영유아 전용 도서 구역 퀄리티가 우수하여 교육 목적 체류 만족도가 매우 높습니다.", "query": "스타필드 수원"},
         {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "타임빌라스 수원 (구 롯데몰)", "datetime": "매일 10:30 ~ 22:00", "emoji": "🛍️", "desc": "공간 대개조 패킹을 통해 유모차 병렬 주행 마진을 확보한 신식 몰", "tags": [{"c": "red", "t": "🍼 휴게실 전면리뉴얼"}, {"c": "green", "t": "🍽️ 유아 친화 다이닝"}, {"c": "blue", "t": "🚗 층별 다이렉트"}], "review": "동선 유효 폭이 넓어져 문화센터 종료 후 유모차 부대 단체 이동이 가장 편합니다.", "query": "타임빌라스 수원"},
@@ -893,7 +893,6 @@
         const container = document.getElementById('hotplace-container');
         container.innerHTML = ''; 
         
-        // 오늘 날짜 계산 (기한 만료용 기준점)
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (currentSubTab === 'event') {
@@ -903,7 +902,6 @@
                 let addr = p.addr1 || p.addr || '';
                 let title = p.title || '';
                 
-                // ⏱️ ✨ [핵심 패치] 기한 만료일(expiryDate)이 지났으면 리스트에서 강제 생략!
                 if (p.expiryDate && todayStr > p.expiryDate) return false;
 
                 let matchesRegion = false;
@@ -937,7 +935,7 @@
             filteredEvents.forEach(item => {
                 const title = item.title || '';
                 const addr = item.addr1 || item.addr || '';
-                const imgUrl = item.firstimage || 'https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?q=80&w=400&auto=format&fit=crop';
+                const rawImg = item.firstimage || '';
                 const startDate = item.eventstartdate ? formatDate(item.eventstartdate) : (item.datetime ? item.datetime : '');
                 const endDate = item.eventenddate ? formatDate(item.eventenddate) : '';
                 const dateText = endDate ? `${startDate} ~ ${endDate}` : startDate;
@@ -949,12 +947,23 @@
 
                 const card = document.createElement('div');
                 card.className = 'fest-card';
-                card.onclick = () => openFestivalModal(title, dateText, addr, tel, review, title, imgUrl);
+                
+                // 📱 ✨ NEW 패치: 이미지가 없을 땐 뜬금없는 사진 대신, 깔끔한 앱 전용 일러스트 배경 그래픽으로 즉시 가동!
+                let imgHtml = '';
+                let modalImgParam = rawImg;
+                if (rawImg) {
+                    imgHtml = `<img src="${rawImg}" alt="${title}" onerror="this.style.display='none'; this.parentNode.innerHTML += '<div style=\'width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;\'>🎈</div>';">`;
+                } else {
+                    imgHtml = `<div style="width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
+                    modalImgParam = '⚙️GRAPHIC'; // 모달에도 엑박 유발 원천 방지용
+                }
+
+                card.onclick = () => openFestivalModal(title, dateText, addr, tel, review, title, modalImgParam);
                 
                 card.innerHTML = `
                     <div class="fest-card-img-wrap">
                         <span class="fest-dday-tag">🎉 축제</span>
-                        <img src="${imgUrl}" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?q=80&w=400&auto=format&fit=crop'">
+                        ${imgHtml}
                     </div>
                     <div class="fest-card-info">
                         <div class="fest-card-title">${title}</div>
@@ -967,7 +976,6 @@
 
         } else {
             const filteredPlaces = hotplacesData.filter(p => {
-                // ⏱️ ✨ [핵심 패치] 기한 만료일(expiryDate)이 지났으면 리스트에서 강제 생략!
                 if (p.expiryDate && todayStr > p.expiryDate) return false;
 
                 const matchesType = (p.isEvent === false);
