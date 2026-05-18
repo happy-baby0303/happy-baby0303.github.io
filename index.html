@@ -59,7 +59,7 @@
         .filter-btn { padding: 10px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 700; border: 1px solid var(--border) !important; background: #FFF; color: var(--text-s); cursor: pointer; transition: 0.15s; }
         .filter-btn.active { background: var(--text-m) !important; color: #FFF !important; border-color: var(--text-m) !important; }
 
-        /* 📸 NEW: 인스타 감성 2열 격자 레이아웃 (축제 전용) */
+        /* 📸 인스타 감성 2열 격자 레이아웃 (축제 전용) */
         .festival-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
         .fest-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.02); display: flex; flex-direction: column; cursor: pointer; position: relative; border: 1px solid var(--border); }
         .fest-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #f0ede6; }
@@ -69,7 +69,7 @@
         .fest-card-title { font-size: 13.5px; font-weight: 700; color: var(--text-m); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
         .fest-card-meta { font-size: 11.5px; color: var(--primary); font-weight: 700; }
         
-        /* 🗺️ NEW: 계층형 세부 시군구 필터 레이아웃 */
+        /* 🗺️ 계층형 세부 시군구 필터 레이아웃 */
         #sub-filter-row { background: rgba(0,0,0,0.03); padding: 8px; border-radius: 14px; display: none; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px; }
 
         .accordion-item { background: #FFF; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
@@ -441,8 +441,8 @@
     let trendChart = null;
     let currentRegion = 'all'; 
     let currentSubTab = 'event'; 
-    let apiFestivals = []; // 💾 로봇이 가져올 실시간 축제 저장소
-    let currentSubRegion = 'all'; // 쪼개기용 소분류
+    let apiFestivals = []; 
+    let currentSubRegion = 'all'; 
 
     function switchTab(id, el) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -469,7 +469,6 @@
         currentSubTab = type;
         currentSubRegion = 'all';
         
-        // 탭 전환 시 계층형 소분류 노출 여부 제어
         const subRow = document.getElementById('sub-filter-row');
         if (type === 'event' && currentRegion !== 'all') {
             generateSubFilters(currentRegion);
@@ -492,7 +491,6 @@
     }
     function getV(id) { return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; }
 
-    // 📡 NEW: 로봇이 만든 보물상자 파일 불러오기 파트
     async function loadApiFestivals() {
         try {
             const response = await fetch('festivals.json');
@@ -507,31 +505,24 @@
         }
     }
 
-    // 🗺️ NEW: 행정구역 매칭 및 소분류(시군구) 자동 추출기
+    // 🗺 *업그레이드: 전북특별자치도, 충남/경남 등 모든 축약어 완벽 감지 필터 코어
     function generateSubFilters(mainRegion) {
         const subRow = document.getElementById('sub-filter-row');
         const subRegions = new Set();
         
-        let matchKeyword = "";
-        if (mainRegion === 'seoul') matchKeyword = "서울";
-        if (mainRegion === 'gyeonggi') matchKeyword = "경기";
-        if (mainRegion === 'chungcheong') matchKeyword = "충청";
-        if (mainRegion === 'gangwon') matchKeyword = "강원";
-        if (mainRegion === 'jeolla') matchKeyword = "전라";
-        if (mainRegion === 'gyeongsang') matchKeyword = "경상";
-        if (mainRegion === 'jeju') matchKeyword = "제주";
-
         let source = apiFestivals.length > 0 ? apiFestivals : hotplacesData.filter(p => p.isEvent);
 
         source.forEach(item => {
             const addr = item.addr1 || item.addr || '';
-            let isMatched = addr.includes(matchKeyword);
+            let isMatched = false;
             
-            // 허용 광역시 예외 보완 매칭
-            if (mainRegion === 'gyeonggi' && addr.includes('인천')) isMatched = true;
-            if (mainRegion === 'chungcheong' && (addr.includes('대전') || addr.includes('세종'))) isMatched = true;
-            if (mainRegion === 'jeolla' && addr.includes('광주')) isMatched = true;
-            if (mainRegion === 'gyeongsang' && (addr.includes('부산') || addr.includes('대구') || addr.includes('울산'))) isMatched = true;
+            if (mainRegion === 'seoul' && addr.includes('서울')) isMatched = true;
+            if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천'))) isMatched = true;
+            if (mainRegion === 'chungcheong' && (addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종'))) isMatched = true;
+            if (mainRegion === 'gangwon' && addr.includes('강원')) isMatched = true;
+            if (mainRegion === 'jeolla' && (addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주'))) isMatched = true;
+            if (mainRegion === 'gyeongsang' && (addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산'))) isMatched = true;
+            if (mainRegion === 'jeju' && addr.includes('제주')) isMatched = true;
 
             if (isMatched) {
                 const parts = addr.split(' ');
@@ -749,16 +740,14 @@
     }
 
     const hotplacesData = [
-        /* --- 🤖 백업용 기존 고정 주말 행사 리스트 --- */
         {"isEvent": true, "region": "gyeonggi", "locText": "경기 수원", "title": "수원화성 미디어아트쇼", "datetime": "2026.05.23(토) ~ 05.24(일)", "emoji": "🎇", "desc": "수원시 주관 주말 야간 미디어아트 및 플리마켓", "tags": [{"c": "green", "t": "🌳 야외 행사"}], "review": "유모차 산책하기 아주 나이스합니다.", "query": "수원화성행궁"},
         {"isEvent": true, "region": "gyeonggi", "locText": "경기 화성", "title": "동탄 호수 루나쇼", "datetime": "2026.05.23(토)", "emoji": "⛲", "desc": "화성시 주관 음악분수쇼", "tags": [{"c": "green", "t": "🌳 호수공원"}], "review": "치킨 배달시켜서 돗자리 펴고 보면 꿀맛입니다.", "query": "동탄호수공원 루나쇼"},
         {"isEvent": true, "region": "seoul", "locText": "서울 시청", "title": "서울스퀘어 가족 축제", "datetime": "2026.05.23(토)", "emoji": "🎪", "desc": "영유아 잔디 정원 및 무료 놀이공간", "tags": [{"c": "blue", "t": "🎫 전면 무료"}], "review": "유모차 군단 대거 출격 예정지입니다.", "query": "서울광장"},
         
-        /* --- 📍 파트너님 안심 고정 검증 육아지도 데이터 파트 (원형 그대로 완벽 유지) --- */
         {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "어반리st 동탄점", "datetime": "매일 10:00 ~ 22:00 (연중무휴)", "emoji": "🥐", "desc": "유모차 전 회전 반경 기동이 완벽 확보된 초대형 플래그십 카페", "tags": [{"c": "red", "t": "🍼 수유실 완비"}, {"c": "green", "t": "🦼 무단차 입구"}, {"c": "blue", "t": "🪑 아기의자 다량"}], "review": "유모차 동선 방해 요소가 전혀 없어 초보 맘 부대 안심 스테이 1티어 공간입니다.", "query": "동탄 어반리st"},
         {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "롯데백화점 (디에비뉴)", "datetime": "백화점 영업시간 동일 (10:30 ~ 20:00)", "emoji": "🛍️", "desc": "S급 유아 휴게 설비 및 프리미엄 수유 케어 센터 복합 인프라 몰", "tags": [{"c": "red", "t": "🍼 S급 휴게실"}, {"c": "green", "t": "🌿 오픈 테라스"}, {"c": "blue", "t": "🦼 하이엔드 대여"}], "review": "이유식 히팅 싱크대 인프라가 훌륭해 안심하고 장시간 가족 체류가 수월합니다.", "query": "동탄 롯데백화점"},
         {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "라크드미엘", "datetime": "매일 10:00 ~ 22:00", "emoji": "🦢", "desc": "동탄호수공원 조망권 보유 및 전동 승강기 직결 통창 베이커리", "tags": [{"c": "red", "t": "🍼 기저귀 교환대"}, {"c": "blue", "t": "🪑 하이체어 가용"}, {"c": "green", "t": "🌳 공원 엘베 연계"}], "review": "산책로 보행 축선에서 끊김 없이 수직 상향 이동이 가능하여 엄마 리프레시에 제격입니다.", "query": "동탄 라크드미엘"},
-        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "타임테라스 & 챔피언 키즈존", "datetime": "매일 10:30 ~ 22:00 (마트 휴무일 확인 요망)", "emoji": "🎪", "desc": "이유식 구매부터 실내 주니어 활동까지 결합된 복합 놀이 광장", "tags": [{"c": "red", "t": "🍼 너싱룸 완비"}, {"c": "green", "t": "🏃‍♂️ 가드 안전 키즈"}, {"c": "blue", "t": "🚗 광폭 주차 구역"}], "review": "내부 안전 요원 배치 배율이 높아 주말 패밀리 쇼핑 연계 동선으로 훌륭합니다.", "query": "동탄 타임테라스"},
+        {"isEvent": false, "region": "gyeonggi", "locText": "동탄", "title": "타임테라스 & 챔피언 키즈존", "datetime": "매일 10:30 ~ 22:00 (마트 휴무일 확인 요망)", "emoji": "🎪", "desc": "이유식 구매부터 실내 주니어 활동까지 결합된 복합 놀이 광장", "tags": [{"c": "red", "t": "🍼 너싱룸 완비"}, {"c": "green", "t": "RUN 안전 키즈"}, {"c": "blue", "t": "🚗 광폭 주차 구역"}], "review": "내부 안전 요원 배치 배율이 높아 주말 패밀리 쇼핑 연계 동선으로 훌륭합니다.", "query": "동탄 타임테라스"},
         {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "스타필드 수원", "datetime": "매일 10:00 ~ 22:00 (연중무휴)", "emoji": "📚", "desc": "와이드 유모차 패스웨이 및 영유아 문화 아카이브 레이어가 결합된 성지", "tags": [{"c": "red", "t": "🍼 S급 수유센터"}, {"c": "blue", "t": "👶 별마당 키즈"}, {"c": "green", "t": "🦼 프리미엄 렌탈"}], "review": "3층 영유아 전용 도서 구역 퀄리티가 우수하여 교육 목적 체류 만족도가 매우 높습니다.", "query": "스타필드 수원"},
         {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "타임빌라스 수원 (구 롯데몰)", "datetime": "매일 10:30 ~ 22:00", "emoji": "🛍️", "desc": "공간 대개조 패킹을 통해 유모차 병렬 주행 마진을 확보한 신식 몰", "tags": [{"c": "red", "t": "🍼 휴게실 전면리뉴얼"}, {"c": "green", "t": "🍽️ 유아 친화 다이닝"}, {"c": "blue", "t": "🚗 층별 다이렉트"}], "review": "동선 유효 폭이 넓어져 문화센터 종료 후 유모차 부대 단체 이동이 가장 편합니다.", "query": "타임빌라스 수원"},
         {"isEvent": false, "region": "gyeonggi", "locText": "수원", "title": "복합문화공간 111CM", "datetime": "화~일 10:00 ~ 18:00 (월요일 휴관)", "emoji": "🏃‍♂️", "desc": "정자동 랜드마크 복합 홀 및 에너지 발산형 광장 인프라", "tags": [{"c": "red", "t": "🍼 패밀리 케어룸"}, {"c": "green", "t": "🌳 잔디 조경광장"}, {"c": "blue", "t": "☕ 내부 북카페"}], "review": "걷기 시작한 영유아들의 안전한 실외 도보 야외 활동에 최적화된 잔디 광장입니다.", "query": "수원 111CM"},
@@ -769,31 +758,29 @@
         {"isEvent": false, "region": "gyeonggi", "locText": "용인", "title": "롯데몰 수지점", "datetime": "매일 10:30 ~ 22:00", "emoji": "🧸", "desc": "수지 권역 가족 단위 원스톱 쇼핑 동선 최적화 몰 인프라", "tags": [{"c": "red", "t": "🍼 수유실 완비"}, {"c": "green", "t": "🚗 광폭 주차 라인"}, {"c": "blue", "t": "👶 다채로운 키즈센터"}], "review": "주차장 진입 동선 및 수평 보행 축선 설계가 정석적인 유모차 프렌드 몰입니다.", "query": "수지 롯데몰"}
     ];
 
-    // 🛠️ 대대적 업그레이드: 하이브리드 필터링 코어 시스템
     function filterPlaces() {
         const keyword = document.getElementById('spot-search').value.toLowerCase().trim();
         const container = document.getElementById('hotplace-container');
         container.innerHTML = ''; 
 
         if (currentSubTab === 'event') {
-            // [1] 📅 주말 행사 탭: 인스타 감성 2열 그리드 레이아웃 자동 빌드
             let eventSource = apiFestivals.length > 0 ? apiFestivals : hotplacesData.filter(p => p.isEvent);
             
             const filteredEvents = eventSource.filter(p => {
                 let addr = p.addr1 || p.addr || '';
                 let title = p.title || '';
                 
-                // 지역 매칭 로직
                 let matchesRegion = false;
                 if (currentRegion === 'all') {
                     matchesRegion = true;
                 } else {
                     if (currentRegion === 'seoul') matchesRegion = addr.includes('서울');
                     if (currentRegion === 'gyeonggi') matchesRegion = addr.includes('경기') || addr.includes('인천');
-                    if (currentRegion === 'chungcheong') matchesRegion = addr.includes('충청') || addr.includes('대전') || addr.includes('세종');
+                    if (currentRegion === 'chungcheong') matchesRegion = addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종');
                     if (currentRegion === 'gangwon') matchesRegion = addr.includes('강원');
-                    if (currentRegion === 'jeolla') matchesRegion = addr.includes('전라') || addr.includes('광주');
-                    if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('대구') || addr.includes('부산') || addr.includes('울산');
+                    // 🛡 *핵심 패치: '전북', '전남' 글자도 전라도 카테고리로 촘촘히 낚아챕니다!
+                    if (currentRegion === 'jeolla') matchesRegion = addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주');
+                    if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산');
                     if (currentRegion === 'jeju') matchesRegion = addr.includes('제주');
                 }
                 
@@ -843,7 +830,6 @@
             container.appendChild(gridEl);
 
         } else {
-            // [2] 📍 검증 육아지도 탭: 파트너님의 소중한 아코디언 레이아웃 원형 그대로 보존
             const filteredPlaces = hotplacesData.filter(p => {
                 const matchesType = (p.isEvent === false);
                 const matchesRegion = (currentRegion === 'all' || p.region === currentRegion);
@@ -894,9 +880,8 @@
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
         currentRegion = region;
-        currentSubRegion = 'all'; // 대분류 바꾸면 소분류 리셋
+        currentSubRegion = 'all'; 
 
-        // 계층형 2차 필터 작동 제어
         if (currentSubTab === 'event' && region !== 'all') {
             generateSubFilters(region);
         } else {
@@ -927,7 +912,6 @@
         return `${str.substring(4,6)}.${str.substring(6,8)}`;
     }
 
-    // 🚀 연산 동기화 마운트
     window.onload = () => { 
         loadApiFestivals(); 
         filterPlaces(); 
