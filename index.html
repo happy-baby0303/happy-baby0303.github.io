@@ -801,7 +801,7 @@
             let eventSource = Array.from(uniqueMap.values());
             
             const filteredEvents = eventSource.filter(p => {
-                let addr = p.addr1 || p.addr || '';
+                let addr = p.addr1 || p.addr || p.locText || '';
                 let title = p.title || '';
                 
                 if (p.expiryDate && todayStr > p.expiryDate) return false;
