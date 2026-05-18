@@ -476,7 +476,7 @@
                 <a href="https://www.instagram.com/ggoom_e2?igsh=MWo0OXFpdzk3OGwzYg==" target="_blank" style="color: #E1306C; text-decoration: none; font-weight: 800;">📸 오피셜 인스타</a> | 
                 <span style="font-weight:600;">Made with 🤍</span>
             </div>
-            <p style="color: #C8D1DA; font-size:10.5px; word-break: keep-all; margin-top:8px;">본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을물 수 있습니다.</p>
+            <p style="color: #C8D1DA; font-size:10.5px; word-break: keep-all; margin-top:8px;">본 서비스의 모든 디자인과 계산 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을 물을 수 있습니다.</p>
         </footer>
 
     </div>
@@ -505,7 +505,7 @@
     let currentRegion = 'all'; 
     let currentSubTab = 'event'; 
     let apiFestivals = []; 
-    let hotplacesData = []; // ⚡ NEW: 하윤이네 주소록 데이터도 외부 JSON 비동기 로딩 방식으로 전면 체질 개선!
+    let hotplacesData = []; 
     let currentSubRegion = 'all'; 
 
     function switchTab(id, el) {
@@ -555,16 +555,13 @@
     }
     function getV(id) { return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; }
 
-    // ⚡ NEW: 찢어놓은 보물 상자 둘 다 부드럽게 가져오는 멀티 파이프라인 탑재
     async function loadAllExternalData() {
         try {
-            // 1. 실시간 자동 수집 축제 연동
             const resFest = await fetch('festivals.json');
-            if (resFest.ok) apiFestivals = await resFest.getJson || await resFest.json();
+            if (resFest.ok) apiFestivals = await resFest.json();
         } catch (e) { console.log(e); }
 
         try {
-            // 2. 파트너님 오피셜 고정 주소록 연동
             const resPlaces = await fetch('places.json');
             if (resPlaces.ok) hotplacesData = await resPlaces.json();
         } catch (e) { console.log(e); }
@@ -576,7 +573,9 @@
         const subRow = document.getElementById('sub-filter-row');
         const subRegions = new Set();
         
-        let source = apiFestivals.length > 0 ? apiFestivals : hotplacesData.filter(p => p.isEvent);
+        // ⚙️ 패치: 실시간 수집본과 수기 저장본의 모든 축제 데이터를 공평하게 스캔합니다.
+        let manualEvents = hotplacesData.filter(p => p.isEvent);
+        let source = [...apiFestivals, ...manualEvents];
 
         source.forEach(item => {
             const addr = item.addr1 || item.addr || '';
@@ -678,7 +677,7 @@
     }
 
     function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
-    function closeFestivalModalForce() { document.getElementById('premium-modal').style.display = 'none'; }
+    function closeFestivalModalForce() { document.getElementById('premium-modal').style.none || (document.getElementById('premium-modal').style.display = 'none'); }
 
     function toggleHistory() {
         const area = document.getElementById('history-list-area');
@@ -784,85 +783,6 @@
         document.getElementById('fever-result').style.display = 'block';
     }
 
-    const wwList = [
-        {w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"},
-        {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"},
-        {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"},
-        {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"},
-        {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"},
-        {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"},
-        {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"},
-        {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"},
-        {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"},
-        {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}
-    ];
-
-    const vaccineData = [
-        { maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" },
-        { maxMonth: 2, desc: "✅ B형간염 2차" },
-        { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" },
-        { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" },
-        { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차(선택)" },
-        { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>국가 지정 필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감(인플루엔자) 시즌일 경우 소아과 상담을 권장합니다." },
-        { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" },
-        { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" },
-        { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간<br>(독감 등 계절성 질환 및 만 4세 이후 추가 접종은 소아과 문의 요망)" }
-    ];
-
-    const weightData = [
-        { m: 0, boy: "3.3", girl: "3.2" }, { m: 1, boy: "4.5", girl: "4.2" }, { m: 2, boy: "5.6", girl: "5.1" },
-        { m: 3, boy: "6.4", girl: "5.8" }, { m: 4, boy: "7.0", girl: "6.4" }, { m: 5, boy: "7.5", girl: "6.9" },
-        { m: 6, boy: "7.9", girl: "7.3" }, { m: 7, boy: "8.3", girl: "7.6" }, { m: 8, boy: "8.6", girl: "7.9" },
-        { m: 9, boy: "8.9", girl: "8.2" }, { m: 10, boy: "9.2", girl: "8.5" }, { m: 11, boy: "9.4", girl: "8.7" },
-        { m: 12, boy: "9.6", girl: "8.9" }, { m: 15, boy: "10.3", girl: "9.6" }, { m: 18, boy: "10.9", girl: "10.2" },
-        { m: 24, boy: "12.2", girl: "11.5" }, { m: 36, boy: "14.3", girl: "13.9" }
-    ];
-
-    function calcHealthMaster() {
-        const b = document.getElementById('v-birth').value;
-        if(!b) return alert("종합 분석을 위해 기준 출산(예정)일을 입력하세요.");
-        
-        const birthDate = new Date(b);
-        const today = new Date();
-        const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
-        
-        if (diffDays < 0) return alert("미래의 날짜는 입력할 수 없습니다.");
-
-        const week = Math.floor(diffDays / 7);
-        const month = Math.floor(diffDays / 30.436875); 
-
-        document.getElementById('res-dday').innerText = diffDays;
-        document.getElementById('res-month').innerText = month;
-        document.getElementById('res-week').innerText = week;
-
-        let curWW = wwList.find(x => week >= x.w-1 && week <= x.w+1);
-        let nxtWW = wwList.find(x => x.w > week);
-        let st = document.getElementById('ww-status');
-        if(curWW) {
-            st.innerHTML = `<div style="font-size:15px; font-weight:800; color:#B78103; margin-bottom:6px;">🚨 현재 ${curWW.t} 진행 레이어</div><strong>특성 지표:</strong> ${curWW.d}. 영유아 주기성 보챔 패턴이 가중되는 시점이므로 세심한 정서 케어가 요구됩니다.`;
-        } else {
-            st.innerHTML = `<div style="font-size:15px; font-weight:800; color:var(--success); margin-bottom:6px;">☀️ 평온기 유지 레이어</div>정신 도약 발달 마진이 안정적인 비보챔 시기입니다.<br>${nxtWW ? '👉 차기 임계 도약 주기: <strong>' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 진입 대기.' : '모든 발달 도약 임계 매트릭스를 이수 완료했습니다.'}`;
-        }
-
-        let table = `<tr><th>주차</th><th>진단 단계</th><th>특성 지표</th></tr>`;
-        wwList.forEach(x => {
-            let active = (week >= x.w-1 && week <= x.w+1) ? 'class="active"' : '';
-            table += `<tr ${active}><td>${x.w-1}~${x.w+1}주</td><td>${x.t}</td><td>${x.d}</td></tr>`;
-        });
-        document.getElementById('ww-table').innerHTML = table;
-
-        let vac = vaccineData.find(v => month <= v.maxMonth);
-        document.getElementById('vaccine-info').innerHTML = vac ? vac.desc : "해당 월령의 기초 접종 정보가 없습니다.";
-
-        let wInfo = weightData.slice().reverse().find(w => month >= w.m);
-        if(!wInfo) wInfo = weightData[0]; 
-        document.getElementById('weight-month-label').innerText = wInfo.m;
-        document.getElementById('weight-boy').innerText = wInfo.boy + " kg";
-        document.getElementById('weight-girl').innerText = wInfo.girl + " kg";
-
-        document.getElementById('growth-result').style.display = 'block';
-    }
-
     function filterPlaces() {
         const keyword = document.getElementById('spot-search').value.toLowerCase().trim();
         const container = document.getElementById('hotplace-container');
@@ -871,7 +791,14 @@
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (currentSubTab === 'event') {
-            let eventSource = apiFestivals.length > 0 ? apiFestivals : hotplacesData.filter(p => p.isEvent);
+            // 🛠️ ✨ [독재 차단 해제 패치] 로봇 수집본과 places.json 수기 데이터를 완벽 결합!
+            let manualEvents = hotplacesData.filter(p => p.isEvent);
+            let combined = [...apiFestivals, ...manualEvents];
+            
+            // 제목 기준 중복 제거 락 탑재
+            let uniqueMap = new Map();
+            combined.forEach(item => { if(item.title) uniqueMap.set(item.title, item); });
+            let eventSource = Array.from(uniqueMap.values());
             
             const filteredEvents = eventSource.filter(p => {
                 let addr = p.addr1 || p.addr || '';
@@ -1034,7 +961,7 @@
     }
 
     window.onload = () => { 
-        loadAllExternalData(); // ⚡ NEW: 통합 비동기 주입 엔진 구동
+        loadAllExternalData(); 
     };
 </script>
 </body>
