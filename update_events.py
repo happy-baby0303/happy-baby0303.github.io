@@ -21,7 +21,8 @@ def download_filtered_festival_data():
     
     all_collected_items = []
     
-    for page in range(1, 4):
+    # 🔄 [무제한 낚시질 패치] 5월 축제 대목을 대비해 최대 15페이지(3000개)까지 데이터 끝까지 추적!
+    for page in range(1, 16):
         params = {
             "serviceKey": encoding_key,
             "MobileOS": "ETC",
@@ -39,19 +40,17 @@ def download_filtered_festival_data():
             if response.status_code == 200:
                 raw_data = response.json()
                 
-                # 🛡️ [핵심 패치] 정부 서버가 빈 글자("")를 주든 상자를 주든 안전하게 분해합니다.
                 body = raw_data.get('response', {}).get('body', {})
                 if not body:
-                    print(f"   ℹ️ {page}페이지에 바디 데이터가 없습니다.")
+                    print(f"   ℹ️ {page}페이지에 바디 데이터가 없어 수집을 종료합니다.")
                     break
                     
                 items_container = body.get('items', '')
                 
-                # TourAPI 특유의 기괴한 꼼수(데이터 없으면 items를 dict가 아닌 str ""로 줌) 방어
                 if isinstance(items_container, dict):
                     items = items_container.get('item', [])
                 else:
-                    print(f"   ℹ️ {page}페이지 구조가 비어있습니다. (수집 종료)")
+                    print(f"   ℹ️ {page}페이지 데이터 끝에 도달했습니다. (전국 수집 완료)")
                     break
                 
                 if isinstance(items, dict):
@@ -69,7 +68,7 @@ def download_filtered_festival_data():
             print(f"   ❌ {page}페이지 연동 중 예외 발생: {e}")
             break
 
-    # 🎯 육아 맞춤형 정밀 필터링
+    # 🎯 전국구 데이터 싹 모아서 육아 맞춤형 정밀 필터링
     filtered_festivals = []
     for item in all_collected_items:
         title = item.get('title', '')
@@ -78,7 +77,7 @@ def download_filtered_festival_data():
         if any(good_word in title for good_word in KID_FRIENDLY_KEYWORDS):
             filtered_festivals.append(item)
     
-    print(f"\n🎯 [최종 결과] 전국 {len(all_collected_items)}개 축제 중 육아 맞춤 축제 {len(filtered_festivals)}개 최종 엄선!")
+    print(f"\n🎯 [최종 결과] 전국 {len(all_collected_items)}개 축제 전수조사 완료 ➔ 육아 맞춤 축제 {len(filtered_festivals)}개 최종 엄선!")
     
     with open("festivals.json", "w", encoding="utf-8") as f:
         json.dump(filtered_festivals, f, ensure_ascii=False, indent=4)
