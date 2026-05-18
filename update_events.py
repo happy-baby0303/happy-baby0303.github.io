@@ -17,32 +17,34 @@ BAD_KEYWORDS = ["산업", "포럼", "세미나", "주류", "막걸리", "노인"
 
 def download_filtered_festival_data():
     today = datetime.date.today().strftime("%Y%m%d")
-    
-    # 🟢 팩트체크: KorService1이 아니라 KorService2가 진짜 최신 정답 주소입니다!
     url = "http://apis.data.go.kr/B551011/KorService2/searchFestival2"
     
+    # 🛠️ 에러의 원인이었던 "listYN" 항목을 깨끗하게 삭제했습니다!
     params = {
         "serviceKey": encoding_key,
         "MobileOS": "ETC",
         "MobileApp": "TosilmomsMate",
         "_type": "json",
-        "listYN": "Y",
         "arrange": "A",
         "eventStartDate": today,
         "numOfRows": "200",  
         "pageNo": "1"
     }
     
-    print("🤖 [토실이 로봇] 올바른 주소로 공공기관 서버에 재접속 중입니다...")
+    print("🤖 [토실이 로봇] 걸림돌을 제거하고 정부 서버로 당당하게 출격합니다...")
     
     try:
         response = requests.get(url, params=params, timeout=10)
         if response.status_code == 200:
             raw_data = response.json()
             
-            # 서버에서 정상 데이터를 줬는지 확인
             try:
                 all_items = raw_data['response']['body']['items']['item']
+                
+                # 데이터가 1개만 올 경우를 대비한 안전장치
+                if isinstance(all_items, dict):
+                    all_items = [all_items]
+                    
                 filtered_festivals = []
                 
                 for item in all_items:
