@@ -5,11 +5,12 @@ import datetime
 # 🔑 파트너님의 마스터 인증키
 encoding_key = "94f9282c8ce5e8396c03a89e610a18ae71fb9f149b08a8c7d81c4e359e6e14bd"
 
-# 👶 아이 친화형 핵심 키워드 리스트
+# 👶 아이 친화형 핵심 키워드 리스트 (대형 전통 문화 축제 단어 대거 보강!)
 KID_FRIENDLY_KEYWORDS = [
     "어린이", "아이", "아동", "가족", "패밀리", "체험", "놀이", "캐릭터", 
     "애니메이션", "토이", "키즈", "문화제", "빛축제", "불빛", "꽃축제", 
-    "물놀이", "페스티벌", "공원", "자연", "생태", "인형극", "뮤지컬"
+    "물놀이", "페스티벌", "공원", "자연", "생태", "인형극", "뮤지컬",
+    "춘향", "장미", "대축제", "한마당", "전통", "민속", "문화재", "단오", "백제", "세계유산" # 👈 [치트키] 로봇에게 이 단어가 들려도 무조건 합격시키라고 명령!
 ]
 
 # ❌ 아이랑 가기엔 부적절한 축제 키워드 리스트
@@ -21,8 +22,8 @@ def download_filtered_festival_data():
     
     all_collected_items = []
     
-    # 🔄 [무제한 낚시질 패치] 5월 축제 대목을 대비해 최대 15페이지(3000개)까지 데이터 끝까지 추적!
-    for page in range(1, 16):
+    # 안전하게 200개씩 3번 나누어 총 600개 수집
+    for page in range(1, 4):
         params = {
             "serviceKey": encoding_key,
             "MobileOS": "ETC",
@@ -42,7 +43,7 @@ def download_filtered_festival_data():
                 
                 body = raw_data.get('response', {}).get('body', {})
                 if not body:
-                    print(f"   ℹ️ {page}페이지에 바디 데이터가 없어 수집을 종료합니다.")
+                    print(f"   ℹ️ {page}페이지에 바디 데이터가 없습니다.")
                     break
                     
                 items_container = body.get('items', '')
