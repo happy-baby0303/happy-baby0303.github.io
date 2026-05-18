@@ -6,7 +6,7 @@ on:
     - cron: '0 14 * * 4'
   workflow_dispatch: # 수동 실행 버튼 활성화
 
-# 🔑 [필수] 깃허브 로봇에게 창고 수정 권한을 명시적으로 부여합니다!
+# 🔑 깃허브 로봇에게 창고 수정 권한 부여
 permissions:
   contents: write
 
@@ -31,7 +31,7 @@ jobs:
 
     - name: 새 데이터로 홈페이지 자동 업데이트 및 커밋
       run: |
-        git config --global user.name "TosilRobot"
-        git config --global user.email "robot@tosil.com"
-        git add index.html
+        git config --local user.name "TosilRobot"
+        git config --local user.email "robot@tosil.com"
+        git add festivals.json  # 👈 [버그 수정] index.html 대신 진짜 새로 만든 축제 파일을 담습니다!
         git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [자동화] 이번주 주말 최신 행사 족보 갱신 완료" && git push)
