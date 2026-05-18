@@ -21,7 +21,6 @@ def download_filtered_festival_data():
     
     all_collected_items = []
     
-    # 🔄 정부 서버가 싫어하는 '1000개 한방' 대신, 안전하게 200개씩 3번 나누어 총 600개 수집! (전라도 완벽 확보)
     for page in range(1, 4):
         params = {
             "serviceKey": encoding_key,
@@ -30,7 +29,7 @@ def download_filtered_festival_data():
             "_type": "json",
             "arrange": "A",
             "eventStartDate": today,
-            "numOfRows": "200",  # 안전한 정부 표준 허용치
+            "numOfRows": "200",  
             "pageNo": str(page)
         }
         
@@ -39,7 +38,21 @@ def download_filtered_festival_data():
             response = requests.get(url, params=params, timeout=10)
             if response.status_code == 200:
                 raw_data = response.json()
-                items = raw_data.get('response', {}).get('body', {}).get('items', {}).get('item', [])
+                
+                # 🛡️ [핵심 패치] 정부 서버가 빈 글자("")를 주든 상자를 주든 안전하게 분해합니다.
+                body = raw_data.get('response', {}).get('body', {})
+                if not body:
+                    print(f"   ℹ️ {page}페이지에 바디 데이터가 없습니다.")
+                    break
+                    
+                items_container = body.get('items', '')
+                
+                # TourAPI 특유의 기괴한 꼼수(데이터 없으면 items를 dict가 아닌 str ""로 줌) 방어
+                if isinstance(items_container, dict):
+                    items = items_container.get('item', [])
+                else:
+                    print(f"   ℹ️ {page}페이지 구조가 비어있습니다. (수집 종료)")
+                    break
                 
                 if isinstance(items, dict):
                     items = [items]
@@ -48,7 +61,6 @@ def download_filtered_festival_data():
                     all_collected_items.extend(items)
                     print(f"   ▶ {page}페이지에서 {len(items)}개 수집 완료!")
                 else:
-                    print(f"   ℹ️ {page}페이지에 더 이상 데이터가 없습니다. 수집을 종료합니다.")
                     break
             else:
                 print(f"   ❌ {page}페이지 연결 실패 (에러 코드: {response.status_code})")
@@ -57,7 +69,7 @@ def download_filtered_festival_data():
             print(f"   ❌ {page}페이지 연동 중 예외 발생: {e}")
             break
 
-    # 🎯 육아 맞춤형 정밀 필터링 시작
+    # 🎯 육아 맞춤형 정밀 필터링
     filtered_festivals = []
     for item in all_collected_items:
         title = item.get('title', '')
@@ -66,9 +78,8 @@ def download_filtered_festival_data():
         if any(good_word in title for good_word in KID_FRIENDLY_KEYWORDS):
             filtered_festivals.append(item)
     
-    print(f"\n🎯 [최종 결과] 전국 {len(all_collected_items)}개 축제 중 전라도 포함 육아 맞춤 축제 {len(filtered_festivals)}개 최종 엄선!")
+    print(f"\n🎯 [최종 결과] 전국 {len(all_collected_items)}개 축제 중 육아 맞춤 축제 {len(filtered_festivals)}개 최종 엄선!")
     
-    # 💾 무조건 빈 파일이라도 생성하여 깃허브 배달 로봇이 뻗는 현상을 전면 방어합니다.
     with open("festivals.json", "w", encoding="utf-8") as f:
         json.dump(filtered_festivals, f, ensure_ascii=False, indent=4)
     print("💾 'festivals.json' 파일 창고 저장 완료!")
