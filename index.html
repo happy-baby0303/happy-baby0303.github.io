@@ -39,6 +39,13 @@
         .home-hero-tag { align-self: flex-start; background: var(--primary); font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px; }
         .home-hero-title { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
+        .sos-banner { background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FFD1D1; border-radius: 24px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px; cursor: pointer; box-shadow: 0 6px 20px rgba(253, 104, 104, 0.15); transition: 0.2s; animation: pulseSOS 2.5s infinite; }
+        .sos-banner:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(253, 104, 104, 0.1); }
+        @keyframes pulseSOS { 0% { box-shadow: 0 0 0 0 rgba(253, 104, 104, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(253, 104, 104, 0); } 100% { box-shadow: 0 0 0 0 rgba(253, 104, 104, 0); } }
+        .sos-banner-icon { font-size: 38px; filter: drop-shadow(0 4px 6px rgba(253, 104, 104, 0.3)); }
+        .sos-banner-title { font-size: 16.5px; font-weight: 900; color: var(--danger); margin-bottom: 2px; letter-spacing: -0.5px; }
+        .sos-banner-desc { font-size: 12.5px; font-weight: 700; color: #D32F2F; opacity: 0.85; }
+
         .home-menu-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
         .home-large-tile { background: #FFF; border-radius: 24px; padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid rgba(0,0,0,0.01); box-shadow: 0 4px 16px rgba(0,0,0,0.02); position: relative; }
         .home-large-tile:active, .home-sub-tile:active { transform: scale(0.98); background: #F8F9FA; }
@@ -96,12 +103,29 @@
         .tag.green { background: #E6F7F2; color: var(--success); }
         .place-review { background: #F8F9FA; border-left: 4px solid var(--primary); padding: 14px; font-size: 13.5px; color: var(--text-m); border-radius: 0 10px 10px 0; line-height: 1.5; margin-top: 10px; font-weight: 500; }
         
-        .btn-main { display: block; width: 100%; padding: 18px; background: var(--primary) !important; color: white !important; border: none !important; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.15s; margin-top: 16px; box-shadow: 0 6px 16px rgba(49, 130, 246, 0.25); text-align: center; }
+        .btn-main { display: block; width: 100%; padding: 18px; background: var(--primary) !important; color: white !important; border: none !important; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.15s; margin-top: 16px; box-shadow: 0 6px 16px rgba(49, 130, 246, 0.25); text-align: center; text-decoration: none; }
         .btn-main:active { transform: scale(0.97); }
-        .map-link-btn { display: block; text-align: center; background: #FFF !important; color: var(--primary) !important; border: 1px solid var(--primary) !important; font-size: 14px; font-weight: 800; padding: 14px; border-radius: 12px; text-decoration: none; margin-top: 16px; transition: 0.15s; }
-        .map-link-btn:active { background: #F0F6FF !important; }
-        .history-btn { background: #FFF !important; border: 1px solid var(--border) !important; color: var(--text-s) !important; padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; transition: 0.15s; }
-        .history-btn:active { background: #F2F4F7 !important; }
+        
+        /* 🚨 ✨ NEW: V3.6 SOS 모달 (약국 팩트 체크 및 분리) */
+        #sos-modal.modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        .sos-content-box { width: 100%; max-width: 400px; background: #191F28; border-radius: 28px; padding: 35px 24px; color: #FFF; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sos-close-btn { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFF; font-weight: bold; cursor: pointer; z-index: 10; }
+        .sos-back-btn { position: absolute; top: 16px; left: 16px; height: 34px; padding: 0 14px; background: rgba(255,255,255,0.1); border-radius: 17px; display: flex; align-items: center; justify-content: center; color: #FFF; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 10; }
+        
+        .sos-choice-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; margin-top: 15px; word-break: keep-all; }
+        .sos-choice-desc { font-size: 13.5px; color: #8B95A1; margin-bottom: 30px; word-break: keep-all; line-height: 1.5; }
+        
+        .sos-btn-medical { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; padding: 24px; background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); border-radius: 20px; color: #FFF; font-size: 18px; font-weight: 900; cursor: pointer; margin-bottom: 14px; box-shadow: 0 8px 20px rgba(255, 65, 108, 0.3); transition: 0.2s; text-align: left; }
+        .sos-btn-medical:active { transform: scale(0.96); }
+        
+        .sos-btn-cry { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; padding: 24px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 20px; color: #FFF; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 242, 254, 0.3); transition: 0.2s; text-align: left; }
+        .sos-btn-cry:active { transform: scale(0.96); }
+
+        .sos-detail-title { font-size: 18px; font-weight: 800; color: #FFF; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; text-align: left; display: flex; align-items: center; gap: 8px; margin-top: 24px; word-break: keep-all; }
+        .sos-checklist { text-align: left; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); }
+        .sos-check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; font-size: 14px; line-height: 1.55; color: #E5E8EB; }
+        .sos-check-item:last-child { margin-bottom: 0; }
+        .sos-check-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
 
         .toolbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
         .tool-chip { background: #FFF; border: 1px solid var(--border); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; transition: 0.15s; }
@@ -155,7 +179,6 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 16px; }
         .modal-content { width: 100%; max-width: 440px; background: #FFF; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
-        @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .modal-close-handle { width: 44px; height: 5px; background: #E5E8EB; border-radius: 3px; margin: 0 auto 20px auto; cursor: pointer; }
         .modal-header-wrap { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
         .modal-emoji { font-size: 32px; }
@@ -193,6 +216,14 @@
                 <div class="home-hero-overlay">
                     <span class="home-hero-tag">My Family Platform</span>
                     <h2 class="home-hero-title">'아장아장 첫걸음부터 함께하는 🤍' 👣</h2>
+                </div>
+            </div>
+
+            <div class="sos-banner" onclick="openSOSModal()">
+                <div class="sos-banner-icon">🚨</div>
+                <div>
+                    <div class="sos-banner-title">한밤중 긴급 SOS 센터</div>
+                    <div class="sos-banner-desc">응급 상담 콜 / 자지러지는 오열 원인 체크</div>
                 </div>
             </div>
 
@@ -500,6 +531,75 @@
         </div>
     </div>
 
+    <div id="sos-modal" class="modal-overlay" style="z-index: 5000;" onclick="closeSOS(event)">
+        <div class="sos-content-box" onclick="event.stopPropagation()">
+            <div id="btn-sos-close" class="sos-close-btn" onclick="closeSOSForce()">✕</div>
+            <div id="btn-sos-back" class="sos-back-btn" style="display:none;" onclick="openSOSModal()">← 뒤로</div>
+            
+            <div id="sos-step-choice">
+                <div style="font-size:42px; margin-bottom:12px;">🚨</div>
+                <div class="sos-choice-title">긴급 SOS 상황 선택</div>
+                <div class="sos-choice-desc">현재 아기의 상태에 맞는 대처법을 누르세요.</div>
+                
+                <div class="sos-btn-medical" onclick="showSosMedical()">
+                    <span style="font-size:28px;">🚑</span>
+                    <div style="flex-grow:1;">
+                        <div style="margin-bottom:2px;">고열 / 응급 상황</div>
+                        <div style="font-size:12px; font-weight:700; opacity:0.85;">119 24시간 소아 의료상담 연결</div>
+                    </div>
+                </div>
+                
+                <div class="sos-btn-cry" onclick="showSosChecklist()">
+                    <span style="font-size:28px;">😭</span>
+                    <div style="flex-grow:1;">
+                        <div style="margin-bottom:2px;">이유 없는 멈추지 않는 오열</div>
+                        <div style="font-size:12px; font-weight:700; opacity:0.85;">원인 파악 긴급 30초 체크리스트</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sos-step-medical" style="display:none; text-align:left;">
+                <div class="sos-detail-title"><span>🚑</span> 119 야간 의료상담 안내</div>
+                <div style="font-size:13.5px; line-height:1.6; color:#E5E8EB; margin-bottom:20px; background: rgba(255, 65, 108, 0.15); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 65, 108, 0.3); word-break: keep-all;">
+                    <strong style="color:#FF4B2B; font-size:15px; display:block; margin-bottom:8px;">"아기 열나는데 119 전화해도 되나요?" 네! 무조건 하세요.</strong>
+                    119는 구급차 호출뿐만 아니라, <strong>24시간 전문의와 간호사가 상주하는 '구급상황관리센터'</strong>를 운영합니다.<br><br>
+                    전화해서 "아기 의료 상담입니다"라고 하면 <strong>구급차 출동 없이</strong> 약 복용법이나 응급실 방문 여부를 정확히 알려줍니다. 맘카페 질문보다 119가 빠르고 확실합니다!
+                </div>
+                <a href="tel:119" class="btn-main" style="background:#F04452 !important; box-shadow: 0 6px 16px rgba(240, 68, 82, 0.3) !important;">🚨 119 전문의 상담 전화걸기</a>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                    <a href="https://www.e-gen.or.kr/moonlight/main.do" target="_blank" class="btn-main" style="background:transparent !important; color:#FFF !important; border:1px solid rgba(255,255,255,0.3) !important; margin-top:0; font-size:13px; padding:14px 4px; word-break: keep-all;">🌙 달빛어린이병원</a>
+                    <a href="https://www.e-gen.or.kr/egen/search_pharmacy.do" target="_blank" class="btn-main" style="background:transparent !important; color:#FFF !important; border:1px solid rgba(255,255,255,0.3) !important; margin-top:0; font-size:13px; padding:14px 4px; word-break: keep-all;">💊 내 주변 약국 찾기</a>
+                </div>
+                <div style="font-size: 11.5px; color: #8B95A1; margin-top: 12px; text-align: center; word-break: keep-all;">※ 약국 방문 전 지도에서 <strong>현재 영업 여부</strong>를 확인하시거나 전화해 보세요!</div>
+            </div>
+
+            <div id="sos-step-cry" style="display:none; text-align:left;">
+                <div class="sos-detail-title"><span>😭</span> 자지러질 때 30초 체크리스트</div>
+                <div class="sos-checklist">
+                    <div class="sos-check-item">
+                        <div class="sos-check-icon">🧶</div>
+                        <div style="word-break: keep-all;"><strong style="color:#FFD166;">토니켓 증후군 (매우 중요)</strong><br>아기 발가락, 손가락, 성기 주변에 머리카락이나 실이 감겨 피가 안 통하고 있지 않나요? 당장 양말을 벗겨 확인하세요.</div>
+                    </div>
+                    <div class="sos-check-item">
+                        <div class="sos-check-icon">🌡️</div>
+                        <div style="word-break: keep-all;"><strong style="color:#FFF;">온도와 습도 체크</strong><br>어른은 시원해도 아기에겐 더울 수 있습니다. 목 뒤가 뜨겁거나 땀이 나진 않나요? (권장: 21~23도)</div>
+                    </div>
+                    <div class="sos-check-item">
+                        <div class="sos-check-icon">🧷</div>
+                        <div style="word-break: keep-all;"><strong style="color:#FFF;">옷차림과 기저귀</strong><br>기저귀 밴드가 접혀 살을 찌르거나, 옷 안쪽 라벨이 따갑게 긁고 있지 않은지 확인하세요.</div>
+                    </div>
+                    <div class="sos-check-item">
+                        <div class="sos-check-icon">🍼</div>
+                        <div style="word-break: keep-all;"><strong style="color:#FFF;">영아산통 (배앓이)</strong><br>배가 빵빵하고 방귀를 못 뀌었나요? 배를 따뜻하게 해주고 시계방향으로 마사지하며 트림을 유도하세요.</div>
+                    </div>
+                </div>
+                <button class="btn-main" style="background:#3182F6 !important; margin-top:20px;" onclick="closeSOSForce()">확인 완료</button>
+            </div>
+
+        </div>
+    </div>
+
 <script>
     let trendChart = null;
     let currentRegion = 'all'; 
@@ -573,7 +673,6 @@
         const subRow = document.getElementById('sub-filter-row');
         const subRegions = new Set();
         
-        // ⚙️ 패치: 실시간 수집본과 수기 저장본의 모든 축제 데이터를 공평하게 스캔합니다.
         let manualEvents = hotplacesData.filter(p => p.isEvent);
         let source = [...apiFestivals, ...manualEvents];
 
@@ -678,6 +777,30 @@
 
     function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
     function closeFestivalModalForce() { document.getElementById('premium-modal').style.none || (document.getElementById('premium-modal').style.display = 'none'); }
+
+    // 🚨 ✨ SOS 시스템 로직
+    function openSOSModal() {
+        document.getElementById('sos-step-choice').style.display = 'block';
+        document.getElementById('sos-step-medical').style.display = 'none';
+        document.getElementById('sos-step-cry').style.display = 'none';
+        document.getElementById('btn-sos-back').style.display = 'none';
+        document.getElementById('sos-modal').style.display = 'flex';
+    }
+
+    function closeSOS(e) { if(e.target.id === 'sos-modal') closeSOSForce(); }
+    function closeSOSForce() { document.getElementById('sos-modal').style.display = 'none'; }
+
+    function showSosMedical() {
+        document.getElementById('sos-step-choice').style.display = 'none';
+        document.getElementById('sos-step-medical').style.display = 'block';
+        document.getElementById('btn-sos-back').style.display = 'flex';
+    }
+
+    function showSosChecklist() {
+        document.getElementById('sos-step-choice').style.display = 'none';
+        document.getElementById('sos-step-cry').style.display = 'block';
+        document.getElementById('btn-sos-back').style.display = 'flex';
+    }
 
     function toggleHistory() {
         const area = document.getElementById('history-list-area');
@@ -791,11 +914,9 @@
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (currentSubTab === 'event') {
-            // 🛠️ ✨ [독재 차단 해제 패치] 로봇 수집본과 places.json 수기 데이터를 완벽 결합!
             let manualEvents = hotplacesData.filter(p => p.isEvent);
             let combined = [...apiFestivals, ...manualEvents];
             
-            // 제목 기준 중복 제거 락 탑재
             let uniqueMap = new Map();
             combined.forEach(item => { if(item.title) uniqueMap.set(item.title, item); });
             let eventSource = Array.from(uniqueMap.values());
@@ -836,7 +957,7 @@
 
             filteredEvents.forEach(item => {
                 const title = item.title || '';
-                const addr = item.addr1 || item.addr || '';
+                const addr = item.addr1 || item.addr || item.locText || '';
                 const rawImg = item.firstimage || '';
                 const startDate = item.eventstartdate ? formatDate(item.eventstartdate) : (item.datetime ? item.datetime : '');
                 const endDate = item.eventenddate ? formatDate(item.eventenddate) : '';
