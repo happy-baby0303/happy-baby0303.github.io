@@ -388,13 +388,33 @@ function uploadPhoto(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            // 브라우저 저장소에 Base64 형태로 이미지 저장
-            localStorage.setItem('tosil_baby_photo', e.target.result);
-            // 즉시 화면 반영
-            const imgEl = document.querySelector('.home-hero-img');
-            imgEl.src = e.target.result;
-            imgEl.style.display = 'block';
-            imgEl.parentNode.style.background = 'none'; // 배경색 제거
+            const img = new Image();
+            img.onload = function() {
+                // 사진 크기를 가로 800px로 줄이는 캔버스 작업
+                const canvas = document.createElement('canvas');
+                const maxSize = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxSize) {
+                    height *= maxSize / width;
+                    width = maxSize;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // 압축된 데이터를 base64로 변환해서 저장
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% 퀄리티로 압축
+                localStorage.setItem('tosil_baby_photo', dataUrl);
+                
+                // 화면 즉시 반영
+                document.querySelector('.home-hero-img').src = dataUrl;
+                document.querySelector('.home-hero-img').style.display = 'block';
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
     }
