@@ -22,14 +22,17 @@
 
     <div class="wrapper">
         
-        <div id="tab-home" class="tab-content active">
-            <div class="home-hero-card">
-                <img src="img.jpg" class="home-hero-img" alt="하윤이 발사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
-                <div class="home-hero-overlay">
-                    <span class="home-hero-tag">My Family Platform</span>
-                    <h2 class="home-hero-title">'아장아장 첫걸음부터 함께하는 🤍' 👣</h2>
-                </div>
+        <div id="tab-home" class="tab-content active">         
+        <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
+              <img src="img.jpg" class="home-hero-img" alt="하윤이 발사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+              <div class="home-hero-overlay">
+             <span class="home-hero-tag">My Family Platform</span>
+             <h2 class="home-hero-title" id="res-baby-dday">여기를 눌러 아기를 등록하세요</h2>
+            <span id="res-baby-name" style="display:block; font-size:14px; margin-top:5px; color:white;"></span>
             </div>
+                </div>
+
+            <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
 
             <div class="sos-banner" onclick="openSOSModal()">
                 <div class="sos-banner-icon">🚨</div>
