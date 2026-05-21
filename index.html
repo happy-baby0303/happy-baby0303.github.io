@@ -22,21 +22,23 @@
 
     <div class="wrapper">
         
-<div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
-    <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
-    
-    <div class="home-hero-overlay" style="background: rgba(255, 255, 255, 0.1);">
-        <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:var(--text-m); font-size:20px; cursor:pointer; padding:0;">
-            ✎
-        </button>
-        
-        <span class="home-hero-tag" style="background:var(--primary); color:white; align-self:flex-start; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px;">My Family Platform</span>
-        <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800; color:var(--text-m); text-shadow: none;">등록 전</h2>
-        <span id="res-baby-name" style="font-size:14px; color:var(--text-m); opacity:0.8;">아기를 등록해주세요</span>
-        
-        <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:var(--text-m); opacity:0.9;"></div>
-    </div>
-</div>
+        <div id="tab-home" class="tab-content active">
+            
+            <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
+                <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+                
+                <div class="home-hero-overlay" style="background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);">
+                    <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer; padding:0; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                        ✎
+                    </button>
+                    
+                    <span class="home-hero-tag" style="background:var(--primary); color:white; align-self:flex-start; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px;">My Family Platform</span>
+                    <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800; color:white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">등록 전</h2>
+                    <span id="res-baby-name" style="font-size:14px; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">아기를 등록해주세요</span>
+                    
+                    <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></div>
+                </div>
+            </div>
 
             <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
 
@@ -108,9 +110,8 @@
                 <div style="font-size: 15px; font-weight: 800; margin-bottom: 6px; color: var(--text-m);">💡 하윤이네 주말 미션</div>
                 <p style="font-size: 13.5px; color: var(--text-s); line-height: 1.55; word-break: keep-all;">매번 주말마다 우리 아이와 어디 갈지 여기저기 흩어진 정보를 찾느라 지친 부모님들을 위해 만들었습니다. 지자체 오피셜 무료 행사와 직접 검증한 안심 공간 정보만 쏙쏙 골라 한눈에 보여드릴게요. 이번 주말도 아이들과 함께 복잡한 준비 없이 행복하고 편안한 추억만 가득 만들어보세요!! *"기능 오류 제보나 나만 아는 안심 장소 추천은 **[토실이네 인스타 DM]**이나 **[블로그]*로 보내주시면 2차 업데이트에 적극 반영하겠습니다! 🤍"</p>
             </div>
-        </div>
-        
-        <div id="tab-hotplace" class="tab-content">
+            
+        </div> <div id="tab-hotplace" class="tab-content">
             <div class="app-box" style="padding-top:28px; padding-bottom:24px;">
                 <h1 class="app-title">토실이네 주말</h1>
                 <p class="app-desc" style="margin-bottom: 20px;">👶 아이와 함께하는 안심 주말 지도</p>
@@ -340,7 +341,6 @@
         </div>
     </div>
 </footer>
-
 
     <nav class="bottom-nav">
         <div id="nav-home" class="nav-item active" onclick="switchTab('home', this)">

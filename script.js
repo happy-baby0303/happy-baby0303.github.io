@@ -63,7 +63,45 @@ async function loadAllExternalData() {
     filterPlaces();
 }
 
-// 3. 필터링 함수
+// 3. 누락되었던 필수 기능 복구!
+function setRegion(region, btn) {
+    currentRegion = region;
+    const buttons = document.querySelectorAll('.filter-wrap .filter-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (currentSubTab === 'event') {
+        generateSubFilters(region);
+        currentSubRegion = 'all';
+    }
+    filterPlaces();
+}
+
+function toggleAccordion(index) {
+    const body = document.getElementById('acc-body-' + index);
+    const arrow = document.getElementById('acc-arrow-' + index);
+    if(body.style.display === 'block') {
+        body.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+    } else {
+        body.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+    }
+}
+
+function downloadImg() {
+    html2canvas(document.getElementById('capture-area')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = '토실이네_가계부_진단.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+function openGoogleForm() {
+    window.open('https://forms.gle/YOUR_FORM_ID', '_blank'); // 나중에 폼 링크 넣으세요!
+}
+
+// 4. 필터링 함수
 function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row');
     const subRegions = new Set();
@@ -103,7 +141,7 @@ function setSubRegion(sub, btn) {
     filterPlaces();
 }
 
-// 4. 기능 함수들
+// 5. 부가 기능 함수들
 function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const body = document.getElementById('modal-dynamic-body');
     const naverUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(query);
@@ -130,6 +168,7 @@ function closeSOS(e) { if(e.target.id === 'sos-modal') closeSOSForce(); }
 function closeSOSForce() { document.getElementById('sos-modal').style.display = 'none'; }
 function showSosMedical() { document.getElementById('sos-step-choice').style.display = 'none'; document.getElementById('sos-step-medical').style.display = 'block'; document.getElementById('btn-sos-back').style.display = 'flex'; }
 function showSosChecklist() { document.getElementById('sos-step-choice').style.display = 'none'; document.getElementById('sos-step-cry').style.display = 'block'; document.getElementById('btn-sos-back').style.display = 'flex'; }
+
 function toggleHistory() {
     const area = document.getElementById('history-list-area');
     if(area.style.display === 'block') { area.style.display = 'none'; } 
@@ -148,6 +187,7 @@ function toggleHistory() {
         area.style.display = 'block';
     }
 }
+
 function analyzeMoney() {
     const d = getV('v-diaper'), f = getV('v-food'), e = getV('v-etc');
     const total = d + f + e;
@@ -187,6 +227,7 @@ function analyzeMoney() {
     document.getElementById('money-result').style.display = 'block';
     setTimeout(() => drawChart(history), 100);
 }
+
 function deleteOldChart() { if(trendChart) trendChart.destroy(); }
 function drawChart(history) {
     const keys = Object.keys(history).sort();
@@ -210,7 +251,7 @@ function calcFever() {
     document.getElementById('fever-result').style.display = 'block';
 }
 
-// [아기 기능]
+// 6. 아기 정보 및 로컬 데이터
 function promptBabyInfo() {
     const name = prompt("우리아기 이름(태명)을 알려주세요!");
     if(!name) return;
@@ -226,7 +267,7 @@ function promptBabyInfo() {
     localStorage.setItem('tosil_baby', JSON.stringify({name, birth: formattedDate}));
     renderBabyInfo();
 }
-// [데이터]
+
 const babyTips = [
     { min: 0, max: 1, tip: "지금은 아이와 눈 맞춤을 연습할 시간이에요! 🤍" },
     { min: 2, max: 3, tip: "목 가누기 연습! 하루 5분 터미타임을 시도해보세요. 💪" },
@@ -234,12 +275,11 @@ const babyTips = [
     { min: 7, max: 12, tip: "분리불안이 생길 수 있어요. '엄마 곧 올게'라고 꼭 말해주세요!" }
 ];
 
-// [통합 아기 정보 렌더링]
 function renderBabyInfo() {
     const saved = localStorage.getItem('tosil_baby');
     const nameEl = document.getElementById('res-baby-name');
     const ddayEl = document.getElementById('res-baby-dday');
-    const msgEl = document.getElementById('daily-message'); // 이게 HTML에 있어야 함!
+    const msgEl = document.getElementById('daily-message'); 
 
     if(!saved) {
         if(nameEl) nameEl.innerText = "이름을 눌러 등록해주세요";
@@ -251,20 +291,15 @@ function renderBabyInfo() {
         const data = JSON.parse(saved);
         const birthDate = new Date(data.birth);
         const today = new Date();
-        
-        // 날짜 계산
         const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
         const monthAge = Math.floor(diffDays / 30.436875);
         
-        // 화면 업데이트
         if(nameEl) nameEl.innerText = data.name + "의 공간";
         if(ddayEl) ddayEl.innerText = "D+" + diffDays + "일";
         
-        // 맞춤 조언 찾기
         const tipObj = babyTips.find(item => monthAge >= item.min && monthAge <= item.max);
         const tipText = tipObj ? tipObj.tip : "오늘도 하윤이와 행복한 하루 되세요! 🤍";
         
-        // 조언 출력 (HTML에 <div id="daily-message">가 있어야 함)
         if(msgEl) msgEl.innerText = tipText;
     } catch (e) {
         console.error("데이터 오류:", e);
@@ -272,7 +307,6 @@ function renderBabyInfo() {
 }
 function formatDate(str) { if (!str || str.length !== 8) return str; return `${str.substring(4,6)}.${str.substring(6,8)}`; }
 
-// [데이터들]
 const wwList = [{w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"}, {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"}, {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"}, {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"}, {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"}, {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"}, {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"}, {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"}, {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"}, {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}];
 const vaccineData = [{ maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" }, { maxMonth: 2, desc: "✅ B형간염 2차" }, { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" }, { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" }, { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차(선택)" }, { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>국가 지정 필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감(인플루엔자) 시즌일 경우 소아과 상담을 권장합니다." }, { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" }, { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" }, { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간<br>(독감 등 계절성 질환 및 만 4세 이후 추가 접종은 소아과 문의 요망)" }];
 const weightData = [{ m: 0, boy: "3.3", girl: "3.2" }, { m: 1, boy: "4.5", girl: "4.2" }, { m: 2, boy: "5.6", girl: "5.1" }, { m: 3, boy: "6.4", girl: "5.8" }, { m: 4, boy: "7.0", girl: "6.4" }, { m: 5, boy: "7.5", girl: "6.9" }, { m: 6, boy: "7.9", girl: "7.3" }, { m: 7, boy: "8.3", girl: "7.6" }, { m: 8, boy: "8.6", girl: "7.9" }, { m: 9, boy: "8.9", girl: "8.2" }, { m: 10, boy: "9.2", girl: "8.5" }, { m: 11, boy: "9.4", girl: "8.7" }, { m: 12, boy: "9.6", girl: "8.9" }, { m: 15, boy: "10.3", girl: "9.6" }, { m: 18, boy: "10.9", girl: "10.2" }, { m: 24, boy: "12.2", girl: "11.5" }, { m: 36, boy: "14.3", girl: "13.9" }];
@@ -383,14 +417,13 @@ function filterPlaces() {
     }
 }
 
-// 1. 사진 업로드 및 저장 함수
+// 7. 사진 화질/용량 최적화 업로드 기능 (Canvas 압축)
 function uploadPhoto(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                // 사진 크기를 가로 800px로 줄이는 캔버스 작업
                 const canvas = document.createElement('canvas');
                 const maxSize = 800;
                 let width = img.width;
@@ -406,13 +439,13 @@ function uploadPhoto(input) {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // 압축된 데이터를 base64로 변환해서 저장
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% 퀄리티로 압축
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                 localStorage.setItem('tosil_baby_photo', dataUrl);
                 
-                // 화면 즉시 반영
-                document.querySelector('.home-hero-img').src = dataUrl;
-                document.querySelector('.home-hero-img').style.display = 'block';
+                const imgEl = document.querySelector('.home-hero-img');
+                imgEl.src = dataUrl;
+                imgEl.style.display = 'block';
+                imgEl.parentNode.style.background = 'none';
             };
             img.src = e.target.result;
         };
@@ -420,7 +453,7 @@ function uploadPhoto(input) {
     }
 }
 
-// 2. 페이지 열릴 때 저장된 사진 불러오기 (window.onload 안에 추가)
+// 로컬 저장된 사진 불러오기
 function loadBabyPhoto() {
     const savedPhoto = localStorage.getItem('tosil_baby_photo');
     if (savedPhoto) {
@@ -431,9 +464,9 @@ function loadBabyPhoto() {
     }
 }
 
-// 최종 실행
+// 최종 앱 초기화
 window.onload = () => { 
     loadAllExternalData(); 
     renderBabyInfo(); 
-    loadBabyPhoto(); //
+    loadBabyPhoto(); 
 };
