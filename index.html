@@ -22,15 +22,27 @@
 
     <div class="wrapper">
         
-        <div id="tab-home" class="tab-content active">         
-        <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
-              <img src="img.jpg" class="home-hero-img" alt="하윤이 발사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
-              <div class="home-hero-overlay">
-             <span class="home-hero-tag">My Family Platform</span>
-             <h2 class="home-hero-title" id="res-baby-dday">여기를 눌러 아기를 등록하세요</h2>
-            <span id="res-baby-name" style="display:block; font-size:14px; margin-top:5px; color:white;"></span>
-            </div>
-                </div>
+<div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
+    <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+    
+    <div class="home-hero-overlay">
+   <button onclick="event.stopPropagation(); promptBabyInfo();" 
+        style="position:absolute; top:12px; right:12px; 
+               background: transparent; 
+               border: none; 
+               color: white; 
+               font-size: 20px; 
+               cursor: pointer; 
+               padding: 0; 
+               text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                ✏️ 
+</button>
+        
+            <span class="home-hero-tag">My Family Platform</span>
+        <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800;">등록 전</h2>
+        <span id="res-baby-name" style="font-size:14px; opacity:0.9;">아기를 등록해주세요</span>
+    </div>
+</div>
 
             <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
 
@@ -299,34 +311,41 @@
             </div>
         </div>
 
-        <div class="seo-box">
-            <h2>💡 대한민국 통합 스마트 육아 가이드</h2>
-            <p>현대 육아에서 가장 중요한 것은 정보력입니다. 기저귀 한 장, 분유 한 통을 살 때도 핫딜 단가를 계산하는 습관이 가계 경제의 기틀을 마련합니다. 본 도구는 대한민국 평균 부모들의 소모품 지출 데이터를 기반으로 하여 우리 집의 소비를 객관적으로 돌아볼 수 있게 설계되었습니다.</p>
-            
-            <h3>1. 대한민국 평균 육아 비용 분석</h3>
-            <p>보건사회연구원 및 최신 통계 데이터에 따르면, 영유아 1인당 필수 소모품 지출(기저귀, 분유, 위생용품)의 평균은 월 약 25만 원~32만 원 선입니다. 본 진단기에서 '평균'으로 잡은 기준은 28만 원입니다. 만약 이보다 높게 나오고 있다면 브랜드 등급을 낮추거나 대용량 구매를 통한 단가 절감이 필요합니다.</p>
-
-            <h3>2. 육아비 방어를 위한 '체감가' 계산법</h3>
-            <p>단순 총액만 보기보다 장당 단가(기저귀 300원 이하 등)를 계산하는 것이 유리합니다. 또한 정부에서 지원하는 부모급여나 아동수당 등을 단순 생활비로 쓰기보다 아이 이름의 적립식 펀드나 청약 통장으로 이체하는 '재무 격리 전략'을 적극 추천합니다.</p>
-
-            <h3>3. 해열제 복용 및 예방접종 후 관리</h3>
-            <p>예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜과 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
-        </div>
-
-<footer style="text-align: center; padding: 40px 20px 30px 20px; font-size: 12px; color: #4E5968; line-height: 1.6; margin-top: 40px;">
-    <div style="margin-bottom: 12px;">
-        <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 800; margin: 0 5px;">📝 공식 블로그</a> | 
-        <a href="https://www.instagram.com/ggoom_e2?igsh=MWo0OXFpdzk3OGwzYg==" target="_blank" style="color: #E1306C; text-decoration: none; font-weight: 800; margin: 0 5px;">📸 오피셜 인스타</a>
+<div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+    
+    <div style="border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 20px;">
+        <h2 style="font-size: 18px; font-weight: 900; margin: 0; color: var(--text-m);">💡 대한민국 통합 스마트 육아 가이드</h2>
     </div>
 
-    <div style="color: #4E5968; word-break: keep-all;">
-        <p style="margin-bottom: 8px;"><strong>© 2026. 토실이 육아 메이트. All rights reserved.</strong></p>
-        <p>본 서비스의 모든 디자인과 로직의 저작권은 '토실이' 블로그에 있으며, 무단 전재 시 법적 책임이 발생할 수 있습니다.</p>
-        <p style="margin-top: 12px; font-weight: 600;">토실이네는 개인정보 보호를 최우선으로 합니다. 아기의 소중한 사진과 기록은 서버로 전송되지 않고 오직 사용자님의 기기에만 안전하게 저장됩니다. 안심하고 사용하세요. 🔒</p>
+    <p style="font-size: 14px; color: var(--text-s); margin-bottom: 20px; line-height: 1.6;">현대 육아에서 가장 중요한 것은 정보력입니다. 기저귀 한 장, 분유 한 통을 살 때도 핫딜 단가를 계산하는 습관이 가계 경제의 기틀을 마련합니다. 본 도구는 대한민국 평균 부모들의 소모품 지출 데이터를 기반으로 하여 우리 집의 소비를 객관적으로 돌아볼 수 있게 설계되었습니다.</p>
+    
+    <h3 style="font-size: 15px; font-weight: 800; margin-top: 20px; margin-bottom: 8px; color: var(--text-m);">1. 대한민국 평균 육아 비용 분석</h3>
+    <p style="font-size: 14px; color: var(--text-s); line-height: 1.6;">보건사회연구원 및 최신 통계 데이터에 따르면, 영유아 1인당 필수 소모품 지출(기저귀, 분유, 위생용품)의 평균은 월 약 25만 원~32만 원 선입니다. 본 진단기에서 '평균'으로 잡은 기준은 28만 원입니다. 만약 이보다 높게 나오고 있다면 브랜드 등급을 낮추거나 대용량 구매를 통한 단가 절감이 필요합니다.</p>
+
+    <h3 style="font-size: 15px; font-weight: 800; margin-top: 20px; margin-bottom: 8px; color: var(--text-m);">2. 육아비 방어를 위한 '체감가' 계산법</h3>
+    <p style="font-size: 14px; color: var(--text-s); line-height: 1.6;">단순 총액만 보기보다 장당 단가(기저귀 300원 이하 등)를 계산하는 것이 유리합니다. 또한 정부에서 지원하는 부모급여나 아동수당 등을 단순 생활비로 쓰기보다 아이 이름의 적립식 펀드나 청약 통장으로 이체하는 '재무 격리 전략'을 적극 추천합니다.</p>
+
+    <h3 style="font-size: 15px; font-weight: 800; margin-top: 20px; margin-bottom: 8px; color: var(--text-m);">3. 해열제 복용 및 예방접종 후 관리</h3>
+    <p style="font-size: 14px; color: var(--text-s); line-height: 1.6;">예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜과 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
+</div>
+
+<footer style="text-align: center; padding: 40px 16px 80px 16px; font-size: 11px; color: #8B95A1; line-height: 1.6; margin-top: 40px; border-top: 1px solid #E5E8EB;">
+    <div style="margin-bottom: 24px;">
+        <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">📝 블로그</a> |
+        <a href="https://www.instagram.com/ggoom_e2" target="_blank" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">📸 인스타</a> |
+        <a href="#" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">🔒 개인정보처리방침</a>
+    </div>
+
+    <div style="font-size: 10.5px; color: #A0AEC0; line-height: 1.5; word-break: keep-all;">
+        <p style="margin-bottom: 6px; font-weight: 800; color: var(--text-s);">© 2026. 토실이 육아 메이트. All rights reserved.</p>
+        <p style="margin-bottom: 15px;">본 서비스의 모든 디자인과 로직의 저작권은 '토실이' 블로그에 있으며,<br>무단 전재 및 상업적 도용 시 법적 책임을 물을 수 있습니다.</p>
+        
+        <div style="background: #F8F9FA; padding: 12px; border-radius: 12px; display: inline-block; color: #4E5968; border: 1px solid #E5E8EB;">
+            🔒 <strong>개인정보 안심 보장</strong><br>
+            아기의 소중한 사진과 기록은 서버로 전송되지 않고<br>오직 사용자님의 기기에만 안전하게 저장됩니다.
+        </div>
     </div>
 </footer>
-
-    </div>
 
     <nav class="bottom-nav">
         <div id="nav-home" class="nav-item active" onclick="switchTab('home', this)">
