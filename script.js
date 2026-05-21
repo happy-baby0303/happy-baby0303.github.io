@@ -226,31 +226,49 @@ function promptBabyInfo() {
     localStorage.setItem('tosil_baby', JSON.stringify({name, birth: formattedDate}));
     renderBabyInfo();
 }
+// [데이터]
+const babyTips = [
+    { min: 0, max: 1, tip: "지금은 아이와 눈 맞춤을 연습할 시간이에요! 🤍" },
+    { min: 2, max: 3, tip: "목 가누기 연습! 하루 5분 터미타임을 시도해보세요. 💪" },
+    { min: 4, max: 6, tip: "뒤집기 시작! 주변에 위험한 물건이 없는지 꼭 확인해주세요." },
+    { min: 7, max: 12, tip: "분리불안이 생길 수 있어요. '엄마 곧 올게'라고 꼭 말해주세요!" }
+];
+
+// [통합 아기 정보 렌더링]
 function renderBabyInfo() {
     const saved = localStorage.getItem('tosil_baby');
     const nameEl = document.getElementById('res-baby-name');
     const ddayEl = document.getElementById('res-baby-dday');
-    const msgEl = document.getElementById('daily-message');
+    const msgEl = document.getElementById('daily-message'); // 이게 HTML에 있어야 함!
+
     if(!saved) {
         if(nameEl) nameEl.innerText = "이름을 눌러 등록해주세요";
         if(ddayEl) ddayEl.innerText = "D+0일";
         return;
     }
+
     try {
         const data = JSON.parse(saved);
         const birthDate = new Date(data.birth);
         const today = new Date();
-        const diff = Math.ceil((today - birthDate) / (1000*60*60*24));
+        
+        // 날짜 계산
+        const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
+        const monthAge = Math.floor(diffDays / 30.436875);
+        
+        // 화면 업데이트
         if(nameEl) nameEl.innerText = data.name + "의 공간";
-        if(ddayEl) ddayEl.innerText = "D+" + diff + "일";
-        if(msgEl) {
-            let dailyMsg = "";
-            if(diff === 100) dailyMsg = "🎉 100일 축하해요!";
-            else if(diff > 0 && diff % 30 === 0) dailyMsg = `✨ ${Math.floor(diff/30)}개월째 성장 중!`;
-            else dailyMsg = "🤍 오늘도 하윤이와 행복한 하루 보내세요!";
-            msgEl.innerText = dailyMsg;
-        }
-    } catch (e) { console.error("데이터 오류:", e); }
+        if(ddayEl) ddayEl.innerText = "D+" + diffDays + "일";
+        
+        // 맞춤 조언 찾기
+        const tipObj = babyTips.find(item => monthAge >= item.min && monthAge <= item.max);
+        const tipText = tipObj ? tipObj.tip : "오늘도 하윤이와 행복한 하루 되세요! 🤍";
+        
+        // 조언 출력 (HTML에 <div id="daily-message">가 있어야 함)
+        if(msgEl) msgEl.innerText = tipText;
+    } catch (e) {
+        console.error("데이터 오류:", e);
+    }
 }
 function formatDate(str) { if (!str || str.length !== 8) return str; return `${str.substring(4,6)}.${str.substring(6,8)}`; }
 
@@ -397,4 +415,5 @@ function loadBabyPhoto() {
 window.onload = () => { 
     loadAllExternalData(); 
     renderBabyInfo(); 
+    loadBabyPhoto(); //
 };

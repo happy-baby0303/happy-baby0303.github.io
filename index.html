@@ -25,22 +25,16 @@
 <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
     <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
     
-    <div class="home-hero-overlay">
-   <button onclick="event.stopPropagation(); promptBabyInfo();" 
-        style="position:absolute; top:12px; right:12px; 
-               background: transparent; 
-               border: none; 
-               color: white; 
-               font-size: 20px; 
-               cursor: pointer; 
-               padding: 0; 
-               text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                ✏️ 
-</button>
+    <div class="home-hero-overlay" style="background: rgba(255, 255, 255, 0.1);">
+        <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:var(--text-m); font-size:20px; cursor:pointer; padding:0;">
+            ✎
+        </button>
         
-            <span class="home-hero-tag">My Family Platform</span>
-        <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800;">등록 전</h2>
-        <span id="res-baby-name" style="font-size:14px; opacity:0.9;">아기를 등록해주세요</span>
+        <span class="home-hero-tag" style="background:var(--primary); color:white; align-self:flex-start; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px;">My Family Platform</span>
+        <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800; color:var(--text-m); text-shadow: none;">등록 전</h2>
+        <span id="res-baby-name" style="font-size:14px; color:var(--text-m); opacity:0.8;">아기를 등록해주세요</span>
+        
+        <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:var(--text-m); opacity:0.9;"></div>
     </div>
 </div>
 
