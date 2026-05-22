@@ -184,110 +184,72 @@ button, input[type="button"], input[type="submit"] { -webkit-appearance: none; -
 .navi-badge-icon.kakao { background: #FEE500; color: #191919; }
 
 /* =========================================
-   🌙 원터치 다크 모드 (프리미엄 세련된 톤)
-=/* =========================================
-/* 1. 기본 배경: 촌스러운 암흑이 아닌, 세련된 네이비/다크그레이 톤 (#1A1C23) */
+   🌙 프리미엄 다크 모드 - 최종 교정 패치
+========================================= */
+
+/* 1. 눈 아픈 '쌩흰색'을 부드러운 '다크 그레이'로 교체 */
 body.dark-mode {
-    background-color: #1A1C23 !important; 
-    color: #E5E8EB;
-    --text-m: #F9FAFB;
-    --text-s: #B0B8C1;
-    --text-sub: #8B95A1;
-    --border: #2D323B;
-    --primary: #3182F6; /* 다크모드에서도 예쁜 블루 유지 */
+    background-color: #1A1C23 !important; /* 배경: 톤다운된 네이비그레이 */
+    color: #E5E8EB !important;
 }
 
-body.dark-mode .wrapper {
-    background-color: #1A1C23 !important;
-}
-
-/* 2. 카드/박스: 배경보다 살짝 밝게 해서 입체감 주기 (#22252D) */
+/* 2. 메인화면/툴박스 박스들: 너무 밝지 않게, 은은한 입체감만 살짝 */
 body.dark-mode .app-box, 
-body.dark-mode .result-card, 
-body.dark-mode .checkbox-area,
-body.dark-mode .health-card {
-    background: #22252D !important;
-    border: 1px solid #2D323B !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+body.dark-mode .home-hero-card,
+body.dark-mode .home-large-tile,
+body.dark-mode .home-sub-tile,
+body.dark-mode .accordion-item,
+body.dark-mode .fest-card {
+    background-color: #252830 !important; /* 배경보다 살짝 밝은 그레이 */
+    border: 1px solid #333842 !important;
+    color: #E5E8EB !important;
 }
 
-/* 3. 헤더 & 하단 바 */
-body.dark-mode .global-header,
-body.dark-mode .bottom-nav {
-    background: rgba(26, 28, 35, 0.85) !important;
-    border-color: #2D323B !important;
-}
-
-/* 4. 까맣게 묻히던 글씨들 하얗게 구출 */
-body.dark-mode h1, 
-body.dark-mode h2, 
-body.dark-mode h3, 
-body.dark-mode .app-title, 
-body.dark-mode .app-desc,
-body.dark-mode .brand-logo, /* 로고 글씨 추가 */
-body.dark-mode strong {
-    color: var(--text-m) !important;
-}
-
-/* 5. 💡 하얀 배경에 하얀 글씨 버튼 해결 ( image_1.png, image_4.png) */
-/* 활성화된 탭/버튼 (파란색 배경 + 흰 글씨) -> 글씨색을 배경과 동일한 진한 그레이로 변경 */
-/* 이것은 image_3.png의 솔루션을 툴박스 타일에 적용하는 것입니다. */
-body.dark-mode .segment-btn.active,
-body.dark-mode .filter-btn.active,
-body.dark-mode .tool-chip.active {
-    background: var(--primary) !important;
-    color: #1A1C23 !important; /* 배경과 동일한 진한 그레이로 변경 */
+/* 3. 주말 나들이 탭 배경 완전 제거 (하얀 박스 탈출!) */
+body.dark-mode #tab-hotplace,
+body.dark-mode #tab-hotplace .app-box {
+    background-color: #1A1C23 !important; /* 전체 배경과 통일 */
     border: none !important;
 }
 
-/* 비활성화된 버튼 (어두운 회색) */
-body.dark-mode .segment-btn:not(.active),
-body.dark-mode .filter-btn:not(.active),
-body.dark-mode .tool-chip:not(.active) {
-    background: #2D323B !important;
-    color: #8B95A1 !important;
-    border: 1px solid #3A404A !important;
+/* 4. 나들이 목록 아이템들만 예쁜 카드 스타일로 */
+body.dark-mode .fest-card,
+body.dark-mode .accordion-header {
+    background-color: #252830 !important;
+    border: 1px solid #333842 !important;
 }
 
-/* 6. 검색창 & 입력창 어둡게 변경 */
-body.dark-mode .search-input,
-body.dark-mode input[type="text"],
-body.dark-mode input[type="number"],
-body.dark-mode input[type="date"] {
-    background: #2D323B !important;
-    color: #F9FAFB !important;
-    border: 1px solid #3A404A !important;
-}
-
-/* 7. 맨 밑 '제보하기' 같은 큰 버튼 ( image_0.png 하얀 버튼) -> 흰색 배경 + 까만 글씨로 눈에 띄게! */
-body.dark-mode .btn-main {
-    background: var(--text-m) !important; 
-    color: #1A1C23 !important; 
+/* 5. 툴박스 버튼 글씨가 파란 배경에 묻히는 문제 완전 해결 */
+body.dark-mode .tool-chip.active,
+body.dark-mode .segment-btn.active,
+body.dark-mode .filter-btn.active {
+    background-color: var(--primary) !important;
+    color: #FFFFFF !important; /* 글씨를 아주 밝은 흰색으로 강제 */
     font-weight: 900 !important;
 }
 
-/* 8. 제보 안내 박스 */
-body.dark-mode #section-report {
-    background: #2A2E37 !important;
-    border: 1px solid #3A404A !important;
+/* 6. 텍스트 가독성 최적화 (흐린 글씨 없애기) */
+body.dark-mode .home-hero-title,
+body.dark-mode .home-hero-title h2,
+body.dark-mode .app-title,
+body.dark-mode .home-tile-title,
+body.dark-mode .home-sub-title,
+body.dark-mode .fest-card-title {
+    color: #FFFFFF !important; /* 제목은 무조건 흰색 */
 }
 
-/* 9. 💡 주말 나들이 영역 흰 배경 해결 ( image_0.png) */
-/* 주말 나들이 컨트롤 영역의 흰 배경 전체 제거 */
-body.dark-mode .outing-segment-container {
-    background: none !important;
-    border: none !important;
+body.dark-mode .home-tile-sub,
+body.dark-mode .home-sub-desc,
+body.dark-mode .app-desc {
+    color: #B0B8C1 !important; /* 설명글은 부드러운 그레이 */
 }
 
-/* 각 요소가 은은한 카드 위에 놓이도록 수정 */
-body.dark-mode .segment-control,
-body.dark-mode .search-wrapper {
-    background: #22252D !important; /* 카드 배경색 */
-    border: 1px solid #2D323B !important; /* 카드 보더 */
-    border-radius: 16px; /* 카드 입체감을 위한 둥근 모서리 */
-    margin-bottom: 20px; /* 입체감을 위한 마진 유지 */
-    padding: 12px; /* 입체감을 위한 패딩 유지 */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* 입체감을 위한 그림자 유지 */
+/* 7. 아코디언(나들이 지도) 열었을 때 나오는 박스 */
+body.dark-mode .accordion-body {
+    background-color: #2A2E37 !important;
+    border-top: 1px solid #333842 !important;
+    color: #E5E8EB !important;
+}
 }
 
 /* =========================================
