@@ -184,180 +184,318 @@ button, input[type="button"], input[type="submit"] { -webkit-appearance: none; -
 .navi-badge-icon.kakao { background: #FEE500; color: #191919; }
 
 /* =========================================
-   🌙 프리미엄 다크 모드 - 최종 교정 패치
+/* =========================================
+   🌙 프리미엄 다크 모드 - 최종 수정 (화이트 박스/글씨 증발 완전 차단)
 ========================================= */
 
-/* 1. 눈 아픈 '쌩흰색'을 부드러운 '다크 그레이'로 교체 */
 body.dark-mode {
-    background-color: #1A1C23 !important; /* 배경: 톤다운된 네이비그레이 */
+    background-color: #1A1C23 !important; 
     color: #E5E8EB !important;
 }
 
-/* 2. 메인화면/툴박스 박스들: 너무 밝지 않게, 은은한 입체감만 살짝 */
+/* 1. 모든 카드/박스 배경을 '톤다운된 다크그레이'로 강제 고정 */
 body.dark-mode .app-box, 
+body.dark-mode .result-card, 
 body.dark-mode .home-hero-card,
 body.dark-mode .home-large-tile,
 body.dark-mode .home-sub-tile,
-body.dark-mode .accordion-item,
-body.dark-mode .fest-card {
-    background-color: #252830 !important; /* 배경보다 살짝 밝은 그레이 */
-    border: 1px solid #333842 !important;
-    color: #E5E8EB !important;
-}
-
-/* 3. 주말 나들이 탭 배경 완전 제거 (하얀 박스 탈출!) */
-body.dark-mode #tab-hotplace,
-body.dark-mode #tab-hotplace .app-box {
-    background-color: #1A1C23 !important; /* 전체 배경과 통일 */
-    border: none !important;
-}
-
-/* 4. 나들이 목록 아이템들만 예쁜 카드 스타일로 */
 body.dark-mode .fest-card,
-body.dark-mode .accordion-header {
-    background-color: #252830 !important;
+body.dark-mode .accordion-item,
+body.dark-mode .accordion-header,
+body.dark-mode .accordion-body,
+body.dark-mode .pill-card,
+body.dark-mode .disclaimer-box,
+body.dark-mode #tab-hotplace,
+body.dark-mode #tab-hotplace .app-box,
+body.dark-mode .checkbox-area {
+    background-color: #22252D !important; /* 배경보다 살짝 밝은 그레이 */
     border: 1px solid #333842 !important;
-}
-
-/* 5. 툴박스 버튼 글씨가 파란 배경에 묻히는 문제 완전 해결 */
-body.dark-mode .tool-chip.active,
-body.dark-mode .segment-btn.active,
-body.dark-mode .filter-btn.active {
-    background-color: var(--primary) !important;
-    color: #FFFFFF !important; /* 글씨를 아주 밝은 흰색으로 강제 */
-    font-weight: 900 !important;
-}
-
-/* 6. 텍스트 가독성 최적화 (흐린 글씨 없애기) */
-body.dark-mode .home-hero-title,
-body.dark-mode .home-hero-title h2,
-body.dark-mode .app-title,
-body.dark-mode .home-tile-title,
-body.dark-mode .home-sub-title,
-body.dark-mode .fest-card-title {
-    color: #FFFFFF !important; /* 제목은 무조건 흰색 */
-}
-
-body.dark-mode .home-tile-sub,
-body.dark-mode .home-sub-desc,
-body.dark-mode .app-desc {
-    color: #B0B8C1 !important; /* 설명글은 부드러운 그레이 */
-}
-
-/* 7. 아코디언(나들이 지도) 열었을 때 나오는 박스 */
-body.dark-mode .accordion-body {
-    background-color: #2A2E37 !important;
-    border-top: 1px solid #333842 !important;
     color: #E5E8EB !important;
 }
+
+/* 2. 텍스트 컬러 강제 지정 (절대 묻히지 않게) */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
+body.dark-mode .app-title, body.dark-mode .brand-logo,
+body.dark-mode .fest-card-title, body.dark-mode .fest-card-meta,
+body.dark-mode .place-desc, body.dark-mode strong {
+    color: #F9FAFB !important; 
 }
 
-/* =========================================
-   🛠️ 다크모드 디테일 A/S 
-========================================= */
-
-/* 1. 🚨 툴박스/필터 눌렀을 때 글씨 증발하는 문제 완벽 해결 */
-body.dark-mode .segment-btn.active,
-body.dark-mode .filter-btn.active,
-body.dark-mode .tool-chip.active,
-body.dark-mode .tool-chip.active .t-label /* 👈 이 녀석이 범인이었습니다! */ {
-    background-color: var(--primary) !important; 
-    color: #FFFFFF !important; /* 파란 배경 위엔 무조건 쨍한 흰색! */
-}
-
-/* 안 눌린 툴박스 글씨도 고급스럽게 구출 */
-body.dark-mode .tool-chip:not(.active) .t-label {
+body.dark-mode .app-desc, 
+body.dark-mode .home-tile-sub, 
+body.dark-mode .home-sub-desc,
+body.dark-mode .pill-title {
     color: #B0B8C1 !important;
 }
 
-/* 2. 🚨 주말 나들이 하얀색 촌스러운 배경 완전 제거 */
-body.dark-mode #tab-hotplace,
-body.dark-mode #tab-hotplace .app-box,
-body.dark-mode .tab-content {
-    background-color: #1A1C23 !important; /* 앱 전체 다크 배경색과 완전 통일 */
-    border: none !important;
-    box-shadow: none !important;
+/* 3. 활성화된 버튼/탭 (파란색 + 흰 글씨) */
+body.dark-mode .segment-btn.active,
+body.dark-mode .filter-btn.active,
+body.dark-mode .tool-chip.active {
+    background-color: #3182F6 !important;
+    color: #FFFFFF !important;
+    font-weight: 900 !important;
 }
 
-/* 주말 나들이 검색창/버튼 주변 은은한 카드 배경 살리기 */
-body.dark-mode #tab-hotplace .search-wrapper,
-body.dark-mode #tab-hotplace .segment-control,
-body.dark-mode #tab-hotplace .filter-wrap {
-    background-color: #22252D !important;
-    border: 1px solid #2D323B !important;
+/* 비활성화 버튼 */
+body.dark-mode .segment-btn:not(.active),
+body.dark-mode .filter-btn:not(.active),
+body.dark-mode .tool-chip:not(.active) {
+    background-color: #2D323B !important;
+    color: #8B95A1 !important;
+}
+
+/* 4. 헤더와 하단 내비게이션 */
+body.dark-mode .global-header,
+body.dark-mode .bottom-nav {
+    background: rgba(26, 28, 35, 0.95) !important;
+    border-top: 1px solid #333842 !important;
+}
+
+/* 5. 투약 계산기 카드 */
+body.dark-mode .pill-card {
+    background-color: #2A2E37 !important;
+    border: 1px solid #333842 !important;
 }
 
 /* =========================================
-   🚨 다크모드 결과창(산출 화면) 글씨 안 보이는 현상 완벽 수리
+   🌙 토실이 육아 메이트 - 완벽 다크모드 마스터 패치 (최종 종결판)
 ========================================= */
-/* 1. 노란색 면책조항 / 원더윅스 경고 박스 어둡게 */
-body.dark-mode .disclaimer-box,
-body.dark-mode .ww-status-box,
-body.dark-mode .place-review {
-    background: #2A2E37 !important;
-    border: 1px solid #3A404A !important;
+
+/* 1. 전체 배경 & 기본 텍스트 */
+body.dark-mode {
+    background-color: #1A1C23 !important;
+    color: #E5E8EB !important;
 }
-body.dark-mode .disclaimer-box p,
-body.dark-mode .disclaimer-box strong,
-body.dark-mode .ww-status-box,
-body.dark-mode .ww-status-box strong {
-    color: #E5E8EB !important; /* 글씨를 또렷한 흰색으로 */
+body.dark-mode .wrapper {
+    background-color: #1A1C23 !important;
 }
 
-/* 2. 해열제 결과창 (빨강/파랑 알약 카드) 배경 어둡게 */
+/* 2. 카드 및 박스 배경 (어두운 그레이) */
+body.dark-mode .app-box,
+body.dark-mode .result-card,
+body.dark-mode #capture-area,
+body.dark-mode #history-list-area,
+body.dark-mode .checkbox-area,
+body.dark-mode .disclaimer-box,
+body.dark-mode .ww-status-box,
+body.dark-mode .accordion-item,
+body.dark-mode .accordion-header,
+body.dark-mode .accordion-body,
+body.dark-mode .fest-card {
+    background-color: #22252D !important;
+    border: 1px solid #333842 !important;
+    color: #E5E8EB !important;
+}
+
+/* 3. 주말 나들이 탭 (배경 투명화) */
+body.dark-mode #tab-hotplace,
+body.dark-mode #tab-hotplace .app-box,
+body.dark-mode .outing-segment-container {
+    background: transparent !important;
+    border: none !important;
+}
+body.dark-mode .search-wrapper,
+body.dark-mode .segment-control {
+    background-color: #22252D !important;
+    border: 1px solid #333842 !important;
+}
+body.dark-mode .search-input {
+    background: transparent !important;
+    color: #FFFFFF !important;
+}
+
+/* 4. 메인 홈 화면 버튼 (부드러운 다크 톤) */
+body.dark-mode .home-large-tile,
+body.dark-mode .home-sub-tile {
+    background-color: #2A2E37 !important;
+    border: 1px solid #3A404A !important;
+}
+body.dark-mode .home-tile-title,
+body.dark-mode .home-sub-title {
+    color: #F9FAFB !important;
+}
+body.dark-mode .home-tile-sub,
+body.dark-mode .home-sub-desc {
+    color: #8B95A1 !important;
+}
+
+/* 5. 툴박스 & 필터 버튼 */
+body.dark-mode .tool-chip,
+body.dark-mode .segment-btn,
+body.dark-mode .filter-btn {
+    background-color: #2D323B !important;
+    color: #8B95A1 !important;
+    border: 1px solid #3A404A !important;
+}
+body.dark-mode .tool-chip span,
+body.dark-mode .segment-btn span,
+body.dark-mode .filter-btn span {
+    color: #8B95A1 !important;
+}
+/* 🔥 버튼 클릭 시 (파란 배경 + 흰 글씨 강제) */
+body.dark-mode .tool-chip.active,
+body.dark-mode .segment-btn.active,
+body.dark-mode .filter-btn.active,
+body.dark-mode .tool-chip.active span,
+body.dark-mode .tool-chip.active .t-label,
+body.dark-mode .tool-chip.active .t-icon,
+body.dark-mode .segment-btn.active span,
+body.dark-mode .filter-btn.active span {
+    background-color: #3182F6 !important;
+    border-color: #3182F6 !important;
+    color: #FFFFFF !important;
+    font-weight: 900 !important;
+}
+
+/* 6. 🚨 [완벽 해결] 툴박스 제목, 주말 미션, 제보 제목들 하얗게 구출 */
+body.dark-mode div[style*="font-size:16.5px"], 
+body.dark-mode div[style*="font-size: 16.5px"],
+body.dark-mode div[style*="font-size: 15px; font-weight: 800"],
+body.dark-mode div[style*="font-size: 15px; font-weight:800"] {
+    color: #FFFFFF !important;
+}
+
+/* 7. 공통 제목들 하얗게 구출 */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
+body.dark-mode .app-title, body.dark-mode .brand-logo,
+body.dark-mode .fest-card-title, body.dark-mode .accordion-title-wrap strong {
+    color: #FFFFFF !important;
+}
+body.dark-mode .fest-card-meta, body.dark-mode .place-loc {
+    color: #B0B8C1 !important;
+}
+
+/* 8. 가계부 텍스트 및 선 색상 */
+body.dark-mode #money-total,
+body.dark-mode .history-item span:last-child {
+    color: #FFFFFF !important;
+}
+body.dark-mode .history-item {
+    border-bottom: 1px dashed #333842 !important;
+}
+body.dark-mode #money-insight {
+    background-color: #1A1C23 !important;
+    border: 1px solid #333842 !important;
+    color: #B0B8C1 !important;
+}
+
+/* 9. 안내사항 / 면책조항 (중요한 글씨는 흰색) */
+body.dark-mode .disclaimer-box p,
+body.dark-mode .ww-status-box {
+    color: #B0B8C1 !important;
+}
+body.dark-mode .disclaimer-box p:first-child,
+body.dark-mode .disclaimer-box strong,
+body.dark-mode .ww-status-box strong {
+    color: #FFFFFF !important; 
+}
+body.dark-mode .checkbox-area label {
+    color: #FF8A8A !important;
+}
+
+/* 10. 해열제 알약 카드 */
 body.dark-mode .pill-card {
-    background: rgba(255, 75, 43, 0.1) !important;
+    background-color: rgba(255, 75, 43, 0.1) !important;
     border: 1px solid rgba(255, 75, 43, 0.3) !important;
 }
 body.dark-mode .pill-card.blue {
-    background: rgba(49, 130, 246, 0.1) !important;
+    background-color: rgba(49, 130, 246, 0.1) !important;
     border: 1px solid rgba(49, 130, 246, 0.3) !important;
 }
 body.dark-mode .pill-card .pill-title,
 body.dark-mode .pill-card .pill-dose {
-    color: #F9FAFB !important; /* 산출된 용량 글씨 하얗게 */
-}
-body.dark-mode .pill-card .pill-title span {
-    color: #B0B8C1 !important; /* 괄호 안 글씨는 살짝 흐리게 */
+    color: #FFFFFF !important;
 }
 
-/* 3. 예방접종 하얀색 체크리스트 박스 수정 */
-body.dark-mode #vaccine-info {
-    background: #2D323B !important;
-    color: #F9FAFB !important;
+/* 11. 입력창 (체온, 몸무게 등) */
+body.dark-mode .input-wrapper input {
+    background-color: #2D323B !important;
+    color: #FFFFFF !important;
     border: 1px solid #3A404A !important;
 }
 
-/* =========================================
-   💊 해열제 타임라인 스타일
-========================================= */
-.pill-btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 800;
-    border: 1px solid var(--border);
-    background: #FFF;
-    color: var(--text-s);
-    cursor: pointer;
-    transition: all 0.2s;
+/* 12. 🚨 [완벽 해결] 맨 밑 푸터 & 개인정보 안심 보장 (촌스러운 테두리 증발!) */
+body.dark-mode footer div[style*="background: #F8F9FA"],
+body.dark-mode footer div[style*="background:#F8F9FA"] {
+    background: transparent !important;
+    border: none !important;
+    color: #8B95A1 !important;
+}
+body.dark-mode footer div[style*="background: #F8F9FA"] strong,
+body.dark-mode footer div[style*="background:#F8F9FA"] strong {
+    color: #B0B8C1 !important; /* 너무 튀지 않는 밝은 회색으로 은은하게 */
 }
 
-/* 눌렸을 때 색상 변화 */
-.pill-btn.red.active { background: #FFF0F1; border-color: #FF4B2B; color: #D32F2F; }
-.pill-btn.blue.active { background: #EBF4FF; border-color: #3182F6; color: #1D5BB6; }
+/* 13. 헤더 & 하단 네비게이션 바 */
+body.dark-mode .global-header,
+body.dark-mode .bottom-nav {
+    background-color: rgba(26, 28, 35, 0.95) !important;
+    border-top: 1px solid #333842 !important;
+    border-bottom: 1px solid #333842 !important;
+}
+body.dark-mode .global-header .header-inner {
+    background-color: #22252D !important;
+    border: 1px solid #333842 !important;
+}
 
-/* 다크모드 대응 */
-body.dark-mode .pill-btn { background: #2D323B; color: #B0B8C1; }
-body.dark-mode .pill-btn.red.active { background: rgba(255,75,43,0.15); color: #FF4B2B; border-color: #FF4B2B; }
-body.dark-mode .pill-btn.blue.active { background: rgba(49,130,246,0.15); color: #3182F6; border-color: #3182F6; }
+/* =========================================
+   🌙 [최종] 박스 테두리/배경 제거 (플랫 디자인 패치)
+========================================= */
 
-.timeline-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
+/* 1. 헤더 로고 박스 테두리 제거 */
+body.dark-mode .global-header .header-inner {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* 2. 툴박스/하윤맘 미션 등 메인 컨텐츠 박스들의 테두리/배경 제거 */
+body.dark-mode .app-box, 
+body.dark-mode .result-card,
+body.dark-mode .disclaimer-box,
+body.dark-mode .accordion-item,
+body.dark-mode .fest-card,
+body.dark-mode .checkbox-area {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 3. 맨 밑 개인정보 안심 보장 박스 테두리 제거 */
+body.dark-mode footer div[style*="background"] {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* 4. 박스가 사라져도 글씨는 잘 보이게 강제 고정 */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
+body.dark-mode .app-title, body.dark-mode .app-desc,
+body.dark-mode .home-tile-title, body.dark-mode .home-sub-title,
+body.dark-mode .fest-card-title, body.dark-mode strong {
+    color: #FFFFFF !important; /* 글씨는 무조건 흰색 */
+}
+
+/* 5. 주말 나들이 탭의 검색창/버튼 영역은 예외적으로 카드 형태 유지 (가독성 위해) */
+body.dark-mode #tab-hotplace .search-wrapper,
+body.dark-mode #tab-hotplace .segment-control,
+body.dark-mode #tab-hotplace .filter-wrap {
+    background-color: #22252D !important;
+    border: 1px solid #333842 !important;
+}
+
+/* =========================================
+   🌙 네비게이션 박스 테두리 제거 (플랫 디자인)
+========================================= */
+
+/* 하단 네비게이션 박스 배경과 테두리를 완전히 투명하게 만듭니다 */
+body.dark-mode .bottom-nav {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* 혹시 네비게이션 안의 개별 메뉴들이 박스처럼 보인다면 그 부분도 제거 */
+body.dark-mode .bottom-nav .nav-item {
+    border: none !important;
+    background: transparent !important;
 }
