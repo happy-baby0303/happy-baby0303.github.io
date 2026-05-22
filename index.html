@@ -16,7 +16,10 @@
     <header class="global-header">
         <div class="header-inner">
             <div class="brand-logo">👣 토실이 육아 메이트 </div>
-            <div class="system-status"><span class="status-dot"></span>공공 API 매칭 온</div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background:none; border:none; font-size:18px; cursor:pointer; padding:0;">🌙</button>
+                <div class="system-status"><span class="status-dot"></span>공공 API 매칭 온</div>
+            </div>
         </div>
     </header>
 
@@ -214,7 +217,7 @@
                     </div>
                 </div>
 
-                <div id="panel-fever" class="panel-block">
+               <div id="panel-fever" class="panel-block">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--danger); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">🌡️ 투약 용량 안전 계측</div>
                     
                     <div class="disclaimer-box" style="background: #FFF0F1; border: 1px solid #FFE3E3; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
@@ -247,6 +250,29 @@
                             <div class="pill-title" style="font-size:15px; font-weight:800;">🔵 이부프로펜 계열 <span style="font-weight:600; font-size:12.5px; color:var(--text-s);">(파랑 챔프 등)</span></div>
                             <div class="pill-dose"><span id="dose-blue">0 ~ 0</span> <small style="font-size:16px; font-weight:800;">ml</small></div>
                         </div>
+                    </div>
+
+                    <div style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 24px;">
+                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m); margin-bottom: 16px;">⏱️ 투약 & 체온 타임라인</div>
+                        
+                        <div class="input-group">
+                            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px;">현재 체온 (℃)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="v-temp" placeholder="38.5" step="0.1" style="text-align:left;">
+                                <span class="unit-label">℃</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                            <button class="pill-btn red" id="btn-pill-red" onclick="selectPill('red')">🔴 아세트 (빨강)</button>
+                            <button class="pill-btn blue" id="btn-pill-blue" onclick="selectPill('blue')">🔵 이부 (파랑)</button>
+                        </div>
+                        
+                        <button class="btn-main" onclick="addFeverRecord()">약 먹이고 기록하기</button>
+                        
+                        <div id="fever-timeline" style="margin-top: 20px;">
+                            </div>
+                        <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important; padding: 10px;" onclick="clearFeverRecord()">전체 기록 지우기</button>
                     </div>
                 </div>
 

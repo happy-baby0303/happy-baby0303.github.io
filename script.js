@@ -464,9 +464,102 @@ function loadBabyPhoto() {
     }
 }
 
+// 🌙 다크모드 토글 함수
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    const isDark = body.classList.contains('dark-mode');
+    
+    // 버튼 아이콘 변경 (달 ↔ 해)
+    document.getElementById('dark-mode-toggle').innerText = isDark ? '☀️' : '🌙';
+    
+    // 사용자의 선택을 로컬 스토리지에 저장
+    localStorage.setItem('tosil_dark_mode', isDark ? 'on' : 'off');
+}
+
+// 🌙 페이지 열릴 때 다크모드 기억해두기
+function initDarkMode() {
+    const savedMode = localStorage.getItem('tosil_dark_mode');
+    if (savedMode === 'on') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('dark-mode-toggle').innerText = '☀️';
+    }
+}
+
+// ==========================================
+// 💊 투약 타임라인 로직 (먹통 해결 완벽판)
+// ==========================================
+window.selectedPillType = ''; // 전역 변수로 확실하게 선언
+
+function selectPill(type) {
+    window.selectedPillType = type;
+    document.getElementById('btn-pill-red').classList.remove('active');
+    document.getElementById('btn-pill-blue').classList.remove('active');
+    document.getElementById('btn-pill-' + type).classList.add('active');
+}
+
+function addFeverRecord() {
+    const temp = document.getElementById('v-temp').value;
+    if(!temp || !window.selectedPillType) {
+        alert('체온과 먹인 약의 종류를 모두 선택해주세요!');
+        return;
+    }
+    
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const record = { time: timeStr, temp: temp, type: window.selectedPillType };
+    
+    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    records.unshift(record); // 최신 기록을 맨 위로
+    if(records.length > 10) records.pop(); // 10개까지만 유지
+    
+    localStorage.setItem('tosil_fever_records', JSON.stringify(records));
+    renderFeverTimeline();
+    
+    // 입력창 초기화
+    document.getElementById('v-temp').value = '';
+    window.selectedPillType = '';
+    document.getElementById('btn-pill-red').classList.remove('active');
+    document.getElementById('btn-pill-blue').classList.remove('active');
+}
+
+function renderFeverTimeline() {
+    const container = document.getElementById('fever-timeline');
+    if(!container) return; 
+
+    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    if(records.length === 0) {
+        container.innerHTML = '<div style="text-align:center; font-size:13px; color:var(--text-sub); padding:20px;">아직 기록된 투약 내역이 없습니다.</div>';
+        return;
+    }
+    
+    let html = '';
+    records.forEach(r => {
+        const pillLabel = r.type === 'red' ? '🔴 아세트아미노펜' : '🔵 이부프로펜';
+        // 38도 이상이면 빨간색으로 경고 표시
+        const tempColor = r.temp >= 38.0 ? 'color:#FF4B2B; font-weight:900;' : 'color:var(--text-m); font-weight:800;';
+        html += `
+        <div class="timeline-item" style="display:flex; justify-content:space-between; padding:14px 12px; border-bottom:1px solid var(--border); font-size:14px;">
+            <span style="font-weight:800; color:var(--text-s); width:45px;">${r.time}</span>
+            <span style="flex:1; text-align:center; font-weight:800; color:var(--text-m);">${pillLabel}</span>
+            <span style="${tempColor}">${r.temp}℃</span>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function clearFeverRecord() {
+    if(confirm('아이가 열이 다 내렸나요? 투약 기록을 초기화하시겠습니까?')) {
+        localStorage.removeItem('tosil_fever_records');
+        renderFeverTimeline();
+    }
+}
+
 // 최종 앱 초기화
 window.onload = () => { 
     loadAllExternalData(); 
     renderBabyInfo(); 
     loadBabyPhoto(); 
+    initDarkMode();
+    renderFeverTimeline();
 };
