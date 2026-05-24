@@ -691,3 +691,21 @@ body.dark-mode .btn-reset {
     background: var(--primary) !important;
     color: #FFF !important;
 }
+
+/* =========================================
+   🎒 체크리스트 다크모드 글씨 구출 작전!
+========================================= */
+/* 1. 체크리스트 기본 글씨 하얗게 */
+body.dark-mode .check-text {
+    color: #F9FAFB !important;
+}
+
+/* 2. 팝업창 맨 위 큰 제목 (외출 준비물 팩킹 완료!) 하얗게 */
+body.dark-mode .sos-choice-title {
+    color: #FFFFFF !important;
+}
+
+/* 3. 100% 다 챙겼을 때 뜨는 축하 멘트 (하윤이랑 잊지 못할...) 밝은 회색으로 */
+body.dark-mode #checklist-items div[style*="color:var(--text-s)"] {
+    color: #B0B8C1 !important;
+}
