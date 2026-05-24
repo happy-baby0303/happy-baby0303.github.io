@@ -555,6 +555,100 @@ function clearFeverRecord() {
     }
 }
 
+/* =========================================
+   🎒 외출 준비물 체크리스트 로직 (로컬 스토리지)
+========================================= */
+const defaultPackList = [
+    '기저귀 (넉넉하게 4~5장)',
+    '물티슈 & 건티슈',
+    '쪽쪽이 & 쪽쪽이 클립',
+    '보온병 (끓였다 식힌 물)',
+    '분유 & 젖병',
+    '손수건 (3~4장 이상)',
+    '여벌 옷 & 턱받이',
+    '기저귀 버릴 비닐봉지',
+    '아기 수첩 (접종이나 병원 시)',
+    '아기 애착인형'
+];
+
+function openChecklistModal() {
+    document.getElementById('checklist-modal').style.display = 'flex';
+    renderChecklist();
+}
+
+function closeChecklist(e) {
+    if (e.target.id === 'checklist-modal') closeChecklistForce();
+}
+
+function closeChecklistForce() {
+    document.getElementById('checklist-modal').style.display = 'none';
+}
+
+function renderChecklist() {
+    const container = document.getElementById('checklist-items');
+    container.innerHTML = '';
+    
+    // 저장된 데이터 불러오기
+    let savedData = JSON.parse(localStorage.getItem('outingChecklist')) || {};
+    let checkedCount = 0; // 체크된 개수 세기
+
+    defaultPackList.forEach((item, index) => {
+        const isChecked = savedData[index] ? 'checked' : '';
+        const checkMark = savedData[index] ? '✔' : '';
+        
+        if(savedData[index]) checkedCount++; 
+        
+        container.innerHTML += `
+            <div class="check-item ${isChecked}" onclick="toggleCheckItem(${index})">
+                <div class="check-box" id="box-${index}">${checkMark}</div>
+                <div class="check-text">${item}</div>
+            </div>
+        `;
+    });
+
+    // ✨ 디테일 업그레이드: 등록된 아기 이름 불러오기 및 한글 조사(랑/이랑) 자동 계산
+    if(checkedCount === defaultPackList.length && defaultPackList.length > 0) {
+        let babyName = "우리아기"; // 기본값
+        const savedBaby = localStorage.getItem('tosil_baby');
+        
+        if (savedBaby) {
+            try {
+                const data = JSON.parse(savedBaby);
+                if (data.name) babyName = data.name;
+            } catch(e) {}
+        }
+
+        // 마지막 글자 받침 유무 확인해서 '랑/이랑' 자연스럽게 붙이기
+        const lastChar = babyName.charCodeAt(babyName.length - 1);
+        const hasBatchim = (lastChar - 44032) % 28 > 0;
+        const particle = hasBatchim ? '이랑' : '랑';
+
+        container.innerHTML += `
+            <div style="text-align:center; padding: 24px 10px; animation: scaleUp 0.4s ease;">
+                <div style="font-size:45px; margin-bottom:10px;">🎉</div>
+                <div style="font-size:17px; font-weight:900; color:var(--success);">외출 준비 완벽하게 끝!</div>
+                <div style="font-size:13.5px; color:var(--text-s); margin-top:6px;">${babyName}${particle} 잊지 못할 행복한 주말 보내세요 🤍</div>
+            </div>
+        `;
+    }
+}
+
+// ✅ 잃어버렸던 클릭 기능
+function toggleCheckItem(index) {
+    let savedData = JSON.parse(localStorage.getItem('outingChecklist')) || {};
+    savedData[index] = !savedData[index];
+    localStorage.setItem('outingChecklist', JSON.stringify(savedData));
+    renderChecklist();
+}
+
+// ✅ 잃어버렸던 초기화 기능
+function resetChecklist() {
+    if(confirm("모든 준비물 체크를 초기화하시겠습니까?")) {
+        localStorage.removeItem('outingChecklist');
+        renderChecklist();
+    }
+}
+
 // 최종 앱 초기화
 window.onload = () => { 
     loadAllExternalData(); 

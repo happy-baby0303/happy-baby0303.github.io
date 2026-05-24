@@ -530,3 +530,164 @@ body.dark-mode .flat-accordion summary {
 body.dark-mode .lib-content {
     color: #B0B8C1 !important;
 }
+
+/* =========================================
+   🎒 외출 준비물 체크리스트
+========================================= */
+.check-item {
+    display: flex; 
+    align-items: center; 
+    padding: 16px 12px; 
+    border-bottom: 1px dashed var(--border); 
+    cursor: pointer; 
+    transition: all 0.2s;
+}
+.check-box {
+    width: 22px; 
+    height: 22px; 
+    border: 2px solid var(--primary); 
+    border-radius: 6px; 
+    margin-right: 14px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    font-size: 14px; 
+    color: transparent;
+    transition: all 0.2s;
+}
+.check-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-m);
+    transition: all 0.2s;
+}
+
+/* 완료 (체크된 상태) */
+.check-item.checked {
+    opacity: 0.5;
+    background: #F8F9FA;
+}
+.check-item.checked .check-box {
+    background: var(--primary);
+    color: #FFF;
+}
+.check-item.checked .check-text {
+    text-decoration: line-through;
+}
+
+/* 다크모드 대응 */
+body.dark-mode .check-item.checked { background: #2A2F3A; }
+
+/* =========================================
+   💻 PC 화면 늘어남 방지 (모바일 사이즈 고정) - 찐 최종
+========================================= */
+.wrapper {
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    background-color: #F2F5F8;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+.global-header {
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+body { background-color: #E5E8EB; }
+body.dark-mode { background-color: #121212 !important; }
+body.dark-mode .wrapper { background-color: #1A1C23 !important; }
+
+/* =========================================
+   🌙 다크모드 하극상 참교육 (인라인 스타일 강제 덮어쓰기)
+========================================= */
+/* 🎒 체크리스트 버튼 */
+body.dark-mode button[onclick="openChecklistModal()"] {
+    background: #2A2E37 !important;
+    border-color: #3A404A !important;
+}
+body.dark-mode button[onclick="openChecklistModal()"] span {
+    color: #FFFFFF !important;
+}
+
+/* 📢 커뮤니티 제보 박스 */
+body.dark-mode #section-report {
+    background: #22252D !important;
+    border-color: #333842 !important;
+}
+body.dark-mode #section-report div {
+    color: #E5E8EB !important;
+}
+
+/* 💬 팩트 검증 피드 (아코디언 안쪽) */
+body.dark-mode .place-review {
+    background: #2A2E37 !important;
+    color: #E5E8EB !important;
+    border-left-color: #3182F6 !important;
+}
+
+/* 🎒 체크리스트 팝업창(모달) 전체 배경 */
+body.dark-mode #checklist-modal .sos-content-box {
+    background: #191F28 !important;
+    border: 1px solid #333842 !important;
+}
+body.dark-mode #checklist-modal .sos-choice-desc {
+    color: #8B95A1 !important;
+}
+
+/* =========================================
+   ✨ 체크리스트 버튼 & 박스 다크모드 완벽 동기화
+========================================= */
+/* 🎒 메인 체크리스트 버튼 */
+.checklist-main-btn {
+    background: #FFF !important; 
+    color: var(--text-m) !important; 
+    border: 2px solid var(--primary) !important; 
+    box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1) !important; 
+    margin-bottom: 20px !important; 
+    text-align: left !important; 
+    padding: 16px 20px !important;
+}
+body.dark-mode .checklist-main-btn {
+    background: #2A2E37 !important;
+    border-color: #3A404A !important;
+    color: #FFF !important;
+}
+body.dark-mode .checklist-main-btn span {
+    color: #FFF !important;
+}
+
+/* 📢 제보 박스 */
+.report-box {
+    background: #F8F9FA; 
+    border: 1px solid var(--border); 
+    border-radius: 16px; 
+    padding: 20px; 
+    margin-top: 30px; 
+    margin-bottom: 15px; 
+    text-align: center;
+}
+body.dark-mode .report-box {
+    background: #22252D !important;
+    border-color: #333842 !important;
+    color: #E5E8EB !important;
+}
+
+/* 🎛️ 팝업창 모달 하단 버튼 (초기화 & 닫기 반반) */
+.btn-reset, .btn-close {
+    flex: 1;
+    margin-top: 0 !important;
+}
+.btn-reset {
+    background: #F2F5F8 !important;
+    color: #4E5968 !important;
+    box-shadow: none !important;
+}
+body.dark-mode .btn-reset {
+    background: #2D323B !important;
+    color: #8B95A1 !important;
+}
+.btn-close {
+    background: var(--primary) !important;
+    color: #FFF !important;
+}

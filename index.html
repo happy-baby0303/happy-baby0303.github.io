@@ -166,28 +166,30 @@
         </div>
     </details>
 
-    <!-- 4번 항목: 똥 색깔 건강법 -->
-    <details class="flat-accordion">
-        <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
-        <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-            <p><strong>✅ 정상적인 똥 (안심하세요!)</strong><br>
-            - <strong>황금변:</strong> 가장 이상적인 상태입니다.<br>
-            - <strong>녹변:</strong> 담즙이 장에 오래 머물거나, 산화되어 나오는 정상적인 변입니다. 아기가 잘 먹고 잘 논다면 전혀 걱정할 필요 없습니다!</p>
-            <br>
-            <p><strong>🚨 병원으로 달려가야 하는 똥 (기저귀 사진 필수!)</strong><br>
-            - <strong>흰색/회색 변:</strong> 담도폐쇄증 등 간담도계 질환 의심<br>
-            - <strong>붉은색(피) 변:</strong> 장출혈, 세균성 장염 의심<br>
-            - <strong>짜장면 같은 검은 변:</strong> 위나 십이지장 등 상부 위장관 출혈 의심<br>
-            <span style="color:var(--danger); font-size:13px;">(※ 이상한 변을 보았다면 <strong>반드시 기저귀를 사진으로 찍거나 그대로 지퍼백에 밀봉</strong>하여 소아과 진료를 보세요!)</span></p>
-            <br>
-            <p><em style="color:var(--primary); font-weight:700;">* 하윤맘의 한마디: 초보 엄빠 시절, 처음 녹변을 봤을 때 "우리 애기 장에 문제 생긴 거 아니야?!" 하고 심장 철렁했던 기억, 다들 있으시죠? 녹변은 정상입니다! 다만 흰색, 빨간색, 검은색은 무조건 기저귀 들고 병원으로 뛰어가세요! 🏃‍♂️💨</em></p>
-        </div>
-    </details>
-</div>
+<!-- 4번 항목: 똥 색깔 건강법 -->
+        <details class="flat-accordion">
+            <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
+            <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
+                <p><strong>✅ 정상적인 똥 (안심하세요!)</strong><br>
+                - <strong>황금변:</strong> 가장 이상적인 상태입니다.<br>
+                - <strong>녹변:</strong> 담즙이 장에 오래 머물거나, 산화되어 나오는 정상적인 변입니다. 아기가 잘 먹고 잘 논다면 전혀 걱정할 필요 없습니다!</p>
+                <br>
+                <p><strong>🚨 병원으로 달려가야 하는 똥 (기저귀 사진 필수!)</strong><br>
+                - <strong>흰색/회색 변:</strong> 담도폐쇄증 등 간담도계 질환 의심<br>
+                - <strong>붉은색(피) 변:</strong> 장출혈, 세균성 장염 의심<br>
+                - <strong>짜장면 같은 검은 변:</strong> 위나 십이지장 등 상부 위장관 출혈 의심<br>
+                <span style="color:var(--danger); font-size:13px;">(※ 이상한 변을 보았다면 <strong>반드시 기저귀를 사진으로 찍거나 그대로 지퍼백에 밀봉</strong>하여 소아과 진료를 보세요!)</span></p>
+                <br>
+                <p><em style="color:var(--primary); font-weight:700;">* 하윤맘의 한마디: 초보 엄빠 시절, 처음 녹변을 봤을 때 "우리 애기 장에 문제 생긴 거 아니야?!" 하고 심장 철렁했던 기억, 다들 있으시죠? 녹변은 정상입니다! 다만 흰색, 빨간색, 검은색은 무조건 기저귀 들고 병원으로 뛰어가세요! 🏃‍♂️💨</em></p>
+            </div>
+        </details>
+    </div> <!-- 1. 육아 상식 라이브러리 끝 -->
 
-</div>
+</div> <!-- 2. 홈 화면 탭 끝 -->
 
-        </div> <div id="tab-hotplace" class="tab-content">
+<!-- ✅ 닫는 태그(div)가 딱 두 개만 있어야 울타리가 안 깨집니다! -->
+
+<div id="tab-hotplace" class="tab-content">
             <div class="app-box" style="padding-top:28px; padding-bottom:24px;">
                 <h1 class="app-title">토실이네 주말</h1>
                 <p class="app-desc" style="margin-bottom: 20px;">👶 아이와 함께하는 안심 주말 지도</p>
@@ -196,6 +198,12 @@
                     <button id="seg-event" class="segment-btn active" onclick="switchOutingSubTab('event')">📅 이번주 주말 행사</button>
                     <button id="seg-map" class="segment-btn" onclick="switchOutingSubTab('map')">📍 검증 육아지도</button>
                 </div>
+
+               <!-- 🎒 외출 준비물 체크 버튼 -->
+                <button class="btn-main checklist-main-btn" onclick="openChecklistModal()">
+                    <span style="font-size: 20px; margin-right: 8px; vertical-align: middle;">🎒</span>
+                    <span style="font-size: 15.5px; font-weight: 800; vertical-align: middle;">3초 컷! 외출 준비물 체크리스트 〉</span>
+                </button>
 
                 <div class="search-wrapper">
                     <span class="search-icon">🔍</span>
@@ -217,10 +225,11 @@
                 
                 <div id="hotplace-container"></div>
 
-                <div id="section-report" style="background: #F8F9FA; border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 30px; margin-bottom: 15px; text-align: center;">
-                    <div style="font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 8px;">📢 실시간 커뮤니티 공간 제보</div>
-                    <div style="font-size: 13px; color: var(--text-s); line-height: 1.55; word-break: keep-all;">직접 경험하신 노키즈존 변동 사항이나 쾌적한 안심 장소를 제보해 주세요.<br><strong style="color:var(--danger); display:inline-block; margin-top:6px;">🚨 상업 목적의 광고 제보는 즉시 필터링됩니다.</strong></div>
+        <div id="section-report" class="report-box">
+                    <div style="font-size: 15px; font-weight: 800; margin-bottom: 8px;">📢 실시간 커뮤니티 공간 제보</div>
+                    <div style="font-size: 13px; line-height: 1.55; word-break: keep-all;">직접 경험하신 노키즈존 변동 사항이나 쾌적한 안심 장소를 제보해 주세요.<br><strong style="color:var(--danger); display:inline-block; margin-top:6px;">🚨 상업 목적의 광고 제보는 즉시 필터링됩니다.</strong></div>
                 </div>
+                
                 <button class="btn-main" style="background:var(--text-m) !important; font-size:15.5px; box-shadow:none !important;" onclick="openGoogleForm()">📝 검증 공간 수기 제보하기 〉</button>
             </div>
         </div>
@@ -440,6 +449,28 @@
         </div>
     </div>
 </footer>
+
+<!-- 🎒 외출 준비물 체크리스트 모달 -->
+    <div id="checklist-modal" class="modal-overlay" style="z-index: 5000; display:none;" onclick="closeChecklist(event)">
+        <div class="sos-content-box" style="background:#FFF; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
+            <div class="sos-close-btn" onclick="closeChecklistForce()">✕</div>
+            
+            <div style="text-align:center; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+                <div style="font-size:32px; margin-bottom:8px;">🎒</div>
+                <div class="sos-choice-title">외출 준비물 팩킹 완료!</div>
+                <div class="sos-choice-desc">터치하면 완료 줄이 그어집니다 (자동 저장)</div>
+            </div>
+
+            <div id="checklist-items" style="flex-grow:1; overflow-y:auto; padding: 10px 0;">
+                <!-- 자바스크립트로 리스트가 들어갈 자리 -->
+            </div>
+            
+            <div style="padding-top: 16px; border-top: 1px solid var(--border); display: flex; gap: 10px;">
+                <button class="btn-main" style="flex: 1; background:#F2F5F8 !important; color:#4E5968 !important; box-shadow:none !important; margin-top:0;" onclick="resetChecklist()">🔄 초기화</button>
+                <button class="btn-main" style="flex: 1; margin-top:0;" onclick="closeChecklistForce()">닫기</button>
+            </div>
+        </div>
+    </div>
 
     <nav class="bottom-nav">
         <div id="nav-home" class="nav-item active" onclick="switchTab('home', this)">
