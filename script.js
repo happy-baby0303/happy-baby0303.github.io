@@ -487,9 +487,12 @@ function initDarkMode() {
 }
 
 // ==========================================
-// 💊 투약 타임라인 로직 (먹통 해결 완벽판)
-// ==========================================
-window.selectedPillType = ''; // 전역 변수로 확실하게 선언
+/* ==========================================
+// 💊 투약 타임라인 로직 (미니 열나요 2.0 - 타이머 & 그래프)
+========================================== */
+window.selectedPillType = ''; 
+window.feverChartObj = null; // 체온 그래프 객체
+window.feverTimerInterval = null; // 초단위 타이머 엔진
 
 function selectPill(type) {
     window.selectedPillType = type;
@@ -499,7 +502,7 @@ function selectPill(type) {
 }
 
 function addFeverRecord() {
-    const temp = document.getElementById('v-temp').value;
+    const temp = parseFloat(document.getElementById('v-temp').value);
     if(!temp || !window.selectedPillType) {
         alert('체온과 먹인 약의 종류를 모두 선택해주세요!');
         return;
@@ -507,11 +510,13 @@ function addFeverRecord() {
     
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const record = { time: timeStr, temp: temp, type: window.selectedPillType };
+    
+    // ⭐️ 타이머 초단위 계산을 위해 timestamp (밀리초) 추가 저장!
+    const record = { time: timeStr, temp: temp, type: window.selectedPillType, timestamp: now.getTime() };
     
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
-    records.unshift(record); // 최신 기록을 맨 위로
-    if(records.length > 10) records.pop(); // 10개까지만 유지
+    records.unshift(record); 
+    if(records.length > 10) records.pop(); // 최대 10개까지만 유지
     
     localStorage.setItem('tosil_fever_records', JSON.stringify(records));
     renderFeverTimeline();
@@ -528,16 +533,22 @@ function renderFeverTimeline() {
     if(!container) return; 
 
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    
+    // 기록이 아예 없으면 타이머랑 그래프 싹 다 가리기
     if(records.length === 0) {
         container.innerHTML = '<div style="text-align:center; font-size:13px; color:var(--text-sub); padding:20px;">아직 기록된 투약 내역이 없습니다.</div>';
+        document.getElementById('fever-timer-box').style.display = 'none';
+        document.getElementById('fever-chart-container').style.display = 'none';
+        document.getElementById('fever-alert').style.display = 'none';
+        if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
         return;
     }
     
+    // 1. 타임라인 리스트 그리기
     let html = '';
     records.forEach(r => {
         const pillLabel = r.type === 'red' ? '🔴 아세트아미노펜' : '🔵 이부프로펜';
-        // 38도 이상이면 빨간색으로 경고 표시
-        const tempColor = r.temp >= 38.0 ? 'color:#FF4B2B; font-weight:900;' : 'color:var(--text-m); font-weight:800;';
+        const tempColor = r.temp >= 38.5 ? 'color:#FF4B2B; font-weight:900;' : 'color:var(--text-m); font-weight:800;';
         html += `
         <div class="timeline-item" style="display:flex; justify-content:space-between; padding:14px 12px; border-bottom:1px solid var(--border); font-size:14px;">
             <span style="font-weight:800; color:var(--text-s); width:45px;">${r.time}</span>
@@ -546,15 +557,114 @@ function renderFeverTimeline() {
         </div>`;
     });
     container.innerHTML = html;
+
+    // 2. 그래프 그리기
+    document.getElementById('fever-chart-container').style.display = 'block';
+    drawFeverChart(records);
+
+    // 3. 교차복용 1초 타이머 가동 시작
+    if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
+    updateFeverTimer(records); // 최초 1회 즉시 실행
+    window.feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000); // 1초마다 자동 갱신
+}
+
+function drawFeverChart(records) {
+    const ctx = document.getElementById('feverChart').getContext('2d');
+    if(window.feverChartObj) window.feverChartObj.destroy(); // 기존 그래프 지우기
+
+    // 과거부터 순서대로 보여주기 위해 배열 순서 뒤집기
+    const chartData = [...records].reverse(); 
+    const labels = chartData.map(r => r.time);
+    const temps = chartData.map(r => r.temp);
+
+    window.feverChartObj = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '체온 변화 (℃)',
+                data: temps,
+                borderColor: '#FF4B2B',
+                backgroundColor: 'rgba(255, 75, 43, 0.1)',
+                borderWidth: 3,
+                pointBackgroundColor: temps.map(t => t >= 38.5 ? '#FF4B2B' : '#3182F6'),
+                pointRadius: 5,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { 
+                y: { min: 36.5, max: 40.5 },
+                x: { grid: { display: false } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+function updateFeverTimer(records) {
+    const timerBox = document.getElementById('fever-timer-box');
+    
+    // 예전 버전 앱에서 저장되어 timestamp가 없는 데이터는 타이머 계산 불가 (에러 방지)
+    const validRecords = records.filter(r => r.timestamp);
+    if(validRecords.length === 0) {
+        timerBox.style.display = 'none';
+        return;
+    }
+    
+    timerBox.style.display = 'block';
+
+    const now = Date.now();
+    let lastRed = 0;
+    let lastBlue = 0;
+    let lastAny = validRecords[0].timestamp; // 가장 최신 기록
+
+    validRecords.forEach(r => {
+        if(r.type === 'red' && r.timestamp > lastRed) lastRed = r.timestamp;
+        if(r.type === 'blue' && r.timestamp > lastBlue) lastBlue = r.timestamp;
+    });
+
+    // 🟢 교차복용 핵심 로직: 다른 계열은 2시간(7200000ms), 같은 계열은 4시간(14400000ms) 간격
+    const CROSS_HOURS = 2 * 60 * 60 * 1000;
+    const SAME_HOURS = 4 * 60 * 60 * 1000;
+
+    let nextRed = Math.max(lastAny + CROSS_HOURS, lastRed ? lastRed + SAME_HOURS : 0);
+    let nextBlue = Math.max(lastAny + CROSS_HOURS, lastBlue ? lastBlue + SAME_HOURS : 0);
+
+    // 시간 포맷 변환 함수
+    const formatTime = (targetTime) => {
+        const diff = targetTime - now;
+        if(diff <= 0) return `<span style="color:var(--success); font-weight:900;">🟢 지금 당장 복용 가능</span>`;
+        
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        return `<span style="color:var(--danger); font-weight:900;">⏳ ${h}시간 ${m}분 ${s}초 후 가능</span>`;
+    };
+
+    document.getElementById('timer-red').innerHTML = formatTime(nextRed);
+    document.getElementById('timer-blue').innerHTML = formatTime(nextBlue);
+
+    // 🚨 38.5도 이상 시 고열 경고창 띄우기
+    const latestTemp = validRecords[0].temp;
+    const alertBox = document.getElementById('fever-alert');
+    if(latestTemp >= 38.5) {
+        alertBox.style.display = 'block';
+        alertBox.innerHTML = `🚨 현재 체온 ${latestTemp}도! 고열입니다. 미온수 마사지를 병행하고 컨디션을 관찰하세요!`;
+    } else {
+        alertBox.style.display = 'none';
+    }
 }
 
 function clearFeverRecord() {
-    if(confirm('아이가 열이 다 내렸나요? 투약 기록을 초기화하시겠습니까?')) {
+    if(confirm('아이가 열이 다 내렸나요? 투약 기록과 타이머를 초기화하시겠습니까?')) {
         localStorage.removeItem('tosil_fever_records');
         renderFeverTimeline();
     }
 }
-
 /* =========================================
    🎒 외출 준비물 체크리스트 로직 (로컬 스토리지)
 ========================================= */

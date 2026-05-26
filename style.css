@@ -709,3 +709,53 @@ body.dark-mode .sos-choice-title {
 body.dark-mode #checklist-items div[style*="color:var(--text-s)"] {
     color: #B0B8C1 !important;
 }
+
+/* =========================================
+   💊 해열제 약 선택 버튼 (옷 입히기)
+========================================= */
+.pill-btn {
+    flex: 1;
+    padding: 16px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--border) !important;
+    background: #FFF !important;
+    color: var(--text-s) !important;
+    font-size: 14.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+/* 🔴 빨간약 선택 시 */
+.pill-btn.red.active {
+    background: #FFF0F1 !important;
+    border-color: #FF4B2B !important;
+    color: #FF4B2B !important;
+    box-shadow: 0 4px 12px rgba(255, 75, 43, 0.15);
+}
+
+/* 🔵 파란약 선택 시 */
+.pill-btn.blue.active {
+    background: #E1F0FF !important;
+    border-color: #3182F6 !important;
+    color: #3182F6 !important;
+    box-shadow: 0 4px 12px rgba(49, 130, 246, 0.15);
+}
+
+/* 🌙 다크모드 약 선택 버튼 */
+body.dark-mode .pill-btn {
+    background: #2D323B !important;
+    border-color: #3A404A !important;
+    color: #8B95A1 !important;
+}
+body.dark-mode .pill-btn.red.active {
+    background: rgba(255, 75, 43, 0.15) !important;
+    border-color: #FF4B2B !important;
+    color: #FF8A8A !important;
+}
+body.dark-mode .pill-btn.blue.active {
+    background: rgba(49, 130, 246, 0.15) !important;
+    border-color: #3182F6 !important;
+    color: #82B1FF !important;
+}

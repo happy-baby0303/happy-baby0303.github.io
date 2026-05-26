@@ -334,8 +334,33 @@
                         </div>
                     </div>
 
+                    <!-- ⏱️ 여기서부터 미니 열나요 (타이머 & 그래프) 영역 -->
                     <div style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 24px;">
-                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m); margin-bottom: 16px;">⏱️ 투약 & 체온 타임라인</div>
+                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m); margin-bottom: 16px;">⏱️ 미니 열나요 (교차복용 & 그래프)</div>
+                        
+                        <!-- 🚨 고열 경고창 -->
+                        <div id="fever-alert" style="display:none; background:#FFF0F1; color:#D32F2F; padding:12px 16px; border-radius:12px; font-size:14px; font-weight:800; margin-bottom:16px; border:1px solid #FFE3E3; animation: pulseSOS 1.5s infinite;"></div>
+
+                        <!-- ⏳ 교차복용 타이머 대시보드 -->
+                        <div id="fever-timer-box" style="display:none; background:#F8F9FA; padding:16px; border-radius:16px; border:1px solid var(--border); margin-bottom:20px;">
+                            <div style="font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:10px;">⏰ 다음 해열제 투약 가능 시간</div>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; padding:12px; border-radius:10px; border:1px solid #FFE3E3;">
+                                    <span style="font-size:13.5px; font-weight:800; color:#FF4B2B;">🔴 아세트 (빨강)</span>
+                                    <span id="timer-red" style="font-size:14px;">계산 중...</span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; padding:12px; border-radius:10px; border:1px solid #E1F0FF;">
+                                    <span style="font-size:13.5px; font-weight:800; color:#3182F6;">🔵 이부 (파랑)</span>
+                                    <span id="timer-blue" style="font-size:14px;">계산 중...</span>
+                                </div>
+                            </div>
+                            <div style="font-size:11.5px; color:var(--text-sub); margin-top:10px; line-height:1.4;">※ 다른 계열은 최소 2시간, 같은 계열은 최소 4시간 간격을 기준으로 계산됩니다.</div>
+                        </div>
+
+                        <!-- 📈 체온 그래프 -->
+                        <div id="fever-chart-container" style="display:none; height:180px; margin-bottom:20px;">
+                            <canvas id="feverChart"></canvas>
+                        </div>
                         
                         <div class="input-group">
                             <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px;">현재 체온 (℃)</label>
@@ -350,11 +375,10 @@
                             <button class="pill-btn blue" id="btn-pill-blue" onclick="selectPill('blue')">🔵 이부 (파랑)</button>
                         </div>
                         
-                        <button class="btn-main" onclick="addFeverRecord()">약 먹이고 기록하기</button>
+                        <button class="btn-main" onclick="addFeverRecord()">약 먹이고 체온 기록하기</button>
                         
-                        <div id="fever-timeline" style="margin-top: 20px;">
-                            </div>
-                        <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important; padding: 10px;" onclick="clearFeverRecord()">전체 기록 지우기</button>
+                        <div id="fever-timeline" style="margin-top: 20px;"></div>
+                        <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important; padding: 10px;" onclick="clearFeverRecord()">전체 기록 지우기 (열 다 내림)</button>
                     </div>
                 </div>
 
