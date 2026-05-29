@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💌 타임캡슐</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <style>
+        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
+        body { background: #FAF7F5; display: flex; justify-content: center; min-height: 100vh; color: #333; }
+        .wrapper { width: 100%; max-width: 480px; padding: 20px; display: flex; flex-direction: column; position: relative; }
+        
+        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-top: 10px; }
+        .home-btn { background: #F0EBE6; border: none; font-size: 1rem; color: #8A7E78; cursor: pointer; font-weight: 800; padding: 8px 14px; border-radius: 12px; }
+        .tab-group { display: flex; background: #F0EBE6; border-radius: 20px; overflow: hidden; padding: 4px; margin: 0 auto; }
+        .tab-btn { background: transparent; color: #8A7E78; border: none; padding: 8px 16px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: #FFF; box-shadow: 0 2px 8px rgba(0,0,0,0.04); color: #D49A8F; } 
+
+        .view-section { display: none; animation: fadeIn 0.3s ease-out; }
+        .view-section.active { display: flex; flex-direction: column; flex-grow: 1; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* === ✍️ 일기장 === */
+        .card { background: #FFFFFF; border-radius: 30px; padding: 40px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #F5F0EC; text-align: center; display: flex; flex-direction: column; flex-grow: 1; margin-bottom: 20px; }
+        .pet-character { font-size: 45px; margin-top: -10px; margin-bottom: 15px; }
+        
+        .baby-info-badge { display: inline-block; background: #FDF5F3; color: #D49A8F; padding: 6px 16px; border-radius: 14px; font-size: 0.85rem; font-weight: 800; margin-bottom: 25px; cursor: pointer; border: 1px solid #FDF5F3; }
+        .badge-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .day-badge { font-size: 1.1rem; font-weight: 900; color: #D49A8F; margin-top: 3px; }
+        .nav-badge { background: #F0EBE6; color: #8A7E78; width: 30px; height: 30px; border-radius: 50%; font-size: 0.8rem; font-weight: 900; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+
+        .quote-icon { font-size: 2rem; color: #E8DCD5; font-family: serif; line-height: 0; opacity: 0.8; }
+        .question { font-size: 1.3rem; font-weight: 800; line-height: 1.5; color: #4A4A4A; word-break: keep-all; padding: 0 10px; margin: 15px 0; }
+        
+        textarea { width: 100%; flex-grow: 1; min-height: 160px; border: none; background: transparent; padding: 20px 10px; font-size: 1.05rem; color: #555; resize: none; outline: none; line-height: 1.8; text-align: center; border-top: 1px dashed #F0EBE6; border-bottom: 1px dashed #F0EBE6; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        .save-btn { width: 100%; padding: 18px; background: #E8BDB5; color: white; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .next-btn { width: 100%; padding: 18px; background: #FFF6F5; color: #D49A8F; border: 1px solid #FDF5F3; border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: none; }
+
+        /* === 📖 서재 === */
+        .history-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
+        .history-card { background: #FFFFFF; border-radius: 20px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.02); border: 1px solid #F5F0EC; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px dashed #F0EBE6; padding-bottom: 12px; }
+        .history-day-label { font-size: 0.85rem; font-weight: 800; color: #D49A8F; background: #FDF5F3; padding: 4px 12px; border-radius: 12px; }
+        .category-label { font-size: 0.8rem; font-weight: 700; color: #A88C83; }
+        .q-text { font-size: 1.05rem; font-weight: 800; color: #4A4A4A; margin-bottom: 16px; line-height: 1.5; word-break: keep-all; }
+        .a-text { font-size: 1rem; color: #666; line-height: 1.7; }
+        .empty-state { text-align: center; padding: 80px 20px; color: #A88C83; font-size: 1.1rem; line-height: 1.6; font-weight: 600; }
+
+        /* === 👩‍👧 온보딩 모달 === */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 360px; border-radius: 24px; padding: 30px 24px; text-align: center; }
+        .modal-title { font-size: 1.3rem; font-weight: 800; color: #333; margin-bottom: 10px; }
+        .modal-input { width: 100%; padding: 15px; border: 1px solid #EAEAEA; border-radius: 14px; font-size: 1rem; margin-bottom: 15px; }
+        .modal-btn { width: 100%; padding: 16px; background: #D49A8F; color: white; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 800; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header class="nav-header">
+            <button class="home-btn" onclick="window.location.href='index.html'">❮ 홈</button>
+            <div class="tab-group">
+                <button class="tab-btn active" id="btn-tab-write" onclick="switchTab('write')">✍️ 쓰기</button>
+                <button class="tab-btn" id="btn-tab-read" onclick="switchTab('read')">📖 모아보기</button>
+            </div>
+        </header>
+
+        <div id="view-write" class="view-section active">
+            <main class="card">
+                <div><span class="baby-info-badge" id="baby-info" onclick="openSetupModal()">정보 로딩중.. ✎</span></div>
+                <div class="pet-character" id="pet-character">🥚</div>
+                
+                <div class="badge-container">
+                    <div class="nav-badge" onclick="moveQuestion(-1)">◀</div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+                        <span id="target-badge" style="background:#E8BDB5; color:white; padding:2px 8px; border-radius:8px; font-size:0.7rem; font-weight:800;">대상</span>
+                        <div class="day-badge" id="diary-day">Day 1</div>
+                    </div>
+                    <div class="nav-badge" onclick="moveQuestion(1)">▶</div>
+                </div>
+
+                <div class="quote-icon quote-up">“</div>
+                <h1 class="question" id="question-text">질문을 불러오는 중입니다...</h1>
+                <div class="quote-icon quote-down">”</div>
+                
+                <textarea id="answer-input" placeholder="이곳을 터치해 마음을 남겨주세요..."></textarea>
+                
+                <div class="btn-group">
+                    <button class="save-btn" id="save-btn">기록 저장하기</button>
+                    <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">➡️ 다음 질문 폭풍 작성하기</button>
+                </div>
+            </main>
+        </div>
+
+        <div id="view-read" class="view-section">
+            <main class="history-list" id="history-container"></main>
+        </div>
+    </div>
+
+    <div id="setup-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">반가워요! 👋</h2>
+            <p style="margin-bottom: 20px; color:#888;">아기 이름과 생일을 입력해주세요.</p>
+            <input type="text" id="input-baby-name" class="modal-input" placeholder="아기 이름 (예: 하윤)">
+            <input type="date" id="input-start-date" class="modal-input">
+            <button class="modal-btn" onclick="saveSetup()">시작하기 ✨</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script> 
+    <script>
+        let babyName = "";
+        let babyBirthStr = null;
+        let viewingDay = 1;
+
+        // 💡 은/는/이/가 완벽 변환 (사람 이름은 받침 있으면 '이'가 붙음!)
+        function formatNameWithJosa(text, name) {
+            const lastChar = name.charCodeAt(name.length - 1);
+            const hasJongseong = (lastChar - 0xAC00) % 28 > 0;
+            
+            // 핵심: 하윤 -> 하윤이 로 변환
+            const processedName = hasJongseong ? name + "이" : name;
+            
+            return text.replace(/{babyName}/g, processedName);
+        }
+
+        function checkOnboarding() {
+            const savedName = localStorage.getItem('tosil_babyName');
+            const savedDate = localStorage.getItem('tosil_startDate');
+            if (!savedName || !savedDate) {
+                openSetupModal();
+            } else {
+                babyName = savedName;
+                babyBirthStr = savedDate;
+                viewingDay = getFirstUnansweredDay();
+                initApp();
+            }
+        }
+
+        function getFirstUnansweredDay() {
+            for (let i = 1; i <= questionDB.length; i++) {
+                if (!localStorage.getItem(`day_${i}_answer`)) return i;
+            }
+            return 1;
+        }
+
+        function openSetupModal() {
+            document.getElementById('setup-modal').style.display = 'flex';
+        }
+
+        function saveSetup() {
+            const nameVal = document.getElementById('input-baby-name').value.trim();
+            const dateVal = document.getElementById('input-start-date').value;
+            if (!nameVal || !dateVal) return alert("모두 입력해주세요!");
+            
+            localStorage.setItem('tosil_babyName', nameVal);
+            localStorage.setItem('tosil_startDate', dateVal);
+            document.getElementById('setup-modal').style.display = 'none';
+            location.reload();
+        }
+
+        function updatePetCharacter() {
+            let count = 0;
+            for (let i = 1; i <= 2000; i++) if (localStorage.getItem(`day_${i}_answer`)) count++;
+            const petEl = document.getElementById("pet-character");
+            if(count < 3) petEl.innerText = "🥚";       
+            else if(count < 10) petEl.innerText = "🐣"; 
+            else if(count < 30) petEl.innerText = "🐥"; 
+            else petEl.innerText = "🦢";                
+        }
+
+        function moveQuestion(direction) {
+            viewingDay += direction;
+            if(viewingDay < 1) viewingDay = 1; 
+            initApp();
+        }
+
+        function initApp() {
+            const today = new Date();
+            const birthDate = new Date(babyBirthStr);
+            const babyDday = Math.ceil(Math.abs(today - birthDate) / (1000 * 60 * 60 * 24));
+            document.getElementById("baby-info").innerText = `${babyName} D+${babyDday} ✎`;
+
+            const index = (viewingDay - 1) % questionDB.length; 
+            const todayData = questionDB[index];
+
+            document.getElementById("target-badge").innerText = todayData.target || "가족"; 
+            document.getElementById("diary-day").innerText = `Day ${viewingDay}`;
+            
+            // 💡 조사 변환 적용 완료!
+            document.getElementById("question-text").innerText = formatNameWithJosa(todayData.question, babyName);
+            
+            updatePetCharacter(); 
+
+            const answerInput = document.getElementById("answer-input");
+            const saveBtn = document.getElementById("save-btn");
+            const nextBtn = document.getElementById("next-btn");
+
+            const savedAnswer = localStorage.getItem(`day_${viewingDay}_answer`);
+            
+            if (savedAnswer) {
+                answerInput.value = savedAnswer;
+                saveBtn.innerText = "기록 수정하기";
+                saveBtn.style.background = "#E8BDB5"; 
+                nextBtn.style.display = "block"; 
+            } else {
+                answerInput.value = "";
+                saveBtn.innerText = "기록 저장하기";
+                saveBtn.style.background = "#E8BDB5"; 
+                nextBtn.style.display = "none"; 
+            }
+
+            // 💡 타이핑 즉시 수정 모드 복귀!
+            answerInput.oninput = () => {
+                if (localStorage.getItem(`day_${viewingDay}_answer`)) {
+                    saveBtn.innerText = "기록 수정하기";
+                    saveBtn.style.background = "#E8BDB5";
+                }
+            };
+
+            saveBtn.onclick = () => {
+                const answer = answerInput.value.trim();
+                if (answer === "") return alert("기록을 한 줄이라도 남겨주세요! 🥺");
+                
+                localStorage.setItem(`day_${viewingDay}_answer`, answer);
+                
+                // 💡 1.5초 딜레이 후 복귀! (다른 화면 튕김 절대 없음!)
+                saveBtn.innerText = "✨ 저장 완료!";
+                saveBtn.style.background = "#B9C9C5"; 
+                
+                updatePetCharacter(); 
+                nextBtn.style.display = "block"; 
+                
+                setTimeout(() => {
+                    saveBtn.innerText = "기록 수정하기";
+                    saveBtn.style.background = "#E8BDB5";
+                }, 1500);
+            };
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('btn-tab-write').classList.remove('active');
+            document.getElementById('btn-tab-read').classList.remove('active');
+            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+            document.getElementById('view-write').classList.remove('active');
+            document.getElementById('view-read').classList.remove('active');
+            document.getElementById(`view-${tabName}`).classList.add('active');
+            if (tabName === 'read') renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            container.innerHTML = ''; 
+            let hasRecord = false;
+            for (let i = 1; i <= 2000; i++) {
+                const answer = localStorage.getItem(`day_${i}_answer`);
+                if (answer) {
+                    hasRecord = true;
+                    const dbIndex = (i - 1) % questionDB.length;
+                    const qData = questionDB[dbIndex];
+                    
+                    // 💡 서재에도 조사 변환 적용 완료!
+                    const qText = formatNameWithJosa(qData.question, babyName);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <span class="history-day-label">Day ${i}</span>
+                            <span class="category-label">${qData.target || "가족"} | ${qData.category}</span>
+                        </div>
+                        <p class="q-text">Q. ${qText}</p>
+                        <div class="a-text">${answer.replace(/\n/g, "<br>")}</div>
+                    `;
+                    container.prepend(card); 
+                }
+            }
+            if (!hasRecord) {
+                container.innerHTML = `<div class="empty-state">🌱<br>아직 저장된 기억이 없어요!</div>`;
+            }
+        }
+
+        checkOnboarding();
+    </script>
+</body>
+</html>

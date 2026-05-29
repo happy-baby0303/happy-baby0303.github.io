@@ -52,6 +52,20 @@
                     <div class="sos-banner-desc">응급 상담 콜 / 자지러지는 오열 원인 체크</div>
                 </div>
             </div>
+ 
+<!-- 🌟 오늘의 문답 카드  🌟 -->
+<div onclick="window.location.href='diary.html'" style="background: linear-gradient(135deg, #FFF5F5, #FFE4E1); border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #FFE4E1;">
+    <div>
+        <h3 style="font-size: 1.1rem; color: #D87093; margin: 0 0 5px 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.3rem;">💌</span> 오늘의 육아 문답
+        </h3>
+        <p style="font-size: 0.85rem; color: #888; margin: 0;">하루 한 줄, 하윤이와의 기억 기록하기</p>
+    </div>
+    <div style="background: white; padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; color: #D87093; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+        기록하러 가기 ❯
+    </div>
+</div>
+<!-- 🌟 오늘의 문답 카드  🌟 -->
 
             <div class="home-menu-list">
                 <div class="home-large-tile" onclick="directGoToolbox('money')">
@@ -585,5 +599,38 @@
     </div>
 
     <script src="script.js"></script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = localStorage.getItem('tosil_babyName');
+        const savedDate = localStorage.getItem('tosil_startDate');
+        
+        if (savedName && savedDate) {
+            const today = new Date();
+            const bDate = new Date(savedDate);
+            const dday = Math.ceil(Math.abs(today - bDate) / (1000 * 60 * 60 * 24));
+            
+            // 홈 화면 요소 교체
+            const ddayEl = document.getElementById('res-baby-dday');
+            const nameEl = document.getElementById('res-baby-name');
+            
+            if(ddayEl) ddayEl.innerText = `D+${dday}`;
+            if(nameEl) nameEl.innerText = savedName;
+        }
+    });
+
+    // 홈 화면에서 연필 버튼 눌렀을 때
+    function promptBabyInfo() {
+        const newName = prompt("우리 아기의 이름을 입력해주세요 (예: 하윤)", localStorage.getItem('tosil_babyName') || "");
+        if(newName) {
+            const newDate = prompt("태어난 날짜를 입력해주세요 (예: 2024-05-01)", localStorage.getItem('tosil_startDate') || "");
+            if(newDate) {
+                localStorage.setItem('tosil_babyName', newName);
+                localStorage.setItem('tosil_startDate', newDate);
+                location.reload(); 
+            }
+        }
+    }
+</script>
 </body>
 </html>
