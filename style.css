@@ -759,3 +759,67 @@ body.dark-mode .pill-btn.blue.active {
     border-color: #3182F6 !important;
     color: #82B1FF !important;
 }
+
+/* =========================================
+   💌 오늘의 육아 문답 카드 (라이트 모드 기본)
+========================================= */
+.diary-card {
+    background: linear-gradient(135deg, #FFF5F5, #FFE4E1);
+    border-radius: 15px; 
+    padding: 20px; 
+    margin-bottom: 15px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border: 1px solid #FFE4E1;
+    transition: all 0.3s ease; /* 부드럽게 변신! */
+}
+.diary-card-title {
+    font-size: 1.1rem; 
+    color: #D87093; 
+    margin: 0 0 5px 0; 
+    font-weight: 800; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+}
+.diary-card-desc {
+    font-size: 0.85rem; 
+    color: #888; 
+    margin: 0;
+}
+.diary-card-btn {
+    background: white; 
+    padding: 8px 12px; 
+    border-radius: 10px; 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    color: #D87093; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+}
+
+/* =========================================
+   🌙 오늘의 육아 문답 카드 (다크 모드일 때!)
+========================================= */
+body.dark-mode .diary-card,
+html.dark-mode .diary-card {
+    background: linear-gradient(135deg, #2A1F21, #362225);
+    border: 1px solid #4A2B30;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+body.dark-mode .diary-card-title,
+html.dark-mode .diary-card-title {
+    color: #E8BDB5; /* 로즈 골드 느낌 */
+}
+body.dark-mode .diary-card-desc,
+html.dark-mode .diary-card-desc {
+    color: #A0A0A0;
+}
+body.dark-mode .diary-card-btn,
+html.dark-mode .diary-card-btn {
+    background: #4A2B30; 
+    color: #E8BDB5; 
+}
