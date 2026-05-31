@@ -251,28 +251,46 @@ function calcFever() {
     document.getElementById('fever-result').style.display = 'block';
 }
 
-// 6. 아기 정보 및 로컬 데이터
+// ==========================================
+// 👶 1. 아기 정보 및 로컬 데이터 (완벽 동기화)
+// ==========================================
 function promptBabyInfo() {
-    const name = prompt("우리아기 이름(태명)을 알려주세요!");
+    const name = prompt("우리아기 이름(태명)을 알려주세요!", "우리아기");
     if(!name) return;
+    
     const input = prompt("아기 생년월일을 입력하세요 (예: 20260303)", "20260303");
     if(!input) return;
+    
     let formattedDate = input;
     const clean = input.replace(/[^0-9]/g, ''); 
     if (clean.length === 8) {
         formattedDate = `${clean.substring(0,4)}-${clean.substring(4,6)}-${clean.substring(6,8)}`;
     }
+    
     const testDate = new Date(formattedDate);
-    if (isNaN(testDate.getTime())) { alert("날짜 형식이 올바르지 않습니다."); return; }
-    localStorage.setItem('tosil_baby', JSON.stringify({name, birth: formattedDate}));
-    renderBabyInfo();
+    if (isNaN(testDate.getTime())) { 
+        alert("날짜 형식이 올바르지 않습니다."); 
+        return; 
+    }
+    
+    // 🔥 데이터 꼬임 원천 차단: 모든 저장소에 싹 다 저장해둠
+    localStorage.setItem('tosil_baby', JSON.stringify({name: name, birth: formattedDate}));
+    localStorage.setItem('tosil_babyName', name);
+    localStorage.setItem('tosil_startDate', formattedDate);
+    
+    alert("아기 정보가 찰떡같이 저장되었습니다! 🤍");
+    location.reload(); 
 }
 
 const babyTips = [
     { min: 0, max: 1, tip: "지금은 아이와 눈 맞춤을 연습할 시간이에요! 🤍" },
     { min: 2, max: 3, tip: "목 가누기 연습! 하루 5분 터미타임을 시도해보세요. 💪" },
-    { min: 4, max: 6, tip: "뒤집기 시작! 주변에 위험한 물건이 없는지 꼭 확인해주세요." },
-    { min: 7, max: 12, tip: "분리불안이 생길 수 있어요. '엄마 곧 올게'라고 꼭 말해주세요!" }
+    { min: 4, max: 6, tip: "뒤집기 시작! 주변에 위험한 물건이 없는지 꼼꼼히 확인해주세요." },
+    { min: 7, max: 9, tip: "분리불안 시작! 화장실 갈 때도 '엄마 곧 올게'라고 꼭 말해주세요!" },
+    { min: 10, max: 12, tip: "잡고 서기 시작! 집안 모서리 보호대를 다시 한번 점검할 시기예요. 🚧" },
+    { min: 13, max: 18, tip: "자아 형성기! '안 돼'라는 말보다 '이거 해볼까?' 하고 대안을 제시해 주세요. 🗣️" },
+    { min: 19, max: 24, tip: "에너지 폭발! 대근육 발달을 위해 안전한 놀이터 바깥놀이를 추천해요. 🏃‍♂️" },
+    { min: 25, max: 36, tip: "언어 폭발기! 아이의 엉뚱한 말에도 귀 기울이고 풍부하게 리액션 해주세요. 💬" }
 ];
 
 function renderBabyInfo() {
@@ -284,6 +302,7 @@ function renderBabyInfo() {
     if(!saved) {
         if(nameEl) nameEl.innerText = "이름을 눌러 등록해주세요";
         if(ddayEl) ddayEl.innerText = "D+0일";
+        initPlayWidget(null, 0); // 💡 아기 정보 없을 때 놀이 자판기도 초기화!
         return;
     }
 
@@ -298,13 +317,143 @@ function renderBabyInfo() {
         if(ddayEl) ddayEl.innerText = "D+" + diffDays + "일";
         
         const tipObj = babyTips.find(item => monthAge >= item.min && monthAge <= item.max);
-        const tipText = tipObj ? tipObj.tip : "오늘도 하윤이와 행복한 하루 되세요! 🤍";
+        const tipText = tipObj ? tipObj.tip : `오늘도 ${data.name}와(과) 행복한 하루 되세요! 🤍`;
         
         if(msgEl) msgEl.innerText = tipText;
+
+        // 🔥 [핵심!] 홈 화면이 렌더링될 때, 놀이 자판기도 똑같은 개월 수로 쏴줍니다!
+        initPlayWidget(monthAge, diffDays);
+
     } catch (e) {
         console.error("데이터 오류:", e);
     }
 }
+
+// ==========================================
+// 🧸 오늘의 5분 맞춤 놀이 자판기 (script.js 통합 버전)
+// ==========================================
+const playDB = [
+    /* 0~2개월 (신생아기: 시각/청각 위주) */
+    { minM: 0, maxM: 2, title: "흑백 초점책 눈맞춤", desc: "초점책을 아기 눈에서 20cm 거리에 두고 천천히 좌우로 움직여주세요.", effect: "👀 시각 발달 및 초점 맞추기" },
+    { minM: 0, maxM: 2, title: "엄마아빠 인간 오르골", desc: "아기와 눈을 맞추고 부드러운 목소리로 노래를 불러주며 가슴을 살살 토닥여주세요.", effect: "👂 청각 발달 및 애착 형성" },
+    { minM: 0, maxM: 2, title: "로션 촵촵 마사지", desc: "목욕 후 로션을 바르며 '우리 아기 다리 길어져라 얍!' 하고 부드럽게 주물러주세요.", effect: "💆 정서 안정 및 혈액순환" },
+    { minM: 0, maxM: 2, title: "입술 푸르르~ 진동 놀이", desc: "아기 배나 볼에 입술을 대고 '푸르르~' 소리를 내며 간지럼을 태워주세요.", effect: "😊 스킨십 및 정서적 안정감" },
+    { minM: 0, maxM: 2, title: "손수건 엄마 냄새 킁킁", desc: "엄마 냄새가 밴 깨끗한 손수건을 아기 코 근처에서 살랑살랑 흔들어주세요.", effect: "👃 후각 자극 및 심리적 안정" },
+    { minM: 0, maxM: 2, title: "딸랑이 시선 추적", desc: "딸랑이를 천천히 흔들며 아기 시선이 소리를 따라가도록 유도해 보세요.", effect: "👀 시청각 연합 능력 발달" },
+
+    /* 3~5개월 (백일 즈음: 뒤집기, 소근육, 호기심) */
+    { minM: 3, maxM: 5, title: "비닐봉지 바스락바스락", desc: "깨끗한 비닐봉지를 아기 귀 옆에서 구겨서 바스락 소리를 들려주세요. (입 주의!)", effect: "👂 청각 자극 및 두뇌 발달" },
+    { minM: 3, maxM: 5, title: "으쌰으쌰 터미타임 비행기", desc: "엄마 배 위에 아기를 엎드려 놓고 비행기 소리를 내며 살짝살짝 흔들어주세요.", effect: "💪 목/허리(코어) 근육 발달" },
+    { minM: 3, maxM: 5, title: "거울 속 까꿍 놀이", desc: "거울 앞에 아기를 안고 서서 '우리 아기 어디 있지?' 하고 놀아주세요.", effect: "🪞 자아 인식 및 호기심 자극" },
+    { minM: 3, maxM: 5, title: "딸랑이 양말 팡팡", desc: "아기 발목에 소리 나는 양말이나 방울을 달아주고 발차기를 유도해 보세요.", effect: "🦵 대근육 및 인과관계 인지" },
+    { minM: 3, maxM: 5, title: "다양한 수건 촉감 놀이", desc: "부드러운 천, 거친 수건 등을 번갈아가며 아기 손과 발에 문질러주세요.", effect: "🖐 다양한 촉각 자극" },
+    { minM: 3, maxM: 5, title: "옹알이 폭풍 통역사", desc: "아기가 '어~ 아~' 할 때마다 '그랬어? 배고파요?' 하며 과장되게 대답해 주세요.", effect: "🗣️ 상호작용 및 언어 발달 기초" },
+    { minM: 3, maxM: 5, title: "알록달록 공 굴러가유", desc: "아기가 엎드려 있을 때 눈앞에서 색깔 공을 천천히 굴려 시선을 끌어주세요.", effect: "👀 동체 시력 및 목 가누기" },
+
+    /* 6~8개월 (앉기, 대상 영속성 발달) */
+    { minM: 6, maxM: 8, title: "수건으로 까꿍!", desc: "엄마 얼굴이나 장난감 위에 얇은 손수건을 올렸다가 '까꿍!' 하며 치워주세요.", effect: "🧠 대상 영속성(기억력) 발달" },
+    { minM: 6, maxM: 8, title: "물티슈 캡 쏙쏙 뽑기", desc: "다 쓴 물티슈 통 안에 자투리 천이나 끈을 넣고 아기가 마음껏 뽑게 해주세요.", effect: "🤏 소근육 조작 및 성취감" },
+    { minM: 6, maxM: 8, title: "이유식 용기 난타 밴드", desc: "플라스틱 용기를 엎어두고 나무 숟가락으로 신나게 두드리며 놀게 해주세요.", effect: "🥁 인과관계 이해 및 스트레스 해소" },
+    { minM: 6, maxM: 8, title: "포스트잇 떼기", desc: "바닥이나 팝업 높이에 포스트잇을 붙여두고 아기가 직접 떼보게 하세요.", effect: "🖐 손끝 소근육(잡기) 발달" },
+    { minM: 6, maxM: 8, title: "종이컵 성 무너뜨리기", desc: "종이컵을 높이 쌓아준 뒤, 아기가 손으로 쳐서 와르르 무너뜨리게 해주세요.", effect: "💥 스트레스 해소 및 시각적 자극" },
+    { minM: 6, maxM: 8, title: "지퍼백 촉감 봉투", desc: "지퍼백 안에 물감이나 밀가루 반죽을 밀봉하고 꾹꾹 누르거나 밟게 해주세요.", effect: "🎨 안전한 오감 촉각 발달" },
+    { minM: 6, maxM: 8, title: "거실 텐트 숨바꼭질", desc: "식탁 밑이나 소파 뒤에 숨어서 아기가 기어 와서 찾게 유도해 보세요.", effect: "🏃‍♂️ 대근육 및 공간 지각 능력" },
+
+    /* 9~12개월 (잡고 서기, 인지 능력 폭발) */
+    { minM: 9, maxM: 12, title: "이불 속 장난감 구출 작전", desc: "아기가 보는 앞에서 최애 장난감을 이불 밑에 숨기고 찾아보게 하세요.", effect: "🕵️‍♂️ 문제 해결 능력 및 공간 지각" },
+    { minM: 9, maxM: 12, title: "휴지심 터널 통과하기", desc: "다 쓴 휴지심 안으로 작은 공이나 장난감을 통과시키며 '슝~' 소리를 내주세요.", effect: "👁️ 눈-손 협응력 발달" },
+    { minM: 9, maxM: 12, title: "스티커 떼기 놀이", desc: "엄마 손등이나 바닥에 큰 스티커를 살짝 붙여두고 아기가 엄지와 검지로 떼게 해주세요.", effect: "🖐 정교한 소근육 발달" },
+    { minM: 9, maxM: 12, title: "통 안에 쏙쏙", desc: "빈 분유통이나 바구니에 작은 블록이나 공을 '쏙!' 소리와 함께 넣고 빼보세요.", effect: "🗑️ 공간 개념 및 조작 능력" },
+    { minM: 9, maxM: 12, title: "거실 이불 썰매 타기", desc: "도톰한 담요 위에 아기를 앉히고 바닥에서 천천히 슝~ 썰매처럼 끌어주세요.", effect: "🎢 균형 감각 및 전정기관 자극" },
+    { minM: 9, maxM: 12, title: "맘마 먹여주기 코스프레", desc: "애착 인형을 가져와서 아기가 직접 숟가락으로 밥을 먹여주는 흉내를 내게 하세요.", effect: "🧸 모방 행동 및 사회성 발달" },
+    { minM: 9, maxM: 12, title: "그림책 스스로 넘기기", desc: "두꺼운 보드북을 주고 아기가 직접 책장을 넘길 때마다 크게 칭찬해 주세요.", effect: "📖 소근육 및 책과 친해지기" },
+
+    /* 13~24개월 (걷기, 자아 형성기) */
+    { minM: 13, maxM: 24, title: "신문지 마구 찢기 놀이", desc: "다 쓴 신문지나 이면지를 아기와 함께 북북 찢으며 종이 비를 내려주세요.", effect: "💥 대소근육 발달 및 스트레스 팡팡" },
+    { minM: 13, maxM: 24, title: "종이컵 볼링 게임", desc: "종이컵을 쌓아두고 부드러운 공을 굴려서 쓰러뜨리며 환호해 주세요.", effect: "🎳 방향 감각 및 성취감" },
+    { minM: 13, maxM: 24, title: "이불 돌돌 김밥 말기", desc: "아기를 이불 위에 눕히고 '김밥 말자~' 하며 돌돌 말았다가 간지럼 태우며 풀어주세요.", effect: "🍙 스킨십 및 신체 인지 능력" },
+    { minM: 13, maxM: 24, title: "마스킹 테이프 징검다리", desc: "바닥에 테이프로 선을 붙여두고, 선을 따라 걷거나 점프하는 놀이를 해보세요.", effect: "👣 대근육 및 신체 조절력" },
+    { minM: 13, maxM: 24, title: "동물농장 흉내 내기", desc: "아빠가 먼저 '사자 어흥!', '토끼 깡총!' 흉내를 내고 아기가 따라 하게 해보세요.", effect: "🦁 모방 능력 및 언어 표현력" },
+    { minM: 13, maxM: 24, title: "상자 구멍에 빨대 꽂기", desc: "구멍 뚫린 상자나 스티로폼에 아기가 직접 빨대를 콕콕 꽂게 유도해 보세요.", effect: "🎯 집중력 및 정교한 눈-손 협응" },
+    { minM: 13, maxM: 24, title: "안전 풍선 배구", desc: "가벼운 풍선을 불어 거실에서 떨어지지 않게 톡톡 치며 배구 놀이를 해보세요.", effect: "🎈 순발력 및 대근육 발달" },
+
+    /* 25~36개월 (언어 발달, 역할놀이) */
+    { minM: 25, maxM: 36, title: "색깔 요정 분류하기", desc: "색깔이 다른 블록이나 장난감을 섞어두고 '빨간색은 어디 있을까?' 하며 모아보세요.", effect: "🎨 인지 능력 및 논리적 사고" },
+    { minM: 25, maxM: 36, title: "병원 놀이 / 마트 놀이", desc: "아기가 의사 선생님이나 계산원이 되어 부모님과 상황극을 해보세요.", effect: "🗣️ 사회성 및 언어 능력 발달" },
+    { minM: 25, maxM: 36, title: "식탁 밑 나만의 비밀기지", desc: "식탁이나 의자 위에 큰 담요를 덮어 텐트를 만들어주고 그 안에서 랜턴을 켜주세요.", effect: "⛺ 독립심 및 상상력 자극" },
+    { minM: 25, maxM: 36, title: "불 끄고 그림자 극장", desc: "방 불을 끄고 휴대폰 손전등으로 벽에 강아지, 새 등 손 그림자를 만들어 보세요.", effect: "🦅 시각적 상상력 및 창의력" },
+    { minM: 25, maxM: 36, title: "현관 신발 짝꿍 찾기", desc: "아빠, 엄마, 아기 신발을 섞어두고 '엄마 신발 짝꿍 찾아주세요!' 하고 미션을 주세요.", effect: "👟 짝 맞추기(인지) 및 성취감" },
+    { minM: 25, maxM: 36, title: "휴지심 망원경 탐험", desc: "휴지심 2개를 이어 붙여 망원경을 만들고 '저기 뭐가 보이나요?' 하며 탐험해보세요.", effect: "🔭 상상력 및 관찰력 향상" },
+    { minM: 25, maxM: 36, title: "눈 감고 과일 맛 맞추기", desc: "아기 눈을 가리고 과일 조각을 입에 쏙 넣어준 뒤 무슨 맛인지 맞춰보게 하세요.", effect: "👅 미각 자극 및 어휘력 발달" },
+    { minM: 25, maxM: 36, title: "빨래 개기 보조 요원", desc: "수건이나 양말을 같이 개면서 '이건 아빠 거, 이건 하윤이 거!' 하고 분류해 보세요.", effect: "👕 일상생활 참여 및 소속감" }
+];
+
+let currentAvailablePlays = [];
+let currentDday = 0;
+
+// 자판기 초기 세팅 함수
+function initPlayWidget(months, dday) {
+    const badgeEl = document.getElementById('play-dday-badge');
+    const titleEl = document.getElementById('play-title');
+    const descEl = document.getElementById('play-desc');
+    const effectEl = document.getElementById('play-effect');
+
+    // 데이터가 없을 때 튕겨내기
+    if (months === null || isNaN(months) || !titleEl) {
+        if(badgeEl) badgeEl.innerText = "0";
+        if(titleEl) titleEl.innerText = "아기 정보를 등록해주세요!";
+        if(descEl) descEl.innerText = "상단 연필 버튼을 눌러 생일을 입력하면 놀이가 추천됩니다.";
+        if(effectEl) effectEl.style.display = "none";
+        currentAvailablePlays = [];
+        return;
+    }
+
+    if(badgeEl) badgeEl.innerText = dday > 0 ? dday : 0;
+    currentDday = dday > 0 ? dday : 0;
+    
+    // 개월 수에 맞는 놀이 필터링
+    currentAvailablePlays = playDB.filter(p => months >= p.minM && months <= p.maxM);
+    renderPlay(currentDday);
+}
+
+// 화면에 그리기
+function renderPlay(index) {
+    const titleEl = document.getElementById('play-title');
+    const descEl = document.getElementById('play-desc');
+    const effectEl = document.getElementById('play-effect');
+
+    if(!titleEl) return;
+
+    if(currentAvailablePlays.length > 0) {
+        const play = currentAvailablePlays[index % currentAvailablePlays.length];
+        titleEl.innerText = play.title;
+        descEl.innerText = play.desc;
+        if(effectEl) {
+            effectEl.innerText = play.effect;
+            effectEl.style.display = "inline-block";
+        }
+    } else {
+        titleEl.innerText = "온 집안이 놀이터! 🏃‍♂️";
+        descEl.innerText = "오늘은 아기가 좋아하는 장난감으로 맘껏 놀아주세요!";
+        if(effectEl) effectEl.style.display = "none";
+    }
+}
+
+// 셔플(새로고침) 버튼
+function shufflePlay() {
+    if(currentAvailablePlays.length > 0) {
+        const randomIndex = Math.floor(Math.random() * currentAvailablePlays.length);
+        renderPlay(randomIndex);
+        
+        const btn = document.getElementById('btn-shuffle-play');
+        if(btn) {
+            btn.style.transform = 'rotate(180deg)';
+            btn.style.transition = 'transform 0.3s ease';
+            setTimeout(() => { btn.style.transform = 'rotate(0deg)'; btn.style.transition = 'none'; }, 300);
+        }
+    }
+}
+
 function formatDate(str) { if (!str || str.length !== 8) return str; return `${str.substring(4,6)}.${str.substring(6,8)}`; }
 
 const wwList = [{w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"}, {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"}, {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"}, {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"}, {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"}, {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"}, {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"}, {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"}, {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"}, {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}];
@@ -534,9 +683,9 @@ function renderFeverTimeline() {
 
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     
-    // 기록이 아예 없으면 타이머랑 그래프 싹 다 가리기
+    // 기록이 아예 없으면 타이머랑 그래프 가리기 (다크모드 글자색 대응)
     if(records.length === 0) {
-        container.innerHTML = '<div style="text-align:center; font-size:13px; color:var(--text-sub); padding:20px;">아직 기록된 투약 내역이 없습니다.</div>';
+        container.innerHTML = '<div style="text-align:center; font-size:13px; opacity:0.6; padding:20px;">아직 기록된 투약 내역이 없습니다.</div>';
         document.getElementById('fever-timer-box').style.display = 'none';
         document.getElementById('fever-chart-container').style.display = 'none';
         document.getElementById('fever-alert').style.display = 'none';
@@ -544,16 +693,20 @@ function renderFeverTimeline() {
         return;
     }
     
-    // 1. 타임라인 리스트 그리기
+   // 1. 타임라인 리스트 그리기
     let html = '';
     records.forEach(r => {
-        const pillLabel = r.type === 'red' ? '🔴 아세트아미노펜' : '🔵 이부프로펜';
-        const tempColor = r.temp >= 38.5 ? 'color:#FF4B2B; font-weight:900;' : 'color:var(--text-m); font-weight:800;';
+        // 이름도 너무 길지 않게 직관적으로 수정
+        const pillLabel = r.type === 'red' ? '🔴 아세트 (빨강)' : '🔵 이부 (파랑)'; 
+        
+        // 🔥 다크모드 버그 해결: 일반 체온일 때 강제로 어두운 색을 주던 걸 빼고 굵기만 지정!
+        const tempStyle = r.temp >= 38.5 ? 'color:#FF4B2B; font-weight:900;' : 'font-weight:800;';
+        
         html += `
         <div class="timeline-item" style="display:flex; justify-content:space-between; padding:14px 12px; border-bottom:1px solid var(--border); font-size:14px;">
-            <span style="font-weight:800; color:var(--text-s); width:45px;">${r.time}</span>
-            <span style="flex:1; text-align:center; font-weight:800; color:var(--text-m);">${pillLabel}</span>
-            <span style="${tempColor}">${r.temp}℃</span>
+            <span style="font-weight:800; opacity:0.7; width:45px;">${r.time}</span>
+            <span style="flex:1; text-align:center; font-weight:800;">${pillLabel}</span>
+            <span style="${tempStyle}">${r.temp}℃</span>
         </div>`;
     });
     container.innerHTML = html;
@@ -564,8 +717,8 @@ function renderFeverTimeline() {
 
     // 3. 교차복용 1초 타이머 가동 시작
     if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
-    updateFeverTimer(records); // 최초 1회 즉시 실행
-    window.feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000); // 1초마다 자동 갱신
+    updateFeverTimer(records); 
+    window.feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
 }
 
 function drawFeverChart(records) {
@@ -665,98 +818,174 @@ function clearFeverRecord() {
         renderFeverTimeline();
     }
 }
-/* =========================================
-   🎒 외출 준비물 체크리스트 로직 (로컬 스토리지)
-========================================= */
-const defaultPackList = [
-    '기저귀 (넉넉하게 4~5장)',
-    '물티슈 & 건티슈',
-    '쪽쪽이 & 쪽쪽이 클립',
-    '보온병 (끓였다 식힌 물)',
-    '분유 & 젖병',
-    '손수건 (3~4장 이상)',
-    '여벌 옷 & 턱받이',
-    '기저귀 버릴 비닐봉지',
-    '아기 수첩 (접종이나 병원 시)',
-    '아기 애착인형'
-];
+
+
+// ==========================================
+// 🎒 2. 외출 준비물 체크리스트 2.0 (절대 먹통 안 되는 안전 버전)
+// ==========================================
+
+let checklistData = [];
 
 function openChecklistModal() {
-    document.getElementById('checklist-modal').style.display = 'flex';
+    let months = 0;
+    let targetDate = localStorage.getItem('tosil_startDate'); 
+    
+    if (!targetDate) {
+        let savedBabyJSON = localStorage.getItem('tosil_baby');
+        if (savedBabyJSON) {
+            try {
+                const data = JSON.parse(savedBabyJSON);
+                if (data.date) targetDate = data.date;
+                if (data.birth) targetDate = data.birth;
+            } catch(e) {}
+        }
+    }
+
+    if (targetDate) {
+        const today = new Date();
+        const bDate = new Date(targetDate);
+        const dday = Math.ceil(Math.abs(today - bDate) / (1000 * 60 * 60 * 24));
+        months = Math.floor(dday / 30); 
+    }
+
+    // 🌟 공통 필수 준비물
+    checklistData = [
+        { id: 'c_diaper', label: '기저귀 (넉넉하게 4~5장)', checked: false },
+        { id: 'c_wipe', label: '물티슈 & 건티슈', checked: false },
+        { id: 'c_cloth', label: '여벌옷 1벌 & 가제 손수건 3장', checked: false },
+        { id: 'c_plastic', label: '기저귀 버릴 냄새차단 비닐팩', checked: false }
+    ];
+
+    if (months <= 5) {
+        checklistData.push({ id: 'c_milk', label: '🍼 분유/모유 & 깨끗한 젖병', checked: false });
+        checklistData.push({ id: 'c_thermos', label: '🌡️ 보온병 (분유물)', checked: false });
+        checklistData.push({ id: 'c_paci', label: '쪽쪽이 & 쪽쪽이 클립', checked: false });
+    } else if (months <= 12) {
+        checklistData.push({ id: 'c_food', label: '🥣 이유식 & 전용 숟가락', checked: false });
+        checklistData.push({ id: 'c_cup', label: '🥤 빨대컵 (마실 물)', checked: false });
+        checklistData.push({ id: 'c_snack', label: '🍘 떡뻥 등 간단한 아기 간식', checked: false });
+        checklistData.push({ id: 'c_bib', label: '턱받이 & 아기 수첩', checked: false });
+    } else {
+        checklistData.push({ id: 'c_meal', label: '🍱 유아식 반찬 & 수저세트', checked: false });
+        checklistData.push({ id: 'c_drink', label: '🧃 유아용 음료/물', checked: false });
+        checklistData.push({ id: 'c_toy', label: '🧸 간단한 장난감/애착인형', checked: false });
+        checklistData.push({ id: 'c_band', label: '🩹 밴드 및 가벼운 구급약', checked: false });
+    }
+
+    const savedChecks = JSON.parse(localStorage.getItem('tosil_checklist') || '{}');
+    checklistData.forEach(item => {
+        if (savedChecks[item.id]) item.checked = true;
+    });
+
     renderChecklist();
+    document.getElementById('checklist-modal').style.display = 'flex';
+}
+
+function renderChecklist() {
+    const container = document.getElementById('checklist-items');
+    let htmlString = ""; // 🔥 파트너님이 쓰시던 가장 안전한 텍스트 누적 방식!
+    let checkedCount = 0; 
+
+    checklistData.forEach((item, index) => {
+        if(item.checked) checkedCount++;
+
+        const isChecked = item.checked ? 'checked' : '';
+        const checkMark = item.checked ? '✔' : '';
+        
+        // 클릭 이벤트를 HTML 텍스트에 직접 박아버려서 절대 안 날아가게 함
+        htmlString += `
+            <div class="check-item ${isChecked}" onclick="toggleCheckItem(${index})" style="cursor:pointer;">
+                <div class="check-box">${checkMark}</div>
+                <div class="check-text">${item.label}</div>
+            </div>
+        `;
+    });
+
+    if(checkedCount === checklistData.length && checklistData.length > 0) {
+        let babyName = "우리아기"; 
+        let savedBabyJSON = localStorage.getItem('tosil_baby');
+        
+        if (savedBabyJSON) {
+            try {
+                const data = JSON.parse(savedBabyJSON);
+                if (data.name) babyName = data.name;
+            } catch(e) {}
+        } else if (localStorage.getItem('tosil_babyName')) {
+            babyName = localStorage.getItem('tosil_babyName');
+        }
+
+        // 🔥 에러 방지용 안전장치 (이름이 비어있어도 절대 안 멈춤)
+        if (!babyName || babyName.trim() === "") babyName = "우리아기";
+
+        const lastChar = babyName.charCodeAt(babyName.length - 1);
+        const hasBatchim = (lastChar - 44032) % 28 > 0;
+        const particle = hasBatchim ? '이랑' : '랑';
+
+        htmlString += `
+            <div style="text-align:center; padding: 24px 10px; animation: scaleUp 0.4s ease;">
+                <div style="font-size:45px; margin-bottom:10px;">🎉</div>
+                <div style="font-size:17px; font-weight:900; color:var(--success, #4A635D);">외출 준비 완벽하게 끝!</div>
+                <div style="font-size:13.5px; color:var(--text-s, #888); margin-top:6px;">${babyName}${particle} 잊지 못할 행복한 주말 보내세요 🤍</div>
+            </div>
+        `;
+    }
+    
+    // 모아둔 HTML을 한 번에 딱 그려줌 (버그 0%)
+    container.innerHTML = htmlString;
+}
+
+// 아이템 토글 및 저장
+function toggleCheckItem(index) {
+    checklistData[index].checked = !checklistData[index].checked;
+    
+    const saveObj = {};
+    checklistData.forEach(item => { saveObj[item.id] = item.checked; });
+    localStorage.setItem('tosil_checklist', JSON.stringify(saveObj));
+    
+    renderChecklist();
+}
+
+// 전체 초기화
+function resetChecklist() {
+    if(confirm("모든 준비물 체크를 초기화하시겠습니까?")) {
+        localStorage.removeItem('tosil_checklist');
+        openChecklistModal(); 
+    }
+}
+
+// 모달 닫기
+function closeChecklistForce() {
+    document.getElementById('checklist-modal').style.display = 'none';
 }
 
 function closeChecklist(e) {
     if (e.target.id === 'checklist-modal') closeChecklistForce();
 }
 
-function closeChecklistForce() {
-    document.getElementById('checklist-modal').style.display = 'none';
-}
-
-function renderChecklist() {
-    const container = document.getElementById('checklist-items');
-    container.innerHTML = '';
+// ==========================================
+// 🏥 소아과 제출용 해열 리포트 캡처
+// ==========================================
+function downloadFeverReport() {
+    const target = document.getElementById('fever-timeline');
     
-    // 저장된 데이터 불러오기
-    let savedData = JSON.parse(localStorage.getItem('outingChecklist')) || {};
-    let checkedCount = 0; // 체크된 개수 세기
+    // 기록이 하나도 없을 때 튕겨내기
+    if(!target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) {
+        alert("캡처할 체온 기록이 없어요! 먼저 기록을 남겨주세요 🌡️");
+        return;
+    }
 
-    defaultPackList.forEach((item, index) => {
-        const isChecked = savedData[index] ? 'checked' : '';
-        const checkMark = savedData[index] ? '✔' : '';
+    // 찰칵! 캡처 시작 (배경 하얗게 고정해서 예쁘게 나오게 설정)
+    html2canvas(target, { 
+        backgroundColor: '#ffffff',
+        scale: 2 // 화질 좋게!
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = '우리아기_해열제_기록.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
         
-        if(savedData[index]) checkedCount++; 
-        
-        container.innerHTML += `
-            <div class="check-item ${isChecked}" onclick="toggleCheckItem(${index})">
-                <div class="check-box" id="box-${index}">${checkMark}</div>
-                <div class="check-text">${item}</div>
-            </div>
-        `;
+        alert("📸 사진첩(다운로드 폴더)에 캡처가 저장되었습니다! 소아과 원장님께 바로 보여주세요 👩‍⚕️");
     });
-
-    // ✨ 디테일 업그레이드: 등록된 아기 이름 불러오기 및 한글 조사(랑/이랑) 자동 계산
-    if(checkedCount === defaultPackList.length && defaultPackList.length > 0) {
-        let babyName = "우리아기"; // 기본값
-        const savedBaby = localStorage.getItem('tosil_baby');
-        
-        if (savedBaby) {
-            try {
-                const data = JSON.parse(savedBaby);
-                if (data.name) babyName = data.name;
-            } catch(e) {}
-        }
-
-        // 마지막 글자 받침 유무 확인해서 '랑/이랑' 자연스럽게 붙이기
-        const lastChar = babyName.charCodeAt(babyName.length - 1);
-        const hasBatchim = (lastChar - 44032) % 28 > 0;
-        const particle = hasBatchim ? '이랑' : '랑';
-
-        container.innerHTML += `
-            <div style="text-align:center; padding: 24px 10px; animation: scaleUp 0.4s ease;">
-                <div style="font-size:45px; margin-bottom:10px;">🎉</div>
-                <div style="font-size:17px; font-weight:900; color:var(--success);">외출 준비 완벽하게 끝!</div>
-                <div style="font-size:13.5px; color:var(--text-s); margin-top:6px;">${babyName}${particle} 잊지 못할 행복한 주말 보내세요 🤍</div>
-            </div>
-        `;
-    }
-}
-
-// ✅ 잃어버렸던 클릭 기능
-function toggleCheckItem(index) {
-    let savedData = JSON.parse(localStorage.getItem('outingChecklist')) || {};
-    savedData[index] = !savedData[index];
-    localStorage.setItem('outingChecklist', JSON.stringify(savedData));
-    renderChecklist();
-}
-
-// ✅ 잃어버렸던 초기화 기능
-function resetChecklist() {
-    if(confirm("모든 준비물 체크를 초기화하시겠습니까?")) {
-        localStorage.removeItem('outingChecklist');
-        renderChecklist();
-    }
 }
 
 // 최종 앱 초기화

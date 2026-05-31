@@ -823,3 +823,73 @@ html.dark-mode .diary-card-btn {
     background: #4A2B30; 
     color: #E8BDB5; 
 }
+
+/* =========================================
+   🧸 오늘의 5분 놀이 자판기 (라이트 모드)
+========================================= */
+.play-card {
+    background: linear-gradient(135deg, #FFF8E7, #FFE8B6);
+    border: 1px solid #FFE8B6;
+    cursor: default; 
+    display: block; 
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+.play-card-title {
+    color: #D4A373; 
+    margin: 0 0 8px 0; 
+    font-weight: 800; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px;
+}
+.play-title {
+    font-size: 1.05rem; 
+    font-weight: 900; 
+    color: #5C4A3D; 
+    margin: 8px 0 4px 0;
+}
+.play-desc {
+    font-size: 0.85rem; 
+    color: #8B7355; 
+    line-height: 1.4; 
+    word-break: keep-all;
+}
+.play-effect-badge {
+    display: inline-block; 
+    margin-top: 10px; 
+    padding: 5px 10px; 
+    background: white; 
+    color: #D4A373; 
+    font-size: 0.75rem; 
+    font-weight: 900; 
+    border-radius: 10px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+}
+
+/* =========================================
+   🌙 오늘의 5분 놀이 자판기 (다크 모드 연동)
+========================================= */
+body.dark-mode .play-card,
+html.dark-mode .play-card {
+    background: linear-gradient(135deg, #2D261A, #3B301D);
+    border: 1px solid #4A3E25;
+}
+body.dark-mode .play-card-title,
+html.dark-mode .play-card-title {
+    color: #E8C396;
+}
+body.dark-mode .play-title,
+html.dark-mode .play-title {
+    color: #E8C396;
+}
+body.dark-mode .play-desc,
+html.dark-mode .play-desc {
+    color: #A38C75;
+}
+body.dark-mode .play-effect-badge,
+html.dark-mode .play-effect-badge {
+    background: #4A3E25;
+    color: #E8C396;
+}

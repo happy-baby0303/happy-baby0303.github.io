@@ -67,6 +67,25 @@
 </div>
 <!-- 🌟 오늘의 문답 카드 끝 🌟 -->
 
+<!-- 🧸 오늘의 5분 맞춤 놀이 자판기 🌟 -->
+<div class="diary-card play-card">
+    <div style="flex-grow: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h3 class="play-card-title">
+                <span style="font-size: 1.3rem;">🧸</span> 
+                <span style="font-size: 0.9rem; opacity: 0.8; margin-right: 4px;">D+<span id="play-dday-badge">0</span></span> 
+                오늘의 5분 놀이
+            </h3>
+            <!-- 🎲 셔플(새로고침) 버튼 추가! -->
+            <button id="btn-shuffle-play" onclick="shufflePlay()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; padding:0; line-height:1;" title="다른 놀이 뽑기">🔄</button>
+        </div>
+        <p id="play-title" class="play-title">장난감을 불러오는 중...</p>
+        <p id="play-desc" class="play-desc">우리아기 개월 수에 딱 맞는 놀이를 준비하고 있어요!</p>
+        <div id="play-effect" class="play-effect-badge">로딩중...</div>
+    </div>
+</div>
+<!-- 🧸 놀이 자판기 끝 🌟 -->
+
             <div class="home-menu-list">
                 <div class="home-large-tile" onclick="directGoToolbox('money')">
                     <div class="home-tile-main-wrap">
@@ -350,7 +369,7 @@
 
                     <!-- ⏱️ 여기서부터 미니 열나요 (타이머 & 그래프) 영역 -->
                     <div style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 24px;">
-                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m); margin-bottom: 16px;">⏱️ 미니 열나요 (교차복용 & 그래프)</div>
+                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m); margin-bottom: 16px;">⏱️ 교차복용 타이머 & 체온 리포트 </div>
                         
                         <!-- 🚨 고열 경고창 -->
                         <div id="fever-alert" style="display:none; background:#FFF0F1; color:#D32F2F; padding:12px 16px; border-radius:12px; font-size:14px; font-weight:800; margin-bottom:16px; border:1px solid #FFE3E3; animation: pulseSOS 1.5s infinite;"></div>
@@ -392,6 +411,7 @@
                         <button class="btn-main" onclick="addFeverRecord()">약 먹이고 체온 기록하기</button>
                         
                         <div id="fever-timeline" style="margin-top: 20px;"></div>
+                        <button class="btn-main" style="background:#2D3436 !important; margin-top:12px; box-shadow:none !important;" onclick="downloadFeverReport()">📸 소아과 제출용 리포트 캡처하기</button>
                         <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important; padding: 10px;" onclick="clearFeverRecord()">전체 기록 지우기 (열 다 내림)</button>
                     </div>
                 </div>
@@ -600,37 +620,6 @@
 
     <script src="script.js"></script>
 
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('tosil_babyName');
-        const savedDate = localStorage.getItem('tosil_startDate');
-        
-        if (savedName && savedDate) {
-            const today = new Date();
-            const bDate = new Date(savedDate);
-            const dday = Math.ceil(Math.abs(today - bDate) / (1000 * 60 * 60 * 24));
-            
-            // 홈 화면 요소 교체
-            const ddayEl = document.getElementById('res-baby-dday');
-            const nameEl = document.getElementById('res-baby-name');
-            
-            if(ddayEl) ddayEl.innerText = `D+${dday}`;
-            if(nameEl) nameEl.innerText = savedName;
-        }
-    });
-
-    // 홈 화면에서 연필 버튼 눌렀을 때
-    function promptBabyInfo() {
-        const newName = prompt("우리 아기의 이름을 입력해주세요 (예: 하윤)", localStorage.getItem('tosil_babyName') || "");
-        if(newName) {
-            const newDate = prompt("태어난 날짜를 입력해주세요 (예: 2024-05-01)", localStorage.getItem('tosil_startDate') || "");
-            if(newDate) {
-                localStorage.setItem('tosil_babyName', newName);
-                localStorage.setItem('tosil_startDate', newDate);
-                location.reload(); 
-            }
-        }
-    }
 </script>
 </body>
 </html>
