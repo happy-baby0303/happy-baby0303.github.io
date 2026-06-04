@@ -595,9 +595,13 @@ function filterPlaces() {
     const container = document.getElementById('hotplace-container');
     container.innerHTML = ''; 
     
-    // 오늘 날짜 구하기 (문자열 방식 & 숫자 방식 두 가지 다 준비)
-    const todayStr = new Date().toISOString().split('T')[0]; // "2026-06-04" 형태
-    const todayNum = parseInt(todayStr.replace(/-/g, ''));   // 20260604 형태 (API 비교용)
+    // 한국 시간 기준 완벽한 오늘 날짜 계산 (새벽 시간대 오류 방지)
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    const todayNum = parseInt(`${yyyy}${mm}${dd}`); // 예: 20260604
 
     if (currentSubTab === 'event') {
         let manualEvents = hotplacesData.filter(p => p.isEvent);
@@ -610,16 +614,18 @@ function filterPlaces() {
             let addr = p.addr1 || p.addr || p.locText || '';
             let title = p.title || '';
             
-            // 🔥 [핵심] 지난 행사 무조건 쳐내는 철벽 수비 2단계!
-            // 1. 수동 제보 데이터 컷 (expiryDate)
-if (p.expiryDate && todayStr > p.expiryDate) return false; 
+            // 🚨 철벽 방어 1: 수동 제보 데이터 컷
+            if (p.expiryDate && todayStr > p.expiryDate) return false; 
 
-// 🔥 2. 공공 API 데이터 컷 (특수문자 완벽 제거 버전)
-if (p.eventenddate) {
-    // 날짜에서 하이픈(-)이나 점(.) 같은 기호 싹 다 빼고 순수 숫자만 추출!
-    let endNum = parseInt(p.eventenddate.replace(/[^0-9]/g, ''));
-    if (endNum < todayNum) return false; 
-}
+            // 🚨 철벽 방어 2: 공공 API 행사 데이터 컷 (기호 빼고 숫자만 완벽 추출)
+            let rawEndDate = p.eventenddate || p.endDate || '';
+            if (rawEndDate) {
+                let endStr = String(rawEndDate).replace(/[^0-9]/g, '');
+                if (endStr.length >= 8) {
+                    let endNum = parseInt(endStr.substring(0, 8));
+                    if (endNum < todayNum) return false; 
+                }
+            }
 
             let matchesRegion = false;
             if (currentRegion === 'all') { matchesRegion = true; } 
@@ -652,8 +658,12 @@ if (p.eventenddate) {
             const title = item.title || '';
             const addr = item.addr1 || item.addr || item.locText || '';
             const rawImg = item.firstimage || '';
-            const startDate = item.eventstartdate ? formatDate(item.eventstartdate) : (item.datetime ? item.datetime : '');
-            const endDate = item.eventenddate ? formatDate(item.eventenddate) : '';
+            // 날짜 포맷 (안전하게 변환)
+            let startDate = item.eventstartdate || item.datetime || '';
+            if(startDate.length >= 8) startDate = `${startDate.substring(4,6)}.${startDate.substring(6,8)}`;
+            let endDate = item.eventenddate || '';
+            if(endDate.length >= 8) endDate = `${endDate.substring(4,6)}.${endDate.substring(6,8)}`;
+            
             const dateText = endDate ? `${startDate} ~ ${endDate}` : startDate;
             const tel = item.tel || '정보없음';
             const review = item.review || '';
@@ -680,6 +690,7 @@ if (p.eventenddate) {
         container.appendChild(gridEl);
         
     } else {
+        // (육아지도 탭 로직 동일하게 유지)
         const filteredPlaces = hotplacesData.filter(p => {
             if (p.expiryDate && todayStr > p.expiryDate) return false;
             const matchesType = (p.isEvent === false);
