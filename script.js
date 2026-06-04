@@ -612,9 +612,14 @@ function filterPlaces() {
             
             // 🔥 [핵심] 지난 행사 무조건 쳐내는 철벽 수비 2단계!
             // 1. 수동 제보 데이터 컷 (expiryDate)
-            if (p.expiryDate && todayStr > p.expiryDate) return false; 
-            // 2. 공공 API 데이터 컷 (eventenddate)
-            if (p.eventenddate && parseInt(p.eventenddate) < todayNum) return false; 
+if (p.expiryDate && todayStr > p.expiryDate) return false; 
+
+// 🔥 2. 공공 API 데이터 컷 (특수문자 완벽 제거 버전)
+if (p.eventenddate) {
+    // 날짜에서 하이픈(-)이나 점(.) 같은 기호 싹 다 빼고 순수 숫자만 추출!
+    let endNum = parseInt(p.eventenddate.replace(/[^0-9]/g, ''));
+    if (endNum < todayNum) return false; 
+}
 
             let matchesRegion = false;
             if (currentRegion === 'all') { matchesRegion = true; } 
