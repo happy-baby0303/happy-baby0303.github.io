@@ -188,44 +188,144 @@ function toggleHistory() {
     }
 }
 
+// ==========================================
+// 💰 가계부: 재무 분석기 (오류 완벽 차단 오마카세급)
+// ==========================================
+const formatter = new Intl.NumberFormat('ko-KR'); // 숫자 콤마 생성기
+let currentDonutChart = null; // 도넛 차트 변수
+
+// 1. 입력창 콤마 찍어주는 함수
+function formatNum(el) {
+    let v = el.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
+    if (v) {
+        el.value = formatter.format(v);
+    } else {
+        el.value = '';
+    }
+}
+
+// 2. 입력창에서 진짜 숫자만 뽑아오는 함수
+function getV(id) { 
+    return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; 
+}
+
+// 3. 메인 분석 엔진
 function analyzeMoney() {
-    const d = getV('v-diaper'), f = getV('v-food'), e = getV('v-etc');
+    const d = getV('v-diaper');
+    const f = getV('v-food');
+    const e = getV('v-etc');
     const total = d + f + e;
-    if(total === 0) return alert("금액을 정확히 입력해주세요.");
+    
+    if(total === 0) {
+        alert("지출하신 금액을 1원이라도 입력해 주세요! 💰");
+        return;
+    }
+
+    // 로컬 스토리지(기록장) 연동
     const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
     const date = new Date();
     const curY = date.getFullYear();
     const curM = date.getMonth() + 1;
     const monthKey = `${curY}-${curM}`;
+    
+    // 현재 달 기록 저장
+    history[monthKey] = total;
+    localStorage.setItem('TosilBabyApp', JSON.stringify(history));
+    
+    // 총액 표시 (HTML에서 "원"을 분리했으므로 여기선 숫자만 넘김)
+    document.getElementById('money-total').innerText = formatter.format(total);
+    
+    // 지난달 비교 로직
     const lastM = curM === 1 ? 12 : curM - 1;
     const lastY = curM === 1 ? curY - 1 : curY;
     const lastKey = `${lastY}-${lastM}`;
+    
     let diffMsg = "";
     if(history[lastKey]) {
         const diff = total - history[lastKey];
-        if(diff > 0) diffMsg = `지난달 대비 <span style="color:var(--danger)">${diff.toLocaleString()}원 증가</span> 🚨`;
-        else if(diff < 0) diffMsg = `지난달 대비 <span style="color:var(--success)">${Math.abs(diff).toLocaleString()}원 절감</span> 🎉`;
-        else diffMsg = "지난달 대조 평형 상태 유지 ⚖️";
-    } else { diffMsg = "첫 세션 벤치마크 데이터 저장 완료."; }
+        if (diff > 0) {
+            diffMsg = `지난달보다 <span style="color:var(--danger)">${formatter.format(diff)}원 더 썼어요! 💸</span>`;
+        } else if (diff < 0) {
+            diffMsg = `지난달보다 <span style="color:var(--success)">${formatter.format(Math.abs(diff))}원 아꼈어요! 🎉</span>`;
+        } else {
+            diffMsg = `지난달과 지출액이 완벽히 똑같습니다! ⚖️`;
+        }
+    } else {
+        diffMsg = "첫 분석 시작! 이번 달이 기준점이 됩니다.";
+    }
     document.getElementById('money-diff').innerHTML = diffMsg;
-    history[monthKey] = total;
-    localStorage.setItem('TosilBabyApp', JSON.stringify(history));
-    const avgBase = 280000; 
+
+    // AI 인사이트 생성
+    const maxVal = Math.max(d, f, e);
+    const avgBase = 280000;
     const percent = Math.round((total / avgBase) * 100);
-    document.getElementById('money-total').innerText = total.toLocaleString() + "원";
+    
+    let insightHtml = `<strong style="font-size:15px; display:block; margin-bottom:8px;">📊 소비 인사이트</strong>`;
+    
+    if (maxVal === d && d > 0) {
+        insightHtml += `🧻 <strong>기저귀/위생용품 비중이 1위!</strong><br>기저귀는 핫딜 뜰 때 박스 떼기로 쟁여두는 게 최고입니다. 맘카페 알림을 꼭 켜두세요!`;
+    } else if (maxVal === f && f > 0) {
+        insightHtml += `🍼 <strong>식비 비중이 1위!</strong><br>아이의 성장 속도를 고려하면 매우 정상입니다! 잘 먹는 건 축복이니 먹는 돈은 절대 아끼지 맙시다 💪`;
+    } else if (maxVal === e && e > 0) {
+        insightHtml += `🧸 <strong>장난감/기타 비중이 1위!</strong><br>육아의 활력소인 소비입니다! 다만 '새 제품'보다는 '당근마켓'을 적절히 섞으면 효율이 배가 됩니다 🥕`;
+    }
+
+    if(percent > 130) {
+        insightHtml += `<br><br><span style="color:var(--danger)">🚨 <strong>주의:</strong></span> 전국 평균 대비 소비가 꽤 높습니다. 충동구매가 없었는지 장바구니를 한 번 더 점검해 보아요!`;
+    } else if(percent < 80) {
+        insightHtml += `<br><br><span style="color:var(--success)">🌿 <strong>우수:</strong></span> 아주 알뜰하게 육아 중입니다! 남는 예산으로 아기 통장에 쏙 넣어주는 건 어떨까요?`;
+    } else {
+        insightHtml += `<br><br>👍 <strong>안정:</strong> 아주 이상적인 육아 소비 패턴입니다. 지금처럼 유지하세요!`;
+    }
+
+    document.getElementById('money-insight').innerHTML = insightHtml;
     document.getElementById('money-avg-percent').innerText = `대한민국 가구 평균 소비치 대비 ${percent}% 수준`;
-    const coffee = Math.floor(total / 4500);
-    let msg = `☕ 분석 데이터: 당월 지출 총액은 스타벅스 Tall 아메리카노 ${coffee}잔 분량입니다.<br><br>`;
-    if(percent > 120) msg += "<span style='color:var(--danger)'>⚠️ 경고:</span> 전국 평균치를 초과했습니다. 소모품 단가 재정비가 요구됩니다.<br><br>";
-    else if(percent < 80) msg += "<span style='color:var(--success)'>🌿 안정:</span> 고효율 알뜰 육아 재무 흐름을 보이고 계십니다.<br><br>";
-    else msg += "👍 대한민국 표준 통계 가구 집단 스케일 범위 내의 안정적 지출입니다.<br><br>";
-    let max = Math.max(d, f, e);
-    if(max === d && d > 0) msg += "👉 주 집중 소모 섹터: <strong>기저귀 및 위생용품</strong>";
-    else if(max === f && f > 0) msg += "👉 주 집중 소모 섹터: <strong>분유 및 이유식 기본 식재료</strong>";
-    else if(max === e && e > 0) msg += "👉 주 집중 소모 섹터: <strong>완구류, 피복 및 기타 아이템</strong>";
-    document.getElementById('money-insight').innerHTML = msg;
-    document.getElementById('money-result').style.display = 'block';
-    setTimeout(() => drawChart(history), 100);
+    
+    // 결과창 나타내기 + 애니메이션 재설정 (눌렀을 때마다 튕기듯 나오게)
+    const resBox = document.getElementById('money-result');
+    resBox.style.display = 'block';
+    resBox.style.animation = "none"; 
+    setTimeout(() => resBox.style.animation = "scaleUp 0.4s ease", 10); 
+
+    // 도넛 차트 렌더링
+    setTimeout(() => drawDonutChart(d, f, e), 100);
+}
+
+// 4. 세련된 도넛 차트 렌더링 함수
+function drawDonutChart(d, f, e) {
+    const ctx = document.getElementById('donutChart').getContext('2d');
+    if(currentDonutChart) {
+        currentDonutChart.destroy(); // 기존 차트가 있으면 삭제 (버그 방지)
+    }
+    
+    currentDonutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['기저귀/위생', '분유/이유식', '장난감/기타'],
+            datasets: [{
+                data: [d, f, e],
+                backgroundColor: ['#3182F6', '#56D364', '#FFCF54'],
+                borderWidth: 0, // 선 없애서 더 모던하게
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%', // 도넛 구멍 크기 조절 (세련됨의 핵심)
+            plugins: {
+                legend: { display: false }, // 범례 숨김 (디자인 깔끔하게)
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ' ' + context.label + ': ' + formatter.format(context.raw) + '원';
+                        }
+                    }
+                }
+            },
+            animation: { animateScale: true, animateRotate: true }
+        }
+    });
 }
 
 function deleteOldChart() { if(trendChart) trendChart.destroy(); }
@@ -494,17 +594,28 @@ function filterPlaces() {
     const keyword = document.getElementById('spot-search').value.toLowerCase().trim();
     const container = document.getElementById('hotplace-container');
     container.innerHTML = ''; 
-    const todayStr = new Date().toISOString().split('T')[0];
+    
+    // 오늘 날짜 구하기 (문자열 방식 & 숫자 방식 두 가지 다 준비)
+    const todayStr = new Date().toISOString().split('T')[0]; // "2026-06-04" 형태
+    const todayNum = parseInt(todayStr.replace(/-/g, ''));   // 20260604 형태 (API 비교용)
+
     if (currentSubTab === 'event') {
         let manualEvents = hotplacesData.filter(p => p.isEvent);
         let combined = [...apiFestivals, ...manualEvents];
         let uniqueMap = new Map();
         combined.forEach(item => { if(item.title) uniqueMap.set(item.title, item); });
         let eventSource = Array.from(uniqueMap.values());
+        
         const filteredEvents = eventSource.filter(p => {
             let addr = p.addr1 || p.addr || p.locText || '';
             let title = p.title || '';
-            if (p.expiryDate && todayStr > p.expiryDate) return false;
+            
+            // 🔥 [핵심] 지난 행사 무조건 쳐내는 철벽 수비 2단계!
+            // 1. 수동 제보 데이터 컷 (expiryDate)
+            if (p.expiryDate && todayStr > p.expiryDate) return false; 
+            // 2. 공공 API 데이터 컷 (eventenddate)
+            if (p.eventenddate && parseInt(p.eventenddate) < todayNum) return false; 
+
             let matchesRegion = false;
             if (currentRegion === 'all') { matchesRegion = true; } 
             else {
@@ -516,14 +627,22 @@ function filterPlaces() {
                 if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산');
                 if (currentRegion === 'jeju') matchesRegion = addr.includes('제주');
             }
+            
             let matchesSubRegion = (currentSubRegion === 'all' || addr.includes(currentSubRegion));
             let searchPool = `${title} ${addr}`.toLowerCase();
             let matchesKeyword = searchPool.includes(keyword);
+            
             return matchesRegion && matchesSubRegion && matchesKeyword;
         });
-        if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 예정된 주말 아동 친화 행사가 없습니다.</p>`; return; }
+        
+        if(filteredEvents.length === 0) { 
+            container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 예정된 주말 아동 친화 행사가 없습니다.</p>`; 
+            return; 
+        }
+        
         const gridEl = document.createElement('div');
         gridEl.className = 'festival-grid';
+        
         filteredEvents.forEach(item => {
             const title = item.title || '';
             const addr = item.addr1 || item.addr || item.locText || '';
@@ -536,16 +655,25 @@ function filterPlaces() {
             const addrParts = addr.split(' ');
             const shortAddr = `${addrParts[0] || ''} ${addrParts[1] || ''}`.replace('특별', '').replace('광역', '');
             const card = document.createElement('div');
+            
             card.className = 'fest-card';
             let imgHtml = '';
             let modalImgParam = rawImg;
-            if (rawImg) { imgHtml = `<img src="${rawImg}" alt="${title}" onerror="this.style.display='none'; this.parentNode.innerHTML += '<div style=\'width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;\'>🎈</div>';">`; } 
-            else { imgHtml = `<div style="width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`; modalImgParam = '⚙️GRAPHIC'; }
+            
+            if (rawImg) { 
+                imgHtml = `<img src="${rawImg}" alt="${title}" onerror="this.style.display='none'; this.parentNode.innerHTML += '<div style=\'width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;\'>🎈</div>';">`; 
+            } else { 
+                imgHtml = `<div style="width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`; 
+                modalImgParam = '⚙️GRAPHIC'; 
+            }
+            
             card.onclick = () => openFestivalModal(title, dateText, addr, tel, review, title, modalImgParam);
             card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
             gridEl.appendChild(card);
         });
+        
         container.appendChild(gridEl);
+        
     } else {
         const filteredPlaces = hotplacesData.filter(p => {
             if (p.expiryDate && todayStr > p.expiryDate) return false;
@@ -556,7 +684,12 @@ function filterPlaces() {
             const matchesKeyword = searchPool.includes(keyword);
             return matchesType && matchesRegion && matchesKeyword;
         });
-        if(filteredPlaces.length === 0) { container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 아직 등록된 검증 육아지도가 없습니다. 첫 제보자가 되어주세요!</p>`; return; }
+        
+        if(filteredPlaces.length === 0) { 
+            container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 아직 등록된 검증 육아지도가 없습니다. 첫 제보자가 되어주세요!</p>`; 
+            return; 
+        }
+        
         filteredPlaces.forEach((p, index) => {
             let tagsHTML = p.tags.map(tag => `<span class="tag ${tag.c}">${tag.t}</span>`).join('');
             let timeHTML = p.datetime ? `<div style="font-size: 12.5px; color: var(--primary); font-weight: 800; margin-bottom: 8px; background: rgba(49,130,246,0.06); padding: 6px 10px; border-radius: 8px; display: inline-block;">⏰ ${p.datetime}</div>` : '';
