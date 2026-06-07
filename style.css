@@ -893,3 +893,176 @@ html.dark-mode .play-effect-badge {
     background: #4A3E25;
     color: #E8C396;
 }
+
+/* 다크모드 일 때 가계부 배경색 완벽 대응 */
+body.dark-mode {
+    --bg-card: #2C2C2E; /* 하얀색 ➔ 진한 그레이 */
+    --bg-sub: #1C1C1E;  /* 연한 회색 ➔ 더 진한 그레이 */
+}
+
+/* =========================================
+   🚀 1. 폰트 교체 (가장 중요!)
+   - 촌스러운 기본 폰트를 버리고, 토스/당근/애플이 쓰는 '프리텐다드' 장착
+========================================= */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+* {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif !important;
+    
+    /* 🚀 2. 웹 브라우저 냄새 완벽 제거 */
+    -webkit-tap-highlight-color: transparent; /* 버튼 누를 때 파란색 네모 깜빡이는 웹 특유의 현상 제거 */
+    -webkit-user-select: none; /* 글씨 꾹 누르면 드래그(블록) 되는 현상 방지 (진짜 앱처럼) */
+    user-select: none;
+}
+
+/* 단, 입력창(가계부, 이름 등)은 글씨가 선택/입력되어야 하므로 예외 처리 */
+input, textarea {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
+/* 🚀 3. 지저분한 스크롤바 숨기기 (기능은 작동함) */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* =========================================
+   🚀 4. 쫀득한 터치 애니메이션 (Micro Interaction)
+   - 버튼을 누를 때 0.2초 만에 스르륵 작아졌다 커지는 네이티브 앱 효과
+========================================= */
+button, .btn-main, .pill-btn, .check-item, .nav-item, .fest-card, .accordion-header {
+    transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+}
+
+/* 버튼을 꾹 누르고 있을 때 (Active 상태) */
+button:active, .btn-main:active, .check-item:active, .fest-card:active {
+    transform: scale(0.96);
+    opacity: 0.85;
+}
+
+/* =========================================
+   🚀 5. 하단 네비게이션 바 '유리 질감(Glassmorphism)' 효과
+   - 아이폰이나 최신 안드로이드 특유의 반투명 블러 효과
+========================================= */
+.bottom-nav {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px); /* 배경이 은은하게 비침 */
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .bottom-nav {
+    background: rgba(28, 28, 30, 0.85) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================
+   🚀 6. 카드 UI 고급화 (그림자 Depth 추가)
+   - 평면적이었던 카드들에 아주 은은하고 고급스러운 그림자 부여
+========================================= */
+.panel-block, .result-card, .fest-card, .accordion-item {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* 다크모드 전용 그림자 */
+body.dark-mode .panel-block, 
+body.dark-mode .result-card, 
+body.dark-mode .fest-card, 
+body.dark-mode .accordion-item {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================
+   🚀 1. 모달 배경 (공통)
+   - 애니메이션 씹힘 현상 해결을 위해 키프레임 재설정
+========================================= */
+.modal-overlay, #premium-modal, #sos-modal, #checklist-modal {
+    position: fixed !important;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 9999;
+    display: none; /* JS에서 flex로 켬 */
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fadeInBg 0.2s ease-out forwards;
+}
+
+/* =========================================
+   💻 2. PC 버전 (넓은 화면일 때)
+   - 화면 정중앙에 예쁘게 팝업 (스케일업 애니메이션)
+========================================= */
+@media (min-width: 769px) {
+    .modal-overlay, #premium-modal, #sos-modal, #checklist-modal {
+        align-items: center; /* 화면 중앙 정렬 */
+        justify-content: center;
+    }
+    .modal-content, #sos-modal > div, #checklist-modal > div {
+        width: 100%;
+        max-width: 420px; /* PC에선 너무 안 뚱뚱하게 */
+        background: var(--bg-card, #FFF);
+        border-radius: 24px !important; /* 전체 모서리 둥글게 */
+        padding: 30px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        animation: popInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* 쫀득하게 커짐 */
+    }
+    /* PC에선 상단 손잡이 막대기 숨김 */
+    .modal-content::before, #sos-modal > div::before, #checklist-modal > div::before {
+        display: none !important;
+    }
+}
+
+/* =========================================
+   📱 3. 모바일 버전 (스마트폰 크기일 때)
+   - 화면 맨 아래에서 스르륵 밀고 올라오는 바텀 시트
+========================================= */
+@media (max-width: 768px) {
+    .modal-overlay, #premium-modal, #sos-modal, #checklist-modal {
+        align-items: flex-end; /* 화면 맨 아래 정렬 */
+        justify-content: center;
+    }
+    .modal-content, #sos-modal > div, #checklist-modal > div {
+        width: 100%;
+        background: var(--bg-card, #FFF);
+        border-radius: 24px 24px 0 0 !important; /* 위쪽 모서리만 둥글게 */
+        padding: 30px 20px 40px 20px !important;
+        margin: 0 !important;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+        animation: slideUpSheet 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; /* 스르륵 완벽 복구 */
+    }
+    /* 모바일 전용 상단 손잡이 막대기 */
+    .modal-content::before, #sos-modal > div::before, #checklist-modal > div::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 5px;
+        background: #E5E8EB;
+        border-radius: 10px;
+        margin: -10px auto 20px auto;
+    }
+    body.dark-mode .modal-content::before, 
+    body.dark-mode #sos-modal > div::before, 
+    body.dark-mode #checklist-modal > div::before { 
+        background: #444; 
+    }
+}
+
+/* =========================================
+   🎬 4. 애니메이션 키프레임 (절대 안 씹히게 0% 추가)
+========================================= */
+@keyframes fadeInBg {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes slideUpSheet {
+    0% { transform: translateY(100%); opacity: 0; } /* 완전히 숨겼다가 */
+    100% { transform: translateY(0); opacity: 1; }  /* 제자리로! */
+}
+
+@keyframes popInModal {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}

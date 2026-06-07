@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+     <!-- 🚀 진짜 앱처럼 보이게 만드는 상태바 동기화 -->
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111111">
     <title>토실이 육아 메이트 | 하윤이네 오피셜 홈</title>
     <meta name="description" content="대한민국 평균 육아비 비교, 안전한 해열제 계산기, 영유아 종합 성장 진단, 전국 지자체 주말 무료 행사 및 육아지도 족보.">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
@@ -284,27 +287,26 @@
                     </div>
                 </div>
 
-   <div id="panel-money" class="panel-block active">
+  <div id="panel-money" class="panel-block active">
     <!-- 헤더 영역 -->
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--text-m); padding-bottom:12px; margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--border); padding-bottom:12px; margin-bottom:24px;">
         <div style="font-size:16.5px; font-weight:900; color:var(--text-m);">📊 육아 소비 정밀 진단기</div>
         <button class="history-btn" onclick="toggleHistory()" style="padding: 6px 12px; background: var(--primary); color: #FFF; font-size: 13px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(49,130,246,0.2);">과거 내역</button>
     </div>
 
     <!-- 안내 문구 -->
-    <div class="disclaimer-box" style="background: #F2F5F8; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+    <div class="disclaimer-box" style="background: var(--bg-sub, #F2F5F8); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
         <p style="font-size:13px; color:var(--text-s); line-height:1.5; margin:0;">
             <strong>💡 스마트한 부모의 지출 점검!</strong><br>이번 달 우리 아이에게 들어간 필수 비용을 입력해 보세요. AI가 국가 통계 기반으로 지출 패턴을 분석해 드립니다.
         </p>
     </div>
     
-   <!-- 입력창 1: 기저귀 -->
-    <div class="input-group" style="background:#FFF; padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+    <!-- 입력창 1: 기저귀 -->
+    <div class="input-group" style="background: var(--bg-card, #FFF); padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; display:flex; align-items:center; gap:12px;">
         <div style="font-size:24px;">🧻</div>
         <div style="flex-grow:1;">
             <label style="font-size:13.5px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">기저귀 및 위생용품</label>
-            <!-- 🔥 겹침 현상 완벽 해결 & 금융앱 스타일 우측 정렬 -->
-            <div style="display:flex; align-items:center; border-bottom:2px solid #E5E8EB; padding-bottom:6px;">
+            <div style="display:flex; align-items:center; border-bottom:2px solid var(--border); padding-bottom:6px;">
                 <input type="text" inputmode="numeric" id="v-diaper" placeholder="0" onkeyup="formatNum(this)" style="flex:1; width:100%; font-size:20px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; padding-right:8px; color:var(--text-m);">
                 <span style="font-size:16px; color:var(--text-s); font-weight:800; white-space:nowrap;">원</span>
             </div>
@@ -312,11 +314,11 @@
     </div>
 
     <!-- 입력창 2: 식비 -->
-    <div class="input-group" style="background:#FFF; padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; display:flex; align-items:center; gap:12px;">
+    <div class="input-group" style="background: var(--bg-card, #FFF); padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; display:flex; align-items:center; gap:12px;">
         <div style="font-size:24px;">🍼</div>
         <div style="flex-grow:1;">
             <label style="font-size:13.5px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">분유, 이유식, 식자재</label>
-            <div style="display:flex; align-items:center; border-bottom:2px solid #E5E8EB; padding-bottom:6px;">
+            <div style="display:flex; align-items:center; border-bottom:2px solid var(--border); padding-bottom:6px;">
                 <input type="text" inputmode="numeric" id="v-food" placeholder="0" onkeyup="formatNum(this)" style="flex:1; width:100%; font-size:20px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; padding-right:8px; color:var(--text-m);">
                 <span style="font-size:16px; color:var(--text-s); font-weight:800; white-space:nowrap;">원</span>
             </div>
@@ -324,11 +326,11 @@
     </div>
 
     <!-- 입력창 3: 기타 -->
-    <div class="input-group" style="background:#FFF; padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+    <div class="input-group" style="background: var(--bg-card, #FFF); padding:16px; border-radius:12px; border:1px solid var(--border); margin-bottom:24px; display:flex; align-items:center; gap:12px;">
         <div style="font-size:24px;">🧸</div>
         <div style="flex-grow:1;">
             <label style="font-size:13.5px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">의류, 장난감, 기타용품</label>
-            <div style="display:flex; align-items:center; border-bottom:2px solid #E5E8EB; padding-bottom:6px;">
+            <div style="display:flex; align-items:center; border-bottom:2px solid var(--border); padding-bottom:6px;">
                 <input type="text" inputmode="numeric" id="v-etc" placeholder="0" onkeyup="formatNum(this)" style="flex:1; width:100%; font-size:20px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; padding-right:8px; color:var(--text-m);">
                 <span style="font-size:16px; color:var(--text-s); font-weight:800; white-space:nowrap;">원</span>
             </div>
@@ -339,18 +341,17 @@
     <button class="btn-main" onclick="analyzeMoney()" style="font-size:16px; padding:16px;">🔍 우리집 소비 패턴 팩트 체크</button>
 
     <!-- 과거 내역 모달 -->
-    <div id="history-list-area" style="display:none; margin-top:20px; background:#FFF; border-radius:16px; padding:20px; border:1px solid var(--border);">
-        <h3 style="font-size:15px; margin-bottom:12px; font-weight:800;">📅 누적 데이터 셋</h3>
+    <div id="history-list-area" style="display:none; margin-top:20px; background: var(--bg-card, #FFF); border-radius:16px; padding:20px; border:1px solid var(--border);">
+        <h3 style="font-size:15px; margin-bottom:12px; font-weight:800; color:var(--text-m);">📅 누적 데이터 셋</h3>
         <div id="history-items"></div>
         <button class="btn-main" style="background:var(--text-sub) !important; font-size:14px; margin-top:14px; box-shadow:none !important;" onclick="toggleHistory()">닫기</button>
     </div>
 
     <!-- 📊 결과 리포트 영역 -->
     <div id="money-result" style="display:none; margin-top:24px; border-top:1px dashed var(--border); padding-top:24px;">
-        <div id="capture-area" class="result-card" style="background:#FFF; border-radius:16px; padding:22px; border:1px solid var(--border); text-align:center;">
-            <div class="stat-badge" style="display:inline-block; font-size:12px; font-weight:800; background:#111; color:#FFF; padding:5px 12px; border-radius:12px; margin-bottom:12px;">월간 지출 리포트</div>
+        <div id="capture-area" class="result-card" style="background: var(--bg-card, #FFF); border-radius:16px; padding:22px; border:1px solid var(--border); text-align:center;">
+            <div class="stat-badge" style="display:inline-block; font-size:12px; font-weight:800; background:var(--text-m); color:var(--bg-body, #FFF); padding:5px 12px; border-radius:12px; margin-bottom:12px;">월간 지출 리포트</div>
             
-            <!-- 원 중복 에러 해결됨 -->
             <div id="money-total" style="font-size:36px; font-weight:900; letter-spacing:-1px; color:var(--primary);">0</div>
             <div style="font-size:16px; font-weight:800; color:var(--text-m); margin-bottom:6px;">원 지출</div>
             
@@ -363,7 +364,7 @@
 
             <div id="money-avg-percent" style="font-size:14.5px; font-weight:800; color:#FFF; background:var(--primary); padding:12px; border-radius:12px; margin-bottom:16px;"></div>
             
-            <div id="money-insight" style="text-align:left; font-size:14px; line-height:1.6; padding:16px; background:#F8F9FA; border-radius:12px; border:1px solid #E5E8EB; color:var(--text-m); font-weight:600;"></div>
+            <div id="money-insight" style="text-align:left; font-size:14px; line-height:1.6; padding:16px; background: var(--bg-sub, #F8F9FA); border-radius:12px; border:1px solid var(--border); color:var(--text-m); font-weight:600;"></div>
         </div>
     </div>
 </div>
@@ -591,9 +592,10 @@
             <div id="btn-sos-back" class="sos-back-btn" style="display:none;" onclick="openSOSModal()">← 뒤로</div>
             
             <div id="sos-step-choice">
-                <div style="font-size:42px; margin-bottom:12px;">🚨</div>
-                <div class="sos-choice-title">긴급 SOS 상황 선택</div>
-                <div class="sos-choice-desc">현재 아기의 상태에 맞는 대처법을 누르세요.</div>
+    <div style="font-size:42px; margin-bottom:12px;">🚨</div>
+    <div class="sos-choice-title" style="color: var(--text-m) !important; font-weight: 900; font-size: 20px; margin-bottom: 8px;">긴급 SOS 상황 선택</div>
+    <div class="sos-choice-desc" style="color: var(--text-s) !important; font-size: 14px; margin-bottom: 20px;">현재 아기의 상태에 맞는 대처법을 누르세요.</div>
+</div>
                 
                 <div class="sos-btn-medical" onclick="showSosMedical()">
                     <span style="font-size:28px;">🚑</span>
