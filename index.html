@@ -370,88 +370,105 @@
 </div>
 
                <div id="panel-fever" class="panel-block">
-                    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--danger); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">🌡️ 투약 용량 안전 계측</div>
-                    
-                    <div class="disclaimer-box" style="background: #FFF0F1; border: 1px solid #FFE3E3; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
-                        <p style="color:#D32F2F; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [법적 책임 부인 및 소아과 의사 지시 우선]</p>
-                        <p style="font-size:12.5px; color:#555; line-height:1.5;">
-                            본 계산기는 일반적인 소아 약전 기준(체중당 10~15mg)을 반영한 단순 참고용입니다. 예방접종 후 발생한 열 등 특수한 경우에는 반드시 소아과 의사의 개별 지시를 1순위로 따르세요. 본 사이트는 의료적 결과에 법적 책임을 지지 않습니다.
-                        </p>
-                    </div>
+    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--danger); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">🌡️ 투약 용량 안전 계측</div>
+    
+    <div class="disclaimer-box" style="background: #FFF0F1; border: 1px solid #FFE3E3; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+        <p style="color:#D32F2F; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [법적 책임 부인 및 소아과 의사 지시 우선]</p>
+        <p style="font-size:12.5px; color:#555; line-height:1.5;">
+            본 계산기는 일반적인 소아 약전 기준(체중당 10~15mg)을 반영한 단순 참고용입니다. 예방접종 후 발생한 열 등 특수한 경우에는 반드시 소아과 의사의 개별 지시를 1순위로 따르세요. 본 사이트는 의료적 결과에 법적 책임을 지지 않습니다.
+        </p>
+    </div>
 
-                    <div class="checkbox-area" style="display: flex; gap: 12px; align-items:flex-start; cursor: pointer; padding: 16px; background: #FFF; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 24px;" onclick="toggleCheck(event)">
-                        <input type="checkbox" id="agree-check" style="width: 22px; height: 22px; accent-color: var(--danger); margin-top:2px;">
-                        <label style="font-size:13px; font-weight:800; color:var(--danger); line-height:1.45;">상기 기술된 의료 리스크 및 예외 고지를 완벽히 숙지하였으며, 본인 판단하에 참고용으로만 사용하겠습니다.</label>
-                    </div>
+    <div class="checkbox-area" style="display: flex; gap: 12px; align-items:flex-start; cursor: pointer; padding: 16px; background: var(--bg-card, #FFF); border-radius: 14px; border: 1px solid var(--border); margin-bottom: 24px;" onclick="toggleCheck(event)">
+        <input type="checkbox" id="agree-check" style="width: 22px; height: 22px; accent-color: var(--danger); margin-top:2px;">
+        <label style="font-size:13px; font-weight:800; color:var(--danger); line-height:1.45;">상기 기술된 의료 리스크 및 예외 고지를 완벽히 숙지하였으며, 본인 판단하에 참고용으로만 사용하겠습니다.</label>
+    </div>
 
-                    <div class="input-group">
-                        <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px;">계측 질량 체중 입력 (kg)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="v-weight" placeholder="0.0" step="0.1" style="text-align:left;">
-                            <span class="unit-label">kg</span>
-                        </div>
-                    </div>
-                    <button class="btn-main" onclick="calcFever()" style="background:var(--accent) !important; box-shadow: 0 6px 16px rgba(253, 104, 104, 0.25) !important;">안전 투약 한계 용량 산출</button>
+    <div class="input-group">
+        <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">계측 질량 체중 입력 (kg)</label>
+        <div class="input-wrapper" style="border-bottom: 2px solid var(--border); padding-bottom: 6px;">
+            <input type="number" id="v-weight" placeholder="0.0" step="0.1" style="text-align:left; font-size:22px; font-weight:800; border:none; outline:none; background:transparent; color:var(--text-m); width:100%;">
+            <span class="unit-label" style="font-size:18px; font-weight:800; color:var(--text-s);">kg</span>
+        </div>
+    </div>
+    <button class="btn-main" onclick="calcFever()" style="background:var(--accent) !important; box-shadow: 0 6px 16px rgba(253, 104, 104, 0.25) !important;">안전 투약 한계 용량 산출</button>
 
-                    <div id="fever-result" style="display:none; margin-top:24px; border-top:1px dashed var(--border); padding-top:24px;">
-                        <div class="pill-card">
-                            <div class="pill-title" style="font-size:15px; font-weight:800;">🔴 아세트아미노펜 계열 <span style="font-weight:600; font-size:12.5px; color:var(--text-s);">(빨강 챔프 등)</span></div>
-                            <div class="pill-dose"><span id="dose-red">0 ~ 0</span> <small style="font-size:16px; font-weight:800;">ml</small></div>
-                        </div>
-                        <div class="pill-card blue">
-                            <div class="pill-title" style="font-size:15px; font-weight:800;">🔵 이부프로펜 계열 <span style="font-weight:600; font-size:12.5px; color:var(--text-s);">(파랑 챔프 등)</span></div>
-                            <div class="pill-dose"><span id="dose-blue">0 ~ 0</span> <small style="font-size:16px; font-weight:800;">ml</small></div>
-                        </div>
-                    </div>
+    <div id="fever-result" style="display:none; margin-top:24px; border-top:1px dashed var(--border); padding-top:24px;">
+        <div class="pill-card" style="background:var(--bg-card, #FFF); border:1px solid #FFE3E3; border-radius:12px; padding:16px; margin-bottom:12px;">
+            <div class="pill-title" style="font-size:15px; font-weight:800; color:#FF4B2B;">🔴 아세트아미노펜 계열 <span style="font-weight:600; font-size:12.5px; color:var(--text-s);">(빨강 챔프 등)</span></div>
+            <div class="pill-dose" style="margin-top:8px; color:var(--text-m);"><span id="dose-red" style="font-size:20px; font-weight:900;">0 ~ 0</span> <small style="font-size:16px; font-weight:800;">ml</small></div>
+        </div>
+        <div class="pill-card blue" style="background:var(--bg-card, #FFF); border:1px solid #E1F0FF; border-radius:12px; padding:16px;">
+            <div class="pill-title" style="font-size:15px; font-weight:800; color:#3182F6;">🔵 이부프로펜 계열 <span style="font-weight:600; font-size:12.5px; color:var(--text-s);">(파랑 챔프 등)</span></div>
+            <div class="pill-dose" style="margin-top:8px; color:var(--text-m);"><span id="dose-blue" style="font-size:20px; font-weight:900;">0 ~ 0</span> <small style="font-size:16px; font-weight:800;">ml</small></div>
+        </div>
+    </div>
 
-                    <!-- ⏱️ 여기서부터 미니 열나요 (타이머 & 그래프) 영역 -->
-                    <div style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 24px;">
-                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m); margin-bottom: 16px;">⏱️ 교차복용 타이머 & 체온 리포트 </div>
-                        
-                        <!-- 🚨 고열 경고창 -->
-                        <div id="fever-alert" style="display:none; background:#FFF0F1; color:#D32F2F; padding:12px 16px; border-radius:12px; font-size:14px; font-weight:800; margin-bottom:16px; border:1px solid #FFE3E3; animation: pulseSOS 1.5s infinite;"></div>
+    <div style="margin-top: 40px; border-top: 2px dashed var(--border); padding-top: 24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-size:16.5px; font-weight:900; color:var(--text-m);">⏱️ 소아과 브리핑 & 교차복용 차트</div>
+        </div>
 
-                        <!-- ⏳ 교차복용 타이머 대시보드 -->
-                        <div id="fever-timer-box" style="display:none; background:#F8F9FA; padding:16px; border-radius:16px; border:1px solid var(--border); margin-bottom:20px;">
-                            <div style="font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:10px;">⏰ 다음 해열제 투약 가능 시간</div>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; padding:12px; border-radius:10px; border:1px solid #FFE3E3;">
-                                    <span style="font-size:13.5px; font-weight:800; color:#FF4B2B;">🔴 아세트 (빨강)</span>
-                                    <span id="timer-red" style="font-size:14px;">계산 중...</span>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; padding:12px; border-radius:10px; border:1px solid #E1F0FF;">
-                                    <span style="font-size:13.5px; font-weight:800; color:#3182F6;">🔵 이부 (파랑)</span>
-                                    <span id="timer-blue" style="font-size:14px;">계산 중...</span>
-                                </div>
-                            </div>
-                            <div style="font-size:11.5px; color:var(--text-sub); margin-top:10px; line-height:1.4;">※ 다른 계열은 최소 2시간, 같은 계열은 최소 4시간 간격을 기준으로 계산됩니다.</div>
-                        </div>
+        <div id="fever-alert" style="display:none; background:#FFF0F1; color:#D32F2F; padding:12px 16px; border-radius:12px; font-size:13.5px; font-weight:800; margin-bottom:16px; border:1px solid #FFE3E3; text-align:center; animation: pulseSOS 1.5s infinite;"></div>
 
-                        <!-- 📈 체온 그래프 -->
-                        <div id="fever-chart-container" style="display:none; height:180px; margin-bottom:20px;">
-                            <canvas id="feverChart"></canvas>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px;">현재 체온 (℃)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="v-temp" placeholder="38.5" step="0.1" style="text-align:left;">
-                                <span class="unit-label">℃</span>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                            <button class="pill-btn red" id="btn-pill-red" onclick="selectPill('red')">🔴 아세트 (빨강)</button>
-                            <button class="pill-btn blue" id="btn-pill-blue" onclick="selectPill('blue')">🔵 이부 (파랑)</button>
-                        </div>
-                        
-                        <button class="btn-main" onclick="addFeverRecord()">약 먹이고 체온 기록하기</button>
-                        
-                        <div id="fever-timeline" style="margin-top: 20px;"></div>
-                        <button class="btn-main" style="background:#2D3436 !important; margin-top:12px; box-shadow:none !important;" onclick="downloadFeverReport()">📸 소아과 제출용 리포트 캡처하기</button>
-                        <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important; padding: 10px;" onclick="clearFeverRecord()">전체 기록 지우기 (열 다 내림)</button>
-                    </div>
-                </div>
+        <div id="fever-timer-box" style="display:none; background:var(--bg-card); border-radius:16px; border:1px solid var(--border); padding:20px; margin-bottom:24px;">
+            <div style="font-size:14px; font-weight:800; margin-bottom:16px; color:var(--text-m); border-bottom:1px dashed var(--border); padding-bottom:8px;">⏳ 다음 투약 가능 시간 (안전 타이머)</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13.5px;">
+                <span style="font-weight:700; color:var(--text-m);">🔴 아세트 계열:</span>
+                <span id="timer-red" style="font-weight:900;"></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:13.5px;">
+                <span style="font-weight:700; color:var(--text-m);">🔵 이부/덱시 계열:</span>
+                <span id="timer-blue" style="font-weight:900;"></span>
+            </div>
+        </div>
+
+        <div style="background:var(--bg-card); padding:20px; border-radius:16px; border:1px solid var(--border); margin-bottom:24px; box-shadow: 0 4px 24px rgba(0,0,0,0.04);">
+            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:12px; color:var(--text-m);">1. 방금 먹인 약 선택 (안전 잠금)</label>
+            <div class="pill-selector" style="display:flex; gap:10px; margin-bottom:20px;">
+                <button id="btn-pill-red" class="pill-btn" onclick="selectPill('red')" style="flex:1; padding:14px 0; border-radius:12px; border:1px solid #E5E8EB; background:#FFF; font-size:13.5px; font-weight:800; color:var(--text-s); cursor:pointer; transition:all 0.2s;">🔴 아세트아미노펜<br><span style="font-size:11px; font-weight:600;">(빨강)</span></button>
+                <button id="btn-pill-blue" class="pill-btn" onclick="selectPill('blue')" style="flex:1; padding:14px 0; border-radius:12px; border:1px solid #E5E8EB; background:#FFF; font-size:13.5px; font-weight:800; color:var(--text-s); cursor:pointer; transition:all 0.2s;">🔵 이부프로펜<br><span style="font-size:11px; font-weight:600;">(파랑)</span></button>
+            </div>
+
+            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 복용 직전 체온 (℃)</label>
+            <div style="display:flex; align-items:center; border-bottom:2px solid var(--border); padding-bottom:6px; margin-bottom:20px;">
+                <input type="number" step="0.1" id="v-temp" placeholder="38.5" style="flex:1; width:100%; font-size:22px; font-weight:800; border:none; outline:none; background:transparent; color:var(--text-m);">
+                <span style="font-size:18px; color:var(--text-s); font-weight:800;">℃</span>
+            </div>
+
+            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:10px; color:var(--text-m);">3. 동반 증상 <span style="font-size:12px; font-weight:600; color:var(--text-s);">(선택)</span></label>
+            <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+                <label style="flex:1; min-width:70px;">
+                    <input type="checkbox" id="sym-cough" style="display:none;">
+                    <div class="sym-btn">🤧 기침/콧물</div>
+                </label>
+                <label style="flex:1; min-width:70px;">
+                    <input type="checkbox" id="sym-vomit" style="display:none;">
+                    <div class="sym-btn">🤮 구토</div>
+                </label>
+                <label style="flex:1; min-width:70px;">
+                    <input type="checkbox" id="sym-diarrhea" style="display:none;">
+                    <div class="sym-btn">💩 설사</div>
+                </label>
+                <label style="flex:1; min-width:70px;">
+                    <input type="checkbox" id="sym-nofood" style="display:none;">
+                    <div class="sym-btn">😰 밥 거부</div>
+                </label>
+            </div>
+
+            <button class="btn-main" onclick="addFeverRecord()" style="font-size:15px; padding:16px;">⏱️ 차트에 기록 추가하기</button>
+        </div>
+
+        <div id="fever-chart-container" style="display:none; height:180px; margin-bottom:20px;">
+            <canvas id="feverChart"></canvas>
+        </div>
+
+        <div id="fever-timeline" style="background:var(--bg-card); border-radius:16px; border:1px solid var(--border); margin-bottom:20px; overflow:hidden;"></div>
+        
+        <button class="btn-main" style="background:#2D3436 !important; box-shadow:none !important;" onclick="downloadFeverReport()">📸 소아과 제출용 리포트 캡처 (저장)</button>
+        <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important;" onclick="clearFeverRecord()">전체 기록 지우기 (열 다 내림)</button>
+    </div>
+</div>
 
                 <div id="panel-growth" class="panel-block">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--success); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">📈 영유아 종합 건강/성장 마스터</div>

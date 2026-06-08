@@ -1066,3 +1066,32 @@ body.dark-mode .accordion-item {
     0% { transform: scale(0.85); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
+
+/* =========================================
+   🚀 소아과 브리핑용 '증상 체크 버튼' 스타일
+========================================= */
+.sym-btn {
+    padding: 10px 6px;
+    background: var(--bg-sub, #F2F5F8);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-s);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 체크박스가 선택됐을 때의 쫀득한 변화 */
+input[type="checkbox"]:checked + .sym-btn {
+    background: rgba(49, 130, 246, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-weight: 800;
+    transform: scale(0.96);
+}
+
+body.dark-mode input[type="checkbox"]:checked + .sym-btn {
+    background: rgba(49, 130, 246, 0.2);
+}

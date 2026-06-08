@@ -792,13 +792,78 @@ window.selectedPillType = '';
 window.feverChartObj = null; // 체온 그래프 객체
 window.feverTimerInterval = null; // 초단위 타이머 엔진
 
-function selectPill(type) {
-    window.selectedPillType = type;
-    document.getElementById('btn-pill-red').classList.remove('active');
-    document.getElementById('btn-pill-blue').classList.remove('active');
-    document.getElementById('btn-pill-' + type).classList.add('active');
+// 0️⃣ 절대 뚫리지 않는 강력 자물쇠 확인 로직 (새로 추가됨!)
+function checkPillLock(type) {
+    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    if (records.length === 0) return { locked: false };
+
+    const now = new Date().getTime();
+    const CROSS_INTERVAL = 2 * 60 * 60 * 1000;
+    const SAME_INTERVAL = 4 * 60 * 60 * 1000;
+
+    // 만약 옛날 테스트 데이터라서 시간이 없으면 쿨하게 패스 (에러 방지)
+    if (!records[0].timestamp) return { locked: false };
+
+    const lastAny = records[0];
+    const lastSame = records.find(r => r.type === type);
+
+    // 1. 교차복용 (2시간) 체크
+    if (now - lastAny.timestamp < CROSS_INTERVAL) {
+        const min = Math.floor((CROSS_INTERVAL - (now - lastAny.timestamp)) / 60000);
+        return { locked: true, reason: `어떤 약이든 최소 2시간(교차복용)이 지나야 합니다.\n(약 ${min}분 남음)` };
+    }
+
+    // 2. 동일약 (4시간) 체크
+    if (lastSame && (now - lastSame.timestamp < SAME_INTERVAL)) {
+        const min = Math.floor((SAME_INTERVAL - (now - lastSame.timestamp)) / 60000);
+        return { locked: true, reason: `같은 약은 최소 4시간 간격이 필요합니다.\n(약 ${min}분 남음)` };
+    }
+
+    return { locked: false };
 }
 
+// 1️⃣ 약 선택 (누르자마자 락 걸렸으면 튕겨내고 경고창 띄움!)
+function selectPill(type) {
+    if (!type) {
+        window.selectedPillType = '';
+        return;
+    }
+
+    // 🚨 여기서 1차로 막고 바로 팝업창으로 때려버림!
+    const lockStatus = checkPillLock(type);
+    if (lockStatus.locked) {
+        alert('🚨 [투약 불가] ' + lockStatus.reason);
+        return; 
+    }
+
+    window.selectedPillType = type;
+
+    const redBtn = document.getElementById('btn-pill-red');
+    const blueBtn = document.getElementById('btn-pill-blue');
+
+    if(redBtn) {
+        redBtn.style.background = '#FFF';
+        redBtn.style.border = '1px solid #E5E8EB';
+        redBtn.style.opacity = '0.4';
+    }
+    if(blueBtn) {
+        blueBtn.style.background = '#FFF';
+        blueBtn.style.border = '1px solid #E5E8EB';
+        blueBtn.style.opacity = '0.4';
+    }
+
+    if (type === 'red' && redBtn) {
+        redBtn.style.background = 'rgba(255, 75, 43, 0.1)';
+        redBtn.style.border = '2px solid #FF4B2B';
+        redBtn.style.opacity = '1';
+    } else if (type === 'blue' && blueBtn) {
+        blueBtn.style.background = 'rgba(49, 130, 246, 0.1)';
+        blueBtn.style.border = '2px solid #3182F6';
+        blueBtn.style.opacity = '1';
+    }
+}
+
+// 2️⃣ 투약 기록 저장
 function addFeverRecord() {
     const temp = parseFloat(document.getElementById('v-temp').value);
     if(!temp || !window.selectedPillType) {
@@ -806,70 +871,174 @@ function addFeverRecord() {
         return;
     }
     
+    // 🚨 야매로 등록버튼 눌러도 2차 철통 방어
+    const lockStatus = checkPillLock(window.selectedPillType);
+    if (lockStatus.locked) {
+        alert('🚨 [저장 실패] ' + lockStatus.reason);
+        return;
+    }
+    
+    const s1 = document.getElementById('sym-cough').checked ? '🤧기침/콧물' : '';
+    const s2 = document.getElementById('sym-vomit').checked ? '🤮구토' : '';
+    const s3 = document.getElementById('sym-diarrhea').checked ? '💩설사' : '';
+    const s4 = document.getElementById('sym-nofood').checked ? '😰밥거부' : '';
+    const symptoms = [s1, s2, s3, s4].filter(Boolean);
+    
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     
-    // ⭐️ 타이머 초단위 계산을 위해 timestamp (밀리초) 추가 저장!
-    const record = { time: timeStr, temp: temp, type: window.selectedPillType, timestamp: now.getTime() };
+    const record = { 
+        time: timeStr, 
+        temp: temp, 
+        type: window.selectedPillType, 
+        timestamp: now.getTime(),
+        symptoms: symptoms 
+    };
     
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     records.unshift(record); 
-    if(records.length > 10) records.pop(); // 최대 10개까지만 유지
+    if(records.length > 10) records.pop(); 
     
     localStorage.setItem('tosil_fever_records', JSON.stringify(records));
-    renderFeverTimeline();
     
-    // 입력창 초기화
     document.getElementById('v-temp').value = '';
     window.selectedPillType = '';
-    document.getElementById('btn-pill-red').classList.remove('active');
-    document.getElementById('btn-pill-blue').classList.remove('active');
+    document.getElementById('sym-cough').checked = false;
+    document.getElementById('sym-vomit').checked = false;
+    document.getElementById('sym-diarrhea').checked = false;
+    document.getElementById('sym-nofood').checked = false;
+    
+    const redBtn = document.getElementById('btn-pill-red');
+    const blueBtn = document.getElementById('btn-pill-blue');
+    if(redBtn) { redBtn.style.background='#FFF'; redBtn.style.border='1px solid #E5E8EB'; redBtn.style.opacity='1'; }
+    if(blueBtn) { blueBtn.style.background='#FFF'; blueBtn.style.border='1px solid #E5E8EB'; blueBtn.style.opacity='1'; }
+    
+    renderFeverTimeline();
 }
 
+// 3️⃣ 타임라인 그리기 (타이머 박스 보이게 버그 수정 완료!)
 function renderFeverTimeline() {
     const container = document.getElementById('fever-timeline');
     if(!container) return; 
 
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     
-    // 기록이 아예 없으면 타이머랑 그래프 가리기 (다크모드 글자색 대응)
     if(records.length === 0) {
         container.innerHTML = '<div style="text-align:center; font-size:13px; opacity:0.6; padding:20px;">아직 기록된 투약 내역이 없습니다.</div>';
         document.getElementById('fever-timer-box').style.display = 'none';
         document.getElementById('fever-chart-container').style.display = 'none';
         document.getElementById('fever-alert').style.display = 'none';
+        
         if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
         return;
     }
     
-   // 1. 타임라인 리스트 그리기
     let html = '';
     records.forEach(r => {
-        // 이름도 너무 길지 않게 직관적으로 수정
         const pillLabel = r.type === 'red' ? '🔴 아세트 (빨강)' : '🔵 이부 (파랑)'; 
-        
-        // 🔥 다크모드 버그 해결: 일반 체온일 때 강제로 어두운 색을 주던 걸 빼고 굵기만 지정!
         const tempStyle = r.temp >= 38.5 ? 'color:#FF4B2B; font-weight:900;' : 'font-weight:800;';
         
+        let symHtml = '';
+        if (r.symptoms && r.symptoms.length > 0) {
+            symHtml = `<div style="margin-top:8px; font-size:11.5px; color:var(--text-s); background:var(--bg-sub, #F2F5F8); padding:6px 10px; border-radius:8px; display:inline-block; font-weight:700;">🚨 동반증상: ${r.symptoms.join(', ')}</div>`;
+        }
+        
         html += `
-        <div class="timeline-item" style="display:flex; justify-content:space-between; padding:14px 12px; border-bottom:1px solid var(--border); font-size:14px;">
-            <span style="font-weight:800; opacity:0.7; width:45px;">${r.time}</span>
-            <span style="flex:1; text-align:center; font-weight:800;">${pillLabel}</span>
-            <span style="${tempStyle}">${r.temp}℃</span>
+        <div class="timeline-item" style="padding:14px 12px; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px;">
+                <span style="font-weight:800; opacity:0.7; width:45px;">${r.time}</span>
+                <span style="flex:1; text-align:center; font-weight:800;">${pillLabel}</span>
+                <span style="${tempStyle}">${r.temp}℃</span>
+            </div>
+            ${symHtml}
         </div>`;
     });
     container.innerHTML = html;
 
-    // 2. 그래프 그리기
     document.getElementById('fever-chart-container').style.display = 'block';
-    drawFeverChart(records);
+    document.getElementById('fever-timer-box').style.display = 'block'; // 🌟 꽁꽁 숨어있던 타이머 박스 보이게 수정!
+    
+    if(typeof drawFeverChart === "function") drawFeverChart(records);
 
-    // 3. 교차복용 1초 타이머 가동 시작
     if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
     updateFeverTimer(records); 
     window.feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
 }
 
+// 4️⃣ 실시간 UI 업데이트 엔진 (버튼 회색 처리)
+function updateFeverTimer(records) {
+    if (!records || records.length === 0) return;
+
+    const redLock = checkPillLock('red');
+    const blueLock = checkPillLock('blue');
+
+    const redBtn = document.getElementById('btn-pill-red');
+    const blueBtn = document.getElementById('btn-pill-blue');
+    const timerRedEl = document.getElementById('timer-red');
+    const timerBlueEl = document.getElementById('timer-blue');
+
+    if (redBtn) {
+        if (redLock.locked) {
+            redBtn.style.background = 'var(--bg-sub, #F2F5F8)';
+            redBtn.style.border = '1px solid var(--border)';
+            redBtn.style.opacity = '0.3';
+            redBtn.style.cursor = 'not-allowed';
+        } else if (window.selectedPillType !== 'red') {
+            redBtn.style.background = '#FFF';
+            redBtn.style.border = '1px solid #E5E8EB';
+            redBtn.style.opacity = '1';
+            redBtn.style.cursor = 'pointer';
+        }
+    }
+
+    if (blueBtn) {
+        if (blueLock.locked) {
+            blueBtn.style.background = 'var(--bg-sub, #F2F5F8)';
+            blueBtn.style.border = '1px solid var(--border)';
+            blueBtn.style.opacity = '0.3';
+            blueBtn.style.cursor = 'not-allowed';
+        } else if (window.selectedPillType !== 'blue') {
+            blueBtn.style.background = '#FFF';
+            blueBtn.style.border = '1px solid #E5E8EB';
+            blueBtn.style.opacity = '1';
+            blueBtn.style.cursor = 'pointer';
+        }
+    }
+
+    if (timerRedEl) {
+        timerRedEl.innerText = redLock.locked ? redLock.reason.split('\n')[1] : "✅ 즉시 복용 가능";
+        timerRedEl.style.color = redLock.locked ? "var(--danger)" : "#2ECC71";
+    }
+    if (timerBlueEl) {
+        timerBlueEl.innerText = blueLock.locked ? blueLock.reason.split('\n')[1] : "✅ 즉시 복용 가능";
+        timerBlueEl.style.color = blueLock.locked ? "var(--danger)" : "#2ECC71";
+    }
+}
+
+// 5️⃣ 전체 삭제
+function clearFeverRecord() {
+    if(!confirm('전체 투약 기록을 지우시겠습니까?')) return;
+    localStorage.removeItem('tosil_fever_records');
+    window.selectedPillType = '';
+    
+    const redBtn = document.getElementById('btn-pill-red');
+    const blueBtn = document.getElementById('btn-pill-blue');
+    
+    if(redBtn) { 
+        redBtn.style.opacity = '1'; 
+        redBtn.style.background = '#FFF'; 
+        redBtn.style.border = '1px solid #E5E8EB'; 
+        redBtn.style.cursor = 'pointer';
+    }
+    if(blueBtn) { 
+        blueBtn.style.opacity = '1'; 
+        blueBtn.style.background = '#FFF'; 
+        blueBtn.style.border = '1px solid #E5E8EB'; 
+        blueBtn.style.cursor = 'pointer';
+    }
+    
+    renderFeverTimeline();
+}
 function drawFeverChart(records) {
     const ctx = document.getElementById('feverChart').getContext('2d');
     if(window.feverChartObj) window.feverChartObj.destroy(); // 기존 그래프 지우기
