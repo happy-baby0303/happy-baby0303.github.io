@@ -38,10 +38,21 @@ function switchOutingSubTab(type) {
 }
 
 function switchTool(panelId, el) {
+    // 💡 1. 상단 칩셋(버튼) 파란색 포커스 이동!
     document.querySelectorAll('.tool-chip').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.panel-block').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('panel-' + panelId).classList.add('active');
+    
+    // 💡 2. 하단 패널(내용물) 껐다 켜기!
+    document.querySelectorAll('.panel-block').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none'; // 철저하게 끔
+    });
+    
+    const targetPanel = document.getElementById('panel-' + panelId);
+    if(targetPanel) {
+        targetPanel.classList.add('active');
+        targetPanel.style.display = 'block'; // 완벽하게 켬
+    }
 }
 
 function formatNum(el) {
@@ -63,7 +74,6 @@ async function loadAllExternalData() {
     filterPlaces();
 }
 
-// 3. 누락되었던 필수 기능 복구!
 function setRegion(region, btn) {
     currentRegion = region;
     const buttons = document.querySelectorAll('.filter-wrap .filter-btn');
@@ -98,10 +108,9 @@ function downloadImg() {
 }
 
 function openGoogleForm() {
-    window.open('https://forms.gle/YOUR_FORM_ID', '_blank'); // 나중에 폼 링크 넣으세요!
+    window.open('https://forms.gle/YOUR_FORM_ID', '_blank'); 
 }
 
-// 4. 필터링 함수
 function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row');
     const subRegions = new Set();
@@ -141,7 +150,6 @@ function setSubRegion(sub, btn) {
     filterPlaces();
 }
 
-// 5. 부가 기능 함수들
 function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const body = document.getElementById('modal-dynamic-body');
     const naverUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(query);
@@ -188,114 +196,13 @@ function toggleHistory() {
     }
 }
 
-// ==========================================
-// 💰 가계부: 재무 분석기 (오류 완벽 차단 오마카세급)
-// ==========================================
-const formatter = new Intl.NumberFormat('ko-KR'); // 숫자 콤마 생성기
-let currentDonutChart = null; // 도넛 차트 변수
+const formatter = new Intl.NumberFormat('ko-KR'); 
+let currentDonutChart = null; 
 
-// 1. 입력창 콤마 찍어주는 함수
-function formatNum(el) {
-    let v = el.value.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
-    if (v) {
-        el.value = formatter.format(v);
-    } else {
-        el.value = '';
-    }
-}
-
-// 2. 입력창에서 진짜 숫자만 뽑아오는 함수
-function getV(id) { 
-    return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; 
-}
-
-// 3. 메인 분석 엔진
-function analyzeMoney() {
-    const d = getV('v-diaper');
-    const f = getV('v-food');
-    const e = getV('v-etc');
-    const total = d + f + e;
-    
-    if(total === 0) {
-        alert("지출하신 금액을 1원이라도 입력해 주세요! 💰");
-        return;
-    }
-
-    // 로컬 스토리지(기록장) 연동
-    const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
-    const date = new Date();
-    const curY = date.getFullYear();
-    const curM = date.getMonth() + 1;
-    const monthKey = `${curY}-${curM}`;
-    
-    // 현재 달 기록 저장
-    history[monthKey] = total;
-    localStorage.setItem('TosilBabyApp', JSON.stringify(history));
-    
-    // 총액 표시 (HTML에서 "원"을 분리했으므로 여기선 숫자만 넘김)
-    document.getElementById('money-total').innerText = formatter.format(total);
-    
-    // 지난달 비교 로직
-    const lastM = curM === 1 ? 12 : curM - 1;
-    const lastY = curM === 1 ? curY - 1 : curY;
-    const lastKey = `${lastY}-${lastM}`;
-    
-    let diffMsg = "";
-    if(history[lastKey]) {
-        const diff = total - history[lastKey];
-        if (diff > 0) {
-            diffMsg = `지난달보다 <span style="color:var(--danger)">${formatter.format(diff)}원 더 썼어요! 💸</span>`;
-        } else if (diff < 0) {
-            diffMsg = `지난달보다 <span style="color:var(--success)">${formatter.format(Math.abs(diff))}원 아꼈어요! 🎉</span>`;
-        } else {
-            diffMsg = `지난달과 지출액이 완벽히 똑같습니다! ⚖️`;
-        }
-    } else {
-        diffMsg = "첫 분석 시작! 이번 달이 기준점이 됩니다.";
-    }
-    document.getElementById('money-diff').innerHTML = diffMsg;
-
-    // AI 인사이트 생성
-    const maxVal = Math.max(d, f, e);
-    const avgBase = 280000;
-    const percent = Math.round((total / avgBase) * 100);
-    
-    let insightHtml = `<strong style="font-size:15px; display:block; margin-bottom:8px;">📊 소비 인사이트</strong>`;
-    
-    if (maxVal === d && d > 0) {
-        insightHtml += `🧻 <strong>기저귀/위생용품 비중이 1위!</strong><br>기저귀는 핫딜 뜰 때 박스 떼기로 쟁여두는 게 최고입니다. 맘카페 알림을 꼭 켜두세요!`;
-    } else if (maxVal === f && f > 0) {
-        insightHtml += `🍼 <strong>식비 비중이 1위!</strong><br>아이의 성장 속도를 고려하면 매우 정상입니다! 잘 먹는 건 축복이니 먹는 돈은 절대 아끼지 맙시다 💪`;
-    } else if (maxVal === e && e > 0) {
-        insightHtml += `🧸 <strong>장난감/기타 비중이 1위!</strong><br>육아의 활력소인 소비입니다! 다만 '새 제품'보다는 '당근마켓'을 적절히 섞으면 효율이 배가 됩니다 🥕`;
-    }
-
-    if(percent > 130) {
-        insightHtml += `<br><br><span style="color:var(--danger)">🚨 <strong>주의:</strong></span> 전국 평균 대비 소비가 꽤 높습니다. 충동구매가 없었는지 장바구니를 한 번 더 점검해 보아요!`;
-    } else if(percent < 80) {
-        insightHtml += `<br><br><span style="color:var(--success)">🌿 <strong>우수:</strong></span> 아주 알뜰하게 육아 중입니다! 남는 예산으로 아기 통장에 쏙 넣어주는 건 어떨까요?`;
-    } else {
-        insightHtml += `<br><br>👍 <strong>안정:</strong> 아주 이상적인 육아 소비 패턴입니다. 지금처럼 유지하세요!`;
-    }
-
-    document.getElementById('money-insight').innerHTML = insightHtml;
-    document.getElementById('money-avg-percent').innerText = `대한민국 가구 평균 소비치 대비 ${percent}% 수준`;
-    
-    // 결과창 나타내기 + 애니메이션 재설정 (눌렀을 때마다 튕기듯 나오게)
-    const resBox = document.getElementById('money-result');
-    resBox.style.display = 'block';
-    resBox.style.animation = "none"; 
-    setTimeout(() => resBox.style.animation = "scaleUp 0.4s ease", 10); 
-
-    // 도넛 차트 렌더링
-    setTimeout(() => drawDonutChart(d, f, e), 100);
-}
-
-// 4. 세련된 도넛 차트 렌더링 함수
 function drawDonutChart(d, f, e) {
     const ctx = document.getElementById('donutChart').getContext('2d');
     if(currentDonutChart) {
-        currentDonutChart.destroy(); // 기존 차트가 있으면 삭제 (버그 방지)
+        currentDonutChart.destroy(); 
     }
     
     currentDonutChart = new Chart(ctx, {
@@ -305,16 +212,16 @@ function drawDonutChart(d, f, e) {
             datasets: [{
                 data: [d, f, e],
                 backgroundColor: ['#3182F6', '#56D364', '#FFCF54'],
-                borderWidth: 0, // 선 없애서 더 모던하게
+                borderWidth: 0, 
                 hoverOffset: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '72%', // 도넛 구멍 크기 조절 (세련됨의 핵심)
+            cutout: '72%', 
             plugins: {
-                legend: { display: false }, // 범례 숨김 (디자인 깔끔하게)
+                legend: { display: false }, 
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -351,9 +258,6 @@ function calcFever() {
     document.getElementById('fever-result').style.display = 'block';
 }
 
-// ==========================================
-// 👶 1. 아기 정보 및 로컬 데이터 (완벽 동기화)
-// ==========================================
 function promptBabyInfo() {
     const name = prompt("우리아기 이름(태명)을 알려주세요!", "우리아기");
     if(!name) return;
@@ -373,7 +277,6 @@ function promptBabyInfo() {
         return; 
     }
     
-    // 🔥 데이터 꼬임 원천 차단: 모든 저장소에 싹 다 저장해둠
     localStorage.setItem('tosil_baby', JSON.stringify({name: name, birth: formattedDate}));
     localStorage.setItem('tosil_babyName', name);
     localStorage.setItem('tosil_startDate', formattedDate);
@@ -402,7 +305,7 @@ function renderBabyInfo() {
     if(!saved) {
         if(nameEl) nameEl.innerText = "이름을 눌러 등록해주세요";
         if(ddayEl) ddayEl.innerText = "D+0일";
-        initPlayWidget(null, 0); // 💡 아기 정보 없을 때 놀이 자판기도 초기화!
+        initPlayWidget(null, 0); 
         return;
     }
 
@@ -421,7 +324,6 @@ function renderBabyInfo() {
         
         if(msgEl) msgEl.innerText = tipText;
 
-        // 🔥 [핵심!] 홈 화면이 렌더링될 때, 놀이 자판기도 똑같은 개월 수로 쏴줍니다!
         initPlayWidget(monthAge, diffDays);
 
     } catch (e) {
@@ -429,76 +331,40 @@ function renderBabyInfo() {
     }
 }
 
-// ==========================================
-// 🧸 오늘의 5분 맞춤 놀이 자판기 (script.js 통합 버전)
-// ==========================================
 const playDB = [
-    /* 0~2개월 (신생아기: 시각/청각 위주) */
     { minM: 0, maxM: 2, title: "흑백 초점책 눈맞춤", desc: "초점책을 아기 눈에서 20cm 거리에 두고 천천히 좌우로 움직여주세요.", effect: "👀 시각 발달 및 초점 맞추기" },
     { minM: 0, maxM: 2, title: "엄마아빠 인간 오르골", desc: "아기와 눈을 맞추고 부드러운 목소리로 노래를 불러주며 가슴을 살살 토닥여주세요.", effect: "👂 청각 발달 및 애착 형성" },
     { minM: 0, maxM: 2, title: "로션 촵촵 마사지", desc: "목욕 후 로션을 바르며 '우리 아기 다리 길어져라 얍!' 하고 부드럽게 주물러주세요.", effect: "💆 정서 안정 및 혈액순환" },
-    { minM: 0, maxM: 2, title: "입술 푸르르~ 진동 놀이", desc: "아기 배나 볼에 입술을 대고 '푸르르~' 소리를 내며 간지럼을 태워주세요.", effect: "😊 스킨십 및 정서적 안정감" },
+    { minM: 0, maxM: 2, title: "입술 푸르르~ 진동 놀이", desc: "아기 배나 볼에 입술 대고 '푸르르~' 소리를 내며 간지럼을 태워주세요.", effect: "😊 스킨십 및 정서적 안정감" },
     { minM: 0, maxM: 2, title: "손수건 엄마 냄새 킁킁", desc: "엄마 냄새가 밴 깨끗한 손수건을 아기 코 근처에서 살랑살랑 흔들어주세요.", effect: "👃 후각 자극 및 심리적 안정" },
     { minM: 0, maxM: 2, title: "딸랑이 시선 추적", desc: "딸랑이를 천천히 흔들며 아기 시선이 소리를 따라가도록 유도해 보세요.", effect: "👀 시청각 연합 능력 발달" },
 
-    /* 3~5개월 (백일 즈음: 뒤집기, 소근육, 호기심) */
     { minM: 3, maxM: 5, title: "비닐봉지 바스락바스락", desc: "깨끗한 비닐봉지를 아기 귀 옆에서 구겨서 바스락 소리를 들려주세요. (입 주의!)", effect: "👂 청각 자극 및 두뇌 발달" },
-    { minM: 3, maxM: 5, title: "으쌰으쌰 터미타임 비행기", desc: "엄마 배 위에 아기를 엎드려 놓고 비행기 소리를 내며 살짝살짝 흔들어주세요.", effect: "💪 목/허리(코어) 근육 발달" },
+    { minM: 3, maxM: 5, title: "으쌰으쌰 터미타임 비행기", desc: "엄마 배 위에 아기를 엎드려 놓고 비행기 소리를 내며 흔들어주세요.", effect: "💪 목/허리(코어) 근육 발달" },
     { minM: 3, maxM: 5, title: "거울 속 까꿍 놀이", desc: "거울 앞에 아기를 안고 서서 '우리 아기 어디 있지?' 하고 놀아주세요.", effect: "🪞 자아 인식 및 호기심 자극" },
     { minM: 3, maxM: 5, title: "딸랑이 양말 팡팡", desc: "아기 발목에 소리 나는 양말이나 방울을 달아주고 발차기를 유도해 보세요.", effect: "🦵 대근육 및 인과관계 인지" },
     { minM: 3, maxM: 5, title: "다양한 수건 촉감 놀이", desc: "부드러운 천, 거친 수건 등을 번갈아가며 아기 손과 발에 문질러주세요.", effect: "🖐 다양한 촉각 자극" },
-    { minM: 3, maxM: 5, title: "옹알이 폭풍 통역사", desc: "아기가 '어~ 아~' 할 때마다 '그랬어? 배고파요?' 하며 과장되게 대답해 주세요.", effect: "🗣️ 상호작용 및 언어 발달 기초" },
+    { minM: 3, maxM: 5, title: "옹알이 폭풍 통역사", desc: "아기가 옹알이할 때마다 과장되게 대답해 주세요.", effect: "🗣️ 상호작용 및 언어 발달 기초" },
     { minM: 3, maxM: 5, title: "알록달록 공 굴러가유", desc: "아기가 엎드려 있을 때 눈앞에서 색깔 공을 천천히 굴려 시선을 끌어주세요.", effect: "👀 동체 시력 및 목 가누기" },
 
-    /* 6~8개월 (앉기, 대상 영속성 발달) */
     { minM: 6, maxM: 8, title: "수건으로 까꿍!", desc: "엄마 얼굴이나 장난감 위에 얇은 손수건을 올렸다가 '까꿍!' 하며 치워주세요.", effect: "🧠 대상 영속성(기억력) 발달" },
     { minM: 6, maxM: 8, title: "물티슈 캡 쏙쏙 뽑기", desc: "다 쓴 물티슈 통 안에 자투리 천이나 끈을 넣고 아기가 마음껏 뽑게 해주세요.", effect: "🤏 소근육 조작 및 성취감" },
     { minM: 6, maxM: 8, title: "이유식 용기 난타 밴드", desc: "플라스틱 용기를 엎어두고 나무 숟가락으로 신나게 두드리며 놀게 해주세요.", effect: "🥁 인과관계 이해 및 스트레스 해소" },
     { minM: 6, maxM: 8, title: "포스트잇 떼기", desc: "바닥이나 팝업 높이에 포스트잇을 붙여두고 아기가 직접 떼보게 하세요.", effect: "🖐 손끝 소근육(잡기) 발달" },
-    { minM: 6, maxM: 8, title: "종이컵 성 무너뜨리기", desc: "종이컵을 높이 쌓아준 뒤, 아기가 손으로 쳐서 와르르 무너뜨리게 해주세요.", effect: "💥 스트레스 해소 및 시각적 자극" },
+    { minM: 6, maxM: 8, title: "종이컵 성 무너뜨리기", desc: "종이컵을 높이 쌓아준 뒤, 아기가 손으로 쳐서 무너뜨리게 해주세요.", effect: "💥 스트레스 해소 및 시각적 자극" },
     { minM: 6, maxM: 8, title: "지퍼백 촉감 봉투", desc: "지퍼백 안에 물감이나 밀가루 반죽을 밀봉하고 꾹꾹 누르거나 밟게 해주세요.", effect: "🎨 안전한 오감 촉각 발달" },
-    { minM: 6, maxM: 8, title: "거실 텐트 숨바꼭질", desc: "식탁 밑이나 소파 뒤에 숨어서 아기가 기어 와서 찾게 유도해 보세요.", effect: "🏃‍♂️ 대근육 및 공간 지각 능력" },
-
-    /* 9~12개월 (잡고 서기, 인지 능력 폭발) */
-    { minM: 9, maxM: 12, title: "이불 속 장난감 구출 작전", desc: "아기가 보는 앞에서 최애 장난감을 이불 밑에 숨기고 찾아보게 하세요.", effect: "🕵️‍♂️ 문제 해결 능력 및 공간 지각" },
-    { minM: 9, maxM: 12, title: "휴지심 터널 통과하기", desc: "다 쓴 휴지심 안으로 작은 공이나 장난감을 통과시키며 '슝~' 소리를 내주세요.", effect: "👁️ 눈-손 협응력 발달" },
-    { minM: 9, maxM: 12, title: "스티커 떼기 놀이", desc: "엄마 손등이나 바닥에 큰 스티커를 살짝 붙여두고 아기가 엄지와 검지로 떼게 해주세요.", effect: "🖐 정교한 소근육 발달" },
-    { minM: 9, maxM: 12, title: "통 안에 쏙쏙", desc: "빈 분유통이나 바구니에 작은 블록이나 공을 '쏙!' 소리와 함께 넣고 빼보세요.", effect: "🗑️ 공간 개념 및 조작 능력" },
-    { minM: 9, maxM: 12, title: "거실 이불 썰매 타기", desc: "도톰한 담요 위에 아기를 앉히고 바닥에서 천천히 슝~ 썰매처럼 끌어주세요.", effect: "🎢 균형 감각 및 전정기관 자극" },
-    { minM: 9, maxM: 12, title: "맘마 먹여주기 코스프레", desc: "애착 인형을 가져와서 아기가 직접 숟가락으로 밥을 먹여주는 흉내를 내게 하세요.", effect: "🧸 모방 행동 및 사회성 발달" },
-    { minM: 9, maxM: 12, title: "그림책 스스로 넘기기", desc: "두꺼운 보드북을 주고 아기가 직접 책장을 넘길 때마다 크게 칭찬해 주세요.", effect: "📖 소근육 및 책과 친해지기" },
-
-    /* 13~24개월 (걷기, 자아 형성기) */
-    { minM: 13, maxM: 24, title: "신문지 마구 찢기 놀이", desc: "다 쓴 신문지나 이면지를 아기와 함께 북북 찢으며 종이 비를 내려주세요.", effect: "💥 대소근육 발달 및 스트레스 팡팡" },
-    { minM: 13, maxM: 24, title: "종이컵 볼링 게임", desc: "종이컵을 쌓아두고 부드러운 공을 굴려서 쓰러뜨리며 환호해 주세요.", effect: "🎳 방향 감각 및 성취감" },
-    { minM: 13, maxM: 24, title: "이불 돌돌 김밥 말기", desc: "아기를 이불 위에 눕히고 '김밥 말자~' 하며 돌돌 말았다가 간지럼 태우며 풀어주세요.", effect: "🍙 스킨십 및 신체 인지 능력" },
-    { minM: 13, maxM: 24, title: "마스킹 테이프 징검다리", desc: "바닥에 테이프로 선을 붙여두고, 선을 따라 걷거나 점프하는 놀이를 해보세요.", effect: "👣 대근육 및 신체 조절력" },
-    { minM: 13, maxM: 24, title: "동물농장 흉내 내기", desc: "아빠가 먼저 '사자 어흥!', '토끼 깡총!' 흉내를 내고 아기가 따라 하게 해보세요.", effect: "🦁 모방 능력 및 언어 표현력" },
-    { minM: 13, maxM: 24, title: "상자 구멍에 빨대 꽂기", desc: "구멍 뚫린 상자나 스티로폼에 아기가 직접 빨대를 콕콕 꽂게 유도해 보세요.", effect: "🎯 집중력 및 정교한 눈-손 협응" },
-    { minM: 13, maxM: 24, title: "안전 풍선 배구", desc: "가벼운 풍선을 불어 거실에서 떨어지지 않게 톡톡 치며 배구 놀이를 해보세요.", effect: "🎈 순발력 및 대근육 발달" },
-
-    /* 25~36개월 (언어 발달, 역할놀이) */
-    { minM: 25, maxM: 36, title: "색깔 요정 분류하기", desc: "색깔이 다른 블록이나 장난감을 섞어두고 '빨간색은 어디 있을까?' 하며 모아보세요.", effect: "🎨 인지 능력 및 논리적 사고" },
-    { minM: 25, maxM: 36, title: "병원 놀이 / 마트 놀이", desc: "아기가 의사 선생님이나 계산원이 되어 부모님과 상황극을 해보세요.", effect: "🗣️ 사회성 및 언어 능력 발달" },
-    { minM: 25, maxM: 36, title: "식탁 밑 나만의 비밀기지", desc: "식탁이나 의자 위에 큰 담요를 덮어 텐트를 만들어주고 그 안에서 랜턴을 켜주세요.", effect: "⛺ 독립심 및 상상력 자극" },
-    { minM: 25, maxM: 36, title: "불 끄고 그림자 극장", desc: "방 불을 끄고 휴대폰 손전등으로 벽에 강아지, 새 등 손 그림자를 만들어 보세요.", effect: "🦅 시각적 상상력 및 창의력" },
-    { minM: 25, maxM: 36, title: "현관 신발 짝꿍 찾기", desc: "아빠, 엄마, 아기 신발을 섞어두고 '엄마 신발 짝꿍 찾아주세요!' 하고 미션을 주세요.", effect: "👟 짝 맞추기(인지) 및 성취감" },
-    { minM: 25, maxM: 36, title: "휴지심 망원경 탐험", desc: "휴지심 2개를 이어 붙여 망원경을 만들고 '저기 뭐가 보이나요?' 하며 탐험해보세요.", effect: "🔭 상상력 및 관찰력 향상" },
-    { minM: 25, maxM: 36, title: "눈 감고 과일 맛 맞추기", desc: "아기 눈을 가리고 과일 조각을 입에 쏙 넣어준 뒤 무슨 맛인지 맞춰보게 하세요.", effect: "👅 미각 자극 및 어휘력 발달" },
-    { minM: 25, maxM: 36, title: "빨래 개기 보조 요원", desc: "수건이나 양말을 같이 개면서 '이건 아빠 거, 이건 하윤이 거!' 하고 분류해 보세요.", effect: "👕 일상생활 참여 및 소속감" }
+    { minM: 6, maxM: 8, title: "거실 텐트 숨바꼭질", desc: "식탁 밑이나 소파 뒤에 숨어서 아기가 기어 와서 찾게 유도해 보세요.", effect: "🏃‍♂️ 대근육 및 공간 지각 능력" }
 ];
 
 let currentAvailablePlays = [];
 let currentDday = 0;
 
-// 자판기 초기 세팅 함수
 function initPlayWidget(months, dday) {
     const badgeEl = document.getElementById('play-dday-badge');
     const titleEl = document.getElementById('play-title');
     const descEl = document.getElementById('play-desc');
     const effectEl = document.getElementById('play-effect');
 
-    // 데이터가 없을 때 튕겨내기
     if (months === null || isNaN(months) || !titleEl) {
         if(badgeEl) badgeEl.innerText = "0";
         if(titleEl) titleEl.innerText = "아기 정보를 등록해주세요!";
@@ -511,12 +377,10 @@ function initPlayWidget(months, dday) {
     if(badgeEl) badgeEl.innerText = dday > 0 ? dday : 0;
     currentDday = dday > 0 ? dday : 0;
     
-    // 개월 수에 맞는 놀이 필터링
     currentAvailablePlays = playDB.filter(p => months >= p.minM && months <= p.maxM);
     renderPlay(currentDday);
 }
 
-// 화면에 그리기
 function renderPlay(index) {
     const titleEl = document.getElementById('play-title');
     const descEl = document.getElementById('play-desc');
@@ -539,7 +403,6 @@ function renderPlay(index) {
     }
 }
 
-// 셔플(새로고침) 버튼
 function shufflePlay() {
     if(currentAvailablePlays.length > 0) {
         const randomIndex = Math.floor(Math.random() * currentAvailablePlays.length);
@@ -557,7 +420,7 @@ function shufflePlay() {
 function formatDate(str) { if (!str || str.length !== 8) return str; return `${str.substring(4,6)}.${str.substring(6,8)}`; }
 
 const wwList = [{w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"}, {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"}, {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"}, {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"}, {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"}, {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"}, {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"}, {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"}, {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"}, {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}];
-const vaccineData = [{ maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" }, { maxMonth: 2, desc: "✅ B형간염 2차" }, { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" }, { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" }, { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차(선택)" }, { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>국가 지정 필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감(인플루엔자) 시즌일 경우 소아과 상담을 권장합니다." }, { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" }, { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" }, { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간<br>(독감 등 계절성 질환 및 만 4세 이후 추가 접종은 소아과 문의 요망)" }];
+const vaccineData = [{ maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" }, { maxMonth: 2, desc: "✅ B형간염 2차" }, { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" }, { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" }, { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차(선택)" }, { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>국가 지정 필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감 시즌일 경우 소아과 상담을 권장합니다." }, { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" }, { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" }, { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간" }];
 const weightData = [{ m: 0, boy: "3.3", girl: "3.2" }, { m: 1, boy: "4.5", girl: "4.2" }, { m: 2, boy: "5.6", girl: "5.1" }, { m: 3, boy: "6.4", girl: "5.8" }, { m: 4, boy: "7.0", girl: "6.4" }, { m: 5, boy: "7.5", girl: "6.9" }, { m: 6, boy: "7.9", girl: "7.3" }, { m: 7, boy: "8.3", girl: "7.6" }, { m: 8, boy: "8.6", girl: "7.9" }, { m: 9, boy: "8.9", girl: "8.2" }, { m: 10, boy: "9.2", girl: "8.5" }, { m: 11, boy: "9.4", girl: "8.7" }, { m: 12, boy: "9.6", girl: "8.9" }, { m: 15, boy: "10.3", girl: "9.6" }, { m: 18, boy: "10.9", girl: "10.2" }, { m: 24, boy: "12.2", girl: "11.5" }, { m: 36, boy: "14.3", girl: "13.9" }];
 
 function calcHealthMaster() {
@@ -595,13 +458,12 @@ function filterPlaces() {
     const container = document.getElementById('hotplace-container');
     container.innerHTML = ''; 
     
-    // 한국 시간 기준 완벽한 오늘 날짜 계산 (새벽 시간대 오류 방지)
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     const todayStr = `${yyyy}-${mm}-${dd}`;
-    const todayNum = parseInt(`${yyyy}${mm}${dd}`); // 예: 20260604
+    const todayNum = parseInt(`${yyyy}${mm}${dd}`);
 
     if (currentSubTab === 'event') {
         let manualEvents = hotplacesData.filter(p => p.isEvent);
@@ -614,10 +476,8 @@ function filterPlaces() {
             let addr = p.addr1 || p.addr || p.locText || '';
             let title = p.title || '';
             
-            // 🚨 철벽 방어 1: 수동 제보 데이터 컷
             if (p.expiryDate && todayStr > p.expiryDate) return false; 
 
-            // 🚨 철벽 방어 2: 공공 API 행사 데이터 컷 (기호 빼고 숫자만 완벽 추출)
             let rawEndDate = p.eventenddate || p.endDate || '';
             if (rawEndDate) {
                 let endStr = String(rawEndDate).replace(/[^0-9]/g, '');
@@ -658,7 +518,6 @@ function filterPlaces() {
             const title = item.title || '';
             const addr = item.addr1 || item.addr || item.locText || '';
             const rawImg = item.firstimage || '';
-            // 날짜 포맷 (안전하게 변환)
             let startDate = item.eventstartdate || item.datetime || '';
             if(startDate.length >= 8) startDate = `${startDate.substring(4,6)}.${startDate.substring(6,8)}`;
             let endDate = item.eventenddate || '';
@@ -690,7 +549,6 @@ function filterPlaces() {
         container.appendChild(gridEl);
         
     } else {
-        // (육아지도 탭 로직 동일하게 유지)
         const filteredPlaces = hotplacesData.filter(p => {
             if (p.expiryDate && todayStr > p.expiryDate) return false;
             const matchesType = (p.isEvent === false);
@@ -715,7 +573,6 @@ function filterPlaces() {
     }
 }
 
-// 7. 사진 화질/용량 최적화 업로드 기능 (Canvas 압축)
 function uploadPhoto(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
@@ -751,7 +608,6 @@ function uploadPhoto(input) {
     }
 }
 
-// 로컬 저장된 사진 불러오기
 function loadBabyPhoto() {
     const savedPhoto = localStorage.getItem('tosil_baby_photo');
     if (savedPhoto) {
@@ -762,20 +618,15 @@ function loadBabyPhoto() {
     }
 }
 
-// 🌙 다크모드 토글 함수
 function toggleDarkMode() {
     const body = document.body;
     body.classList.toggle('dark-mode');
     const isDark = body.classList.contains('dark-mode');
     
-    // 버튼 아이콘 변경 (달 ↔ 해)
     document.getElementById('dark-mode-toggle').innerText = isDark ? '☀️' : '🌙';
-    
-    // 사용자의 선택을 로컬 스토리지에 저장
     localStorage.setItem('tosil_dark_mode', isDark ? 'on' : 'off');
 }
 
-// 🌙 페이지 열릴 때 다크모드 기억해두기
 function initDarkMode() {
     const savedMode = localStorage.getItem('tosil_dark_mode');
     if (savedMode === 'on') {
@@ -784,15 +635,10 @@ function initDarkMode() {
     }
 }
 
-// ==========================================
-/* ==========================================
-// 💊 투약 타임라인 로직 (미니 열나요 2.0 - 타이머 & 그래프)
-========================================== */
 window.selectedPillType = ''; 
-window.feverChartObj = null; // 체온 그래프 객체
-window.feverTimerInterval = null; // 초단위 타이머 엔진
+window.feverChartObj = null; 
+window.feverTimerInterval = null; 
 
-// 0️⃣ 절대 뚫리지 않는 강력 자물쇠 확인 로직 (새로 추가됨!)
 function checkPillLock(type) {
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     if (records.length === 0) return { locked: false };
@@ -801,19 +647,16 @@ function checkPillLock(type) {
     const CROSS_INTERVAL = 2 * 60 * 60 * 1000;
     const SAME_INTERVAL = 4 * 60 * 60 * 1000;
 
-    // 만약 옛날 테스트 데이터라서 시간이 없으면 쿨하게 패스 (에러 방지)
     if (!records[0].timestamp) return { locked: false };
 
     const lastAny = records[0];
     const lastSame = records.find(r => r.type === type);
 
-    // 1. 교차복용 (2시간) 체크
     if (now - lastAny.timestamp < CROSS_INTERVAL) {
         const min = Math.floor((CROSS_INTERVAL - (now - lastAny.timestamp)) / 60000);
         return { locked: true, reason: `어떤 약이든 최소 2시간(교차복용)이 지나야 합니다.\n(약 ${min}분 남음)` };
     }
 
-    // 2. 동일약 (4시간) 체크
     if (lastSame && (now - lastSame.timestamp < SAME_INTERVAL)) {
         const min = Math.floor((SAME_INTERVAL - (now - lastSame.timestamp)) / 60000);
         return { locked: true, reason: `같은 약은 최소 4시간 간격이 필요합니다.\n(약 ${min}분 남음)` };
@@ -822,14 +665,12 @@ function checkPillLock(type) {
     return { locked: false };
 }
 
-// 1️⃣ 약 선택 (누르자마자 락 걸렸으면 튕겨내고 경고창 띄움!)
 function selectPill(type) {
     if (!type) {
         window.selectedPillType = '';
         return;
     }
 
-    // 🚨 여기서 1차로 막고 바로 팝업창으로 때려버림!
     const lockStatus = checkPillLock(type);
     if (lockStatus.locked) {
         alert('🚨 [투약 불가] ' + lockStatus.reason);
@@ -863,7 +704,6 @@ function selectPill(type) {
     }
 }
 
-// 2️⃣ 투약 기록 저장
 function addFeverRecord() {
     const temp = parseFloat(document.getElementById('v-temp').value);
     if(!temp || !window.selectedPillType) {
@@ -871,7 +711,6 @@ function addFeverRecord() {
         return;
     }
     
-    // 🚨 야매로 등록버튼 눌러도 2차 철통 방어
     const lockStatus = checkPillLock(window.selectedPillType);
     if (lockStatus.locked) {
         alert('🚨 [저장 실패] ' + lockStatus.reason);
@@ -914,9 +753,9 @@ function addFeverRecord() {
     if(blueBtn) { blueBtn.style.background='#FFF'; blueBtn.style.border='1px solid #E5E8EB'; blueBtn.style.opacity='1'; }
     
     renderFeverTimeline();
+    setTimeout(updateHomeDashboard, 100); 
 }
 
-// 3️⃣ 타임라인 그리기 (타이머 박스 보이게 버그 수정 완료!)
 function renderFeverTimeline() {
     const container = document.getElementById('fever-timeline');
     if(!container) return; 
@@ -940,11 +779,11 @@ function renderFeverTimeline() {
         
         let symHtml = '';
         if (r.symptoms && r.symptoms.length > 0) {
-            symHtml = `<div style="margin-top:8px; font-size:11.5px; color:var(--text-s); background:var(--bg-sub, #F2F5F8); padding:6px 10px; border-radius:8px; display:inline-block; font-weight:700;">🚨 동반증상: ${r.symptoms.join(', ')}</div>`;
+            symHtml = `<div style="margin-top:8px; font-size:11.5px; color:var(--text-s); background:#F9FAFB; padding:6px 10px; border-radius:8px; display:inline-block; font-weight:700;">🚨 동반증상: ${r.symptoms.join(', ')}</div>`;
         }
         
         html += `
-        <div class="timeline-item" style="padding:14px 12px; border-bottom:1px solid var(--border);">
+        <div class="timeline-item" style="padding:16px 12px; border-bottom:1px solid #E5E8EB;">
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px;">
                 <span style="font-weight:800; opacity:0.7; width:45px;">${r.time}</span>
                 <span style="flex:1; text-align:center; font-weight:800;">${pillLabel}</span>
@@ -956,7 +795,7 @@ function renderFeverTimeline() {
     container.innerHTML = html;
 
     document.getElementById('fever-chart-container').style.display = 'block';
-    document.getElementById('fever-timer-box').style.display = 'block'; // 🌟 꽁꽁 숨어있던 타이머 박스 보이게 수정!
+    document.getElementById('fever-timer-box').style.display = 'block'; 
     
     if(typeof drawFeverChart === "function") drawFeverChart(records);
 
@@ -965,7 +804,6 @@ function renderFeverTimeline() {
     window.feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
 }
 
-// 4️⃣ 실시간 UI 업데이트 엔진 (버튼 회색 처리)
 function updateFeverTimer(records) {
     if (!records || records.length === 0) return;
 
@@ -1015,7 +853,6 @@ function updateFeverTimer(records) {
     }
 }
 
-// 5️⃣ 전체 삭제
 function clearFeverRecord() {
     if(!confirm('전체 투약 기록을 지우시겠습니까?')) return;
     localStorage.removeItem('tosil_fever_records');
@@ -1038,12 +875,13 @@ function clearFeverRecord() {
     }
     
     renderFeverTimeline();
+    setTimeout(updateHomeDashboard, 100);
 }
+
 function drawFeverChart(records) {
     const ctx = document.getElementById('feverChart').getContext('2d');
-    if(window.feverChartObj) window.feverChartObj.destroy(); // 기존 그래프 지우기
+    if(window.feverChartObj) window.feverChartObj.destroy(); 
 
-    // 과거부터 순서대로 보여주기 위해 배열 순서 뒤집기
     const chartData = [...records].reverse(); 
     const labels = chartData.map(r => r.time);
     const temps = chartData.map(r => r.temp);
@@ -1076,72 +914,6 @@ function drawFeverChart(records) {
     });
 }
 
-function updateFeverTimer(records) {
-    const timerBox = document.getElementById('fever-timer-box');
-    
-    // 예전 버전 앱에서 저장되어 timestamp가 없는 데이터는 타이머 계산 불가 (에러 방지)
-    const validRecords = records.filter(r => r.timestamp);
-    if(validRecords.length === 0) {
-        timerBox.style.display = 'none';
-        return;
-    }
-    
-    timerBox.style.display = 'block';
-
-    const now = Date.now();
-    let lastRed = 0;
-    let lastBlue = 0;
-    let lastAny = validRecords[0].timestamp; // 가장 최신 기록
-
-    validRecords.forEach(r => {
-        if(r.type === 'red' && r.timestamp > lastRed) lastRed = r.timestamp;
-        if(r.type === 'blue' && r.timestamp > lastBlue) lastBlue = r.timestamp;
-    });
-
-    // 🟢 교차복용 핵심 로직: 다른 계열은 2시간(7200000ms), 같은 계열은 4시간(14400000ms) 간격
-    const CROSS_HOURS = 2 * 60 * 60 * 1000;
-    const SAME_HOURS = 4 * 60 * 60 * 1000;
-
-    let nextRed = Math.max(lastAny + CROSS_HOURS, lastRed ? lastRed + SAME_HOURS : 0);
-    let nextBlue = Math.max(lastAny + CROSS_HOURS, lastBlue ? lastBlue + SAME_HOURS : 0);
-
-    // 시간 포맷 변환 함수
-    const formatTime = (targetTime) => {
-        const diff = targetTime - now;
-        if(diff <= 0) return `<span style="color:var(--success); font-weight:900;">🟢 지금 당장 복용 가능</span>`;
-        
-        const h = Math.floor(diff / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-        return `<span style="color:var(--danger); font-weight:900;">⏳ ${h}시간 ${m}분 ${s}초 후 가능</span>`;
-    };
-
-    document.getElementById('timer-red').innerHTML = formatTime(nextRed);
-    document.getElementById('timer-blue').innerHTML = formatTime(nextBlue);
-
-    // 🚨 38.5도 이상 시 고열 경고창 띄우기
-    const latestTemp = validRecords[0].temp;
-    const alertBox = document.getElementById('fever-alert');
-    if(latestTemp >= 38.5) {
-        alertBox.style.display = 'block';
-        alertBox.innerHTML = `🚨 현재 체온 ${latestTemp}도! 고열입니다. 미온수 마사지를 병행하고 컨디션을 관찰하세요!`;
-    } else {
-        alertBox.style.display = 'none';
-    }
-}
-
-function clearFeverRecord() {
-    if(confirm('아이가 열이 다 내렸나요? 투약 기록과 타이머를 초기화하시겠습니까?')) {
-        localStorage.removeItem('tosil_fever_records');
-        renderFeverTimeline();
-    }
-}
-
-
-// ==========================================
-// 🎒 2. 외출 준비물 체크리스트 2.0 (절대 먹통 안 되는 안전 버전)
-// ==========================================
-
 let checklistData = [];
 
 function openChecklistModal() {
@@ -1166,7 +938,6 @@ function openChecklistModal() {
         months = Math.floor(dday / 30); 
     }
 
-    // 🌟 공통 필수 준비물
     checklistData = [
         { id: 'c_diaper', label: '기저귀 (넉넉하게 4~5장)', checked: false },
         { id: 'c_wipe', label: '물티슈 & 건티슈', checked: false },
@@ -1201,7 +972,7 @@ function openChecklistModal() {
 
 function renderChecklist() {
     const container = document.getElementById('checklist-items');
-    let htmlString = ""; // 🔥 파트너님이 쓰시던 가장 안전한 텍스트 누적 방식!
+    let htmlString = ""; 
     let checkedCount = 0; 
 
     checklistData.forEach((item, index) => {
@@ -1210,7 +981,6 @@ function renderChecklist() {
         const isChecked = item.checked ? 'checked' : '';
         const checkMark = item.checked ? '✔' : '';
         
-        // 클릭 이벤트를 HTML 텍스트에 직접 박아버려서 절대 안 날아가게 함
         htmlString += `
             <div class="check-item ${isChecked}" onclick="toggleCheckItem(${index})" style="cursor:pointer;">
                 <div class="check-box">${checkMark}</div>
@@ -1232,7 +1002,6 @@ function renderChecklist() {
             babyName = localStorage.getItem('tosil_babyName');
         }
 
-        // 🔥 에러 방지용 안전장치 (이름이 비어있어도 절대 안 멈춤)
         if (!babyName || babyName.trim() === "") babyName = "우리아기";
 
         const lastChar = babyName.charCodeAt(babyName.length - 1);
@@ -1248,11 +1017,9 @@ function renderChecklist() {
         `;
     }
     
-    // 모아둔 HTML을 한 번에 딱 그려줌 (버그 0%)
     container.innerHTML = htmlString;
 }
 
-// 아이템 토글 및 저장
 function toggleCheckItem(index) {
     checklistData[index].checked = !checklistData[index].checked;
     
@@ -1263,7 +1030,6 @@ function toggleCheckItem(index) {
     renderChecklist();
 }
 
-// 전체 초기화
 function resetChecklist() {
     if(confirm("모든 준비물 체크를 초기화하시겠습니까?")) {
         localStorage.removeItem('tosil_checklist');
@@ -1271,46 +1037,242 @@ function resetChecklist() {
     }
 }
 
-// 모달 닫기
-function closeChecklistForce() {
-    document.getElementById('checklist-modal').style.display = 'none';
-}
+function closeChecklistForce() { document.getElementById('checklist-modal').style.display = 'none'; }
+function closeChecklist(e) { if (e.target.id === 'checklist-modal') closeChecklistForce(); }
 
-function closeChecklist(e) {
-    if (e.target.id === 'checklist-modal') closeChecklistForce();
-}
-
-// ==========================================
-// 🏥 소아과 제출용 해열 리포트 캡처
-// ==========================================
 function downloadFeverReport() {
     const target = document.getElementById('fever-timeline');
-    
-    // 기록이 하나도 없을 때 튕겨내기
     if(!target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) {
         alert("캡처할 체온 기록이 없어요! 먼저 기록을 남겨주세요 🌡️");
         return;
     }
 
-    // 찰칵! 캡처 시작 (배경 하얗게 고정해서 예쁘게 나오게 설정)
     html2canvas(target, { 
         backgroundColor: '#ffffff',
-        scale: 2 // 화질 좋게!
+        scale: 2 
     }).then(canvas => {
         const link = document.createElement('a');
         link.download = '우리아기_해열제_기록.png';
         link.href = canvas.toDataURL("image/png");
         link.click();
-        
         alert("📸 사진첩(다운로드 폴더)에 캡처가 저장되었습니다! 소아과 원장님께 바로 보여주세요 👩‍⚕️");
     });
 }
 
-// 최종 앱 초기화
+function navigateToPanel(targetPanel) {
+    if (targetPanel === 'hotplace') {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('nav-hotplace').classList.add('active');
+
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-hotplace').classList.add('active');
+
+    } else {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const toolboxNav = document.getElementById('nav-toolbox');
+        if(toolboxNav) toolboxNav.classList.add('active');
+
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        const toolboxTab = document.getElementById('tab-toolbox');
+        if(toolboxTab) toolboxTab.classList.add('active');
+
+        let actualPanelId = targetPanel === 'ledger' ? 'money' : targetPanel; 
+
+        // 💡 위젯에서 눌렀을 때 칩셋 활성화 상태로 바꿔주기!
+        document.querySelectorAll('.tool-chip').forEach(el => el.classList.remove('active'));
+        const targetChip = document.getElementById('btn-tool-' + actualPanelId);
+        if(targetChip) targetChip.classList.add('active');
+
+        document.querySelectorAll('.panel-block').forEach(el => {
+            el.classList.remove('active');
+            el.style.display = 'none';
+        });
+        const targetBlock = document.getElementById('panel-' + actualPanelId);
+        if(targetBlock) {
+            targetBlock.classList.add('active');
+            targetBlock.style.display = 'block';
+        }
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateHomeDashboard() {
+    const feverRecords = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    const feverCard = document.getElementById('db-fever-card');
+    
+    if (feverCard) {
+        if (feverRecords.length > 0) {
+            const lastRecord = feverRecords[0];
+            const isHighFever = lastRecord.temp >= 38.5; 
+            
+            if (isHighFever) {
+                feverCard.style.background = 'linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%)';
+                feverCard.style.color = 'white';
+                feverCard.style.border = 'none';
+                const pillLabel = lastRecord.type === 'red' ? '🔴 아세트' : '🔵 이부/덱시';
+                feverCard.innerHTML = `
+                    <div style="width:100%;">
+                        <div style="font-size:13px; font-weight:700; opacity:0.9; margin-bottom:6px;">🚨 고열 상태 (${lastRecord.time} 측정)</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-size:20px; font-weight:900; color:#FFF;">${lastRecord.temp}℃ <span style="font-size:14px; font-weight:700; margin-left:4px; opacity:0.9;">(${pillLabel} 복용)</span></div>
+                            <span style="font-size:24px;">🔥</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feverCard.style.background = 'var(--bg-card, #FFF)';
+                feverCard.style.color = 'var(--text-m)';
+                feverCard.style.border = '1px solid var(--border)';
+                feverCard.innerHTML = `
+                    <div style="width:100%;">
+                        <div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:6px;">최근 체온 기록 (${lastRecord.time} 측정)</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-size:20px; font-weight:900; color:#2ECC71;">${lastRecord.temp}℃ <span style="font-size:14px; font-weight:700; margin-left:4px; color:var(--text-s);">정상범위</span></div>
+                            <span style="font-size:24px;">👍</span>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            feverCard.style.background = 'var(--bg-card, #FFF)';
+            feverCard.style.color = 'var(--text-m)';
+            feverCard.style.border = '1px solid var(--border)';
+            feverCard.innerHTML = `
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">스마트 해열 타이머</div>
+                    <div style="font-size:14.5px; font-weight:800; opacity:0.8;">현재 등록된 체온 기록이 없습니다.</div>
+                </div>
+                <span style="font-size:24px;">💚</span>
+            `;
+        }
+    }
+
+    const ledgerCard = document.getElementById('db-ledger-card');
+    if (ledgerCard) {
+        let totalExpense = parseInt(localStorage.getItem('tosil_money_total')) || 0;
+        const budget = parseInt(localStorage.getItem('tosil_budget')) || 500000;
+        
+        if (totalExpense > 0) {
+            const percent = Math.min(Math.round((totalExpense / budget) * 100), 100);
+            ledgerCard.innerHTML = `
+                <div style="width: 100%;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;">
+                        <div style="font-size:13px; font-weight:700; color:var(--text-s);">이번 달 육아 소비</div>
+                        <div style="font-size:20px; font-weight:900; color:var(--primary); letter-spacing:-0.5px;">${totalExpense.toLocaleString()}원</div>
+                    </div>
+                    <div style="width:100%; height:10px; background:var(--bg-sub, #F2F5F8); border-radius:6px; overflow:hidden;">
+                        <div style="width:${percent}%; height:100%; background:var(--primary); border-radius:6px; transition:width 0.5s ease;"></div>
+                    </div>
+                </div>
+            `;
+        } else {
+            ledgerCard.innerHTML = `
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">이번 달 육아 소비 진단</div>
+                    <div style="font-size:14.5px; font-weight:800; opacity:0.8;">가계부를 작성하고 게이지를 확인하세요.</div>
+                </div>
+                <span style="font-size:24px;">📊</span>
+            `;
+        }
+    }
+}
+
+function analyzeMoney() {
+    const budgetInput = document.getElementById('v-budget');
+    let userBudget = 500000; 
+    if (budgetInput && budgetInput.value) {
+        userBudget = parseInt(budgetInput.value.replace(/,/g, '')) || 500000;
+    }
+    localStorage.setItem('tosil_budget', userBudget);
+
+    const d = getV('v-diaper');
+    const f = getV('v-food');
+    const e = getV('v-etc');
+    const total = d + f + e;
+    
+    if(total === 0) {
+        alert("지출하신 금액을 1원이라도 입력해 주세요! 💰");
+        return;
+    }
+
+    localStorage.setItem('tosil_money_total', total); 
+
+    const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
+    const date = new Date();
+    const curY = date.getFullYear();
+    const curM = date.getMonth() + 1;
+    const monthKey = `${curY}-${curM}`;
+    
+    history[monthKey] = total;
+    localStorage.setItem('TosilBabyApp', JSON.stringify(history));
+    
+    document.getElementById('money-total').innerText = formatter.format(total);
+    
+    const lastM = curM === 1 ? 12 : curM - 1;
+    const lastY = curM === 1 ? curY - 1 : curY;
+    const lastKey = `${lastY}-${lastM}`;
+    
+    let diffMsg = "";
+    if(history[lastKey]) {
+        const diff = total - history[lastKey];
+        if (diff > 0) {
+            diffMsg = `지난달보다 <span style="color:var(--danger)">${formatter.format(diff)}원 더 썼어요! 💸</span>`;
+        } else if (diff < 0) {
+            diffMsg = `지난달보다 <span style="color:var(--success)">${formatter.format(Math.abs(diff))}원 아꼈어요! 🎉</span>`;
+        } else {
+            diffMsg = `지난달과 지출액이 완벽히 똑같습니다! ⚖️`;
+        }
+    } else {
+        diffMsg = "첫 분석 시작! 이번 달이 기준점이 됩니다.";
+    }
+    document.getElementById('money-diff').innerHTML = diffMsg;
+
+    const maxVal = Math.max(d, f, e);
+    const percent = Math.round((total / userBudget) * 100);
+    
+    let insightHtml = `<strong style="font-size:15px; display:block; margin-bottom:8px;">📊 소비 인사이트</strong>`;
+    
+    if (maxVal === d && d > 0) {
+        insightHtml += `🧻 <strong>기저귀/위생용품 비중이 1위!</strong><br>기저귀는 핫딜 뜰 때 박스 떼기로 쟁여두는 게 최고입니다. 맘카페 알림을 꼭 켜두세요!`;
+    } else if (maxVal === f && f > 0) {
+        insightHtml += `🍼 <strong>식비 비중이 1위!</strong><br>아이의 성장 속도를 고려하면 매우 정상입니다! 잘 먹는 건 축복이니 먹는 돈은 절대 아끼지 맙시다 💪`;
+    } else if (maxVal === e && e > 0) {
+        insightHtml += `🧸 <strong>장난감/기타 비중이 1위!</strong><br>육아의 활력소인 소비입니다! 다만 '새 제품'보다는 '당근마켓'을 적절히 섞으면 효율이 배가 됩니다 🥕`;
+    }
+
+    if(percent > 100) {
+        insightHtml += `<br><br><span style="color:var(--danger)">🚨 <strong>주의:</strong></span> 목표 예산을 초과했습니다! 충동구매가 없었는지 장바구니를 한 번 더 점검해 보아요!`;
+    } else if(percent < 80) {
+        insightHtml += `<br><br><span style="color:var(--success)">🌿 <strong>우수:</strong></span> 목표 예산 내에서 아주 알뜰하게 육아 중입니다! 남는 예산으로 아기 통장에 쏙 넣어주는 건 어떨까요?`;
+    } else {
+        insightHtml += `<br><br>👍 <strong>안정:</strong> 목표 예산에 알맞은 이상적인 육아 소비 패턴입니다. 지금처럼 유지하세요!`;
+    }
+
+    document.getElementById('money-insight').innerHTML = insightHtml;
+    document.getElementById('money-avg-percent').innerText = `설정한 목표 예산 대비 ${percent}% 수준`;
+    
+    const resBox = document.getElementById('money-result');
+    resBox.style.display = 'block';
+    resBox.style.animation = "none"; 
+    setTimeout(() => resBox.style.animation = "scaleUp 0.4s ease", 10); 
+
+    setTimeout(() => drawDonutChart(d, f, e), 100);
+    
+    updateHomeDashboard(); 
+}
+
 window.onload = () => { 
     loadAllExternalData(); 
     renderBabyInfo(); 
     loadBabyPhoto(); 
     initDarkMode();
+    
+    // 🔥 초기화 시 패널들을 한 번씩 리셋해줘서 디스플레이 충돌 완벽 방지
+    document.querySelectorAll('.panel-block').forEach(p => {
+        if(!p.classList.contains('active')) p.style.display = 'none';
+    });
+    
     renderFeverTimeline();
+    updateHomeDashboard();
 };

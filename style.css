@@ -1095,3 +1095,36 @@ input[type="checkbox"]:checked + .sym-btn {
 body.dark-mode input[type="checkbox"]:checked + .sym-btn {
     background: rgba(49, 130, 246, 0.2);
 }
+
+/* =========================================
+   📱 홈 대시보드 위젯 전용 프리미엄 디자인
+========================================= */
+/* 빠른 실행 2x2 위젯 버튼 */
+.quick-btn {
+    background: var(--bg-card, #FFF);
+    border: 1px solid var(--border, #E5E8EB);
+    padding: 18px 12px;
+    border-radius: 20px;
+    text-align: center;
+    font-weight: 800;
+    color: var(--text-m);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.quick-btn:active {
+    transform: scale(0.94);
+    background: var(--bg-sub, #F2F5F8);
+}
+
+/* 탭들 내용이 짧아도 밑에 휑한 공백 안 보이게 최소 높이 지정 */
+.tab-content {
+    min-height: 85vh; 
+    padding-bottom: 40px;
+}
