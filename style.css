@@ -1150,16 +1150,16 @@ body.dark-mode .history-btn {
 }
 
 /* =========================================
-   🚨 다크모드 하얀색 보호색(닌자) 오류 픽스
+   🚨 다크모드 하얀색 보호색(닌자) 완벽 픽스
 ========================================= */
-/* 1. 검증 공간 제보하기 & 모달 확인 버튼 구출 */
+/* 1. 배경이 하얀색으로 고정된 버튼들은 글씨를 까맣게 우회! */
 body.dark-mode button[onclick="openGoogleForm()"],
 body.dark-mode button[onclick="closeFestivalModalForce()"] {
-    background: #2D323B !important; 
-    color: #F9FAFB !important;
+    color: #111111 !important; 
+    font-weight: 900 !important;
 }
 
-/* 2. 월간 지출 리포트 뱃지 구출 */
+/* 2. 월간 지출 리포트 뱃지 구출 (이건 그대로 유지) */
 body.dark-mode .stat-badge {
     background: #2D323B !important;
     color: #F9FAFB !important;
