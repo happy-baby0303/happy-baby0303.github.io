@@ -10,7 +10,6 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,20 +26,14 @@
 
     <div class="wrapper">
         
-        <div id="tab-home" class="tab-content active">
-            
+        <div id="tab-home" class="tab-content active" style="padding: 12px 4px;">
             <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
                 <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
-                
                 <div class="home-hero-overlay" style="background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);">
-                    <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer; padding:0; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                        ✎
-                    </button>
-                    
+                    <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer; padding:0; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">✎</button>
                     <span class="home-hero-tag" style="background:var(--primary); color:white; align-self:flex-start; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px;">My Family Platform</span>
                     <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800; color:white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">등록 전</h2>
                     <span id="res-baby-name" style="font-size:14px; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">아기를 등록해주세요</span>
-                    
                     <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></div>
                 </div>
             </div>
@@ -74,28 +67,22 @@
             <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:12px; padding: 0 4px;">빠른 실행 위젯</div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px;">
                 <button class="quick-btn" onclick="navigateToPanel('fever')">
-                    <span style="font-size:26px; margin-bottom:2px;">🌡️</span>
-                    <span style="font-size:14px;">해열제 기록</span>
+                    <span style="font-size:26px; margin-bottom:2px;">🌡️</span><span style="font-size:14px;">해열제 기록</span>
                 </button>
                 <button class="quick-btn" onclick="navigateToPanel('ledger')">
-                    <span style="font-size:26px; margin-bottom:2px;">🧮</span>
-                    <span style="font-size:14px;">지출 입력</span>
+                    <span style="font-size:26px; margin-bottom:2px;">🧮</span><span style="font-size:14px;">지출 입력</span>
                 </button>
                 <button class="quick-btn" onclick="navigateToPanel('growth')">
-                    <span style="font-size:26px; margin-bottom:2px;">📈</span>
-                    <span style="font-size:14px;">성장/접종</span>
+                    <span style="font-size:26px; margin-bottom:2px;">📈</span><span style="font-size:14px;">성장/접종</span>
                 </button>
                 <button class="quick-btn" onclick="navigateToPanel('hotplace')">
-                    <span style="font-size:26px; margin-bottom:2px;">🗺️</span>
-                    <span style="font-size:14px;">주말 나들이</span>
+                    <span style="font-size:26px; margin-bottom:2px;">🗺️</span><span style="font-size:14px;">주말 나들이</span>
                 </button>
             </div>
  
             <div class="diary-card" onclick="window.location.href='diary.html'">
                 <div>
-                    <h3 class="diary-card-title">
-                        <span style="font-size: 1.3rem;">💌</span> 오늘의 육아 문답
-                    </h3>
+                    <h3 class="diary-card-title"><span style="font-size: 1.3rem;">💌</span> 오늘의 육아 문답</h3>
                     <p class="diary-card-desc">하루 한 줄, 우리 아기와의 기억 기록하기</p>
                 </div>
                 <div class="diary-card-btn">기록하러 가기 ❯</div>
@@ -104,11 +91,7 @@
             <div class="diary-card play-card">
                 <div style="flex-grow: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <h3 class="play-card-title">
-                            <span style="font-size: 1.3rem;">🧸</span> 
-                            <span style="font-size: 0.9rem; opacity: 0.8; margin-right: 4px;">D+<span id="play-dday-badge">0</span></span> 
-                            오늘의 5분 놀이
-                        </h3>
+                        <h3 class="play-card-title"><span style="font-size: 1.3rem;">🧸</span> <span style="font-size: 0.9rem; opacity: 0.8; margin-right: 4px;">D+<span id="play-dday-badge">0</span></span> 오늘의 5분 놀이</h3>
                         <button id="btn-shuffle-play" onclick="shufflePlay()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; padding:0; line-height:1;" title="다른 놀이 뽑기">🔄</button>
                     </div>
                     <p id="play-title" class="play-title">장난감을 불러오는 중...</p>
@@ -119,56 +102,24 @@
 
             <div class="app-box" style="padding: 22px;">
                 <div style="font-size: 15px; font-weight: 800; margin-bottom: 6px; color: var(--text-m);">💡 하윤이네 주말 미션</div>
-                <p style="font-size: 13.5px; color: var(--text-s); line-height: 1.55; word-break: keep-all;">매번 주말마다 우리 아이와 어디 갈지 여기저기 흩어진 정보를 찾느라 지친 부모님들을 위해 만들었습니다. 지자체 오피셜 무료 행사와 직접 검증한 안심 공간 정보만 쏙쏙 골라 한눈에 보여드릴게요. 이번 주말도 아이들과 함께 복잡한 준비 없이 행복하고 편안한 추억만 가득 만들어보세요!! *"기능 오류 제보나 나만 아는 안심 장소 추천은 **[토실이네 인스타 DM]**이나 **[블로그]*로 보내주시면 2차 업데이트에 적극 반영하겠습니다! 🤍"</p>
+                <p style="font-size: 13.5px; color: var(--text-s); line-height: 1.55; word-break: keep-all;">매번 주말마다 우리 아이와 어디 갈지 여기저기 흩어진 정보를 찾느라 지친 부모님들을 위해 만들었습니다. 지자체 오피셜 무료 행사와 직접 검증한 안심 공간 정보만 쏙쏙 골라 한눈에 보여드릴게요. 이번 주말도 아이들과 함께 복잡한 준비 없이 행복하고 편안한 추억만 가득 만들어보세요!!</p>
             </div>
 
             <div class="library-container" style="margin-top: 30px; padding: 0 12px;">
                 <div class="lib-title" style="font-size:18px; font-weight:900; margin-bottom:16px;">📚 육아 상식 라이브러리</div>
-                
                 <details class="flat-accordion">
                     <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">🌡️ 신생아/영유아 열날 때 대처법</summary>
                     <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-                        <p><strong>🚨 3개월 미만 아기가 38도 이상이면?</strong><br>
-                        즉시 종합병원 응급실로 가야 합니다. 3개월 미만 신생아는 면역력이 약해 패혈증 등 위험이 있으니 집에서 해열제 쓰지 마세요!</p>
-                        <br>
-                        <p><strong>✅ 열날 때 환경 관리</strong><br>
-                        - <strong>옷은 얇게:</strong> 두꺼운 옷은 피하고 가벼운 면 내의만 입혀주세요.<br>
-                        - <strong>실내 온도/습도:</strong> 22~24도, 습도 50~60%가 적당합니다.<br>
-                        - <strong>수분 보충:</strong> 탈수 예방을 위해 <strong>모유나 분유를 평소보다 자주, 조금씩</strong> 먹여주세요. <br>
-                        <span style="color:var(--danger); font-size:13px;">(※ 6개월 미만 아기에게 맹물이나 보리차는 신장에 무리를 주어 '수분 중독' 위험이 있으니 절대 금물입니다!)</span></p>
+                        <p><strong>🚨 3개월 미만 아기가 38도 이상이면?</strong><br>즉시 종합병원 응급실로 가야 합니다. 3개월 미만 신생아는 면역력이 약해 패혈증 등 위험이 있으니 집에서 해열제 쓰지 마세요!</p>
                     </div>
                 </details>
-
                 <details class="flat-accordion">
                     <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">💧 신생아 맹물·보리차, 언제부터 먹일까?</summary>
                     <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-                        <p><strong>🚨 생후 6개월 미만은 절대 금물!</strong><br>
-                        신생아는 아직 신장(콩팥) 기능이 미숙합니다. 이때 맹물이나 보리차를 마시면 체내 나트륨 농도가 급격히 떨어지는 <strong>'수분 중독(저나트륨혈증)'</strong>이 올 수 있어 매우 위험합니다. 영아의 수분은 오직 <strong>모유와 분유만으로도 100% 충분</strong>합니다.</p>
-                        <br>
-                        <p><strong>✅ 물은 언제부터, 어떻게 먹이나요?</strong><br>
-                        - <strong>시기:</strong> 생후 6개월 이후, <strong>이유식을 시작하면서</strong>부터 조금씩 시도하세요.<br>
-                        - <strong>종류:</strong> 끓인 후 식힌 맹물이 가장 좋습니다. 보리차는 곡물이라 간혹 알레르기를 유발할 수 있어 초기엔 맹물이 안전합니다.</p>
-                    </div>
-                </details>
-
-                <details class="flat-accordion">
-                    <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">💤 기적의 '통잠' 수면 교육, 언제부터?</summary>
-                    <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-                        <p><strong>✅ 수면 교육의 골든 타임</strong><br>
-                        전문가들은 보통 <strong>생후 6주~4개월 사이</strong>를 수면 교육의 적기로 봅니다. 이 시기부터 아기가 밤낮을 구분하기 시작하기 때문입니다.</p>
-                    </div>
-                </details>
-
-                <details class="flat-accordion">
-                    <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
-                    <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-                        <p><strong>✅ 정상적인 똥 (안심하세요!)</strong><br>
-                        - <strong>황금변:</strong> 가장 이상적인 상태입니다.<br>
-                        - <strong>녹변:</strong> 담즙이 장에 오래 머물거나, 산화되어 나오는 정상적인 변입니다.</p>
+                        <p><strong>🚨 생후 6개월 미만은 절대 금물!</strong><br>신생아는 수분 중독 위험이 있어 모유와 분유만으로 수분을 보충해야 합니다.</p>
                     </div>
                 </details>
             </div>
-
         </div> 
         
         <div id="tab-hotplace" class="tab-content">
@@ -214,30 +165,24 @@
             </div>
         </div>
 
-        <!-- =================================================================
-             🧰 3. 툴박스 탭 (🔥 박스 중첩 완벽 철거 & 버튼 클릭 100% 정상화)
-             ================================================================= -->
         <div id="tab-toolbox" class="tab-content">
-            <!-- 가장 겉에 있는 단 하나의 하얀색 겉포장 상자 -->
-            <div class="app-box">
+            <div class="app-box" style="padding-bottom: 40px; min-height: 75vh;">
                 <h1 class="app-title">🧰 필수 육아 툴박스</h1>
                 <p class="app-desc" style="margin-bottom:20px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
                 
-                <!-- 💡 버튼(칩셋)에서 하드코딩된 inline-style을 싹 제거하여 CSS의 .active가 정상 작동하도록 수리함! -->
-                <div class="toolbox-grid">
+                <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px;">
                     <div id="btn-tool-money" class="tool-chip active" onclick="switchTool('money', this)">
-                        <span class="t-icon">💰</span><span class="t-label">가계부</span>
+                        <span class="t-icon" style="font-size: 22px; display: block; margin-bottom: 6px;">💰</span><span class="t-label" style="font-size: 12px; font-weight: 800;">가계부</span>
                     </div>
                     <div id="btn-tool-fever" class="tool-chip" onclick="switchTool('fever', this)">
-                        <span class="t-icon">🌡️</span><span class="t-label">해열제</span>
+                        <span class="t-icon" style="font-size: 22px; display: block; margin-bottom: 6px;">🌡️</span><span class="t-label" style="font-size: 12px; font-weight: 800;">해열제</span>
                     </div>
                     <div id="btn-tool-growth" class="tool-chip" onclick="switchTool('growth', this)">
-                        <span class="t-icon">📈</span><span class="t-label" style="letter-spacing:-1px;">성장/건강</span>
+                        <span class="t-icon" style="font-size: 22px; display: block; margin-bottom: 6px;">📈</span><span class="t-label" style="font-size: 12px; font-weight: 800;">성장/건강</span>
                     </div>
                 </div>
 
-                <!-- 💰 가계부 패널 (박스 스타일 강제 무효화) -->
-                <div id="panel-money" class="panel-block active" style="box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
+                <div id="panel-money" class="panel-block active" style="display:block; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--text-m); padding-bottom:12px; margin-bottom:24px;">
                         <div style="font-size:16.5px; font-weight:900; color:var(--text-m);">📊 육아 소비 정밀 진단기</div>
                         <button class="history-btn" onclick="toggleHistory()" style="padding: 6px 12px; background: var(--bg-sub, #F2F5F8); color: var(--text-m); font-size: 13px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">과거 내역</button>
@@ -262,7 +207,6 @@
                                 <span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span>
                             </div>
                         </div>
-
                         <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; border-bottom: 1px dashed var(--border);">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div style="font-size:22px;">🍼</div>
@@ -273,7 +217,6 @@
                                 <span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span>
                             </div>
                         </div>
-
                         <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; margin-bottom: 24px;">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div style="font-size:22px;">🧸</div>
@@ -291,7 +234,7 @@
                     <div id="history-list-area" style="display:none; margin-top:20px; background: var(--bg-sub, #F2F5F8); border-radius:16px; padding:20px; border:1px solid var(--border);">
                         <h3 style="font-size:15px; margin-bottom:12px; font-weight:800; color:var(--text-m);">📅 누적 데이터 셋</h3>
                         <div id="history-items"></div>
-                        <button class="btn-main" style="background:#FFF !important; color:var(--text-m) !important; font-size:14px; margin-top:14px; border:1px solid var(--border) !important; box-shadow:none !important;" onclick="toggleHistory()">닫기</button>
+                        <button class="btn-main" style="background:var(--bg-card, #FFF) !important; color:var(--text-m) !important; font-size:14px; margin-top:14px; border:1px solid var(--border) !important; box-shadow:none !important;" onclick="toggleHistory()">닫기</button>
                     </div>
 
                     <div id="money-result" style="display:none; margin-top:24px; padding-top:24px;">
@@ -304,12 +247,11 @@
                                 <canvas id="donutChart"></canvas>
                             </div>
                             <div id="money-avg-percent" style="font-size:14.5px; font-weight:800; color:#FFF; background:var(--primary); padding:12px; border-radius:12px; margin-bottom:16px;"></div>
-                            <div id="money-insight" style="text-align:left; font-size:14px; line-height:1.6; padding:16px; background: #FFF; border-radius:12px; border:1px solid var(--border); color:var(--text-m); font-weight:600;"></div>
+                            <div id="money-insight" style="text-align:left; font-size:14px; line-height:1.6; padding:16px; background: var(--bg-card, #FFF); border-radius:12px; border:1px solid var(--border); color:var(--text-m); font-weight:600;"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 🌡️ 해열제 패널 (박스 스타일 강제 무효화) -->
                 <div id="panel-fever" class="panel-block" style="display:none; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--danger); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">🌡️ 투약 용량 안전 계측</div>
                     
@@ -367,8 +309,8 @@
                         <div style="padding:10px 0; margin-bottom:24px;">
                             <label style="font-size:14px; font-weight:800; display:block; margin-bottom:12px; color:var(--text-m);">1. 방금 먹인 약 선택 (안전 잠금)</label>
                             <div class="pill-selector" style="display:flex; gap:10px; margin-bottom:20px;">
-                                <button id="btn-pill-red" class="pill-btn" onclick="selectPill('red')" style="flex:1; padding:14px 0; border-radius:12px; border:1px solid var(--border); background:#FFF; font-size:13.5px; font-weight:800; color:var(--text-s); cursor:pointer; transition:all 0.2s;">🔴 아세트아미노펜<br><span style="font-size:11px; font-weight:600;">(빨강)</span></button>
-                                <button id="btn-pill-blue" class="pill-btn" onclick="selectPill('blue')" style="flex:1; padding:14px 0; border-radius:12px; border:1px solid var(--border); background:#FFF; font-size:13.5px; font-weight:800; color:var(--text-s); cursor:pointer; transition:all 0.2s;">🔵 이부프로펜<br><span style="font-size:11px; font-weight:600;">(파랑)</span></button>
+                                <button id="btn-pill-red" class="pill-btn" onclick="selectPill('red')" style="flex:1; padding:14px 0; border-radius:12px; border:1px solid var(--border); background:var(--bg-card, #FFF); font-size:13.5px; font-weight:800; color:var(--text-s); cursor:pointer; transition:all 0.2s;">🔴 아세트아미노펜<br><span style="font-size:11px; font-weight:600;">(빨강)</span></button>
+                                <button id="btn-pill-blue" class="pill-btn" onclick="selectPill('blue')" style="flex:1; padding:14px 0; border-radius:12px; border:1px solid var(--border); background:var(--bg-card, #FFF); font-size:13.5px; font-weight:800; color:var(--text-s); cursor:pointer; transition:all 0.2s;">🔵 이부프로펜<br><span style="font-size:11px; font-weight:600;">(파랑)</span></button>
                             </div>
 
                             <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 복용 직전 체온 (℃)</label>
@@ -381,19 +323,19 @@
                             <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
                                 <label style="flex:1; min-width:70px;">
                                     <input type="checkbox" id="sym-cough" style="display:none;">
-                                    <div class="sym-btn" style="background:#FFF; padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">🤧 기침/콧물</div>
+                                    <div class="sym-btn" style="background:var(--bg-card, #FFF); padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">🤧 기침/콧물</div>
                                 </label>
                                 <label style="flex:1; min-width:70px;">
                                     <input type="checkbox" id="sym-vomit" style="display:none;">
-                                    <div class="sym-btn" style="background:#FFF; padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">🤮 구토</div>
+                                    <div class="sym-btn" style="background:var(--bg-card, #FFF); padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">🤮 구토</div>
                                 </label>
                                 <label style="flex:1; min-width:70px;">
                                     <input type="checkbox" id="sym-diarrhea" style="display:none;">
-                                    <div class="sym-btn" style="background:#FFF; padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">💩 설사</div>
+                                    <div class="sym-btn" style="background:var(--bg-card, #FFF); padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">💩 설사</div>
                                 </label>
                                 <label style="flex:1; min-width:70px;">
                                     <input type="checkbox" id="sym-nofood" style="display:none;">
-                                    <div class="sym-btn" style="background:#FFF; padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">😰 밥 거부</div>
+                                    <div class="sym-btn" style="background:var(--bg-card, #FFF); padding:10px 6px; border:1px solid var(--border); border-radius:10px; font-size:12.5px; font-weight:700; color:var(--text-s); text-align:center;">😰 밥 거부</div>
                                 </label>
                             </div>
 
@@ -411,64 +353,98 @@
                     </div>
                 </div>
 
-                <!-- 📈 성장 마스터 패널 (박스 스타일 강제 무효화) -->
                 <div id="panel-growth" class="panel-block" style="display:none; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
-                    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--success); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">📈 영유아 종합 건강/성장 마스터</div>
+                    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--success); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">📈 영유아 종합 성장/건강 마스터</div>
                     
                     <div class="disclaimer-box" style="background: #FFF9E6; border-radius: 14px; padding: 18px; margin-bottom: 20px;">
-                        <p style="color:#B78103; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [필독: 의료 정보 면책 조항]</p>
+                        <p style="color:#B78103; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [의료 정보 면책 조항]</p>
                         <p style="font-size:12.5px; color:#5C4300; line-height:1.5;">
-                            본 종합 진단기는 질병관리청 표준 데이터를 기반으로 산출된 <strong style="color:#D32F2F;">단순 참고용 데이터</strong>입니다. 판단은 <strong>반드시 전문의와 상담</strong>하시기 바랍니다.
+                            질병관리청 표준 성장도표 기반의 정밀 백분위 추정치입니다. 실제 발달 평가는 반드시 소아청소년과 전문의의 영유아 검진을 통해 확인하세요.
                         </p>
                     </div>
 
-                    <div class="input-group">
-                        <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px;">아기 생년월일 입력</label>
-                        <div class="input-wrapper" style="border-bottom: 2px solid var(--border); padding-bottom:6px;">
-                            <input type="date" id="v-birth" style="width:100%; border:none; outline:none; background:transparent; font-size:18px; font-weight:800;">
+                    <div style="background:var(--bg-sub, #F8F9FA); padding:20px; border-radius:16px; margin-bottom:24px;">
+                        <div style="font-size:13px; font-weight:800; color:var(--primary); background:rgba(49,130,246,0.06); padding:10px; border-radius:10px; margin-bottom:18px; text-align:center; border:1px dashed var(--primary);">
+                            💡 키와 몸무게는 둘 중 하나만 입력해도 또래 등수 진단이 가능해요!
+                        </div>
+
+                        <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">1. 아기 생년월일</label>
+                        <div style="border-bottom: 2px solid var(--border); padding-bottom:6px; margin-bottom:16px;">
+                            <input type="date" id="v-birth" style="width:100%; border:none; outline:none; background:transparent; font-size:18px; font-weight:800; color:var(--text-m);">
+                        </div>
+
+                        <div style="display:flex; gap:12px; margin-bottom:16px;">
+                            <div style="flex:1;">
+                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 성별</label>
+                                <select id="v-gender" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:15px; font-weight:700; background:var(--bg-card, #FFF); color:var(--text-m);">
+                                    <option value="boy">👦 남아</option>
+                                    <option value="girl">👧 여아</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:12px;">
+                            <div style="flex:1;">
+                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">3. 현재 키 (cm) <span style="font-size:11px; color:var(--text-sub); font-weight:500;">(선택)</span></label>
+                                <input type="number" id="v-height" step="0.1" placeholder="모르면 비워두기" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:16px; font-weight:800; text-align:center; background:var(--bg-card, #FFF); color:var(--text-m);">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">4. 체중 (kg) <span style="font-size:11px; color:var(--text-sub); font-weight:500;">(선택)</span></label>
+                                <input type="number" id="v-weight-growth" step="0.1" placeholder="모르면 비워두기" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:16px; font-weight:800; text-align:center; background:var(--bg-card, #FFF); color:var(--text-m);">
+                            </div>
                         </div>
                     </div>
-                    <button class="btn-main" onclick="calcHealthMaster()" style="background:var(--success) !important; box-shadow: 0 6px 16px rgba(0, 179, 122, 0.25) !important;">성장/접종 종합 리포트 산출</button>
 
-                    <div id="growth-result" style="display:none; margin-top:24px; padding-top:24px;">
+                    <button class="btn-main" onclick="calcHealthMaster()" style="background:var(--success) !important; box-shadow: 0 6px 16px rgba(0, 179, 122, 0.25) !important; margin-top:0;">✨ 대한민국 100명 중 몇 등? 분석하기</button>
+
+                    <div id="growth-result" style="display:none; margin-top:30px;">
+                        
                         <div style="text-align:center; margin-bottom:24px;">
-                            <div style="font-size:14px; color:var(--text-sub); font-weight:700;">오늘 기준 우리 아기는</div>
+                            <div style="font-size:14px; color:var(--text-sub); font-weight:700;">우리아기 성장 기록일</div>
                             <div style="font-size:40px; font-weight:900; color:var(--success); letter-spacing:-1px;">D+<span id="res-dday">0</span></div>
                             <div style="display:inline-block; background:#E6F7F2; padding:6px 14px; border-radius:10px; font-size:13.5px; font-weight:800; color:var(--success); margin-top:6px;">생후 <span id="res-month">0</span>개월 (<span id="res-week">0</span>주 차)</div>
                         </div>
 
-                        <div class="ww-status-box" id="ww-status" style="background:var(--bg-sub, #F8F9FA); border-radius:16px; padding:20px; font-size:14px; line-height:1.55; margin-bottom:16px;"></div>
-
-                        <div style="padding:16px 0; border-bottom: 1px dashed var(--border);">
-                            <div class="health-card-title" style="font-size:15px; font-weight:800; margin-bottom:12px;"><span class="icon">💉</span> 이번 달 소아과 접종 스케줄</div>
-                            <div style="font-size:13px; color:var(--text-s); margin-bottom:10px;">질병관리청 국가 필수예방접종 가이드라인 기준 (오차범위 ±1주)</div>
-                            <div id="vaccine-info" class="vaccine-list" style="background:#FFF; padding:12px; border-radius:10px; font-size:13.5px; font-weight:700; border-left:4px solid var(--primary);"></div>
+                        <div style="background:var(--bg-sub, #F8F9FA); border-radius:20px; padding:20px; margin-bottom:20px;">
+                            <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:16px; display:flex; align-items:center; gap:6px;"><span style="font-size:20px;">🏅</span> 또래 100명 중 우리 아기 등수</div>
+                            
+                            <div style="display:flex; gap:12px; margin-bottom:12px;">
+                                <div style="flex:1; background:var(--bg-card, #FFF); padding:16px; border-radius:16px; border:1px solid var(--border); text-align:center;">
+                                    <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">키 (신장)</div>
+                                    <div style="font-size:24px; font-weight:900; color:var(--primary); margin-bottom:4px;" id="pct-height">0%</div>
+                                    <div style="font-size:11px; font-weight:700; color:var(--text-sub);" id="desc-height">-</div>
+                                </div>
+                                <div style="flex:1; background:var(--bg-card, #FFF); padding:16px; border-radius:16px; border:1px solid var(--border); text-align:center;">
+                                    <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">몸무게 (체중)</div>
+                                    <div style="font-size:24px; font-weight:900; color:var(--success); margin-bottom:4px;" id="pct-weight">0%</div>
+                                    <div style="font-size:11px; font-weight:700; color:var(--text-sub);" id="desc-weight">-</div>
+                                </div>
+                            </div>
+                            <div id="growth-insight" style="font-size:13px; line-height:1.5; color:var(--text-m); font-weight:700; background:var(--bg-card, #FFF); padding:12px; border-radius:12px; border-left:4px solid var(--success);"></div>
                         </div>
 
-                        <div style="padding:16px 0; border-bottom: 1px dashed var(--border);">
-                            <div class="health-card-title" style="font-size:15px; font-weight:800; margin-bottom:12px;"><span class="icon">⚖️</span> 소아청소년 성장도표 (50백분위수)</div>
-                            <div style="font-size:13px; color:var(--text-s); margin-bottom:10px;">현재 <span id="weight-month-label">0</span>개월 기준 대한민국 평균 체중 참고치입니다.</div>
-                            <div class="health-data-row" style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px dashed var(--border); font-size:14px;">
-                                <span style="color:var(--text-s); font-weight:700;">👦 남아 평균</span>
-                                <span id="weight-boy" style="color:var(--primary); font-weight:800;">0.0 kg</span>
-                            </div>
-                            <div class="health-data-row" style="display:flex; justify-content:space-between; padding:12px 0; font-size:14px;">
-                                <span style="color:var(--text-s); font-weight:700;">👧 여아 평균</span>
-                                <span id="weight-girl" style="color:var(--accent); font-weight:800;">0.0 kg</span>
+                        <div style="display:grid; grid-template-columns: 1fr; gap:12px; margin-bottom:24px;">
+                            <div class="ww-status-box" id="ww-status" style="background:#FFF9E6; border:1px solid #FFE58F; border-radius:16px; padding:20px; font-size:14px; line-height:1.55; margin:0;"></div>
+                            
+                            <div style="background:var(--bg-sub, #F0F7FF); border:1px solid #E1F0FF; border-radius:16px; padding:20px;">
+                                <div style="font-size:14px; font-weight:900; color:#3182F6; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+                                    <span>💉 다음 예방접종 브리핑</span>
+                                    <span id="vac-dday" style="background:#3182F6; color:#FFF; padding:4px 8px; border-radius:8px; font-size:11px;">-</span>
+                                </div>
+                                <div id="vaccine-info" style="font-size:13.5px; font-weight:700; color:var(--text-m); line-height:1.5;"></div>
                             </div>
                         </div>
                         
-                        <div style="padding:16px 0; text-align:left;">
-                            <h3 style="font-size:14.5px; margin-bottom:8px; font-weight:800; color:var(--text-m);">📅 전체 원더윅스 도약기 타임라인</h3>
-                            <table class="ww-table" id="ww-table" style="width:100%; border-collapse:collapse; font-size:13.5px;"></table>
+                        <div class="result-card" style="padding:0; text-align:left; background:transparent !important; border:none !important; box-shadow:none !important;">
+                            <h3 style="font-size:15px; margin-bottom:12px; font-weight:800; color:var(--text-m);">📅 전체 원더윅스 도약기 타임라인</h3>
+                            <div style="background:var(--bg-sub, #F9FAFB); border-radius:16px; overflow:hidden;">
+                                <table class="ww-table" id="ww-table" style="width:100%; border-collapse:collapse; font-size:13.5px;"></table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-            </div> <!-- 오직 하나 남은 app-box 끝 -->
-        </div> <!-- tab-toolbox 끝 -->
-
-    </div> 
+            </div> </div> </div> 
 
     <div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
         <div style="border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 20px;">

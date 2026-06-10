@@ -1128,3 +1128,39 @@ body.dark-mode input[type="checkbox"]:checked + .sym-btn {
     min-height: 85vh; 
     padding-bottom: 40px;
 }
+
+/* =========================================
+   🚨 가계부/성장 패널 다크모드 글씨 증발 방지 패치
+========================================= */
+body.dark-mode {
+    /* 배경이 까매지면, 글씨 색상 변수들을 자동으로 하얗게 강제 교체! */
+    --text-m: #F9FAFB !important; 
+    --text-s: #B0B8C1 !important;
+    --border: #333842 !important;
+}
+
+body.dark-mode input, 
+body.dark-mode select {
+    color: #F9FAFB !important; /* 입력창 안의 숫자(0)도 하얗게 구출 */
+}
+
+body.dark-mode .history-btn {
+    background: #2D323B !important; /* 혼자 눈부시게 하얗던 과거내역 버튼 톤다운 */
+    color: #F9FAFB !important;
+}
+
+/* =========================================
+   🚨 다크모드 하얀색 보호색(닌자) 오류 픽스
+========================================= */
+/* 1. 검증 공간 제보하기 & 모달 확인 버튼 구출 */
+body.dark-mode button[onclick="openGoogleForm()"],
+body.dark-mode button[onclick="closeFestivalModalForce()"] {
+    background: #2D323B !important; 
+    color: #F9FAFB !important;
+}
+
+/* 2. 월간 지출 리포트 뱃지 구출 */
+body.dark-mode .stat-badge {
+    background: #2D323B !important;
+    color: #F9FAFB !important;
+}

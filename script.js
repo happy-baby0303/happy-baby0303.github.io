@@ -38,29 +38,31 @@ function switchOutingSubTab(type) {
 }
 
 function switchTool(panelId, el) {
-    // 💡 1. 상단 칩셋(버튼) 파란색 포커스 이동!
     document.querySelectorAll('.tool-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+    if(el) el.classList.add('active');
     
-    // 💡 2. 하단 패널(내용물) 껐다 켜기!
     document.querySelectorAll('.panel-block').forEach(p => {
         p.classList.remove('active');
-        p.style.display = 'none'; // 철저하게 끔
+        p.style.display = 'none'; 
     });
     
     const targetPanel = document.getElementById('panel-' + panelId);
     if(targetPanel) {
         targetPanel.classList.add('active');
-        targetPanel.style.display = 'block'; // 완벽하게 켬
+        targetPanel.style.display = 'block'; 
     }
+}
+
+function getV(id) { 
+    const el = document.getElementById(id);
+    if(!el) return 0;
+    return Number(el.value.replace(/,/g,'')) || 0; 
 }
 
 function formatNum(el) {
     let v = el.value.replace(/[^0-9]/g, '');
     if(v) el.value = Number(v).toLocaleString();
 }
-
-function getV(id) { return Number(document.getElementById(id).value.replace(/,/g,'')) || 0; }
 
 async function loadAllExternalData() {
     try {
@@ -351,9 +353,34 @@ const playDB = [
     { minM: 6, maxM: 8, title: "물티슈 캡 쏙쏙 뽑기", desc: "다 쓴 물티슈 통 안에 자투리 천이나 끈을 넣고 아기가 마음껏 뽑게 해주세요.", effect: "🤏 소근육 조작 및 성취감" },
     { minM: 6, maxM: 8, title: "이유식 용기 난타 밴드", desc: "플라스틱 용기를 엎어두고 나무 숟가락으로 신나게 두드리며 놀게 해주세요.", effect: "🥁 인과관계 이해 및 스트레스 해소" },
     { minM: 6, maxM: 8, title: "포스트잇 떼기", desc: "바닥이나 팝업 높이에 포스트잇을 붙여두고 아기가 직접 떼보게 하세요.", effect: "🖐 손끝 소근육(잡기) 발달" },
-    { minM: 6, maxM: 8, title: "종이컵 성 무너뜨리기", desc: "종이컵을 높이 쌓아준 뒤, 아기가 손으로 쳐서 무너뜨리게 해주세요.", effect: "💥 스트레스 해소 및 시각적 자극" },
+    { minM: 6, maxM: 8, title: "종이컵 성 무너뜨리기", desc: "종이컵을 높이 쌓아준 뒤, 아기가 손으로 쳐서 와르르 무너뜨리게 해주세요.", effect: "💥 스트레스 해소 및 시각적 자극" },
     { minM: 6, maxM: 8, title: "지퍼백 촉감 봉투", desc: "지퍼백 안에 물감이나 밀가루 반죽을 밀봉하고 꾹꾹 누르거나 밟게 해주세요.", effect: "🎨 안전한 오감 촉각 발달" },
-    { minM: 6, maxM: 8, title: "거실 텐트 숨바꼭질", desc: "식탁 밑이나 소파 뒤에 숨어서 아기가 기어 와서 찾게 유도해 보세요.", effect: "🏃‍♂️ 대근육 및 공간 지각 능력" }
+    { minM: 6, maxM: 8, title: "거실 텐트 숨바꼭질", desc: "식탁 밑이나 소파 뒤에 숨어서 아기가 기어 와서 찾게 유도해 보세요.", effect: "🏃‍♂️ 대근육 및 공간 지각 능력" },
+
+    { minM: 9, maxM: 12, title: "이불 속 장난감 구출 작전", desc: "아기가 보는 앞에서 최애 장난감을 이불 밑에 숨기고 찾아보게 하세요.", effect: "🕵️‍♂️ 문제 해결 능력 및 공간 지각" },
+    { minM: 9, maxM: 12, title: "휴지심 터널 통과하기", desc: "다 쓴 휴지심 안으로 작은 공이나 장난감을 통과시키며 '슝~' 소리를 내주세요.", effect: "👁️ 눈-손 협응력 발달" },
+    { minM: 9, maxM: 12, title: "스티커 떼기 놀이", desc: "엄마 손등이나 바닥에 큰 스티커를 살짝 붙여두고 아기가 엄지와 검지로 떼게 해주세요.", effect: "🖐 정교한 소근육 발달" },
+    { minM: 9, maxM: 12, title: "통 안에 쏙쏙", desc: "빈 분유통이나 바구니에 작은 블록이나 공을 '쏙!' 소리와 함께 넣고 빼보세요.", effect: "🗑️ 공간 개념 및 조작 능력" },
+    { minM: 9, maxM: 12, title: "거실 이불 썰매 타기", desc: "도톰한 담요 위에 아기를 앉히고 바닥에서 천천히 슝~ 썰매처럼 끌어주세요.", effect: "🎢 균형 감각 및 전정기관 자극" },
+    { minM: 9, maxM: 12, title: "맘마 먹여주기 코스프레", desc: "애착 인형을 가져와서 아기가 직접 숟가락으로 밥을 먹여주는 흉내를 내게 하세요.", effect: "🧸 모방 행동 및 사회성 발달" },
+    { minM: 9, maxM: 12, title: "그림책 스스로 넘기기", desc: "두꺼운 보드북을 주고 아기가 직접 책장을 넘길 때마다 크게 칭찬해 주세요.", effect: "📖 소근육 및 책과 친해지기" },
+
+    { minM: 13, maxM: 24, title: "신문지 마구 찢기 놀이", desc: "다 쓴 신문지나 이면지를 아기와 함께 북북 찢으며 종이 비를 내려주세요.", effect: "💥 대소근육 발달 및 스트레스 팡팡" },
+    { minM: 13, maxM: 24, title: "종이컵 볼링 게임", desc: "종이컵을 쌓아두고 부드러운 공을 굴려서 쓰러뜨리며 환호해 주세요.", effect: "🎳 방향 감각 및 성취감" },
+    { minM: 13, maxM: 24, title: "이불 돌돌 김밥 말기", desc: "아기를 이불 위에 눕히고 '김밥 말자~' 하며 돌돌 말았다가 간지럼 태우며 풀어주세요.", effect: "🍙 스킨십 및 신체 인지 능력" },
+    { minM: 13, maxM: 24, title: "마스킹 테이프 징검다리", desc: "바닥에 테이프로 선을 붙여두고, 선을 따라 걷거나 점프하는 놀이를 해보세요.", effect: "👣 대근육 및 신체 조절력" },
+    { minM: 13, maxM: 24, title: "동물농장 흉내 내기", desc: "아빠가 먼저 '사자 어흥!', '토끼 깡총!' 흉내를 내고 아기가 따라 하게 해보세요.", effect: "🦁 모방 능력 및 언어 표현력" },
+    { minM: 13, maxM: 24, title: "상자 구멍에 빨대 꽂기", desc: "구멍 뚫린 상자나 스티로폼에 아기가 직접 빨대를 콕콕 꽂게 유도해 보세요.", effect: "🎯 집중력 및 정교한 눈-손 협응" },
+    { minM: 13, maxM: 24, title: "안전 풍선 배구", desc: "가벼운 풍선을 불어 거실에서 떨어지지 않게 톡톡 치며 배구 놀이를 해보세요.", effect: "🎈 순발력 및 대근육 발달" },
+
+    { minM: 25, maxM: 36, title: "색깔 요정 분류하기", desc: "색깔이 다른 블록이나 장난감을 섞어두고 '빨간색은 어디 있을까?' 하며 모아보세요.", effect: "🎨 인지 능력 및 논리적 사고" },
+    { minM: 25, maxM: 36, title: "병원 놀이 / 마트 놀이", desc: "아기가 의사 선생님이나 계산원이 되어 부모님과 상황극을 해보세요.", effect: "🗣️ 사회성 및 언어 능력 발달" },
+    { minM: 25, maxM: 36, title: "식탁 밑 나만의 비밀기지", desc: "식탁이나 의자 위에 큰 담요를 덮어 텐트를 만들어주고 그 안에서 랜턴을 켜주세요.", effect: "⛺ 독립심 및 상상력 자극" },
+    { minM: 25, maxM: 36, title: "불 끄고 그림자 극장", desc: "방 불을 끄고 휴대폰 손전등으로 벽에 강아지, 새 등 손 그림자를 만들어 보세요.", effect: "🦅 시각적 상상력 및 창의력" },
+    { minM: 25, maxM: 36, title: "현관 신발 짝꿍 찾기", desc: "아빠, 엄마, 아기 신발을 섞어두고 '엄마 신발 짝꿍 찾아주세요!' 하고 미션을 주세요.", effect: "👟 짝 맞추기(인지) 및 성취감" },
+    { minM: 25, maxM: 36, title: "휴지심 망원경 탐험", desc: "휴지심 2개를 이어 붙여 망원경을 만들고 '저기 뭐가 보이나요?' 하며 탐험해보세요.", effect: "🔭 상상력 및 관찰력 향상" },
+    { minM: 25, maxM: 36, title: "눈 감고 과일 맛 맞추기", desc: "아기 눈을 가리고 과일 조각을 입에 쏙 넣어준 뒤 무슨 맛인지 맞춰보게 하세요.", effect: "👅 미각 자극 및 어휘력 발달" },
+    { minM: 25, maxM: 36, title: "빨래 개기 보조 요원", desc: "수건이나 양말을 같이 개면서 '이건 아빠 거, 이건 하윤이 거!' 하고 분류해 보세요.", effect: "👕 일상생활 참여 및 소속감" }
 ];
 
 let currentAvailablePlays = [];
@@ -415,42 +442,6 @@ function shufflePlay() {
             setTimeout(() => { btn.style.transform = 'rotate(0deg)'; btn.style.transition = 'none'; }, 300);
         }
     }
-}
-
-function formatDate(str) { if (!str || str.length !== 8) return str; return `${str.substring(4,6)}.${str.substring(6,8)}`; }
-
-const wwList = [{w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"}, {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"}, {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"}, {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"}, {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"}, {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"}, {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"}, {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"}, {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"}, {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}];
-const vaccineData = [{ maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" }, { maxMonth: 2, desc: "✅ B형간염 2차" }, { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" }, { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" }, { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차(선택)" }, { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>국가 지정 필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감 시즌일 경우 소아과 상담을 권장합니다." }, { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" }, { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" }, { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간" }];
-const weightData = [{ m: 0, boy: "3.3", girl: "3.2" }, { m: 1, boy: "4.5", girl: "4.2" }, { m: 2, boy: "5.6", girl: "5.1" }, { m: 3, boy: "6.4", girl: "5.8" }, { m: 4, boy: "7.0", girl: "6.4" }, { m: 5, boy: "7.5", girl: "6.9" }, { m: 6, boy: "7.9", girl: "7.3" }, { m: 7, boy: "8.3", girl: "7.6" }, { m: 8, boy: "8.6", girl: "7.9" }, { m: 9, boy: "8.9", girl: "8.2" }, { m: 10, boy: "9.2", girl: "8.5" }, { m: 11, boy: "9.4", girl: "8.7" }, { m: 12, boy: "9.6", girl: "8.9" }, { m: 15, boy: "10.3", girl: "9.6" }, { m: 18, boy: "10.9", girl: "10.2" }, { m: 24, boy: "12.2", girl: "11.5" }, { m: 36, boy: "14.3", girl: "13.9" }];
-
-function calcHealthMaster() {
-    const b = document.getElementById('v-birth').value;
-    if(!b) return alert("종합 분석을 위해 기준 출산(예정)일을 입력하세요.");
-    const birthDate = new Date(b);
-    const today = new Date();
-    const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
-    if (diffDays < 0) return alert("미래의 날짜는 입력할 수 없습니다.");
-    const week = Math.floor(diffDays / 7);
-    const month = Math.floor(diffDays / 30.436875); 
-    document.getElementById('res-dday').innerText = diffDays;
-    document.getElementById('res-month').innerText = month;
-    document.getElementById('res-week').innerText = week;
-    let curWW = wwList.find(x => week >= x.w-1 && week <= x.w+1);
-    let nxtWW = wwList.find(x => x.w > week);
-    let st = document.getElementById('ww-status');
-    if(curWW) { st.innerHTML = `<div style="font-size:15px; font-weight:800; color:#B78103; margin-bottom:6px;">🚨 현재 ${curWW.t} 진행 레이어</div><strong>특성 지표:</strong> ${curWW.d}. 영유아 주기성 보챔 패턴이 가중되는 시점이므로 세심한 정서 케어가 요구됩니다.`; } 
-    else { st.innerHTML = `<div style="font-size:15px; font-weight:800; color:var(--success); margin-bottom:6px;">☀️ 평온기 유지 레이어</div>정신 도약 발달 마진이 안정적인 비보챔 시기입니다.<br>${nxtWW ? '👉 차기 임계 도약 주기: <strong>' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 진입 대기.' : '모든 발달 도약 임계 매트릭스를 이수 완료했습니다.'}`; }
-    let table = `<tr><th>주차</th><th>진단 단계</th><th>특성 지표</th></tr>`;
-    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'class="active"' : ''; table += `<tr ${active}><td>${x.w-1}~${x.w+1}주</td><td>${x.t}</td><td>${x.d}</td></tr>`; });
-    document.getElementById('ww-table').innerHTML = table;
-    let vac = vaccineData.find(v => month <= v.maxMonth);
-    document.getElementById('vaccine-info').innerHTML = vac ? vac.desc : "해당 월령의 기초 접종 정보가 없습니다.";
-    let wInfo = weightData.slice().reverse().find(w => month >= w.m);
-    if(!wInfo) wInfo = weightData[0]; 
-    document.getElementById('weight-month-label').innerText = wInfo.m;
-    document.getElementById('weight-boy').innerText = wInfo.boy + " kg";
-    document.getElementById('weight-girl').innerText = wInfo.girl + " kg";
-    document.getElementById('growth-result').style.display = 'block';
 }
 
 function filterPlaces() {
@@ -1040,25 +1031,6 @@ function resetChecklist() {
 function closeChecklistForce() { document.getElementById('checklist-modal').style.display = 'none'; }
 function closeChecklist(e) { if (e.target.id === 'checklist-modal') closeChecklistForce(); }
 
-function downloadFeverReport() {
-    const target = document.getElementById('fever-timeline');
-    if(!target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) {
-        alert("캡처할 체온 기록이 없어요! 먼저 기록을 남겨주세요 🌡️");
-        return;
-    }
-
-    html2canvas(target, { 
-        backgroundColor: '#ffffff',
-        scale: 2 
-    }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = '우리아기_해열제_기록.png';
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-        alert("📸 사진첩(다운로드 폴더)에 캡처가 저장되었습니다! 소아과 원장님께 바로 보여주세요 👩‍⚕️");
-    });
-}
-
 function navigateToPanel(targetPanel) {
     if (targetPanel === 'hotplace') {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -1078,7 +1050,6 @@ function navigateToPanel(targetPanel) {
 
         let actualPanelId = targetPanel === 'ledger' ? 'money' : targetPanel; 
 
-        // 💡 위젯에서 눌렀을 때 칩셋 활성화 상태로 바꿔주기!
         document.querySelectorAll('.tool-chip').forEach(el => el.classList.remove('active'));
         const targetChip = document.getElementById('btn-tool-' + actualPanelId);
         if(targetChip) targetChip.classList.add('active');
@@ -1141,7 +1112,7 @@ function updateHomeDashboard() {
             feverCard.innerHTML = `
                 <div>
                     <div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">스마트 해열 타이머</div>
-                    <div style="font-size:14.5px; font-weight:800; opacity:0.8;">현재 등록된 체온 기록이 없습니다.</div>
+                    <div style="font-size:14.5px; font-weight:800; opacity:0.8;">현재 등록된 실시간 체온 기록이 없습니다.</div>
                 </div>
                 <span style="font-size:24px;">💚</span>
             `;
@@ -1170,7 +1141,7 @@ function updateHomeDashboard() {
             ledgerCard.innerHTML = `
                 <div>
                     <div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">이번 달 육아 소비 진단</div>
-                    <div style="font-size:14.5px; font-weight:800; opacity:0.8;">가계부를 작성하고 게이지를 확인하세요.</div>
+                    <div style="font-size:14.5px; font-weight:800; opacity:0.8;">가계부를 작성하고 실시간 게이지를 확인하세요.</div>
                 </div>
                 <span style="font-size:24px;">📊</span>
             `;
@@ -1262,13 +1233,149 @@ function analyzeMoney() {
     updateHomeDashboard(); 
 }
 
+// ==========================================
+// 📈 소아청소년 성장도표 정밀 백분위(Z-score) 및 디데이 위젯 엔진
+// ==========================================
+
+const wwList = [{w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"}, {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"}, {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"}, {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"}, {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"}, {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"}, {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"}, {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"}, {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"}, {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}];
+
+const vaccineData = [{ maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" }, { maxMonth: 2, desc: "✅ B형간염 2차" }, { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" }, { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" }, { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차" }, { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감 시즌일 경우 소아과 상담을 권장합니다." }, { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" }, { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" }, { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간" }];
+
+const growthStandard = {
+    boy: [ {m:0, h:49.9, w:3.3}, {m:1, h:54.7, w:4.5}, {m:2, h:58.4, w:5.6}, {m:3, h:61.4, w:6.4}, {m:4, h:63.9, w:7.0}, {m:5, h:65.9, w:7.5}, {m:6, h:67.6, w:7.9}, {m:7, h:69.2, w:8.3}, {m:8, h:70.6, w:8.6}, {m:9, h:72.0, w:8.9}, {m:10, h:73.3, w:9.2}, {m:11, h:74.5, w:9.4}, {m:12, h:75.7, w:9.6}, {m:15, h:79.1, w:10.3}, {m:18, h:82.3, w:10.9}, {m:24, h:87.1, w:12.2}, {m:36, h:96.1, w:14.3} ],
+    girl: [ {m:0, h:49.1, w:3.2}, {m:1, h:53.7, w:4.2}, {m:2, h:57.1, w:5.1}, {m:3, h:59.8, w:5.8}, {m:4, h:62.1, w:6.4}, {m:5, h:64.0, w:6.9}, {m:6, h:65.7, w:7.3}, {m:7, h:67.3, w:7.6}, {m:8, h:68.7, w:7.9}, {m:9, h:70.1, w:8.2}, {m:10, h:71.5, w:8.5}, {m:11, h:72.8, w:8.7}, {m:12, h:74.0, w:8.9}, {m:15, h:77.5, w:9.6}, {m:18, h:80.7, w:10.2}, {m:24, h:85.5, w:11.5}, {m:36, h:95.0, w:13.9} ]
+};
+
+function getPercentile(z) {
+    if (z < -3) return 1;
+    if (z > 3) return 99;
+    let p = 1 / (1 + Math.exp(-z * 1.702));
+    return Math.round(p * 100);
+}
+
+function calcHealthMaster() {
+    const b = document.getElementById('v-birth').value;
+    const gender = document.getElementById('v-gender').value;
+    
+    const hVal = document.getElementById('v-height').value;
+    const wVal = document.getElementById('v-weight-growth').value;
+    const h = hVal ? parseFloat(hVal) : null;
+    const w = wVal ? parseFloat(wVal) : null;
+
+    if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요!");
+    if(!h && !w) return alert("정확한 백분위 진단을 위해 키 또는 몸무게 중 하나 이상을 입력해 주세요!");
+
+    const birthDate = new Date(b);
+    const today = new Date();
+    const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
+    if (diffDays < 0) return alert("미래의 날짜는 입력할 수 없습니다.");
+    
+    const week = Math.floor(diffDays / 7);
+    const month = Math.floor(diffDays / 30.436875); 
+    
+    document.getElementById('res-dday').innerText = diffDays;
+    document.getElementById('res-month').innerText = month;
+    document.getElementById('res-week').innerText = week;
+
+    let curWW = wwList.find(x => week >= x.w-1 && week <= x.w+1);
+    let nxtWW = wwList.find(x => x.w > week);
+    let st = document.getElementById('ww-status');
+    if(curWW) { 
+        st.style.background = '#FFF0F1'; st.style.borderColor = '#FFE3E3';
+        st.innerHTML = `<div style="font-size:15px; font-weight:900; color:#D32F2F; margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> ${curWW.d}.<br>이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 엄빠의 멘탈을 꽉 잡고 아기를 많이 안아주세요!`; 
+    } else { 
+        st.style.background = '#E6F7F2'; st.style.borderColor = '#00B37A';
+        st.innerHTML = `<div style="font-size:15px; font-weight:900; color:#00B37A; margin-bottom:6px;">☀️ 맑음! 평온기 유지 중</div>현재 정신 도약 마진이 안정적인 비보챔 시기입니다.<br><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong>' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 발달 도약 임계 매트릭스를 이수 완료했습니다.'}</span>`; 
+    }
+
+    let table = `<tr><th>주차</th><th>진단 단계</th><th>특성 지표</th></tr>`;
+    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'class="active" style="background:#FFF0F1; color:#D32F2F;"' : ''; table += `<tr ${active}><td>${x.w-1}~${x.w+1}주</td><td>${x.t}</td><td>${x.d}</td></tr>`; });
+    document.getElementById('ww-table').innerHTML = table;
+
+    let vac = vaccineData.find(v => month <= v.maxMonth);
+    document.getElementById('vaccine-info').innerHTML = vac ? vac.desc : "해당 월령의 접종 정보가 없습니다.";
+    
+    let nextVacMonth = vac ? vac.maxMonth : 0;
+    let vacDdayText = "";
+    if (month === nextVacMonth) vacDdayText = "이번 달 접종 필요";
+    else if (nextVacMonth === 99) vacDdayText = "기초 접종 완료";
+    else vacDdayText = `약 ${nextVacMonth - month}개월 뒤 접종`;
+    document.getElementById('vac-dday').innerText = vacDdayText;
+
+    let standardArr = growthStandard[gender];
+    let std = standardArr.slice().reverse().find(x => month >= x.m);
+    if(!std) std = standardArr[0]; 
+
+    const sdHeight = std.h * 0.04; 
+    const sdWeight = std.w * 0.12;
+
+    const getDesc = (pct, type) => {
+        if(pct >= 95) return `매우 큼 (상위 5%)`;
+        if(pct >= 75) return `큰 편 (상위 25%)`;
+        if(pct >= 25) return `평균 범위 (정상)`;
+        if(pct >= 5) return `작은 편 (하위 25%)`;
+        return `매우 작음 (소아과 상담 요망)`;
+    };
+
+    let pctHeight = null;
+    let pctWeight = null;
+
+    if (h) {
+        const zHeight = (h - std.h) / sdHeight;
+        pctHeight = getPercentile(zHeight);
+        document.getElementById('pct-height').innerText = `상위 ${100 - pctHeight}%`;
+        document.getElementById('desc-height').innerText = getDesc(pctHeight, '키');
+    } else {
+        document.getElementById('pct-height').innerText = `-`;
+        document.getElementById('desc-height').innerText = `미입력`;
+    }
+
+    if (w) {
+        const zWeight = (w - std.w) / sdWeight;
+        pctWeight = getPercentile(zWeight);
+        document.getElementById('pct-weight').innerText = `상위 ${100 - pctWeight}%`;
+        document.getElementById('desc-weight').innerText = getDesc(pctWeight, '몸무게');
+    } else {
+        document.getElementById('pct-weight').innerText = `-`;
+        document.getElementById('desc-weight').innerText = `미입력`;
+    }
+
+    let insightMsg = "";
+    if (w && !h) {
+        if (pctWeight > 90) insightMsg = "💪 몸무게가 10등 안에 드는 튼튼한 우량아예요! 잘 먹는 건 축복입니다.";
+        else if (pctWeight < 10) insightMsg = "🌱 체중 증가가 조금 더딘 편입니다. 영유아 검진 시 원장님과 상담해 보세요.";
+        else insightMsg = "⚖️ 몸무게가 아주 안정적인 평균 범위에서 쑥쑥 자라고 있어요!";
+    } else if (h && !w) {
+        if (pctHeight > 90) insightMsg = "🦒 키가 또래 10% 안에 들 정도로 훤칠하게 자라고 있어요!";
+        else if (pctHeight < 10) insightMsg = "🌱 키 성장이 다소 느린 편입니다. 꾸준히 지켜봐 주세요.";
+        else insightMsg = "⚖️ 키가 안정적인 평균 범위에서 건강하게 자라고 있어요!";
+    } else if (h && w) {
+        if (pctWeight > 90) insightMsg = "💪 아기는 또래 100명 중 몸무게가 10등 안에 드는 튼튼한 우량아예요! 잘 먹는 건 축복입니다.";
+        else if (pctWeight < 10) insightMsg = "🌱 몸무게 증가가 다소 느린 편입니다. 영유아 검진 시 소아과 원장님과 식단/수유량을 상담해 보시면 좋아요.";
+        else if (pctHeight > 80 && pctWeight < 50) insightMsg = "🦒 키에 비해 날씬한 모델 체형이네요! 균형 있게 아주 잘 자라고 있습니다.";
+        else insightMsg = "⚖️ 키와 몸무게 모두 완벽한 황금 밸런스로 아주 건강하게 쑥쑥 크고 있어요!";
+    }
+
+    let babyNameText = "아기";
+    const genderSelect = document.getElementById('v-gender');
+    if (genderSelect && genderSelect.options.length > 0) {
+        babyNameText = genderSelect.options[genderSelect.selectedIndex].text.split(' ')[1] + ' 아기';
+    }
+    document.getElementById('growth-insight').innerText = insightMsg.replace('아기', babyNameText); 
+
+    document.getElementById('growth-result').style.display = 'block';
+    
+    setTimeout(() => {
+        document.getElementById('growth-result').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+}
+
 window.onload = () => { 
     loadAllExternalData(); 
     renderBabyInfo(); 
     loadBabyPhoto(); 
     initDarkMode();
     
-    // 🔥 초기화 시 패널들을 한 번씩 리셋해줘서 디스플레이 충돌 완벽 방지
     document.querySelectorAll('.panel-block').forEach(p => {
         if(!p.classList.contains('active')) p.style.display = 'none';
     });
