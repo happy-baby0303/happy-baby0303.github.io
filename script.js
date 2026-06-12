@@ -163,8 +163,17 @@ function getV(id) { const el = document.getElementById(id); return !el ? 0 : Num
 function formatNum(el) { let v = el.value.replace(/[^0-9]/g, ''); if(v) el.value = Number(v).toLocaleString(); }
 
 async function loadAllExternalData() {
-    try { const resFest = await fetch('festivals.json'); if (resFest.ok) apiFestivals = await resFest.json(); } catch (e) {}
-    try { const resPlaces = await fetch('places.json'); if (resPlaces.ok) hotplacesData = await resPlaces.json(); } catch (e) {}
+    // 깃허브 페이지의 주소 구조에 맞춰서 경로를 명시해 주는 것이 안전합니다.
+    // 만약 파일이 index.html과 같은 위치에 있다면 './'를 붙여보세요.
+    try {
+        const resFest = await fetch('./festivals.json'); 
+        if (resFest.ok) apiFestivals = await resFest.json();
+        
+        const resPlaces = await fetch('./places.json');
+        if (resPlaces.ok) hotplacesData = await resPlaces.json();
+    } catch (e) {
+        console.error("파일 경로를 확인하세요. JSON 파일이 리포지토리에 올라가 있나요?", e);
+    }
     filterPlaces();
 }
 
