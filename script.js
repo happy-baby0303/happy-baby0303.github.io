@@ -162,21 +162,32 @@ function initQuickScrollDrag() {
 function getV(id) { const el = document.getElementById(id); return !el ? 0 : Number(el.value.replace(/,/g,'')) || 0; }
 function formatNum(el) { let v = el.value.replace(/[^0-9]/g, ''); if(v) el.value = Number(v).toLocaleString(); }
 
+// [script.js에서 이 함수를 찾아서 이렇게 바꾸세요]
 async function loadAllExternalData() {
-    // 깃허브 페이지의 주소 구조에 맞춰서 경로를 명시해 주는 것이 안전합니다.
-    // 만약 파일이 index.html과 같은 위치에 있다면 './'를 붙여보세요.
-    try {
-        const resFest = await fetch('./festivals.json'); 
-        if (resFest.ok) apiFestivals = await resFest.json();
-        
-        const resPlaces = await fetch('./places.json');
-        if (resPlaces.ok) hotplacesData = await resPlaces.json();
-    } catch (e) {
-        console.error("파일 경로를 확인하세요. JSON 파일이 리포지토리에 올라가 있나요?", e);
-    }
+    // 1. [핵심] 데이터 로딩 전, 일단 화면을 먼저 그립니다.
+    // 그래야 데이터가 없어도 버튼들과 UI가 정상적으로 작동합니다.
     filterPlaces();
+    
+    // 2. 이제 데이터는 배경에서 조용히 불러옵니다.
+    // 에러가 나도 filterPlaces()를 다시 실행하지 않도록 안전하게 처리합니다.
+    try {
+        if (window.location.protocol !== 'file:') {
+            const resFest = await fetch('festivals.json');
+            if (resFest.ok) {
+                apiFestivals = await resFest.json();
+                filterPlaces(); // 데이터를 불러왔을 때만 다시 그림
+            }
+            
+            const resPlaces = await fetch('places.json');
+            if (resPlaces.ok) {
+                hotplacesData = await resPlaces.json();
+                filterPlaces(); // 데이터를 불러왔을 때만 다시 그림
+            }
+        }
+    } catch (e) {
+        console.warn("데이터 로드 실패 - 앱은 정상 작동 중");
+    }
 }
-
 function setRegion(region, btn) {
     currentRegion = region;
     document.querySelectorAll('.filter-wrap .filter-btn').forEach(b => b.classList.remove('active'));
@@ -373,27 +384,42 @@ function resetMoneyAll() {
     }
 }
 function calcHotDeal() {
-    const cat = document.getElementById('hd-category').value, price = Number(document.getElementById('hd-total-price').value.replace(/,/g,'')), count = Number(document.getElementById('hd-count').value);
-    if(!price || !count) return alert("결제 금액과 수량을 정확히 숫자로 입력해주세요!");
+    const priceEl = document.getElementById('hd-total-price');
+    const countEl = document.getElementById('hd-count');
+    const standardEl = document.getElementById('hd-standard-price'); // 새로 만드신 기준가
+    
+    if(!priceEl || !countEl || !standardEl) return alert("입력창을 확인하세요!");
+    
+    const price = Number(priceEl.value.replace(/,/g,''));
+    const count = Number(countEl.value);
+    const standardPrice = Number(standardEl.value);
+    
+    if(!price || !count || !standardPrice) return alert("모든 항목을 정확히 입력해주세요!");
+    
     const unitPrice = Math.round(price / count);
     document.getElementById('hd-unit-price').innerText = unitPrice.toLocaleString() + "원";
-    const verdictEl = document.getElementById('hd-verdict'), commentEl = document.getElementById('hd-comment');
-    let verdict = "", comment = "", color = "";
-    if(cat === 'diaper') {
-        if(unitPrice <= 240) { verdict = "🚀 역대급 핫딜 (당장 사세요!)"; color = "#3182F6"; comment = "이 가격은 1년에 몇 번 안 오는 가격입니다!"; }
-        else if(unitPrice <= 290) { verdict = "✅ 준수한 가격 (살만해요)"; color = "#00B37A"; comment = "지금 당장 기저귀가 부족하다면 사도 좋은 가격입니다."; }
-        else { verdict = "❌ 비싸요 (급한거 아님 참으세요)"; color = "#F04452"; comment = "평소보다 비싼 편입니다. 핫딜이 뜹니다!"; }
-    } else if(cat === 'wipe') {
-        if(unitPrice <= 1200) { verdict = "🚀 초특가 탄생 (달리세요!)"; color = "#3182F6"; comment = "고급형 물티슈가 이 가격이면 거저입니다!"; }
-        else if(unitPrice <= 1600) { verdict = "✅ 적당한 가격"; color = "#00B37A"; comment = "무난하게 살 수 있는 가격입니다."; }
-        else { verdict = "❌ 눈탱이 주의 (패스하세요)"; color = "#F04452"; comment = "이건 정가에 가깝습니다. 패스하세요."; }
-    } else if(cat === 'milk') {
-        if(unitPrice <= 26000) { verdict = "🚀 황금 단가 (묻지마 결제!)"; color = "#3182F6"; comment = "무조건 사야 합니다. 유통기한 확인하고 고고!"; }
-        else if(unitPrice <= 31000) { verdict = "✅ 나쁘지 않은 가격"; color = "#00B37A"; comment = "시중 마트보다 싼 가격입니다. 안심하세요."; }
-        else { verdict = "❌ 오프라인급 가격"; color = "#F04452"; comment = "메리트가 전혀 없습니다. 다른 곳을 찾아보세요."; }
+    
+    // 평소 단가와 비교해서 할인율(%) 계산
+    const percent = Math.round(((standardPrice - unitPrice) / standardPrice) * 100);
+    
+    const verdictEl = document.getElementById('hd-verdict');
+    const commentEl = document.getElementById('hd-comment');
+    
+    if (percent >= 10) {
+        verdictEl.innerText = `🚀 역대급 핫딜 (${percent}% 저렴)`;
+        verdictEl.style.backgroundColor = "#3182F6";
+        commentEl.innerText = "이건 당장 무조건 쟁여야 할 핫딜입니다!";
+    } else if (percent > 0) {
+        verdictEl.innerText = `✅ 살만함 (${percent}% 저렴)`;
+        verdictEl.style.backgroundColor = "#00B37A";
+        commentEl.innerText = "지금 당장 필요하다면 사도 좋은 가격입니다.";
+    } else {
+        verdictEl.innerText = `❌ 비싸요 (오히려 손해)`;
+        verdictEl.style.backgroundColor = "#F04452";
+        commentEl.innerText = "평소 오프라인 마트보다 비쌉니다. 패스하세요!";
     }
-    verdictEl.innerText = verdict; verdictEl.style.backgroundColor = color; verdictEl.style.color = "#FFF";
-    commentEl.innerText = comment; document.getElementById('hd-result').style.display = 'block';
+    verdictEl.style.color = "#FFF";
+    document.getElementById('hd-result').style.display = 'block';
 }
 
 // ==========================================
