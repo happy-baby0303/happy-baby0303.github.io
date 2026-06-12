@@ -580,3 +580,18 @@ body.dark-mode .btn-main {
 .search-input { 
     padding-left: 44px !important; /* 아이콘만큼 왼쪽을 밀어줌 */
 }
+
+/* ☀️ 주간 모드 (기본) : 밝은 회색 바탕 + 진한 글씨 */
+.btn-capture {
+    background: #F2F5F8 !important;
+    color: #4E5968 !important;
+    box-shadow: none !important;
+    border: 1px solid var(--border) !important;
+}
+
+/* 🌙 야간 모드 (다크 모드) : 어두운 바탕 + 밝은 글씨 */
+body.dark-mode .btn-capture {
+    background: #2D3436 !important;
+    color: #F8F9FA !important;
+    border: 1px solid #4E5968 !important;
+}
