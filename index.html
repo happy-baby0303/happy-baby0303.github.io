@@ -26,14 +26,20 @@
 
     <div class="wrapper">
         
-        <div id="tab-home" class="tab-content active" style="padding: 12px 4px;">
+        <div id="tab-home" class="tab-content active">
+            
             <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
                 <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+                
                 <div class="home-hero-overlay" style="background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);">
-                    <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer; padding:0; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">✎</button>
+                    <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer; padding:0; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                        ✎
+                    </button>
+                    
                     <span class="home-hero-tag" style="background:var(--primary); color:white; align-self:flex-start; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px;">My Family Platform</span>
                     <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800; color:white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">등록 전</h2>
                     <span id="res-baby-name" style="font-size:14px; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">아기를 등록해주세요</span>
+                    
                     <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></div>
                 </div>
             </div>
@@ -45,6 +51,38 @@
                 <div>
                     <div class="sos-banner-title">한밤중 긴급 SOS 센터</div>
                     <div class="sos-banner-desc">응급 상담 콜 / 자지러지는 오열 원인 체크</div>
+                </div>
+            </div>
+
+            <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:28px; margin-bottom:12px; padding: 0 4px; display:flex; justify-content:space-between; align-items:flex-end;">
+                <span>🚀 빠른 실행 퀵 메뉴</span>
+                <span style="font-size:11.5px; font-weight:700; color:var(--text-s);">밀어서 보기 👉</span>
+            </div>
+            
+            <div class="quick-scroll-wrap">
+                <div class="q-item" onclick="navigateToPanel('fever')">
+                    <div class="q-icon-box">🌡️</div>
+                    <span class="q-label">해열제</span>
+                </div>
+                <div class="q-item" onclick="navigateToPanel('ledger')">
+                    <div class="q-icon-box">🧮</div>
+                    <span class="q-label">지출입력</span>
+                </div>
+                <div class="q-item" onclick="navigateToPanel('growth')">
+                    <div class="q-icon-box">📈</div>
+                    <span class="q-label">성장진단</span>
+                </div>
+                <div class="q-item" onclick="navigateToPanel('hotdeal')">
+                    <div class="q-icon-box">🔥</div>
+                    <span class="q-label" style="color:#FF823A;">핫딜판독</span>
+                </div>
+                <div class="q-item" onclick="navigateToPanel('hotplace')">
+                    <div class="q-icon-box">🗺️</div>
+                    <span class="q-label">주말나들이</span>
+                </div>
+                <div class="q-item" onclick="openChecklistModal()">
+                    <div class="q-icon-box">🎒</div>
+                    <span class="q-label">외출준비</span>
                 </div>
             </div>
 
@@ -63,26 +101,12 @@
                 </div>
                 <span style="font-size:24px;">📊</span>
             </div>
-
-            <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:12px; padding: 0 4px;">빠른 실행 위젯</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px;">
-                <button class="quick-btn" onclick="navigateToPanel('fever')">
-                    <span style="font-size:26px; margin-bottom:2px;">🌡️</span><span style="font-size:14px;">해열제 기록</span>
-                </button>
-                <button class="quick-btn" onclick="navigateToPanel('ledger')">
-                    <span style="font-size:26px; margin-bottom:2px;">🧮</span><span style="font-size:14px;">지출 입력</span>
-                </button>
-                <button class="quick-btn" onclick="navigateToPanel('growth')">
-                    <span style="font-size:26px; margin-bottom:2px;">📈</span><span style="font-size:14px;">성장/접종</span>
-                </button>
-                <button class="quick-btn" onclick="navigateToPanel('hotplace')">
-                    <span style="font-size:26px; margin-bottom:2px;">🗺️</span><span style="font-size:14px;">주말 나들이</span>
-                </button>
-            </div>
  
             <div class="diary-card" onclick="window.location.href='diary.html'">
                 <div>
-                    <h3 class="diary-card-title"><span style="font-size: 1.3rem;">💌</span> 오늘의 육아 문답</h3>
+                    <h3 class="diary-card-title">
+                        <span style="font-size: 1.3rem;">💌</span> 오늘의 육아 문답
+                    </h3>
                     <p class="diary-card-desc">하루 한 줄, 우리 아기와의 기억 기록하기</p>
                 </div>
                 <div class="diary-card-btn">기록하러 가기 ❯</div>
@@ -91,7 +115,11 @@
             <div class="diary-card play-card">
                 <div style="flex-grow: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <h3 class="play-card-title"><span style="font-size: 1.3rem;">🧸</span> <span style="font-size: 0.9rem; opacity: 0.8; margin-right: 4px;">D+<span id="play-dday-badge">0</span></span> 오늘의 5분 놀이</h3>
+                        <h3 class="play-card-title">
+                            <span style="font-size: 1.3rem;">🧸</span> 
+                            <span style="font-size: 0.9rem; opacity: 0.8; margin-right: 4px;">D+<span id="play-dday-badge">0</span></span> 
+                            오늘의 5분 놀이
+                        </h3>
                         <button id="btn-shuffle-play" onclick="shufflePlay()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; padding:0; line-height:1;" title="다른 놀이 뽑기">🔄</button>
                     </div>
                     <p id="play-title" class="play-title">장난감을 불러오는 중...</p>
@@ -105,22 +133,70 @@
                 <p style="font-size: 13.5px; color: var(--text-s); line-height: 1.55; word-break: keep-all;">매번 주말마다 우리 아이와 어디 갈지 여기저기 흩어진 정보를 찾느라 지친 부모님들을 위해 만들었습니다. 지자체 오피셜 무료 행사와 직접 검증한 안심 공간 정보만 쏙쏙 골라 한눈에 보여드릴게요. 이번 주말도 아이들과 함께 복잡한 준비 없이 행복하고 편안한 추억만 가득 만들어보세요!!</p>
             </div>
 
-            <div class="library-container" style="margin-top: 30px; padding: 0 12px;">
-                <div class="lib-title" style="font-size:18px; font-weight:900; margin-bottom:16px;">📚 육아 상식 라이브러리</div>
-                <details class="flat-accordion">
-                    <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">🌡️ 신생아/영유아 열날 때 대처법</summary>
-                    <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-                        <p><strong>🚨 3개월 미만 아기가 38도 이상이면?</strong><br>즉시 종합병원 응급실로 가야 합니다. 3개월 미만 신생아는 면역력이 약해 패혈증 등 위험이 있으니 집에서 해열제 쓰지 마세요!</p>
-                    </div>
-                </details>
-                <details class="flat-accordion">
-                    <summary style="font-weight:800; cursor:pointer; padding: 12px 0; border-bottom: 1px solid var(--border);">💧 신생아 맹물·보리차, 언제부터 먹일까?</summary>
-                    <div class="lib-content" style="padding: 16px 0; line-height:1.6; font-size:14px;">
-                        <p><strong>🚨 생후 6개월 미만은 절대 금물!</strong><br>신생아는 수분 중독 위험이 있어 모유와 분유만으로 수분을 보충해야 합니다.</p>
-                    </div>
-                </details>
-            </div>
-        </div> 
+<div class="library-container" style="margin-top: 30px; padding: 0 12px;">
+    <div class="lib-title" style="font-size:18px; font-weight:900; margin-bottom:16px;">📚 육아 상식 라이브러리</div>
+
+    <!-- 1. 열날 때 -->
+    <details class="flat-accordion">
+        <summary>🌡️ 신생아/영유아 열날 때 대처법</summary>
+        <div class="lib-content">
+            <p><strong>🚨 3개월 미만 아기가 38도 이상이면?</strong><br>
+            지체 없이 응급실로 가야 합니다. 3개월 미만은 면역체계가 미성숙해 패혈증 등 감염 위험이 큽니다. 집에서 해열제를 함부로 먹이지 마세요.</p>
+            <p><strong>✅ 월령별 가이드</strong><br>
+            - <strong>3~6개월:</strong> 38도 이상 시 전문가(소아과) 상담 필수.<br>
+            - <strong>6개월 이후:</strong> 38.5도 이상이면서 처지고 힘들어하면 해열제 복용을 고려하세요.</p>
+            <p><strong>✅ 집에서 해줄 수 있는 케어</strong><br>
+            1. <strong>해열제 복용:</strong> 아세트아미노펜 계열은 4~6시간 간격, 이부프로펜/덱시부프로펜은 6~8시간 간격으로 복용합니다. (몸무게 기준 복용량 엄수!)<br>
+            2. <strong>옷은 가볍게:</strong> 열이 오를 땐 얇은 내의만 입히고, 오한(떨림)이 오면 얇은 담요를 덮어주세요.<br>
+            3. <strong>수분 보충:</strong> 탈수가 가장 위험합니다. 모유/분유/보리차를 조금씩 자주 먹여주세요.<br>
+            4. <strong>미온수 마사지 주의:</strong> 해열제 없이 억지로 마사지하면 아기가 스트레스를 받고 오히려 체온이 오를 수 있으니, 의사 권고가 있을 때만 미온수로 가볍게 닦아주세요.</p>
+        </div>
+    </details>
+
+    <!-- 2. 물/보리차 -->
+    <details class="flat-accordion">
+        <summary>💧 신생아 맹물·보리차, 언제부터 먹일까?</summary>
+        <div class="lib-content">
+            <p><strong>🚨 생후 6개월 미만은 맹물 금지!</strong><br>
+            신생아의 신장(콩팥)은 아직 미숙합니다. 분유나 모유에는 아기에게 필요한 수분과 전해질이 완벽한 비율로 들어있습니다.</p>
+            <p><strong>✅ 왜 위험한가요?</strong><br>
+            - <strong>전해질 불균형:</strong> 맹물을 과하게 먹으면 혈액 속 나트륨 농도가 낮아지는 '수분 중독(저나트륨혈증)'이 올 수 있으며, 이는 경련이나 발작의 원인이 됩니다.<br>
+            - <strong>위장 용량 부족:</strong> 작은 위장에 물을 채우면 정작 필요한 영양가 있는 우유를 덜 먹게 됩니다.</p>
+            <p><strong>✅ 언제부터 먹이나요?</strong><br>
+            - 이유식을 시작하는 <strong>6개월 이후</strong>부터는 소화 기관이 발달하여 적당량의 물을 마실 수 있습니다. 처음엔 하루 50~100ml 정도로 아주 소량씩 시작하세요.</p>
+        </div>
+    </details>
+
+    <!-- 3. 수면교육 -->
+    <details class="flat-accordion">
+        <summary>💤 기적의 '통잠' 수면 교육, 언제부터?</summary>
+        <div class="lib-content">
+            <p><strong>✅ 수면 교육의 골든 타임</strong><br>
+            생후 6주~4개월 사이가 적기입니다. 이 시기 아기는 밤낮을 구분하기 시작하고, 스스로 잠드는 법을 배울 준비가 됩니다.</p>
+            <p><strong>✅ 성공을 위한 3단계 핵심</strong><br>
+            1. <strong>일관된 루틴:</strong> '목욕-마사지-수유-책 읽기-취침' 등 매일 같은 순서를 반복하여 아기에게 "이제 잘 시간이야"라는 신호를 주세요.<br>
+            2. <strong>환경 조성:</strong> 암막 커튼으로 빛을 차단하고, 온도(22~24도)와 습도(50~60%)를 쾌적하게 유지하세요.<br>
+            3. <strong>스스로 잠들기(자가입면):</strong> 아기가 잠들기 직전, 졸려 할 때 눕히세요. 안아서 재우는 습관이 들면 밤에 깰 때마다 다시 안아달라고 울게 됩니다.</p>
+            <p><strong>※ 주의:</strong> 수면 교육은 아기의 기질에 따라 차이가 큽니다. 강압적인 울리기 방식보다는 아기를 안심시켜 주는 방식부터 천천히 시도하세요.</p>
+        </div>
+    </details>
+
+    <!-- 4. 똥 색깔 -->
+    <details class="flat-accordion">
+        <summary>💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
+        <div class="lib-content">
+            <p><strong>✅ 안심해도 되는 색깔</strong><br>
+            - <strong>황금색:</strong> 가장 이상적인 건강한 변입니다.<br>
+            - <strong>녹색:</strong> 담즙이 장을 빨리 통과하거나 산화되어 나오는 정상적인 현상입니다. 분유를 바꿔도 자주 나타납니다.<br>
+            - <strong>갈색:</strong> 이유식을 시작하면 음식 색깔에 따라 변할 수 있습니다.</p>
+            <p><strong>⚠️ 주의해서 봐야 할 색깔 (병원 방문 권장)</strong><br>
+            - <strong>흰색(회색):</strong> 담도가 막혔을 가능성이 있습니다. 즉시 병원에 가세요.<br>
+            - <strong>검은색:</strong> 위장관 출혈의 신호일 수 있습니다. (단, 철분제를 먹는 경우는 제외)<br>
+            - <strong>빨간색:</strong> 변에 피가 섞여 나온다면 항문 찢어짐이나 장염, 알레르기 등 확인이 필요합니다.</p>
+            <p><strong>※ Tip:</strong> 변의 색보다 더 중요한 건 아기의 컨디션입니다. 똥 색이 이상해도 아기가 잘 먹고 잘 논다면 며칠 지켜봐도 좋지만, <strong>흰색/회색 변은 예외 없이 즉시 내원</strong>하세요!</p>
+        </div>
+    </details>
+</div>
         
         <div id="tab-hotplace" class="tab-content">
             <div class="app-box" style="padding-top:28px; padding-bottom:24px;">
@@ -161,31 +237,37 @@
                     <div style="font-size: 13px; line-height: 1.55; word-break: keep-all;">직접 경험하신 노키즈존 변동 사항이나 쾌적한 안심 장소를 제보해 주세요.<br><strong style="color:var(--danger); display:inline-block; margin-top:6px;">🚨 상업 목적의 광고 제보는 즉시 필터링됩니다.</strong></div>
                 </div>
                 
-                <button class="btn-main" style="background:var(--text-m) !important; font-size:15.5px; box-shadow:none !important;" onclick="openGoogleForm()">📝 검증 공간 수기 제보하기 〉</button>
+                <button class="btn-main" onclick="openGoogleForm()">📝 검증 공간 수기 제보하기 〉</button>
             </div>
         </div>
 
         <div id="tab-toolbox" class="tab-content">
-            <div class="app-box" style="padding-bottom: 40px; min-height: 75vh;">
+            <div class="app-box">
                 <h1 class="app-title">🧰 필수 육아 툴박스</h1>
                 <p class="app-desc" style="margin-bottom:20px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
                 
-                <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px;">
+                <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
                     <div id="btn-tool-money" class="tool-chip active" onclick="switchTool('money', this)">
-                        <span class="t-icon" style="font-size: 22px; display: block; margin-bottom: 6px;">💰</span><span class="t-label" style="font-size: 12px; font-weight: 800;">가계부</span>
+                        <span class="t-icon">💰</span><span class="t-label">가계부</span>
                     </div>
                     <div id="btn-tool-fever" class="tool-chip" onclick="switchTool('fever', this)">
-                        <span class="t-icon" style="font-size: 22px; display: block; margin-bottom: 6px;">🌡️</span><span class="t-label" style="font-size: 12px; font-weight: 800;">해열제</span>
+                        <span class="t-icon">🌡️</span><span class="t-label">해열제</span>
                     </div>
                     <div id="btn-tool-growth" class="tool-chip" onclick="switchTool('growth', this)">
-                        <span class="t-icon" style="font-size: 22px; display: block; margin-bottom: 6px;">📈</span><span class="t-label" style="font-size: 12px; font-weight: 800;">성장/건강</span>
+                        <span class="t-icon">📈</span><span class="t-label">성장/건강</span>
+                    </div>
+                    <div id="btn-tool-hotdeal" class="tool-chip" onclick="switchTool('hotdeal', this)">
+                        <span class="t-icon">🔥</span><span class="t-label">핫딜</span>
                     </div>
                 </div>
 
-                <div id="panel-money" class="panel-block active" style="display:block; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
+                <div id="panel-money" class="panel-block active" style="box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--text-m); padding-bottom:12px; margin-bottom:24px;">
                         <div style="font-size:16.5px; font-weight:900; color:var(--text-m);">📊 육아 소비 정밀 진단기</div>
-                        <button class="history-btn" onclick="toggleHistory()" style="padding: 6px 12px; background: var(--bg-sub, #F2F5F8); color: var(--text-m); font-size: 13px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">과거 내역</button>
+                        <div style="display:flex; gap:8px;">
+                            <button class="history-btn" onclick="toggleHistory()" style="padding: 6px 12px; background: var(--bg-sub, #F2F5F8); color: var(--text-m); font-size: 13px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">과거 내역</button>
+                            <button onclick="resetMoneyAll()" style="padding: 6px 12px; background: #FFF0F1; color:#F04452; font-size:12px; border-radius:8px; font-weight:800; border:1px solid #FFE3E3; cursor:pointer;">지출 리셋</button>
+                        </div>
                     </div>
 
                     <div style="margin-bottom:28px;">
@@ -207,6 +289,7 @@
                                 <span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span>
                             </div>
                         </div>
+
                         <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; border-bottom: 1px dashed var(--border);">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div style="font-size:22px;">🍼</div>
@@ -217,6 +300,7 @@
                                 <span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span>
                             </div>
                         </div>
+
                         <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; margin-bottom: 24px;">
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <div style="font-size:22px;">🧸</div>
@@ -234,7 +318,7 @@
                     <div id="history-list-area" style="display:none; margin-top:20px; background: var(--bg-sub, #F2F5F8); border-radius:16px; padding:20px; border:1px solid var(--border);">
                         <h3 style="font-size:15px; margin-bottom:12px; font-weight:800; color:var(--text-m);">📅 누적 데이터 셋</h3>
                         <div id="history-items"></div>
-                        <button class="btn-main" style="background:var(--bg-card, #FFF) !important; color:var(--text-m) !important; font-size:14px; margin-top:14px; border:1px solid var(--border) !important; box-shadow:none !important;" onclick="toggleHistory()">닫기</button>
+                        <button class="btn-main" style="background:#FFF !important; color:var(--text-m) !important; font-size:14px; margin-top:14px; border:1px solid var(--border) !important; box-shadow:none !important;" onclick="toggleHistory()">닫기</button>
                     </div>
 
                     <div id="money-result" style="display:none; margin-top:24px; padding-top:24px;">
@@ -257,9 +341,7 @@
                     
                     <div class="disclaimer-box" style="background: #FFF0F1; border-radius: 14px; padding: 18px; margin-bottom: 16px;">
                         <p style="color:#D32F2F; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [법적 책임 부인 및 소아과 의사 지시 우선]</p>
-                        <p style="font-size:12.5px; color:#555; line-height:1.5;">
-                            본 계산기는 일반적인 소아 약전 기준(체중당 10~15mg)을 반영한 단순 참고용입니다. 본 사이트는 의료적 결과에 법적 책임을 지지 않습니다.
-                        </p>
+                        <p style="font-size:12.5px; color:#555; line-height:1.5;">본 계산기는 일반적인 소아 약전 기준(체중당 10~15mg)을 반영한 단순 참고용입니다.</p>
                     </div>
 
                     <div class="checkbox-area" style="display: flex; gap: 12px; align-items:flex-start; cursor: pointer; padding: 16px; background: var(--bg-sub, #F8F9FA); border-radius: 14px; margin-bottom: 24px;" onclick="toggleCheck(event)">
@@ -359,7 +441,7 @@
                     <div class="disclaimer-box" style="background: #FFF9E6; border-radius: 14px; padding: 18px; margin-bottom: 20px;">
                         <p style="color:#B78103; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [의료 정보 면책 조항]</p>
                         <p style="font-size:12.5px; color:#5C4300; line-height:1.5;">
-                            질병관리청 표준 성장도표 기반의 정밀 백분위 추정치입니다. 실제 발달 평가는 반드시 소아청소년과 전문의의 영유아 검진을 통해 확인하세요.
+                            질병관리청 표준 성장도표(Z-score) 기반의 정밀 백분위 추정치입니다. 실제 발달 평가는 반드시 소아청소년과 전문의의 영유아 검진을 통해 확인하세요.
                         </p>
                     </div>
 
@@ -444,9 +526,46 @@
                     </div>
                 </div>
 
-            </div> </div> </div> 
+                <div id="panel-hotdeal" class="panel-block" style="display:none; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; margin-top:20px;">
+                    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid #FF823A; padding-bottom:12px; margin-bottom:24px; color:var(--text-m);">🛍️ 육아 핫딜 단가 판독기</div>
+                    
+                    <div style="background:rgba(255, 130, 58, 0.06); padding:16px; border-radius:14px; margin-bottom:24px; border:1px dashed #FF823A;">
+                        <p style="font-size:13px; font-weight:700; color:#E65100; line-height:1.5;">💡 핫딜 가격, 이제 물어보지 마세요!<br>총 가격과 수량만 넣으면 알고리즘이 '황금 단가'를 즉시 판독합니다.</p>
+                    </div>
 
-    <div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    <div style="margin-bottom:24px;">
+                        <label style="font-size:14px; font-weight:800; margin-bottom:10px; display:block;">1. 품목 선택</label>
+                        <select id="hd-category" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-size:15px; font-weight:700; background:var(--bg-card); color:var(--text-m);">
+                            <option value="diaper">🧻 기저귀 (장당 단가)</option>
+                            <option value="wipe">🫧 물티슈 (팩당 단가)</option>
+                            <option value="milk">🍼 분유 (통당 단가)</option>
+                        </select>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-bottom:24px;">
+                        <div style="flex:1;">
+                            <label style="font-size:14px; font-weight:800; margin-bottom:10px; display:block;">2. 결제 총액</label>
+                            <input type="text" id="hd-total-price" inputmode="numeric" placeholder="예: 45,000" onkeyup="formatNum(this)" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:14px; font-weight:800; margin-bottom:10px; display:block;">3. 총 수량(팩수/통수)</label>
+                            <input type="number" id="hd-count" placeholder="예: 180" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
+                        </div>
+                    </div>
+
+                    <button class="btn-main" onclick="calcHotDeal()" style="background:#FF823A !important; box-shadow:0 6px 16px rgba(255, 130, 58, 0.2) !important;">🔥 이 가격, 핫딜일까? 판독하기</button>
+
+                    <div id="hd-result" style="display:none; margin-top:24px;">
+                        <div style="background:var(--bg-card); border-radius:20px; padding:24px; border:1px solid var(--border); text-align:center;">
+                            <div style="font-size:13px; font-weight:800; color:var(--text-s); margin-bottom:8px;">판독된 개당 단가는</div>
+                            <div style="font-size:36px; font-weight:900; color:#FF823A; margin-bottom:12px;" id="hd-unit-price">0원</div>
+                            <div id="hd-verdict" style="font-size:16px; font-weight:800; padding:12px; border-radius:12px; margin-bottom:16px;"></div>
+                            <p id="hd-comment" style="font-size:13.5px; line-height:1.6; color:var(--text-m); word-break:keep-all;"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div> </div> </div> <div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
         <div style="border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 20px;">
             <h2 style="font-size: 18px; font-weight: 900; margin: 0; color: var(--text-m);">💡 대한민국 통합 스마트 육아 가이드</h2>
         </div>

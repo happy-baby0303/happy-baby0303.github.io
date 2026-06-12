@@ -1,1166 +1,582 @@
 :root { 
     --primary: #3182F6; --accent: #FD6868; --text-m: #191F28; --text-s: #4E5968; 
     --text-sub: #8B95A1; --border: #E5E8EB; --success: #00B37A; --danger: #F04452; 
+    --bg-main: #F2F5F8; --bg-card: #FFFFFF; --bg-sub: #F8F9FA;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Pretendard', sans-serif; background: #F2F5F8; color: var(--text-m); line-height: 1.5; padding-top: 60px; padding-bottom: 120px; min-height: 100vh; letter-spacing: -0.4px; }
-button, input[type="button"], input[type="submit"] { -webkit-appearance: none; -moz-appearance: none; appearance: none; border: none; outline: none; background: transparent; }
+
+body.dark-mode {
+    --text-m: #F9FAFB !important; --text-s: #B0B8C1 !important; --text-sub: #8B95A1 !important;
+    --border: #333842 !important; --bg-main: #121212 !important; --bg-card: #1E2024 !important; --bg-sub: #2A2D32 !important;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: 'Pretendard', sans-serif; }
+body { background: var(--bg-main); color: var(--text-m); line-height: 1.5; padding-top: 60px; padding-bottom: 120px; min-height: 100vh; letter-spacing: -0.4px; }
+button, input[type="button"], input[type="submit"] { -webkit-appearance: none; appearance: none; border: none; outline: none; background: transparent; cursor: pointer; }
 .wrapper { max-width: 500px; margin: 0 auto; padding: 10px 16px; }
 
-.global-header { position: fixed; top: 0; left: 0; width: 100%; height: 56px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0, 0, 0, 0.04); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+/* 공통 입력창 투명화 (회색 박스 박멸) */
+input, select { color: var(--text-m) !important; background: transparent !important; }
+body.dark-mode input[type="text"], body.dark-mode input[type="number"], body.dark-mode input[type="date"], body.dark-mode select { background-color: transparent !important; background: transparent !important; color: #FFF !important; border-color: #444 !important; }
+body.dark-mode .input-wrapper input { background: transparent !important; }
+body.dark-mode input::placeholder { color: #666 !important; }
+body.dark-mode #v-budget { color: var(--primary) !important; }
+
+/* 기본 UI */
+.global-header { position: fixed; top: 0; left: 0; width: 100%; height: 56px; background: var(--bg-card); opacity: 0.95; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 2000; display: flex; align-items: center; justify-content: center; }
 .header-inner { width: 100%; max-width: 500px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
-.brand-logo { font-size: 16.5px; font-weight: 900; color: #111; letter-spacing: -0.5px; }
-.system-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(49, 130, 246, 0.08); padding: 5px 12px; border-radius: 12px; }
+.brand-logo { font-size: 16.5px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px; }
+.system-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; color: var(--primary); background: rgba(49, 130, 246, 0.1); padding: 5px 12px; border-radius: 12px; }
 .status-dot { width: 6px; height: 6px; background-color: var(--primary); border-radius: 50%; }
 
-.tab-content { display: none; animation: appReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.tab-content.active { display: block; }
+.tab-content, .panel-block { display: none; }
+.tab-content.active, .panel-block.active { display: block; animation: appReveal 0.3s ease; }
 @keyframes appReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-.app-box { background: #FFF; border-radius: 24px; padding: 24px 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.01); margin-bottom: 20px; }
-.app-title { font-size: 22px; font-weight: 800; color: #111; letter-spacing: -0.6px; margin-bottom: 8px; }
-.app-desc { font-size: 13.5px; color: var(--text-s); margin-bottom: 24px; line-height: 1.5; word-break: keep-all; }
+/* 🚀 퀵 메뉴 & 홈 배너 */
+.quick-scroll-wrap { display: flex; overflow-x: auto; gap: 16px; padding: 4px 4px 16px 4px; margin-bottom: 20px; scrollbar-width: none; -ms-overflow-style: none; }
+.quick-scroll-wrap::-webkit-scrollbar { display: none; }
+.q-item { flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.1s; }
+.q-item:active { transform: scale(0.95); }
+.q-icon-box { width: 62px; height: 62px; background: var(--bg-card); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 10px; border: 1px solid var(--border); }
+.q-label { font-size: 12.5px; font-weight: 800; color: var(--text-m); text-align: center; white-space: nowrap; }
 
-.home-hero-card { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 24px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); background-color: #E5E8EB; }
+.app-box { background: var(--bg-card); border-radius: 24px; padding: 24px 20px; border: 1px solid var(--border); margin-bottom: 20px; }
+.app-title { font-size: 22px; font-weight: 800; color: var(--text-m); margin-bottom: 8px; }
+.app-desc { font-size: 13.5px; color: var(--text-s); margin-bottom: 24px; }
+.home-hero-card { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 24px; overflow: hidden; margin-bottom: 16px; background-color: var(--bg-sub); border: 1px solid var(--border); }
 .home-hero-img { width: 100%; height: 100%; object-fit: cover; }
-.home-hero-img {filter: contrast(1.1) saturate(1.2) brightness(1.05); }
-.home-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.02) 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; color: #FFF; }
+.home-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; color: #FFF; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.02) 60%); }
 .home-hero-tag { align-self: flex-start; background: var(--primary); font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 8px; }
-.home-hero-title { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-.home-hero-title, .home-hero-overlay span {text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5); }
+.home-hero-title { font-size: 21px; font-weight: 800; color: #FFF !important; }
 
-.sos-banner { background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FFD1D1; border-radius: 24px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px; cursor: pointer; box-shadow: 0 6px 20px rgba(253, 104, 104, 0.15); transition: 0.2s; animation: pulseSOS 2.5s infinite; }
-.sos-banner:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(253, 104, 104, 0.1); }
-@keyframes pulseSOS { 0% { box-shadow: 0 0 0 0 rgba(253, 104, 104, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(253, 104, 104, 0); } 100% { box-shadow: 0 0 0 0 rgba(253, 104, 104, 0); } }
-.sos-banner-icon { font-size: 38px; filter: drop-shadow(0 4px 6px rgba(253, 104, 104, 0.3)); }
-.sos-banner-title { font-size: 16.5px; font-weight: 900; color: var(--danger); margin-bottom: 2px; letter-spacing: -0.5px; }
-.sos-banner-desc { font-size: 12.5px; font-weight: 700; color: #D32F2F; opacity: 0.85; }
+.sos-banner { background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FFD1D1; border-radius: 24px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px; cursor: pointer; }
+.sos-banner:active { transform: scale(0.97); }
+.sos-banner-icon { font-size: 38px; }
+.sos-banner-title { font-size: 16.5px; font-weight: 900; color: var(--danger); margin-bottom: 2px; }
 
-.home-menu-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
-.home-large-tile { background: #FFF; border-radius: 24px; padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid rgba(0,0,0,0.01); box-shadow: 0 4px 16px rgba(0,0,0,0.02); position: relative; }
-.home-large-tile:active, .home-sub-tile:active { transform: scale(0.98); background: #F8F9FA; }
-.home-tile-main-wrap { display: flex; align-items: center; gap: 16px; }
-.home-tile-emoji { font-size: 34px; }
-.home-tile-title { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 2px; }
-.home-tile-sub { font-size: 13px; color: var(--text-sub); font-weight: 600; }
-.home-tile-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; background: rgba(49, 130, 246, 0.08); color: var(--primary); }
-.home-tile-badge.accent { background: rgba(253, 104, 104, 0.08); color: var(--accent); }
-.home-tile-badge.success { background: rgba(0, 179, 122, 0.08); color: var(--success); }
-
-.home-sub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
-.home-sub-tile { background: #FFF; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 130px; border: 1px solid rgba(0,0,0,0.01); box-shadow: 0 4px 16px rgba(0,0,0,0.02); }
-.home-sub-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.home-sub-emoji { font-size: 26px; }
-.home-sub-title { font-size: 14.5px; font-weight: 800; color: #111; margin-bottom: 3px; }
-.home-sub-desc { font-size: 11.5px; color: var(--text-sub); font-weight: 600; line-height: 1.3; }
-
-.segment-control { display: flex; background: #E5E8EB; padding: 4px; border-radius: 14px; margin-bottom: 24px; }
-.segment-btn { flex: 1; padding: 12px; border: none !important; background: transparent; border-radius: 10px; font-size: 14px; font-weight: 800; color: var(--text-s); cursor: pointer; transition: 0.15s; }
-.segment-btn.active { background: #FFF !important; color: var(--text-m) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
-.search-wrapper { position: relative; margin-bottom: 18px; }
-.search-input { width: 100%; padding: 15px 16px 15px 44px; font-size: 15px; font-weight: 600; border: 1px solid var(--border); border-radius: 14px; background-color: #FFF; transition: all 0.2s; color: var(--text-m); }
-.search-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(49,130,246,0.1); }
-.search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--text-sub); }
-
-.filter-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.filter-btn { padding: 10px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 700; border: 1px solid var(--border) !important; background: #FFF; color: var(--text-s); cursor: pointer; transition: 0.15s; }
-.filter-btn.active { background: var(--text-m) !important; color: #FFF !important; border-color: var(--text-m) !important; }
-
-.festival-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
-.fest-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.02); display: flex; flex-direction: column; cursor: pointer; position: relative; border: 1px solid var(--border); }
-.fest-card-img-wrap { width: 100%; aspect-ratio: 1 / 1; position: relative; background-color: #EBF4FF; overflow: hidden; }
-.fest-card img { width: 100%; height: 100%; object-fit: cover; }
-.fest-dday-tag { position: absolute; top: 8px; left: 8px; background: rgba(25, 31, 40, 0.85); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; z-index: 10; }
-.fest-card-info { padding: 12px 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-.fest-card-title { font-size: 13.5px; font-weight: 700; color: var(--text-m); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
-.fest-card-meta { font-size: 11.5px; color: var(--primary); font-weight: 700; }
-
-#sub-filter-row { background: rgba(0,0,0,0.03); padding: 8px; border-radius: 14px; display: none; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px; }
-
-.accordion-item { background: #FFF; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
-.accordion-header { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #FFF; transition: background 0.1s; }
-.accordion-header:active { background: #F8F9FA; }
-.accordion-title-wrap { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; color: var(--text-m); }
-.accordion-arrow { font-size: 12px; color: var(--text-sub); transition: transform 0.25s; }
-.accordion-body { display: none; padding: 0 20px 20px 20px; background: #FFF; border-top: 1px dashed var(--border); }
-
-.place-loc { font-size: 11px; color: var(--primary); font-weight: 900; background: #EBF4FF; padding: 4px 8px; border-radius: 6px; }
-.place-desc { font-size: 13.5px; color: var(--text-s); margin: 12px 0; font-weight: 600; line-height: 1.5; }
-.tag { font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 8px; display: inline-block; margin-right: 6px; margin-bottom: 6px; }
-.tag.blue { background: #EBF4FF; color: var(--primary); }
-.tag.red { background: #FFF0F1; color: var(--danger); }
-.tag.green { background: #E6F7F2; color: var(--success); }
-.place-review { background: #F8F9FA; border-left: 4px solid var(--primary); padding: 14px; font-size: 13.5px; color: var(--text-m); border-radius: 0 10px 10px 0; line-height: 1.5; margin-top: 10px; font-weight: 500; }
-
-.btn-main { display: block; width: 100%; padding: 18px; background: var(--primary) !important; color: white !important; border: none !important; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.15s; margin-top: 16px; box-shadow: 0 6px 16px rgba(49, 130, 246, 0.25); text-align: center; text-decoration: none; }
-.btn-main:active { transform: scale(0.97); }
-
-/* 🚨 ✨ NEW: V3.6 SOS 모달 (약국 팩트 체크 및 분리) */
-#sos-modal.modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.sos-content-box { width: 100%; max-width: 400px; background: #191F28; border-radius: 28px; padding: 35px 24px; color: #FFF; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-.sos-close-btn { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFF; font-weight: bold; cursor: pointer; z-index: 10; }
-.sos-back-btn { position: absolute; top: 16px; left: 16px; height: 34px; padding: 0 14px; background: rgba(255,255,255,0.1); border-radius: 17px; display: flex; align-items: center; justify-content: center; color: #FFF; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 10; }
-
-.sos-choice-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.5px; margin-top: 15px; word-break: keep-all; }
-.sos-choice-desc { font-size: 13.5px; color: #8B95A1; margin-bottom: 30px; word-break: keep-all; line-height: 1.5; }
-
-.sos-btn-medical { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; padding: 24px; background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); border-radius: 20px; color: #FFF; font-size: 18px; font-weight: 900; cursor: pointer; margin-bottom: 14px; box-shadow: 0 8px 20px rgba(255, 65, 108, 0.3); transition: 0.2s; text-align: left; }
-.sos-btn-medical:active { transform: scale(0.96); }
-
-.sos-btn-cry { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; padding: 24px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 20px; color: #FFF; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(0, 242, 254, 0.3); transition: 0.2s; text-align: left; }
-.sos-btn-cry:active { transform: scale(0.96); }
-
-.sos-detail-title { font-size: 18px; font-weight: 800; color: #FFF; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; text-align: left; display: flex; align-items: center; gap: 8px; margin-top: 24px; word-break: keep-all; }
-.sos-checklist { text-align: left; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); }
-.sos-check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; font-size: 14px; line-height: 1.55; color: #E5E8EB; }
-.sos-check-item:last-child { margin-bottom: 0; }
-.sos-check-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
-
-.toolbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
-.tool-chip { background: #FFF; border: 1px solid var(--border); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; transition: 0.15s; }
-.tool-chip:active { background: #F8F9FA; }
+/* 툴박스 아이콘 그리드 */
+.toolbox-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8px; margin-bottom: 24px; }
+.tool-chip { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 8px; text-align: center; cursor: pointer; }
 .tool-chip .t-icon { font-size: 22px; display: block; margin-bottom: 6px; }
-.tool-chip .t-label { font-size: 12px; font-weight: 800; color: var(--text-s); letter-spacing: -0.5px; }
-.tool-chip.active { border-color: var(--primary); background: rgba(49, 130, 246, 0.05); }
-.tool-chip.active .t-label { color: var(--primary); }
-.panel-block { display: none; }
-.panel-block.active { display: block; animation: foldReveal 0.3s ease-out; }
-@keyframes foldReveal { from { opacity: 0; } to { opacity: 1; } }
+.tool-chip .t-label { font-size: 12px; font-weight: 800; color: var(--text-s); }
+.tool-chip.active { background: var(--primary) !important; border-color: var(--primary) !important; }
+.tool-chip.active .t-label { color: #FFF !important; }
 
-.input-group { margin-bottom: 20px; }
-.input-wrapper { position: relative; }
-.input-wrapper input { width: 100%; padding: 16px 45px 16px 16px; font-size: 17px; font-weight: 800; border: 1px solid var(--border); border-radius: 14px; background: #FFF; text-align: right; color: var(--text-m); transition: 0.2s; }
-.input-wrapper input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(49,130,246,0.1); }
-.input-wrapper input[type="date"] { text-align: left; padding: 16px; font-family: 'Pretendard'; font-size: 16px; }
-.unit-label { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 15px; font-weight: 800; color: var(--text-sub); }
+/* 나들이 탭 */
+.segment-control { display: flex; background: var(--bg-sub); padding: 4px; border-radius: 14px; margin-bottom: 24px; border: 1px solid var(--border); }
+.segment-btn { flex: 1; padding: 12px; background: transparent; border-radius: 10px; font-size: 14px; font-weight: 800; color: var(--text-s); cursor: pointer; border: none !important; }
+.segment-btn.active { background: var(--bg-card) !important; color: var(--text-m) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.search-wrapper { position: relative; margin-bottom: 18px; }
+.search-input { width: 100%; padding: 15px 16px 15px 44px; font-size: 15px; font-weight: 600; border: 1px solid var(--border); border-radius: 14px; background-color: var(--bg-card); color: var(--text-m); }
+.filter-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.filter-btn { padding: 10px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 700; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-s); cursor: pointer; transition: 0.2s; }
+.filter-btn.active { background: var(--text-m) !important; color: var(--bg-card) !important; border-color: var(--text-m) !important; }
 
-.pill-card { background: #FFF0F1; border: 1px solid #FFE3E3; border-radius: 16px; padding: 20px; margin-bottom: 12px; text-align: center; }
-.pill-card.blue { background: #F2F7FF; border: 1px solid #E1F0FF; }
-.pill-dose { font-size: 28px; font-weight: 900; color: var(--danger); margin-top: 8px; letter-spacing: -0.5px; }
-.pill-card.blue .pill-dose { color: var(--primary); }
-
-.health-card { background: #FFF; border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-.health-card-title { font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-.health-card-title .icon { font-size: 18px; }
-.health-data-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
-.health-data-row:last-child { border-bottom: none; padding-bottom: 0; }
-.health-data-row span:first-child { color: var(--text-s); font-weight: 700; }
-.health-data-row span:last-child { color: var(--primary); font-weight: 800; text-align: right; }
-.vaccine-list { background: #F8F9FA; padding: 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; color: var(--text-m); line-height: 1.5; margin-top: 8px; border-left: 4px solid var(--primary); }
-
-.ww-status-box { background: #FFF9E6; border: 1px solid #FFE58F; border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 16px; }
-.ww-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 10px; }
-.ww-table th, .ww-table td { padding: 14px 8px; border-bottom: 1px solid var(--border); text-align: left; }
-.ww-table th { color: var(--text-s); font-weight: 800; }
-.ww-table tr.active td { background: #FFF9E6; font-weight: 800; color: #B78103; }
-
-.bottom-nav { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 440px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 22px; display: flex; justify-content: space-around; padding: 12px 0; z-index: 3000; box-shadow: 0 12px 35px rgba(0,0,0,0.06); border: 1px solid rgba(255, 255, 255, 0.9); }
-.nav-item { flex: 1; text-align: center; color: #8B95A1; cursor: pointer; transition: 0.2s; }
-.nav-item .icon { font-size: 22px; margin-bottom: 4px; display: block; filter: grayscale(100%); opacity: 0.45; transition: 0.2s; }
+.btn-main { display: block; width: 100%; padding: 18px; background: var(--primary) !important; color: white !important; border: none !important; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 16px; text-align: center; text-decoration: none !important; transition: 0.15s; }
+.btn-main:active { transform: scale(0.97); }
+.bottom-nav { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 440px; background: var(--bg-card); opacity: 0.95; backdrop-filter: blur(20px); border-radius: 22px; display: flex; justify-content: space-around; padding: 12px 0; z-index: 3000; border: 1px solid var(--border); transition: 0.2s; }
+.nav-item { flex: 1; text-align: center; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
+.nav-item .icon { font-size: 22px; margin-bottom: 4px; display: block; filter: grayscale(100%); opacity: 0.45; }
 .nav-item .label { font-size: 11px; font-weight: 800; }
 .nav-item.active { color: var(--primary); }
 .nav-item.active .icon { filter: grayscale(0%); opacity: 1; transform: translateY(-2px); }
 
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 4000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 16px; }
-.modal-content { width: 100%; max-width: 440px; background: #FFF; border-radius: 24px; padding: 24px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
-.modal-close-handle { width: 44px; height: 5px; background: #E5E8EB; border-radius: 3px; margin: 0 auto 20px auto; cursor: pointer; }
-.modal-header-wrap { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
-.modal-emoji { font-size: 32px; }
-.modal-title { font-size: 20px; font-weight: 800; color: #111; line-height: 1.4; letter-spacing: -0.5px; }
-.modal-meta-box { background: #F8F9FA; border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
-.modal-meta-row { display: flex; font-size: 13.5px; margin-bottom: 10px; line-height: 1.4; }
-.modal-meta-row:last-child { margin-bottom: 0; }
-.modal-meta-label { font-weight: 800; color: var(--text-s); width: 60px; flex-shrink: 0; }
-.modal-meta-value { color: var(--text-m); font-weight: 600; }
-.modal-action-grid { display: grid; grid-template-columns: 1.2fr 2fr; gap: 10px; margin-top: 20px; }
-.modal-call-btn { background: #FFF !important; color: var(--text-m) !important; border: 1px solid var(--border) !important; font-size: 14.5px; font-weight: 800; padding: 16px; border-radius: 14px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; }
-.modal-navi-container { background: #F2F5F8; border-radius: 16px; padding: 12px; display: flex; align-items: center; justify-content: space-around; gap: 8px; }
-.modal-navi-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--text-s); font-size: 10.5px; font-weight: 800; cursor: pointer; flex: 1; }
+/* 라이브러리 아코디언 */
+.flat-accordion summary { color: var(--text-m); font-size: 15px; font-weight: 800; cursor: pointer; padding: 12px 0; border-bottom: 1px solid var(--border); list-style: none; outline: none; transition: 0.2s; }
+.flat-accordion summary::-webkit-details-marker { display: none; }
+.flat-accordion summary::after { content: '➕'; float: right; font-size: 12px; color: var(--text-s); }
+.flat-accordion[open] summary::after { content: '➖'; }
+.lib-content { padding: 16px 0; line-height: 1.6; font-size: 14px; color: var(--text-s); }
 
-.navi-badge-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #FFF; margin-bottom: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-.navi-badge-icon.naver { background: #03C75A; }
-.navi-badge-icon.tmap { background: #1B2B54; font-size: 12px; }
-.navi-badge-icon.kakao { background: #FEE500; color: #191919; }
+/* 해열제 동반증상 버튼 */
+.pill-btn { flex: 1; padding: 16px 10px; border-radius: 14px; border: 1px solid var(--border) !important; background: var(--bg-card) !important; color: var(--text-s) !important; font-size: 14.5px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+.pill-btn.active#btn-pill-red { background: rgba(255, 75, 43, 0.1) !important; border: 2px solid #FF4B2B !important; color: #FF4B2B !important; opacity: 1 !important; }
+.pill-btn.active#btn-pill-blue { background: rgba(49, 130, 246, 0.1) !important; border: 2px solid #3182F6 !important; color: #3182F6 !important; opacity: 1 !important; }
+
+.sym-btn { padding: 10px 6px; background: var(--bg-card) !important; border: 1px solid var(--border) !important; border-radius: 10px; font-size: 12.5px; font-weight: 700 !important; color: var(--text-s) !important; text-align: center; cursor: pointer; transition: all 0.2s; }
+input[type="checkbox"]:checked + .sym-btn { background: rgba(49, 130, 246, 0.1) !important; border: 1px solid var(--primary) !important; color: var(--primary) !important; font-weight: 800 !important; transform: scale(0.96); }
+
+/* 문답 & 플레이 카드 */
+.diary-card { background: linear-gradient(135deg, #FFF5F5, #FFE4E1); border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #FFE4E1; cursor: pointer; transition: 0.3s; }
+.diary-card-title { font-size: 1.1rem; color: #D87093; margin: 0 0 5px 0; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.diary-card-desc { font-size: 0.85rem; color: #888; margin: 0; }
+.diary-card-btn { background: white; padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; color: #D87093; }
+.play-card { background: linear-gradient(135deg, #FFF8E7, #FFE8B6); border: 1px solid #FFE8B6; cursor: default; display: block; margin-bottom: 15px; }
+.play-card-title { color: #D4A373; margin: 0 0 8px 0; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+.play-title { font-size: 1.05rem; font-weight: 900; color: #5C4A3D; margin: 8px 0 4px 0; }
+.play-desc { font-size: 0.85rem; color: #8B7355; line-height: 1.4; word-break: keep-all; }
+.play-effect-badge { display: inline-block; margin-top: 10px; padding: 5px 10px; background: white; color: #D4A373; font-size: 0.75rem; font-weight: 900; border-radius: 10px; }
+
+/* 🚨 1, 2번 해결: 모달 오버레이 공통화 (체크리스트 구석 처박힘 100% 복구!) */
+.modal-overlay { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000; padding: 16px; }
+.sos-content-box, .modal-content { width: 100%; max-width: 400px; background: var(--bg-card); border-radius: 24px; padding: 24px; color: var(--text-m); position: relative; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+#sos-modal .sos-content-box { text-align: center; }
+
+/* 🚨 1번 해결: 119 제목 주간(검정)/야간(흰색) 완벽 구출 */
+.sos-choice-title, .sos-detail-title { color: var(--text-m) !important; font-size: 22px; font-weight: 900; margin-bottom: 8px; word-break: keep-all; display: block; }
+body.dark-mode .sos-choice-title, body.dark-mode .sos-detail-title { color: #FFF !important; }
+
+.sos-choice-desc { font-size: 13.5px; color: var(--text-sub) !important; margin-bottom: 30px; line-height: 1.5; display: block; }
+.sos-btn-medical { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; padding: 24px; background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); border-radius: 20px; color: #FFF !important; font-size: 18px; font-weight: 900; cursor: pointer; margin-bottom: 14px; text-align: left; text-decoration: none !important; }
+.sos-btn-cry { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; padding: 24px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 20px; color: #FFF !important; font-size: 18px; font-weight: 900; cursor: pointer; text-align: left; text-decoration: none !important; }
+
+.sos-check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; font-size: 14px; background: var(--bg-sub); padding: 16px; border-radius: 16px; border: 1px solid var(--border); text-align: left; }
+.sos-check-item strong { display: block; margin-bottom: 4px; color: var(--text-m); }
+body.dark-mode .sos-check-item strong { color: #FFF !important; }
+
+/* 119 글씨 밑줄 완벽 제거 */
+#sos-step-medical a { text-decoration: none !important; }
+#sos-step-medical div { color: var(--text-m); }
+body.dark-mode #sos-step-medical div { color: #E5E8EB !important; }
+#sos-step-medical strong { color: var(--danger) !important; }
+
+/* 🎒 체크리스트 CSS */
+.checklist-main-btn { background: var(--bg-card) !important; color: var(--text-m) !important; border: 2px solid var(--primary) !important; padding: 16px 20px !important; text-align: left !important; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1) !important; margin-bottom: 20px !important; }
+.check-item { display: flex; align-items: center; padding: 16px 12px; border-bottom: 1px dashed var(--border); cursor: pointer; transition: 0.2s; }
+.check-box { width: 22px; height: 22px; border: 2px solid var(--primary); border-radius: 6px; margin-right: 14px; display: flex; justify-content: center; align-items: center; font-size: 14px; color: transparent; transition: 0.2s; }
+.check-text { font-size: 15px; font-weight: 700; color: var(--text-m); transition: 0.2s; }
+.check-item.checked { opacity: 0.5; background: var(--bg-sub); }
+.check-item.checked .check-box { background: var(--primary); color: #FFF; }
+.check-item.checked .check-text { text-decoration: line-through; }
 
 /* =========================================
-/* =========================================
-   🌙 프리미엄 다크 모드 - 최종 수정 (화이트 박스/글씨 증발 완전 차단)
+   🌙 다크 모드 - 촌스러운 색상 강제 오버라이딩 완벽 패치
 ========================================= */
+body.dark-mode .stat-badge { background: #333842 !important; color: #F9FAFB !important; }
+body.dark-mode .sos-banner { background: linear-gradient(135deg, #2A1F21 0%, #1A1213 100%) !important; border: 1px solid #4A2B30 !important; }
+body.dark-mode .sos-banner-title { color: #FF8A8A !important; }
+body.dark-mode .sos-banner-desc { color: #B0B8C1 !important; }
 
-body.dark-mode {
-    background-color: #1A1C23 !important; 
-    color: #E5E8EB !important;
+body.dark-mode div[style*="background: #FFF9E6"], body.dark-mode div[style*="background:#FFF9E6"] { background-color: #2A1F00 !important; border-color: #4A3E00 !important; }
+body.dark-mode p[style*="color:#B78103"], body.dark-mode p[style*="color:#5C4300"] { color: #E8C396 !important; }
+body.dark-mode div[style*="background: #E6F7F2"], body.dark-mode div[style*="background:#E6F7F2"] { background-color: #002A1F !important; border-color: #004A36 !important; }
+body.dark-mode div[style*="color:#00B37A"] { color: #A6E3C9 !important; }
+body.dark-mode div[style*="background: #FFF0F1"], body.dark-mode div[style*="background:#FFF0F1"] { background-color: rgba(253, 104, 104, 0.1) !important; border-color: rgba(253, 104, 104, 0.2) !important; }
+body.dark-mode div[style*="color:#D32F2F"] { color: #FF8A8A !important; }
+
+body.dark-mode div[style*="background: #FFF"], body.dark-mode div[style*="background:#FFF"], body.dark-mode div[style*="background: #fff"], body.dark-mode div[style*="background:#fff"], body.dark-mode .app-box, body.dark-mode .accordion-item, body.dark-mode .fest-card, body.dark-mode .report-box { background-color: var(--bg-card) !important; border-color: var(--border) !important; }
+body.dark-mode div[style*="background: #F8F9FA"], body.dark-mode div[style*="background:#F8F9FA"], body.dark-mode div[style*="background: var(--bg-sub"] { background-color: var(--bg-sub) !important; border-color: var(--border) !important; }
+
+body.dark-mode .diary-card { background: linear-gradient(135deg, #2A1F21, #1A1415) !important; border: 1px solid #4A2B30 !important; }
+body.dark-mode .diary-card-title { color: #E8BDB5 !important; }
+body.dark-mode .diary-card-desc { color: #A0A0A0 !important; }
+body.dark-mode .diary-card-btn { background: #333 !important; color: #E8BDB5 !important; }
+body.dark-mode .play-card { background: linear-gradient(135deg, #2D261A, #1C1810) !important; border: 1px solid #4A3E25 !important; }
+body.dark-mode .play-card-title, body.dark-mode .play-title { color: #E8C396 !important; }
+body.dark-mode .play-desc { color: #A38C75 !important; }
+body.dark-mode .play-effect-badge { background: #4A3E25 !important; color: #E8C396 !important; }
+
+body.dark-mode button[style*="background:var(--text-m)"] { background-color: #333 !important; color: #FFF !important; border: 1px solid #444 !important; }
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode .app-title, body.dark-mode .brand-logo, body.dark-mode strong { color: #FFF !important; }
+body.dark-mode div[style*="color: #111"], body.dark-mode div[style*="color:#111"], body.dark-mode div[style*="color:var(--text-m)"], body.dark-mode label[style*="color:var(--text-m)"] { color: #FFF !important; }
+
+body.dark-mode .pill-btn.active#btn-pill-red { background: rgba(253, 104, 104, 0.15) !important; border-color: #FD6868 !important; color: #FF8A8A !important; }
+body.dark-mode .pill-btn.active#btn-pill-blue { background: rgba(49, 130, 246, 0.15) !important; border-color: #3182F6 !important; color: #82B1FF !important; }
+body.dark-mode input[type="checkbox"]:checked + .sym-btn { background: rgba(49, 130, 246, 0.2) !important; color: #82B1FF !important; border-color: #82B1FF !important; }
+
+body.dark-mode #checklist-modal .check-item { border-bottom: 1px dashed rgba(255,255,255,0.1) !important; }
+body.dark-mode #checklist-modal .check-text { color: #E5E8EB !important; }
+body.dark-mode #checklist-modal .check-item.checked { background: rgba(255,255,255,0.05) !important; }
+body.dark-mode #checklist-modal .check-item.checked .check-text { color: #8B95A1 !important; text-decoration: line-through; }
+body.dark-mode #checklist-modal button.btn-main:first-child { background: rgba(255,255,255,0.1) !important; color: #FFF !important; }
+
+/* =========================================================
+   🔥 파트너님 요청 핀셋 수정 CSS (기존 코드 맨 밑에 추가!)
+========================================================= */
+
+/* 1. 해열제 동반증상 버튼 클릭 시 파란불 강제 켜기 (자바스크립트 필요 없는 무적 CSS) */
+input[type="checkbox"]:checked + .sym-btn { 
+    background: rgba(49, 130, 246, 0.1) !important; 
+    border: 1px solid #3182F6 !important; 
+    color: #3182F6 !important; 
+    font-weight: 800 !important; 
+    transform: scale(0.96); 
 }
 
-/* 1. 모든 카드/박스 배경을 '톤다운된 다크그레이'로 강제 고정 */
-body.dark-mode .app-box, 
-body.dark-mode .result-card, 
-body.dark-mode .home-hero-card,
-body.dark-mode .home-large-tile,
-body.dark-mode .home-sub-tile,
-body.dark-mode .fest-card,
-body.dark-mode .accordion-item,
-body.dark-mode .accordion-header,
-body.dark-mode .accordion-body,
-body.dark-mode .pill-card,
-body.dark-mode .disclaimer-box,
-body.dark-mode #tab-hotplace,
-body.dark-mode #tab-hotplace .app-box,
-body.dark-mode .checkbox-area {
-    background-color: #22252D !important; /* 배경보다 살짝 밝은 그레이 */
+/* 2. 119 긴급 SOS 모달 제목이 주간모드에서 하얀 배경에 묻혀 사라지는 현상 구출 */
+#sos-modal .sos-choice-title, 
+#sos-modal .sos-detail-title { 
+    color: #FFFFFF !important; /* 주간/야간 상관없이 무조건 잘 보이게 하얀색 고정 */
+}
+
+/* 3. 119 모달 내 전화걸기 버튼 등 링크의 보기 싫은 흰색 밑줄 제거 */
+#sos-step-medical a { text-decoration: none !important; }
+
+/* 4. 빠른 실행 퀵 메뉴 가로 스크롤 레이아웃 뼈대 보강 (깨짐 방지) */
+.quick-scroll-wrap { 
+    display: flex; overflow-x: auto; gap: 16px; padding: 4px 4px 16px 4px; 
+    scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; 
+}
+.quick-scroll-wrap::-webkit-scrollbar { display: none; }
+
+/* 🚨 119 SOS 모달 강제 복구 CSS (디자인 깨짐 원천 차단) */
+#sos-modal .sos-content-box {
+    background-color: #191F28 !important; /* 주간모드에서도 무조건 다크 배경 유지 */
     border: 1px solid #333842 !important;
+}
+#sos-modal .sos-choice-title, 
+#sos-modal .sos-detail-title,
+#sos-modal .sos-detail-title span {
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+}
+#sos-modal .sos-choice-desc { color: #B0B8C1 !important; }
+#sos-modal .sos-btn-medical, #sos-modal .sos-btn-cry { color: #FFFFFF !important; }
+
+/* 의료 상담 텍스트 및 버튼 */
+#sos-step-medical div, #sos-step-medical span, #sos-step-medical p { color: #E5E8EB !important; }
+#sos-step-medical strong { color: #FF4B2B !important; }
+#sos-step-medical a.btn-main, #sos-step-medical a.btn-main:link, #sos-step-medical a.btn-main:visited {
+    background-color: rgba(255,255,255,0.05) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    text-decoration: none !important; /* 지저분한 밑줄 강제 제거 */
+}
+
+/* 오열 체크리스트 */
+#sos-step-cry .sos-check-item {
+    background-color: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
     color: #E5E8EB !important;
 }
+#sos-step-cry .sos-check-item strong { color: #FFFFFF !important; }
+#sos-step-cry .sos-check-item:first-child strong { color: #FFD166 !important; }
 
-/* 2. 텍스트 컬러 강제 지정 (절대 묻히지 않게) */
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
-body.dark-mode .app-title, body.dark-mode .brand-logo,
-body.dark-mode .fest-card-title, body.dark-mode .fest-card-meta,
-body.dark-mode .place-desc, body.dark-mode strong {
-    color: #F9FAFB !important; 
+/* =========================================================
+   🔥 119 SOS 모달 찐막 통합 패치 (기존 패치 3개 지우고 이것만 넣으세요)
+========================================================= */
+
+/* 1. 홈 화면 119 배너 스타일 변경 */
+.sos-banner { 
+    background: #FFF0F1 !important; 
+    border: 2px solid #FFE3E3 !important; 
+    border-radius: 18px !important; 
+    padding: 20px 24px !important; 
+    display: flex !important; 
+    align-items: center !important; 
+    gap: 16px !important; 
+    margin-bottom: 20px !important; 
+    box-shadow: none !important;
+}
+.sos-banner-icon { 
+    font-size: 40px !important; 
+    filter: drop-shadow(0 4px 6px rgba(253, 104, 104, 0.3)) !important; 
+}
+.sos-banner-title { 
+    font-size: 17px !important; 
+    font-weight: 900 !important; 
+    color: #F04452 !important; 
+    margin-bottom: 4px !important; 
+}
+.sos-banner-desc { 
+    font-size: 13.5px !important; 
+    color: #FF8A8A !important; 
+    font-weight: 700 !important; 
+}
+body.dark-mode .sos-banner { 
+    background: #2A1F21 !important; 
+    border: 1px solid #4A2B30 !important; 
+}
+body.dark-mode .sos-banner-title { color: #FF8A8A !important; }
+body.dark-mode .sos-banner-desc { color: #D87093 !important; }
+
+/* 2. 모달 전체 배경 (주간엔 하양, 야간엔 검정) */
+#sos-modal .sos-content-box {
+    background-color: var(--bg-card) !important; 
+    border: 1px solid var(--border) !important;
 }
 
-body.dark-mode .app-desc, 
-body.dark-mode .home-tile-sub, 
-body.dark-mode .home-sub-desc,
-body.dark-mode .pill-title {
-    color: #B0B8C1 !important;
-}
-
-/* 3. 활성화된 버튼/탭 (파란색 + 흰 글씨) */
-body.dark-mode .segment-btn.active,
-body.dark-mode .filter-btn.active,
-body.dark-mode .tool-chip.active {
-    background-color: #3182F6 !important;
-    color: #FFFFFF !important;
+/* 3. 모달 제목 강제 색상 지정 및 버튼 겹침 방지 (아래로 밀기) */
+#sos-modal .sos-choice-title, 
+#sos-modal .sos-detail-title {
+    display: block !important; 
+    text-align: center !important;
+    color: var(--text-m) !important;
+    font-size: 22px !important; 
     font-weight: 900 !important;
+    margin-bottom: 8px !important;
+    margin-top: 45px !important; /* 뒤로가기 버튼과 안 겹치게 내림 */
 }
-
-/* 비활성화 버튼 */
-body.dark-mode .segment-btn:not(.active),
-body.dark-mode .filter-btn:not(.active),
-body.dark-mode .tool-chip:not(.active) {
-    background-color: #2D323B !important;
-    color: #8B95A1 !important;
+#sos-modal .sos-detail-title {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 12px !important;
 }
-
-/* 4. 헤더와 하단 내비게이션 */
-body.dark-mode .global-header,
-body.dark-mode .bottom-nav {
-    background: rgba(26, 28, 35, 0.95) !important;
-    border-top: 1px solid #333842 !important;
-}
-
-/* 5. 투약 계산기 카드 */
-body.dark-mode .pill-card {
-    background-color: #2A2E37 !important;
-    border: 1px solid #333842 !important;
-}
-
-/* =========================================
-   🌙 토실이 육아 메이트 - 완벽 다크모드 마스터 패치 (최종 종결판)
-========================================= */
-
-/* 1. 전체 배경 & 기본 텍스트 */
-body.dark-mode {
-    background-color: #1A1C23 !important;
-    color: #E5E8EB !important;
-}
-body.dark-mode .wrapper {
-    background-color: #1A1C23 !important;
-}
-
-/* 2. 카드 및 박스 배경 (어두운 그레이) */
-body.dark-mode .app-box,
-body.dark-mode .result-card,
-body.dark-mode #capture-area,
-body.dark-mode #history-list-area,
-body.dark-mode .checkbox-area,
-body.dark-mode .disclaimer-box,
-body.dark-mode .ww-status-box,
-body.dark-mode .accordion-item,
-body.dark-mode .accordion-header,
-body.dark-mode .accordion-body,
-body.dark-mode .fest-card {
-    background-color: #22252D !important;
-    border: 1px solid #333842 !important;
-    color: #E5E8EB !important;
-}
-
-/* 3. 주말 나들이 탭 (배경 투명화) */
-body.dark-mode #tab-hotplace,
-body.dark-mode #tab-hotplace .app-box,
-body.dark-mode .outing-segment-container {
-    background: transparent !important;
-    border: none !important;
-}
-body.dark-mode .search-wrapper,
-body.dark-mode .segment-control {
-    background-color: #22252D !important;
-    border: 1px solid #333842 !important;
-}
-body.dark-mode .search-input {
-    background: transparent !important;
-    color: #FFFFFF !important;
-}
-
-/* 4. 메인 홈 화면 버튼 (부드러운 다크 톤) */
-body.dark-mode .home-large-tile,
-body.dark-mode .home-sub-tile {
-    background-color: #2A2E37 !important;
-    border: 1px solid #3A404A !important;
-}
-body.dark-mode .home-tile-title,
-body.dark-mode .home-sub-title {
-    color: #F9FAFB !important;
-}
-body.dark-mode .home-tile-sub,
-body.dark-mode .home-sub-desc {
-    color: #8B95A1 !important;
-}
-
-/* 5. 툴박스 & 필터 버튼 */
-body.dark-mode .tool-chip,
-body.dark-mode .segment-btn,
-body.dark-mode .filter-btn {
-    background-color: #2D323B !important;
-    color: #8B95A1 !important;
-    border: 1px solid #3A404A !important;
-}
-body.dark-mode .tool-chip span,
-body.dark-mode .segment-btn span,
-body.dark-mode .filter-btn span {
-    color: #8B95A1 !important;
-}
-/* 🔥 버튼 클릭 시 (파란 배경 + 흰 글씨 강제) */
-body.dark-mode .tool-chip.active,
-body.dark-mode .segment-btn.active,
-body.dark-mode .filter-btn.active,
-body.dark-mode .tool-chip.active span,
-body.dark-mode .tool-chip.active .t-label,
-body.dark-mode .tool-chip.active .t-icon,
-body.dark-mode .segment-btn.active span,
-body.dark-mode .filter-btn.active span {
-    background-color: #3182F6 !important;
-    border-color: #3182F6 !important;
-    color: #FFFFFF !important;
-    font-weight: 900 !important;
-}
-
-/* 6. 🚨 [완벽 해결] 툴박스 제목, 주말 미션, 제보 제목들 하얗게 구출 */
-body.dark-mode div[style*="font-size:16.5px"], 
-body.dark-mode div[style*="font-size: 16.5px"],
-body.dark-mode div[style*="font-size: 15px; font-weight: 800"],
-body.dark-mode div[style*="font-size: 15px; font-weight:800"] {
-    color: #FFFFFF !important;
-}
-
-/* 7. 공통 제목들 하얗게 구출 */
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
-body.dark-mode .app-title, body.dark-mode .brand-logo,
-body.dark-mode .fest-card-title, body.dark-mode .accordion-title-wrap strong {
-    color: #FFFFFF !important;
-}
-body.dark-mode .fest-card-meta, body.dark-mode .place-loc {
-    color: #B0B8C1 !important;
-}
-
-/* 8. 가계부 텍스트 및 선 색상 */
-body.dark-mode #money-total,
-body.dark-mode .history-item span:last-child {
-    color: #FFFFFF !important;
-}
-body.dark-mode .history-item {
-    border-bottom: 1px dashed #333842 !important;
-}
-body.dark-mode #money-insight {
-    background-color: #1A1C23 !important;
-    border: 1px solid #333842 !important;
-    color: #B0B8C1 !important;
-}
-
-/* 9. 안내사항 / 면책조항 (중요한 글씨는 흰색) */
-body.dark-mode .disclaimer-box p,
-body.dark-mode .ww-status-box {
-    color: #B0B8C1 !important;
-}
-body.dark-mode .disclaimer-box p:first-child,
-body.dark-mode .disclaimer-box strong,
-body.dark-mode .ww-status-box strong {
+body.dark-mode #sos-modal .sos-choice-title, 
+body.dark-mode #sos-modal .sos-detail-title { 
     color: #FFFFFF !important; 
 }
-body.dark-mode .checkbox-area label {
-    color: #FF8A8A !important;
+
+/* 4. 설명 글씨 색상 정상화 */
+#sos-step-medical div { color: var(--text-m) !important; }
+body.dark-mode #sos-step-medical div { color: #E5E8EB !important; }
+#sos-step-medical strong { color: #FF4B2B !important; }
+
+/* 5. 119 모달 내 모든 <a> 태그 밑줄 완벽 제거 */
+#sos-modal a { text-decoration: none !important; }
+
+/* 6. ★핵심 수정★ 달빛어린이병원 / 약국 찾기 버튼 주간모드 구출 */
+/* 기존 코드와 충돌하던 부분을 깔끔하게 덮어씁니다. */
+#sos-step-medical div[style*="display: grid"] a.btn-main {
+    background-color: #F2F5F8 !important; /* 주간: 회색 배경 */
+    color: #191F28 !important;            /* 주간: 까만 글씨 */
+    border: 1px solid #E5E8EB !important; /* 주간: 부드러운 테두리 */
+    font-weight: 800 !important;
+    text-decoration: none !important;
+}
+body.dark-mode #sos-step-medical div[style*="display: grid"] a.btn-main {
+    background-color: rgba(255,255,255,0.05) !important; /* 야간: 투명한 배경 */
+    color: #FFFFFF !important;            /* 야간: 하얀 글씨 */
+    border: 1px solid rgba(255,255,255,0.2) !important;
 }
 
-/* 10. 해열제 알약 카드 */
-body.dark-mode .pill-card {
-    background-color: rgba(255, 75, 43, 0.1) !important;
-    border: 1px solid rgba(255, 75, 43, 0.3) !important;
-}
-body.dark-mode .pill-card.blue {
-    background-color: rgba(49, 130, 246, 0.1) !important;
-    border: 1px solid rgba(49, 130, 246, 0.3) !important;
-}
-body.dark-mode .pill-card .pill-title,
-body.dark-mode .pill-card .pill-dose {
-    color: #FFFFFF !important;
-}
-
-/* 11. 입력창 (체온, 몸무게 등) */
-body.dark-mode .input-wrapper input {
-    background-color: #2D323B !important;
-    color: #FFFFFF !important;
-    border: 1px solid #3A404A !important;
-}
-
-/* 12. 🚨 [완벽 해결] 맨 밑 푸터 & 개인정보 안심 보장 (촌스러운 테두리 증발!) */
-body.dark-mode footer div[style*="background: #F8F9FA"],
-body.dark-mode footer div[style*="background:#F8F9FA"] {
-    background: transparent !important;
-    border: none !important;
-    color: #8B95A1 !important;
-}
-body.dark-mode footer div[style*="background: #F8F9FA"] strong,
-body.dark-mode footer div[style*="background:#F8F9FA"] strong {
-    color: #B0B8C1 !important; /* 너무 튀지 않는 밝은 회색으로 은은하게 */
-}
-
-/* 13. 헤더 & 하단 네비게이션 바 */
-body.dark-mode .global-header,
-body.dark-mode .bottom-nav {
-    background-color: rgba(26, 28, 35, 0.95) !important;
-    border-top: 1px solid #333842 !important;
-    border-bottom: 1px solid #333842 !important;
-}
-body.dark-mode .global-header .header-inner {
-    background-color: #22252D !important;
-    border: 1px solid #333842 !important;
-}
-
-/* =========================================
-   🌙 [최종] 박스 테두리/배경 제거 (플랫 디자인 패치)
-========================================= */
-
-/* 1. 헤더 로고 박스 테두리 제거 */
-body.dark-mode .global-header .header-inner {
-    background: transparent !important;
-    border: none !important;
-}
-
-/* 2. 툴박스/하윤맘 미션 등 메인 컨텐츠 박스들의 테두리/배경 제거 */
-body.dark-mode .app-box, 
-body.dark-mode .result-card,
-body.dark-mode .disclaimer-box,
-body.dark-mode .accordion-item,
-body.dark-mode .fest-card,
-body.dark-mode .checkbox-area {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-/* 3. 맨 밑 개인정보 안심 보장 박스 테두리 제거 */
-body.dark-mode footer div[style*="background"] {
-    background: transparent !important;
-    border: none !important;
-}
-
-/* 4. 박스가 사라져도 글씨는 잘 보이게 강제 고정 */
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
-body.dark-mode .app-title, body.dark-mode .app-desc,
-body.dark-mode .home-tile-title, body.dark-mode .home-sub-title,
-body.dark-mode .fest-card-title, body.dark-mode strong {
-    color: #FFFFFF !important; /* 글씨는 무조건 흰색 */
-}
-
-/* 5. 주말 나들이 탭의 검색창/버튼 영역은 예외적으로 카드 형태 유지 (가독성 위해) */
-body.dark-mode #tab-hotplace .search-wrapper,
-body.dark-mode #tab-hotplace .segment-control,
-body.dark-mode #tab-hotplace .filter-wrap {
-    background-color: #22252D !important;
-    border: 1px solid #333842 !important;
-}
-
-/* =========================================
-   🌙 네비게이션 박스 테두리 제거 (플랫 디자인)
-========================================= */
-
-/* 하단 네비게이션 박스 배경과 테두리를 완전히 투명하게 만듭니다 */
-body.dark-mode .bottom-nav {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-/* 혹시 네비게이션 안의 개별 메뉴들이 박스처럼 보인다면 그 부분도 제거 */
-body.dark-mode .bottom-nav .nav-item {
-    border: none !important;
-    background: transparent !important;
-}
-
-/* =========================================
-   💡 육아 상식 라이브러리 (라이트/다크 자동 전환)
-========================================= */
-/* 기본 (라이트 모드) */
-.flat-accordion { width: 100%; }
-.lib-title { color: var(--text-m); }
-.flat-accordion summary {
-    list-style: none; 
-    color: var(--text-m);
-    font-size: 15px;
-    transition: all 0.2s;
-}
-.lib-content { color: var(--text-s); }
-.flat-accordion summary::-webkit-details-marker { display: none; }
-.flat-accordion summary::after {
-    content: '➕'; float: right; font-size: 12px;
-}
-.flat-accordion[open] summary::after { content: '➖'; }
-
-/* 다크 모드 대응 */
-body.dark-mode .lib-title,
-body.dark-mode .flat-accordion summary {
-    color: #FFFFFF !important;
-}
-body.dark-mode .flat-accordion summary {
-    border-bottom: 1px solid #333842 !important;
-}
-body.dark-mode .lib-content {
-    color: #B0B8C1 !important;
-}
-
-/* =========================================
-   🎒 외출 준비물 체크리스트
-========================================= */
-.check-item {
-    display: flex; 
-    align-items: center; 
-    padding: 16px 12px; 
-    border-bottom: 1px dashed var(--border); 
-    cursor: pointer; 
-    transition: all 0.2s;
-}
-.check-box {
-    width: 22px; 
-    height: 22px; 
-    border: 2px solid var(--primary); 
-    border-radius: 6px; 
-    margin-right: 14px; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    font-size: 14px; 
-    color: transparent;
-    transition: all 0.2s;
-}
-.check-text {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-m);
-    transition: all 0.2s;
-}
-
-/* 완료 (체크된 상태) */
-.check-item.checked {
-    opacity: 0.5;
-    background: #F8F9FA;
-}
-.check-item.checked .check-box {
-    background: var(--primary);
-    color: #FFF;
-}
-.check-item.checked .check-text {
-    text-decoration: line-through;
-}
-
-/* 다크모드 대응 */
-body.dark-mode .check-item.checked { background: #2A2F3A; }
-
-/* =========================================
-   💻 PC 화면 늘어남 방지 (모바일 사이즈 고정) - 찐 최종
-========================================= */
-.wrapper {
-    max-width: 500px !important;
-    margin: 0 auto !important;
-    background-color: #F2F5F8;
-    min-height: 100vh;
-    box-shadow: 0 0 20px rgba(0,0,0,0.05);
-}
-.global-header {
-    max-width: 500px !important;
-    margin: 0 auto !important;
-    left: 0 !important;
-    right: 0 !important;
-}
-body { background-color: #E5E8EB; }
-body.dark-mode { background-color: #121212 !important; }
-body.dark-mode .wrapper { background-color: #1A1C23 !important; }
-
-/* =========================================
-   🌙 다크모드 하극상 참교육 (인라인 스타일 강제 덮어쓰기)
-========================================= */
-/* 🎒 체크리스트 버튼 */
-body.dark-mode button[onclick="openChecklistModal()"] {
-    background: #2A2E37 !important;
-    border-color: #3A404A !important;
-}
-body.dark-mode button[onclick="openChecklistModal()"] span {
-    color: #FFFFFF !important;
-}
-
-/* 📢 커뮤니티 제보 박스 */
-body.dark-mode #section-report {
-    background: #22252D !important;
-    border-color: #333842 !important;
-}
-body.dark-mode #section-report div {
-    color: #E5E8EB !important;
-}
-
-/* 💬 팩트 검증 피드 (아코디언 안쪽) */
-body.dark-mode .place-review {
-    background: #2A2E37 !important;
-    color: #E5E8EB !important;
-    border-left-color: #3182F6 !important;
-}
-
-/* 🎒 체크리스트 팝업창(모달) 전체 배경 */
-body.dark-mode #checklist-modal .sos-content-box {
-    background: #191F28 !important;
-    border: 1px solid #333842 !important;
-}
-body.dark-mode #checklist-modal .sos-choice-desc {
-    color: #8B95A1 !important;
-}
-
-/* =========================================
-   ✨ 체크리스트 버튼 & 박스 다크모드 완벽 동기화
-========================================= */
-/* 🎒 메인 체크리스트 버튼 */
-.checklist-main-btn {
-    background: #FFF !important; 
-    color: var(--text-m) !important; 
-    border: 2px solid var(--primary) !important; 
-    box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1) !important; 
-    margin-bottom: 20px !important; 
-    text-align: left !important; 
-    padding: 16px 20px !important;
-}
-body.dark-mode .checklist-main-btn {
-    background: #2A2E37 !important;
-    border-color: #3A404A !important;
-    color: #FFF !important;
-}
-body.dark-mode .checklist-main-btn span {
-    color: #FFF !important;
-}
-
-/* 📢 제보 박스 */
-.report-box {
-    background: #F8F9FA; 
-    border: 1px solid var(--border); 
-    border-radius: 16px; 
-    padding: 20px; 
-    margin-top: 30px; 
-    margin-bottom: 15px; 
-    text-align: center;
-}
-body.dark-mode .report-box {
-    background: #22252D !important;
-    border-color: #333842 !important;
-    color: #E5E8EB !important;
-}
-
-/* 🎛️ 팝업창 모달 하단 버튼 (초기화 & 닫기 반반) */
-.btn-reset, .btn-close {
-    flex: 1;
-    margin-top: 0 !important;
-}
-.btn-reset {
-    background: #F2F5F8 !important;
-    color: #4E5968 !important;
-    box-shadow: none !important;
-}
-body.dark-mode .btn-reset {
-    background: #2D323B !important;
-    color: #8B95A1 !important;
-}
-.btn-close {
-    background: var(--primary) !important;
-    color: #FFF !important;
-}
-
-/* =========================================
-   🎒 체크리스트 다크모드 글씨 구출 작전!
-========================================= */
-/* 1. 체크리스트 기본 글씨 하얗게 */
-body.dark-mode .check-text {
-    color: #F9FAFB !important;
-}
-
-/* 2. 팝업창 맨 위 큰 제목 (외출 준비물 팩킹 완료!) 하얗게 */
-body.dark-mode .sos-choice-title {
-    color: #FFFFFF !important;
-}
-
-/* 3. 100% 다 챙겼을 때 뜨는 축하 멘트 (하윤이랑 잊지 못할...) 밝은 회색으로 */
-body.dark-mode #checklist-items div[style*="color:var(--text-s)"] {
-    color: #B0B8C1 !important;
-}
-
-/* =========================================
-   💊 해열제 약 선택 버튼 (옷 입히기)
-========================================= */
-.pill-btn {
-    flex: 1;
-    padding: 16px 10px;
-    border-radius: 14px;
+/* 7. 오열 체크리스트 배경 및 글자색 복구 */
+#sos-step-cry .sos-check-item {
+    background: var(--bg-sub) !important;
     border: 1px solid var(--border) !important;
-    background: #FFF !important;
-    color: var(--text-s) !important;
-    font-size: 14.5px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    color: var(--text-m) !important;
+}
+body.dark-mode #sos-step-cry .sos-check-item {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: #E5E8EB !important;
+}
+#sos-step-cry .sos-check-item strong { color: var(--text-m) !important; }
+body.dark-mode #sos-step-cry .sos-check-item strong { color: #FFFFFF !important; }
+#sos-step-cry .sos-check-item:first-child strong { color: #F04452 !important; }
+body.dark-mode #sos-step-cry .sos-check-item:first-child strong { color: #FFD166 !important; }
+
+/* 8. 닫기(X) 및 뒤로가기(<-) 버튼 디자인 */
+#sos-modal .sos-close-btn {
+    position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;
+    background: #F2F5F8 !important; color: #191F28 !important; 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 900; cursor: pointer; z-index: 20;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+#sos-modal .sos-back-btn {
+    position: absolute; top: 16px; left: 16px; height: 36px; padding: 0 16px;
+    background: #F2F5F8 !important; color: #191F28 !important; 
+    border-radius: 18px; display: flex; align-items: center; justify-content: center;
+    font-size: 13.5px; font-weight: 800; cursor: pointer; z-index: 20;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+body.dark-mode #sos-modal .sos-close-btn,
+body.dark-mode #sos-modal .sos-back-btn {
+    background: #2D323B !important; color: #E5E8EB !important;
+}
+/* =========================================================
+   🔥 진짜 최종 완벽 패치 (기존 에러 코드 싹 지우고 이것만 넣으세요!)
+========================================================= */
+
+/* 1. 119 병원/약국 버튼 주간/야간 완벽 스위칭 */
+#sos-step-medical div[style*="grid-template-columns"] a.btn-main {
+    background-color: #F2F5F8 !important; /* 주간모드: 회색 배경 */
+    color: #191F28 !important;            /* 주간모드: 까만 글씨 */
+    border: 1px solid #E5E8EB !important;
+    text-shadow: none !important;
 }
 
-/* 🔴 빨간약 선택 시 */
-.pill-btn.red.active {
-    background: #FFF0F1 !important;
-    border-color: #FF4B2B !important;
-    color: #FF4B2B !important;
-    box-shadow: 0 4px 12px rgba(255, 75, 43, 0.15);
+body.dark-mode #sos-step-medical div[style*="grid-template-columns"] a.btn-main {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* 야간모드: 반투명 검정 */
+    color: #FFFFFF !important;                              /* 야간모드: 하얀 글씨 */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-/* 🔵 파란약 선택 시 */
-.pill-btn.blue.active {
-    background: #E1F0FF !important;
-    border-color: #3182F6 !important;
-    color: #3182F6 !important;
-    box-shadow: 0 4px 12px rgba(49, 130, 246, 0.15);
+/* 2. 성장 마스터 원더윅스 타임라인 여백 확보 (잘림 방어) */
+.ww-table th, .ww-table td {
+    padding: 14px 16px !important;
 }
 
-/* 🌙 다크모드 약 선택 버튼 */
-body.dark-mode .pill-btn {
-    background: #2D323B !important;
-    border-color: #3A404A !important;
-    color: #8B95A1 !important;
-}
-body.dark-mode .pill-btn.red.active {
-    background: rgba(255, 75, 43, 0.15) !important;
-    border-color: #FF4B2B !important;
-    color: #FF8A8A !important;
-}
-body.dark-mode .pill-btn.blue.active {
-    background: rgba(49, 130, 246, 0.15) !important;
-    border-color: #3182F6 !important;
-    color: #82B1FF !important;
+/* 3. 핫딜 판독기 드롭다운(select) 리스트 주간/야간 완벽 스위칭 */
+select option {
+    background-color: #FFFFFF !important; /* 주간모드: 하얀 바탕 */
+    color: #191F28 !important;            /* 주간모드: 까만 글씨 */
 }
 
-/* =========================================
-   💌 오늘의 육아 문답 카드 (라이트 모드 기본)
-========================================= */
-.diary-card {
-    background: linear-gradient(135deg, #FFF5F5, #FFE4E1);
-    border-radius: 15px; 
-    padding: 20px; 
-    margin-bottom: 15px; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-    cursor: pointer; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border: 1px solid #FFE4E1;
-    transition: all 0.3s ease; /* 부드럽게 변신! */
-}
-.diary-card-title {
-    font-size: 1.1rem; 
-    color: #D87093; 
-    margin: 0 0 5px 0; 
-    font-weight: 800; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px;
-}
-.diary-card-desc {
-    font-size: 0.85rem; 
-    color: #888; 
-    margin: 0;
-}
-.diary-card-btn {
-    background: white; 
-    padding: 8px 12px; 
-    border-radius: 10px; 
-    font-size: 0.75rem; 
-    font-weight: bold; 
-    color: #D87093; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    transition: all 0.3s ease;
+body.dark-mode select option {
+    background-color: #2D323B !important; /* 야간모드: 다크 네이비 바탕 */
+    color: #FFFFFF !important;            /* 야간모드: 하얀 글씨 */
 }
 
-/* =========================================
-   🌙 오늘의 육아 문답 카드 (다크 모드일 때!)
-========================================= */
-body.dark-mode .diary-card,
-html.dark-mode .diary-card {
-    background: linear-gradient(135deg, #2A1F21, #362225);
-    border: 1px solid #4A2B30;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-body.dark-mode .diary-card-title,
-html.dark-mode .diary-card-title {
-    color: #E8BDB5; /* 로즈 골드 느낌 */
-}
-body.dark-mode .diary-card-desc,
-html.dark-mode .diary-card-desc {
-    color: #A0A0A0;
-}
-body.dark-mode .diary-card-btn,
-html.dark-mode .diary-card-btn {
-    background: #4A2B30; 
-    color: #E8BDB5; 
-}
-
-/* =========================================
-   🧸 오늘의 5분 놀이 자판기 (라이트 모드)
-========================================= */
-.play-card {
-    background: linear-gradient(135deg, #FFF8E7, #FFE8B6);
-    border: 1px solid #FFE8B6;
-    cursor: default; 
-    display: block; 
-    margin-bottom: 15px;
-    transition: all 0.3s ease;
-}
-.play-card-title {
-    color: #D4A373; 
-    margin: 0 0 8px 0; 
-    font-weight: 800; 
-    display: flex; 
-    align-items: center; 
-    gap: 5px;
-}
-.play-title {
-    font-size: 1.05rem; 
-    font-weight: 900; 
-    color: #5C4A3D; 
-    margin: 8px 0 4px 0;
-}
-.play-desc {
-    font-size: 0.85rem; 
-    color: #8B7355; 
-    line-height: 1.4; 
-    word-break: keep-all;
-}
-.play-effect-badge {
-    display: inline-block; 
-    margin-top: 10px; 
-    padding: 5px 10px; 
-    background: white; 
-    color: #D4A373; 
-    font-size: 0.75rem; 
-    font-weight: 900; 
-    border-radius: 10px; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    transition: all 0.3s ease;
-}
-
-/* =========================================
-   🌙 오늘의 5분 놀이 자판기 (다크 모드 연동)
-========================================= */
-body.dark-mode .play-card,
-html.dark-mode .play-card {
-    background: linear-gradient(135deg, #2D261A, #3B301D);
-    border: 1px solid #4A3E25;
-}
-body.dark-mode .play-card-title,
-html.dark-mode .play-card-title {
-    color: #E8C396;
-}
-body.dark-mode .play-title,
-html.dark-mode .play-title {
-    color: #E8C396;
-}
-body.dark-mode .play-desc,
-html.dark-mode .play-desc {
-    color: #A38C75;
-}
-body.dark-mode .play-effect-badge,
-html.dark-mode .play-effect-badge {
-    background: #4A3E25;
-    color: #E8C396;
-}
-
-/* 다크모드 일 때 가계부 배경색 완벽 대응 */
-body.dark-mode {
-    --bg-card: #2C2C2E; /* 하얀색 ➔ 진한 그레이 */
-    --bg-sub: #1C1C1E;  /* 연한 회색 ➔ 더 진한 그레이 */
-}
-
-/* =========================================
-   🚀 1. 폰트 교체 (가장 중요!)
-   - 촌스러운 기본 폰트를 버리고, 토스/당근/애플이 쓰는 '프리텐다드' 장착
-========================================= */
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-
-* {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif !important;
-    
-    /* 🚀 2. 웹 브라우저 냄새 완벽 제거 */
-    -webkit-tap-highlight-color: transparent; /* 버튼 누를 때 파란색 네모 깜빡이는 웹 특유의 현상 제거 */
-    -webkit-user-select: none; /* 글씨 꾹 누르면 드래그(블록) 되는 현상 방지 (진짜 앱처럼) */
-    user-select: none;
-}
-
-/* 단, 입력창(가계부, 이름 등)은 글씨가 선택/입력되어야 하므로 예외 처리 */
-input, textarea {
-    -webkit-user-select: auto;
-    user-select: auto;
-}
-
-/* 🚀 3. 지저분한 스크롤바 숨기기 (기능은 작동함) */
-::-webkit-scrollbar {
-    display: none;
-}
-
-/* =========================================
-   🚀 4. 쫀득한 터치 애니메이션 (Micro Interaction)
-   - 버튼을 누를 때 0.2초 만에 스르륵 작아졌다 커지는 네이티브 앱 효과
-========================================= */
-button, .btn-main, .pill-btn, .check-item, .nav-item, .fest-card, .accordion-header {
-    transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
-    cursor: pointer;
-}
-
-/* 버튼을 꾹 누르고 있을 때 (Active 상태) */
-button:active, .btn-main:active, .check-item:active, .fest-card:active {
-    transform: scale(0.96);
-    opacity: 0.85;
-}
-
-/* =========================================
-   🚀 5. 하단 네비게이션 바 '유리 질감(Glassmorphism)' 효과
-   - 아이폰이나 최신 안드로이드 특유의 반투명 블러 효과
-========================================= */
-.bottom-nav {
-    background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(12px); /* 배경이 은은하게 비침 */
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-body.dark-mode .bottom-nav {
-    background: rgba(28, 28, 30, 0.85) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* =========================================
-   🚀 6. 카드 UI 고급화 (그림자 Depth 추가)
-   - 평면적이었던 카드들에 아주 은은하고 고급스러운 그림자 부여
-========================================= */
-.panel-block, .result-card, .fest-card, .accordion-item {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-/* 다크모드 전용 그림자 */
-body.dark-mode .panel-block, 
-body.dark-mode .result-card, 
-body.dark-mode .fest-card, 
-body.dark-mode .accordion-item {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* =========================================
-   🚀 1. 모달 배경 (공통)
-   - 애니메이션 씹힘 현상 해결을 위해 키프레임 재설정
-========================================= */
-.modal-overlay, #premium-modal, #sos-modal, #checklist-modal {
-    position: fixed !important;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 9999;
-    display: none; /* JS에서 flex로 켬 */
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    animation: fadeInBg 0.2s ease-out forwards;
-}
-
-/* =========================================
-   💻 2. PC 버전 (넓은 화면일 때)
-   - 화면 정중앙에 예쁘게 팝업 (스케일업 애니메이션)
-========================================= */
-@media (min-width: 769px) {
-    .modal-overlay, #premium-modal, #sos-modal, #checklist-modal {
-        align-items: center; /* 화면 중앙 정렬 */
-        justify-content: center;
-    }
-    .modal-content, #sos-modal > div, #checklist-modal > div {
-        width: 100%;
-        max-width: 420px; /* PC에선 너무 안 뚱뚱하게 */
-        background: var(--bg-card, #FFF);
-        border-radius: 24px !important; /* 전체 모서리 둥글게 */
-        padding: 30px !important;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        animation: popInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* 쫀득하게 커짐 */
-    }
-    /* PC에선 상단 손잡이 막대기 숨김 */
-    .modal-content::before, #sos-modal > div::before, #checklist-modal > div::before {
-        display: none !important;
-    }
-}
-
-/* =========================================
-   📱 3. 모바일 버전 (스마트폰 크기일 때)
-   - 화면 맨 아래에서 스르륵 밀고 올라오는 바텀 시트
-========================================= */
-@media (max-width: 768px) {
-    .modal-overlay, #premium-modal, #sos-modal, #checklist-modal {
-        align-items: flex-end; /* 화면 맨 아래 정렬 */
-        justify-content: center;
-    }
-    .modal-content, #sos-modal > div, #checklist-modal > div {
-        width: 100%;
-        background: var(--bg-card, #FFF);
-        border-radius: 24px 24px 0 0 !important; /* 위쪽 모서리만 둥글게 */
-        padding: 30px 20px 40px 20px !important;
-        margin: 0 !important;
-        box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
-        animation: slideUpSheet 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; /* 스르륵 완벽 복구 */
-    }
-    /* 모바일 전용 상단 손잡이 막대기 */
-    .modal-content::before, #sos-modal > div::before, #checklist-modal > div::before {
-        content: '';
-        display: block;
-        width: 40px;
-        height: 5px;
-        background: #E5E8EB;
-        border-radius: 10px;
-        margin: -10px auto 20px auto;
-    }
-    body.dark-mode .modal-content::before, 
-    body.dark-mode #sos-modal > div::before, 
-    body.dark-mode #checklist-modal > div::before { 
-        background: #444; 
-    }
-}
-
-/* =========================================
-   🎬 4. 애니메이션 키프레임 (절대 안 씹히게 0% 추가)
-========================================= */
-@keyframes fadeInBg {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes slideUpSheet {
-    0% { transform: translateY(100%); opacity: 0; } /* 완전히 숨겼다가 */
-    100% { transform: translateY(0); opacity: 1; }  /* 제자리로! */
-}
-
-@keyframes popInModal {
-    0% { transform: scale(0.85); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* =========================================
-   🚀 소아과 브리핑용 '증상 체크 버튼' 스타일
-========================================= */
-.sym-btn {
-    padding: 10px 6px;
-    background: var(--bg-sub, #F2F5F8);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text-s);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* 체크박스가 선택됐을 때의 쫀득한 변화 */
-input[type="checkbox"]:checked + .sym-btn {
-    background: rgba(49, 130, 246, 0.1);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    font-weight: 800;
-    transform: scale(0.96);
-}
-
-body.dark-mode input[type="checkbox"]:checked + .sym-btn {
-    background: rgba(49, 130, 246, 0.2);
-}
-
-/* =========================================
-   📱 홈 대시보드 위젯 전용 프리미엄 디자인
-========================================= */
-/* 빠른 실행 2x2 위젯 버튼 */
-.quick-btn {
-    background: var(--bg-card, #FFF);
-    border: 1px solid var(--border, #E5E8EB);
-    padding: 18px 12px;
-    border-radius: 20px;
-    text-align: center;
-    font-weight: 800;
-    color: var(--text-m);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.quick-btn:active {
-    transform: scale(0.94);
-    background: var(--bg-sub, #F2F5F8);
-}
-
-/* 탭들 내용이 짧아도 밑에 휑한 공백 안 보이게 최소 높이 지정 */
-.tab-content {
-    min-height: 85vh; 
-    padding-bottom: 40px;
-}
-
-/* =========================================
-   🚨 가계부/성장 패널 다크모드 글씨 증발 방지 패치
-========================================= */
-body.dark-mode {
-    /* 배경이 까매지면, 글씨 색상 변수들을 자동으로 하얗게 강제 교체! */
-    --text-m: #F9FAFB !important; 
-    --text-s: #B0B8C1 !important;
-    --border: #333842 !important;
-}
-
-body.dark-mode input, 
+/* (추가 안전장치) 다크모드에서 드롭다운 화살표 영역 글씨 색상 보장 */
 body.dark-mode select {
-    color: #F9FAFB !important; /* 입력창 안의 숫자(0)도 하얗게 구출 */
+    color: #FFFFFF !important; 
+    background-color: transparent !important;
 }
 
-body.dark-mode .history-btn {
-    background: #2D323B !important; /* 혼자 눈부시게 하얗던 과거내역 버튼 톤다운 */
-    color: #F9FAFB !important;
+/* =========================================================
+   🔥 약국 & 달빛어린이병원 무적 강제 구출 (핵폭탄 CSS)
+========================================================= */
+
+/* 주간모드: 병원/약국 버튼 (div 안에 숨은 a태그) 강제 회색바탕+까만글씨 */
+html body:not(.dark-mode) #sos-modal #sos-step-medical div a {
+    background-color: #F2F5F8 !important;
+    color: #191F28 !important; 
+    border: 1px solid #E5E8EB !important;
+    text-shadow: none !important;
+    -webkit-text-fill-color: #191F28 !important; /* 애플 브라우저 강제 오버라이드 */
 }
 
-/* =========================================
-   🚨 다크모드 하얀색 보호색(닌자) 완벽 픽스
-========================================= */
-/* 1. 배경이 하얀색으로 고정된 버튼들은 글씨를 까맣게 우회! */
-body.dark-mode button[onclick="openGoogleForm()"],
-body.dark-mode button[onclick="closeFestivalModalForce()"] {
-    color: #111111 !important; 
-    font-weight: 900 !important;
+/* 야간모드: 병원/약국 버튼 투명바탕+하얀글씨 */
+html body.dark-mode #sos-modal #sos-step-medical div a {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    text-shadow: none !important;
+    -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* 2. 월간 지출 리포트 뱃지 구출 (이건 그대로 유지) */
-body.dark-mode .stat-badge {
+/* ★단, 119 빨간색 메인 전화 버튼은 하얀 글씨 무조건 보호!★ */
+html body #sos-modal #sos-step-medical > a:first-of-type,
+html body #sos-modal #sos-step-medical > a.btn-main {
+    background: #F04452 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border: none !important;
+}
+
+/* =========================================================
+   🔥 병원/약국 둥근 버튼 껍데기 복구 (style.css 맨 밑에 추가)
+========================================================= */
+
+/* 주간모드: 회색 둥근 박스 버튼 */
+a[href*="moonlight"], 
+a[href*="pharmacy"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #F2F5F8 !important;
+    color: #191F28 !important;
+    border: 1px solid #E5E8EB !important;
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin-top: 12px !important;
+}
+
+/* 야간모드: 투명한 검정 박스 버튼 */
+body.dark-mode a[href*="moonlight"], 
+body.dark-mode a[href*="pharmacy"] {
+    background-color: rgba(255,255,255,0.05) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+/* =========================================================
+   🔥 병원 & 약국 버튼 예쁜 박스 디자인 입히기 (style.css 맨 밑)
+========================================================= */
+
+/* 주간모드: 연한 회색의 예쁘고 빵빵한 둥근 버튼 */
+html body #sos-modal #sos-step-medical a:not([href^="tel"]) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #F2F5F8 !important; /* 연한 회색 배경 */
+    color: #191F28 !important;            /* 진한 까만 글씨 */
+    border: 1px solid #E5E8EB !important; /* 부드러운 테두리 */
+    border-radius: 14px !important;       /* 요즘 앱처럼 둥근 모서리 */
+    padding: 16px 10px !important;        /* 큼직한 높이 여백 */
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.03) !important;
+    margin-top: 8px !important;
+}
+
+/* 야간모드: 다크 테마에 맞는 투명 검정 버튼 */
+html body.dark-mode #sos-modal #sos-step-medical a:not([href^="tel"]) {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* =========================================================
+   🔥 찐막 패치 2: 제보 버튼 다크모드 & 라이브러리 글자 짤림 방지
+========================================================= */
+
+/* 1. 육아 나들이 제보 버튼 (다크모드일 때 너무 밝은 문제 해결) */
+button[onclick*="openGoogleForm"],
+a[href*="forms.gle"] {
+    background-color: #FFFFFF !important; /* 주간모드: 깔끔한 흰색 */
+    color: #191F28 !important;            /* 주간모드: 글씨색 */
+    border: 1px solid #E5E8EB !important;
+}
+
+body.dark-mode button[onclick*="openGoogleForm"],
+body.dark-mode a[href*="forms.gle"] {
+    background-color: #2A2D32 !important; /* 야간모드: 어두운 회색으로 변경 */
+    color: #F9FAFB !important;            /* 야간모드: 글씨색 */
+    border: 1px solid #444950 !important;
+}
+
+/* 2. 라이브러리 글자 잘림 방지 (내용이 길어도 100% 다 보이게 강제) */
+.lib-content {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    white-space: normal !important; /* 글자 줄바꿈 강제 허용 */
+    word-break: break-all !important; /* 긴 영어단어 등 줄바꿈 강제 */
+    padding: 16px !important;
+}
+
+/* 아코디언 상세 내용 강제 펼침 유지 */
+.flat-accordion[open] .lib-content {
+    display: block !important;
+}
+
+/* 제보 버튼 디자인 복구 및 다크모드 대응 */
+.btn-main {
+    font-size: 15.5px !important;
+    box-shadow: none !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    border: 1px solid #E5E8EB !important;
+    cursor: pointer;
+    /* 주간모드 배경/글씨 */
+    background: #F2F5F8 !important;
+    color: #191F28 !important;
+}
+
+/* 다크모드일 때만 배경/글씨를 어둡게 변경 */
+body.dark-mode .btn-main {
     background: #2D323B !important;
-    color: #F9FAFB !important;
+    color: #FFFFFF !important;
+    border: 1px solid #444950 !important;
+}
+
+/* =========================================================
+   🔥 돋보기 아이콘 입력창 안으로 강제 진입 (style.css 맨 밑에 추가)
+========================================================= */
+
+/* 1. 검색창 wrapper를 위치 기준점으로 설정 */
+.search-wrapper { 
+    position: relative !important; 
+    display: flex !important; 
+    align-items: center !important; 
+}
+
+/* 2. 돋보기를 입력창 왼쪽 안으로 강제 이동 */
+.search-wrapper .search-icon, 
+.search-wrapper span:first-child { /* 아이콘 태그를 콕 집어서 지정 */
+    position: absolute !important; 
+    left: 14px !important; 
+    top: 50% !important; 
+    transform: translateY(-50%) !important; 
+    z-index: 10 !important;
+    pointer-events: none; /* 아이콘 클릭해서 입력창 방해하는 것 방지 */
+}
+
+/* 3. 아이콘이 텍스트를 가리지 않게 왼쪽 여백 확보 */
+.search-input { 
+    padding-left: 44px !important; /* 아이콘만큼 왼쪽을 밀어줌 */
 }
