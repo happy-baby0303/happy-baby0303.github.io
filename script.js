@@ -384,44 +384,55 @@ function resetMoneyAll() {
     }
 }
 function calcHotDeal() {
+    const cat = document.getElementById('hd-category').value;
     const priceEl = document.getElementById('hd-total-price');
     const countEl = document.getElementById('hd-count');
-    const standardEl = document.getElementById('hd-standard-price'); // 새로 만드신 기준가
-    
-    if(!priceEl || !countEl || !standardEl) return alert("입력창을 확인하세요!");
+    const pastPriceEl = document.getElementById('hd-standard-price'); // 지난번 단가
     
     const price = Number(priceEl.value.replace(/,/g,''));
     const count = Number(countEl.value);
-    const standardPrice = Number(standardEl.value);
+    const pastPrice = Number(pastPriceEl.value);
     
-    if(!price || !count || !standardPrice) return alert("모든 항목을 정확히 입력해주세요!");
+    if(!price || !count) return alert("최종 결제액과 총 수량을 정확히 입력해주세요!");
     
     const unitPrice = Math.round(price / count);
     document.getElementById('hd-unit-price').innerText = unitPrice.toLocaleString() + "원";
     
-    // 평소 단가와 비교해서 할인율(%) 계산
-    const percent = Math.round(((standardPrice - unitPrice) / standardPrice) * 100);
-    
     const verdictEl = document.getElementById('hd-verdict');
     const commentEl = document.getElementById('hd-comment');
     
-    if (percent >= 10) {
-        verdictEl.innerText = `🚀 역대급 핫딜 (${percent}% 저렴)`;
-        verdictEl.style.backgroundColor = "#3182F6";
-        commentEl.innerText = "이건 당장 무조건 쟁여야 할 핫딜입니다!";
-    } else if (percent > 0) {
-        verdictEl.innerText = `✅ 살만함 (${percent}% 저렴)`;
-        verdictEl.style.backgroundColor = "#00B37A";
-        commentEl.innerText = "지금 당장 필요하다면 사도 좋은 가격입니다.";
+    // 품목에 따른 단위 설정
+    let unitName = "장";
+    if (cat === 'wipe') unitName = "팩";
+    else if (cat === 'milk') unitName = "통";
+    
+    // 지난번 단가를 입력했을 때 비교 분석
+    if (pastPrice > 0) {
+        const diff = pastPrice - unitPrice;
+        
+        if (diff > 0) {
+            verdictEl.innerText = `🎉 지난번보다 ${unitName}당 ${diff.toLocaleString()}원 저렴해요!`;
+            verdictEl.style.backgroundColor = "#00B37A"; // 우수 (초록)
+            commentEl.innerText = `총 ${count}${unitName}를 사니까, 지난번 구매할 때보다 총 ${(diff * count).toLocaleString()}원 아끼는 셈이에요. 아주 훌륭한 소비입니다!`;
+        } else if (diff < 0) {
+            verdictEl.innerText = `⚠️ 지난번보다 ${unitName}당 ${Math.abs(diff).toLocaleString()}원 비싸요.`;
+            verdictEl.style.backgroundColor = "#F04452"; // 경고 (빨강)
+            commentEl.innerText = `이번에 사면 지난번보다 총 ${(Math.abs(diff) * count).toLocaleString()}원 더 지출하게 됩니다. 급한 게 아니라면 조금 더 기다려보는 건 어떨까요?`;
+        } else {
+            verdictEl.innerText = `⚖️ 지난번 구매가와 완벽히 똑같아요!`;
+            verdictEl.style.backgroundColor = "#3182F6"; // 안정 (파랑)
+            commentEl.innerText = "평소 사시던 가격 그대로네요. 필요하다면 지금 구매하셔도 좋습니다.";
+        }
     } else {
-        verdictEl.innerText = `❌ 비싸요 (오히려 손해)`;
-        verdictEl.style.backgroundColor = "#F04452";
-        commentEl.innerText = "평소 오프라인 마트보다 비쌉니다. 패스하세요!";
+        // 지난번 단가를 안 적은 경우 단순 명확하게 단가만 알려줌
+        verdictEl.innerText = `✅ 정확한 단가 계산 완료!`;
+        verdictEl.style.backgroundColor = "#3182F6"; // 안정 (파랑)
+        commentEl.innerText = `복잡한 쿠폰/할인 다 합쳐서 결국 1${unitName}당 ${unitPrice.toLocaleString()}원에 사시는 겁니다! (위에 4번 항목에 비교할 단가를 넣으시면 더 자세히 분석해 드려요)`;
     }
+    
     verdictEl.style.color = "#FFF";
     document.getElementById('hd-result').style.display = 'block';
 }
-
 // ==========================================
 // 5. 스마트 해열제 타이머 엔진 
 // ==========================================
@@ -880,6 +891,72 @@ function toggleDarkMode() {
     localStorage.setItem('tosil_dark_mode', body.classList.contains('dark-mode') ? 'on' : 'off');
 }
 
+// ==========================================
+// 8. 이유식 알레르기 체크리스트 엔진
+// ==========================================
+const foodCategories = [
+    { id: 'carb', name: '🍚 탄수화물 (초기)', items: ['쌀', '오트밀', '고구마', '감자', '단호박'] },
+    { id: 'veg', name: '🥦 채소/과일 (초~중기)', items: ['애호박', '청경채', '브로콜리', '양배추', '사과', '바나나'] },
+    { id: 'meat', name: '🥩 단백질 (중기~)', items: ['소고기', '닭고기', '두부', '흰살생선'] },
+    { id: 'allergy', name: '🚨 알레르기 주의군 (전문의 상담 후)', items: ['밀가루', '계란 노른자', '계란 흰자', '땅콩', '새우'] }
+];
+
+function renderFoodChecklist() {
+    const container = document.getElementById('food-list-container');
+    if (!container) return;
+    
+    // 저장된 데이터 불러오기
+    let savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {};
+    let passedCount = 0;
+    let totalCount = 0;
+
+    let html = '';
+    foodCategories.forEach(cat => {
+        html += `<div><div style="font-size:14px; font-weight:800; color:var(--text-m); margin-bottom:10px;">${cat.name}</div><div style="display:flex; flex-wrap:wrap; gap:8px;">`;
+        
+        cat.items.forEach(item => {
+            totalCount++;
+            const status = savedFoods[item] || 0; // 0: 미확인, 1: 통과, 2: 알레르기
+            let btnStyle = "background:#F2F5F8; color:var(--text-s); border:1px solid var(--border);";
+            let icon = "⬜ ";
+            
+            if (status === 1) {
+                btnStyle = "background:#E6F7F2; color:#00B37A; border:1px solid #00B37A; font-weight:800;";
+                icon = "✅ ";
+                passedCount++;
+            } else if (status === 2) {
+                btnStyle = "background:#FFF0F1; color:#F04452; border:1px solid #F04452; font-weight:800;";
+                icon = "🚨 ";
+            }
+
+            html += `<button onclick="toggleFoodStatus('${item}')" style="padding:10px 14px; border-radius:12px; font-size:13.5px; cursor:pointer; transition:all 0.2s; ${btnStyle}">${icon}${item}</button>`;
+        });
+        html += `</div></div>`;
+    });
+
+    container.innerHTML = html;
+    
+    // 미식가 레벨(통과한 재료 수) 업데이트
+    const countEl = document.getElementById('food-passed-count');
+    if(countEl) {
+        countEl.innerText = passedCount;
+        countEl.nextElementSibling.innerText = `/${totalCount}`;
+    }
+}
+
+function toggleFoodStatus(itemName) {
+    let savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {};
+    let currentStatus = savedFoods[itemName] || 0;
+    
+    // 상태 변경 로직: 미확인(0) -> 통과(1) -> 알레르기(2) -> 다시 미확인(0)
+    currentStatus = (currentStatus + 1) % 3;
+    
+    savedFoods[itemName] = currentStatus;
+    localStorage.setItem('tosil_food_test', JSON.stringify(savedFoods));
+    
+    renderFoodChecklist(); // 화면 다시 그리기
+}
+
 // 🚨 119 SOS 모달 겹침 현상 완벽 방어 자바스크립트
 window.openSOSModal = function() {
     const modal = document.getElementById('sos-modal');
@@ -934,6 +1011,7 @@ window.closeSOS = function(e) {
     if(e.target.id === 'sos-modal') closeSOSForce(); 
 };
 
+
 // ==========================================
 // 🚀 11. 구동 엔진
 // ==========================================
@@ -966,4 +1044,5 @@ window.onload = () => {
     initQuickScrollDrag();
     renderFeverTimeline();
     updateHomeDashboard();
+    renderFoodChecklist();
 };
