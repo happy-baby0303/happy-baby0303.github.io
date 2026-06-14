@@ -69,14 +69,17 @@ def download_filtered_festival_data():
             print(f"   ❌ {page}페이지 연동 중 예외 발생: {e}")
             break
 
-    # 🎯 전국구 데이터 싹 모아서 육아 맞춤형 정밀 필터링
+    # 🎯 전국구 데이터 싹 모아서 육아 맞춤형 정밀 필터링 (너무 깐깐했던 룰 수정!)
     filtered_festivals = []
     for item in all_collected_items:
         title = item.get('title', '')
+        
+        # 1. 술, 산업, 세미나 등 아기랑 가기 안 좋은 건 무조건 탈락! ❌
         if any(bad_word in title for bad_word in BAD_KEYWORDS):
             continue
-        if any(good_word in title for good_word in KID_FRIENDLY_KEYWORDS):
-            filtered_festivals.append(item)
+            
+        # 2. 나쁜 단어만 없으면 일단 웬만하면 다 통과! ✅ (그래야 루나쇼 같은 예쁜 축제가 뜹니다)
+        filtered_festivals.append(item)
     
     print(f"\n🎯 [최종 결과] 전국 {len(all_collected_items)}개 축제 전수조사 완료 ➔ 육아 맞춤 축제 {len(filtered_festivals)}개 최종 엄선!")
     
