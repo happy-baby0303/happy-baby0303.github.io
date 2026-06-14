@@ -26,7 +26,6 @@
 
     <div class="wrapper">
         
-        <!-- 🏠 1. 홈 탭 시작 -->
         <div id="tab-home" class="tab-content active">
             
             <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
@@ -141,7 +140,6 @@
             <div class="library-container" style="margin-top: 30px; padding: 0 12px;">
                 <div class="lib-title" style="font-size:18px; font-weight:900; margin-bottom:16px;">📚 육아 상식 라이브러리</div>
 
-                <!-- 1. 열날 때 -->
                 <details class="flat-accordion">
                     <summary>🌡️ 신생아/영유아 열날 때 대처법</summary>
                     <div class="lib-content">
@@ -149,7 +147,6 @@
                     </div>
                 </details>
 
-                <!-- 2. 물/보리차 -->
                 <details class="flat-accordion">
                     <summary>💧 신생아 맹물·보리차, 언제부터 먹일까?</summary>
                     <div class="lib-content">
@@ -157,7 +154,6 @@
                     </div>
                 </details>
 
-                <!-- 3. 수면교육 -->
                 <details class="flat-accordion">
                     <summary>💤 기적의 '통잠' 수면 교육, 언제부터?</summary>
                     <div class="lib-content">
@@ -165,7 +161,6 @@
                     </div>
                 </details>
 
-                <!-- 4. 똥 색깔 -->
                 <details class="flat-accordion">
                     <summary>💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
                     <div class="lib-content">
@@ -174,10 +169,7 @@
                 </details>
             </div>
             
-        </div> <!-- 홈 탭 끝 -->
-
-        <!-- 🗺️ 2. 핫플레이스 탭 시작 -->
-        <div id="tab-hotplace" class="tab-content">
+        </div> <div id="tab-hotplace" class="tab-content">
             <div class="app-box" style="padding-top:28px; padding-bottom:24px;">
                 <h1 class="app-title">토실이네 주말</h1>
                 <p class="app-desc" style="margin-bottom: 20px;">👶 아이와 함께하는 안심 주말 지도</p>
@@ -218,15 +210,12 @@
                 
                 <button class="btn-main" onclick="openGoogleForm()">📝 검증 공간 수기 제보하기 〉</button>
             </div>
-        </div> <!-- 핫플레이스 탭 끝 -->
-
-        <!-- 🧰 3. 툴박스 탭 시작 -->
-        <div id="tab-toolbox" class="tab-content">
+        </div> <div id="tab-toolbox" class="tab-content">
             <div class="app-box">
                 <h1 class="app-title">🧰 필수 육아 툴박스</h1>
                 <p class="app-desc" style="margin-bottom:20px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
 
-                <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 30px;">
+                <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
                     <div id="btn-tool-money" class="tool-chip active" onclick="switchTool('money', this)">
                         <span class="t-icon">💰</span><span class="t-label">가계부</span>
                     </div>
@@ -242,12 +231,20 @@
                     <div id="btn-tool-food" class="tool-chip" onclick="switchTool('food', this)">
                         <span class="t-icon">🥦</span><span class="t-label">이유식</span>
                     </div>
+                    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 수면/수유 트래커를 열심히 개발 중입니다.')">
+                        <span class="t-icon">🍼</span><span class="t-label">수면수유</span>
+                    </div>
+                    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 병원 진료 및 예방접종 수첩을 개발 중입니다.')">
+                        <span class="t-icon">🏥</span><span class="t-label">병원수첩</span>
+                    </div>
+                    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 우는 아기를 달래줄 백색소음기를 개발 중입니다.')">
+                        <span class="t-icon">🎵</span><span class="t-label">백색소음</span>
+                    </div>
                 </div>
 
-                <!-- 1. 가계부 패널 -->
                 <div id="panel-money" class="panel-block active" style="box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--text-m); padding-bottom:12px; margin-bottom:24px;">
-                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m);">📊 육아 소비 정밀 진단기</div>
+                        <div style="font-size:16.5px; font-weight:900; color:var(--text-m);">📊 육아 소비 진단기</div>
                         <div style="display:flex; gap:8px;">
                             <button class="history-btn" onclick="toggleHistory()" style="padding: 6px 12px; background: var(--bg-sub, #F2F5F8); color: var(--text-m); font-size: 13px; font-weight: 800; border-radius: 8px; border: none; cursor: pointer;">과거 내역</button>
                             <button onclick="resetMoneyAll()" style="padding: 6px 12px; background: #FFF0F1; color:#F04452; font-size:12px; border-radius:8px; font-weight:800; border:1px solid #FFE3E3; cursor:pointer;">지출 리셋</button>
@@ -320,7 +317,6 @@
                     </div>
                 </div>
 
-                <!-- 2. 해열제 패널 -->
                 <div id="panel-fever" class="panel-block" style="display:none; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--danger); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">🌡️ 투약 용량 안전 계측</div>
                     
@@ -420,7 +416,6 @@
                     </div>
                 </div>
 
-                <!-- 3. 성장/건강 패널 -->
                 <div id="panel-growth" class="panel-block" style="display:none; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--success); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">📈 영유아 종합 성장/건강 마스터</div>
                     
@@ -512,7 +507,6 @@
                     </div>
                 </div>
 
-                <!-- 4. 핫딜 패널 -->
                 <div id="panel-hotdeal" class="panel-block" style="display:none; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; margin-top:20px;">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid #FF823A; padding-bottom:12px; margin-bottom:24px; color:var(--text-m);">🛍️ 내돈내산 단가/비교 계산기</div>
                     
@@ -553,11 +547,11 @@
                             <div style="font-size:36px; font-weight:900; color:#FF823A; margin-bottom:12px;" id="hd-unit-price">0원</div>
                             <div id="hd-verdict" style="font-size:16px; font-weight:800; padding:12px; border-radius:12px; margin-bottom:16px;"></div>
                             <p id="hd-comment" style="font-size:13.5px; line-height:1.6; color:var(--text-m); word-break:keep-all;"></p>
+                            <div id="hd-action-area"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 🥦 5. 이유식 알레르기 체크 패널 -->
                 <div id="panel-food" class="panel-block" style="display:none; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; margin-top:20px;">
                     <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid #56D364; padding-bottom:12px; margin-bottom:24px; color:var(--text-m);">🥦 우리 아기 미식가 노트 (알레르기 체크)</div>
                     
@@ -569,14 +563,10 @@
                         <div style="font-size:24px; font-weight:900; color:#2E7D32;"><span id="food-passed-count">0</span><span style="font-size:14px; font-weight:700; color:var(--text-s);">/20</span></div>
                     </div>
 
-                    <!-- 재료 리스트가 자바스크립트로 자동 생성될 영역 -->
                     <div id="food-list-container" style="display:flex; flex-direction:column; gap:20px;"></div>
                 </div>
 
-            </div> <!-- app-box 끝 -->
-        </div> <!-- 툴박스 탭 끝 -->
-
-        <div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+            </div> </div> <div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
             <div style="border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 20px;">
                 <h2 style="font-size: 18px; font-weight: 900; margin: 0; color: var(--text-m);">💡 대한민국 통합 스마트 육아 가이드</h2>
             </div>
@@ -589,9 +579,7 @@
             <p style="font-size: 14px; color: var(--text-s); line-height: 1.6;">예방접종 이후 발생하는 열은 아이의 면역 체계가 형성되는 자연스러운 과정입니다. 이때 해열제 용량은 반드시 '연령'이 아닌 '체중'에 맞춰야 하며, 약사의 가이드에 따라 아세트아미노펜과 이부프로펜 계열을 적절히 교차 복용하는 지혜가 필요합니다. 단, 의사의 개별 지시가 있다면 무조건 우선해야 합니다.</p>
         </div>
 
-    </div> <!-- wrapper 끝 -->
-
-    <footer style="text-align: center; padding: 40px 16px 80px 16px; font-size: 11px; color: #8B95A1; line-height: 1.6; margin-top: 40px; border-top: 1px solid #E5E8EB;">
+    </div> <footer style="text-align: center; padding: 40px 16px 80px 16px; font-size: 11px; color: #8B95A1; line-height: 1.6; margin-top: 40px; border-top: 1px solid #E5E8EB;">
         <div style="margin-bottom: 24px;">
             <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">📝 블로그</a> |
             <a href="https://www.instagram.com/ggoom_e2" target="_blank" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">📸 인스타</a> |
@@ -607,7 +595,6 @@
         </div>
     </footer>
 
-    <!-- 모달창 및 네비게이션 복구 완료 -->
     <div id="checklist-modal" class="modal-overlay" style="z-index: 5000; display:none;" onclick="closeChecklist(event)">
         <div class="sos-content-box" style="background:#FFF; max-height:80vh; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
             <div class="sos-close-btn" onclick="closeChecklistForce()">✕</div>

@@ -141,6 +141,19 @@ function switchTool(panelId, el) {
     document.querySelectorAll('.panel-block').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
     const targetPanel = document.getElementById('panel-' + panelId);
     if(targetPanel) { targetPanel.classList.add('active'); targetPanel.style.display = 'block'; }
+
+    // 🔥 [데이터 시너지] 해열제 탭을 열 때, 성장 진단에서 쟀던 몸무게가 있으면 자동으로 입력!
+    if (panelId === 'fever') {
+        const wInput = document.getElementById('v-weight');
+        const savedW = localStorage.getItem('tosil_latest_weight');
+        if (savedW && !wInput.value) {
+            wInput.value = savedW;
+            const label = wInput.parentElement.previousElementSibling;
+            if (label && !label.innerText.includes('자동입력')) {
+                label.innerHTML += ' <span style="font-size:11px; color:var(--primary); background:rgba(49,130,246,0.1); padding:2px 6px; border-radius:6px; margin-left:6px;">성장기록 자동입력</span>';
+            }
+        }
+    }
 }
 
 function navigateToPanel(targetPanel) {
@@ -162,26 +175,20 @@ function initQuickScrollDrag() {
 function getV(id) { const el = document.getElementById(id); return !el ? 0 : Number(el.value.replace(/,/g,'')) || 0; }
 function formatNum(el) { let v = el.value.replace(/[^0-9]/g, ''); if(v) el.value = Number(v).toLocaleString(); }
 
-// [script.js에서 이 함수를 찾아서 이렇게 바꾸세요]
 async function loadAllExternalData() {
-    // 1. [핵심] 데이터 로딩 전, 일단 화면을 먼저 그립니다.
-    // 그래야 데이터가 없어도 버튼들과 UI가 정상적으로 작동합니다.
     filterPlaces();
-    
-    // 2. 이제 데이터는 배경에서 조용히 불러옵니다.
-    // 에러가 나도 filterPlaces()를 다시 실행하지 않도록 안전하게 처리합니다.
     try {
         if (window.location.protocol !== 'file:') {
             const resFest = await fetch('festivals.json');
             if (resFest.ok) {
                 apiFestivals = await resFest.json();
-                filterPlaces(); // 데이터를 불러왔을 때만 다시 그림
+                filterPlaces();
             }
             
             const resPlaces = await fetch('places.json');
             if (resPlaces.ok) {
                 hotplacesData = await resPlaces.json();
-                filterPlaces(); // 데이터를 불러왔을 때만 다시 그림
+                filterPlaces();
             }
         }
     } catch (e) {
@@ -331,11 +338,20 @@ function toggleHistory() {
         const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
         const items = document.getElementById('history-items'); items.innerHTML = "";
         const sortedKeys = Object.keys(history).sort().reverse();
-        if(sortedKeys.length === 0) { items.innerHTML = "<p style='color:#aaa; text-align:center; padding:15px; font-size:13.5px; font-weight:600;'>기록된 지출 인덱스가 없습니다.</p>"; } 
+        if(sortedKeys.length === 0) { 
+            // 🔥 [감성 패치] 가계부 과거 내역 빈 화면
+            items.innerHTML = `
+                <div style="text-align:center; padding:30px 10px;">
+                    <div style="font-size:32px; margin-bottom:10px;">💨</div>
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">텅~ 비어있네요! 지출 방어 성공?</div>
+                    <div style="font-size:12.5px; color:var(--text-s);">아직 지난달에 기록하신 가계부 내역이 없어요.</div>
+                </div>`; 
+        } 
         else { sortedKeys.forEach(k => { items.innerHTML += `<div class="history-item" style="display:flex; justify-content:space-between; font-size:14px; border-bottom:1px dashed var(--border); padding:10px 2px;"><span>${k}</span><span style="font-weight:800; color:var(--text-m);">${history[k].toLocaleString()}원</span></div>`; }); }
         area.style.display = 'block';
     }
 }
+
 const formatter = new Intl.NumberFormat('ko-KR'); 
 function drawDonutChart(d, f, e) {
     const ctx = document.getElementById('donutChart').getContext('2d');
@@ -432,7 +448,13 @@ function calcHotDeal() {
     
     verdictEl.style.color = "#FFF";
     document.getElementById('hd-result').style.display = 'block';
+    // 🔥 [데이터 시너지] 가계부로 금액을 쏘는 버튼 생성
+   document.getElementById('hd-action-area').innerHTML = `<button class="btn-main" style="margin-top:16px; background:#3182F6 !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(49,130,246,0.2) !important; padding:14px; font-size:14.5px; font-weight:800; border-radius:12px;" onclick="sendHotdealToLedger(${price}, '${cat}')">💰 이번 지출 (${price.toLocaleString()}원) 가계부로 쏙! 보내기 〉</button>`;
+    
+    document.getElementById('hd-result').style.display = 'block';
 }
+
+
 // ==========================================
 // 5. 스마트 해열제 타이머 엔진 
 // ==========================================
@@ -501,7 +523,13 @@ function renderFeverTimeline() {
     const container = document.getElementById('fever-timeline'); if(!container) return; 
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     if(records.length === 0) {
-        container.innerHTML = '<div style="text-align:center; font-size:13px; opacity:0.6; padding:20px;">아직 기록된 투약 내역이 없습니다.</div>';
+        // 🔥 [감성 패치] 딱딱한 문구 대신 예쁜 위로의 메시지로 변경!
+        container.innerHTML = `
+            <div style="text-align:center; padding:40px 20px; background:var(--bg-sub, #F8F9FA); border-radius:16px; border:1px dashed #E5E8EB;">
+                <div style="font-size:32px; margin-bottom:12px;">🌿</div>
+                <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">휴~ 정말 다행이에요!</div>
+                <div style="font-size:13px; color:var(--text-s); line-height:1.5; word-break:keep-all;">우리 아기가 아프지 않아서 기록이 텅 비어있네요.<br>이 화면은 영원히 비어있기를 바랄게요! 💚</div>
+            </div>`;
         ['fever-timer-box','fever-chart-container','fever-alert'].forEach(id=>document.getElementById(id).style.display='none');
         if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
         const rB = document.getElementById('btn-pill-red'), bB = document.getElementById('btn-pill-blue');
@@ -651,9 +679,12 @@ function calcHealthMaster() {
     const h = hVal ? parseFloat(hVal) : null;
     const w = wVal ? parseFloat(wVal) : null;
 
+    // 🔥 [데이터 시너지] 몸무게를 입력했으면 해열제 타이머를 위해 몰래 저장해둡니다!
+    if (wVal) localStorage.setItem('tosil_latest_weight', wVal);
+
     if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요!");
     if(!h && !w) return alert("정확한 백분위 진단을 위해 키 또는 몸무게 중 하나 이상을 입력해 주세요!");
-
+    // ... 이하 기존 코드 동일 ...
     const birthDate = new Date(b);
     const today = new Date();
     const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
@@ -865,7 +896,8 @@ function updateHomeDashboard() {
             }
         } else {
             feverCard.style.background = 'var(--bg-card)'; feverCard.style.color = 'var(--text-m)'; feverCard.style.border = '1px solid var(--border)';
-            feverCard.innerHTML = `<div><div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">스마트 해열 타이머</div><div style="font-size:14.5px; font-weight:800; opacity:0.8;">현재 등록된 실시간 체온 기록이 없습니다.</div></div><span style="font-size:24px;">💚</span>`;
+            // 🔥 [감성 패치] 해열제 대시보드 빈 화면
+            feverCard.innerHTML = `<div><div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">스마트 해열 타이머</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m); opacity:0.9;">휴~ 다행이에요! 아픈 곳 없이 건강해요 🌿</div></div><span style="font-size:24px;">💚</span>`;
         }
     }
 
@@ -876,7 +908,8 @@ function updateHomeDashboard() {
             const percent = Math.min(Math.round((totalExpense / budget) * 100), 100);
             ledgerCard.innerHTML = `<div style="width: 100%;"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="font-size:13px; font-weight:700; color:var(--text-s);">이번 달 육아 소비</div><div style="font-size:20px; font-weight:900; color:var(--primary); letter-spacing:-0.5px;">${totalExpense.toLocaleString()}원</div></div><div style="width:100%; height:10px; background:var(--bg-sub); border-radius:6px; overflow:hidden;"><div style="width:${percent}%; height:100%; background:var(--primary); border-radius:6px; transition:width 0.5s ease;"></div></div></div>`;
         } else {
-            ledgerCard.innerHTML = `<div><div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">이번 달 육아 소비 진단</div><div style="font-size:14.5px; font-weight:800; opacity:0.8;">가계부를 작성하고 실시간 지출 게이지를 확인하세요.</div></div><span style="font-size:24px;">📊</span>`;
+            // 🔥 [감성 패치] 가계부 대시보드 빈 화면
+            ledgerCard.innerHTML = `<div><div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">이번 달 육아 소비 진단</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m); opacity:0.9;">이번 달 첫 육아 득템은 무엇인가요? 🎁</div></div><span style="font-size:24px;">📊</span>`;
         }
     }
 }
@@ -905,8 +938,15 @@ function renderFoodChecklist() {
     const container = document.getElementById('food-list-container');
     if (!container) return;
     
-    // 저장된 데이터 불러오기
-    let savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {};
+    // 🔥 [오류 완벽 방어] 혹시라도 데이터가 꼬여있으면 깨끗하게 리셋합니다.
+    let savedFoods = {};
+    try {
+        savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {};
+    } catch (e) {
+        console.warn("데이터가 꼬여서 초기화합니다.");
+        savedFoods = {};
+    }
+
     let passedCount = 0;
     let totalCount = 0;
 
@@ -936,7 +976,6 @@ function renderFoodChecklist() {
 
     container.innerHTML = html;
     
-    // 미식가 레벨(통과한 재료 수) 업데이트
     const countEl = document.getElementById('food-passed-count');
     if(countEl) {
         countEl.innerText = passedCount;
@@ -1010,6 +1049,23 @@ window.closeSOSForce = function() {
 window.closeSOS = function(e) { 
     if(e.target.id === 'sos-modal') closeSOSForce(); 
 };
+
+function sendHotdealToLedger(price, cat) {
+    let targetId = 'v-etc';
+    if(cat === 'diaper' || cat === 'wipe') targetId = 'v-diaper';
+    if(cat === 'milk') targetId = 'v-food';
+
+    const inputEl = document.getElementById(targetId);
+    const currentVal = Number(inputEl.value.replace(/,/g, '')) || 0;
+    
+    // 기존 입력된 금액에 핫딜 결제액을 더해줍니다.
+    inputEl.value = (currentVal + price).toLocaleString();
+
+    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부 [${targetId === 'v-diaper' ? '기저귀/위생' : (targetId === 'v-food' ? '식비' : '기타')}] 항목에 합산되었습니다!\n가계부 패널에서 [소비 패턴 팩트 체크]를 눌러주세요.`);
+    
+    // 가계부 탭으로 슝~ 이동!
+    directGoToolbox('money');
+}
 
 
 // ==========================================
