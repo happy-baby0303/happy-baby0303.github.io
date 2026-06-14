@@ -833,3 +833,16 @@ body.dark-mode .btn-capture {
 .modal-navi-item span { font-size: 12px; font-weight: 800; }
 .modal-action-grid { display: flex; gap: 10px; }
 .modal-call-btn { flex: 1; background: #F2F5F8; color: #4E5968; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; padding: 16px; text-decoration: none; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+
+/* 🗺️ 지역 세분화 필터 기차놀이 방지 (줄바꿈) */
+#sub-filter-row {
+    display: flex;
+    flex-wrap: wrap !important; /* 공간 모자라면 밑으로 떨어지게! */
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 16px;
+}
+#sub-filter-row .filter-btn {
+    margin: 0 !important; 
+    white-space: nowrap; /* 글씨 꺾임 방지 */
+}
