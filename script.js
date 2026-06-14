@@ -179,13 +179,14 @@ async function loadAllExternalData() {
     filterPlaces();
     try {
         if (window.location.protocol !== 'file:') {
-            const resFest = await fetch('festivals.json');
+            // 🔥 [캐시 완벽 방어] 시간 값을 달아서 무조건 최신 파이썬 봇 데이터를 읽어오게 강제합니다!
+            const resFest = await fetch('festivals.json?v=' + new Date().getTime());
             if (resFest.ok) {
                 apiFestivals = await resFest.json();
                 filterPlaces();
             }
             
-            const resPlaces = await fetch('places.json');
+            const resPlaces = await fetch('places.json?v=' + new Date().getTime());
             if (resPlaces.ok) {
                 hotplacesData = await resPlaces.json();
                 filterPlaces();
@@ -195,6 +196,7 @@ async function loadAllExternalData() {
         console.warn("데이터 로드 실패 - 앱은 정상 작동 중");
     }
 }
+
 function setRegion(region, btn) {
     currentRegion = region;
     document.querySelectorAll('.filter-wrap .filter-btn').forEach(b => b.classList.remove('active'));
