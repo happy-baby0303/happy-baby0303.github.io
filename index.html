@@ -88,6 +88,10 @@
                     <div class="q-icon-box" style="font-size: 24px;">🥦</div>
                     <span class="q-label">이유식</span>
                 </div>
+                <div class="q-item" onclick="location.href='./stroller/index.html'">
+                   <div class="q-icon-box">🛍️</div>
+                   <span class="q-label">템 비교</span>
+                 </div>
             </div>
 
             <div id="db-fever-card" onclick="navigateToPanel('fever')" style="background: var(--bg-card, #FFF); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.3s; display:flex; justify-content:space-between; align-items:center;">
@@ -231,9 +235,9 @@
                     <div id="btn-tool-food" class="tool-chip" onclick="switchTool('food', this)">
                         <span class="t-icon">🥦</span><span class="t-label">이유식</span>
                     </div>
-                    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 수면/수유 트래커를 열심히 개발 중입니다.')">
-                        <span class="t-icon">🍼</span><span class="t-label">수면수유</span>
-                    </div>
+                  <div id="btn-tool-stroller" class="tool-chip" onclick="window.location.href='stroller/index.html'">
+                         <span class="t-icon">🛒</span><span class="t-label">템판독기</span>
+                     </div>
                     <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 병원 진료 및 예방접종 수첩을 개발 중입니다.')">
                         <span class="t-icon">🏥</span><span class="t-label">병원수첩</span>
                     </div>
@@ -565,6 +569,15 @@
 
                     <div id="food-list-container" style="display:flex; flex-direction:column; gap:20px;"></div>
                 </div>
+
+             <div id="panel-food" class="panel-block" style="display:none; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; margin-top:20px;">
+                    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid #56D364; padding-bottom:12px; margin-bottom:24px; color:var(--text-m);">🥦 우리 아기 미식가 노트 (알레르기 체크)</div>
+                    <div id="food-list-container" style="display:flex; flex-direction:column; gap:20px;"></div>
+                </div>
+                <div id="panel-stroller" class="panel-block" style="display:none; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; margin-top:20px;">
+                    <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid #00B894; padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">🛒 통합 육아템 스펙 판독기</div>
+                    </div>
+                </div> </div>
 
             </div> </div> <div class="app-box" style="margin-top: 40px; padding: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
             <div style="border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 20px;">
