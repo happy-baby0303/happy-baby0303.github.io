@@ -1,0 +1,346 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Pretendard', sans-serif; background: #F2F4F6; margin: 0; padding: 0; color: #191F28; letter-spacing: -0.3px; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 20px 60px; }
+
+.app-header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+.back-btn { position: absolute; left: 20px; color: #4E5968; text-decoration: none; font-weight: 700; font-size: 14px; }
+.app-header h1 { margin: 0; font-size: 16px; font-weight: 800; }
+.pro-badge { position: absolute; right: 20px; background: linear-gradient(135deg, #3182F6, #6B31F6); color: white; font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+
+.hero-title { padding: 32px 0 24px; }
+.hero-title h2 { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.35; color: #191F28; letter-spacing: -0.5px; }
+.gradient-text { background: linear-gradient(135deg, #3182F6, #6B31F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-title p { margin: 8px 0 0; color: #8B95A1; font-weight: 600; font-size: 14px; }
+
+.matrix-panel { background: #11151F; padding: 28px 24px; border-radius: 28px; box-shadow: 0 20px 40px rgba(17, 21, 31, 0.2); margin-bottom: 32px; border: 1px solid #2A3241; }
+.matrix-header { font-size: 16px; font-weight: 800; color: #FFF; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+.matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+.matrix-item { display: flex; flex-direction: column; }
+.matrix-item.full-width { grid-column: 1 / -1; }
+.matrix-item label { font-size: 12px; color: #8B95A1; font-weight: 700; margin-bottom: 8px; }
+
+.custom-select-wrapper { position: relative; width: 100%; }
+.custom-select-wrapper select { width: 100%; padding: 14px 40px 14px 16px; border-radius: 12px; background-color: #1A2130; border: 1px solid #2A3241; color: #F9FAFB; font-family: 'Pretendard'; font-size: 13.5px; font-weight: 600; appearance: none; -webkit-appearance: none; outline: none; transition: 0.2s ease; cursor: pointer; }
+.custom-select-wrapper select:focus { border-color: #3182F6; background-color: #212A3D; box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.2); }
+.custom-select-wrapper::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238B95A1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
+.custom-select-wrapper select optgroup { background-color: #11151F; color: #8B95A1; font-weight: 800; font-style: normal; }
+.custom-select-wrapper select option { background-color: #1A2130; color: #F9FAFB; font-weight: 600; }
+
+.matrix-footer-vs { margin-top: 24px; padding-top: 20px; border-top: 1px solid #2A3241; }
+.vs-label-text { font-size: 13px; font-weight: 800; color: #B0B8C1; margin-bottom: 12px; }
+.vs-select-group { display: flex; align-items: center; gap: 10px; }
+.custom-select-wrapper.mini select { padding: 12px 30px 12px 12px; font-size: 13px; background-color: #1F2937; }
+.vs-divider { color: #4E5968; font-weight: 900; font-size: 12px; }
+.vs-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; background: #FFF; border-radius: 16px; overflow: hidden; }
+.vs-table th, .vs-table td { padding: 14px 8px; border-bottom: 1px solid #F2F4F6; color: #191F28; }
+.vs-label { color: #6B7280; font-weight: 700; background: #F9FAFB; width: 25%; text-align: left; padding-left: 14px; }
+
+.filter-section { margin-bottom: 24px; padding: 0 4px; }
+.filter-label { font-size: 12px; font-weight: 700; color: #8B95A1; margin-bottom: 8px; }
+.filter-row { margin-bottom: 16px; }
+.filter-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.stroller-filt-btn { padding: 12px 18px; border-radius: 24px; font-size: 14px; font-weight: 600; background: #FFFFFF; color: #4E5968; border: 1px solid #E5E8EB; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.stroller-filt-btn.active { background: #191F28; color: #FFFFFF; border-color: #191F28; font-weight: 700; }
+.match-btn.active { background: #3182F6; color: #FFFFFF; border-color: #3182F6; }
+.cabin-btn { width: 100%; background: #E8F3FF; color: #1B64DA; border: 1px solid #C6E0FF; font-weight: 700; }
+
+.result-area { display: flex; flex-direction: column; gap: 24px; }
+.stroller-card { background: #FFFFFF; padding: 28px 24px; border-radius: 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); position: relative; border: 1px solid #F2F4F6; }
+.match-score { position: absolute; top: 28px; right: 24px; font-size: 26px; font-weight: 900; color: #3182F6; letter-spacing: -1px; }
+.match-score span { font-size: 11px; color: #8B95A1; display: block; text-align: right; font-weight: 700; margin-top: -2px; }
+
+.receipt-box { margin: 16px 0; padding: 16px; background: #F9FAFB; border-radius: 12px; border: 1px solid #E5E8EB; }
+.receipt-row { display: flex; justify-content: space-between; font-size: 13px; color: #6B7280; margin-bottom: 6px; font-weight: 600; }
+.receipt-row.tax { color: #E32636; }
+.receipt-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 900; color: #191F28; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #D1D5DB; }
+.receipt-desc { font-size: 11px; color: #8B95A1; margin-top: 6px; line-height: 1.4; }
+
+.card-tabs { display: flex; background: #F2F4F6; border-radius: 12px; padding: 4px; margin: 20px 0; }
+.tab-btn { flex: 1; text-align: center; padding: 12px 0; font-size: 13.5px; font-weight: 700; color: #8B95A1; cursor: pointer; border-radius: 10px; transition: 0.2s; }
+.tab-btn.active { background: #FFFFFF; color: #191F28; font-weight: 800; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.tab-content { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+.spec-list { display: flex; flex-direction: column; gap: 14px; }
+.spec-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F2F4F6; padding-bottom: 12px; }
+.spec-row:last-child { border-bottom: none; padding-bottom: 0; }
+.spec-label { font-size: 13.5px; color: #4E5968; font-weight: 600; }
+.spec-val { font-size: 14.5px; font-weight: 700; color: #191F28; text-align: right; }
+.meter-container { background: #F2F4F6; height: 6px; width: 100%; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 3px; width: 0%; transition: width 0.8s ease; }
+
+.size-visual-box { background: #F9FAFB; padding: 20px; border-radius: 16px; border: 1px solid #E5E8EB; margin-top: 12px; text-align: center; }
+.size-visual-title { font-size: 13px; font-weight: 800; color: #4E5968; margin-bottom: 24px; }
+.visual-chart { display: flex; justify-content: center; gap: 40px; align-items: flex-end; min-height: 140px; padding-top: 20px; margin-bottom: 24px; }
+.v-bar-group { display: flex; flex-direction: column; align-items: center; width: 80px; justify-content: flex-end; }
+.v-bar-bg { width: 44px; height: 100px; background: #E5E8EB; border-radius: 6px 6px 0 0; position: relative; display: flex; align-items: flex-end; overflow: hidden; }
+.v-bar-fill { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.carrier-color { background: #A0A8B1; }
+.stroller-color { background: #3182F6; }
+.v-bar-label { font-size: 12px; font-weight: 600; color: #8B95A1; margin-top: 10px; line-height: 1.4; white-space: nowrap; } 
+.v-bar-label b { font-size: 15px; color: #191F28; font-weight: 800; display: block; margin-top: 4px;}
+.size-visual-desc { font-size: 13.5px; font-weight: 700; color: #1B64DA; background: #E8F3FF; padding: 12px; border-radius: 10px; display: inline-block;}
+.size-visual-desc.warn { color: #E32636; background: #FEECEF; }
+
+.fact-list { display: flex; flex-direction: column; gap: 12px; }
+.fact-item { display: flex; gap: 14px; background: #F9FAFB; padding: 18px 16px; border-radius: 16px; align-items: flex-start; border: 1px solid #E5E8EB; }
+.fact-icon { font-size: 18px; background: #FFF; padding: 8px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+.fact-info { flex: 1; }
+.fact-title { font-size: 12px; font-weight: 700; color: #8B95A1; margin-bottom: 6px; }
+.fact-desc { font-size: 14.5px; font-weight: 700; color: #191F28; line-height: 1.5; word-break: keep-all; }
+
+.fact-item.as-good { background: #E8F3FF; border-color: #C6E0FF; }
+.fact-item.as-good .fact-icon { background: #3182F6; color: #FFF; }
+.fact-item.as-good .fact-title, .fact-item.as-good .fact-desc { color: #1B64DA; }
+
+.fact-item.as-warn { background: #FFFBEB; border-color: #FDE68A; }
+.fact-item.as-warn .fact-icon { background: #F59E0B; color: #FFF; }
+.fact-item.as-warn .fact-title, .fact-item.as-warn .fact-desc { color: #B45309; }
+
+.fact-item.as-bad { background: #FEECEF; border-color: #FDBECA; }
+.fact-item.as-bad .fact-icon { background: #E32636; color: #FFF; }
+.fact-item.as-bad .fact-title, .fact-item.as-bad .fact-desc { color: #E32636; }
+
+.ai-sim-report { padding: 20px; border-radius: 16px; margin-bottom: 16px; font-size: 14px; line-height: 1.6; font-weight: 600; word-break: keep-all; }
+.ai-sim-report h4 { margin: 0 0 8px 0; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+.ai-sim-report.match-100 { background: #E8F3FF; border: 1px solid #C6E0FF; color: #1B64DA; }
+.ai-sim-report.match-warn { background: #FFF9E6; border: 1px solid #FDE08B; color: #C46C00; }
+.ai-sim-report.match-danger { background: #FEECEF; border: 1px solid #FDBECA; color: #E32636; }
+
+.premium-empty-state { display: flex; flex-direction: row; gap: 16px; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 16px; padding: 24px; align-items: center; margin-bottom: 16px; }
+.empty-icon { font-size: 28px; background: #FFF; padding: 12px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.empty-text { display: flex; flex-direction: column; gap: 4px; }
+.empty-text b { font-size: 15px; color: #191F28; font-weight: 800; }
+.empty-text span { font-size: 13px; color: #6B7280; font-weight: 600; line-height: 1.4; word-break: keep-all; }
+
+.adapter-container { margin-top: 20px; }
+.adapter-title { font-size: 14px; font-weight: 800; color: #191F28; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.adapter-list { display: flex; flex-direction: column; gap: 10px; }
+.adapter-card { background: #FFF; border: 1px solid #E5E8EB; border-radius: 14px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.adapter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.adapter-brand { font-size: 13px; font-weight: 800; color: #4E5968; }
+.adapter-badge { font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
+.adapter-badge.good { background: #E8F3FF; color: #1B64DA; }
+.adapter-badge.warn { background: #FFF9E6; color: #C46C00; }
+.adapter-badge.bad { background: #FEECEF; color: #E32636; }
+.adapter-main-desc { font-size: 14px; font-weight: 700; color: #191F28; line-height: 1.4; }
+.adapter-sub-desc { font-size: 12.5px; font-weight: 600; color: #E32636; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #F2F4F6; }
+
+.insight-box { margin-top: 20px; background: #F9FAFB; padding: 18px; border-radius: 14px; border: 1px solid #E5E8EB; }
+.insight-box .title { font-size: 12.5px; font-weight: 800; color: #4E5968; margin-bottom: 6px; }
+.insight-box .text { font-size: 14px; color: #191F28; line-height: 1.5; font-weight: 700; }
+.buy-btn { display: block; text-align: center; background: #3182F6; color: #FFF; font-weight: 700; padding: 16px; border-radius: 14px; text-decoration: none; font-size: 15px; margin-top: 24px; transition: 0.2s; }
+.buy-btn:active { transform: scale(0.97); }
+
+.ktx-alert-box { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; margin-top: 12px; font-size: 13.5px; font-weight: 700; line-height: 1.4; word-break: keep-all; }
+.ktx-alert-box.pass { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; }
+.ktx-alert-box.fail { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+.ktx-alert-box.warn { background: #FFF9E6; border: 1px solid #FDE08B; color: #C46C00; }
+.ktx-icon { font-size: 20px; }
+
+/* 🌟 신규: 지하철/엘리베이터 통과 알림 UI */
+.gate-alert { font-size: 13px; font-weight: 700; padding: 10px 12px; border-radius: 8px; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+.gate-alert.pass { background: #F0F9FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+.gate-alert.fail { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+
+/* --- 기존 style.css 맨 아래에 추가 --- */
+
+/* 수익화 제휴 버튼 (쿠팡 & 공식몰) */
+.buy-btn { display: block; text-align: center; font-weight: 800; padding: 16px; border-radius: 14px; text-decoration: none; font-size: 15px; margin-top: 24px; transition: 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+.buy-btn:active { transform: scale(0.97); }
+.buy-btn.coupang { background: #0074E9; color: #FFF; border: 1px solid #0056B3; } /* 쿠팡 블루 */
+.buy-btn.official { background: #191F28; color: #FFF; border: 1px solid #000; } /* 프리미엄 블랙 */
+.buy-btn.naver { background: #03C75A; color: #FFF; border: 1px solid #02A84B; } /* 네이버 그린 (백업용) */
+
+/* Top 3 UX 타이틀 & 펼쳐보기 버튼 */
+.result-title { font-size: 18px; font-weight: 900; color: #191F28; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.show-more-btn { display: block; width: 100%; padding: 16px; margin-top: 24px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 14px; font-size: 14px; font-weight: 700; color: #4E5968; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.show-more-btn:active { background: #F2F4F6; }
+
+/* --- 기존 style.css 맨 아래에 추가 --- */
+.coupang-safety-guard { font-size: 11px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 8px; line-height: 1.3; word-break: keep-all; }
+.coupang-safety-guard b { color: #E32636; font-weight: 800; }
+
+/* --- 기존 style.css 맨 아래에 추가 --- */
+
+/* 🛡️ 법적 고지 푸터 (Compliance Footer) */
+.legal-footer {
+    margin-top: 40px;
+    padding: 24px 20px;
+    background: #F9FAFB;
+    border-top: 1px solid #E5E8EB;
+    border-radius: 16px;
+    text-align: left;
+}
+
+.legal-footer p {
+    font-size: 11px;
+    color: #8B95A1;
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+    word-break: keep-all;
+}
+
+.legal-footer p:last-child {
+    margin-bottom: 0;
+}
+
+.legal-footer strong {
+    color: #4E5968;
+    font-weight: 700;
+}
+
+/* --- GNB 메뉴바 스타일 --- */
+.gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; border-bottom: 1px solid #E5E8EB; padding: 0 10px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
+.gnb-menu::-webkit-scrollbar { display: none; }
+.gnb-item { flex: 0 0 auto; padding: 12px 16px; font-size: 14px; font-weight: 700; color: #8B95A1; text-decoration: none; position: relative; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
+.gnb-item.active { color: #191F28; font-weight: 800; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
+.gnb-item .badge { background: #E32636; color: #FFF; font-size: 9px; padding: 2px 4px; border-radius: 4px; font-weight: 900; line-height: 1; }
+
+/* --- 플로팅 공유 버튼 (Viral) --- */
+.floating-share-btn { position: fixed; bottom: 24px; right: 20px; background: #191F28; color: #FFF; border: none; padding: 14px 20px; border-radius: 30px; font-size: 14.5px; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s; display: flex; align-items: center; gap: 6px; }
+.floating-share-btn:active { transform: scale(0.95); }
+
+/* style.css 에서 .container 부분을 찾아서 padding-bottom을 추가하세요! (또는 맨 밑에 추가해도 됩니다) */
+.container {
+    padding-bottom: 120px; /* 🌟 구매 버튼이 공유 버튼에 가려지지 않게 안전 여백 확보 */
+}
+
+/* --- V15.0 패치: 버튼 가림 방지 및 필터 디자인 정리 --- */
+
+/* 하단 공유 버튼이 쿠팡 링크를 가리지 않게 안전 여백 120px 확보 */
+.container {
+    padding-bottom: 120px; 
+}
+
+/* 어색한 검은색 괄호를 지우고 깔끔한 회색 테두리로 요약 박스 변경 */
+.insight-box { 
+    margin-top: 20px; 
+    background: #F9FAFB; 
+    padding: 18px; 
+    border-radius: 14px; 
+    border: 1px solid #E5E8EB; 
+}
+
+/* GNB 메뉴바 시원하게 확대 */
+.gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; border-bottom: 1px solid #E5E8EB; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
+.gnb-menu::-webkit-scrollbar { display: none; }
+.gnb-item { flex: 0 0 auto; padding: 16px 18px; font-size: 16px; font-weight: 700; color: #8B95A1; text-decoration: none; position: relative; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+.gnb-item.active { color: #191F28; font-weight: 800; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 18px; right: 18px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
+.gnb-item .badge { background: #E32636; color: #FFF; font-size: 10px; padding: 3px 5px; border-radius: 6px; font-weight: 900; line-height: 1; margin-top: -2px; }
+
+/* 플로팅 바이럴 공유 버튼 디자인 */
+.floating-share-btn { position: fixed; bottom: 24px; right: 20px; background: #191F28; color: #FFF; border: none; padding: 16px 24px; border-radius: 30px; font-size: 15px; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s; display: flex; align-items: center; gap: 6px; }
+.floating-share-btn:active { transform: scale(0.95); }
+
+/* 법적 고지 푸터 디자인 */
+.legal-footer { margin-top: 40px; padding: 24px 20px; background: #F9FAFB; border-top: 1px solid #E5E8EB; border-radius: 16px; text-align: left; }
+.legal-footer p { font-size: 11px; color: #8B95A1; line-height: 1.6; margin: 0 0 8px 0; word-break: keep-all; }
+.legal-footer p:last-child { margin-bottom: 0; }
+.legal-footer strong { color: #4E5968; font-weight: 700; }
+
+/* --- V15.1 패치: 맨 위로 버튼 추가 및 스타일 정리 --- */
+
+/* 하단 공유 버튼이 쿠팡 링크를 가리지 않게 안전 여백 120px 확보 */
+.container { padding-bottom: 120px; }
+
+/* 어색한 괄호 제거 & 깔끔한 테두리 요약 박스 */
+.insight-box { margin-top: 20px; background: #F9FAFB; padding: 18px; border-radius: 14px; border: 1px solid #E5E8EB; }
+
+/* GNB 메뉴바 시원하게 확대 */
+.gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; border-bottom: 1px solid #E5E8EB; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
+.gnb-menu::-webkit-scrollbar { display: none; }
+.gnb-item { flex: 0 0 auto; padding: 16px 18px; font-size: 16px; font-weight: 700; color: #8B95A1; text-decoration: none; position: relative; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+.gnb-item.active { color: #191F28; font-weight: 800; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 18px; right: 18px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
+.gnb-item .badge { background: #E32636; color: #FFF; font-size: 10px; padding: 3px 5px; border-radius: 6px; font-weight: 900; line-height: 1; margin-top: -2px; }
+
+/* 플로팅 바이럴 공유 버튼 */
+.floating-share-btn { position: fixed; bottom: 24px; right: 20px; background: #191F28; color: #FFF; border: none; padding: 16px 24px; border-radius: 30px; font-size: 15px; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s; display: flex; align-items: center; gap: 6px; }
+.floating-share-btn:active { transform: scale(0.95); }
+
+/* 🌟 맨 위로 (Scroll To Top) 동그란 버튼 */
+.scroll-top-btn { position: fixed; bottom: 84px; right: 20px; width: 44px; height: 44px; background: #FFF; color: #191F28; border: 1px solid #E5E8EB; border-radius: 50%; font-size: 20px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 999; display: none; align-items: center; justify-content: center; transition: 0.2s; }
+.scroll-top-btn:active { transform: scale(0.9); }
+
+/* 법적 고지 푸터 */
+.legal-footer { margin-top: 40px; padding: 24px 20px; background: #F9FAFB; border-top: 1px solid #E5E8EB; border-radius: 16px; text-align: left; }
+.legal-footer p { font-size: 11px; color: #8B95A1; line-height: 1.6; margin: 0 0 8px 0; word-break: keep-all; }
+.legal-footer p:last-child { margin-bottom: 0; }
+.legal-footer strong { color: #4E5968; font-weight: 700; }
+
+/* --- V15.5 패치: 검색/초기화 버튼, 검은 선 영구 삭제, 맨 위로 가기 --- */
+
+/* 🌟 하단 공유 버튼이 쿠팡 링크를 가리지 않게 안전 여백 120px 확보 */
+.container { padding-bottom: 120px; }
+
+/* 🌟 문제의 검은 괄호 완벽 제거 (강제 초기화) */
+.insight-box { 
+    margin-top: 20px; 
+    background: #F9FAFB !important; 
+    padding: 18px; 
+    border-radius: 14px; 
+    border: 1px solid #E5E8EB !important; 
+    border-left: 1px solid #E5E8EB !important; /* 강제 삭제! */
+}
+
+/* 🌟 매트릭스 하단 검색/초기화 버튼 영역 */
+.matrix-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 20px;
+    border-top: 1px solid #333D4B;
+}
+.btn-reset {
+    flex: 1;
+    background: #333D4B;
+    color: #B0B8C1;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.btn-search {
+    flex: 2;
+    background: #3182F6;
+    color: #FFF;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(49, 130, 246, 0.3);
+    transition: transform 0.2s;
+}
+.btn-reset:active, .btn-search:active { transform: scale(0.98); }
+
+/* GNB 메뉴바 시원하게 확대 */
+.gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; border-bottom: 1px solid #E5E8EB; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; }
+.gnb-menu::-webkit-scrollbar { display: none; }
+.gnb-item { flex: 0 0 auto; padding: 16px 18px; font-size: 16px; font-weight: 700; color: #8B95A1; text-decoration: none; position: relative; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+.gnb-item.active { color: #191F28; font-weight: 800; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 18px; right: 18px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
+.gnb-item .badge { background: #E32636; color: #FFF; font-size: 10px; padding: 3px 5px; border-radius: 6px; font-weight: 900; line-height: 1; margin-top: -2px; }
+
+/* 플로팅 바이럴 공유 버튼 */
+.floating-share-btn { position: fixed; bottom: 24px; right: 20px; background: #191F28; color: #FFF; border: none; padding: 16px 24px; border-radius: 30px; font-size: 15px; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.2); cursor: pointer; z-index: 1000; transition: transform 0.2s; display: flex; align-items: center; gap: 6px; }
+.floating-share-btn:active { transform: scale(0.95); }
+
+/* 🌟 맨 위로 (Scroll To Top) 동그란 버튼 */
+.scroll-top-btn { position: fixed; bottom: 84px; right: 20px; width: 44px; height: 44px; background: #FFF; color: #191F28; border: 1px solid #E5E8EB; border-radius: 50%; font-size: 20px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 999; display: none; align-items: center; justify-content: center; transition: 0.2s; }
+.scroll-top-btn:active { transform: scale(0.9); }
+
+/* 법적 고지 푸터 */
+.legal-footer { margin-top: 40px; padding: 24px 20px; background: #F9FAFB; border-top: 1px solid #E5E8EB; border-radius: 16px; text-align: left; }
+.legal-footer p { font-size: 11px; color: #8B95A1; line-height: 1.6; margin: 0 0 8px 0; word-break: keep-all; }
+.legal-footer p:last-child { margin-bottom: 0; }
+.legal-footer strong { color: #4E5968; font-weight: 700; }
