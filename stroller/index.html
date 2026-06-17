@@ -10,20 +10,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>육아메이트 | 프리미엄 유모차 5D AI 매칭</title>
     <link rel="stylesheet" href="style.css">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>육아메이트 | 프리미엄 유모차 5D AI 매칭</title>
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="육아메이트 | 내 차에 들어가는 유모차 찾기">
+    <meta property="og:description" content="324가지 라이프스타일 분석! 엘베 없는 빌라, 내 차 트렁크에 딱 맞는 유모차를 1초만에 찾아보세요.">
+    <meta property="og:image" content="https://happy-baby0303.github.io/baby-master/stroller/og-image.png"> 
+    <meta property="og:url" content="https://happy-baby0303.github.io/baby-master/stroller/index.html">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8RVVNWZ"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- 🌟 글씨 겹침 완벽 해결된 헤더 -->
     <header class="app-header" style="flex-direction: column; padding: 0;">
-        <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 16px 20px;">
-            <a href="../index.html" class="back-btn">← 홈</a>
-            <h1>육아메이트 AI</h1>
-            <div class="pro-badge">PRO V15.5</div>
+        <div style="position: relative; display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <!-- 홈 버튼을 텍스트 위로 올리고 여백 확보 -->
+            <a href="../index.html" class="back-btn" style="position: relative; z-index: 10; margin: 0; background: #fff; border: none;">← 홈</a>
+            <!-- 제목을 중앙에 강제 고정 -->
+            <h1 style="position: absolute; left: 0; right: 0; text-align: center; margin: 0; z-index: 1; font-size: 18px;">육아메이트 AI</h1>
+            <div class="pro-badge" style="position: relative; z-index: 10;">PRO V15.5</div>
         </div>
+<!-- 🌟 수유/젖병과 이유식을 명확히 분리한 GNB 메뉴 --><!-- 🌟 유모차 페이지용 GNB 메뉴 (유모차에 파란불 켜짐) -->
         <nav class="gnb-menu">
             <a href="#" class="gnb-item active">🛒 유모차</a>
             <a href="#" class="gnb-item" onclick="showComingSoon('카시트')">💺 카시트 <span class="badge">UP</span></a>
-            <a href="#" class="gnb-item" onclick="showComingSoon('수유/젖병')">🍼 수유/젖병 <span class="badge">UP</span></a>
+            <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
+            <a href="../food/index.html" class="gnb-item">🍲 이유식</a>
             <a href="#" class="gnb-item" onclick="showComingSoon('장난감')">🧸 장난감</a>
         </nav>
     </header>
