@@ -54,45 +54,60 @@
                 </div>
             </div>
 
-            <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:28px; margin-bottom:12px; padding: 0 4px; display:flex; justify-content:space-between; align-items:flex-end;">
-                <span>🚀 빠른 실행 퀵 메뉴</span>
-                <span style="font-size:11.5px; font-weight:700; color:var(--text-s);">밀어서 보기 👉</span>
-            </div>
-            
-            <div class="quick-scroll-wrap">
-                <div class="q-item" onclick="navigateToPanel('fever')">
-                    <div class="q-icon-box">🌡️</div>
-                    <span class="q-label">해열제</span>
-                </div>
-                <div class="q-item" onclick="navigateToPanel('ledger')">
-                    <div class="q-icon-box">🧮</div>
-                    <span class="q-label">지출입력</span>
-                </div>
-                <div class="q-item" onclick="navigateToPanel('growth')">
-                    <div class="q-icon-box">📈</div>
-                    <span class="q-label">성장진단</span>
-                </div>
-                <div class="q-item" onclick="navigateToPanel('hotdeal')">
-                    <div class="q-icon-box">🔥</div>
-                    <span class="q-label" style="color:#FF823A;">핫딜판독</span>
-                </div>
-                <div class="q-item" onclick="navigateToPanel('hotplace')">
-                    <div class="q-icon-box">🗺️</div>
-                    <span class="q-label">주말나들이</span>
-                </div>
-                <div class="q-item" onclick="openChecklistModal()">
-                    <div class="q-icon-box">🎒</div>
-                    <span class="q-label">외출준비</span>
-                </div>
-                <div class="q-item" onclick="navigateToPanel('food')">
-                    <div class="q-icon-box" style="font-size: 24px;">🥦</div>
-                    <span class="q-label">이유식</span>
-                </div>
-                <div class="q-item" onclick="location.href='./stroller/index.html'">
-                   <div class="q-icon-box">🛍️</div>
-                   <span class="q-label">템 비교</span>
-                 </div>
-            </div>
+            <!-- ======================================== -->
+<!-- 🚀 그룹 1: 육아메이트 AI 솔루션 (최상단 강조) -->
+<!-- ======================================== -->
+<div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:28px; margin-bottom:12px; padding: 0 4px; display:flex; justify-content:space-between; align-items:flex-end;">
+    <span>🚀 육아메이트 AI 솔루션</span>
+    <span style="font-size:11.5px; font-weight:700; color:var(--text-s);">밀어서 보기 👉</span>
+</div>
+<div class="quick-scroll-wrap">
+    <!-- 1. 템비교 AI (새로 만든 유모차/장비 매칭) -->
+    <div class="q-item" onclick="location.href='./stroller/index.html'">
+        <div class="q-icon-box" style="background: #E8F3FF;">🛍️</div>
+        <span class="q-label" style="font-weight: 700; color: #3182F6;">템비교 AI</span>
+    </div>
+    <!-- 2. 이유식 AI (방금 만든 안심 이유식 엔진) -->
+    <div class="q-item" onclick="location.href='./food/index.html'">
+        <div class="q-icon-box" style="background: #ECFDF5; font-size: 24px;">🥦</div>
+        <span class="q-label" style="font-weight: 700; color: #10B981;">이유식 AI</span>
+    </div>
+    <!-- 3. 핫딜판독 (기존 함수 유지) -->
+    <div class="q-item" onclick="navigateToPanel('hotdeal')">
+        <div class="q-icon-box" style="background: #FFF0F0;">🔥</div>
+        <span class="q-label" style="font-weight: 700; color: #E32636;">핫딜판독</span>
+    </div>
+</div>
+
+<!-- ======================================== -->
+<!-- 🛠️ 그룹 2: 매일 쓰는 툴박스 -->
+<!-- ======================================== -->
+<div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:32px; margin-bottom:12px; padding: 0 4px;">
+    <span>🛠️ 매일 쓰는 툴박스</span>
+</div>
+<div class="quick-scroll-wrap">
+    <!-- 기존 함수들 100% 유지 -->
+    <div class="q-item" onclick="navigateToPanel('fever')">
+        <div class="q-icon-box">🌡️</div>
+        <span class="q-label">해열제</span>
+    </div>
+    <div class="q-item" onclick="navigateToPanel('ledger')">
+        <div class="q-icon-box">🧮</div>
+        <span class="q-label">지출입력</span>
+    </div>
+    <div class="q-item" onclick="navigateToPanel('growth')">
+        <div class="q-icon-box">📈</div>
+        <span class="q-label">성장진단</span>
+    </div>
+    <div class="q-item" onclick="navigateToPanel('hotplace')">
+        <div class="q-icon-box">🗺️</div>
+        <span class="q-label">주말나들이</span>
+    </div>
+    <div class="q-item" onclick="openChecklistModal()">
+        <div class="q-icon-box">🎒</div>
+        <span class="q-label">외출준비</span>
+    </div>
+</div>
 
             <div id="db-fever-card" onclick="navigateToPanel('fever')" style="background: var(--bg-card, #FFF); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.3s; display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -219,32 +234,35 @@
                 <h1 class="app-title">🧰 필수 육아 툴박스</h1>
                 <p class="app-desc" style="margin-bottom:20px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
 
-                <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
-                    <div id="btn-tool-money" class="tool-chip active" onclick="switchTool('money', this)">
-                        <span class="t-icon">💰</span><span class="t-label">가계부</span>
-                    </div>
-                    <div id="btn-tool-fever" class="tool-chip" onclick="switchTool('fever', this)">
-                        <span class="t-icon">🌡️</span><span class="t-label">해열제</span>
-                    </div>
-                    <div id="btn-tool-growth" class="tool-chip" onclick="switchTool('growth', this)">
-                        <span class="t-icon">📈</span><span class="t-label">성장</span>
-                    </div>
-                    <div id="btn-tool-hotdeal" class="tool-chip" onclick="switchTool('hotdeal', this)">
-                        <span class="t-icon">🔥</span><span class="t-label">핫딜</span>
-                    </div>
-                    <div id="btn-tool-food" class="tool-chip" onclick="switchTool('food', this)">
-                        <span class="t-icon">🥦</span><span class="t-label">이유식</span>
-                    </div>
-                  <div id="btn-tool-stroller" class="tool-chip" onclick="window.location.href='stroller/index.html'">
-                         <span class="t-icon">🛍️</span><span class="t-label">템비교</span>
-                     </div>
-                    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 병원 진료 및 예방접종 수첩을 개발 중입니다.')">
-                        <span class="t-icon">🏥</span><span class="t-label">병원수첩</span>
-                    </div>
-                    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 우는 아기를 달래줄 백색소음기를 개발 중입니다.')">
-                        <span class="t-icon">🎵</span><span class="t-label">백색소음</span>
-                    </div>
-                </div>
+<div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
+    <div id="btn-tool-money" class="tool-chip active" onclick="switchTool('money', this)">
+        <span class="t-icon">💰</span><span class="t-label">가계부</span>
+    </div>
+    <div id="btn-tool-fever" class="tool-chip" onclick="switchTool('fever', this)">
+        <span class="t-icon">🌡️</span><span class="t-label">해열제</span>
+    </div>
+    <div id="btn-tool-growth" class="tool-chip" onclick="switchTool('growth', this)">
+        <span class="t-icon">📈</span><span class="t-label">성장</span>
+    </div>
+    <div id="btn-tool-hotdeal" class="tool-chip" onclick="switchTool('hotdeal', this)">
+        <span class="t-icon">🔥</span><span class="t-label">핫딜</span>
+    </div>
+    
+    <!-- 🌟 오타 완벽 해결! -->
+    <div id="btn-tool-food" class="tool-chip" onclick="location.href='./food/index.html'">
+        <span class="t-icon">🥦</span><span class="t-label">이유식</span>
+    </div>
+    
+    <div id="btn-tool-stroller" class="tool-chip" onclick="location.href='./stroller/index.html'">
+        <span class="t-icon">🛍️</span><span class="t-label">템비교</span>
+    </div>
+    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 병원 진료 및 예방접종 수첩을 개발 중입니다.')">
+        <span class="t-icon">🏥</span><span class="t-label">병원수첩</span>
+    </div>
+    <div class="tool-chip" style="opacity:0.5; filter:grayscale(1);" onclick="alert('뚝딱뚝딱! 🛠️ 우는 아기를 달래줄 백색소음기를 개발 중입니다.')">
+        <span class="t-icon">🎵</span><span class="t-label">백색소음</span>
+    </div>
+</div>
 
                 <div id="panel-money" class="panel-block active" style="box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--text-m); padding-bottom:12px; margin-bottom:24px;">
