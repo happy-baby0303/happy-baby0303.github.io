@@ -219,7 +219,9 @@ if (!Kakao.isInitialized()) {
 }
 
 function shareToHusband(searchKeyword) {
-    const myCoupangLink = "https://link.coupang.com/a/eEtXJsuJxc"; 
+    // 🍼 프레시 링크 삭제! -> 누르면 해당 '젖병 이름'으로 쿠팡 자동 검색되도록 똑똑하게 변경!
+    const myCoupangLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(searchKeyword + ' 젖병')}`; 
+    
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
