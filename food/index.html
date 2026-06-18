@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>육아메이트 | 안심 이유식 AI</title>
     <link rel="stylesheet" href="style.css?v=4">
@@ -12,12 +13,12 @@
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
             <a href="../index.html" class="back-btn" style="border:none; background:transparent;">← 홈</a>
             <h1 style="font-size: 18px; margin: 0; font-weight: 800;">육아메이트 AI</h1>
-            <div class="pro-badge">PRO V2.5</div>
+            <div class="pro-badge">PRO V3.0</div>
         </div>
         <nav class="gnb-menu">
             <a href="../stroller/index.html" class="gnb-item">🛒 유모차</a>
             <a href="#" class="gnb-item" onclick="alert('준비중입니다!')">💺 카시트 <span class="badge">UP</span></a>
-            <a href="#" class="gnb-item" onclick="alert('준비중입니다!')">🍼 수유/젖병 <span class="badge">UP</span></a>
+            <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
             <a href="#" class="gnb-item active">🍲 이유식</a>
             <a href="#" class="gnb-item" onclick="alert('준비중입니다!')">🧸 장난감</a>
         </nav>
@@ -28,6 +29,9 @@
             <h2>우리아기 생명 지킴이<br><span class="gradient-text">안심 이유식 AI 큐레이터</span></h2>
             <p>전문의 가이드라인 기반! 알레르기 철벽 방어</p>
         </div>
+
+        <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
+            </div>
 
         <div class="search-box">
             <label style="display:block; font-size:14px; font-weight:800; color:#191F28; margin-bottom:12px;">🚦 이 식재료 먹여도 될까? (신호등 판독기)</label>
@@ -84,9 +88,14 @@
             </div>
         </div>
 
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; margin-top: 16px;">
+            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
+                ❤️ 내가 찜한 식단 모아보기
+            </button>
+        </div>
+
         <div id="food-result-area"></div>
 
-<!-- 법적 고지 및 쿠팡 파트너스 안내 -->
         <div class="legal-footer">
             <strong>※ 의학적 면책 조항</strong><br>
             본 서비스의 이유식 정보는 일반적인 소아과 가이드라인을 바탕으로 제작되었으나, 전문의의 의학적 진단을 대신할 수 없습니다. 알레르기 반응은 개인차가 크므로 새로운 식재료 도입 시 반드시 소량으로 시작하여 3일간 관찰하시기 바랍니다.<br><br>

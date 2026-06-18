@@ -7,11 +7,7 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-N8RVVNWZ');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>육아메이트 | 프리미엄 유모차 5D AI 매칭</title>
-    <link rel="stylesheet" href="style.css">
-    <head>
-    <meta charset="UTF-8">
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>육아메이트 | 프리미엄 유모차 5D AI 매칭</title>
 
@@ -23,21 +19,17 @@
 
     <link rel="stylesheet" href="style.css">
 </head>
-
-</head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8RVVNWZ"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- 🌟 글씨 겹침 완벽 해결된 헤더 -->
+    
     <header class="app-header" style="flex-direction: column; padding: 0;">
         <div style="position: relative; display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 16px 20px;">
-            <!-- 홈 버튼을 텍스트 위로 올리고 여백 확보 -->
             <a href="../index.html" class="back-btn" style="position: relative; z-index: 10; margin: 0; background: #fff; border: none;">← 홈</a>
-            <!-- 제목을 중앙에 강제 고정 -->
             <h1 style="position: absolute; left: 0; right: 0; text-align: center; margin: 0; z-index: 1; font-size: 18px;">육아메이트 AI</h1>
             <div class="pro-badge" style="position: relative; z-index: 10;">PRO V15.5</div>
         </div>
-<!-- 🌟 수유/젖병과 이유식을 명확히 분리한 GNB 메뉴 --><!-- 🌟 유모차 페이지용 GNB 메뉴 (유모차에 파란불 켜짐) -->
+
         <nav class="gnb-menu">
             <a href="#" class="gnb-item active">🛒 유모차</a>
             <a href="#" class="gnb-item" onclick="showComingSoon('카시트')">💺 카시트 <span class="badge">UP</span></a>
@@ -54,10 +46,14 @@
     </button>
 
     <main class="container">
+        
         <div class="hero-title">
             <h2>내 특수한 상황을 다 맞추는<br><span class="gradient-text">5D AI 매칭 센서</span></h2>
             <p>50종 완벽 DB! 324가지 라이프스타일 정밀 연산</p>
         </div>
+
+        <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
+            </div>
 
         <div class="matrix-panel">
             <div class="matrix-header"><span class="icon">🧬</span> 5차원 개인 상황 설정 데이터</div>
@@ -65,7 +61,9 @@
                 <div class="matrix-item">
                     <label>🏡 거주 및 주행 환경</label>
                     <div class="custom-select-wrapper">
-                        <select id="mat-env" onchange="runMatrixEngine(true)"><option value="all">모든 환경 무관</option><option value="stairs">엘베 없는 빌라 (계단 필수)</option><option value="apartment">아파트 단지 산책 위주</option><option value="mall">백화점 / 실내 쇼핑몰 위주</option></select>
+                        <select id="mat-env" onchange="runMatrixEngine(true)">
+                            <option value="all">모든 환경 무관</option><option value="stairs">엘베 없는 빌라 (계단 필수)</option><option value="apartment">아파트 단지 산책 위주</option><option value="mall">백화점 / 실내 쇼핑몰 위주</option>
+                        </select>
                     </div>
                 </div>
                 <div class="matrix-item">
@@ -83,19 +81,25 @@
                 <div class="matrix-item">
                     <label>👶 아기 성장 (둘째 계획)</label>
                     <div class="custom-select-wrapper">
-                        <select id="mat-baby" onchange="runMatrixEngine(true)"><option value="all">개월 수 무관</option><option value="newborn">신생아 ~ 돌 이전</option><option value="giant">돌 이후 / 우량아</option><option value="twins">둘째 계획 / 연년생 (확장성)</option></select>
+                        <select id="mat-baby" onchange="runMatrixEngine(true)">
+                            <option value="all">개월 수 무관</option><option value="newborn">신생아 ~ 돌 이전</option><option value="giant">돌 이후 / 우량아</option><option value="twins">둘째 계획 / 연년생 (확장성)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="matrix-item">
                     <label>🦴 주 양육자 피지컬 상태</label>
                     <div class="custom-select-wrapper">
-                        <select id="mat-parent" onchange="runMatrixEngine(true)"><option value="all">건강 상태 양호</option><option value="joint">손목 건초염 / 요통 진행 중</option><option value="strong">체력 만렙 / 안정감 우선</option></select>
+                        <select id="mat-parent" onchange="runMatrixEngine(true)">
+                            <option value="all">건강 상태 양호</option><option value="joint">손목 건초염 / 요통 진행 중</option><option value="strong">체력 만렙 / 안정감 우선</option>
+                        </select>
                     </div>
                 </div>
                 <div class="matrix-item full-width">
                     <label>💰 구매 예산 마지노선</label>
                     <div class="custom-select-wrapper">
-                        <select id="mat-budget" onchange="runMatrixEngine(true)"><option value="all">예산한도 없음 (하이엔드)</option><option value="under100">100만원 이하 (실속형)</option><option value="under40">40만원 이하 (가성비)</option></select>
+                        <select id="mat-budget" onchange="runMatrixEngine(true)">
+                            <option value="all">예산한도 없음 (하이엔드)</option><option value="under100">100만원 이하 (실속형)</option><option value="under40">40만원 이하 (가성비)</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -143,6 +147,13 @@
                     <button class="stroller-filt-btn" data-filter="price-over100">💎 100만원 이상</button>
                 </div>
             </div>
+        </div>
+
+        <!-- 🚀 찜 보관함 토글 버튼 (위치 이동 완료!) -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; margin-top: 16px;">
+            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
+                ❤️ 내가 찜한 유모차 모아보기
+            </button>
         </div>
 
         <div class="result-title" id="result-top-title" style="display:none;">🏆 최적합 AI 픽 Top 3</div>

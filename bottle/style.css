@@ -1,0 +1,36 @@
+* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Helvetica Neue", Arial, sans-serif; }
+body { margin: 0; background-color: #F2F4F6; color: #191F28; -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; color: inherit; }
+
+.app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; padding: 0; }
+.back-btn { font-size: 14px; font-weight: 600; color: #4E5968; cursor: pointer; }
+.pro-badge { background: #3182F6; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
+.gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; border-top:1px solid #f2f4f6; }
+.gnb-menu::-webkit-scrollbar { display: none; }
+.gnb-item { flex: 0 0 auto; padding: 14px 16px; font-size: 15px; font-weight: 700; color: #8B95A1; position: relative; display: flex; align-items: center; gap: 6px; }
+.gnb-item.active { color: #191F28; font-weight: 800; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
+.badge { background: #E32636; color: #FFF; font-size: 10px; padding: 3px 5px; border-radius: 6px; font-weight: 900; line-height: 1; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 40px 20px 120px 20px; background: transparent; min-height: 100vh; }
+.hero-title { margin-bottom: 32px; text-align: center; }
+.hero-title h2 { font-size: 26px; font-weight: 900; line-height: 1.4; margin: 0 0 12px 0; letter-spacing: -0.5px; }
+.gradient-text { background: linear-gradient(135deg, #1B64DA, #3182F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-title p { font-size: 15px; color: #4E5968; margin: 0; font-weight: 600; }
+
+.matrix-panel { padding: 24px; border-radius: 20px; margin-bottom: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+.matrix-header { font-size: 16px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:600px) { .matrix-grid { grid-template-columns: 1fr; } }
+.matrix-item label { display: block; font-size: 13px; font-weight: 700; color: #4E5968; margin-bottom: 8px; }
+
+.custom-select-wrapper { position: relative; }
+.custom-select-wrapper select { width: 100%; padding: 16px; background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 12px; font-size: 15px; font-weight: 600; color: #191F28; appearance: none; }
+
+.stroller-card { background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); }
+.premium-empty-state { padding: 48px 20px; background: #FFF; border-radius: 16px; border: 1px dashed #D1D6DB; text-align: center; }
+.premium-empty-state .empty-icon { font-size: 32px; margin-bottom: 16px; }
+.premium-empty-state .empty-text b { display: block; font-size: 16px; color: #333D4B; margin-bottom: 6px; }
+.premium-empty-state .empty-text span { font-size: 14px; color: #8B95A1; }
+
+.legal-footer { margin-top: 40px; padding: 24px; background: #F9FAFB; border-radius: 16px; text-align: left; font-size: 12px; color: #8B95A1; line-height: 1.6; border:1px solid #E5E8EB; }

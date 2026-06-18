@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>육아메이트 | 젖병 AI 큐레이터</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 헤더 & 메뉴 -->
+    <header class="app-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <a href="../index.html" class="back-btn" style="border:none; background:transparent;">← 홈</a>
+            <h1 style="font-size: 18px; margin: 0; font-weight: 800;">육아메이트 AI</h1>
+            <div class="pro-badge">PRO V3.0</div>
+        </div>
+        <nav class="gnb-menu">
+            <a href="../stroller/index.html" class="gnb-item">🛒 유모차</a>
+            <a href="#" class="gnb-item" onclick="alert('카시트 AI 엔진은 현재 구축 중입니다!')">💺 카시트 <span class="badge">UP</span></a>
+            <a href="../bottle/index.html" class="gnb-item active">🍼 수유/젖병</a>
+            <a href="../food/index.html" class="gnb-item">🍲 이유식</a>
+            <a href="#" class="gnb-item" onclick="showComingSoon('장난감')">🧸 장난감</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="hero-title">
+            <h2>젖꼭지 거부, 배앓이 완벽 차단!<br><span class="gradient-text">맞춤 젖병 세트 AI 큐레이터</span></h2>
+            <p>우리 아이 입에 꼭 맞는 인생 젖병 찾기</p>
+        </div>
+
+        <!-- 🚀 킬러 기능 1: 글로벌 D-Day 프로필 -->
+<!-- 🚀 글로벌 데이터 자동 연동 배너 (평소엔 숨김) -->
+        <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
+            <!-- 자바스크립트가 아기 이름과 개월 수를 이곳에 꽂아줍니다 -->
+        </div>
+
+        <!-- 🩺 젖병 필터 매트릭스 -->
+        <div class="matrix-panel" style="background: #F0F8FF; border: 2px solid #D6E8F9;">
+            <div class="matrix-header" style="color: #1B64DA;">🔍 맞춤 젖병 상세 조건</div>
+            <div class="matrix-grid">
+                
+                <!-- 👶 1. 월령 필터 -->
+                <div class="matrix-item">
+                    <label>👶 우리 아기 월령</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-age">
+                            <option value="all">전체 월령</option>
+                            <option value="newborn">신생아 (0~3개월) - 배앓이 집중</option>
+                            <option value="infant">영아 (4~6개월) - 혼합수유 적응</option>
+                            <option value="toddler">유아 (6개월 이상) - 스스로 잡기</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 🛡️ 2. 젖꼭지 거부 필터 -->
+                <div class="matrix-item">
+                    <label>🛡️ 젖꼭지 거부 성향</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-rejection">
+                            <option value="all">아무거나 잘 무는 편이에요</option>
+                            <option value="super">🚨 거부가 심해요 (모유실감/실리콘 필수)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 🍼 3. 소재 필터 -->
+                <div class="matrix-item">
+                    <label>🍼 선호하는 소재</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-material">
+                            <option value="all">전체 (상관없음)</option>
+                            <option value="ppsu">가볍고 튼튼한 국민 소재 (PPSU)</option>
+                            <option value="glass">미세플라스틱 완벽 차단 (내열유리)</option>
+                            <option value="silicone">말랑말랑 엄마 가슴 촉감 (실리콘)</option>
+                            <option value="pa">유리처럼 투명하고 가벼움 (PA)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 😭 4. 배앓이 방지력 -->
+                <div class="matrix-item">
+                    <label>😭 배앓이 방지력</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-anticolic">
+                            <option value="all">일반적인 수준 (상관없음)</option>
+                            <option value="yes">공기 흡입 최소화 (배앓이 특화)</option>
+                            <option value="super">🚨 영아산통 완벽 차단 (설거지는 힘듦)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 🔄 5. 호환성 필터 -->
+                <div class="matrix-item">
+                    <label>🔄 타사 젖꼭지 호환 여부</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-compatible">
+                            <option value="all">상관없음 (전용 젖꼭지도 괜찮음)</option>
+                            <option value="yes">더블하트(모유실감) 젖꼭지 완벽 호환</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 💰 6. 가격대 -->
+                <div class="matrix-item">
+                    <label>💰 가격대</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-price">
+                            <option value="all">전체 가격대</option>
+                            <option value="low">1만 원대 (가성비)</option>
+                            <option value="mid">2만 원대 (표준)</option>
+                            <option value="high">3만 원 이상 (프리미엄)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 🧼 7. 세척 및 소독 편의성 -->
+                <div class="matrix-item">
+                    <label>🧼 소독 및 세척 방식</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-sterilization">
+                            <option value="all">상관없음 (열탕 소독 할게요)</option>
+                            <option value="uv">UV 소독기 맘 편히 돌려도 되는 것</option>
+                            <option value="easy">손목 아파요! 입구 넓어 설거지 편한 것</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 🔄 8. 필터 초기화 버튼 -->
+                <div class="matrix-item" style="display: flex; align-items: flex-end;">
+                    <button onclick="resetBottleFilters()" style="width: 100%; height: 50px; background: #E8F3FF; color: #1B64DA; border: 1px solid #C6DFFF; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s ease;">
+                        🔄 필터 한 번에 초기화
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
+                ❤️ 내가 찜한 젖병 모아보기
+            </button>
+        </div>
+
+        <div id="bottle-result-area"></div>
+
+        <div class="legal-footer">
+            <strong>※ 면책 조항</strong><br>
+            본 서비스의 호환성 및 소재 정보는 제조사 스펙을 기준으로 제공되나, 제품 리뉴얼에 따라 변경될 수 있습니다. 구매 전 한 번 더 확인하시기 바랍니다.<br><br>
+            <strong>※ 쿠팡 파트너스 안내</strong><br>
+            이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+        </div>
+    </main>
+    
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
