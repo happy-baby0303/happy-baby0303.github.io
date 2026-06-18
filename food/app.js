@@ -270,7 +270,7 @@ function toggleFoodFilter(btn) {
     runFoodEngine();
 }
 
-// 🚀 카카오 SDK 초기화
+// 🚀 카카오 SDK 초기화 (food/app.js)
 if (!Kakao.isInitialized()) {
     Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
 }
@@ -282,13 +282,16 @@ function shareToHusband(recipeName, ingredients) {
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-            title: `여보! 낼 맘마는 [${recipeName}] 해줄거야 👶`,
-            description: `🛒 장보기 리스트: ${ingredients}\n\n퇴근길에 사오거나, 로켓프레시로 '${firstIngredient}' 담아줘! ❤️`,
+            // 💡 1. 제목에 애교 몰빵!
+            title: `여보! 내일 우리 아기 맘마야 👶❤️`,
+            // 💡 2. 설명은 딱 3줄로 압축 (메뉴 -> 재료 -> 애교 마무리)
+            description: `🍲 메뉴: ${recipeName}\n🛒 재료: ${ingredients}\n여보 늘 고마워! 로켓프레시 부탁해 🥰`, 
             imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
             link: { mobileWebUrl: myCoupangLink, webUrl: myCoupangLink },
         },
         buttons: [
-            { title: '🥦 로켓프레시 장보러 가기', link: { mobileWebUrl: myCoupangLink, webUrl: myCoupangLink } }
+            // 💡 3. 버튼에도 남편을 콕 집어서 행동 유도!
+            { title: `🚀 여보 전용 '${firstIngredient}' 주문 링크`, link: { mobileWebUrl: myCoupangLink, webUrl: myCoupangLink } }
         ],
     });
 }
