@@ -888,3 +888,69 @@ body.dark-mode .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.2) !import
 body.dark-mode .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2) !important; }
 body.dark-mode .bg-green-100 { background-color: rgba(16, 185, 129, 0.2) !important; }
 body.dark-mode .bg-purple-100 { background-color: rgba(139, 92, 246, 0.2) !important; }
+
+/* =========================================================
+   🔥 진짜 최종 완벽 패치 (AI 5대장 배경 & 길찾기 모달 원상복구)
+========================================================= */
+
+/* 1. AI 5대장 아이콘 배경색 야간모드 복구 (인라인 스타일 강제 덮어쓰기) */
+body.dark-mode div[style*="background: #E8F3FF"], body.dark-mode div[style*="background:#E8F3FF"] { background-color: rgba(49, 130, 246, 0.15) !important; }
+body.dark-mode div[style*="background: #FFF0F0"], body.dark-mode div[style*="background:#FFF0F0"] { background-color: rgba(227, 38, 54, 0.15) !important; }
+body.dark-mode div[style*="background: #FFF9E6"], body.dark-mode div[style*="background:#FFF9E6"] { background-color: rgba(255, 130, 58, 0.15) !important; }
+body.dark-mode div[style*="background: #ECFDF5"], body.dark-mode div[style*="background:#ECFDF5"] { background-color: rgba(16, 185, 129, 0.15) !important; }
+body.dark-mode div[style*="background: #F3E8FF"], body.dark-mode div[style*="background:#F3E8FF"] { background-color: rgba(168, 85, 247, 0.15) !important; }
+
+/* 2. 길찾기 네비게이션 3형제 가로 정렬 및 디자인 강제 복구 (3번 사진처럼 완벽하게) */
+.modal-navi-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-bottom: 24px !important;
+}
+
+.modal-navi-item {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #E5E8EB !important;
+    border-radius: 14px !important;
+    padding: 16px 0 !important;
+    text-decoration: none !important;
+    color: #191F28 !important;
+}
+
+/* 야간모드 네비 버튼 */
+body.dark-mode .modal-navi-item {
+    background-color: #2A2D32 !important;
+    border: 1px solid #444950 !important;
+    color: #F9FAFB !important;
+}
+
+/* 잃어버린 네비 아이콘 박스(초록, 검정, 노랑) 강제 부활 */
+.navi-badge-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    margin-bottom: 8px !important;
+    color: #FFFFFF !important;
+}
+.navi-badge-icon.naver { background-color: #03C75A !important; }
+.navi-badge-icon.tmap { background-color: #000000 !important; }
+.navi-badge-icon.kakao { background-color: #FEE500 !important; color: #191919 !important; }
+
+/* 길찾기 글씨 간격 조절 */
+.modal-navi-item span {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    margin-top: 4px !important;
+}
