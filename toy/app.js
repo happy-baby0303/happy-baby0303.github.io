@@ -9,7 +9,6 @@ function applyGlobalBabyProfile() {
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
     const banner = document.getElementById('auto-sync-banner');
     
-    // 🚨 Fix 1: 가짜 D-Day가 아닌, 진짜 자동 필터링 변수 세팅
     let autoMilestone = 'all'; 
 
     if(birthStr) {
@@ -21,21 +20,18 @@ function applyGlobalBabyProfile() {
         banner.style.display = 'flex';
         banner.innerHTML = `✨ <b>${babyName}(생후 ${months}개월)</b>의 월령에 맞춰 AI가 매칭 센서를 조율했어요!`;
 
-        // 개월 수에 따른 마일스톤 자동 분류 엔진
         if (months <= 3) autoMilestone = 'tummy';
         else if (months <= 6) autoMilestone = 'flip';
         else if (months <= 9) autoMilestone = 'crawl';
         else autoMilestone = 'stand';
     }
 
-    // 자동으로 맞는 발달 칩 활성화
     const targetChip = document.querySelector(`.ms-chip[data-milestone="${autoMilestone}"]`);
     if (targetChip) {
         document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
         targetChip.classList.add('active');
     }
 
-    // 🚨 Fix 2: 초기 렌더링 시 'all' (필수 국민템) 안 날아가게 방어
     const initialData = autoMilestone === 'all' 
         ? toyData 
         : toyData.filter(t => t.milestone === autoMilestone || t.milestone === 'all');
@@ -72,7 +68,6 @@ function toggleFavView() {
         btn.innerHTML = '❤️ 내가 찜한 장난감 모아보기';
         btn.style.background = '#333D4B'; btn.style.color = '#FFFFFF';
         
-        // 검색 화면으로 돌아갈 때, 현재 눌려있는 칩 상태 유지하며 복구
         const activeChip = document.querySelector('.ms-chip.active');
         const ms = activeChip ? activeChip.getAttribute('data-milestone') : 'all';
         const filteredData = ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all');
@@ -112,11 +107,11 @@ function generateToyHTML(toy, favs) {
     const hCol = isFav ? '#E32636' : '#4E5968';
     const hBor = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // 🚨 Fix 4: 건전지 크로스셀링 파트너스 링크 교체 안내
+    // 💡 변경 핵심: toyData에 기입된 대표님의 실시간 쿠팡 파트너스 링크(toy.batteryLink)를 다이렉트로 주입
     let batteryHtml = toy.battery !== "건전지 필요 없음" ? `
         <div style="background:#FFFBEB; padding:12px; border-radius:8px; font-size:13px; color:#8A6D3B; margin-top:12px;">
             <b style="color:#D97706;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b><br>
-            <a href="https://link.coupang.com/a/여기에_건전지_수익링크_세팅" target="_blank" style="color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
+            <a href="${toy.batteryLink}" target="_blank" style="color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
         </div>` : '';
 
     return `
@@ -157,7 +152,6 @@ function shareToHusband(id) {
         content: {
             title: `여보 나 오늘 밥도 못 먹었어 😭`,
             description: `[${toy.name}] 이거 하나만 로켓으로 쏴줘. 나 ${toy.freeTime} 쉴 수 있대!`,
-            // 🚨 Fix 3: 카카오톡 썸네일 장난감 전용 이미지 경로로 완벽 교체
             imageUrl: 'https://happy-baby0303.github.io/baby-master/toy/og-image.png',
             link: { mobileWebUrl: toy.coupangLink, webUrl: toy.coupangLink },
         },
@@ -166,7 +160,6 @@ function shareToHusband(id) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // applyGlobalBabyProfile 안에서 초기 렌더링(renderToys)을 자동으로 실행하도록 수정했으므로, 여기서 중복 호출하지 않습니다.
     applyGlobalBabyProfile();
 
     const msChips = document.querySelectorAll('.ms-chip');
@@ -179,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.classList.add('active');
             
             const ms = e.target.getAttribute('data-milestone');
-            // 🚨 Fix 2: 'all' 인 국민템들이 증발하지 않도록 로직 완벽 방어
             renderToys(ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all'));
         });
     });
