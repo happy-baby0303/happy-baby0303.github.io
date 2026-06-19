@@ -179,7 +179,6 @@ async function loadAllExternalData() {
     filterPlaces();
     try {
         if (window.location.protocol !== 'file:') {
-            // 🔥 [캐시 완벽 방어] 시간 값을 달아서 무조건 최신 파이썬 봇 데이터를 읽어오게 강제합니다!
             const resFest = await fetch('festivals.json?v=' + new Date().getTime());
             if (resFest.ok) {
                 apiFestivals = await resFest.json();
@@ -298,14 +297,12 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
     const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query);
     
-    // 🔥 [디자인 1차 패치] 전화 버튼 세로로 깨지는 현상 완벽 방어 (white-space: nowrap 추가)
     const telLink = tel && tel !== '정보없음' 
         ? `<a href="tel:${tel}" style="flex:1; display:flex; justify-content:center; align-items:center; background:#F2F5F8; color:#4E5968; border-radius:14px; font-size:14px; font-weight:800; text-decoration:none; white-space:nowrap;">📞 전화 문의</a>` 
         : `<div style="flex:1; display:flex; justify-content:center; align-items:center; background:#F2F5F8; color:#A0AEC0; border-radius:14px; font-size:14px; font-weight:800; white-space:nowrap; opacity:0.6;">📞 번호 없음</div>`;
         
     const modalImgHtml = (!image.startsWith('⚙️') && image) ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : '';
 
-    // 🔥 [디자인 2차 패치] 까맣게 죽었던 확인 완료 버튼을 예쁜 파란색으로 부활!
     body.innerHTML = `
         <div class="modal-header-wrap"><span class="modal-emoji">🌲</span><div class="modal-title">${title}</div></div>
         ${modalImgHtml}
@@ -365,7 +362,6 @@ function toggleHistory() {
         const items = document.getElementById('history-items'); items.innerHTML = "";
         const sortedKeys = Object.keys(history).sort().reverse();
         if(sortedKeys.length === 0) { 
-            // 🔥 [감성 패치] 가계부 과거 내역 빈 화면
             items.innerHTML = `
                 <div style="text-align:center; padding:30px 10px;">
                     <div style="font-size:32px; margin-bottom:10px;">💨</div>
@@ -429,7 +425,7 @@ function calcHotDeal() {
     const cat = document.getElementById('hd-category').value;
     const priceEl = document.getElementById('hd-total-price');
     const countEl = document.getElementById('hd-count');
-    const pastPriceEl = document.getElementById('hd-standard-price'); // 지난번 단가
+    const pastPriceEl = document.getElementById('hd-standard-price'); 
     
     const price = Number(priceEl.value.replace(/,/g,''));
     const count = Number(countEl.value);
@@ -443,43 +439,36 @@ function calcHotDeal() {
     const verdictEl = document.getElementById('hd-verdict');
     const commentEl = document.getElementById('hd-comment');
     
-    // 품목에 따른 단위 설정
     let unitName = "장";
     if (cat === 'wipe') unitName = "팩";
     else if (cat === 'milk') unitName = "통";
     
-    // 지난번 단가를 입력했을 때 비교 분석
     if (pastPrice > 0) {
         const diff = pastPrice - unitPrice;
-        
         if (diff > 0) {
             verdictEl.innerText = `🎉 지난번보다 ${unitName}당 ${diff.toLocaleString()}원 저렴해요!`;
-            verdictEl.style.backgroundColor = "#00B37A"; // 우수 (초록)
+            verdictEl.style.backgroundColor = "#00B37A"; 
             commentEl.innerText = `총 ${count}${unitName}를 사니까, 지난번 구매할 때보다 총 ${(diff * count).toLocaleString()}원 아끼는 셈이에요. 아주 훌륭한 소비입니다!`;
         } else if (diff < 0) {
             verdictEl.innerText = `⚠️ 지난번보다 ${unitName}당 ${Math.abs(diff).toLocaleString()}원 비싸요.`;
-            verdictEl.style.backgroundColor = "#F04452"; // 경고 (빨강)
+            verdictEl.style.backgroundColor = "#F04452"; 
             commentEl.innerText = `이번에 사면 지난번보다 총 ${(Math.abs(diff) * count).toLocaleString()}원 더 지출하게 됩니다. 급한 게 아니라면 조금 더 기다려보는 건 어떨까요?`;
         } else {
             verdictEl.innerText = `⚖️ 지난번 구매가와 완벽히 똑같아요!`;
-            verdictEl.style.backgroundColor = "#3182F6"; // 안정 (파랑)
+            verdictEl.style.backgroundColor = "#3182F6"; 
             commentEl.innerText = "평소 사시던 가격 그대로네요. 필요하다면 지금 구매하셔도 좋습니다.";
         }
     } else {
-        // 지난번 단가를 안 적은 경우 단순 명확하게 단가만 알려줌
         verdictEl.innerText = `✅ 정확한 단가 계산 완료!`;
-        verdictEl.style.backgroundColor = "#3182F6"; // 안정 (파랑)
+        verdictEl.style.backgroundColor = "#3182F6"; 
         commentEl.innerText = `복잡한 쿠폰/할인 다 합쳐서 결국 1${unitName}당 ${unitPrice.toLocaleString()}원에 사시는 겁니다! (위에 4번 항목에 비교할 단가를 넣으시면 더 자세히 분석해 드려요)`;
     }
     
     verdictEl.style.color = "#FFF";
     document.getElementById('hd-result').style.display = 'block';
-    // 🔥 [데이터 시너지] 가계부로 금액을 쏘는 버튼 생성
-   document.getElementById('hd-action-area').innerHTML = `<button class="btn-main" style="margin-top:16px; background:#3182F6 !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(49,130,246,0.2) !important; padding:14px; font-size:14.5px; font-weight:800; border-radius:12px;" onclick="sendHotdealToLedger(${price}, '${cat}')">💰 이번 지출 (${price.toLocaleString()}원) 가계부로 쏙! 보내기 〉</button>`;
-    
+    document.getElementById('hd-action-area').innerHTML = `<button class="btn-main" style="margin-top:16px; background:#3182F6 !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(49,130,246,0.2) !important; padding:14px; font-size:14.5px; font-weight:800; border-radius:12px;" onclick="sendHotdealToLedger(${price}, '${cat}')">💰 이번 지출 (${price.toLocaleString()}원) 가계부로 쏙! 보내기 〉</button>`;
     document.getElementById('hd-result').style.display = 'block';
 }
-
 
 // ==========================================
 // 5. 스마트 해열제 타이머 엔진 
@@ -549,7 +538,6 @@ function renderFeverTimeline() {
     const container = document.getElementById('fever-timeline'); if(!container) return; 
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     if(records.length === 0) {
-        // 🔥 [감성 패치] 딱딱한 문구 대신 예쁜 위로의 메시지로 변경!
         container.innerHTML = `
             <div style="text-align:center; padding:40px 20px; background:var(--bg-sub, #F8F9FA); border-radius:16px; border:1px dashed #E5E8EB;">
                 <div style="font-size:32px; margin-bottom:12px;">🌿</div>
@@ -688,7 +676,7 @@ function closeChecklistForce() { document.getElementById('checklist-modal').styl
 function closeChecklist(e) { if (e.target.id === 'checklist-modal') closeChecklistForce(); }
 
 // ==========================================
-// 🚨 7. 아기 정보, 사진 업로드, 플레이 위젯, 성장 진단 (함수 부활 완료!)
+// 🚨 7. 아기 정보, 사진 업로드, 플레이 위젯, 성장 진단
 // ==========================================
 function getPercentile(z) {
     if (z < -3) return 1;
@@ -705,12 +693,10 @@ function calcHealthMaster() {
     const h = hVal ? parseFloat(hVal) : null;
     const w = wVal ? parseFloat(wVal) : null;
 
-    // 🔥 [데이터 시너지] 몸무게를 입력했으면 해열제 타이머를 위해 몰래 저장해둡니다!
     if (wVal) localStorage.setItem('tosil_latest_weight', wVal);
 
     if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요!");
     if(!h && !w) return alert("정확한 백분위 진단을 위해 키 또는 몸무게 중 하나 이상을 입력해 주세요!");
-    // ... 이하 기존 코드 동일 ...
     const birthDate = new Date(b);
     const today = new Date();
     const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
@@ -828,7 +814,9 @@ function renderBabyInfo() {
     const saved = localStorage.getItem('tosil_baby'), nameEl = document.getElementById('res-baby-name'), ddayEl = document.getElementById('res-baby-dday'), msgEl = document.getElementById('daily-message'); 
     if(!saved) {
         if(nameEl) nameEl.innerText = "이름을 눌러 등록해주세요"; if(ddayEl) ddayEl.innerText = "D+0일";
-        initPlayWidget(null, 0); return;
+        initPlayWidget(null, 0);
+        setDefaultMainAISensors();
+        return;
     }
     try {
         const data = JSON.parse(saved), diffDays = Math.ceil((new Date() - new Date(data.birth)) / (1000*60*60*24)), monthAge = Math.floor(diffDays / 30.436875);
@@ -836,7 +824,51 @@ function renderBabyInfo() {
         const tipObj = babyTips.find(item => monthAge >= item.min && monthAge <= item.max);
         if(msgEl) msgEl.innerText = tipObj ? tipObj.tip : `오늘도 ${data.name}와(과) 행복한 하루 되세요! 🤍`;
         initPlayWidget(monthAge, diffDays);
+        updateMainAISensors(monthAge);
     } catch (e) {}
+}
+
+function updateMainAISensors(months) {
+    const txtStroller = document.getElementById('main-txt-stroller');
+    const txtCarseat = document.getElementById('main-txt-carseat');
+    const txtBottle = document.getElementById('main-txt-bottle');
+    const txtFood = document.getElementById('main-txt-food');
+    const txtToy = document.getElementById('main-txt-toy');
+
+    if(!txtStroller) return;
+
+    if (months <= 6) txtStroller.innerText = "👶 아직 흔들림 금물! 안전한 [디럭스형 유모차]";
+    else if (months <= 12) txtStroller.innerText = "🏃 혼자 앉기 시작할 때, 가성비 [절충형 유모차]";
+    else txtStroller.innerText = "⚡ 가볍고 신속한 외출 전용 [휴대용 유모차]";
+
+    if (months <= 12) txtCarseat.innerText = "🛡️ 목 근육 보호! 필수 뒤보기 안전 [신생아 카시트]";
+    else txtCarseat.innerText = "🧒 앞보기 전환 완료! 몸무게 맞춤형 [토들러 카시트]";
+
+    if (months <= 3) txtBottle.innerText = "🍼 배앓이 지옥 탈출! 신생아 입구경 매칭 젖꼭지";
+    else if (months <= 6) txtBottle.innerText = "🍼 흡착 세기 증가! 3~6개월용 단계 교체 체크";
+    else txtBottle.innerText = "🥛 빨대컵 연습 돌입! 스스로 쥐고 마시는 법";
+
+    if (months < 4) txtFood.innerText = "🥣 미리 공부하는 초기 [이유식 식단 준비 가이드]";
+    else if (months <= 6) txtFood.innerText = "🥣 쌀미음 스타트! [초기 이유식] 식단 매칭";
+    else if (months <= 9) txtFood.innerText = "🥣 입자 크기 업그레이드! [중기 이유식] 재료 신호등";
+    else if (months <= 11) txtFood.innerText = "🥣 하루 세 번 미공개 전쟁! [후기 이유식] 시간표";
+    else txtFood.innerText = "🥣 유아식으로 진화! [완료기 식단] 영양소 체크";
+
+    if (months <= 2) txtToy.innerText = "🐣 꼼짝 못하는 시기! [신생아 생존기] 초점책/모빌";
+    else if (months <= 5) txtToy.innerText = "💪 고개 가누기 연습! [터미타임 연습용] 꼬꼬맘";
+    else if (months <= 7) txtToy.innerText = "🔄 온 거실을 구르는 [엎드려 뒤집기용] 에듀테이블";
+    else if (months <= 10) txtToy.innerText = "🏃 잡으러 뛰어다니는 [배밀이/기어가기용] 깜짝볼";
+    else txtToy.innerText = "🧗 온 집안 문짝 잡고 일어서는 [걸음마보조기/러닝홈]";
+}
+
+function setDefaultMainAISensors() {
+    if(document.getElementById('main-txt-stroller')) {
+        document.getElementById('main-txt-stroller').innerText = "아기 맞춤형 유모차 선택 가이드 보기";
+        document.getElementById('main-txt-carseat').innerText = "단계별 안전 규격 카시트 큐레이션 보기";
+        document.getElementById('main-txt-bottle').innerText = "배앓이 방지 젖병 및 젖꼭지 스펙 확인";
+        document.getElementById('main-txt-food').innerText = "월령별 안심 이유식 레시피 및 재료 매칭";
+        document.getElementById('main-txt-toy').innerText = "부모의 자유시간 확보용 SOS 장난감 70대장";
+    }
 }
 
 function uploadPhoto(input) {
@@ -871,8 +903,6 @@ function initPlayWidget(months, dday) {
     }
     if(badgeEl) badgeEl.innerText = dday > 0 ? dday : 0; currentDday = dday > 0 ? dday : 0;
     currentAvailablePlays = playDB.filter(p => months >= p.minM && months <= p.maxM);
-    
-    // 이전에 저장된 랜덤 인덱스가 없으면 첫 번째 놀이를 보여줌
     renderPlay(0); 
 }
 
@@ -894,7 +924,6 @@ function shufflePlay() {
         const titleEl = document.getElementById('play-title');
         let newIndex;
         let attempts = 0;
-        // 지금 보고 있는 거랑 "다른" 놀이가 무조건 나오도록 똑똑하게 뽑음!
         do {
             newIndex = Math.floor(Math.random() * currentAvailablePlays.length);
             attempts++;
@@ -922,7 +951,6 @@ function updateHomeDashboard() {
             }
         } else {
             feverCard.style.background = 'var(--bg-card)'; feverCard.style.color = 'var(--text-m)'; feverCard.style.border = '1px solid var(--border)';
-            // 🔥 [감성 패치] 해열제 대시보드 빈 화면
             feverCard.innerHTML = `<div><div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">스마트 해열 타이머</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m); opacity:0.9;">휴~ 다행이에요! 아픈 곳 없이 건강해요 🌿</div></div><span style="font-size:24px;">💚</span>`;
         }
     }
@@ -934,7 +962,6 @@ function updateHomeDashboard() {
             const percent = Math.min(Math.round((totalExpense / budget) * 100), 100);
             ledgerCard.innerHTML = `<div style="width: 100%;"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px;"><div style="font-size:13px; font-weight:700; color:var(--text-s);">이번 달 육아 소비</div><div style="font-size:20px; font-weight:900; color:var(--primary); letter-spacing:-0.5px;">${totalExpense.toLocaleString()}원</div></div><div style="width:100%; height:10px; background:var(--bg-sub); border-radius:6px; overflow:hidden;"><div style="width:${percent}%; height:100%; background:var(--primary); border-radius:6px; transition:width 0.5s ease;"></div></div></div>`;
         } else {
-            // 🔥 [감성 패치] 가계부 대시보드 빈 화면
             ledgerCard.innerHTML = `<div><div style="font-size:13px; font-weight:700; color:var(--text-s); margin-bottom:4px;">이번 달 육아 소비 진단</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m); opacity:0.9;">이번 달 첫 육아 득템은 무엇인가요? 🎁</div></div><span style="font-size:24px;">📊</span>`;
         }
     }
@@ -964,14 +991,8 @@ function renderFoodChecklist() {
     const container = document.getElementById('food-list-container');
     if (!container) return;
     
-    // 🔥 [오류 완벽 방어] 혹시라도 데이터가 꼬여있으면 깨끗하게 리셋합니다.
     let savedFoods = {};
-    try {
-        savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {};
-    } catch (e) {
-        console.warn("데이터가 꼬여서 초기화합니다.");
-        savedFoods = {};
-    }
+    try { savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {}; } catch (e) { savedFoods = {}; }
 
     let passedCount = 0;
     let totalCount = 0;
@@ -982,7 +1003,7 @@ function renderFoodChecklist() {
         
         cat.items.forEach(item => {
             totalCount++;
-            const status = savedFoods[item] || 0; // 0: 미확인, 1: 통과, 2: 알레르기
+            const status = savedFoods[item] || 0; 
             let btnStyle = "background:#F2F5F8; color:var(--text-s); border:1px solid var(--border);";
             let icon = "⬜ ";
             
@@ -1012,57 +1033,43 @@ function renderFoodChecklist() {
 function toggleFoodStatus(itemName) {
     let savedFoods = JSON.parse(localStorage.getItem('tosil_food_test')) || {};
     let currentStatus = savedFoods[itemName] || 0;
-    
-    // 상태 변경 로직: 미확인(0) -> 통과(1) -> 알레르기(2) -> 다시 미확인(0)
     currentStatus = (currentStatus + 1) % 3;
-    
     savedFoods[itemName] = currentStatus;
     localStorage.setItem('tosil_food_test', JSON.stringify(savedFoods));
-    
-    renderFoodChecklist(); // 화면 다시 그리기
+    renderFoodChecklist(); 
 }
 
 // 🚨 119 SOS 모달 겹침 현상 완벽 방어 자바스크립트
 window.openSOSModal = function() {
     const modal = document.getElementById('sos-modal');
     if(!modal) return;
-    
-    // 이전 화면 내용 강제 숨김
     document.getElementById('sos-step-medical').style.setProperty('display', 'none', 'important');
     document.getElementById('sos-step-cry').style.setProperty('display', 'none', 'important');
     document.getElementById('btn-sos-back').style.setProperty('display', 'none', 'important');
-    
-    // 메인 메뉴 강제 표시
     document.getElementById('sos-step-choice').style.setProperty('display', 'block', 'important');
-    
     const medBtn = document.querySelector('.sos-btn-medical');
     const cryBtn = document.querySelector('.sos-btn-cry');
     if(medBtn) medBtn.style.setProperty('display', 'flex', 'important');
     if(cryBtn) cryBtn.style.setProperty('display', 'flex', 'important');
-    
     modal.style.display = 'flex';
 };
 
 window.showSosMedical = function() { 
     document.getElementById('sos-step-choice').style.setProperty('display', 'none', 'important');
-    
     const medBtn = document.querySelector('.sos-btn-medical');
     const cryBtn = document.querySelector('.sos-btn-cry');
     if(medBtn) medBtn.style.setProperty('display', 'none', 'important');
     if(cryBtn) cryBtn.style.setProperty('display', 'none', 'important');
-    
     document.getElementById('sos-step-medical').style.setProperty('display', 'block', 'important');
     document.getElementById('btn-sos-back').style.setProperty('display', 'flex', 'important');
 };
 
 window.showSosChecklist = function() { 
     document.getElementById('sos-step-choice').style.setProperty('display', 'none', 'important');
-    
     const medBtn = document.querySelector('.sos-btn-medical');
     const cryBtn = document.querySelector('.sos-btn-cry');
     if(medBtn) medBtn.style.setProperty('display', 'none', 'important');
     if(cryBtn) cryBtn.style.setProperty('display', 'none', 'important');
-    
     document.getElementById('sos-step-cry').style.setProperty('display', 'block', 'important');
     document.getElementById('btn-sos-back').style.setProperty('display', 'flex', 'important');
 };
@@ -1083,16 +1090,11 @@ function sendHotdealToLedger(price, cat) {
 
     const inputEl = document.getElementById(targetId);
     const currentVal = Number(inputEl.value.replace(/,/g, '')) || 0;
-    
-    // 기존 입력된 금액에 핫딜 결제액을 더해줍니다.
     inputEl.value = (currentVal + price).toLocaleString();
 
     alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부 [${targetId === 'v-diaper' ? '기저귀/위생' : (targetId === 'v-food' ? '식비' : '기타')}] 항목에 합산되었습니다!\n가계부 패널에서 [소비 패턴 팩트 체크]를 눌러주세요.`);
-    
-    // 가계부 탭으로 슝~ 이동!
     directGoToolbox('money');
 }
-
 
 // ==========================================
 // 🚀 11. 구동 엔진
@@ -1105,7 +1107,6 @@ window.onload = () => {
     
     document.querySelectorAll('.panel-block').forEach(p => { if(!p.classList.contains('active')) p.style.display = 'none'; });
     
-    // 해열제 동반 증상 파란색 활성화 강제 지원
     document.querySelectorAll('.sym-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const cb = this.previousElementSibling;

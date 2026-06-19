@@ -384,7 +384,7 @@ body.dark-mode #sos-modal .sos-back-btn {
 
 body.dark-mode #sos-step-medical div[style*="grid-template-columns"] a.btn-main {
     background-color: rgba(255, 255, 255, 0.05) !important; /* 야간모드: 반투명 검정 */
-    color: #FFFFFF !important;                              /* 야간모드: 하얀 글씨 */
+    color: #FFFFFF !important;                               /* 야간모드: 하얀 글씨 */
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
@@ -768,81 +768,61 @@ body.dark-mode .btn-capture {
     cursor: pointer;
 }
 .modal-header-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.modal-emoji { font-size: 24px; }
-.modal-title { font-size: 18px; font-weight: 900; color: var(--text-m, #333); line-height: 1.4; word-break: keep-all; }
 
-.modal-meta-box { background: #F8F9FA; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-.modal-meta-row { display: flex; margin-bottom: 8px; }
-.modal-meta-row:last-child { margin-bottom: 0; }
-.modal-meta-label { width: 60px; font-size: 13px; font-weight: 800; color: var(--text-s, #888); }
-.modal-meta-value { flex: 1; font-size: 13.5px; font-weight: 700; color: var(--text-m, #333); }
+/* =========================================================
+   🌙 주말나들이 (축제 길찾기 모달 & 검증 육아지도) 다크모드 구출 패치
+========================================================= */
 
-/* 네비게이션 버튼 3형제 */
-.modal-navi-container { display: flex; gap: 10px; margin-bottom: 24px; }
-.modal-navi-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: #FFF; border: 1px solid var(--border, #E5E8EB); border-radius: 14px; padding: 12px 0;
-    text-decoration: none; color: var(--text-m, #333); transition: background 0.2s;
+/* 1. 축제/행사 길찾기 모달(팝업) 배경 및 텍스트 다크모드 대응 */
+body.dark-mode .modal-content {
+    background-color: var(--bg-card) !important; /* 눈뽕 하얀 배경 -> 다크 배경 */
+    border: 1px solid var(--border) !important;
 }
-.modal-navi-item:active { background: #F2F5F8; }
-.navi-badge-icon { width: 36px; height: 36px; border-radius: 10px; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; margin-bottom: 8px; }
-.navi-badge-icon.naver { background: #03C75A; }
-.navi-badge-icon.tmap { background: #000000; }
-.navi-badge-icon.kakao { background: #FEE500; color: #191919; }
-.modal-navi-item span { font-size: 12px; font-weight: 800; }
-
-.modal-action-grid { display: flex; gap: 10px; }
-.modal-call-btn { flex: 1; background: #F2F5F8; color: #4E5968; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; padding: 16px; text-decoration: none; display: flex; justify-content: center; align-items: center; }
-
-/* =========================================
-   🚨 축제/장소 길찾기 모달(팝업) 복구 CSS 
-========================================= */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center;
-    z-index: 9999; backdrop-filter: blur(4px);
+body.dark-mode .modal-title {
+    color: #FFFFFF !important; /* 모달 제목 하얗게 */
 }
-.modal-content {
-    background: #fff; width: 100%; max-width: 500px; max-height: 90vh;
-    border-radius: 24px 24px 0 0; padding: 24px; overflow-y: auto;
-    position: relative; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+body.dark-mode .modal-meta-box {
+    background-color: var(--bg-sub) !important; /* 기간/장소 박스 배경 어둡게 */
 }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-close-handle { width: 40px; height: 5px; background: #E5E8EB; border-radius: 3px; margin: 0 auto 20px auto; cursor: pointer; }
-.modal-header-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.modal-emoji { font-size: 24px; }
-.modal-title { font-size: 18px; font-weight: 900; color: var(--text-m, #333); line-height: 1.4; word-break: keep-all; }
-.modal-meta-box { background: #F8F9FA; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-.modal-meta-row { display: flex; margin-bottom: 8px; }
-.modal-meta-row:last-child { margin-bottom: 0; }
-.modal-meta-label { width: 60px; font-size: 13px; font-weight: 800; color: var(--text-s, #888); }
-.modal-meta-value { flex: 1; font-size: 13.5px; font-weight: 700; color: var(--text-m, #333); }
+body.dark-mode .modal-meta-label {
+    color: var(--text-s) !important; /* '기간', '장소' 라벨 색상 */
+}
+body.dark-mode .modal-meta-value {
+    color: #FFFFFF !important; /* 실제 기간/장소 데이터 색상 */
+}
 
-/* 네비게이션 & 전화 버튼 */
-.modal-navi-container { display: flex; gap: 10px; margin-bottom: 24px; }
-.modal-navi-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: #FFF; border: 1px solid var(--border, #E5E8EB); border-radius: 14px; padding: 12px 0;
-    text-decoration: none; color: var(--text-m, #333); transition: background 0.2s;
+/* 길찾기 네비게이션 버튼 3형제 다크모드 */
+body.dark-mode .modal-navi-item {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
 }
-.modal-navi-item:active { background: #F2F5F8; }
-.navi-badge-icon { width: 36px; height: 36px; border-radius: 10px; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; margin-bottom: 8px; }
-.navi-badge-icon.naver { background: #03C75A; }
-.navi-badge-icon.tmap { background: #000000; }
-.navi-badge-icon.kakao { background: #FEE500; color: #191919; }
-.modal-navi-item span { font-size: 12px; font-weight: 800; }
-.modal-action-grid { display: flex; gap: 10px; }
-.modal-call-btn { flex: 1; background: #F2F5F8; color: #4E5968; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; padding: 16px; text-decoration: none; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+body.dark-mode .modal-navi-item:active {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode .modal-navi-item span {
+    color: #E5E8EB !important;
+}
 
-/* 🗺️ 지역 세분화 필터 기차놀이 방지 (줄바꿈) */
-#sub-filter-row {
-    display: flex;
-    flex-wrap: wrap !important; /* 공간 모자라면 밑으로 떨어지게! */
-    gap: 8px;
-    margin-top: 12px;
-    margin-bottom: 16px;
+/* 2. 검증 육아지도 (아코디언 내부) 다크모드 대응 */
+
+/* 팩트 검증 피드 (리뷰 박스) - 하얀 배경에 하얀 글씨 증발 대참사 해결! */
+body.dark-mode .place-review {
+    background-color: rgba(255, 255, 255, 0.05) !important; /* 투명한 다크 박스 */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #E5E8EB !important; /* 글씨는 밝은 회색으로 뚜렷하게 */
 }
-#sub-filter-row .filter-btn {
-    margin: 0 !important; 
-    white-space: nowrap; /* 글씨 꺾임 방지 */
+body.dark-mode .place-review strong {
+    color: #FFFFFF !important; /* '팩트 검증 피드:' 강조 글씨는 쨍한 흰색 */
+}
+
+/* 시설 편의 태그 (S급 휴게실, 오픈 테라스 등) 하얀 눈뽕 제거 */
+body.dark-mode .tag {
+    background-color: #2D323B !important;
+    color: #B0B8C1 !important;
+}
+
+/* 장소 상세 설명 텍스트 */
+body.dark-mode .place-desc {
+    color: #B0B8C1 !important;
 }
