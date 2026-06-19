@@ -107,12 +107,21 @@ function generateToyHTML(toy, favs) {
     const hCol = isFav ? '#E32636' : '#4E5968';
     const hBor = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // 💡 변경 핵심: toyData에 기입된 대표님의 실시간 쿠팡 파트너스 링크(toy.batteryLink)를 다이렉트로 주입
+    // 🔋 건전지 크로스셀링 로직
     let batteryHtml = toy.battery !== "건전지 필요 없음" ? `
         <div style="background:#FFFBEB; padding:12px; border-radius:8px; font-size:13px; color:#8A6D3B; margin-top:12px;">
             <b style="color:#D97706;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b><br>
             <a href="${toy.batteryLink}" target="_blank" style="color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
         </div>` : '';
+
+    // 🚀 [핵심] 빈 링크 방어(Fallback) 및 UX 텍스트 동적 변환 로직
+    const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy"; // 대표님의 쿠팡 홈 메인 링크
+    const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
+    
+    const finalLink = isFallback ? fallbackLink : toy.coupangLink;
+    const btnText = isFallback 
+        ? `🔍 쿠팡에서 '${toy.name}' 검색해보기` 
+        : `🚀 로켓배송 최저가 확인하기`;
 
     return `
         <div class="report-card">
@@ -137,9 +146,11 @@ function generateToyHTML(toy, favs) {
                 <div style="font-size:14px; color:#333D4B;">✅ <b>자유시간:</b> 약 ${toy.freeTime} 확보</div>
             </div>
 
-            <a href="${toy.coupangLink}" target="_blank" style="display:block; width:100%; padding:14px; background:#3182F6; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; text-decoration:none;">🚀 로켓배송 최저가 확인하기</a>
+            <!-- 동적 쿠팡 버튼 (링크 유무에 따라 알아서 바뀝니다) -->
+            <a href="${finalLink}" target="_blank" style="display:block; width:100%; padding:14px; background:#3182F6; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; text-decoration:none;">${btnText}</a>
             
-            <button onclick="shareToHusband(${toy.id})" style="width:100%; padding:14px; background:#FEE500; color:#3C1E1E; border:none; border-radius:10px; font-weight:900; font-size:14px; cursor:pointer; margin-top:8px;">💬 남편에게 3만 원만 투자하라고 톡 보내기</button>
+            <!-- 남편 카톡 공유 버튼 문구 감성 자극형으로 수정 완료! -->
+            <button onclick="shareToHusband(${toy.id})" style="width:100%; padding:14px; background:#FEE500; color:#3C1E1E; border:none; border-radius:10px; font-weight:900; font-size:14px; cursor:pointer; margin-top:8px;">💬 남편에게 내 '자유시간' 사달라고 톡 보내기</button>
             ${batteryHtml}
         </div>`;
 }
@@ -147,15 +158,21 @@ function generateToyHTML(toy, favs) {
 function shareToHusband(id) {
     const toy = toyData.find(t => t.id === id);
     if(!toy) return;
+
+    // 카톡 공유 시에도 남편이 빈 화면을 보지 않도록 동일한 방어 로직 적용
+    const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy";
+    const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
+    const finalLink = isFallback ? fallbackLink : toy.coupangLink;
+
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-            title: `여보 나 오늘 밥도 못 먹었어 😭`,
+            title: `여보 나 오늘 너무 힘들어 😭`,
             description: `[${toy.name}] 이거 하나만 로켓으로 쏴줘. 나 ${toy.freeTime} 쉴 수 있대!`,
             imageUrl: 'https://happy-baby0303.github.io/baby-master/toy/og-image.png',
-            link: { mobileWebUrl: toy.coupangLink, webUrl: toy.coupangLink },
+            link: { mobileWebUrl: finalLink, webUrl: finalLink },
         },
-        buttons: [{ title: `💳 여보 찬스로 바로 결제하기`, link: { mobileWebUrl: toy.coupangLink, webUrl: toy.coupangLink } }]
+        buttons: [{ title: `💳 여보 찬스로 바로 결제하기`, link: { mobileWebUrl: finalLink, webUrl: finalLink } }]
     });
 }
 
