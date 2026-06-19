@@ -826,3 +826,65 @@ body.dark-mode .tag {
 body.dark-mode .place-desc {
     color: #B0B8C1 !important;
 }
+
+/* =========================================================
+   🚨 모달창 텍스트 증발, 네비게이션 붕괴, AI 패널 배경 복구 패치
+========================================================= */
+
+/* 1. 라이트모드(기본) 모달 텍스트 증발 해결 (글씨를 어둡게 강제) */
+.modal-content { background-color: #FFFFFF !important; }
+.modal-title { color: #111111 !important; }
+.modal-meta-label { color: #888888 !important; }
+.modal-meta-value { color: #333333 !important; }
+.place-review { background-color: #F8F9FA !important; color: #333333 !important; }
+.place-review strong { color: #111111 !important; }
+
+/* 다크모드 모달 텍스트 & 배경 안정화 */
+body.dark-mode .modal-content { background-color: var(--bg-card) !important; border: 1px solid var(--border) !important; }
+body.dark-mode .modal-title { color: #FFFFFF !important; }
+body.dark-mode .modal-meta-label { color: var(--text-s) !important; }
+body.dark-mode .modal-meta-value { color: #FFFFFF !important; }
+body.dark-mode .place-review { background-color: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #E5E8EB !important; }
+body.dark-mode .place-review strong { color: #FFFFFF !important; }
+
+
+/* 2. 네비게이션 3형제 버튼 레이아웃 붕괴 복구 (가로 정렬 강제) */
+.modal-navi-container, .navi-buttons, .navi-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+.modal-navi-item, .navi-btn {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+}
+
+/* 네비게이션 버튼 라이트/다크 색상 분리 */
+.modal-navi-item { background-color: #FFFFFF !important; border: 1px solid #E5E8EB !important; color: #333333 !important; }
+body.dark-mode .modal-navi-item { background-color: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #FFFFFF !important; }
+body.dark-mode .modal-navi-item span { color: #E5E8EB !important; }
+
+
+/* 3. AI 5대장 2번(카시트) & 3번(수유) 배경색 다크모드 누락 복구 */
+/* 2번 카시트 (빨간색 계열) */
+.bg-red-100 { background-color: #FEE2E2 !important; }
+body.dark-mode .bg-red-100 { background-color: rgba(239, 68, 68, 0.2) !important; }
+
+/* 3번 수유/배앓이 (주황색 계열) */
+.bg-orange-100 { background-color: #FFEDD5 !important; }
+body.dark-mode .bg-orange-100 { background-color: rgba(245, 158, 11, 0.2) !important; }
+/* 혹시 노란색(yellow) 클래스를 쓰셨을 경우를 대비한 스페어 */
+.bg-yellow-100 { background-color: #FEF9C3 !important; }
+body.dark-mode .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.2) !important; }
+
+/* 나머지 1, 4, 5번 다크모드 배경 톤도 고급스럽게 통일 */
+body.dark-mode .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2) !important; }
+body.dark-mode .bg-green-100 { background-color: rgba(16, 185, 129, 0.2) !important; }
+body.dark-mode .bg-purple-100 { background-color: rgba(139, 92, 246, 0.2) !important; }
