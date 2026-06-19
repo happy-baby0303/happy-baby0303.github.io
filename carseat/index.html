@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>육아메이트 | 카시트 AI 큐레이터</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
+    <script>
+        // 장난감 준비중 알림 함수
+        function showComingSoon(item) {
+            alert(`🧸 ${item} 큐레이션 엔진은 현재 열심히 학습 중입니다! 조금만 기다려주세요.`);
+        }
+    </script>
+</head>
+<body>
+
+    <header class="app-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <a href="../index.html" class="back-btn" style="border:none; background:transparent;">← 홈</a>
+            <h1 style="font-size: 18px; margin: 0; font-weight: 800;">육아메이트 AI</h1>
+            <div class="pro-badge">PRO V3.0</div>
+        </div>
+        <nav class="gnb-menu">
+            <a href="../stroller/index.html" class="gnb-item">🛒 유모차</a>
+            <a href="#" class="gnb-item active">💺 카시트</a>
+            <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
+            <a href="../food/index.html" class="gnb-item">🍲 이유식</a>
+            <a href="../toy/index.html" class="gnb-item">🧸 장난감</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="hero-title">
+            <h2>안전과 호환성 완벽 검증!<br><span class="gradient-text">맞춤 카시트 AI 큐레이터</span></h2>
+            <p>디자인보다 중요한 건 '우리아이 생명'과 '내 차와의 궁합'입니다.</p>
+        </div>
+
+        <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
+            </div>
+
+        <div class="matrix-panel" style="background: #F0F8FF; border: 2px solid #D6E8F9;">
+            <div class="matrix-header" style="color: #1B64DA;">🔍 맞춤 카시트 상세 조건</div>
+            <div class="matrix-grid">
+                
+                <div class="matrix-item">
+                    <label>👶 탑승 연령 (가장 중요)</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-age">
+                            <option value="all">전체 연령</option>
+                            <option value="newborn">바구니형 (신생아~1돌 미만)</option>
+                            <option value="toddler">토들러/회전형 (신생아~5세)</option>
+                            <option value="junior">주니어 (4세~12세)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="matrix-item">
+                    <label>🚙 우리 집 차량 크기</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-car">
+                            <option value="all">차량 상관없음</option>
+                            <option value="compact">소형/준중형 (공간 절약 필요)</option>
+                            <option value="suv">중형/SUV (예: QM6, 싼타페 - 넉넉함)</option>
+                            <option value="carnival">다둥이/카니발 (3열 장착 등)</option>
+                        </select>
+                    </div>
+                </div>
+
+              <div class="filter-group">
+                <label>🛠️ 장착/고정 방식 (내 차 호환성)</label>
+                <div class="custom-select-wrapper">
+                    <select id="filter-install">
+                        <option value="all">전체 (잘 모르겠어요)</option>
+                        <option value="isofix_leg">ISOFIX + 바닥 지지대 (일반적인 최신 차량)</option>
+                        <option value="isofix_tether">ISOFIX + 탑테더 (바닥 수납함 있는 카니발/패밀리카)</option>
+                        <option value="belt">안전벨트 고정 (ISOFIX 없는 구형 차량)</option>
+                    </select>
+                </div>
+            </div>
+
+                <div class="matrix-item">
+                    <label>🛡️ 필수 안전/편의 조건</label>
+                    <div class="custom-select-wrapper">
+                        <select id="filter-safety">
+                            <option value="all">기본 안전 기준 충족</option>
+                            <option value="isize">유럽 최신 i-Size 인증 필수</option>
+                            <option value="adac">ADAC(독일) 테스트 우수 등급 필수</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="matrix-item" style="display: flex; align-items: flex-end;">
+                    <button onclick="resetFilters()" style="width: 100%; height: 50px; background: #E8F3FF; color: #1B64DA; border: 1px solid #C6DFFF; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s ease;">
+                        🔄 필터 한 번에 초기화
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
+                ❤️ 내가 찜한 카시트 모아보기
+            </button>
+        </div>
+
+        <div id="vehicle-warning-banner" class="warning-banner" style="display: none;"></div>
+
+        <div id="carseat-result-area"></div>
+
+        <div class="legal-footer">
+            <strong>※ 면책 조항</strong><br>
+            본 서비스의 차량 호환성 및 안전 스펙 정보는 제조사 기준에 따르며, 차종의 연식이나 실내 옵션에 따라 미세한 차이가 있을 수 있습니다. 구매 전 반드시 확인하시기 바랍니다.<br><br>
+            <strong>※ 쿠팡 파트너스 안내</strong><br>
+            이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+        </div>
+
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

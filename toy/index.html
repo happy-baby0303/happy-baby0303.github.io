@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>육아메이트 AI - 장난감</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+</head>
+<body>
+    <!-- 글로벌 헤더 -->
+    <div class="global-header">
+        <div class="header-left">← 홈</div>
+        <div class="header-center">육아메이트 AI</div>
+        <div class="header-right"><span class="pro-badge">PRO V15.5</span></div>
+    </div>
+
+    <!-- 5대장 완벽 정렬 GNB 메뉴 -->
+    <div class="gnb-wrapper">
+        <div class="gnb-menu">
+            <a href="../stroller/index.html" class="gnb-item">🛒 유모차</a>
+            <a href="../carseat/index.html" class="gnb-item">💺 카시트</a>
+            <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
+            <a href="../food/index.html" class="gnb-item">🥣 이유식</a>
+            <a href="index.html" class="gnb-item active">🧸 장난감</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="hero-title">
+            <h2>내 상황을 맞추는 <span class="highlight">AI 장난감 센서</span></h2>
+            <p class="subtitle">단순 장난감이 아닙니다. 엄마의 시간을 벌어주는 생존템입니다.</p>
+        </div>
+
+        <div id="auto-sync-banner" class="sync-banner"></div>
+
+        <!-- 🚨 부모 생존 SOS 테마 (다크 패널) -->
+        <div class="sos-theme-panel">
+            <div class="panel-header">🚨 엄마아빠 SOS 긴급 처방전</div>
+            <div class="theme-scroll-wrapper" id="theme-filters">
+                <button class="theme-card" data-theme="sos-meal">
+                    <div class="theme-emoji">🍚</div>
+                    <div class="theme-text">엄마 밥 먹을 시간<br><b>20분 벌어주는 템</b></div>
+                </button>
+                <button class="theme-card" data-theme="sos-sleep">
+                    <div class="theme-emoji">⚡</div>
+                    <div class="theme-text">오늘 밤 기절 보장<br><b>체력 완전 방전템</b></div>
+                </button>
+                <button class="theme-card" data-theme="sos-out">
+                    <div class="theme-emoji">🚗</div>
+                    <div class="theme-text">식당/카시트<br><b>절대 얌전 보장템</b></div>
+                </button>
+                <button class="theme-card" data-theme="sos-shower">
+                    <div class="theme-emoji">🚿</div>
+                    <div class="theme-text">엄마 씻을 시간<br><b>안전 화장실 보장템</b></div>
+                </button>
+            </div>
+            <button class="btn-secondary" onclick="toggleFavView()" id="btn-show-fav" style="margin-top: 20px; width: 100%;">❤️ 내가 찜한 장난감 모아보기</button>
+        </div>
+
+        <!-- 👶 발달 마일스톤 칩 필터 -->
+        <div class="milestone-panel">
+            <div class="panel-header-dark">👶 우리 아기 현재 발달 상태는?</div>
+            <div class="chip-group" id="milestone-filters">
+                <button class="ms-chip active" data-milestone="all">전체보기</button>
+                <button class="ms-chip" data-milestone="tummy">🍼 터미타임 지옥</button>
+                <button class="ms-chip" data-milestone="flip">🔄 엎드려 뒤집기</button>
+                <button class="ms-chip" data-milestone="crawl">🏃 배밀이/기어가기</button>
+                <button class="ms-chip" data-milestone="stand">🧗 잡고 일어서기</button>
+            </div>
+        </div>
+
+        <!-- 결과 리스트 -->
+        <div id="toy-result-area"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
