@@ -276,26 +276,27 @@ if (!Kakao.isInitialized()) {
 }
 
 function shareToHusband(recipeName, ingredients) {
+    // 첫 번째 핵심 식재료 추출 (예: "소고기 20g, 애호박 10g" -> "소고기")
     let firstIngredient = ingredients.split(',')[0].replace(/[0-9].*$/, '').trim();
-    const myCoupangLink = "https://link.coupang.com/a/eEtXJsuJxc"; 
+    
+    // 🚀 대표님이 발급받으신 로켓프레시 전용 링크 적용 완료!
+    const myCoupangLink = "https://link.coupang.com/a/eH5RAg1h2y"; 
     
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-            // 💡 1. 넉넉한 제목 영역에 메뉴 이름과 애교 멘트를 두 줄로 몰아넣습니다!
             title: `여보! 낼 맘마는 [${recipeName}]야 👶❤️\n퇴근길 픽업이나 로켓프레시 부탁해 🥰`,
-            
-            // 💡 2. 설명 영역은 오직 재료 리스트만 넣어서 절대 잘리지 않게 공간 확보!
             description: `🛒 필요 식재료:\n${ingredients}`, 
             
-            imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
+            // 💡 썸네일 이미지 경로도 카시트/유모차가 아닌 이유식(food) 폴더로 수정했습니다!
+            imageUrl: 'https://happy-baby0303.github.io/baby-master/food/og-image.png',
+            
             link: { mobileWebUrl: myCoupangLink, webUrl: myCoupangLink },
         },
         buttons: [
-            // 💡 3. 버튼 1: 프레시 주문 버튼 (제일 급한 메인 재료)
+            // 남편이 누르면 바로 로켓프레시 홈으로 이동하여 파트너스 수익 창출!
             { title: `🚀 '${firstIngredient}' 로켓프레시 주문`, link: { mobileWebUrl: myCoupangLink, webUrl: myCoupangLink } },
-            
-            // 💡 4. (보너스) 버튼 2: 남편이 헷갈릴 때를 대비해 우리 웹사이트로 다시 돌아오는 버튼 추가!
+            // 남편이 레시피를 다시 볼 수 있게 웹사이트로 유도
             { title: `📝 전체 레시피/재료 다시 보기`, link: { mobileWebUrl: 'https://happy-baby0303.github.io/food/index.html', webUrl: 'https://happy-baby0303.github.io/food/index.html' } }
         ],
     });
