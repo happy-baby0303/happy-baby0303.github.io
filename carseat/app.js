@@ -23,7 +23,7 @@ function applyGlobalBabyProfile() {
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
         banner.style.display = 'flex';
-        banner.innerHTML = `✨ <b>${babyName}</b>(생후 ${months}개월)의 안전을 위해 연령 필터가 자동 세팅되었습니다!`;
+        banner.innerHTML = `✨ <b>${babyName}</b> 아기(생후 ${months}개월)의 안전을 위해 연령 필터가 자동 세팅되었습니다!`;
     }
 }
 
