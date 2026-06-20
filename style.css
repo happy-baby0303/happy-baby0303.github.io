@@ -990,3 +990,29 @@ body.dark-mode #family-sync-banner span {
     outline: none;
     border-color: #4a90e2; /* 파란색으로 하이라이트 */
 }
+
+/* ==========================================
+   🔗 부부 연동 모달창 코드 입력칸 스타일 (메인 style.css용)
+   ========================================== */
+#partner-sync-code {
+    width: 100% !important;
+    padding: 15px !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    color: #191F28 !important; /* 진한 검정 글씨 */
+    background-color: #F8F9FA !important; /* 밝고 깨끗한 배경 */
+    border: 2px solid #E5E8EB !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+    letter-spacing: 2px !important; /* 입력하기 편하게 자간 넓힘 */
+    box-sizing: border-box !important;
+    transition: 0.2s ease !important;
+}
+
+/* 터치했을 때 (포커스) 예쁜 파란색 테두리 */
+#partner-sync-code:focus {
+    outline: none !important;
+    border-color: #3182F6 !important; 
+    background-color: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1) !important;
+}
