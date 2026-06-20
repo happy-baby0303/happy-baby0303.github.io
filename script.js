@@ -106,7 +106,9 @@ const playDB = [
 function switchTab(id, el) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
+    const targetTab = document.getElementById('tab-' + id);
+    if(targetTab) targetTab.classList.add('active');
+    
     if (el) el.classList.add('active'); 
     else { const navEl = document.getElementById('nav-' + id); if (navEl) navEl.classList.add('active'); }
     window.scrollTo(0,0);
@@ -125,12 +127,13 @@ function directGoToolbox(toolType) {
 
 function switchOutingSubTab(type) {
     document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('seg-' + type).classList.add('active');
+    const segBtn = document.getElementById('seg-' + type);
+    if(segBtn) segBtn.classList.add('active');
     currentSubTab = type;
     currentSubRegion = 'all';
     const subRow = document.getElementById('sub-filter-row');
     if (type === 'event' && currentRegion !== 'all') { generateSubFilters(currentRegion); } 
-    else { subRow.style.display = 'none'; }
+    else { if(subRow) subRow.style.display = 'none'; }
     filterPlaces();
 }
 
@@ -142,13 +145,14 @@ function switchTool(panelId, el) {
     const targetPanel = document.getElementById('panel-' + panelId);
     if(targetPanel) { targetPanel.classList.add('active'); targetPanel.style.display = 'block'; }
 
-    // 🔥 [데이터 시너지] 해열제 탭을 열 때, 성장 진단에서 쟀던 몸무게가 있으면 자동으로 입력!
+    // 🔥 [오류 수정 및 데이터 시너지 보강] 해열제 탭을 열 때 안전 검사 추가
     if (panelId === 'fever') {
         const wInput = document.getElementById('v-weight');
         const savedW = localStorage.getItem('tosil_latest_weight');
-        if (savedW && !wInput.value) {
+        // 🚨 널 체크 추가 (wInput 엘리먼트가 현재 DOM에 존재할 때만 작동하도록 방어)
+        if (wInput && savedW && !wInput.value) {
             wInput.value = savedW;
-            const label = wInput.parentElement.previousElementSibling;
+            const label = wInput.parentElement ? wInput.parentElement.previousElementSibling : null;
             if (label && !label.innerText.includes('자동입력')) {
                 label.innerHTML += ' <span style="font-size:11px; color:var(--primary); background:rgba(49,130,246,0.1); padding:2px 6px; border-radius:6px; margin-left:6px;">성장기록 자동입력</span>';
             }
@@ -206,14 +210,16 @@ function setRegion(region, btn) {
 
 function toggleAccordion(index) {
     const body = document.getElementById('acc-body-' + index), arrow = document.getElementById('acc-arrow-' + index);
-    if(body.style.display === 'block') { body.style.display = 'none'; arrow.style.transform = 'rotate(0deg)'; } 
-    else { body.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; }
+    if(!body) return;
+    if(body.style.display === 'block') { body.style.display = 'none'; if(arrow) arrow.style.transform = 'rotate(0deg)'; } 
+    else { body.style.display = 'block'; if(arrow) arrow.style.transform = 'rotate(180deg)'; }
 }
 
 function openGoogleForm() { window.open('https://forms.gle/YOUR_FORM_ID', '_blank'); }
 
 function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row'), subRegions = new Set();
+    if(!subRow) return;
     let source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)];
     source.forEach(item => {
         const addr = item.addr1 || item.addr || ''; let isMatched = false;
@@ -239,7 +245,8 @@ function setSubRegion(sub, btn) {
 }
 
 function filterPlaces() {
-    const keyword = document.getElementById('spot-search').value.toLowerCase().trim(), container = document.getElementById('hotplace-container');
+    const searchInput = document.getElementById('spot-search');
+    const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '', container = document.getElementById('hotplace-container');
     if(!container) return; container.innerHTML = ''; 
     const todayStr = new Date().toISOString().split('T')[0], todayNum = parseInt(todayStr.replace(/-/g,''));
 
@@ -293,6 +300,7 @@ function filterPlaces() {
 
 function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const body = document.getElementById('modal-dynamic-body');
+    if(!body) return;
     const naverUrl = 'https://m.map.naver.com/search2/search.naver?query=' + encodeURIComponent(query);
     const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
     const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query);
@@ -301,7 +309,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
         ? `<a href="tel:${tel}" style="flex:1; display:flex; justify-content:center; align-items:center; background:#F2F5F8; color:#4E5968; border-radius:14px; font-size:14px; font-weight:800; text-decoration:none; white-space:nowrap;">📞 전화 문의</a>` 
         : `<div style="flex:1; display:flex; justify-content:center; align-items:center; background:#F2F5F8; color:#A0AEC0; border-radius:14px; font-size:14px; font-weight:800; white-space:nowrap; opacity:0.6;">📞 번호 없음</div>`;
         
-    const modalImgHtml = (!image.startsWith('⚙️') && image) ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : '';
+    const modalImgHtml = (image && !image.startsWith('⚙️')) ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : '';
 
     body.innerHTML = `
         <div class="modal-header-wrap"><span class="modal-emoji">🌲</span><div class="modal-title">${title}</div></div>
@@ -322,11 +330,12 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
             <button class="btn-main" style="flex:1; margin-top:0; padding:16px; border-radius:14px; background:#3182F6 !important; color:#FFF !important; font-weight:900; border:none; white-space:nowrap; cursor:pointer;" onclick="closeFestivalModalForce()">확인 완료</button>
         </div>`;
         
-    document.getElementById('premium-modal').style.display = 'flex';
+    const modalWrap = document.getElementById('premium-modal');
+    if(modalWrap) modalWrap.style.display = 'flex';
 }
 
 function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
-function closeFestivalModalForce() { document.getElementById('premium-modal').style.display = 'none'; }
+function closeFestivalModalForce() { const m = document.getElementById('premium-modal'); if(m) m.style.display = 'none'; }
 
 // ==========================================
 // 🚨 3. 119 SOS 센터 모달
@@ -349,17 +358,18 @@ function showSosChecklist() {
     document.getElementById('btn-sos-back').style.display = 'flex'; 
 }
 function closeSOS(e) { if(e.target.id === 'sos-modal') closeSOSForce(); }
-function closeSOSForce() { document.getElementById('sos-modal').style.display = 'none'; }
+function closeSOSForce() { const m = document.getElementById('sos-modal'); if(m) m.style.display = 'none'; }
 
 // ==========================================
 // 4. 가계부 및 핫딜
 // ==========================================
 function toggleHistory() {
     const area = document.getElementById('history-list-area');
+    if(!area) return;
     if(area.style.display === 'block') { area.style.display = 'none'; } 
     else {
         const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
-        const items = document.getElementById('history-items'); items.innerHTML = "";
+        const items = document.getElementById('history-items'); if(!items) return; items.innerHTML = "";
         const sortedKeys = Object.keys(history).sort().reverse();
         if(sortedKeys.length === 0) { 
             items.innerHTML = `
@@ -376,7 +386,10 @@ function toggleHistory() {
 
 const formatter = new Intl.NumberFormat('ko-KR'); 
 function drawDonutChart(d, f, e) {
-    const ctx = document.getElementById('donutChart').getContext('2d');
+    const canvas = document.getElementById('donutChart');
+    // 🚨 차트 라이브러리 부재 및 엘리먼트 미발견 방어코드
+    if(!canvas || typeof Chart === 'undefined') return;
+    const ctx = canvas.getContext('2d');
     if(currentDonutChart) { currentDonutChart.destroy(); }
     currentDonutChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['기저귀/위생', '분유/이유식', '장난감/기타'], datasets: [{ data: [d, f, e], backgroundColor: ['#3182F6', '#56D364', '#FFCF54'], borderWidth: 0, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + formatter.format(c.raw) + '원'; } } } }, animation: { animateScale: true, animateRotate: true } } });
 }
@@ -390,7 +403,10 @@ function analyzeMoney() {
     localStorage.setItem('tosil_money_total', total); 
     const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {}, date = new Date(), curY = date.getFullYear(), curM = date.getMonth() + 1, monthKey = `${curY}-${curM}`;
     history[monthKey] = total; localStorage.setItem('TosilBabyApp', JSON.stringify(history));
-    document.getElementById('money-total').innerText = formatter.format(total);
+    
+    const moneyTotalEl = document.getElementById('money-total');
+    if(moneyTotalEl) moneyTotalEl.innerText = formatter.format(total);
+    
     const lastM = curM === 1 ? 12 : curM - 1, lastY = curM === 1 ? curY - 1 : curY, lastKey = `${lastY}-${lastM}`;
     let diffMsg = "";
     if(history[lastKey]) {
@@ -399,7 +415,10 @@ function analyzeMoney() {
         else if (diff < 0) diffMsg = `지난달보다 <span style="color:var(--success)">${formatter.format(Math.abs(diff))}원 아꼈어요! 🎉</span>`;
         else diffMsg = `지난달과 지출액이 완벽히 똑같습니다! ⚖️`;
     } else { diffMsg = "첫 분석 시작! 이번 달이 기준점이 됩니다."; }
-    document.getElementById('money-diff').innerHTML = diffMsg;
+    
+    const moneyDiffEl = document.getElementById('money-diff');
+    if(moneyDiffEl) moneyDiffEl.innerHTML = diffMsg;
+    
     const maxVal = Math.max(d, f, e), percent = Math.round((total / userBudget) * 100);
     let insightHtml = `<strong style="font-size:15px; display:block; margin-bottom:8px;">📊 소비 인사이트</strong>`;
     if (maxVal === d && d > 0) insightHtml += `🧻 <strong>기저귀/위생용품 비중이 1위!</strong><br>기저귀는 핫딜 뜰 때 쟁여두는 게 최고입니다!`;
@@ -408,19 +427,30 @@ function analyzeMoney() {
     if(percent > 100) insightHtml += `<br><br><span style="color:var(--danger)">🚨 <strong>주의:</strong></span> 목표 예산을 초과했습니다!`;
     else if(percent < 80) insightHtml += `<br><br><span style="color:var(--success)">🌿 <strong>우수:</strong></span> 알뜰하게 육아 중입니다!`;
     else insightHtml += `<br><br>👍 <strong>안정:</strong> 이상적인 육아 소비 패턴입니다.`;
-    document.getElementById('money-insight').innerHTML = insightHtml;
-    document.getElementById('money-avg-percent').innerText = `설정한 목표 예산 대비 ${percent}% 수준`;
-    const resBox = document.getElementById('money-result'); resBox.style.display = 'block'; resBox.style.animation = "none"; 
-    setTimeout(() => resBox.style.animation = "scaleUp 0.4s ease", 10); 
+    
+    const moneyInsightEl = document.getElementById('money-insight');
+    if(moneyInsightEl) moneyInsightEl.innerHTML = insightHtml;
+    
+    const avgPercentEl = document.getElementById('money-avg-percent');
+    if(avgPercentEl) avgPercentEl.innerText = `설정한 목표 예산 대비 ${percent}% 수준`;
+    
+    const resBox = document.getElementById('money-result'); 
+    if(resBox) {
+        resBox.style.display = 'block'; resBox.style.animation = "none"; 
+        setTimeout(() => resBox.style.animation = "scaleUp 0.4s ease", 10); 
+    }
     setTimeout(() => drawDonutChart(d, f, e), 100); updateHomeDashboard(); 
 }
+
 function resetMoneyAll() {
     if(confirm("이번 달 기록된 모든 지출 데이터를 초기화할까요?")) {
         localStorage.removeItem('tosil_money_total');
         document.getElementById('v-diaper').value = ''; document.getElementById('v-food').value = ''; document.getElementById('v-etc').value = '';
-        document.getElementById('money-result').style.display = 'none'; alert("깔끔하게 리셋되었습니다! 다시 시작해봐요 💸"); updateHomeDashboard();
+        const resBox = document.getElementById('money-result'); if(resBox) resBox.style.display = 'none'; 
+        alert("깔끔하게 리셋되었습니다! 다시 시작해봐요 💸"); updateHomeDashboard();
     }
 }
+
 function calcHotDeal() {
     const cat = document.getElementById('hd-category').value;
     const priceEl = document.getElementById('hd-total-price');
@@ -465,9 +495,8 @@ function calcHotDeal() {
     }
     
     verdictEl.style.color = "#FFF";
-    document.getElementById('hd-result').style.display = 'block';
+    const hdRes = document.getElementById('hd-result'); if(hdRes) hdRes.style.display = 'block';
     document.getElementById('hd-action-area').innerHTML = `<button class="btn-main" style="margin-top:16px; background:#3182F6 !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(49,130,246,0.2) !important; padding:14px; font-size:14.5px; font-weight:800; border-radius:12px;" onclick="sendHotdealToLedger(${price}, '${cat}')">💰 이번 지출 (${price.toLocaleString()}원) 가계부로 쏙! 보내기 〉</button>`;
-    document.getElementById('hd-result').style.display = 'block';
 }
 
 // ==========================================
@@ -489,32 +518,33 @@ function checkPillLock(type) {
 
 function selectPill(type) {
     const redBtn = document.getElementById('btn-pill-red'), blueBtn = document.getElementById('btn-pill-blue');
-    if(redBtn) { redBtn.classList.remove('active'); redBtn.id = "btn-pill-red"; }
-    if(blueBtn) { blueBtn.classList.remove('active'); blueBtn.id = "btn-pill-blue"; }
+    if(redBtn) { redBtn.classList.remove('active'); }
+    if(blueBtn) { blueBtn.classList.remove('active'); }
     
-    if (!type) { window.selectedPillType = ''; return; }
+    if (!type) { selectedPillType = ''; return; }
     const lockStatus = checkPillLock(type);
     if (lockStatus.locked) { alert('🚨 [투약 불가] ' + lockStatus.reason); return; }
-    window.selectedPillType = type;
-    if (type === 'red' && redBtn) { redBtn.classList.add('active'); redBtn.id = "btn-pill-red"; } 
-    else if (type === 'blue' && blueBtn) { blueBtn.classList.add('active'); blueBtn.id = "btn-pill-blue"; }
+    selectedPillType = type;
+    if (type === 'red' && redBtn) { redBtn.classList.add('active'); } 
+    else if (type === 'blue' && blueBtn) { blueBtn.classList.add('active'); }
 }
 
-function toggleCheck(e) { if(e.target.tagName !== 'INPUT') { const cb = document.getElementById('agree-check'); cb.checked = !cb.checked; } }
+function toggleCheck(e) { if(e.target.tagName !== 'INPUT') { const cb = document.getElementById('agree-check'); if(cb) cb.checked = !cb.checked; } }
 
 function calcFever() {
-    if(!document.getElementById('agree-check').checked) return alert("⚠️ 위험 고지 및 면책조항 동의 확인이 필요합니다.");
+    const agreeCb = document.getElementById('agree-check');
+    if(agreeCb && !agreeCb.checked) return alert("⚠️ 위험 고지 및 면책조항 동의 확인이 필요합니다.");
     const w = Number(document.getElementById('v-weight').value);
     if(!w) return alert("체중 값을 계측하여 정확히 입력하십시오.");
     document.getElementById('dose-red').innerText = `${(w*0.3).toFixed(1)} ~ ${(w*0.38).toFixed(1)}`;
     document.getElementById('dose-blue').innerText = `${(w*0.4).toFixed(1)} ~ ${(w*0.5).toFixed(1)}`;
-    document.getElementById('fever-result').style.display = 'block';
+    const fRes = document.getElementById('fever-result'); if(fRes) fRes.style.display = 'block';
 }
 
 function addFeverRecord() {
     const temp = parseFloat(document.getElementById('v-temp').value);
-    if(!temp || !window.selectedPillType) return alert('체온과 먹인 약의 종류를 모두 선택해주세요!');
-    const lockStatus = checkPillLock(window.selectedPillType);
+    if(!temp || !selectedPillType) return alert('체온 and 먹인 약 종류를 모두 올바르게 짚어주십시오!');
+    const lockStatus = checkPillLock(selectedPillType);
     if (lockStatus.locked) return alert('🚨 [저장 실패] ' + lockStatus.reason);
     
     const symptoms = [
@@ -523,14 +553,14 @@ function addFeverRecord() {
     ].filter(Boolean);
     
     const now = new Date(), timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const record = { time: timeStr, temp: temp, type: window.selectedPillType, timestamp: now.getTime(), symptoms: symptoms };
+    const record = { time: timeStr, temp: temp, type: selectedPillType, timestamp: now.getTime(), symptoms: symptoms };
     
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     records.unshift(record); if(records.length > 10) records.pop(); 
     localStorage.setItem('tosil_fever_records', JSON.stringify(records));
     
     document.getElementById('v-temp').value = '';
-    ['sym-cough','sym-vomit','sym-diarrhea','sym-nofood'].forEach(id => document.getElementById(id).checked = false);
+    ['sym-cough','sym-vomit','sym-diarrhea','sym-nofood'].forEach(id => { const cb = document.getElementById(id); if(cb) cb.checked = false; });
     selectPill(''); renderFeverTimeline(); setTimeout(updateHomeDashboard, 100); 
 }
 
@@ -544,8 +574,8 @@ function renderFeverTimeline() {
                 <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">휴~ 정말 다행이에요!</div>
                 <div style="font-size:13px; color:var(--text-s); line-height:1.5; word-break:keep-all;">우리 아기가 아프지 않아서 기록이 텅 비어있네요.<br>이 화면은 영원히 비어있기를 바랄게요! 💚</div>
             </div>`;
-        ['fever-timer-box','fever-chart-container','fever-alert'].forEach(id=>document.getElementById(id).style.display='none');
-        if(window.feverTimerInterval) clearInterval(window.feverTimerInterval);
+        ['fever-timer-box','fever-chart-container','fever-alert'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display='none'; });
+        if(feverTimerInterval) clearInterval(feverTimerInterval);
         const rB = document.getElementById('btn-pill-red'), bB = document.getElementById('btn-pill-blue');
         if(rB) { rB.style.opacity = '1'; rB.style.cursor = 'pointer'; }
         if(bB) { bB.style.opacity = '1'; bB.style.cursor = 'pointer'; }
@@ -560,9 +590,14 @@ function renderFeverTimeline() {
         html += `<div class="timeline-item" style="padding:16px 12px; border-bottom:1px solid var(--border);"><div style="display:flex; justify-content:space-between; align-items:center; font-size:14px;"><span style="font-weight:800; opacity:0.7; width:45px;">${r.time}</span><span style="flex:1; text-align:center; font-weight:800;">${pillLabel}</span><span style="${tempStyle}">${r.temp}℃</span></div>${symHtml}</div>`;
     });
     container.innerHTML = html;
-    document.getElementById('fever-chart-container').style.display = 'block'; document.getElementById('fever-timer-box').style.display = 'block'; 
-    if(typeof drawFeverChart === "function") drawFeverChart(records);
-    if(window.feverTimerInterval) clearInterval(window.feverTimerInterval); updateFeverTimer(records); window.feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
+    
+    const fChart = document.getElementById('fever-chart-container'); if(fChart) fChart.style.display = 'block';
+    const fTimer = document.getElementById('fever-timer-box'); if(fTimer) fTimer.style.display = 'block'; 
+    
+    drawFeverChart(records);
+    if(feverTimerInterval) clearInterval(feverTimerInterval); 
+    updateFeverTimer(records); 
+    feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
 }
 
 function updateFeverTimer(records) {
@@ -577,24 +612,22 @@ function updateFeverTimer(records) {
     if (redBtn) {
         if (redLock.locked) { 
             redBtn.style.opacity = '0.3'; redBtn.style.cursor = 'not-allowed'; 
-            redBtn.classList.remove('pill-ready-red'); // 잠기면 애니메이션 제거
+            redBtn.classList.remove('pill-ready-red');
         } else { 
             redBtn.style.cursor = 'pointer'; 
-            redBtn.style.opacity = (window.selectedPillType && window.selectedPillType !== 'red') ? '0.4' : '1';
-            // 🔥 복용 가능하고, 아직 약을 선택하지 않았을 때만 쿵쾅쿵쾅!
-            if(!window.selectedPillType) redBtn.classList.add('pill-ready-red');
+            redBtn.style.opacity = (selectedPillType && selectedPillType !== 'red') ? '0.4' : '1';
+            if(!selectedPillType) redBtn.classList.add('pill-ready-red');
             else redBtn.classList.remove('pill-ready-red');
         }
     }
     if (blueBtn) {
         if (blueLock.locked) { 
             blueBtn.style.opacity = '0.3'; blueBtn.style.cursor = 'not-allowed'; 
-            blueBtn.classList.remove('pill-ready-blue'); // 잠기면 애니메이션 제거
+            blueBtn.classList.remove('pill-ready-blue');
         } else { 
             blueBtn.style.cursor = 'pointer'; 
-            blueBtn.style.opacity = (window.selectedPillType && window.selectedPillType !== 'blue') ? '0.4' : '1';
-            // 🔥 복용 가능하고, 아직 약을 선택하지 않았을 때만 쿵쾅쿵쾅!
-            if(!window.selectedPillType) blueBtn.classList.add('pill-ready-blue');
+            blueBtn.style.opacity = (selectedPillType && selectedPillType !== 'blue') ? '0.4' : '1';
+            if(!selectedPillType) blueBtn.classList.add('pill-ready-blue');
             else blueBtn.classList.remove('pill-ready-blue');
         }
     }
@@ -610,15 +643,18 @@ function clearFeverRecord() {
 }
 
 function drawFeverChart(records) {
-    const ctx = document.getElementById('feverChart').getContext('2d');
-    if(window.feverChartObj) window.feverChartObj.destroy(); 
+    const canvas = document.getElementById('feverChart');
+    if(!canvas || typeof Chart === 'undefined') return; // 🚨 라이브러리 부재 방어
+    const ctx = canvas.getContext('2d');
+    if(feverChartObj) feverChartObj.destroy(); 
     const chartData = [...records].reverse(), labels = chartData.map(r => r.time), temps = chartData.map(r => r.temp);
-    window.feverChartObj = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '체온 변화 (℃)', data: temps, borderColor: '#FF4B2B', backgroundColor: 'rgba(255, 75, 43, 0.1)', borderWidth: 3, pointBackgroundColor: temps.map(t => t >= 38.5 ? '#FF4B2B' : '#3182F6'), pointRadius: 5, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 36.5, max: 40.5 }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+    feverChartObj = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '체온 변화 (℃)', data: temps, borderColor: '#FF4B2B', backgroundColor: 'rgba(255, 75, 43, 0.1)', borderWidth: 3, pointBackgroundColor: temps.map(t => t >= 38.5 ? '#FF4B2B' : '#3182F6'), pointRadius: 5, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 36.5, max: 40.5 }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
 }
 
 function downloadFeverReport() {
     const target = document.getElementById('fever-timeline');
-    if(!target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) return alert("캡처할 체온 기록이 없어요!");
+    if(!target || !target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) return alert("캡처할 체온 기록이 없어요!");
+    if(typeof html2canvas === 'undefined') return alert("이미지 변환 라이브러리가 준비되지 않았습니다.");
     html2canvas(target, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
         const link = document.createElement('a'); link.download = '우리아기_해열제_기록.png'; link.href = canvas.toDataURL("image/png"); link.click();
         alert("📸 캡처가 저장되었습니다!");
@@ -652,11 +688,12 @@ function openChecklistModal() {
     checklistData.forEach(item => { if (savedChecks[item.id]) item.checked = true; });
 
     renderChecklist();
-    document.getElementById('checklist-modal').style.display = 'flex';
+    const modal = document.getElementById('checklist-modal'); if(modal) modal.style.display = 'flex';
 }
 
 function renderChecklist() {
     const container = document.getElementById('checklist-items');
+    if(!container) return; // 🚨 널포인터 방어코드 추가
     let htmlString = "", checkedCount = 0; 
 
     checklistData.forEach((item, index) => {
@@ -688,7 +725,7 @@ function resetChecklist() {
     }
 }
 
-function closeChecklistForce() { document.getElementById('checklist-modal').style.display = 'none'; }
+function closeChecklistForce() { const m = document.getElementById('checklist-modal'); if(m) m.style.display = 'none'; }
 function closeChecklist(e) { if (e.target.id === 'checklist-modal') closeChecklistForce(); }
 
 // ==========================================
@@ -728,6 +765,8 @@ function calcHealthMaster() {
     let curWW = wwList.find(x => week >= x.w-1 && week <= x.w+1);
     let nxtWW = wwList.find(x => x.w > week);
     let st = document.getElementById('ww-status');
+    if(!st) return;
+
     if(curWW) { 
         st.style.background = 'rgba(253, 104, 104, 0.1)'; st.style.borderColor = 'rgba(253, 104, 104, 0.2)';
         st.innerHTML = `<div style="font-size:15px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> ${curWW.d}.<br>이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 엄빠의 멘탈을 꽉 잡고 아기를 많이 안아주세요!`; 
@@ -809,11 +848,11 @@ function calcHealthMaster() {
     }
     document.getElementById('growth-insight').innerText = insightMsg.replace('아기', babyNameText); 
 
-    document.getElementById('growth-result').style.display = 'block';
-    
-    setTimeout(() => {
-        document.getElementById('growth-result').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    const gRes = document.getElementById('growth-result');
+    if(gRes) {
+        gRes.style.display = 'block';
+        setTimeout(() => { gRes.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+    }
 }
 
 function promptBabyInfo() {
@@ -985,11 +1024,12 @@ function updateHomeDashboard() {
 
 function initDarkMode() {
     const savedMode = localStorage.getItem('tosil_dark_mode');
-    if (savedMode === 'on') { document.body.classList.add('dark-mode'); document.getElementById('dark-mode-toggle').innerText = '☀️'; }
+    if (savedMode === 'on') { document.body.classList.add('dark-mode'); const toggleBtn = document.getElementById('dark-mode-toggle'); if(toggleBtn) toggleBtn.innerText = '☀️'; }
 }
 function toggleDarkMode() {
     const body = document.body; body.classList.toggle('dark-mode');
-    document.getElementById('dark-mode-toggle').innerText = body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    const toggleBtn = document.getElementById('dark-mode-toggle');
+    if(toggleBtn) toggleBtn.innerText = body.classList.contains('dark-mode') ? '☀️' : '🌙';
     localStorage.setItem('tosil_dark_mode', body.classList.contains('dark-mode') ? 'on' : 'off');
 }
 
@@ -1042,7 +1082,7 @@ function renderFoodChecklist() {
     const countEl = document.getElementById('food-passed-count');
     if(countEl) {
         countEl.innerText = passedCount;
-        countEl.nextElementSibling.innerText = `/${totalCount}`;
+        if(countEl.nextElementSibling) countEl.nextElementSibling.innerText = `/${totalCount}`;
     }
 }
 
@@ -1055,14 +1095,18 @@ function toggleFoodStatus(itemName) {
     renderFoodChecklist(); 
 }
 
+// ==========================================
 // 🚨 119 SOS 모달 겹침 현상 완벽 방어 자바스크립트
+// ==========================================
 window.openSOSModal = function() {
     const modal = document.getElementById('sos-modal');
     if(!modal) return;
-    document.getElementById('sos-step-medical').style.setProperty('display', 'none', 'important');
-    document.getElementById('sos-step-cry').style.setProperty('display', 'none', 'important');
-    document.getElementById('btn-sos-back').style.setProperty('display', 'none', 'important');
-    document.getElementById('sos-step-choice').style.setProperty('display', 'block', 'important');
+    
+    const medStep = document.getElementById('sos-step-medical'); if(medStep) medStep.style.setProperty('display', 'none', 'important');
+    const cryStep = document.getElementById('sos-step-cry'); if(cryStep) cryStep.style.setProperty('display', 'none', 'important');
+    const backBtn = document.getElementById('btn-sos-back'); if(backBtn) backBtn.style.setProperty('display', 'none', 'important');
+    const choiceStep = document.getElementById('sos-step-choice'); if(choiceStep) choiceStep.style.setProperty('display', 'block', 'important');
+    
     const medBtn = document.querySelector('.sos-btn-medical');
     const cryBtn = document.querySelector('.sos-btn-cry');
     if(medBtn) medBtn.style.setProperty('display', 'flex', 'important');
@@ -1071,23 +1115,25 @@ window.openSOSModal = function() {
 };
 
 window.showSosMedical = function() { 
-    document.getElementById('sos-step-choice').style.setProperty('display', 'none', 'important');
+    const choiceStep = document.getElementById('sos-step-choice'); if(choiceStep) choiceStep.style.setProperty('display', 'none', 'important');
     const medBtn = document.querySelector('.sos-btn-medical');
     const cryBtn = document.querySelector('.sos-btn-cry');
     if(medBtn) medBtn.style.setProperty('display', 'none', 'important');
     if(cryBtn) cryBtn.style.setProperty('display', 'none', 'important');
-    document.getElementById('sos-step-medical').style.setProperty('display', 'block', 'important');
-    document.getElementById('btn-sos-back').style.setProperty('display', 'flex', 'important');
+    
+    const medStep = document.getElementById('sos-step-medical'); if(medStep) medStep.style.setProperty('display', 'block', 'important');
+    const backBtn = document.getElementById('btn-sos-back'); if(backBtn) backBtn.style.setProperty('display', 'flex', 'important');
 };
 
 window.showSosChecklist = function() { 
-    document.getElementById('sos-step-choice').style.setProperty('display', 'none', 'important');
+    const choiceStep = document.getElementById('sos-step-choice'); if(choiceStep) choiceStep.style.setProperty('display', 'none', 'important');
     const medBtn = document.querySelector('.sos-btn-medical');
     const cryBtn = document.querySelector('.sos-btn-cry');
     if(medBtn) medBtn.style.setProperty('display', 'none', 'important');
     if(cryBtn) cryBtn.style.setProperty('display', 'none', 'important');
-    document.getElementById('sos-step-cry').style.setProperty('display', 'block', 'important');
-    document.getElementById('btn-sos-back').style.setProperty('display', 'flex', 'important');
+    
+    const cryStep = document.getElementById('sos-step-cry'); if(cryStep) cryStep.style.setProperty('display', 'block', 'important');
+    const backBtn = document.getElementById('btn-sos-back'); if(backBtn) backBtn.style.setProperty('display', 'flex', 'important');
 };
 
 window.closeSOSForce = function() { 
@@ -1105,10 +1151,11 @@ function sendHotdealToLedger(price, cat) {
     if(cat === 'milk') targetId = 'v-food';
 
     const inputEl = document.getElementById(targetId);
-    const currentVal = Number(inputEl.value.replace(/,/g, '')) || 0;
-    inputEl.value = (currentVal + price).toLocaleString();
-
-    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부 [${targetId === 'v-diaper' ? '기저귀/위생' : (targetId === 'v-food' ? '식비' : '기타')}] 항목에 합산되었습니다!\n가계부 패널에서 [소비 패턴 팩트 체크]를 눌러주세요.`);
+    if(inputEl) {
+        const currentVal = Number(inputEl.value.replace(/,/g, '')) || 0;
+        inputEl.value = (currentVal + price).toLocaleString();
+        alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부 [${targetId === 'v-diaper' ? '기저귀/위생' : (targetId === 'v-food' ? '식비' : '기타')}] 항목에 합산되었습니다!\n가계부 패널에서 [소비 패턴 팩트 체크]를 눌러주세요.`);
+    }
     directGoToolbox('money');
 }
 
@@ -1116,15 +1163,14 @@ function sendHotdealToLedger(price, cat) {
 // 👨‍👩‍👧 11. 가족 실시간 연동 모달 컨트롤
 // ==========================================
 function openFamilySyncModal() {
-    document.getElementById('family-sync-modal').style.display = 'flex';
+    const m = document.getElementById('family-sync-modal'); if(m) m.style.display = 'flex';
 }
 
 function closeFamilySyncModalForce() {
-    document.getElementById('family-sync-modal').style.display = 'none';
+    const m = document.getElementById('family-sync-modal'); if(m) m.style.display = 'none';
 }
 
 function closeFamilySyncModal(e) {
-    // 팝업 바깥쪽 어두운 배경을 누르면 닫히도록 설정
     if (e.target.id === 'family-sync-modal') {
         closeFamilySyncModalForce();
     }
