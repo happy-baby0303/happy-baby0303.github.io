@@ -792,12 +792,10 @@
 딱 이 구역만 갈아 끼우고 저장하신 뒤에 화면 열어서 버튼 눌러보십시오.
 **[새로운 가족 코드 생성하기]** 누르면 `TS-XXXX` 암호가 짠! 하고 나타납니다!
 <script type="module">
-        // 1. 구글 서버에서 핵심 부품(로그인, 데이터베이스 기능) 가져오기
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        // 2. 대표님의 육아메이트 전용 마스터키
         const firebaseConfig = {
             apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
             authDomain: "happybaby-6de42.firebaseapp.com",
@@ -807,31 +805,27 @@
             appId: "1:1075311024495:web:b9212eab58802dabf9709a"
         };
 
-        // 3. 앱에 파이어베이스 시동 걸기
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // [보이지 않는 마법] 유저가 접속하면 자동으로 구글 보안 아이디를 부여합니다.
         signInAnonymously(auth).then(() => {
             console.log("🔥 파이어베이스 익명 로그인 안전하게 성공!");
         }).catch((err) => console.error("인증 실패:", err));
 
-
-        // 🚀 [마법 1] 아내가 새로운 가족 코드 생성 버튼을 누를 때 (구글 클라우드에 방 개설)
+        // 🚀 [마법 1] 아내가 새로운 가족 코드 생성 버튼을 누를 때 (사진까지 압축해서 전송!)
         async function createSyncCode() {
-            // 무작위 4자리 암호 생성
             const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
             
             try {
-                // 구글 Firestore 데이터베이스의 'families'라는 저장소에 이 코드로 문서를 생성합니다!
                 await setDoc(doc(db, "families", newCode), {
                     createdAt: new Date().toISOString(),
-                    babyName: localStorage.getItem("babyName") || "하윤이", // 내 폰에 저장된 아기 정보 백업
-                    babyBirth: localStorage.getItem("babyBirth") || "2026-03-03"
+                    babyName: localStorage.getItem("babyName") || "하윤이",
+                    babyBirth: localStorage.getItem("babyBirth") || "2026-03-03",
+                    // 🔥 핵심 추가: 폰에 저장된 아기 사진(Base64 문자열)을 구글 서버로 같이 쏜다!
+                    babyPhoto: localStorage.getItem("babyPhoto") || "" 
                 });
 
-                // 화면에 코드 보여주기
                 const codeArea = document.getElementById('my-sync-code-area');
                 if(codeArea) {
                     codeArea.style.display = 'block';
@@ -839,14 +833,14 @@
                 }
                 
                 localStorage.setItem("family_sync_code", newCode);
-                alert("우리 가족 전용 코드가 구글 실시간 서버에 등록되었습니다! 🔑\n남편분에게 카톡으로 이 코드를 복사해서 보내주세요.");
+                alert("우리 가족 전용 코드가 사진과 함께 서버에 등록되었습니다! 📸🔑\n배우자에게 카톡으로 이 코드를 보내주세요.");
             } catch (error) {
                 console.error("구글 서버 저장 실패:", error);
-                alert("데이터베이스 연결에 실패했습니다. 콘솔 창의 에러를 확인하거나 Firestore 설정을 확인해주세요.");
+                alert("데이터베이스 연결에 실패했습니다. 콘솔 창의 에러를 확인해주세요.");
             }
         }
 
-        // 🚀 [마법 2] 남편이 아내가 보낸 코드를 입력하고 연결을 누를 때 (구글 클라우드에서 데이터 매칭)
+        // 🚀 [마법 2] 남편이 코드를 입력하고 연결을 누를 때 (사진까지 싹 다 다운로드!)
         async function connectSyncCode() {
             const inputCode = document.getElementById('partner-sync-code').value.trim().toUpperCase();
             
@@ -856,24 +850,28 @@
             }
 
             try {
-                // 구글 서버에 남편이 입력한 코드가 진짜 방으로 존재하는지 확인하러 갑니다.
                 const docRef = doc(db, "families", inputCode);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const familyData = docSnap.data();
                     
-                    // 아내가 백업해둔 아기 정보를 남편 스마트폰에도 그대로 강제 주입(동기화)!
+                    // 아내 폰의 텍스트 데이터 덮어쓰기
                     localStorage.setItem("babyName", familyData.babyName);
                     localStorage.setItem("babyBirth", familyData.babyBirth);
                     localStorage.setItem("family_sync_code", inputCode);
+
+                    // 🔥 핵심 추가: 구글 서버에 아내 폰의 아기 사진이 있다면 남편 폰에도 강제 주입!
+                    if(familyData.babyPhoto) {
+                        localStorage.setItem("babyPhoto", familyData.babyPhoto);
+                    }
                     
-                    alert(`🎉 [${familyData.babyName}]네 가족 실시간 연동이 완료되었습니다!\n부부의 화면이 동기화됩니다.`);
+                    alert(`🎉 [${familyData.babyName}]네 가족 연동 완료!\n사진과 디데이가 완벽하게 동기화되었습니다! 📸`);
                     
-                    // 연동된 아기 정보(D-Day 등)를 화면에 즉시 새로고침해서 반영하기
+                    // 새로고침하면 사진이 짠! 하고 화면에 뜹니다.
                     location.reload();
                 } else {
-                    alert("❌ 구글 서버에 등록되지 않은 코드입니다. 알파벳을 다시 확인해주세요.");
+                    alert("❌ 구글 서버에 등록되지 않은 코드입니다.");
                 }
             } catch (error) {
                 console.error("구글 서버 조회 실패:", error);
@@ -881,12 +879,10 @@
             }
         }
 
-        // HTML의 버튼들이 이 함수들을 인식할 수 있도록 전역 창에 등록합니다.
         window.createSyncCode = createSyncCode;
         window.connectSyncCode = connectSyncCode;
 
-        console.log("🔥 파이어베이스 엔진 및 실시간 부부 동기화 시스템 구동 완료!");
+        console.log("🔥 사진 동기화 패치 완료! 파이어베이스 V2.0 구동 중!");
     </script>
-    <script src="script.js"></script>
 </body>
 </html>
