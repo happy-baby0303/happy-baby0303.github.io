@@ -8,23 +8,21 @@
     <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
 </head>
 <body>
-    <!-- 글로벌 헤더 -->
-    <div class="global-header">
-        <div class="header-left">← 홈</div>
-        <div class="header-center">육아메이트 AI</div>
-        <div class="header-right"><span class="pro-badge">PRO V3.0</span></div>
-    </div>
 
-    <!-- 5대장 완벽 정렬 GNB 메뉴 -->
-    <div class="gnb-wrapper">
-        <div class="gnb-menu">
+<header class="app-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <a href="../index.html" class="back-btn" style="border:none; background:transparent;">← 홈</a>
+            <h1 style="font-size: 18px; margin: 0; font-weight: 800;">육아메이트 AI</h1>
+            <div class="pro-badge">PRO V3.0</div>
+        </div>
+        <nav class="gnb-menu">
             <a href="../stroller/index.html" class="gnb-item">🛒 유모차</a>
             <a href="../carseat/index.html" class="gnb-item">💺 카시트</a>
             <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
-            <a href="../food/index.html" class="gnb-item">🥣 이유식</a>
-            <a href="index.html" class="gnb-item active">🧸 장난감</a>
-        </div>
-    </div>
+            <a href="../food/index.html" class="gnb-item">🍲 이유식</a>
+            <a href="../toy/index.html" class="gnb-item active">🧸 장난감</a>
+        </nav>
+    </header>
 
     <div class="container">
         <div class="hero-title">
@@ -71,11 +69,17 @@
             </div>
         </div>
 
-        <!-- 결과 리스트 -->
-        <div id="toy-result-area"></div>
-    </div>
+<div id="toy-result-area"></div>
+        
+        <div style="background: #F8F9FA; border: 1px solid #E5E8EB; border-radius: 12px; padding: 24px 20px; margin-top: 40px; margin-bottom: 20px; color: #8B95A1; font-size: 12.5px; line-height: 1.6; word-break: keep-all;">
+            <div style="font-weight: 700; color: #4E5968; margin-bottom: 4px;">※ 장난감 안전 면책 조항</div>
+            <div style="margin-bottom: 16px;">본 큐레이션은 일반적인 발달 단계를 기준으로 한 참고용입니다. 구매 전 반드시 제조사의 권장 사용 연령과 주의사항(작은 부품 질식 위험 등)을 직접 확인하시기 바랍니다. 보호자의 세심한 관찰이 필요하며, 부주의나 제품 결함으로 인한 사고에 대해 본 서비스는 법적 책임을 지지 않습니다.</div>
 
-    <script src="data.js"></script>
+            <div style="font-weight: 700; color: #4E5968; margin-bottom: 4px;">※ 쿠팡 파트너스 안내</div>
+            <div>이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+        </div>
+
+    </div> <script src="data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -1097,7 +1097,64 @@ function sendHotdealToLedger(price, cat) {
 }
 
 // ==========================================
-// 🚀 11. 구동 엔진
+// 👨‍👩‍👧 11. 가족 실시간 연동 모달 컨트롤
+// ==========================================
+function openFamilySyncModal() {
+    document.getElementById('family-sync-modal').style.display = 'flex';
+}
+
+function closeFamilySyncModalForce() {
+    document.getElementById('family-sync-modal').style.display = 'none';
+}
+
+function closeFamilySyncModal(e) {
+    // 팝업 바깥쪽 어두운 배경을 누르면 닫히도록 설정
+    if (e.target.id === 'family-sync-modal') {
+        closeFamilySyncModalForce();
+    }
+}
+
+// ==========================================
+// 🔥12. 파이어베이스 부부 데이터 연동 (가족 코드 시스템)
+// ==========================================
+
+// 1. [새로운 가족 코드 생성하기] 버튼 눌렀을 때
+function createSyncCode() {
+    // TS- 뒤에 무작위 영어+숫자 4자리 생성 (예: TS-7A9B)
+    const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+    
+    // 숨겨져 있던 코드 영역을 화면에 보여줌
+    const codeArea = document.getElementById('my-sync-code-area');
+    if(codeArea) {
+        codeArea.style.display = 'block';
+        codeArea.querySelector('div').innerText = newCode;
+    }
+    
+    // 내 폰(브라우저)에 이 코드를 '우리가족 암호'로 저장
+    localStorage.setItem("family_sync_code", newCode);
+    alert("우리 가족 전용 코드가 발급되었습니다! 🔑\n배우자에게 카톡으로 이 코드를 알려주세요.");
+}
+
+// 2. [배우자가 보낸 코드 입력하기] 연결 버튼 눌렀을 때
+function connectSyncCode() {
+    // 입력칸에 적힌 코드 가져오기
+    const inputCode = document.getElementById('partner-sync-code').value.trim().toUpperCase();
+    
+    if(inputCode.length < 5 || !inputCode.startsWith("TS-")) {
+        alert("🚨 올바른 가족 코드를 입력해주세요. (예: TS-7A9B)");
+        return;
+    }
+    
+    // 남편 폰에도 아내와 똑같은 '우리가족 암호' 저장
+    localStorage.setItem("family_sync_code", inputCode);
+    alert("🎉 부부 폰 연동이 완료되었습니다!\n이제 가계부와 찜한 장난감이 실시간으로 공유됩니다.");
+    
+    // 팝업창 닫기
+    closeFamilySyncModalForce();
+}
+
+// ==========================================
+// 🚀 13. 구동 엔진
 // ==========================================
 window.onload = () => { 
     loadAllExternalData(); 
