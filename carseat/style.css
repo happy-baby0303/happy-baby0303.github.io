@@ -43,3 +43,26 @@ a { text-decoration: none; color: inherit; }
 
 /* 🚀 6. 하단 면책 조항 법적 고지 (젖병과 100% 동일) */
 .legal-footer { margin-top: 40px; padding: 24px; background: #F9FAFB; border-radius: 16px; text-align: left; font-size: 12px; color: #8B95A1; line-height: 1.6; border: 1px solid #E5E8EB; }
+
+/* --- 모바일 줄바꿈 방어 및 버튼 가로 정렬 --- */
+
+/* 1. 장난감/카시트 버튼들이 세로로 길게 늘어서지 않게 (flex-wrap) */
+.filter-btns, .category-buttons, .stage-buttons {
+    display: flex;
+    flex-wrap: wrap !important; /* 공간이 모자라면 자연스럽게 다음 줄로 넘김 */
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.filter-btns button, .category-buttons button, .stage-buttons button {
+    flex: 0 0 auto !important; /* 글자 길이에 맞춰 버튼 크기 조절 */
+    white-space: nowrap !important; /* 버튼 안의 글자는 줄바꿈 금지 */
+    margin: 0 !important;
+}
+
+/* 2. 파란색 알림 배너 (이름과 나이가 찢어지지 않게) */
+.sync-banner, #auto-sync-banner {
+    word-break: keep-all !important; /* 단어가 중간에 잘리지 않게 강제 유지 */
+    line-height: 1.5 !important;
+    text-align: center !important;
+}
