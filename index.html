@@ -788,11 +788,12 @@
         </div>
     </div>
 
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+        // Representative, double check these match your Firebase Console exactly.
         const firebaseConfig = {
             apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
             authDomain: "happybaby-6de42.firebaseapp.com",
@@ -802,91 +803,144 @@
             appId: "1:1075311024495:web:b9212eab58802dabf9709a"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
+        // 🚨 CRITICAL MOBILE PATCH: Initialize Auth with explicit storage preference.
+        // This tries to ensure the session survives on Mobile Safari even with strict settings.
         const auth = getAuth(app);
 
-        signInAnonymously(auth).then(() => {
-            console.log("🔥 파이어베이스 익명 로그인 안전하게 성공!");
-        }).catch((err) => console.error("인증 실패:", err));
-
-        // 🚀 [마법 1] 아내가 새로운 가족 코드 생성 버튼을 누를 때
-        async function createSyncCode() {
-            const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
-            
+        // Define the authentication and persistence flow.
+        const initializeMobileAuth = async () => {
             try {
-                await setDoc(doc(db, "families", newCode), {
+                // Ensure persistence is set to browser local (standard, but explicit for mobile).
+                await setPersistence(auth, browserLocalPersistence);
+                
+                // Sign in anonymously.
+                await signInAnonymously(auth);
+                console.log("🔥 Firebase Mobile Auth Secured!");
+                
+            } catch (err) {
+                console.error("🚨 Mobile Firebase Auth failed. Reasons include network issues or strict browser settings.", err);
+                // On failure, we don't alert yet, but createSyncCode will catch it.
+            }
+        };
+
+        // Start the enhanced auth flow immediately.
+        initializeMobileAuth();
+
+        // ==========================================
+        // 🚀 [마법 1] 새로운 가족 코드 생성하기
+        // ==========================================
+        async function createSyncCode() {
+            // First, make sure we are actually authenticated. Mobile networks can cause delay.
+            if (!auth.currentUser) {
+                console.log("Auth not ready, retrying...");
+                await initializeMobileAuth(); // Retry auth flow
+                
+                // If still not authed after retry, network is likely the issue.
+                if(!auth.currentUser) {
+                    alert("🚨 구글 서버와 통신이 원활하지 않습니다.\n\n네트워크(LTE/Wi-Fi) 상태를 확인하고 잠시 후 다시 시도해주세요.");
+                    return;
+                }
+            }
+
+            const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+            console.log(`Creating family code: ${newCode}`);
+
+            try {
+                // Store in families/{newCode}
+                const docRef = doc(db, "families", newCode);
+                await setDoc(docRef, {
                     createdAt: new Date().toISOString(),
-                    // 🔥 육아메이트 전용 이름표(tosil_~)로 완벽하게 호출!
+                    // Sync crucial Tosil keys
                     babyName: localStorage.getItem("tosil_babyName") || "우리아기",
                     babyBirth: localStorage.getItem("tosil_startDate") || "2026-03-03",
-                    babyPhoto: localStorage.getItem("tosil_baby_photo") || "" 
+                    babyPhoto: localStorage.getItem("tosil_baby_photo") || "", // Base64 image
+                    createdBy: auth.currentUser.uid // Link to auth user
                 });
 
+                // Display code to user
                 const codeArea = document.getElementById('my-sync-code-area');
-                if(codeArea) {
+                if (codeArea) {
                     codeArea.style.display = 'block';
                     codeArea.querySelector('div').innerText = newCode;
                 }
-                
+
                 localStorage.setItem("family_sync_code", newCode);
-                alert("우리 가족 전용 코드가 사진과 함께 서버에 등록되었습니다! 📸🔑\n배우자에게 카톡으로 이 코드를 보내주세요.");
+                alert(`🎉 가족 코드가 생성되었습니다! [${newCode}]\n\n이 코드를 배우자의 폰에 입력해주세요.`);
             } catch (error) {
-                console.error("구글 서버 저장 실패:", error);
-                alert("데이터베이스 연결에 실패했습니다. 콘솔 창의 에러를 확인해주세요.");
+                console.error("Firebase CreateDoc Failed:", error);
+                // On mobile, this often means the request was blocked by browser security or network drop.
+                alert(`가족 코드 등록 실패 🚨\n\n원인: ${error.message}\n\n잠시 후 다시 시도해보세요.`);
             }
         }
 
-        // 🚀 [마법 2] 남편이 코드를 입력하고 연결을 누를 때
+        // ==========================================
+        // 🚀 [마법 2] 배우자 코드 입력하기
+        // ==========================================
         async function connectSyncCode() {
+            // Check auth state first.
+            if (!auth.currentUser) {
+                alert("🚨 서버 인증 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+                await initializeMobileAuth(); // Retry auth flow
+                return;
+            }
+
             const inputCode = document.getElementById('partner-sync-code').value.trim().toUpperCase();
-            
-            if(inputCode.length < 5 || !inputCode.startsWith("TS-")) {
+
+            // Validate format: TS-XXXX
+            if (inputCode.length < 5 || !inputCode.startsWith("TS-")) {
                 alert("🚨 올바른 가족 코드를 입력해주세요. (예: TS-7A9B)");
                 return;
             }
 
+            console.log(`Connecting to family code: ${inputCode}`);
+
             try {
+                // Fetch the family document
                 const docRef = doc(db, "families", inputCode);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const familyData = docSnap.data();
-                    
-                    // 🔥 육아메이트 전용 이름표(tosil_~)로 완벽하게 복구!
+                    console.log("Family Data found:", familyData);
+
+                    // Restoring keys specifically for Tosil Baby Mate app logic.
                     localStorage.setItem("tosil_babyName", familyData.babyName);
                     localStorage.setItem("tosil_startDate", familyData.babyBirth);
-                    
-                    // 앱 전체 화면을 깨우는 핵심 데이터 강제 주입
+
+                    // Build the main 'tosil_baby' object required by the app's standard functions.
                     localStorage.setItem("tosil_baby", JSON.stringify({
-                        name: familyData.babyName, 
+                        name: familyData.babyName,
                         birth: familyData.babyBirth
                     }));
-                    
+
                     localStorage.setItem("family_sync_code", inputCode);
 
-                    // 아기 사진이 있다면 강제로 덮어쓰기!
-                    if(familyData.babyPhoto) {
+                    // Sync the image if it exists.
+                    if (familyData.babyPhoto) {
                         localStorage.setItem("tosil_baby_photo", familyData.babyPhoto);
                     }
-                    
-                    alert(`🎉 [${familyData.babyName}]네 가족 연동 완료!\n사진과 디데이가 완벽하게 동기화되었습니다! 📸`);
-                    
-                    // 화면을 새로고침하여 데이터 완벽 반영
+
+                    alert(`🎉 [${familyData.babyName}]네 가족 연동 완료!\n\n홈 화면의 데이터가 곧 업데이트됩니다.`);
+
+                    // Forced reload to propagate all new Tosil keys throughout the app UI.
                     location.reload();
                 } else {
-                    alert("❌ 구글 서버에 등록되지 않은 코드입니다.");
+                    alert(`❌ 코드를 찾을 수 없습니다.\n\n입력한 코드를 다시 확인해주세요: [${inputCode}]`);
                 }
             } catch (error) {
-                console.error("구글 서버 조회 실패:", error);
-                alert("서버 통신 중 에러가 발생했습니다.");
+                console.error("Firebase GetDoc Failed:", error);
+                alert(`가족 조회 실패 🚨\n\n네트워크 상태를 확인해주세요.`);
             }
         }
 
+        // Expose functions globally for HTML buttons.
         window.createSyncCode = createSyncCode;
         window.connectSyncCode = connectSyncCode;
 
-        console.log("🔥 사진 동기화 변수명 오류 완벽 수정 패치 완료! (V2.1)");
     </script>
 
     <script src="script.js"></script>
