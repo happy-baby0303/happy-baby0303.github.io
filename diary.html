@@ -6,7 +6,6 @@
     <title>💌 타임캡슐</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     
-    <!-- 💡 화면 깜빡임 방지 -->
     <script>
         if (localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark-mode');
@@ -31,10 +30,14 @@
             --main-btn-text: #FFFFFF;
             --success-bg: #B9C9C5;
             --quote-color: #E8DCD5;
-            --input-bg: #FAFAFA;
+            --input-bg: #FCFAFA;
             --modal-overlay: rgba(0,0,0,0.4);
             --dad-color: #4A90E2;
             --mom-color: #E74C3C;
+            --notice-bg: #F8F9FA;
+            --notice-border: #EEF1F4;
+            --notice-text: #7A828A;
+            --notice-strong: #5B636A;
         }
 
         /* 🌙 다크 모드 색상 */
@@ -54,6 +57,10 @@
             --quote-color: #333333;
             --input-bg: #121212;
             --modal-overlay: rgba(0,0,0,0.7);
+            --notice-bg: #1A1A1A;
+            --notice-border: #333333;
+            --notice-text: #A0A0A0;
+            --notice-strong: #E0E0E0;
         }
 
         body { background: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; transition: background 0.3s, color 0.3s; }
@@ -81,11 +88,27 @@
 
         #target-badge { background: var(--main-btn-bg); color: var(--main-btn-text); padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
 
-        .quote-icon { font-size: 2rem; color: var(--quote-color); font-family: serif; line-height: 0; opacity: 0.8; }
-        .question { font-size: 1.3rem; font-weight: 800; line-height: 1.5; color: var(--text-main); word-break: keep-all; padding: 0 10px; margin: 15px 0; }
+        /* 🔥 감성 디자인 업데이트 영역 */
+        .quote-icon { font-size: 2.5rem; color: var(--badge-text); font-family: 'Times New Roman', serif; line-height: 0; opacity: 0.6; margin: 10px 0; }
+        .question { font-size: 1.25rem; font-weight: 600; line-height: 1.6; color: var(--text-main); word-break: keep-all; padding: 0 15px; margin: 10px 0 25px 0; }
         
-        /* 🔥 썸원 스타일 입력창 & 보기창 */
-        textarea { width: 100%; min-height: 140px; border: none; background: transparent; padding: 20px 10px; font-size: 1.05rem; color: var(--text-main); resize: none; outline: none; line-height: 1.8; text-align: center; border-top: 1px dashed var(--border-color); border-bottom: 1px dashed var(--border-color); margin-bottom: 20px; }
+        textarea { 
+            width: 100%; 
+            min-height: 160px; 
+            border: none; 
+            background: var(--input-bg); 
+            border-radius: 16px;
+            padding: 24px; 
+            font-size: 1.05rem; 
+            color: var(--text-main); 
+            resize: none; 
+            outline: none; 
+            line-height: 1.8; 
+            text-align: center; 
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+        }
+        textarea::placeholder { color: var(--text-sub); opacity: 0.6; }
         
         .answer-bubble { text-align: left; background: var(--input-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 18px; margin-bottom: 12px; }
         .answer-bubble.dad { border-left: 4px solid var(--dad-color); }
@@ -93,8 +116,36 @@
         .bubble-role { font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; color: var(--text-sub); }
         .bubble-text { font-size: 1.05rem; line-height: 1.6; color: var(--text-main); white-space: pre-wrap; word-break: keep-all; }
         
-        .save-btn { width: 100%; padding: 18px; background: var(--main-btn-bg); color: var(--main-btn-text); border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .save-btn { 
+            width: 100%; 
+            padding: 18px; 
+            background: var(--main-btn-bg); 
+            color: var(--main-btn-text); 
+            border: none; 
+            border-radius: 20px; 
+            font-size: 1.1rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
         .next-btn { width: 100%; padding: 18px; background: var(--badge-bg); color: var(--badge-text); border: 1px solid var(--badge-bg); border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: none; margin-top: 10px; transition: 0.2s; }
+
+        /* 🔥 연동 전 안내 문구 전용 디자인 */
+        .unlinked-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: var(--notice-bg);
+            border: 1px solid var(--notice-border);
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .unlinked-notice span { font-size: 1.1rem; margin-top: 2px; }
+        .unlinked-notice p { font-size: 0.85rem; line-height: 1.5; color: var(--notice-text); margin: 0; word-break: keep-all; }
+        .unlinked-notice strong { color: var(--notice-strong); }
 
         /* === 📖 서재 === */
         .history-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
@@ -145,29 +196,28 @@
                 <h1 class="question" id="question-text">질문을 불러오는 중입니다...</h1>
                 <div class="quote-icon quote-down">”</div>
                 
-                <!-- 🔥 썸원 스타일: 상태에 따라 바뀌는 영역 -->
                 <div id="answer-section">
                     
-                    <!-- 1. 내가 아직 입력 안 했을 때 (입력창 1개만 보임) -->
                     <div id="input-mode">
-                        <textarea id="my-answer" placeholder="나의 답변을 남겨주세요..."></textarea>
+                        <div class="unlinked-notice" id="unlinked-notice" style="display: none;">
+                            <span>💌</span>
+                            <p>아직 연동 전이라면 <strong>나만의 일기장</strong>에 보관돼요.<br>부부 연동을 마치면 새로운 공간에서 Day 1이 시작됩니다.</p>
+                        </div>
+
+                        <textarea id="my-answer" placeholder="오늘 하루도 고생 많았어요. 나의 답변을 남겨주세요..."></textarea>
                         <button class="save-btn" id="btn-submit">답변 등록하기</button>
                     </div>
 
-                    <!-- 2. 내가 입력 완료했을 때 (부부 답변 카드 보임) -->
                     <div id="view-mode" style="display: none; margin-top: 20px;">
-                        <!-- 아빠 카드 -->
                         <div class="answer-bubble dad">
                             <div class="bubble-role">👨 아빠의 답변</div>
                             <div class="bubble-text" id="view-husband-text"></div>
                         </div>
-                        <!-- 엄마 카드 -->
                         <div class="answer-bubble mom">
                             <div class="bubble-role">👩 엄마의 답변</div>
                             <div class="bubble-text" id="view-wife-text"></div>
                         </div>
                         
-                        <!-- 다음 질문 가기 -->
                         <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">➡️ 다음 질문 넘어가기</button>
                     </div>
 
@@ -180,14 +230,12 @@
         </div>
     </div>
 
-    <!-- 👩‍👧 온보딩 모달 (역할 선택 추가!) -->
     <div id="setup-modal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">반가워요! 👋</h2>
             <p style="margin-bottom: 20px; color:var(--text-sub);">아기 정보와 나의 역할을 설정해주세요.</p>
             <input type="text" id="input-baby-name" class="modal-input" placeholder="아기 이름 (예: 하윤)">
             <input type="date" id="input-start-date" class="modal-input">
-            <!-- 🔥 추가된 역할 선택창 -->
             <select id="input-user-role" class="modal-input" style="appearance: none; text-align: center;">
                 <option value="husband">👨 저는 아빠입니다</option>
                 <option value="wife">👩 저는 엄마입니다</option>
@@ -213,7 +261,6 @@
 
         let babyName = "";
         let babyBirthStr = null;
-        let myRole = "husband"; // 기본값
         let viewingDay = 1;
 
         function formatNameWithJosa(text, name) {
@@ -226,14 +273,13 @@
         function checkOnboarding() {
             const savedName = localStorage.getItem('tosil_babyName');
             const savedDate = localStorage.getItem('tosil_startDate');
-            const savedRole = localStorage.getItem('tosil_userRole'); // 역할 정보 확인
+            const savedRole = localStorage.getItem('tosil_userRole'); 
             
             if (!savedName || !savedDate || !savedRole) {
                 openSetupModal();
             } else {
                 babyName = savedName;
                 babyBirthStr = savedDate;
-                myRole = savedRole;
                 viewingDay = getFirstUnansweredDay();
                 initApp();
             }
@@ -251,7 +297,7 @@
         function saveSetup() {
             const nameVal = document.getElementById('input-baby-name').value.trim();
             const dateVal = document.getElementById('input-start-date').value;
-            const roleVal = document.getElementById('input-user-role').value; // 역할 저장
+            const roleVal = document.getElementById('input-user-role').value;
             
             if (!nameVal || !dateVal) return alert("모두 입력해주세요!");
             
@@ -316,7 +362,6 @@
                     const qData = questionDB[dbIndex];
                     const qText = formatNameWithJosa(qData.question, babyName);
                     
-                    // 저장된 양식 파싱해서 아빠/엄마 색깔 분리해서 예쁘게 보여주기
                     let ansHtml = answer.replace(/\n/g, "<br>");
                     if(answer.includes("|||")) {
                         const parts = answer.split("|||");
@@ -347,10 +392,25 @@
         checkOnboarding();
     </script>
 
-    <!-- 🔥 파이어베이스 실시간 동기화 & 썸원 로직 모듈 -->
     <script type="module">
-        import { db } from "./firebase.js";
-        import { doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
+            authDomain: "happybaby-6de42.firebaseapp.com",
+            projectId: "happybaby-6de42",
+            storageBucket: "happybaby-6de42.firebasestorage.app",
+            messagingSenderId: "1075311024495",
+            appId: "1:1075311024495:web:b9212eab58802dabf9709a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        signInAnonymously(auth).catch(() => console.log("익명로그인 무시"));
 
         let unsubscribe = null;
 
@@ -360,7 +420,20 @@
 
         function startSync() {
             const currentDay = getCurrentDay();
-            const docRef = doc(db, "hayun_diary", `day_${currentDay}`);
+            const currentRole = localStorage.getItem("tosil_userRole") || "husband";
+            const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+            
+            // 🔥 연동 코드 유무에 따라 안내 문구를 숨기거나 보여주는 로직
+            const noticeEl = document.getElementById("unlinked-notice");
+            if (noticeEl) {
+                if (syncCode !== "unlinked_local_diary") {
+                    noticeEl.style.display = "none"; // 연동되었으면 숨기기
+                } else {
+                    noticeEl.style.display = "flex"; // 연동 전이면 보여주기
+                }
+            }
+
+            const docRef = doc(db, "diary_" + syncCode, `day_${currentDay}`);
 
             if (unsubscribe) unsubscribe();
 
@@ -369,33 +442,26 @@
                 const hText = data.husbandAns || "";
                 const wText = data.wifeAns || "";
 
-                // 현재 내 역할에 맞춰서 내가 쓴 글과 상대방 글 확인
-                const myAns = (myRole === "husband") ? hText : wText;
-                const partnerAns = (myRole === "husband") ? wText : hText;
+                const myAns = (currentRole === "husband") ? hText : wText;
+                const partnerAns = (currentRole === "husband") ? wText : hText;
 
                 if (myAns) {
-                    // 💡 내가 글을 썼다! -> 입력창 숨기고, 서로의 답변 카드 보여주기
                     document.getElementById("input-mode").style.display = "none";
                     document.getElementById("view-mode").style.display = "block";
 
-                    // 내 화면에 아빠/엄마 텍스트 세팅 (상대방이 안 썼으면 자물쇠 표시 🔒)
                     document.getElementById("view-husband-text").innerText = hText ? hText : "🔒 아빠의 답변을 기다리는 중입니다...";
                     document.getElementById("view-husband-text").style.opacity = hText ? "1" : "0.5";
                     
                     document.getElementById("view-wife-text").innerText = wText ? wText : "🔒 엄마의 답변을 기다리는 중입니다...";
                     document.getElementById("view-wife-text").style.opacity = wText ? "1" : "0.5";
 
-                    // 둘 다 작성 완료 시 -> '다음 버튼' 활성화 & 모아보기용 로컬 저장
                     if (hText && wText) {
                         document.getElementById("next-btn").style.display = "block";
-                        // 모아보기용 구분자(|||) 넣어서 저장
                         localStorage.setItem(`day_${currentDay}_answer`, `${hText}|||${wText}`);
                     } else {
                         document.getElementById("next-btn").style.display = "none";
                     }
-
                 } else {
-                    // 💡 내가 아직 안 썼다! -> 입력창 활성화 (상대방 글 못봄)
                     document.getElementById("input-mode").style.display = "block";
                     document.getElementById("view-mode").style.display = "none";
                     document.getElementById("my-answer").value = "";
@@ -403,28 +469,27 @@
             });
         }
 
-        // [답변 등록하기] 버튼 클릭
         document.getElementById("btn-submit").addEventListener("click", async () => {
             const ans = document.getElementById("my-answer").value.trim();
             if(!ans) return alert("마음을 한 줄이라도 남겨주세요! 🥺");
 
-            const docRef = doc(db, "hayun_diary", `day_${getCurrentDay()}`);
+            const currentRole = localStorage.getItem("tosil_userRole") || "husband";
+            const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+            const docRef = doc(db, "diary_" + syncCode, `day_${getCurrentDay()}`);
             
-            // 내 역할에 맞는 필드에만 업데이트
-            const updateData = (myRole === "husband") ? { husbandAns: ans } : { wifeAns: ans };
+            const updateData = (currentRole === "husband") ? { husbandAns: ans } : { wifeAns: ans };
             
             const btn = document.getElementById("btn-submit");
             btn.innerText = "저장 중...";
+            
             await setDoc(docRef, updateData, { merge: true });
             btn.innerText = "답변 등록하기";
         });
 
-        // 네비게이션 버튼 누를 때마다 동기화 방 다시 연결
         document.querySelector(".badge-container").addEventListener("click", () => {
             setTimeout(startSync, 50);
         });
 
-        // 앱 켜질 때 즉시 동기화 시작
         setTimeout(startSync, 100);
     </script>
 </body>
