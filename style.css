@@ -954,3 +954,39 @@ body.dark-mode .modal-navi-item {
     font-weight: 800 !important;
     margin-top: 4px !important;
 }
+
+/* 부부 동기화 배너 다크모드 */
+body.dark-mode #family-sync-banner {
+    background: rgba(49, 130, 246, 0.15) !important;
+    border: 1px solid rgba(49, 130, 246, 0.3) !important;
+}
+body.dark-mode #sync-banner-title {
+    color: #FFFFFF !important;
+}
+body.dark-mode #family-sync-banner span {
+    background: #3182F6 !important;
+    color: #FFFFFF !important;
+    box-shadow: none !important;
+}
+
+/* --- 모달창 코드 입력칸 스타일 수정 --- */
+.sync-modal input[type="text"] {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    background-color: #f8f9fa; /* 밝은 회색/흰색 배경 */
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    box-sizing: border-box;
+    text-align: center; /* 가운데 정렬 */
+    margin-bottom: 10px;
+    letter-spacing: 2px; /* 코드 입력하기 편하게 자간 넓힘 */
+}
+
+/* 입력칸 눌렀을 때(포커스) 테두리 색상 */
+.sync-modal input[type="text"]:focus {
+    outline: none;
+    border-color: #4a90e2; /* 파란색으로 하이라이트 */
+}
