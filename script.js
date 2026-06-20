@@ -871,7 +871,7 @@ function updateMainAISensors(months) {
     else txtFood.innerText = "🍽️ [완료기] 유아식 진화, 영양소 체크";
 
     if (months <= 2) txtToy.innerText = "🐣 [신생아] 꼼짝 마! 초점책/모빌";
-    else if (months <= 5) txtToy.innerText = "💪 [터미타임] 고개 가누기 연습 완구";
+    else if (months <= 5) txtToy.innerText = "💪 [터미타임] 고개 가누기 완구";
     else if (months <= 7) txtToy.innerText = "⭐ [뒤집기/앉기] 오감 발달 완구";
     else if (months <= 10) txtToy.innerText = "🌈[배밀이] 스스로 움직이는 완구";
     else txtToy.innerText = "🏃 [걸음마] 잡고 일어서는 완구";
