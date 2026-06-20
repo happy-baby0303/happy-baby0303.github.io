@@ -1,0 +1,15 @@
+{
+  "name": "토실이 육아메이트",
+  "short_name": "육아메이트",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F2F4F6",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
