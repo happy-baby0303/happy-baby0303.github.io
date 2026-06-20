@@ -6,6 +6,21 @@
     <meta name="naver-site-verification" content="ca4d9c6e9d67449206cd0c54313cc776aff61ce1" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111111">
+    <link rel="manifest" href="https://happy-baby0303.github.io/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="육아메이트">
+    <link rel="apple-touch-icon" href="https://happy-baby0303.github.io/icon-512.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                  .then(() => console.log('✅ PWA 세팅 완료!'))
+                  .catch(err => console.error('❌ PWA 세팅 실패:', err));
+            });
+        }
+    </script>
     <title>토실이 육아 메이트 | 하윤이네 오피셜 홈</title>
     <meta name="description" content="대한민국 평균 육아비 비교, 안전한 해열제 계산기, 영유아 종합 성장 진단, 전국 지자체 주말 무료 행사 및 육아지도 족보.">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
