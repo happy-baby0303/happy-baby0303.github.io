@@ -788,49 +788,12 @@
         </div>
     </div>
 
-<script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script>
+        window.createSyncCode = function() { alert("🚨 폰에서 구글 서버를 아직 불러오지 못했습니다!\n3초 후 다시 누르시거나 '새 시크릿 탭'으로 접속해주세요."); };
+        window.connectSyncCode = function() { alert("🚨 폰에서 구글 서버를 아직 불러오지 못했습니다!\n3초 후 다시 누르시거나 '새 시크릿 탭'으로 접속해주세요."); };
+    </script>
 
-        // Representative, double check these match your Firebase Console exactly.
-        const firebaseConfig = {
-            apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
-            authDomain: "happybaby-6de42.firebaseapp.com",
-            projectId: "happybaby-6de42",
-            storageBucket: "happybaby-6de42.firebasestorage.app",
-            messagingSenderId: "1075311024495",
-            appId: "1:1075311024495:web:b9212eab58802dabf9709a"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // 🚨 CRITICAL MOBILE PATCH: Initialize Auth with explicit storage preference.
-        // This tries to ensure the session survives on Mobile Safari even with strict settings.
-        const auth = getAuth(app);
-
-        // Define the authentication and persistence flow.
-        const initializeMobileAuth = async () => {
-            try {
-                // Ensure persistence is set to browser local (standard, but explicit for mobile).
-                await setPersistence(auth, browserLocalPersistence);
-                
-                // Sign in anonymously.
-                await signInAnonymously(auth);
-                console.log("🔥 Firebase Mobile Auth Secured!");
-                
-            } catch (err) {
-                console.error("🚨 Mobile Firebase Auth failed. Reasons include network issues or strict browser settings.", err);
-                // On failure, we don't alert yet, but createSyncCode will catch it.
-            }
-        };
-
-        // Start the enhanced auth flow immediately.
-        initializeMobileAuth();
-
-<script type="module">
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -848,11 +811,11 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // 쓸데없이 까다로운 검사 없이 백그라운드에서 조용히 로그인 시도
-        signInAnonymously(auth).catch((e) => console.log("Auth 지연 발생(무시됨)"));
+        signInAnonymously(auth).catch(() => console.log("익명로그인 무시"));
 
         // 🚀 [마법 1] 새로운 가족 코드 생성
         window.createSyncCode = async () => {
+            alert("⏳ 서버와 통신 중입니다. 잠시만 기다려주세요!");
             try {
                 const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
                 
@@ -872,8 +835,7 @@
                 localStorage.setItem("family_sync_code", newCode);
                 alert(`🎉 가족 코드가 생성되었습니다! [${newCode}]\n\n이 코드를 배우자의 폰에 입력해주세요.`);
             } catch (error) {
-                // 여기서 막히면 100% 카톡/네이버 인앱브라우저 방화벽 때문입니다.
-                alert("🚨 구글 서버 접속이 차단되었습니다!\n\n현재 카카오톡 내부 브라우저를 사용 중이신가요?\n우측 하단 [점 3개(⋮)]를 눌러 'Safari/Chrome으로 열기'를 선택하신 후 100% 정상 작동합니다.");
+                alert("🚨 카톡이나 네이버 인앱 브라우저에서 서버를 차단했습니다!\n\n우측 하단 [점 3개(⋮)]를 눌러 'Safari/Chrome으로 열기'를 선택하신 후 다시 시도해주세요.");
             }
         };
 
@@ -886,11 +848,11 @@
                 return;
             }
 
+            alert("⏳ 코드를 확인 중입니다...");
             try {
                 const docSnap = await getDoc(doc(db, "families", inputCode));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    
                     localStorage.setItem("tosil_babyName", data.babyName);
                     localStorage.setItem("tosil_startDate", data.babyBirth);
                     localStorage.setItem("tosil_baby", JSON.stringify({ name: data.babyName, birth: data.babyBirth }));
@@ -903,11 +865,10 @@
                     alert("❌ 서버에 등록되지 않은 코드입니다. 다시 확인해주세요.");
                 }
             } catch (error) {
-                alert("🚨 구글 서버 접속이 차단되었습니다!\n\n현재 카카오톡 내부 브라우저를 사용 중이신가요?\n우측 하단 [점 3개(⋮)]를 눌러 'Safari/Chrome으로 열기'를 선택하신 후 다시 시도해주세요!");
+                alert("🚨 카톡이나 네이버 인앱 브라우저에서 서버를 차단했습니다!\n\n우측 하단 [점 3개(⋮)]를 눌러 'Safari/Chrome으로 열기'를 선택하신 후 다시 시도해주세요.");
             }
         };
     </script>
-
     <script src="script.js"></script>
 </body>
 </html>
