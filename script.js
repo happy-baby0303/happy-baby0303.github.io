@@ -853,28 +853,28 @@ function updateMainAISensors(months) {
 
     if(!txtStroller) return;
 
-    if (months <= 6) txtStroller.innerText = "👶 아직 흔들림 금물! 안전한 [디럭스형 유모차]";
-    else if (months <= 12) txtStroller.innerText = "🏃 혼자 앉기 시작할 때, 가성비 [절충형 유모차]";
-    else txtStroller.innerText = "⚡ 가볍고 신속한 외출 전용 [휴대용 유모차]";
+    if (months <= 6) txtStroller.innerText = "👶 [디럭스] 흔들림 없는 안전 승차감";
+    else if (months <= 12) txtStroller.innerText = "🏃 [절충형] 혼자 앉는 시기 가성비템";
+    else txtStroller.innerText = "⚡ [휴대용] 가볍고 신속한 외출 전용";
 
-    if (months <= 12) txtCarseat.innerText = "🛡️ 목 근육 보호! 필수 뒤보기 안전 [신생아 카시트]";
-    else txtCarseat.innerText = "🧒 앞보기 전환 완료! 몸무게 맞춤형 [토들러 카시트]";
+    if (months <= 12) txtCarseat.innerText = "🛡️ [신생아] 뒤보기 필수, 목 보호 안전";
+    else txtCarseat.innerText = "🧒 [토들러] 앞보기 전환, 체형 맞춤형";
 
-    if (months <= 3) txtBottle.innerText = "🍼 배앓이 지옥 탈출! 신생아 입구경 매칭 젖꼭지";
-    else if (months <= 6) txtBottle.innerText = "🍼 흡착 세기 증가! 3~6개월용 단계 교체 체크";
-    else txtBottle.innerText = "🥛 빨대컵 연습 돌입! 스스로 쥐고 마시는 법";
+    if (months <= 3) txtBottle.innerText = "🍼 [신생아] 배앓이 방지, 젖꼭지 매칭";
+    else if (months <= 6) txtBottle.innerText = "🍼 [3~6개월] 흡착 세기 증가, 단계 교체";
+    else txtBottle.innerText = "🥛 [6개월+] 빨대컵 연습, 스스로 마시기";
 
-    if (months < 4) txtFood.innerText = "🥣 미리 공부하는 초기 [이유식 식단 준비 가이드]";
-    else if (months <= 6) txtFood.innerText = "🥣 쌀미음 스타트! [초기 이유식] 식단 매칭";
-    else if (months <= 9) txtFood.innerText = "🥣 입자 크기 업그레이드! [중기 이유식] 재료 신호등";
-    else if (months <= 11) txtFood.innerText = "🥣 하루 세 번 미공개 전쟁! [후기 이유식] 시간표";
-    else txtFood.innerText = "🥣 유아식으로 진화! [완료기 식단] 영양소 체크";
+    if (months < 4) txtFood.innerText = "🥄 [준비기] 미리 보는 이유식 가이드";
+    else if (months <= 6) txtFood.innerText = "🌾 [초기] 쌀미음 스타트, 식단 매칭";
+    else if (months <= 9) txtFood.innerText = "🥕 [중기] 입자 업그레이드, 재료 신호등";
+    else if (months <= 11) txtFood.innerText = "🥑 [후기] 하루 세 끼, 이유식 시간표";
+    else txtFood.innerText = "🍽️ [완료기] 유아식 진화, 영양소 체크";
 
-    if (months <= 2) txtToy.innerText = "🐣 꼼짝 못하는 시기! [신생아 생존기] 초점책/모빌";
-    else if (months <= 5) txtToy.innerText = "💪 고개 가누기 연습! [터미타임 연습용] 꼬꼬맘";
-    else if (months <= 7) txtToy.innerText = "🔄 온 거실을 구르는 [엎드려 뒤집기용] 에듀테이블";
-    else if (months <= 10) txtToy.innerText = "🏃 잡으러 뛰어다니는 [배밀이/기어가기용] 깜짝볼";
-    else txtToy.innerText = "🧗 온 집안 문짝 잡고 일어서는 [걸음마보조기/러닝홈]";
+    if (months <= 2) txtToy.innerText = "🐣 [신생아] 꼼짝 마! 초점책/모빌";
+    else if (months <= 5) txtToy.innerText = "💪 [터미타임] 고개 가누기 연습용 완구";
+    else if (months <= 7) txtToy.innerText = "⭐ [뒤집기/앉기] 오감 발달 사운드 완구";
+    else if (months <= 10) txtToy.innerText = "🌈[배밀이] 스스로 움직이는 활동 완구";
+    else txtToy.innerText = "🏃 [걸음마] 잡고 일어서는 보조완구";
 }
 
 function setDefaultMainAISensors() {
