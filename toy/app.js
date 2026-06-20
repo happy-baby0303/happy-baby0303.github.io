@@ -18,7 +18,7 @@ function applyGlobalBabyProfile() {
         if (months < 0) months = 0;
 
         banner.style.display = 'flex';
-        banner.innerHTML = `✨ <b>${babyName}(생후 ${months}개월)</b>의 월령에 맞춰 AI가 매칭 센서를 조율했어요!`;
+        banner.innerHTML = `✨ <b>${babyName} 아기(생후 ${months}개월)</b>의 월령에 맞춰 AI가 매칭 센서를 조율했어요!`;
 
         if (months <= 3) autoMilestone = 'tummy';
         else if (months <= 6) autoMilestone = 'flip';
