@@ -6,7 +6,7 @@
     <title>💌 타임캡슐</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     
-    <!-- 💡 화면 깜빡임 방지: 로딩되자마자 다크모드인지 확인 -->
+    <!-- 💡 화면 깜빡임 방지 -->
     <script>
         if (localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark-mode');
@@ -33,9 +33,11 @@
             --quote-color: #E8DCD5;
             --input-bg: #FAFAFA;
             --modal-overlay: rgba(0,0,0,0.4);
+            --dad-color: #4A90E2;
+            --mom-color: #E74C3C;
         }
 
-        /* 🌙 다크 모드 색상 (index.html 연동) */
+        /* 🌙 다크 모드 색상 */
         html.dark-mode {
             --bg-color: #121212;
             --card-bg: #1E1E1E;
@@ -77,17 +79,22 @@
         .day-badge { font-size: 1.1rem; font-weight: 900; color: var(--badge-text); margin-top: 3px; }
         .nav-badge { background: var(--btn-bg); color: var(--btn-text); width: 30px; height: 30px; border-radius: 50%; font-size: 0.8rem; font-weight: 900; cursor: pointer; display: flex; justify-content: center; align-items: center; }
 
-        /* 타겟 뱃지 (남편/아내) */
         #target-badge { background: var(--main-btn-bg); color: var(--main-btn-text); padding: 2px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
 
         .quote-icon { font-size: 2rem; color: var(--quote-color); font-family: serif; line-height: 0; opacity: 0.8; }
         .question { font-size: 1.3rem; font-weight: 800; line-height: 1.5; color: var(--text-main); word-break: keep-all; padding: 0 10px; margin: 15px 0; }
         
-        textarea { width: 100%; flex-grow: 1; min-height: 160px; border: none; background: transparent; padding: 20px 10px; font-size: 1.05rem; color: var(--text-sub); resize: none; outline: none; line-height: 1.8; text-align: center; border-top: 1px dashed var(--border-color); border-bottom: 1px dashed var(--border-color); }
+        /* 🔥 썸원 스타일 입력창 & 보기창 */
+        textarea { width: 100%; min-height: 140px; border: none; background: transparent; padding: 20px 10px; font-size: 1.05rem; color: var(--text-main); resize: none; outline: none; line-height: 1.8; text-align: center; border-top: 1px dashed var(--border-color); border-bottom: 1px dashed var(--border-color); margin-bottom: 20px; }
         
-        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        .answer-bubble { text-align: left; background: var(--input-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 18px; margin-bottom: 12px; }
+        .answer-bubble.dad { border-left: 4px solid var(--dad-color); }
+        .answer-bubble.mom { border-left: 4px solid var(--mom-color); }
+        .bubble-role { font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; color: var(--text-sub); }
+        .bubble-text { font-size: 1.05rem; line-height: 1.6; color: var(--text-main); white-space: pre-wrap; word-break: keep-all; }
+        
         .save-btn { width: 100%; padding: 18px; background: var(--main-btn-bg); color: var(--main-btn-text); border: none; border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; }
-        .next-btn { width: 100%; padding: 18px; background: var(--badge-bg); color: var(--badge-text); border: 1px solid var(--badge-bg); border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: none; transition: 0.2s; }
+        .next-btn { width: 100%; padding: 18px; background: var(--badge-bg); color: var(--badge-text); border: 1px solid var(--badge-bg); border-radius: 20px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: none; margin-top: 10px; transition: 0.2s; }
 
         /* === 📖 서재 === */
         .history-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
@@ -96,7 +103,7 @@
         .history-day-label { font-size: 0.85rem; font-weight: 800; color: var(--badge-text); background: var(--badge-bg); padding: 4px 12px; border-radius: 12px; }
         .category-label { font-size: 0.8rem; font-weight: 700; color: var(--btn-text); }
         .q-text { font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin-bottom: 16px; line-height: 1.5; word-break: keep-all; }
-        .a-text { font-size: 1rem; color: var(--text-sub); line-height: 1.7; }
+        .a-text { font-size: 1rem; color: var(--text-sub); line-height: 1.7; background: var(--input-bg); padding: 15px; border-radius: 12px; margin-bottom: 8px; }
         .empty-state { text-align: center; padding: 80px 20px; color: var(--btn-text); font-size: 1.1rem; line-height: 1.6; font-weight: 600; }
 
         /* === 👩‍👧 온보딩 모달 === */
@@ -112,7 +119,6 @@
         <header class="nav-header">
             <div style="display:flex; gap:8px;">
                 <button class="home-btn" onclick="window.location.href='index.html'">❮ 홈</button>
-                <!-- 💡 다크모드 스위치 버튼 추가! -->
                 <button class="home-btn" id="dark-mode-toggle" onclick="toggleDiaryDarkMode()">🌙</button>
             </div>
             <div class="tab-group">
@@ -139,11 +145,32 @@
                 <h1 class="question" id="question-text">질문을 불러오는 중입니다...</h1>
                 <div class="quote-icon quote-down">”</div>
                 
-                <textarea id="answer-input" placeholder="이곳을 터치해 마음을 남겨주세요..."></textarea>
-                
-                <div class="btn-group">
-                    <button class="save-btn" id="save-btn">기록 저장하기</button>
-                    <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">➡️ 다음 질문 폭풍 작성하기</button>
+                <!-- 🔥 썸원 스타일: 상태에 따라 바뀌는 영역 -->
+                <div id="answer-section">
+                    
+                    <!-- 1. 내가 아직 입력 안 했을 때 (입력창 1개만 보임) -->
+                    <div id="input-mode">
+                        <textarea id="my-answer" placeholder="나의 답변을 남겨주세요..."></textarea>
+                        <button class="save-btn" id="btn-submit">답변 등록하기</button>
+                    </div>
+
+                    <!-- 2. 내가 입력 완료했을 때 (부부 답변 카드 보임) -->
+                    <div id="view-mode" style="display: none; margin-top: 20px;">
+                        <!-- 아빠 카드 -->
+                        <div class="answer-bubble dad">
+                            <div class="bubble-role">👨 아빠의 답변</div>
+                            <div class="bubble-text" id="view-husband-text"></div>
+                        </div>
+                        <!-- 엄마 카드 -->
+                        <div class="answer-bubble mom">
+                            <div class="bubble-role">👩 엄마의 답변</div>
+                            <div class="bubble-text" id="view-wife-text"></div>
+                        </div>
+                        
+                        <!-- 다음 질문 가기 -->
+                        <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">➡️ 다음 질문 넘어가기</button>
+                    </div>
+
                 </div>
             </main>
         </div>
@@ -153,21 +180,25 @@
         </div>
     </div>
 
+    <!-- 👩‍👧 온보딩 모달 (역할 선택 추가!) -->
     <div id="setup-modal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">반가워요! 👋</h2>
-            <p style="margin-bottom: 20px; color:var(--text-sub);">아기 이름과 생일을 입력해주세요.</p>
+            <p style="margin-bottom: 20px; color:var(--text-sub);">아기 정보와 나의 역할을 설정해주세요.</p>
             <input type="text" id="input-baby-name" class="modal-input" placeholder="아기 이름 (예: 하윤)">
             <input type="date" id="input-start-date" class="modal-input">
+            <!-- 🔥 추가된 역할 선택창 -->
+            <select id="input-user-role" class="modal-input" style="appearance: none; text-align: center;">
+                <option value="husband">👨 저는 아빠입니다</option>
+                <option value="wife">👩 저는 엄마입니다</option>
+            </select>
             <button class="modal-btn" onclick="saveSetup()">시작하기 ✨</button>
         </div>
     </div>
 
     <script src="data.js"></script> 
+    
     <script>
-        // ==========================================
-        // 💡 1. 다크모드 로직 (index.html과 100% 동기화)
-        // ==========================================
         window.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('darkMode') === 'true') {
                 document.getElementById('dark-mode-toggle').innerText = '☀️';
@@ -180,18 +211,14 @@
             document.getElementById('dark-mode-toggle').innerText = isDark ? '☀️' : '🌙';
         }
 
-        // ==========================================
-        // 💡 2. 다이어리 로직
-        // ==========================================
         let babyName = "";
         let babyBirthStr = null;
+        let myRole = "husband"; // 기본값
         let viewingDay = 1;
 
-        // "이/가" 완벽 해결!
         function formatNameWithJosa(text, name) {
             const lastChar = name.charCodeAt(name.length - 1);
             const hasJongseong = (lastChar - 0xAC00) % 28 > 0;
-            // 받침 있으면 무조건 '이'를 붙여버림 (하윤 -> 하윤이)
             const processedName = hasJongseong ? name + "이" : name;
             return text.replace(/{babyName}/g, processedName);
         }
@@ -199,18 +226,21 @@
         function checkOnboarding() {
             const savedName = localStorage.getItem('tosil_babyName');
             const savedDate = localStorage.getItem('tosil_startDate');
-            if (!savedName || !savedDate) {
+            const savedRole = localStorage.getItem('tosil_userRole'); // 역할 정보 확인
+            
+            if (!savedName || !savedDate || !savedRole) {
                 openSetupModal();
             } else {
                 babyName = savedName;
                 babyBirthStr = savedDate;
+                myRole = savedRole;
                 viewingDay = getFirstUnansweredDay();
                 initApp();
             }
         }
 
         function getFirstUnansweredDay() {
-            for (let i = 1; i <= questionDB.length; i++) {
+            for (let i = 1; i <= 2000; i++) {
                 if (!localStorage.getItem(`day_${i}_answer`)) return i;
             }
             return 1;
@@ -221,10 +251,13 @@
         function saveSetup() {
             const nameVal = document.getElementById('input-baby-name').value.trim();
             const dateVal = document.getElementById('input-start-date').value;
+            const roleVal = document.getElementById('input-user-role').value; // 역할 저장
+            
             if (!nameVal || !dateVal) return alert("모두 입력해주세요!");
             
             localStorage.setItem('tosil_babyName', nameVal);
             localStorage.setItem('tosil_startDate', dateVal);
+            localStorage.setItem('tosil_userRole', roleVal);
             document.getElementById('setup-modal').style.display = 'none';
             location.reload();
         }
@@ -259,50 +292,6 @@
             document.getElementById("question-text").innerText = formatNameWithJosa(todayData.question, babyName);
             
             updatePetCharacter(); 
-
-            const answerInput = document.getElementById("answer-input");
-            const saveBtn = document.getElementById("save-btn");
-            const nextBtn = document.getElementById("next-btn");
-
-            const savedAnswer = localStorage.getItem(`day_${viewingDay}_answer`);
-            
-            if (savedAnswer) {
-                answerInput.value = savedAnswer;
-                saveBtn.innerText = "기록 수정하기";
-                saveBtn.style.background = "var(--main-btn-bg)"; 
-                nextBtn.style.display = "block"; 
-            } else {
-                answerInput.value = "";
-                saveBtn.innerText = "기록 저장하기";
-                saveBtn.style.background = "var(--main-btn-bg)"; 
-                nextBtn.style.display = "none"; 
-            }
-
-            // 글씨 치면 바로바로 수정 모드
-            answerInput.oninput = () => {
-                if (localStorage.getItem(`day_${viewingDay}_answer`)) {
-                    saveBtn.innerText = "기록 수정하기";
-                    saveBtn.style.background = "var(--main-btn-bg)";
-                }
-            };
-
-            saveBtn.onclick = () => {
-                const answer = answerInput.value.trim();
-                if (answer === "") return alert("기록을 한 줄이라도 남겨주세요! 🥺");
-                
-                localStorage.setItem(`day_${viewingDay}_answer`, answer);
-                
-                saveBtn.innerText = "✨ 저장 완료!";
-                saveBtn.style.background = "var(--success-bg)"; 
-                
-                updatePetCharacter(); 
-                nextBtn.style.display = "block"; 
-                
-                setTimeout(() => {
-                    saveBtn.innerText = "기록 수정하기";
-                    saveBtn.style.background = "var(--main-btn-bg)";
-                }, 1500);
-            };
         }
 
         function switchTab(tabName) {
@@ -327,6 +316,16 @@
                     const qData = questionDB[dbIndex];
                     const qText = formatNameWithJosa(qData.question, babyName);
                     
+                    // 저장된 양식 파싱해서 아빠/엄마 색깔 분리해서 예쁘게 보여주기
+                    let ansHtml = answer.replace(/\n/g, "<br>");
+                    if(answer.includes("|||")) {
+                        const parts = answer.split("|||");
+                        ansHtml = `<div class="a-text" style="border-left: 4px solid var(--dad-color);">👨 ${parts[0]}</div>
+                                   <div class="a-text" style="border-left: 4px solid var(--mom-color);">👩 ${parts[1]}</div>`;
+                    } else {
+                        ansHtml = `<div class="a-text">${ansHtml}</div>`;
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'history-card';
                     card.innerHTML = `
@@ -335,17 +334,98 @@
                             <span class="category-label">${qData.target || "가족"} | ${qData.category}</span>
                         </div>
                         <p class="q-text">Q. ${qText}</p>
-                        <div class="a-text">${answer.replace(/\n/g, "<br>")}</div>
+                        ${ansHtml}
                     `;
                     container.prepend(card); 
                 }
             }
             if (!hasRecord) {
-                container.innerHTML = `<div class="empty-state">🌱<br>아직 저장된 기억이 없어요!</div>`;
+                container.innerHTML = `<div class="empty-state">🌱<br>아직 완성된 기억이 없어요!</div>`;
             }
         }
 
         checkOnboarding();
+    </script>
+
+    <!-- 🔥 파이어베이스 실시간 동기화 & 썸원 로직 모듈 -->
+    <script type="module">
+        import { db } from "./firebase.js";
+        import { doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        let unsubscribe = null;
+
+        function getCurrentDay() {
+            return document.getElementById("diary-day").innerText.replace("Day ", "");
+        }
+
+        function startSync() {
+            const currentDay = getCurrentDay();
+            const docRef = doc(db, "hayun_diary", `day_${currentDay}`);
+
+            if (unsubscribe) unsubscribe();
+
+            unsubscribe = onSnapshot(docRef, (docSnap) => {
+                const data = docSnap.exists() ? docSnap.data() : {};
+                const hText = data.husbandAns || "";
+                const wText = data.wifeAns || "";
+
+                // 현재 내 역할에 맞춰서 내가 쓴 글과 상대방 글 확인
+                const myAns = (myRole === "husband") ? hText : wText;
+                const partnerAns = (myRole === "husband") ? wText : hText;
+
+                if (myAns) {
+                    // 💡 내가 글을 썼다! -> 입력창 숨기고, 서로의 답변 카드 보여주기
+                    document.getElementById("input-mode").style.display = "none";
+                    document.getElementById("view-mode").style.display = "block";
+
+                    // 내 화면에 아빠/엄마 텍스트 세팅 (상대방이 안 썼으면 자물쇠 표시 🔒)
+                    document.getElementById("view-husband-text").innerText = hText ? hText : "🔒 아빠의 답변을 기다리는 중입니다...";
+                    document.getElementById("view-husband-text").style.opacity = hText ? "1" : "0.5";
+                    
+                    document.getElementById("view-wife-text").innerText = wText ? wText : "🔒 엄마의 답변을 기다리는 중입니다...";
+                    document.getElementById("view-wife-text").style.opacity = wText ? "1" : "0.5";
+
+                    // 둘 다 작성 완료 시 -> '다음 버튼' 활성화 & 모아보기용 로컬 저장
+                    if (hText && wText) {
+                        document.getElementById("next-btn").style.display = "block";
+                        // 모아보기용 구분자(|||) 넣어서 저장
+                        localStorage.setItem(`day_${currentDay}_answer`, `${hText}|||${wText}`);
+                    } else {
+                        document.getElementById("next-btn").style.display = "none";
+                    }
+
+                } else {
+                    // 💡 내가 아직 안 썼다! -> 입력창 활성화 (상대방 글 못봄)
+                    document.getElementById("input-mode").style.display = "block";
+                    document.getElementById("view-mode").style.display = "none";
+                    document.getElementById("my-answer").value = "";
+                }
+            });
+        }
+
+        // [답변 등록하기] 버튼 클릭
+        document.getElementById("btn-submit").addEventListener("click", async () => {
+            const ans = document.getElementById("my-answer").value.trim();
+            if(!ans) return alert("마음을 한 줄이라도 남겨주세요! 🥺");
+
+            const docRef = doc(db, "hayun_diary", `day_${getCurrentDay()}`);
+            
+            // 내 역할에 맞는 필드에만 업데이트
+            const updateData = (myRole === "husband") ? { husbandAns: ans } : { wifeAns: ans };
+            
+            const btn = document.getElementById("btn-submit");
+            btn.innerText = "저장 중...";
+            await setDoc(docRef, updateData, { merge: true });
+            btn.innerText = "답변 등록하기";
+        });
+
+        // 네비게이션 버튼 누를 때마다 동기화 방 다시 연결
+        document.querySelector(".badge-container").addEventListener("click", () => {
+            setTimeout(startSync, 50);
+        });
+
+        // 앱 켜질 때 즉시 동기화 시작
+        setTimeout(startSync, 100);
     </script>
 </body>
 </html>
