@@ -883,7 +883,7 @@ function setDefaultMainAISensors() {
         document.getElementById('main-txt-carseat').innerText = "단계별 안전 규격 카시트 큐레이션 보기";
         document.getElementById('main-txt-bottle').innerText = "배앓이 방지 젖병 및 젖꼭지 스펙 확인";
         document.getElementById('main-txt-food').innerText = "월령별 안심 이유식 레시피 및 재료 매칭";
-        document.getElementById('main-txt-toy').innerText = "부모의 자유시간 확보용 SOS 장난감 70대장";
+        document.getElementById('main-txt-toy').innerText = "부모의 자유시간 확보용 장난감";
     }
 }
 
