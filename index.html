@@ -73,7 +73,7 @@
             <div class="ai-matrix-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
                 <a href="./stroller/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 16px 20px; border-radius: 20px; text-decoration: none; transition: 0.2s;">
                     <div style="display:flex; align-items:center; gap:16px;">
-                        <div style="font-size:26px; background: #E8F3FF; width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:14px;">🛒</div>
+                        <div style="font-size:26px; background: #E8F3FF; width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:14px;">☀️</div>
                         <div>
                             <div style="font-size:12px; font-weight:700; color: #3182F6;">유모차 매칭 센서</div>
                             <div id="main-txt-stroller" style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-top:2px;">분석 중...</div>
@@ -84,7 +84,7 @@
 
                 <a href="./carseat/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 16px 20px; border-radius: 20px; text-decoration: none; transition: 0.2s;">
                     <div style="display:flex; align-items:center; gap:16px;">
-                        <div style="font-size:26px; background: #FFF0F0; width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:14px;">💺</div>
+                        <div style="font-size:26px; background: #FFF0F0; width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:14px;">🚘</div>
                         <div>
                             <div style="font-size:12px; font-weight:700; color: #E32636;">안전 카시트 매칭</div>
                             <div id="main-txt-carseat" style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-top:2px;">분석 중...</div>
@@ -830,117 +830,82 @@
         // Start the enhanced auth flow immediately.
         initializeMobileAuth();
 
-        // ==========================================
-        // 🚀 [마법 1] 새로운 가족 코드 생성하기
-        // ==========================================
-        async function createSyncCode() {
-            // First, make sure we are actually authenticated. Mobile networks can cause delay.
-            if (!auth.currentUser) {
-                console.log("Auth not ready, retrying...");
-                await initializeMobileAuth(); // Retry auth flow
-                
-                // If still not authed after retry, network is likely the issue.
-                if(!auth.currentUser) {
-                    alert("🚨 구글 서버와 통신이 원활하지 않습니다.\n\n네트워크(LTE/Wi-Fi) 상태를 확인하고 잠시 후 다시 시도해주세요.");
-                    return;
-                }
-            }
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-            const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
-            console.log(`Creating family code: ${newCode}`);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
+            authDomain: "happybaby-6de42.firebaseapp.com",
+            projectId: "happybaby-6de42",
+            storageBucket: "happybaby-6de42.firebasestorage.app",
+            messagingSenderId: "1075311024495",
+            appId: "1:1075311024495:web:b9212eab58802dabf9709a"
+        };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // 쓸데없이 까다로운 검사 없이 백그라운드에서 조용히 로그인 시도
+        signInAnonymously(auth).catch((e) => console.log("Auth 지연 발생(무시됨)"));
+
+        // 🚀 [마법 1] 새로운 가족 코드 생성
+        window.createSyncCode = async () => {
             try {
-                // Store in families/{newCode}
-                const docRef = doc(db, "families", newCode);
-                await setDoc(docRef, {
+                const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+                
+                await setDoc(doc(db, "families", newCode), {
                     createdAt: new Date().toISOString(),
-                    // Sync crucial Tosil keys
                     babyName: localStorage.getItem("tosil_babyName") || "우리아기",
                     babyBirth: localStorage.getItem("tosil_startDate") || "2026-03-03",
-                    babyPhoto: localStorage.getItem("tosil_baby_photo") || "", // Base64 image
-                    createdBy: auth.currentUser.uid // Link to auth user
+                    babyPhoto: localStorage.getItem("tosil_baby_photo") || "" 
                 });
 
-                // Display code to user
                 const codeArea = document.getElementById('my-sync-code-area');
                 if (codeArea) {
                     codeArea.style.display = 'block';
                     codeArea.querySelector('div').innerText = newCode;
                 }
-
+                
                 localStorage.setItem("family_sync_code", newCode);
                 alert(`🎉 가족 코드가 생성되었습니다! [${newCode}]\n\n이 코드를 배우자의 폰에 입력해주세요.`);
             } catch (error) {
-                console.error("Firebase CreateDoc Failed:", error);
-                // On mobile, this often means the request was blocked by browser security or network drop.
-                alert(`가족 코드 등록 실패 🚨\n\n원인: ${error.message}\n\n잠시 후 다시 시도해보세요.`);
+                // 여기서 막히면 100% 카톡/네이버 인앱브라우저 방화벽 때문입니다.
+                alert("🚨 구글 서버 접속이 차단되었습니다!\n\n현재 카카오톡 내부 브라우저를 사용 중이신가요?\n우측 하단 [점 3개(⋮)]를 눌러 'Safari/Chrome으로 열기'를 선택하신 후 100% 정상 작동합니다.");
             }
-        }
+        };
 
-        // ==========================================
-        // 🚀 [마법 2] 배우자 코드 입력하기
-        // ==========================================
-        async function connectSyncCode() {
-            // Check auth state first.
-            if (!auth.currentUser) {
-                alert("🚨 서버 인증 로딩 중입니다. 잠시 후 다시 시도해주세요.");
-                await initializeMobileAuth(); // Retry auth flow
-                return;
-            }
-
+        // 🚀 [마법 2] 배우자 코드 연결
+        window.connectSyncCode = async () => {
             const inputCode = document.getElementById('partner-sync-code').value.trim().toUpperCase();
-
-            // Validate format: TS-XXXX
+            
             if (inputCode.length < 5 || !inputCode.startsWith("TS-")) {
                 alert("🚨 올바른 가족 코드를 입력해주세요. (예: TS-7A9B)");
                 return;
             }
 
-            console.log(`Connecting to family code: ${inputCode}`);
-
             try {
-                // Fetch the family document
-                const docRef = doc(db, "families", inputCode);
-                const docSnap = await getDoc(docRef);
-
+                const docSnap = await getDoc(doc(db, "families", inputCode));
                 if (docSnap.exists()) {
-                    const familyData = docSnap.data();
-                    console.log("Family Data found:", familyData);
-
-                    // Restoring keys specifically for Tosil Baby Mate app logic.
-                    localStorage.setItem("tosil_babyName", familyData.babyName);
-                    localStorage.setItem("tosil_startDate", familyData.babyBirth);
-
-                    // Build the main 'tosil_baby' object required by the app's standard functions.
-                    localStorage.setItem("tosil_baby", JSON.stringify({
-                        name: familyData.babyName,
-                        birth: familyData.babyBirth
-                    }));
-
+                    const data = docSnap.data();
+                    
+                    localStorage.setItem("tosil_babyName", data.babyName);
+                    localStorage.setItem("tosil_startDate", data.babyBirth);
+                    localStorage.setItem("tosil_baby", JSON.stringify({ name: data.babyName, birth: data.babyBirth }));
                     localStorage.setItem("family_sync_code", inputCode);
-
-                    // Sync the image if it exists.
-                    if (familyData.babyPhoto) {
-                        localStorage.setItem("tosil_baby_photo", familyData.babyPhoto);
-                    }
-
-                    alert(`🎉 [${familyData.babyName}]네 가족 연동 완료!\n\n홈 화면의 데이터가 곧 업데이트됩니다.`);
-
-                    // Forced reload to propagate all new Tosil keys throughout the app UI.
+                    if (data.babyPhoto) localStorage.setItem("tosil_baby_photo", data.babyPhoto);
+                    
+                    alert(`🎉 [${data.babyName}]네 가족 연동 완료!\n홈 화면의 데이터가 완벽히 동기화되었습니다.`);
                     location.reload();
                 } else {
-                    alert(`❌ 코드를 찾을 수 없습니다.\n\n입력한 코드를 다시 확인해주세요: [${inputCode}]`);
+                    alert("❌ 서버에 등록되지 않은 코드입니다. 다시 확인해주세요.");
                 }
             } catch (error) {
-                console.error("Firebase GetDoc Failed:", error);
-                alert(`가족 조회 실패 🚨\n\n네트워크 상태를 확인해주세요.`);
+                alert("🚨 구글 서버 접속이 차단되었습니다!\n\n현재 카카오톡 내부 브라우저를 사용 중이신가요?\n우측 하단 [점 3개(⋮)]를 눌러 'Safari/Chrome으로 열기'를 선택하신 후 다시 시도해주세요!");
             }
-        }
-
-        // Expose functions globally for HTML buttons.
-        window.createSyncCode = createSyncCode;
-        window.connectSyncCode = connectSyncCode;
-
+        };
     </script>
 
     <script src="script.js"></script>

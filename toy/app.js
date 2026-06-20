@@ -4,6 +4,7 @@ if (!Kakao.isInitialized()) {
     Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
 }
 
+// 🚀 글로벌 데이터 자동 동기화 (모바일 글씨 찢어짐 완벽 방어 패치)
 function applyGlobalBabyProfile() {
     const birthStr = localStorage.getItem('tosil_startDate');
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
@@ -17,8 +18,14 @@ function applyGlobalBabyProfile() {
         let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
         if (months < 0) months = 0;
 
-        banner.style.display = 'flex';
-        banner.innerHTML = `✨ <b>${babyName} 아기(생후 ${months}개월)</b>의 월령에 맞춰 AI가 매칭 센서를 조율했어요!`;
+        // 🔥 핵심 수정: flex를 버리고 block으로 강제 지정, 글자 안 찢어지게 nowrap 적용
+        banner.style.display = 'block';
+        banner.style.textAlign = 'center';
+        banner.style.lineHeight = '1.6';
+        banner.style.wordBreak = 'keep-all';
+        
+        const safeText = `<span style="white-space: nowrap; display: inline-block;">${babyName} 아기(생후 ${months}개월)</span>`;
+        banner.innerHTML = `✨ <b>${safeText}</b>의 월령에 맞춰 AI가 매칭 센서를 조율했어요!`;
 
         if (months <= 3) autoMilestone = 'tummy';
         else if (months <= 6) autoMilestone = 'flip';
@@ -146,10 +153,8 @@ function generateToyHTML(toy, favs) {
                 <div style="font-size:14px; color:#333D4B;">✅ <b>자유시간:</b> 약 ${toy.freeTime} 확보</div>
             </div>
 
-            <!-- 동적 쿠팡 버튼 (링크 유무에 따라 알아서 바뀝니다) -->
             <a href="${finalLink}" target="_blank" style="display:block; width:100%; padding:14px; background:#3182F6; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; text-decoration:none;">${btnText}</a>
             
-            <!-- 남편 카톡 공유 버튼 문구 감성 자극형으로 수정 완료! -->
             <button onclick="shareToHusband(${toy.id})" style="width:100%; padding:14px; background:#FEE500; color:#3C1E1E; border:none; border-radius:10px; font-weight:900; font-size:14px; cursor:pointer; margin-top:8px;">💬 남편에게 내 '자유시간' 사달라고 톡 보내기</button>
             ${batteryHtml}
         </div>`;
@@ -159,7 +164,6 @@ function shareToHusband(id) {
     const toy = toyData.find(t => t.id === id);
     if(!toy) return;
 
-    // 카톡 공유 시에도 남편이 빈 화면을 보지 않도록 동일한 방어 로직 적용
     const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy";
     const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
     const finalLink = isFallback ? fallbackLink : toy.coupangLink;

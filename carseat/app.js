@@ -22,8 +22,15 @@ function applyGlobalBabyProfile() {
 
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
-        banner.style.display = 'flex';
-        banner.innerHTML = `✨ <b>${babyName}</b> 아기(생후 ${months}개월)의 안전을 위해 연령 필터가 자동 세팅되었습니다!`;
+        // 🔥 여기서부터가 고쳐진 부분입니다 (flex 제거, block 적용, 줄바꿈 방지)
+        banner.style.display = 'block'; 
+        banner.style.textAlign = 'center';
+        banner.style.lineHeight = '1.6';
+        banner.style.wordBreak = 'keep-all';
+        banner.style.padding = '16px';
+        
+        const safeText = `<span style="white-space: nowrap; display: inline-block; font-weight: 800;">✨ ${babyName} 아기(생후 ${months}개월)</span>`;
+        banner.innerHTML = `${safeText}의 안전을 위해 연령 필터가 자동 세팅되었습니다!`;
     }
 }
 
@@ -150,7 +157,6 @@ function generateReportHTML(item, favorites) {
         ? `<a href="${item.reportUrl}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:#3182F6; text-decoration:underline; font-weight:700;">🔗 ADAC 충돌 테스트 원문 보기 ➔</a>` 
         : '';
         
-    // 💡 구매처(purchasePlatform)에 따라 버튼 분기 처리
     let purchaseBtn = '';
     if (item.purchasePlatform === 'coupang') {
         purchaseBtn = `
@@ -166,7 +172,6 @@ function generateReportHTML(item, favorites) {
         `;
     }
 
-    // 💡 완벽하게 수정된 조건문 (데이터가 없으면 해당 줄을 출력하지 않음)
     const techSpecHTML = item.specs.sideProtection 
         ? `✅ <b>기술 스펙:</b> ${item.specs.sideProtection}<br>` 
         : ``;
@@ -229,7 +234,6 @@ function shareToHusband(id) {
     const item = carseatData.find(d => d.id === id);
     if(!item) return;
 
-    // 💡 data.js 변경에 맞춰 linkUrl로 변수명 수정 및 방어 코드 적용
     const myLink = item.linkUrl.includes("여기에") 
         ? `https://www.coupang.com/np/search?q=${encodeURIComponent(item.searchKeyword)}`
         : item.linkUrl; 

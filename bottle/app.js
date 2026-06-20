@@ -35,7 +35,7 @@ function applyGlobalBabyProfile() {
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
         banner.style.display = 'flex';
-        banner.innerHTML = `<span style="font-size:18px; margin-right:8px;">✨</span> <div><b>${babyName}</b> 아기 (생후 ${months}개월)의 월령에 맞춰 AI가 젖병 필터를 자동 세팅했어요!</div>`;
+        banner.innerHTML = `<span style="font-size:18px; margin-right:8px;">✨</span> <div><b>${babyName}</b> 아기의 (생후 ${months}개월)이 월령에 맞춰 AI가 젖병 필터를 자동 세팅했어요!</div>`;
     }
 }
 
