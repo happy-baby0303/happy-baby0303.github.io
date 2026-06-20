@@ -575,12 +575,28 @@ function updateFeverTimer(records) {
     if (timerBlueEl) { timerBlueEl.innerText = blueLock.locked ? blueLock.reason.split('\n')[1] : "✅ 즉시 복용 가능"; timerBlueEl.style.color = blueLock.locked ? "var(--danger)" : "#2ECC71"; }
 
     if (redBtn) {
-        if (redLock.locked) { redBtn.style.opacity = '0.3'; redBtn.style.cursor = 'not-allowed'; } 
-        else { redBtn.style.cursor = 'pointer'; redBtn.style.opacity = (window.selectedPillType && window.selectedPillType !== 'red') ? '0.4' : '1'; }
+        if (redLock.locked) { 
+            redBtn.style.opacity = '0.3'; redBtn.style.cursor = 'not-allowed'; 
+            redBtn.classList.remove('pill-ready-red'); // 잠기면 애니메이션 제거
+        } else { 
+            redBtn.style.cursor = 'pointer'; 
+            redBtn.style.opacity = (window.selectedPillType && window.selectedPillType !== 'red') ? '0.4' : '1';
+            // 🔥 복용 가능하고, 아직 약을 선택하지 않았을 때만 쿵쾅쿵쾅!
+            if(!window.selectedPillType) redBtn.classList.add('pill-ready-red');
+            else redBtn.classList.remove('pill-ready-red');
+        }
     }
     if (blueBtn) {
-        if (blueLock.locked) { blueBtn.style.opacity = '0.3'; blueBtn.style.cursor = 'not-allowed'; } 
-        else { blueBtn.style.cursor = 'pointer'; blueBtn.style.opacity = (window.selectedPillType && window.selectedPillType !== 'blue') ? '0.4' : '1'; }
+        if (blueLock.locked) { 
+            blueBtn.style.opacity = '0.3'; blueBtn.style.cursor = 'not-allowed'; 
+            blueBtn.classList.remove('pill-ready-blue'); // 잠기면 애니메이션 제거
+        } else { 
+            blueBtn.style.cursor = 'pointer'; 
+            blueBtn.style.opacity = (window.selectedPillType && window.selectedPillType !== 'blue') ? '0.4' : '1';
+            // 🔥 복용 가능하고, 아직 약을 선택하지 않았을 때만 쿵쾅쿵쾅!
+            if(!window.selectedPillType) blueBtn.classList.add('pill-ready-blue');
+            else blueBtn.classList.remove('pill-ready-blue');
+        }
     }
 }
 
@@ -1112,45 +1128,6 @@ function closeFamilySyncModal(e) {
     if (e.target.id === 'family-sync-modal') {
         closeFamilySyncModalForce();
     }
-}
-
-// ==========================================
-// 🔥12. 파이어베이스 부부 데이터 연동 (가족 코드 시스템)
-// ==========================================
-
-// 1. [새로운 가족 코드 생성하기] 버튼 눌렀을 때
-function createSyncCode() {
-    // TS- 뒤에 무작위 영어+숫자 4자리 생성 (예: TS-7A9B)
-    const newCode = "TS-" + Math.random().toString(36).substr(2, 4).toUpperCase();
-    
-    // 숨겨져 있던 코드 영역을 화면에 보여줌
-    const codeArea = document.getElementById('my-sync-code-area');
-    if(codeArea) {
-        codeArea.style.display = 'block';
-        codeArea.querySelector('div').innerText = newCode;
-    }
-    
-    // 내 폰(브라우저)에 이 코드를 '우리가족 암호'로 저장
-    localStorage.setItem("family_sync_code", newCode);
-    alert("우리 가족 전용 코드가 발급되었습니다! 🔑\n배우자에게 카톡으로 이 코드를 알려주세요.");
-}
-
-// 2. [배우자가 보낸 코드 입력하기] 연결 버튼 눌렀을 때
-function connectSyncCode() {
-    // 입력칸에 적힌 코드 가져오기
-    const inputCode = document.getElementById('partner-sync-code').value.trim().toUpperCase();
-    
-    if(inputCode.length < 5 || !inputCode.startsWith("TS-")) {
-        alert("🚨 올바른 가족 코드를 입력해주세요. (예: TS-7A9B)");
-        return;
-    }
-    
-    // 남편 폰에도 아내와 똑같은 '우리가족 암호' 저장
-    localStorage.setItem("family_sync_code", inputCode);
-    alert("🎉 부부 폰 연동이 완료되었습니다!\n이제 가계부와 찜한 장난감이 실시간으로 공유됩니다.");
-    
-    // 팝업창 닫기
-    closeFamilySyncModalForce();
 }
 
 // ==========================================

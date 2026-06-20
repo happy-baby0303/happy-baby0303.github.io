@@ -1016,3 +1016,30 @@ body.dark-mode #family-sync-banner span {
     background-color: #FFFFFF !important;
     box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1) !important;
 }
+
+/* --- 🚨 해열제 투약 가능 심장박동 애니메이션 --- */
+@keyframes heartbeatAlertRed {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.5); }
+    50% { transform: scale(1.04); box-shadow: 0 0 0 12px rgba(255, 75, 43, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+}
+
+@keyframes heartbeatAlertBlue {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(49, 130, 246, 0.5); }
+    50% { transform: scale(1.04); box-shadow: 0 0 0 12px rgba(49, 130, 246, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(49, 130, 246, 0); }
+}
+
+.pill-ready-red {
+    animation: heartbeatAlertRed 1.5s infinite !important;
+    border: 2px solid #FF4B2B !important;
+    background: #FFF0F1 !important;
+    color: #FF4B2B !important;
+}
+
+.pill-ready-blue {
+    animation: heartbeatAlertBlue 1.5s infinite !important;
+    border: 2px solid #3182F6 !important;
+    background: #E8F3FF !important;
+    color: #3182F6 !important;
+}
