@@ -510,8 +510,8 @@
 
                             <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 복용 직전 체온 (℃)</label>
                             <div style="display:flex; align-items:center; border-bottom:2px solid var(--border); padding-bottom:6px; margin-bottom:20px;">
-                                <input type="number" step="0.1" id="v-temp" placeholder="38.5" style="flex:1; width:100%; font-size:22px; font-weight:800; border:none; outline:none; background:transparent; color:var(--text-m);">
-                                <span style="font-size:18px; color:var(--text-s); font-weight:800;">℃</span>
+                                <input type="number" step="0.1" id="v-temp" placeholder="38.5" style="flex:1; width:100%; min-width:0; box-sizing:border-box; font-size:22px; font-weight:800; border:none; outline:none; background:transparent; color:var(--text-m);">
+                                <span style="font-size:18px; color:var(--text-s); font-weight:800; flex-shrink:0;">℃</span>
                             </div>
 
                             <label style="font-size:14px; font-weight:800; display:block; margin-bottom:10px; color:var(--text-m);">3. 동반 증상 <span style="font-size:12px; font-weight:600; color:var(--text-s);">(선택)</span></label>
@@ -658,17 +658,17 @@
                     <div style="display:flex; gap:12px; margin-bottom:24px;">
                         <div style="flex:1;">
                             <label style="font-size:14px; font-weight:800; margin-bottom:10px; display:block;">2. 최종 결제액</label>
-                            <input type="text" id="hd-total-price" inputmode="numeric" placeholder="예: 45,000" onkeyup="formatNum(this)" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
+                            <input type="text" id="hd-total-price" inputmode="numeric" placeholder="예: 45,000" onkeyup="formatNum(this)" style="width:100%; min-width:0; box-sizing:border-box; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
                         </div>
                         <div style="flex:1;">
                             <label style="font-size:14px; font-weight:800; margin-bottom:10px; display:block;">3. 총 수량(장/팩/통)</label>
-                            <input type="number" id="hd-count" placeholder="예: 180" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
+                            <input type="number" id="hd-count" placeholder="예: 180" style="width:100%; min-width:0; box-sizing:border-box; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
                         </div>
                     </div>
 
                     <div style="margin-bottom:24px;">
                         <label style="font-size:14px; font-weight:800; margin-bottom:10px; display:block;">4. 지난번 샀던 단가 <span style="font-size:12px; font-weight:600; color:var(--text-s);">(모르면 비워두세요)</span></label>
-                        <input type="number" id="hd-standard-price" placeholder="예: 250" style="width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
+                        <input type="number" id="hd-standard-price" placeholder="예: 250" style="width:100%; min-width:0; box-sizing:border-box; padding:14px; border-radius:12px; border:1px solid var(--border); font-weight:800; text-align:right; background:var(--bg-card); color:var(--text-m);">
                     </div>
 
                     <button class="btn-main" onclick="calcHotDeal()" style="background:#FF823A !important; box-shadow:0 6px 16px rgba(255, 130, 58, 0.2) !important;">🔍 정확한 단가 및 손익 계산하기</button>
@@ -688,52 +688,49 @@
                     <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
                         <div style="font-size: 15px; font-weight: 800; margin-bottom: 16px; color: #191F28;">➕ 큐브 추가하기</div>
                         
-                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                            <select id="cube-category" style="width: 90px; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; background: #F8F9FA; font-weight: 800; font-size: 13px;">
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px; width: 100%;">
+                            <select id="cube-category" style="width: 90px; flex-shrink: 0; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; background: #F8F9FA; font-weight: 800; font-size: 13px;">
                                 <option value="meat">🥩 고기</option>
                                 <option value="veg">🥦 채소</option>
                             </select>
-                            <input type="text" id="cube-name" placeholder="재료 이름 (예: 소고기)" style="flex:1; padding:12px; border-radius:12px; border:1px solid #E5E8EB; font-size: 13px; font-weight: 600;">
+                            <input type="text" id="cube-name" placeholder="재료 이름 (예: 소고기)" style="flex:1; min-width:0; box-sizing: border-box; padding:12px; border-radius:12px; border:1px solid #E5E8EB; font-size: 13px; font-weight: 600;">
                         </div>
                         
-                        <div style="display:flex; gap:8px; margin-bottom: 16px;">
-                            <input type="date" id="cube-date" style="flex:1; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 13px; font-weight: 600;">
-                            <input type="number" id="cube-qty" placeholder="수량" style="width: 80px; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 13px; font-weight: 600; text-align: center;">
+                        <div style="display:flex; gap:8px; margin-bottom: 16px; width: 100%;">
+                            <input type="date" id="cube-date" style="flex:1; min-width:0; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 13px; font-weight: 600;">
+                            <input type="number" id="cube-qty" placeholder="수량" style="width: 80px; flex-shrink: 0; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 13px; font-weight: 600; text-align: center;">
                         </div>
                         
-                        <button onclick="addCubeRecord()" style="width:100%; padding:14px; background:#191F28; color:#FFF; border:none; border-radius:12px; font-weight:800; font-size: 14px; cursor:pointer;">냉동실 보관</button>
+                        <button onclick="addCubeRecord()" style="width:100%; box-sizing: border-box; padding:14px; background:#191F28; color:#FFF; border:none; border-radius:12px; font-weight:800; font-size: 14px; cursor:pointer;">냉동실 보관</button>
                     </div>
 
                     <div style="font-size: 14px; font-weight: 800; margin-bottom: 12px; padding: 0 4px; color: #4E5968;">📋 현재 보관 중인 큐브</div>
                     <div id="cube-list-container" style="display:flex; flex-direction:column; gap:10px;"></div>
                 </div>
 
-                <!-- 💌 실시간 부부 육아 바통터치 패널 시스템 신설!! -->
                 <div id="panel-baton" class="panel-block" style="display:none; padding: 0 !important; background: transparent !important; margin-top: 24px;">
                     <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
                             <div style="font-size: 15px; font-weight: 800; color: #191F28;">🚨 부부 바통 터치 (SOS 심부름)</div>
                         </div>
                         
-                        <!-- 🎁 기브 앤 테이크! 보상 선택 드롭다운 신설 -->
-<div style="margin-bottom: 16px;">
-            <label style="font-size:12.5px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🎁 미션 완료 보상 (선택)</label>
-            
-            <select id="baton-reward" onchange="var customInput = document.getElementById('baton-reward-custom'); if(this.value === 'custom') { customInput.style.display = 'block'; customInput.focus(); } else { customInput.style.display = 'none'; customInput.value = ''; }" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; background: #F8F9FA; font-weight: 800; font-size: 13.5px; color:#4E5968; margin-bottom:8px;">
-                <option value="없음">선택 안 함 (순수한 사랑으로 해줌 🫶)</option>
-                <option value="💋 진한 뽀뽀 1회">💋 진한 뽀뽀 1회</option>
-                <option value="🎮 게임 2시간 자유이용권">🎮 게임 2시간 자유이용권</option>
-                <option value="🍻 시원한 맥주 & 안주 세팅">🍻 시원한 맥주 & 안주 세팅</option>
-                <option value="💆‍♂️ 전신 안마 15분">💆‍♂️ 전신 안마 15분</option>
-                <option value="💳 자유 용돈 1만원 적립">💳 자유 용돈 1만원 적립</option>
-                <option value="☕ 내일 모닝커피 쏘기">☕ 내일 모닝커피 쏘기</option>
-                <option value="custom" style="color: #3182F6;">✍️ 직접 입력하기...</option>
-            </select>
-            
-            <input type="text" id="baton-reward-custom" placeholder="원하는 보상을 당당하게 적어보세요! (예: 주말 늦잠 쿠폰)" style="display:none; width:100%; padding:12px; border-radius:12px; border:1px solid #3182F6; font-size: 13.5px; font-weight: 600; background:rgba(49, 130, 246, 0.05); color: #191F28;">
-        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-size:12.5px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🎁 미션 완료 보상 (선택)</label>
+                            
+                            <select id="baton-reward" onchange="var customInput = document.getElementById('baton-reward-custom'); if(this.value === 'custom') { customInput.style.display = 'block'; customInput.focus(); } else { customInput.style.display = 'none'; customInput.value = ''; }" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid #E5E8EB; background: #F8F9FA; font-weight: 800; font-size: 13.5px; color:#4E5968; margin-bottom:8px;">
+                                <option value="없음">선택 안 함 (순수한 사랑으로 해줌 🫶)</option>
+                                <option value="💋 진한 뽀뽀 1회">💋 진한 뽀뽀 1회</option>
+                                <option value="🎮 게임 2시간 자유이용권">🎮 게임 2시간 자유이용권</option>
+                                <option value="🍻 시원한 맥주 & 안주 세팅">🍻 시원한 맥주 & 안주 세팅</option>
+                                <option value="💆‍♂️ 전신 안마 15분">💆‍♂️ 전신 안마 15분</option>
+                                <option value="💳 자유 용돈 1만원 적립">💳 자유 용돈 1만원 적립</option>
+                                <option value="☕ 내일 모닝커피 쏘기">☕ 내일 모닝커피 쏘기</option>
+                                <option value="custom" style="color: #3182F6;">✍️ 직접 입력하기...</option>
+                            </select>
+                            
+                            <input type="text" id="baton-reward-custom" placeholder="원하는 보상을 당당하게 적어보세요! (예: 주말 늦잠 쿠폰)" style="display:none; width:100%; min-width:0; box-sizing: border-box; padding:12px; border-radius:12px; border:1px solid #3182F6; font-size: 13.5px; font-weight: 600; background:rgba(49, 130, 246, 0.05); color: #191F28;">
+                        </div>
 
-                        <!-- 퀵 요청 단축 링크 메트릭스 -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
                             <button onclick="addQuickBaton('🍼 새벽 수유 턴 대타 요청합니다!')" style="padding: 11px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; font-size: 12px; font-weight: 800; color:#4E5968; cursor: pointer; transition: 0.2s;">🍼 새벽 수유 대타</button>
                             <button onclick="addQuickBaton('🛒 퇴근길에 아기 기저귀/위생용품 장보기!')" style="padding: 11px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; font-size: 12px; font-weight: 800; color:#4E5968; cursor: pointer; transition: 0.2s;">🛒 퇴근길 장보기</button>
@@ -741,10 +738,9 @@
                             <button onclick="addQuickBaton('😴 아기 재우기 턴 교대합시다! 엄빠체인지!')" style="padding: 11px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; font-size: 12px; font-weight: 800; color:#4E5968; cursor: pointer; transition: 0.2s;">😴 아기 재우기</button>
                         </div>
 
-                        <!-- 자유 텍스트 수기 입력 폼 -->
-                        <div style="display: flex; gap: 8px;">
-                            <input type="text" id="baton-text" placeholder="부탁할 세부 미션을 입력하세요..." style="flex:1; padding:12px; border-radius:12px; border:1px solid #E5E8EB; font-size: 13px; font-weight: 600;">
-                            <button onclick="addCustomBaton()" style="padding:12px 18px; background:#3182F6; color:#FFF; border:none; border-radius:12px; font-weight:800; font-size: 13px; cursor:pointer; white-space: nowrap;">부탁하기</button>
+                        <div style="display: flex; gap: 8px; width: 100%;">
+                            <input type="text" id="baton-text" placeholder="부탁할 세부 미션을 입력하세요..." style="flex:1; min-width:0; box-sizing: border-box; padding:12px; border-radius:12px; border:1px solid #E5E8EB; font-size: 13px; font-weight: 600;">
+                            <button onclick="addCustomBaton()" style="flex-shrink: 0; box-sizing: border-box; padding:12px 18px; background:#3182F6; color:#FFF; border:none; border-radius:12px; font-weight:800; font-size: 13px; cursor:pointer; white-space: nowrap;">부탁하기</button>
                         </div>
                     </div>
 
@@ -930,7 +926,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        
+        // 🔥 핵심: 외부 JS(script.js)에서 Firebase 명령어를 쓸 수 있도록 문을 열어줌!! (먹통 원인 해결)
         window.db = db;
+        window.doc = doc;
+        window.setDoc = setDoc;
 
         signInAnonymously(auth).catch((err) => console.log("익명로그인 실패: ", err));
 
