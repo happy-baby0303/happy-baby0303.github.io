@@ -1217,7 +1217,305 @@ function closeFamilySyncModal(e) {
 }
 
 // ==========================================
-// 🚀 13. 구동 엔진 (최종 장착)
+// 🧊 [안심 큐브 냉장고 엔진] (실시간 동기화)
+// ==========================================
+// 페이지 로드 시 날짜 입력칸을 '오늘'로 자동 세팅
+document.addEventListener("DOMContentLoaded", () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('cube-date');
+    if (dateInput) dateInput.value = todayStr;
+});
+
+// 유통기한 D-Day 계산 (얼린 날로부터 14일 기준)
+function getCubeDDayText(madeDateStr) {
+    const madeDate = new Date(madeDateStr);
+    madeDate.setHours(0,0,0,0);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const expDate = new Date(madeDate);
+    expDate.setDate(expDate.getDate() + 14); // 유통기한 14일
+    
+    const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+    
+    let color = "#00B37A"; // 여유 (초록)
+    let bg = "#E6F7F2";
+    let text = `D-${diffDays}`;
+    
+    if (diffDays < 0) {
+        color = "#F04452"; // 지남 (빨강)
+        bg = "#FFF0F1";
+        text = `기한지남`;
+    } else if (diffDays <= 4) {
+        color = "#FF823A"; // 임박 (주황)
+        bg = "#FFF0E6";
+        text = `D-${diffDays} (임박)`;
+    }
+    
+    return `<span style="background:${bg}; color:${color}; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid ${color};">${text}</span>`;
+}
+
+// 큐브 추가하기
+async function addCubeRecord() {
+    const cat = document.getElementById('cube-category').value;
+    const name = document.getElementById('cube-name').value.trim();
+    const date = document.getElementById('cube-date').value;
+    const qty = parseInt(document.getElementById('cube-qty').value);
+
+    if (!name || !date || isNaN(qty) || qty <= 0) {
+        return alert("큐브 이름, 날짜, 수량을 정확히 입력해주세요!");
+    }
+
+    const newCube = {
+        id: "cube_" + new Date().getTime(),
+        cat: cat,
+        name: name,
+        date: date,
+        qty: qty,
+        timestamp: new Date().getTime()
+    };
+
+    let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
+    records.push(newCube);
+    
+    // 파이어베이스에 쏘기
+    if (typeof db !== 'undefined') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try {
+            await setDoc(doc(db, "cube_" + syncCode, "status"), { records: records });
+        } catch (e) { console.error(e); }
+    }
+
+    localStorage.setItem('tosil_cube_records', JSON.stringify(records));
+    document.getElementById('cube-name').value = '';
+    document.getElementById('cube-qty').value = '';
+    renderCubes();
+}
+
+// 큐브 1개 사용하기 (-1 차감)
+async function useCube(id) {
+    let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
+    const index = records.findIndex(r => r.id === id);
+    if (index === -1) return;
+
+    records[index].qty -= 1;
+    
+    if (records[index].qty <= 0) {
+        records.splice(index, 1); // 0개 되면 자동 삭제
+    }
+
+    if (typeof db !== 'undefined') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { await setDoc(doc(db, "cube_" + syncCode, "status"), { records: records }); } 
+        catch (e) { console.error(e); }
+    }
+
+    localStorage.setItem('tosil_cube_records', JSON.stringify(records));
+    renderCubes();
+}
+
+// 큐브 화면에 그리기
+function renderCubes() {
+    const container = document.getElementById('cube-list-container');
+    if (!container) return;
+
+    let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
+    
+    if (records.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
+                <div style="font-size:24px; margin-bottom:10px;">🌬️</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">냉동실이 텅 비어있어요!<br>이유식 재료를 얼리고 기록해보세요.</div>
+            </div>`;
+        return;
+    }
+
+    // 날짜 임박순 정렬
+    records.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let html = '';
+    records.forEach(r => {
+        const icon = r.cat === 'meat' ? '🥩' : '🥦';
+        const dDayHtml = getCubeDDayText(r.date);
+        
+        html += `
+        <div style="background:var(--bg-card); border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:24px; background:var(--bg-sub); width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">${icon}</div>
+                <div>
+                    <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:4px;">${r.name}</div>
+                    <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s);">
+                        ${dDayHtml} <span style="opacity:0.7;">(${r.date} 제조)</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:18px; font-weight:900; color:var(--primary);">${r.qty}<span style="font-size:12px; color:var(--text-s);">개</span></div>
+                <button onclick="useCube('${r.id}')" style="background:#F2F5F8; color:#4E5968; border:none; border-radius:10px; width:44px; height:44px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🥄</button>
+            </div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+window.addCubeRecord = addCubeRecord;
+window.useCube = useCube;
+
+// ==========================================
+// 💌 [부부 육아 바통터치 엔진] (실시간 동기화 + 보상 시스템)
+// ==========================================
+async function saveBatonToFirebase(records) {
+    if (typeof db !== 'undefined') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try {
+            await setDoc(doc(db, "baton_" + syncCode, "status"), { records: records });
+        } catch (e) { console.error(e); }
+    }
+    localStorage.setItem('tosil_baton_records', JSON.stringify(records));
+    renderBatonTasks();
+}
+
+async function addQuickBaton(text) {
+    const rewardSelect = document.getElementById('baton-reward');
+    const reward = rewardSelect ? rewardSelect.value : "없음";
+    await createBatonTask(text, reward);
+}
+
+async function addCustomBaton() {
+    const input = document.getElementById('baton-text');
+    const rewardSelect = document.getElementById('baton-reward');
+    if (!input || !input.value.trim()) return alert("부탁할 내용을 입력해 주세요!");
+    
+    const reward = rewardSelect ? rewardSelect.value : "없음";
+    await createBatonTask(input.value.trim(), reward);
+    
+    input.value = '';
+    if(rewardSelect) rewardSelect.value = "없음"; // 보상 선택 초기화
+}
+
+async function createBatonTask(text, reward) {
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    
+    // 중복 방지 (도배 막기)
+    const isDuplicate = records.some(r => r.text === text);
+    if (isDuplicate) {
+        alert("🚨 이미 똑같은 부탁이 대기 중입니다! (중복 입력 방지)");
+        return;
+    }
+
+    const now = new Date(), timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const newTask = {
+        id: "baton_" + now.getTime(),
+        text: text,
+        reward: reward, // 🎁 보상 데이터 저장
+        time: timeStr,
+        status: "requested",
+        timestamp: now.getTime()
+    };
+    records.unshift(newTask);
+    await saveBatonToFirebase(records);
+}
+
+async function acceptBaton(id) {
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    const idx = records.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    records[idx].status = "accepted";
+    await saveBatonToFirebase(records);
+}
+
+async function completeBaton(id) {
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    const idx = records.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    
+    const reward = records[idx].reward; // 완료 처리 전 보상 내용 빼두기
+    records.splice(idx, 1); 
+    
+    await saveBatonToFirebase(records);
+
+    // 🎁 미션 완료 팡파르 알림
+    if (reward && reward !== "없음") {
+        alert(`🎉 미션 해결 완료!\n\n약속된 보상 [${reward}]을(를) 당당하게 요구하세요! ㅋㅋㅋ 👍`);
+    } else {
+        alert("🎉 미션 해결 완료! 든든한 육아메이트 최고입니다 👍\n(다음엔 보상도 걸어달라고 딜을 해보세요!)");
+    }
+}
+
+async function cancelBaton(id) {
+    if (!confirm("이 부탁을 취소하시겠습니까?")) return;
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    const idx = records.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    
+    records.splice(idx, 1);
+    await saveBatonToFirebase(records);
+}
+
+function renderBatonTasks() {
+    const container = document.getElementById('baton-list-container');
+    if (!container) return;
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    
+    if (records.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
+                <div style="font-size:24px; margin-bottom:10px;">🕊️</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중! 🤍</div>
+            </div>`;
+        return;
+    }
+
+    let html = '';
+    records.forEach(r => {
+        let statusHtml = '';
+        let actionBtn = '';
+        
+        if (r.status === 'requested') {
+            statusHtml = `<span style="background:#FFF0F1; color:#F04452; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid #F04452;">⏳ 요청중</span>`;
+            actionBtn = `<button onclick="acceptBaton('${r.id}')" style="padding:10px 14px; background:#3182F6; color:#FFF; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;">🫡 미션접수</button>`;
+        } else if (r.status === 'accepted') {
+            statusHtml = `<span style="background:#EBF4FF; color:#3182F6; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid #3182F6;">🏃‍♂️ 처리중</span>`;
+            actionBtn = `<button onclick="completeBaton('${r.id}')" style="padding:10px 14px; background:#00B37A; color:#FFF; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap;">✅ 해결완료</button>`;
+        }
+
+        let cancelBtn = `<button onclick="cancelBaton('${r.id}')" style="padding:10px 12px; background:#F2F5F8; color:#8B95A1; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; margin-right:6px;">취소</button>`;
+
+        // 🎁 화면에 보상 뱃지 예쁘게 노출
+        let rewardHtml = '';
+        if (r.reward && r.reward !== "없음") {
+            rewardHtml = `<div style="display:inline-block; margin-top:8px; background:#FFF9E6; color:#B78103; font-size:11.5px; font-weight:800; padding:5px 10px; border-radius:8px; border:1px solid #FFE58F;">🎁 약속된 보상: ${r.reward}</div>`;
+        }
+
+        html += `
+        <div class="timeline-item" style="background:#FFFFFF; border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.01); margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                <div style="flex:1;">
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px; line-height:1.4;">${r.text}</div>
+                    <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s);">
+                        ${statusHtml} <span style="opacity:0.6;">⏱️ ${r.time}</span>
+                    </div>
+                    ${rewardHtml}
+                </div>
+            </div>
+            <div style="margin-left:12px; display:flex; align-items:center;">
+                ${cancelBtn}
+                ${actionBtn}
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+window.addQuickBaton = addQuickBaton;
+window.addCustomBaton = addCustomBaton;
+window.acceptBaton = acceptBaton;
+window.completeBaton = completeBaton;
+window.cancelBaton = cancelBaton;
+
+// ==========================================
+// 🚀 13. 구동 엔진 (최종 마스터 장착)
 // ==========================================
 window.onload = () => { 
     loadAllExternalData(); 
@@ -1247,11 +1545,25 @@ window.onload = () => {
     initQuickScrollDrag();
     renderFoodChecklist();
 
-    // 🌟 수정: 실시간 리스너가 로드된 후 데이터를 받아와 그리도록 함수가 존재할 때만 보조 구동
+    // 🌟 1. 해열제 실시간 엔진 구동
     if (typeof startFeverRealtimeSync === 'function') {
         startFeverRealtimeSync();
     } else {
         renderFeverTimeline();
         updateHomeDashboard();
+    }
+
+    // 🌟 2. 큐브 냉장고 실시간 엔진 구동
+    if (typeof startCubeRealtimeSync === 'function') {
+        startCubeRealtimeSync();
+    } else {
+        renderCubes();
+    }
+
+    // 🌟 3. 바통터치 실시간 미션보드 엔진 구동
+    if (typeof startBatonRealtimeSync === 'function') {
+        startBatonRealtimeSync();
+    } else {
+        renderBatonTasks();
     }
 };
