@@ -230,16 +230,31 @@
         </div>
     </div>
 
+<!-- 👩‍👧 온보딩 모달 (친절하게 변경!) -->
     <div id="setup-modal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">반가워요! 👋</h2>
-            <p style="margin-bottom: 20px; color:var(--text-sub);">아기 정보와 나의 역할을 설정해주세요.</p>
-            <input type="text" id="input-baby-name" class="modal-input" placeholder="아기 이름 (예: 하윤)">
-            <input type="date" id="input-start-date" class="modal-input">
-            <select id="input-user-role" class="modal-input" style="appearance: none; text-align: center;">
-                <option value="husband">👨 저는 아빠입니다</option>
-                <option value="wife">👩 저는 엄마입니다</option>
-            </select>
+            <p style="margin-bottom: 20px; color:var(--text-sub); line-height: 1.5;">아기의 소중한 첫 기록을 위해<br>아래 정보를 알려주세요.</p>
+            
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin-left: 5px;">아기 이름</label>
+                <input type="text" id="input-baby-name" class="modal-input" placeholder="예: 하윤">
+            </div>
+
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin-left: 5px;">아기 생년월일</label>
+                <input type="date" id="input-start-date" class="modal-input">
+            </div>
+
+            <div style="text-align: left; margin-bottom: 20px;">
+                <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin-left: 5px;">나의 역할</label>
+                <select id="input-user-role" class="modal-input" style="appearance: none; text-align: center;">
+                    <option value="" disabled selected>역할을 선택해주세요</option>
+                    <option value="husband">👨 아빠입니다</option>
+                    <option value="wife">👩 엄마입니다</option>
+                </select>
+            </div>
+            
             <button class="modal-btn" onclick="saveSetup()">시작하기 ✨</button>
         </div>
     </div>
