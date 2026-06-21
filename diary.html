@@ -414,25 +414,25 @@
         checkOnboarding();
     </script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
-            authDomain: "happybaby-6de42.firebaseapp.com",
-            projectId: "happybaby-6de42",
-            storageBucket: "happybaby-6de42.firebasestorage.app",
-            messagingSenderId: "1075311024495",
-            appId: "1:1075311024495:web:b9212eab58802dabf9709a"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyCx-Jd-6S05a_xY0ZbT8SjpH0vPWIhSDd4",
+        authDomain: "diray-8c002.firebaseapp.com",
+        projectId: "diray-8c002",
+        storageBucket: "diray-8c002.firebasestorage.app",
+        messagingSenderId: "340346494414",
+        appId: "1:340346494414:web:aba027d55a34fcf01f9f9f"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        signInAnonymously(auth).catch(() => console.log("익명로그인 무시"));
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); 
+    const auth = getAuth(app);
+    
+    signInAnonymously(auth).catch(() => console.log("익명로그인 무시"));
 
         let unsubscribe = null;
 
