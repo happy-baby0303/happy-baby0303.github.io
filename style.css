@@ -1043,3 +1043,8 @@ body.dark-mode #family-sync-banner span {
     background: #E8F3FF !important;
     color: #3182F6 !important;
 }
+
+/* 서브 지역 필터 가로 스크롤바 숨기기 */
+#sub-filter-row::-webkit-scrollbar {
+    display: none;
+}
