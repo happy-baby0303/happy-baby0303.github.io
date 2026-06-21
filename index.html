@@ -846,11 +846,12 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // 기존 getDoc과 새로운 onSnapshot을 한 줄로 깔끔하게 합쳤습니다!
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
@@ -862,9 +863,11 @@
             appId: "1:1075311024495:web:b9212eab58802dabf9709a"
         };
 
+        // 파이어베이스는 무조건 여기서 딱 한 번만 켜야 합니다!
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        window.db = db; // 외부 JS 파일에서 파이어베이스를 쓸 수 있게 허가
 
         // 익명 로그인 실행
         signInAnonymously(auth).catch((err) => console.log("익명로그인 실패: ", err));
@@ -924,6 +927,31 @@
                 alert("🚨 서버와 통신 중 문제가 발생했습니다. 인터넷 연결을 확인해주세요.");
             }
         };
+
+        // 🌟 🚀 [마법 3] 해열제 기록 실시간 부부 동기화 리스너
+        let feverUnsubscribe = null;
+        function startFeverRealtimeSync() {
+            const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+            const docRef = doc(db, "fever_" + syncCode, "status");
+
+            if (feverUnsubscribe) feverUnsubscribe();
+
+            feverUnsubscribe = onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const firebaseRecords = data.records || [];
+                    // 파이어베이스 최신 데이터로 로컬스토리지 갱신
+                    localStorage.setItem('tosil_fever_records', JSON.stringify(firebaseRecords));
+                }
+                // 화면 렌더링 및 대시보드 강제 즉시 리프레시
+                if (typeof renderFeverTimeline === 'function') renderFeverTimeline();
+                if (typeof updateHomeDashboard === 'function') updateHomeDashboard();
+            });
+        }
+
+        // 초기 구동 실행
+        startFeverRealtimeSync();
+        window.startFeverRealtimeSync = startFeverRealtimeSync;
     </script>
 </body>
 </html>

@@ -502,6 +502,9 @@ function calcHotDeal() {
 // ==========================================
 // 5. 스마트 해열제 타이머 엔진 
 // ==========================================
+// ==========================================
+// 5. 스마트 해열제 타이머 엔진 (실시간 연동형)
+// ==========================================
 function checkPillLock(type) {
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     if (records.length === 0) return { locked: false };
@@ -541,15 +544,18 @@ function calcFever() {
     const fRes = document.getElementById('fever-result'); if(fRes) fRes.style.display = 'block';
 }
 
-function addFeverRecord() {
+// 🔥 핵심 업데이트: 데이터를 파이어베이스로 쏘는 로직
+async function addFeverRecord() {
     const temp = parseFloat(document.getElementById('v-temp').value);
     if(!temp || !selectedPillType) return alert('체온 and 먹인 약 종류를 모두 올바르게 짚어주십시오!');
     const lockStatus = checkPillLock(selectedPillType);
     if (lockStatus.locked) return alert('🚨 [저장 실패] ' + lockStatus.reason);
     
     const symptoms = [
-        document.getElementById('sym-cough').checked ? '🤧기침/콧물' : '', document.getElementById('sym-vomit').checked ? '🤮구토' : '',
-        document.getElementById('sym-diarrhea').checked ? '💩설사' : '', document.getElementById('sym-nofood').checked ? '😰밥거부' : ''
+        document.getElementById('sym-cough').checked ? '🤧기침/콧물' : '', 
+        document.getElementById('sym-vomit').checked ? '🤮구토' : '',
+        document.getElementById('sym-diarrhea').checked ? '💩설사' : '', 
+        document.getElementById('sym-nofood').checked ? '😰밥거부' : ''
     ].filter(Boolean);
     
     const now = new Date(), timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -557,11 +563,25 @@ function addFeverRecord() {
     
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     records.unshift(record); if(records.length > 10) records.pop(); 
-    localStorage.setItem('tosil_fever_records', JSON.stringify(records));
     
+    // 파이어베이스 업로드 연동
+    if (typeof db !== 'undefined') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        const docRef = doc(db, "fever_" + syncCode, "status");
+        try {
+            await setDoc(docRef, { records: records }, { merge: true });
+        } catch (e) {
+            console.error("Firebase Fever Sync Failed: ", e);
+        }
+    }
+    
+    // 로컬 백업 및 화면 초기화
+    localStorage.setItem('tosil_fever_records', JSON.stringify(records));
     document.getElementById('v-temp').value = '';
     ['sym-cough','sym-vomit','sym-diarrhea','sym-nofood'].forEach(id => { const cb = document.getElementById(id); if(cb) cb.checked = false; });
-    selectPill(''); renderFeverTimeline(); setTimeout(updateHomeDashboard, 100); 
+    selectPill(''); 
+    renderFeverTimeline(); 
+    setTimeout(updateHomeDashboard, 100); 
 }
 
 function renderFeverTimeline() {
@@ -633,14 +653,34 @@ function updateFeverTimer(records) {
     }
 }
 
-function clearFeverRecord() {
+// 🔥 핵심 업데이트: 리셋 버튼 클릭 시 파이어베이스 데이터도 함께 비우기
+async function clearFeverRecord() {
     if(!confirm('전체 투약 기록을 지우시겠습니까?')) return;
-    localStorage.removeItem('tosil_fever_records'); selectPill(''); 
+    localStorage.removeItem('tosil_fever_records'); 
+    
+    if (typeof db !== 'undefined') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        const docRef = doc(db, "fever_" + syncCode, "status");
+        try {
+            await setDoc(docRef, { records: [] });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    
+    selectPill(''); 
     const rB = document.getElementById('btn-pill-red'), bB = document.getElementById('btn-pill-blue');
     if(rB) { rB.style.opacity = '1'; rB.style.cursor = 'pointer'; }
     if(bB) { bB.style.opacity = '1'; bB.style.cursor = 'pointer'; }
-    renderFeverTimeline(); setTimeout(updateHomeDashboard, 100);
+    renderFeverTimeline(); 
+    setTimeout(updateHomeDashboard, 100);
 }
+
+// HTML onclick 바인딩을 위해 전역 스코프(window)에 매핑
+window.addFeverRecord = addFeverRecord;
+window.clearFeverRecord = clearFeverRecord;
+window.selectPill = selectPill;
+window.calcFever = calcFever;
 
 function drawFeverChart(records) {
     const canvas = document.getElementById('feverChart');
@@ -1177,7 +1217,7 @@ function closeFamilySyncModal(e) {
 }
 
 // ==========================================
-// 🚀 13. 구동 엔진
+// 🚀 13. 구동 엔진 (최종 장착)
 // ==========================================
 window.onload = () => { 
     loadAllExternalData(); 
@@ -1205,7 +1245,13 @@ window.onload = () => {
     });
     
     initQuickScrollDrag();
-    renderFeverTimeline();
-    updateHomeDashboard();
     renderFoodChecklist();
+
+    // 🌟 수정: 실시간 리스너가 로드된 후 데이터를 받아와 그리도록 함수가 존재할 때만 보조 구동
+    if (typeof startFeverRealtimeSync === 'function') {
+        startFeverRealtimeSync();
+    } else {
+        renderFeverTimeline();
+        updateHomeDashboard();
+    }
 };
