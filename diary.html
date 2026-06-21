@@ -318,11 +318,18 @@
             else petEl.innerText = "🦢";                
         }
 
-        function moveQuestion(direction) {
-            viewingDay += direction;
-            if(viewingDay < 1) viewingDay = 1; 
-            initApp();
-        }
+     function moveQuestion(direction) {
+    viewingDay += direction;
+    if(viewingDay < 1) viewingDay = 1; 
+
+    // 🔥 추가: 다음 질문으로 넘어가면 무조건 입력창 모드로 초기화!
+    document.getElementById("input-mode").style.display = "block";
+    document.getElementById("view-mode").style.display = "none";
+    document.getElementById("my-answer").value = ""; // 기존 답변 내용도 삭제
+
+    initApp();
+    setTimeout(startSync, 50); // 화면이 바뀌면 다시 실시간 동기화 체크
+}
 
         function initApp() {
             const today = new Date();
