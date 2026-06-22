@@ -980,7 +980,20 @@
         window.getDoc = getDoc;
         window.onSnapshot = onSnapshot;
 
-        signInAnonymously(auth).catch((err) => console.log("익명로그인 실패: ", err));
+       // 2. 인증 및 데이터 로딩 로직 (한 번만 호출)
+signInAnonymously(auth)
+    .then(() => {
+        console.log("🎉 익명 로그인 성공! 이제 데이터를 불러옵니다.");
+        
+        // 데이터 로딩 함수 호출
+        if (typeof startDataSync === 'function') {
+            startDataSync(); 
+        }
+    })
+    .catch((err) => {
+        console.error("❌ 익명 로그인 실패: ", err);
+        alert("로그인에 실패했습니다. 인터넷 연결을 확인해주세요.");
+    });
 
 // 1. 알림 권한 요청 (새로 추가됨)
         window.requestNotificationPermission = async () => {
