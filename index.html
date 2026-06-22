@@ -941,13 +941,7 @@
                     <input type="text" id="partner-sync-code" placeholder="예: TS-7A9B" style="flex:1; padding:14px; border-radius:12px; border:1px solid var(--border); font-size:16px; font-weight:800; text-align:center; text-transform:uppercase; background:var(--bg-card); color:var(--text-m);">
                     <button class="btn-main" onclick="connectSyncCode()" style="margin-top:0; width:auto; padding:0 20px; border-radius:12px; font-size:14px; background:var(--text-m) !important; color:var(--bg-card) !important; box-shadow:none !important;">연결</button>
                 </div>
-            </div>
-
-            <button onclick="requestNotificationPermission()" 
-                    style="margin-top:12px; width:100%; padding:14px; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; border:none; cursor:pointer; font-size:14px;">
-                🔔 바통터치 & 해열제 알림 켜기
-            </button>
-            
+            </div>   
         </div> </div> ```
 
     <script src="script.js"></script>
@@ -956,7 +950,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+       
 
         // ... (firebaseConfig는 그대로) ...
 
@@ -972,7 +966,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const messaging = getMessaging(app);
+       
 
         window.db = db;
         window.doc = doc;
@@ -994,35 +988,6 @@ signInAnonymously(auth)
         console.error("❌ 익명 로그인 실패: ", err);
         alert("로그인에 실패했습니다. 인터넷 연결을 확인해주세요.");
     });
-
-// 1. 알림 권한 요청 (새로 추가됨)
-        window.requestNotificationPermission = async () => {
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    const currentToken = await getToken(messaging, { 
-                        vapidKey: 'BNDHmOKzsbHE8M65bZWNpGOZ7ijelfwfSsGvwCYHCrBkXDSh8jw1rq7R5uqNlXpMalZsM8yvqB7aDRS0YPnJKyk' 
-                    });
-                    if (currentToken) {
-                        const familyCode = localStorage.getItem("family_sync_code");
-                        if (familyCode) {
-                            const uid = auth.currentUser ? auth.currentUser.uid : "unknown_user";
-                            await setDoc(doc(db, `families/${familyCode}/tokens`, uid), {
-                                token: currentToken,
-                                updatedAt: new Date().toISOString()
-                            }, { merge: true });
-                            alert("알림 설정 완료! 🔔");
-                        } else {
-                            alert("먼저 가족 코드를 연결해주세요!");
-                        }
-                    }
-                } else {
-                    alert("알림 권한을 허용해야 알림을 받을 수 있어요!");
-                }
-            } catch (error) {
-                console.error('알림 설정 에러:', error);
-            }
-        };
 
 // 2. 가족 코드 생성 (기존 기능)
         window.createSyncCode = async () => {
