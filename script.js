@@ -1180,22 +1180,41 @@ function updateHomeDashboard() {
     
     if (feverRecords.length > 0) {
         const latest = feverRecords[0];
+        let trendHtml = "";
         
+        // 1. 입체적 분석: 이전 기록과 비교 (공백 채우기 핵심!)
+        if (feverRecords.length > 1) {
+            const prev = feverRecords[1];
+            const diff = (latest.temp - prev.temp).toFixed(1);
+            const icon = diff > 0 ? "📈 상승" : (diff < 0 ? "📉 하락" : "➡️ 보합");
+            trendHtml = `<div style="font-size:12px; opacity:0.8; margin-top:4px;">이전 기록 대비 <b>${Math.abs(diff)}℃ ${icon}</b></div>`;
+        }
+
+        // 2. 상태별 UI 구성 (밀도 높이기)
         if (latest.temp >= 38.0) {
-            // 1. 발열 단계 (빨간색)
-            feverText.innerHTML = `🚨 <b>주의! ${latest.time} 측정 체온 ${latest.temp}℃ 입니다.</b><br>해열제를 확인하고 상태를 살펴주세요.`;
-            feverText.style.color = "#E32636"; 
+            feverText.innerHTML = `
+                <div style="font-size:20px; font-weight:900; margin-bottom:4px;">🚨 고열 주의: ${latest.temp}℃</div>
+                <div style="font-size:13px; font-weight:700;">${latest.time} 측정 / 지금 즉시 해열제 복용을 고려하세요.</div>
+                ${trendHtml}
+            `;
+            feverText.style.color = "#E32636";
         } else if (latest.temp >= 37.5) {
-            // 2. 미열/주의 단계 (주황색/노란색) - 여기부터 엄마 아빠의 긴장 모드!
-            feverText.innerHTML = `⚠️ <b>미열 주의! ${latest.time} 측정 체온 ${latest.temp}℃ 입니다.</b><br>옷을 얇게 입히고 수분 섭취를 도와주세요.`;
-            feverText.style.color = "#F59E0B"; 
+            feverText.innerHTML = `
+                <div style="font-size:20px; font-weight:900; margin-bottom:4px;">⚠️ 미열 주의: ${latest.temp}℃</div>
+                <div style="font-size:13px; font-weight:700;">${latest.time} 측정 / 가벼운 옷차림과 수분 섭취가 필요해요.</div>
+                ${trendHtml}
+            `;
+            feverText.style.color = "#F59E0B";
         } else {
-            // 3. 정상 단계 (회색)
-            feverText.innerText = `최근 기록: ${latest.temp}℃ (${latest.time} 측정 완료) - 우리 아기 건강해요! 🤍`;
+            feverText.innerHTML = `
+                <div style="font-size:20px; font-weight:900; margin-bottom:4px;">🤍 정상 체온: ${latest.temp}℃</div>
+                <div style="font-size:13px; font-weight:700;">${latest.time} 측정 / 우리 아기 컨디션 아주 좋아요!</div>
+                ${trendHtml}
+            `;
             feverText.style.color = "#4E5968";
         }
     } else {
-        feverText.innerText = "오늘도 우리 아기, 아주 건강하게 잘 지내고 있어요! 🤍";
+        feverText.innerHTML = `<div style="padding:10px 0;">아직 측정된 체온 기록이 없습니다.<br>아이의 건강을 위해 첫 기록을 시작해 보세요! 🤍</div>`;
         feverText.style.color = "#4E5968";
     }
 
