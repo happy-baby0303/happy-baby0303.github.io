@@ -145,17 +145,25 @@
     </div>
 </div>
 
-            <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:32px; margin-bottom:12px; padding: 0 4px;">
-                <span>📊 실시간 관제 대시보드</span>
-            </div>
+<div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:32px; margin-bottom:12px; padding: 0 4px;">
+    <span>📊 우리 아기 건강 모니터</span>
+</div>
 
-            <div id="db-fever-card" onclick="directGoToolbox('fever')" style="background: var(--bg-card, #FFF); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.3s; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-size:13px; font-weight:700; color:var(--text-s, #8B95A1); margin-bottom:4px;">스마트 해열 타이머</div>
-                    <div id="db-fever-text" style="font-size:14.5px; font-weight:800; color:var(--text-m); opacity:0.8;">현재 등록된 실시간 체온 기록이 없습니다.</div>
-                </div>
-                <span style="font-size:24px;">💚</span>
-            </div>
+<div style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 20px; padding: 20px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+        <div>
+            <div style="font-size:13px; font-weight:800; color:#3182F6; margin-bottom:4px;">스마트 해열 타이머</div>
+            <div id="db-fever-text" style="font-size:14.5px; font-weight:800; color:#4E5968;">오늘도 우리 아기, 아주 건강하게 잘 지내고 있어요! 🤍</div>
+        </div>
+               </div>
+    
+    <!-- 버튼을 오른쪽 끝으로 보내는 마법의 한 줄: justify-content: flex-end; -->
+    <div style="display: flex; justify-content: flex-end;">
+        <span onclick="directGoToolbox('fever')" style="font-size: 12px; font-weight: 800; color: #3182F6; background: #F0F7FF; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+            🌡️ 해열제 관리 바로가기 〉
+        </span>
+    </div>
+</div>
 
             <div id="db-ledger-card" onclick="directGoToolbox('money')" style="background: var(--bg-card, #FFF); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); cursor:pointer; transition:all 0.3s; display:flex; flex-direction:column; justify-content:center; align-items:stretch; gap:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
