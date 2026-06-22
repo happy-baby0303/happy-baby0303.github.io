@@ -719,7 +719,7 @@ async function addFeverRecord() {
     if (lockStatus.locked) return alert('🚨 [저장 실패] ' + lockStatus.reason);
     
     const symptoms = [
-        document.getElementById('sym-cough').checked ? '🤧기침/콧물' : '', 
+        document.getElementById('sym-cough').checked ? '🤧기침' : '', 
         document.getElementById('sym-vomit').checked ? '🤮구토' : '',
         document.getElementById('sym-diarrhea').checked ? '💩설사' : '', 
         document.getElementById('sym-nofood').checked ? '😰밥거부' : ''
@@ -1145,14 +1145,26 @@ function uploadPhoto(input) {
         reader.onload = function(e) {
             const img = new Image();
             img.onload = function() {
-                const canvas = document.createElement('canvas'), maxSize = 350; 
+                const canvas = document.createElement('canvas'), maxSize = 600; 
                 let width = img.width, height = img.height;
                 if (width > maxSize) { height *= maxSize / width; width = maxSize; }
-                canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.5); 
-                try { localStorage.setItem('tosil_baby_photo', dataUrl); loadBabyPhoto(); } catch(err) { alert("사진 용량이 너무 큽니다. 화면을 캡처해서 올려주세요!"); }
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(input.files[0]);
+                canvas.width = width; canvas.height = height; 
+                const ctx = canvas.getContext('2d'); 
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 화질을 0.5에서 0.85로 상향 조정했습니다!
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85); 
+                
+                try { 
+                    localStorage.setItem('tosil_baby_photo', dataUrl); 
+                    loadBabyPhoto(); 
+                } catch(err) { 
+                    alert("사진 용량이 너무 큽니다. 화면을 캡처해서 올려주세요!"); 
+                }
+            }; 
+            img.src = e.target.result;
+        }; 
+        reader.readAsDataURL(input.files[0]);
     }
 }
 window.uploadPhoto = uploadPhoto;
@@ -1163,11 +1175,31 @@ function loadBabyPhoto() {
 }
 
 function updateHomeDashboard() {
-    const feverRecords = JSON.parse(localStorage.getItem('tosil_fever_records')) || [], feverCard = document.getElementById('db-fever-card');
-    if (feverCard && feverRecords.length > 0) {
-        document.getElementById('db-fever-text').innerText = `${feverRecords[0].temp}℃ (${feverRecords[0].time} 측정 완료)`;
+    const feverRecords = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    const feverText = document.getElementById('db-fever-text');
+    
+    if (feverRecords.length > 0) {
+        const latest = feverRecords[0];
+        
+        if (latest.temp >= 38.0) {
+            // 1. 발열 단계 (빨간색)
+            feverText.innerHTML = `🚨 <b>주의! ${latest.time} 측정 체온 ${latest.temp}℃ 입니다.</b><br>해열제를 확인하고 상태를 살펴주세요.`;
+            feverText.style.color = "#E32636"; 
+        } else if (latest.temp >= 37.5) {
+            // 2. 미열/주의 단계 (주황색/노란색) - 여기부터 엄마 아빠의 긴장 모드!
+            feverText.innerHTML = `⚠️ <b>미열 주의! ${latest.time} 측정 체온 ${latest.temp}℃ 입니다.</b><br>옷을 얇게 입히고 수분 섭취를 도와주세요.`;
+            feverText.style.color = "#F59E0B"; 
+        } else {
+            // 3. 정상 단계 (회색)
+            feverText.innerText = `최근 기록: ${latest.temp}℃ (${latest.time} 측정 완료) - 우리 아기 건강해요! 🤍`;
+            feverText.style.color = "#4E5968";
+        }
+    } else {
+        feverText.innerText = "오늘도 우리 아기, 아주 건강하게 잘 지내고 있어요! 🤍";
+        feverText.style.color = "#4E5968";
     }
 
+    // 2. 가계부 로직 (기존과 동일)
     const ledgerCard = document.getElementById('db-ledger-card');
     if (ledgerCard) {
         const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "목표 사기", goalAmount: 100000 };
@@ -1182,8 +1214,8 @@ function updateHomeDashboard() {
         const progressBar = document.getElementById('db-ledger-progress-bar');
         
         if(textEl) {
-    textEl.innerHTML = `🎉 <strong>${babyName}의 ${ledger.goal || '공동목표'}</strong>까지 <strong>${percent}%</strong> 달성 완료!<br><span style="font-size:12.5px; color:#8B95A1; font-weight:700; display:inline-block; margin-top:4px;">(${(ledger.savedTotal).toLocaleString()}원 / ${(targetAmount).toLocaleString()}원 모음) 조금만 더 화이팅! 🔥</span>`;
-}
+            textEl.innerHTML = `🎉 <strong>${babyName}의 ${ledger.goal || '공동목표'}</strong>까지 <strong>${percent}%</strong> 달성 완료!<br><span style="font-size:12.5px; color:#8B95A1; font-weight:700; display:inline-block; margin-top:4px;">(${(ledger.savedTotal).toLocaleString()}원 / ${(targetAmount).toLocaleString()}원 모음) 조금만 더 화이팅! 🔥</span>`;
+        }
         if(progressWrap && progressBar) {
             progressWrap.style.display = 'block';
             progressBar.style.width = percent + "%";
