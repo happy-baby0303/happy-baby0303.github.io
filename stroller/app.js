@@ -250,9 +250,9 @@ function generateCardHtml(item) {
     }
 
     // 🚀 카시트 크로스셀링 버튼
-    const crossSellHtml = `
-        <a href="#" onclick="showComingSoon('카시트'); return false;" style="display:block; width:100%; background:#FFF; border:1px solid #3182F6; color:#3182F6; padding:14px; border-radius:12px; font-weight:800; font-size:14px; text-align:center; text-decoration:none; transition:0.2s; margin-top:12px;">
-            💺 이 유모차와 어울리는 [안전 카시트] 알아보기 ➔
+   const crossSellHtml = `
+        <a href="../carseat/index.html" style="display:block; width:100%; background:#FFF; border:1px solid #3182F6; color:#3182F6; padding:14px; border-radius:12px; font-weight:800; font-size:14px; text-align:center; text-decoration:none; transition:0.2s; margin-top:12px;">
+            🚘 이 유모차와 어울리는 [안전 카시트] 알아보기 ➔
         </a>
     `;
 
