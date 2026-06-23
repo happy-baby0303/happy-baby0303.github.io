@@ -765,20 +765,55 @@
                             </div>
                         </details>
 
-                        <details class="flat-accordion">
-                            <summary>💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
-                            <div class="lib-content">
-                                <p style="margin-bottom: 10px;"><strong>✅ 안심해도 되는 '건강한 똥'</strong><br>
-                                - <strong>황금색/노란색:</strong> 가장 이상적인 변입니다.<br>
-                                - <strong>녹색(쑥색):</strong> 담즙이 장을 빨리 통과하거나 산화되어 나오는 정상 변입니다. (특히 분유 수유 시 흔함)<br>
-                                - <strong>하얀 알갱이 변:</strong> 소화되지 않은 지방이나 칼슘 덩어리이므로 걱정 안 하셔도 됩니다.</p>
-                                <p style="margin-bottom: 10px;"><strong>🚨 당장 병원에 가야 하는 '위험한 똥'</strong><br>
-                                - <strong>빨간색(피똥):</strong> 세균성 장염, 항문 상처, 혹은 심한 유제품 알레르기일 수 있습니다.<br>
-                                - <strong>검은색(짜장면 색):</strong> 위나 십이지장 등 상부 소화기 출혈을 의심해야 합니다.<br>
-                                - <strong>흰색/회백색:</strong> 담도폐쇄증 등 간이나 쓸개 쪽에 문제가 있을 수 있습니다.</p>
-                                <p><strong>💡 소아과 방문 꿀팁</strong><br>이상한 변을 봤다면 기저귀를 버리지 말고 사진을 찍어두거나, 기저귀 자체를 지퍼백에 밀봉해 병원에 가져가 의사 선생님께 꼭 보여주세요.</p>
-                            </div>
-                        </details>
+<details class="flat-accordion">
+    <summary>💩 당황하지 마세요! 아기 똥 색깔 건강법</summary>
+    <div class="lib-content">
+        <p style="margin-bottom: 10px;"><strong>✅ 안심해도 되는 '건강한 똥'</strong><br>
+        - <strong>황금색/노란색:</strong> 가장 이상적인 변입니다.<br>
+        - <strong>녹색(쑥색):</strong> 담즙이 장을 빨리 통과하거나 산화되어 나오는 정상 변입니다. (특히 분유 수유 시 흔함)<br>
+        - <strong>하얀 알갱이 변:</strong> 소화되지 않은 지방이나 칼슘 덩어리이므로 걱정 안 하셔도 됩니다.</p>
+
+        <p style="margin-bottom: 10px;"><strong>🚨 당장 병원에 가야 하는 '위험한 똥'</strong><br>
+        - <strong>빨간색(피똥):</strong> 세균성 장염, 항문 상처, 혹은 심한 유제품 알레르기일 수 있습니다.<br>
+        - <strong>검은색(짜장면 색):</strong> 위나 십이지장 등 상부 소화기 출혈을 의심해야 합니다.<br>
+        - <strong>흰색/회백색:</strong> 담도폐쇄증 등 간이나 쓸개 쪽에 문제가 있을 수 있습니다.</p>
+
+        <p><strong>💡 소아과 방문 꿀팁</strong><br>이상한 변을 봤다면 기저귀를 버리지 말고 사진을 찍어두거나, 기저귀 자체를 지퍼백에 밀봉해 병원에 가져가 의사 선생님께 꼭 보여주세요.</p>
+
+        <!-- ⭐️ 여기서부터 기저귀 일기 UI가 시작됩니다 ⭐️ -->
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #E5E8EB;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                <strong style="font-size:15px; color:#191F28;">📝 기저귀 일기 (배변 기록)</strong>
+                <button onclick="togglePoopForm()" style="background:#FFF9E6; color:#B78103; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">+ 새 기록</button>
+            </div>
+
+            <!-- 💩 숨겨진 입력창 (새 기록 버튼 누르면 스르륵 열림) -->
+            <div id="poop-input-area" style="display:none; background:#F8F9FA; padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid #E5E8EB;">
+                <div style="font-size:12px; font-weight:800; color:#4E5968; margin-bottom:8px;">1. 색깔은 어땠나요?</div>
+                <div style="display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px;">
+                    <button class="poop-color-btn" onclick="selectPoopColor('🟨 황금', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; white-space:nowrap;">🟨 황금</button>
+                    <button class="poop-color-btn" onclick="selectPoopColor('🟩 녹색', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; white-space:nowrap;">🟩 녹색</button>
+                    <button class="poop-color-btn" onclick="selectPoopColor('🟫 갈색', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; white-space:nowrap;">🟫 갈색</button>
+                    <button class="poop-color-btn" onclick="selectPoopColor('🚨 붉은/흰색', this)" style="padding:8px; border-radius:8px; border:1px solid #F04452; background:#FFF0F1; color:#F04452; font-size:13px; white-space:nowrap;">🚨 붉은/흰색</button>
+                </div>
+
+                <div style="font-size:12px; font-weight:800; color:#4E5968; margin-bottom:8px;">2. 상태(묽기)는 어땠나요?</div>
+                <div style="display:flex; gap:6px; margin-bottom:16px;">
+                    <button class="poop-tex-btn" onclick="selectPoopTexture('🍦 적당함', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; flex:1;">🍦 적당함</button>
+                    <button class="poop-tex-btn" onclick="selectPoopTexture('💧 묽음', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; flex:1;">💧 묽음</button>
+                    <button class="poop-tex-btn" onclick="selectPoopTexture('🪨 딱딱함', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; flex:1;">🪨 딱딱함</button>
+                </div>
+
+                <button onclick="savePoopRecord()" style="width:100%; padding:12px; background:#3182F6; color:white; border:none; border-radius:10px; font-weight:800; font-size:14px;">저장하기</button>
+            </div>
+
+            <!-- 💩 기록이 쌓이는 타임라인 공간 -->
+            <div id="poop-timeline" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding-right:4px;"></div>
+        </div>
+        <!-- ⭐️ 기저귀 일기 UI 끝 ⭐️ -->
+
+    </div> <!-- 여기가 진짜 lib-content를 닫는 태그입니다 -->
+</details>
                     </div>
                 </div>
             </div>

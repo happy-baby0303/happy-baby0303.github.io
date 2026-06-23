@@ -1831,3 +1831,121 @@ function updateSmartBanner() {
     container.style.display = 'none';
 }
 window.updateSmartBanner = updateSmartBanner;
+
+// ==========================================
+// 💩 기저귀 일기 (배변 기록기) 엔진 (완전체)
+// ==========================================
+let currentPoopColor = '';
+let currentPoopTexture = '';
+
+// 입력창 열고 닫기
+function togglePoopForm() {
+    const area = document.getElementById('poop-input-area');
+    if(area) area.style.display = (area.style.display === 'none') ? 'block' : 'none';
+}
+
+// 색깔 선택
+function selectPoopColor(color, btn) {
+    currentPoopColor = color;
+    document.querySelectorAll('.poop-color-btn').forEach(b => {
+        b.style.border = '1px solid #ddd'; b.style.fontWeight = 'normal'; b.style.boxShadow = 'none';
+    });
+    btn.style.border = '2px solid #3182F6'; btn.style.fontWeight = '900'; btn.style.boxShadow = '0 2px 4px rgba(49,130,246,0.2)';
+}
+
+// 상태 선택
+function selectPoopTexture(tex, btn) {
+    currentPoopTexture = tex;
+    document.querySelectorAll('.poop-tex-btn').forEach(b => {
+        b.style.border = '1px solid #ddd'; b.style.fontWeight = 'normal'; b.style.boxShadow = 'none';
+    });
+    btn.style.border = '2px solid #3182F6'; btn.style.fontWeight = '900'; btn.style.boxShadow = '0 2px 4px rgba(49,130,246,0.2)';
+}
+
+// 저장 및 파이어베이스 연동 로직
+async function savePoopRecord() {
+    if(!currentPoopColor || !currentPoopTexture) return alert("색깔과 상태를 모두 선택해주세요!");
+
+    const now = new Date();
+    // 날짜와 시간을 보기 좋게 포맷팅 (예: 6/23 14:30)
+    const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    
+    const record = {
+        id: "poop_" + now.getTime(),
+        time: timeStr,
+        color: currentPoopColor,
+        texture: currentPoopTexture
+    };
+
+    let records = JSON.parse(localStorage.getItem('tosil_poop_records')) || [];
+    records.unshift(record); // 최신 기록이 위로 오게
+    if(records.length > 20) records.pop(); // 최대 20개만 보관 (최적화)
+
+    // 파이어베이스 동기화 (가족 연동)
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { await setDoc(doc(db, "poop_" + syncCode, "status"), { records: records }); } catch(e){}
+    }
+
+    localStorage.setItem('tosil_poop_records', JSON.stringify(records));
+    
+    // 초기화 및 화면 닫기
+    currentPoopColor = ''; currentPoopTexture = '';
+    document.querySelectorAll('.poop-color-btn, .poop-tex-btn').forEach(b => {
+        b.style.border = '1px solid #ddd'; b.style.fontWeight = 'normal'; b.style.boxShadow = 'none';
+    });
+    togglePoopForm();
+    renderPoopTimeline(); // 즉시 화면에 그리기
+}
+
+// 화면에 타임라인 그리기
+// 화면에 타임라인 그리기 (❌ 삭제 버튼 추가)
+function renderPoopTimeline() {
+    const container = document.getElementById('poop-timeline');
+    if(!container) return;
+
+    let records = JSON.parse(localStorage.getItem('tosil_poop_records')) || [];
+    
+    if(records.length === 0) {
+        container.innerHTML = `<div style="font-size:12px; color:#8B95A1; text-align:center; padding:20px 10px;">아직 기록된 배변 일기가 없습니다.</div>`;
+        return;
+    }
+
+    let html = '';
+    records.forEach(r => {
+        html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#FFFFFF; border:1px solid #E5E8EB; padding:12px; border-radius:12px;">
+            <div style="font-size:12px; color:#8B95A1; font-weight:800;">${r.time}</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="background:#F2F5F8; padding:4px 8px; border-radius:6px; font-size:12.5px; font-weight:800;">${r.color}</span>
+                <span style="background:#F2F5F8; padding:4px 8px; border-radius:6px; font-size:12.5px; font-weight:800;">${r.texture}</span>
+                <button onclick="deletePoopRecord('${r.id}')" style="background:none; border:none; color:#B0B8C1; font-size:14px; cursor:pointer; padding:0 0 0 4px; margin-top:2px;">❌</button>
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+window.renderPoopTimeline = renderPoopTimeline;
+
+// 🗑️ 배변 기록 삭제 함수 새로 추가!
+async function deletePoopRecord(id) {
+    if(!confirm("이 배변 기록을 삭제하시겠습니까?")) return;
+
+    let records = JSON.parse(localStorage.getItem('tosil_poop_records')) || [];
+    records = records.filter(r => r.id !== id);
+
+    // 파이어베이스 동기화
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { await setDoc(doc(db, "poop_" + syncCode, "status"), { records: records }); } catch(e){}
+    }
+
+    localStorage.setItem('tosil_poop_records', JSON.stringify(records));
+    renderPoopTimeline(); // 지우고 나서 화면 즉시 새로고침
+}
+window.deletePoopRecord = deletePoopRecord;
+
+// 앱 켜질 때 자동으로 그려주기 위해 window.onload 안이나 바깥에 연결
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(renderPoopTimeline, 300); // UI 렌더링 후 안전하게 호출
+});
