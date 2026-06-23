@@ -1949,3 +1949,75 @@ window.deletePoopRecord = deletePoopRecord;
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(renderPoopTimeline, 300); // UI 렌더링 후 안전하게 호출
 });
+
+// ==========================================
+// 👨‍⚕️ 소아과 진료 브리핑 리포트 엔진
+// ==========================================
+function openPediatricianReport() {
+    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    if(records.length === 0) {
+        return alert("아직 기록된 체온/투약 데이터가 없습니다. 건강한 상태네요! 🌿");
+    }
+    
+    // 체중 정보 가져오기 (약 용량 계산용)
+    let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
+    
+    // 기록을 타임라인 UI로 변환
+    let recordHtml = '<div style="max-height: 350px; overflow-y: auto; background:#F8F9FA; padding:16px; border-radius:12px; border:1px solid #E5E8EB; display:flex; flex-direction:column; gap:12px;">';
+    
+    records.forEach(r => {
+        // 약 종류에 따른 텍스트 및 색상 세팅
+        let pillText = '<span style="color:#8B95A1; font-weight:700;">약 미복용</span>';
+        if (r.type === 'red') {
+            pillText = '<span style="color:#FF4B2B; font-weight:900;">🔴 아세트아미노펜 (빨강)</span>';
+        } else if (r.type === 'blue') {
+            pillText = '<span style="color:#3182F6; font-weight:900;">🔵 이부/덱시부프로펜 (파랑)</span>';
+        }
+        
+        // 동반 증상 세팅
+        let symText = (r.symptoms && r.symptoms.length > 0) ? `<div style="margin-top:6px; font-size:11.5px; color:#6B7684; background:#F2F5F8; padding:4px 8px; border-radius:6px; display:inline-block;">🚨 증상: ${r.symptoms.join(', ')}</div>` : '';
+        
+        // 체온에 따른 색상 (38도 이상이면 빨간색 강조)
+        let tempStyle = r.temp >= 38.0 ? 'color:#E32636; font-weight:900; font-size:16px;' : 'color:#191F28; font-weight:800; font-size:15px;';
+        
+        recordHtml += `
+            <div style="border-bottom:1px dashed #D1D6DB; padding-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="color:#4E5968; font-weight:800; font-size:13px;">⏱️ ${r.time}</span>
+                    <span style="${tempStyle}">${r.temp}℃</span>
+                </div>
+                <div style="font-size:13px;">${pillText}</div>
+                ${symText}
+            </div>
+        `;
+    });
+    recordHtml += '</div>';
+
+    // 우리가 만들어둔 공용 프리미엄 모달을 불러와서 내용물만 싹 갈아끼웁니다
+    const body = document.getElementById('modal-dynamic-body');
+    if(!body) return;
+
+    body.innerHTML = `
+        <div class="modal-header-wrap" style="margin-bottom:8px;">
+            <span class="modal-emoji">👨‍⚕️</span>
+            <div class="modal-title">소아과 진료 브리핑</div>
+        </div>
+        <div style="font-size:13px; color:#6B7684; margin-bottom:20px; line-height:1.5;">
+            의사 선생님께 스마트폰을 이대로 보여주세요.<br>최근 체중과 투약 기록이 시간순으로 정리되어 있습니다.
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#EBF4FF; padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid #D3E4FD;">
+            <span style="color:#1A73E8; font-weight:800; font-size:14px;">⚖️ 최근 계측 체중</span>
+            <span style="color:#1A73E8; font-weight:900; font-size:18px;">${weight}${weight !== '미입력' ? ' kg' : ''}</span>
+        </div>
+
+        <div style="font-size:14px; font-weight:800; color:#191F28; margin-bottom:10px;">📊 최근 타임라인 요약</div>
+        ${recordHtml}
+
+        <button class="btn-main" style="width:100%; margin-top:20px; padding:16px; border-radius:14px; background:#3182F6 !important; color:#FFF !important; font-weight:900; font-size:15px; border:none; cursor:pointer;" onclick="closeFestivalModalForce()">확인 완료</button>
+    `;
+
+    const modalWrap = document.getElementById('premium-modal');
+    if(modalWrap) modalWrap.style.display = 'flex';
+}
+window.openPediatricianReport = openPediatricianReport;
