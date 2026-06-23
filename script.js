@@ -1240,6 +1240,9 @@ function updateHomeDashboard() {
             progressBar.style.width = percent + "%";
         }
     }
+
+    // ✨✨ 여기서 방금 만든 스마트 배너를 호출합니다! ✨✨
+    if (typeof updateSmartBanner === 'function') updateSmartBanner();
 }
 
 function initDarkMode() {
@@ -1773,3 +1776,58 @@ function startLedgerRealtimeSync() {
     });
 }
 window.startLedgerRealtimeSync = startLedgerRealtimeSync;
+
+// ==========================================
+// 💡 스마트 홈 배너 엔진 (우선순위: 바통터치 > 큐브)
+// ==========================================
+function updateSmartBanner() {
+    const container = document.getElementById('smart-banner-container');
+    if(!container) return;
+
+    // 💌 1순위: 바통터치 SOS 확인 (디자인 분리: 보라색 테마)
+    const batonRecords = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    const urgentBaton = batonRecords.find(r => r.status === 'requested');
+
+    if (urgentBaton) {
+        container.innerHTML = `
+            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('baton'), 50);" style="background: linear-gradient(135deg, #F4F0FF 0%, #EBE5FF 100%); border: 1px solid #D9CFFF; border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(107,78,255,0.12);">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="font-size: 26px;">💌</div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 800; color: #6B4EFF; margin-bottom: 4px;">아내의 바통터치 요청!</div>
+                        <div style="font-size: 15px; font-weight: 900; color: #191F28; line-height: 1.3;">"${urgentBaton.text}"</div>
+                    </div>
+                </div>
+                <span style="background: #6B4EFF; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">교대하기</span>
+            </div>
+        `;
+        container.style.display = 'block';
+        return; // 1순위가 떴으니 큐브는 무시!
+    }
+
+    // ⚠️ 2순위: 큐브 재고 확인 (노란색 테마)
+    const cubeRecords = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
+    const lowCube = cubeRecords.find(r => r.qty <= 2);
+
+    if (lowCube) {
+        container.innerHTML = `
+            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('cube'), 50);" style="background: linear-gradient(135deg, #FFF9E6 0%, #FFF3C4 100%); border: 1px solid #FFE58F; border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.08);">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="font-size: 26px;">🧊</div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 800; color: #B78103; margin-bottom: 4px;">이유식 큐브 충전 필요</div>
+                        <div style="font-size: 15px; font-weight: 900; color: #191F28; line-height: 1.3;">${lowCube.name} 큐브가 ${lowCube.qty}개 남았어요!</div>
+                    </div>
+                </div>
+                <span style="background: #F59E0B; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">채우기</span>
+            </div>
+        `;
+        container.style.display = 'block';
+        return;
+    }
+
+    // 🌿 3순위: 아무 이슈가 없으면 빈칸으로 만들고 숨기기
+    container.innerHTML = '';
+    container.style.display = 'none';
+}
+window.updateSmartBanner = updateSmartBanner;
