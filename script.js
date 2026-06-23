@@ -15,14 +15,9 @@ let selectedPillType = '';
 let feverChartObj = null; 
 let feverTimerInterval = null; 
 let currentDonutChart = null; 
+let playTimerInterval = null;
 
-const wwList = [{w:5, t:"1차 원더윅스", d:"감각 발달 (모든 것이 낯선 시기)"}, {w:8, t:"2차 원더윅스", d:"패턴 인지 (밤낮 구분 시작)"}, {w:12, t:"3차 원더윅스", d:"부드러운 움직임 (목 가누기)"}, {w:19, t:"4차 원더윅스", d:"변화 인지 (마의 구간-수면퇴행)"}, {w:26, t:"5차 원더윅스", d:"관계 인지 (분리불안 시작)"}, {w:37, t:"6차 원더윅스", d:"분류 인지 (저지레의 시작)"}, {w:46, t:"7차 원더윅스", d:"순서 인지 (조립/쌓기)"}, {w:55, t:"8차 원더윅스", d:"목적 인지 (1주년 폭풍우)"}, {w:64, t:"9차 원더윅스", d:"원칙 인지 (떼쓰기 최고조)"}, {w:75, t:"10차 원더윅스", d:"시스템 인지 (자아 형성)"}];
-const vaccineData = [{ maxMonth: 1, desc: "✅ BCG(결핵) 1회<br>✅ B형간염 1차" }, { maxMonth: 2, desc: "✅ B형간염 2차" }, { maxMonth: 3, desc: "✅ DTaP 1차<br>✅ 폴리오(소아마비) 1차<br>✅ 폐렴구균 1차<br>✅ 로타바이러스 1차" }, { maxMonth: 5, desc: "✅ DTaP 2차<br>✅ 폴리오 2차<br>✅ 폐렴구균 2차<br>✅ 로타바이러스 2차" }, { maxMonth: 7, desc: "✅ B형간염 3차<br>✅ DTaP 3차<br>✅ 폴리오 3차<br>✅ 폐렴구균 3차<br>✅ 로타바이러스 3차" }, { maxMonth: 11, desc: "※ 현재(7~11개월)는 <strong>필수 신규 접종이 쉬어가는 달</strong>입니다.<br>독감 시즌일 경우 소아과 상담을 권장합니다." }, { maxMonth: 16, desc: "✅ MMR 1차<br>✅ 수두 1차<br>✅ 일본뇌염 1차<br>✅ 폐렴구균 4차<br>✅ 뇌수막염(Hib) 4차" }, { maxMonth: 24, desc: "✅ DTaP 4차<br>✅ 일본뇌염 2차<br>✅ A형간염 4차" }, { maxMonth: 99, desc: "✅ 영유아 주요 기초 접종 완료 구간" }];
-const growthStandard = {
-    boy: [ {m:0, h:49.9, w:3.3}, {m:1, h:54.7, w:4.5}, {m:2, h:58.4, w:5.6}, {m:3, h:61.4, w:6.4}, {m:4, h:63.9, w:7.0}, {m:5, h:65.9, w:7.5}, {m:6, h:67.6, w:7.9}, {m:7, h:69.2, w:8.3}, {m:8, h:70.6, w:8.6}, {m:9, h:72.0, w:8.9}, {m:10, h:73.3, w:9.2}, {m:11, h:74.5, w:9.4}, {m:12, h:75.7, w:9.6}, {m:15, h:79.1, w:10.3}, {m:18, h:82.3, w:10.9}, {m:24, h:87.1, w:12.2}, {m:36, h:96.1, w:14.3} ],
-    girl: [ {m:0, h:49.1, w:3.2}, {m:1, h:53.7, w:4.2}, {m:2, h:57.1, w:5.1}, {m:3, h:59.8, w:5.8}, {m:4, h:62.1, w:6.4}, {m:5, h:64.0, w:6.9}, {m:6, h:65.7, w:7.3}, {m:7, h:67.3, w:7.6}, {m:8, h:68.7, w:7.9}, {m:9, h:70.1, w:8.2}, {m:10, h:71.5, w:8.5}, {m:11, h:72.8, w:8.7}, {m:12, h:74.0, w:8.9}, {m:15, h:77.5, w:9.6}, {m:18, h:80.7, w:10.2}, {m:24, h:85.5, w:11.5}, {m:36, h:95.0, w:13.9} ]
-};
-
+const PLAY_TIME_SEC = 300; // 5분 = 300초
 const babyTips = [
     { min: 0, max: 1, tip: "지금은 아이와 눈 맞춤을 연습할 시간이에요! 🤍" }, 
     { min: 2, max: 3, tip: "목 가누기 연습! 하루 5분 터미타임을 시도해보세요. 💪" }, 
@@ -32,76 +27,6 @@ const babyTips = [
     { min: 13, max: 18, tip: "자아 형성기! '안 돼'라는 말보다 '이거 해볼까?' 하고 대안을 제시해 주세요. 🗣️" }, 
     { min: 19, max: 24, tip: "에너지 폭발! 대근육 발달을 위해 안전한 놀이터 바깥놀이를 추천해요. 🏃‍♂️" }, 
     { min: 25, max: 36, tip: "언어 폭발기! 아이의 엉뚱한 말에도 귀 기울이고 풍부하게 리액션 해주세요. 💬" }
-];
-
-const playDB = [
-    { minM: 0, maxM: 2, title: "흑백 초점책 눈맞춤", desc: "초점책을 아기 눈에서 20cm 거리에 두고 천천히 좌우로 움직여주세요.", effect: "👀 시각 발달 및 초점 맞추기" },
-    { minM: 0, maxM: 2, title: "엄마아빠 인간 오르골", desc: "아기와 눈을 맞추고 부드러운 목소리로 노래를 불러주며 가슴을 살살 토닥여주세요.", effect: "👂 청각 발달 및 애착 형성" },
-    { minM: 0, maxM: 2, title: "로션 촵촵 마사지", desc: "목욕 후 로션을 바르며 '우리 아기 다리 길어져라 얍!' 하고 부드럽게 주물러주세요.", effect: "💆 정서 안정 및 혈액순환" },
-    { minM: 0, maxM: 2, title: "입술 푸르르~ 진동 놀이", desc: "아기 배나 볼에 입술 대고 '푸르르~' 소리를 내며 간지럼을 태워주세요.", effect: "😊 스킨십 및 정서적 안정감" },
-    { minM: 0, maxM: 2, title: "손수건 엄마 냄새 킁킁", desc: "엄마 냄새가 밴 깨끗한 손수건을 아기 코 근처에서 살랑살랑 흔들어주세요.", effect: "👃 후각 자극 및 심리적 안정" },
-    { minM: 0, maxM: 2, title: "딸랑이 시선 추적", desc: "딸랑이를 천천히 흔들며 아기 시선이 소리를 따라가도록 유도해 보세요.", effect: "👀 시청각 연합 능력 발달" },
-    { minM: 0, maxM: 2, title: "허공 자전거 타기", desc: "기저귀 갈 때 아기의 양다리를 잡고 자전거 타듯 부드럽게 굴려주세요.", effect: "🦵 장운동 촉진 및 배앓이 예방" },
-    { minM: 0, maxM: 2, title: "심장소리 ASMR", desc: "엄마나 아빠의 가슴 팍에 아기를 엎드려 놓고 규칙적인 심장소리를 들려주세요.", effect: "🤍 엄마 뱃속 같은 극강의 안정감" },
-    { minM: 0, maxM: 2, title: "안전 거울 눈맞춤", desc: "아기용 안전 거울을 보여주며 '안녕? 예쁜 우리 아기네!' 하고 말을 걸어주세요.", effect: "🪞 시각 자극 및 자아 인식 기초" },
-    { minM: 0, maxM: 2, title: "부드러운 깃털 터치", desc: "아주 부드러운 천이나 수건으로 아기의 손등, 발등, 볼을 스르륵 스쳐주세요.", effect: "🪶 말초 신경 자극 및 촉각 발달" },
-    { minM: 3, maxM: 5, title: "비닐봉지 바스락바스락", desc: "깨끗한 비닐봉지를 아기 귀 옆에서 구겨서 바스락 소리를 들려주세요. (입 주의!)", effect: "👂 청각 자극 및 두뇌 발달" },
-    { minM: 3, maxM: 5, title: "으쌰으쌰 터미타임 비행기", desc: "엄마 배 위에 아기를 엎드려 놓고 비행기 소리를 내며 흔들어주세요.", effect: "💪 목/허리(코어) 근육 발달" },
-    { minM: 3, maxM: 5, title: "손수건 까꿍 놀이 (입문)", desc: "엄마 얼굴을 수건으로 가렸다가 '까꿍!' 하고 보여주세요.", effect: "😊 대상 영속성 기초 및 유대감" },
-    { minM: 3, maxM: 5, title: "딸랑이 양말 팡팡", desc: "아기 발목에 소리 나는 양말이나 방울을 달아주고 발차기를 유도해 보세요.", effect: "🦵 대근육 및 인과관계 인지" },
-    { minM: 3, maxM: 5, title: "다양한 수건 촉감 놀이", desc: "부드러운 천, 거친 수건 등을 번갈아가며 아기 손과 발에 문질러주세요.", effect: "🖐 다양한 촉각 자극" },
-    { minM: 3, maxM: 5, title: "옹알이 폭풍 통역사", desc: "아기가 옹알이할 때마다 입모양을 크게 하며 과장되게 대답해 주세요.", effect: "🗣️ 상호작용 및 언어 발달 기초" },
-    { minM: 3, maxM: 5, title: "알록달록 공 굴러가유", desc: "아기가 엎드려 있을 때 눈앞에서 색깔 공을 천천히 굴려 시선을 끌어주세요.", effect: "👀 동체 시력 및 목 가누기" },
-    { minM: 3, maxM: 5, title: "오뚝이 넘어뜨리기", desc: "아기 손이 닿는 곳에 오뚝이를 두고 손을 뻗어 치게끔 유도해 보세요.", effect: "🎯 소근육 및 인과관계 이해" },
-    { minM: 3, maxM: 5, title: "에어캡(뽁뽁이) 발 구르기", desc: "아기 발밑에 뽁뽁이를 깔아주고 발을 구를 때마다 터지는 소리를 듣게 해주세요.", effect: "👣 발바닥 촉각 및 청각 자극" },
-    { minM: 3, maxM: 5, title: "첨벙첨벙 물장구", desc: "목욕 시간, 욕조에 장난감을 띄우고 물을 손으로 쳐서 물방울을 보여주세요.", effect: "💧 물에 대한 적응력 및 소근육" },
-    { minM: 6, maxM: 8, title: "수건으로 장난감 숨기기", desc: "장난감 위에 얇은 손수건을 올렸다가 아기가 직접 들춰보게 하세요.", effect: "🧠 대상 영속성(기억력) 발달" },
-    { minM: 6, maxM: 8, title: "물티슈 캡 쏙쏙 뽑기", desc: "다 쓴 물티슈 통 안에 자투리 천이나 끈을 넣고 아기가 마음껏 뽑게 해주세요.", effect: "🤏 소근육 조작 및 성취감" },
-    { minM: 6, maxM: 8, title: "이유식 용기 난타 밴드", desc: "플라스틱 용기를 엎어두고 나무 숟가락으로 신나게 두드리며 놀게 해주세요.", effect: "🥁 인과관계 이해 및 스트레스 해소" },
-    { minM: 6, maxM: 8, title: "포스트잇 떼기", desc: "바닥이나 팝업 높이에 포스트잇을 붙여두고 아기가 직접 떼보게 하세요.", effect: "🖐 손끝 소근육(잡기) 발달" },
-    { minM: 6, maxM: 8, title: "종이컵 성 무너뜨리기", desc: "종이컵을 3~4층 쌓아준 뒤, 아기가 손으로 쳐서 와르르 무너뜨리게 해주세요.", effect: "💥 스트레스 해소 및 시각적 자극" },
-    { minM: 6, maxM: 8, title: "지퍼백 물감/밀가루 봉투", desc: "지퍼백 안에 물감이나 밀가루 반죽을 밀봉하고 꾹꾹 누르거나 밟게 해주세요.", effect: "🎨 안전한 오감 촉각 발달" },
-    { minM: 6, maxM: 8, title: "술래잡기 (기어가기 유도)", desc: "아기에게서 조금 떨어져서 장난감을 흔들며 '여기까지 와보세요~' 유도하세요.", effect: "🏃‍♂️ 대근육 및 공간 지각 능력" },
-    { minM: 6, maxM: 8, title: "휴지심 사이로 까꿍", desc: "다 쓴 휴지심을 눈에 대고 망원경처럼 아기를 보며 까꿍 놀이를 해보세요.", effect: "👁️ 시각 집중력 및 유대감" },
-    { minM: 6, maxM: 8, title: "미역/국수 오감 촉감놀이", desc: "삶은 소면이나 불린 미역을 김장 매트에 깔고 마음껏 만지고 던지게 해주세요.", effect: "🍝 두뇌 자극 최고봉 (치우기 주의)" },
-    { minM: 6, maxM: 8, title: "리듬 맞춰 몸 흔들기", desc: "신나는 동요를 틀어놓고 엄마아빠가 과장되게 춤추며 아기를 무릎에 앉혀 흔들어주세요.", effect: "🎵 리듬감 및 정서적 흥겨움" },
-    { minM: 9, maxM: 12, title: "이불 속 구출 작전", desc: "아기가 보는 앞에서 최애 장난감을 이불 깊숙이 숨기고 찾아보게 하세요.", effect: "🕵️‍♂️ 문제 해결 능력 및 공간 지각" },
-    { minM: 9, maxM: 12, title: "휴지심 터널 통과하기", desc: "다 쓴 휴지심 안으로 작은 공이나 장난감을 통과시키며 '슝~' 소리를 내주세요.", effect: "👁️ 눈-손 협응력 발달" },
-    { minM: 9, maxM: 12, title: "스티커 떼서 옮기기", desc: "엄마 손등의 큰 스티커를 떼서 아기 무릎으로 옮겨 붙이는 놀이를 해보세요.", effect: "🖐 정교한 소근육 발달" },
-    { minM: 9, maxM: 12, title: "빈 통에 장난감 쏙쏙", desc: "빈 분유통이나 바구니에 작은 블록이나 공을 '쏙!' 소리와 함께 넣고 빼보세요.", effect: "🗑️ 공간 개념 및 조작 능력" },
-    { minM: 9, maxM: 12, title: "거실 이불 썰매 타기", desc: "도톰한 담요 위에 아기를 앉히고 바닥에서 천천히 슝~ 썰매처럼 끌어주세요.", effect: "🎢 균형 감각 및 전정기관 자극" },
-    { minM: 9, maxM: 12, title: "맘마 먹여주기 코스프레", desc: "애착 인형을 가져와서 아기가 직접 숟가락으로 밥을 먹여주는 흉내를 내게 하세요.", effect: "🧸 모방 행동 및 사회성 발달" },
-    { minM: 9, maxM: 12, title: "그림책 스스로 넘기기", desc: "두꺼운 보드북을 주고 아기가 직접 책장을 넘길 때마다 크게 칭찬해 주세요.", effect: "📖 소근육 및 책과 친해지기" },
-    { minM: 9, maxM: 12, title: "요플레/두부 박살내기", desc: "욕조 안에서 부드러운 두부나 요플레를 손으로 으깨며 마음껏 놀게 해주세요.", effect: "👅 미각 및 강력한 촉각 자극" },
-    { minM: 9, maxM: 12, title: "여보세요? 전화 놀이", desc: "리모컨이나 빈 장난감을 귀에 대고 '여보세요? 아빠예요?' 하며 통화 흉내를 내주세요.", effect: "📱 언어 모방 능력 폭발" },
-    { minM: 9, maxM: 12, title: "떡뻥/퍼프 집어먹기", desc: "그릇에 작은 핑거푸드를 담아주고, 엄지와 검지로 직접 집어먹게 칭찬해 주세요.", effect: "🤏 소근육(핀셋 쥐기) 발달" },
-    { minM: 13, maxM: 24, title: "신문지 마구 찢기 놀이", desc: "다 쓴 신문지나 이면지를 아기와 함께 북북 찢으며 종이 비를 내려주세요.", effect: "💥 대소근육 발달 및 스트레스 팡팡" },
-    { minM: 13, maxM: 24, title: "종이컵 볼링 게임", desc: "종이컵을 볼링핀처럼 세워두고 부드러운 공을 굴려서 쓰러뜨리며 환호해 주세요.", effect: "🎳 방향 감각 및 성취감" },
-    { minM: 13, maxM: 24, title: "이불 돌돌 김밥 말기", desc: "아기를 이불 위에 눕히고 '김밥 말자~' 하며 돌돌 말았다가 간지럼 태우며 풀어주세요.", effect: "🍙 스킨십 및 신체 인지 능력" },
-    { minM: 13, maxM: 24, title: "마스킹 테이프 징검다리", desc: "바닥에 테이프로 선을 붙여두고, 선을 따라 걷거나 점프하는 놀이를 해보세요.", effect: "👣 대근육 및 신체 조절력" },
-    { minM: 13, maxM: 24, title: "동물농장 흉내 내기", desc: "아빠가 먼저 '사자 어흥!', '토끼 깡총!' 흉내를 내고 아기가 따라 하게 해보세요.", effect: "🦁 모방 능력 및 언어 표현력" },
-    { minM: 13, maxM: 24, title: "상자 구멍에 빨대 꽂기", desc: "구멍 뚫린 상자나 스티로폼에 아기가 직접 빨대를 콕콕 꽂게 유도해 보세요.", effect: "🎯 집중력 및 정교한 눈-손 협응" },
-    { minM: 13, maxM: 24, title: "안전 풍선 배구", desc: "가벼운 풍선을 불어 거실에서 떨어지지 않게 톡톡 치며 배구 놀이를 해보세요.", effect: "🎈 순발력 및 대근육 발달" },
-    { minM: 13, maxM: 24, title: "블록/종이컵 높이 쌓기", desc: "아기가 닿을 수 있는 만큼 최대한 높이 블록을 쌓고 스스로 무너뜨리게 하세요.", effect: "🏗️ 공간 감각 및 소근육 조절력" },
-    { minM: 13, maxM: 24, title: "거실 장바구니 쇼핑", desc: "작은 바구니나 박스를 주고 '사과 가져오세요~' 심부름을 시키며 카트 놀이를 하세요.", effect: "🛒 인지 능력 및 심부름 성취감" },
-    { minM: 13, maxM: 24, title: "스케치북 자유 낙서", desc: "큰 전지나 스케치북을 바닥에 깔고 무독성 크레용으로 마음껏 선을 긋게 해주세요.", effect: "🖍️ 창의력 및 운지력 기초" },
-    { minM: 25, maxM: 36, title: "색깔 요정 분류하기", desc: "색깔이 다른 블록이나 장난감을 섞어두고 '빨간색은 어디 있을까?' 하며 모아보세요.", effect: "🎨 인지 능력 및 논리적 사고" },
-    { minM: 25, maxM: 36, title: "병원 놀이 / 마트 놀이", desc: "아기가 의사 선생님이나 계산원이 되어 부모님과 상황극(역할극)을 해보세요.", effect: "🗣️ 사회성 및 언어 능력 발달" },
-    { minM: 25, maxM: 36, title: "식탁 밑 나만의 비밀기지", desc: "식탁이나 의자 위에 큰 담요를 덮어 텐트를 만들어주고 그 안에서 랜턴을 켜주세요.", effect: "⛺ 독립심 및 상상력 자극" },
-    { minM: 25, maxM: 36, title: "불 끄고 그림자 극장", desc: "방 불을 끄고 휴대폰 손전등으로 벽에 강아지, 새 등 손 그림자를 만들어 보세요.", effect: "🦅 시각적 상상력 및 창의력" },
-    { minM: 25, maxM: 36, title: "현관 신발 짝꿍 찾기", desc: "아빠, 엄마, 아기 신발을 섞어두고 '엄마 신발 짝꿍 찾아주세요!' 하고 미션을 주세요.", effect: "👟 짝 맞추기(인지) 및 성취감" },
-    { minM: 25, maxM: 36, title: "휴지심 망원경 탐험", desc: "휴지심 2개를 이어 붙여 망원경을 만들고 '저기 뭐가 보이나요?' 하며 탐험해보세요.", effect: "🔭 상상력 및 관찰력 향상" },
-    { minM: 25, maxM: 36, title: "눈 감고 과일 맛 맞추기", desc: "아기 눈을 가리고 과일 조각을 입에 쏙 넣어준 뒤 무슨 맛인지 맞춰보게 하세요.", effect: "👅 미각 자극 및 어휘력 발달" },
-    { minM: 25, maxM: 36, title: "수건 접기 보조 요원", desc: "마른 수건을 갤 때 아이에게 하나씩 주며 끝을 맞춰 접는 연습을 함께 해보세요.", effect: "👕 일상생활 참여 및 소속감" },
-    { minM: 25, maxM: 36, title: "밀가루 반죽 요리사", desc: "밀가루 반죽을 만들어주고 틀로 찍거나 뱀처럼 길게 늘려보게 하세요.", effect: "🧑‍🍳 강력한 소근육 발달 및 조형 감각" },
-    { minM: 25, maxM: 36, title: "종이접기 비행기 날리기", desc: "색종이로 비행기를 접어주고, 누가 더 멀리 날리나 거실 끝에서 시합해 보세요.", effect: "✈️ 신체 조절력 및 규칙 이해" }
-];
-
-const foodCategories = [
-    { id: 'carb', name: '🍚 탄수화물 (초기)', items: ['쌀', '오트밀', '고구마', '감자', '단호박'] },
-    { id: 'veg', name: '🥦 채소/과일 (초~중기)', items: ['애호박', '청경채', '브로콜리', '양배추', '사과', '바나나'] },
-    { id: 'meat', name: '🥩 단백질 (중기~)', items: ['소고기', '닭고기', '두부', '흰살생선'] },
-    { id: 'allergy', name: '🚨 알레르기 주의군 (전문의 상담 후)', items: ['밀가루', '계란 노른자', '계란 흰자', '땅콩', '새우'] }
 ];
 
 // ==========================================
@@ -1138,6 +1063,89 @@ function shufflePlay() {
     }
 }
 window.shufflePlay = shufflePlay;
+
+// ==========================================
+// ✨ 5분 집중 놀이 타이머 엔진
+// ==========================================
+// ==========================================
+// ✨ 5분 집중 놀이 타이머 엔진
+// ==========================================
+function startPlayTimer() {
+    // 0. ✨ 시작 버튼을 누를 때, 현재 놀이 정보를 타이머 화면으로 복사
+    const currentTitle = document.getElementById('play-title').innerText;
+    const currentDesc = document.getElementById('play-desc').innerText;
+    
+    const activeTitleEl = document.getElementById('active-play-title');
+    const activeDescEl = document.getElementById('active-play-desc');
+    
+    if(activeTitleEl) activeTitleEl.innerText = '🧸 ' + currentTitle;
+    if(activeDescEl) activeDescEl.innerText = currentDesc;
+
+    // 1. UI 구역 교체 (A 숨기고, B/C 보이기)
+    document.getElementById('play-info-zone').style.display = 'none';
+    document.getElementById('play-timer-zone').style.display = 'block';
+    
+    const progressBar = document.getElementById('play-progress-bar');
+    if(progressBar) progressBar.style.display = 'block';
+    
+    // 2. 타이머 초기화 (초기 텍스트 세팅)
+    let timeLeft = PLAY_TIME_SEC;
+    updateTimerDisplay(timeLeft); // 👈 여기서 에러가 났던 겁니다! 이제 해결!
+    
+    // 3. 진행률 바 애니메이션 (100% -> 0% 스르륵 줄어듦)
+    setTimeout(() => {
+        if(progressBar) {
+            progressBar.style.transition = `width ${PLAY_TIME_SEC}s linear`;
+            progressBar.style.width = '0%';
+        }
+    }, 50);
+
+    // 4. 1초마다 타이머 숫자 감소
+    playTimerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay(timeLeft);
+
+        // 5분이 다 지나면 종료 처리
+        if (timeLeft <= 0) {
+            clearInterval(playTimerInterval);
+            completePlayTimer();
+        }
+    }, 1000);
+}
+
+// 👇👇 아까 빼먹으신 필수 세트 메뉴 함수들입니다! 👇👇
+
+function updateTimerDisplay(seconds) {
+    const min = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const sec = String(seconds % 60).padStart(2, '0');
+    const display = document.getElementById('play-timer-display');
+    if(display) display.innerText = `${min}:${sec}`;
+}
+
+function stopPlayTimer() {
+    clearInterval(playTimerInterval);
+    resetPlayUI();
+}
+
+function completePlayTimer() {
+    alert("🎉 5분 놀이 완료! 오늘도 아기에게 즐거운 시간을 선물하셨네요!");
+    resetPlayUI();
+}
+
+function resetPlayUI() {
+    document.getElementById('play-info-zone').style.display = 'block';
+    document.getElementById('play-timer-zone').style.display = 'none';
+    
+    const progressBar = document.getElementById('play-progress-bar');
+    if(progressBar) {
+        progressBar.style.display = 'none';
+        progressBar.style.transition = 'none'; // 애니메이션 초기화
+        progressBar.style.width = '100%';      // 게이지 꽉 찬 상태로 복구
+    }
+}
+
+window.startPlayTimer = startPlayTimer;
+window.stopPlayTimer = stopPlayTimer;
 
 function uploadPhoto(input) {
     if (input.files && input.files[0]) {
