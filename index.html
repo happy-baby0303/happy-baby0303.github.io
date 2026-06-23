@@ -54,6 +54,13 @@
             <div class="brand-logo">👣 토실이 육아 메이트 </div>
             <div style="display:flex; align-items:center; gap:12px;">
                 <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background:none; border:none; font-size:18px; cursor:pointer; padding:0;">🌙</button>
+
+<!-- 2. ✨ 새로 추가된 부부 연동 뱃지 ✨ -->
+                <button id="sync-badge-btn" onclick="openFamilySyncModal()" style="background: #E8F0FE; color: #1A73E8; border: none; padding: 6px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
+                    <span id="sync-status-icon">🔗</span>
+                    <span id="sync-status-text">연동설정</span>
+                </button>
+
                 <div class="system-status"><span class="status-dot"></span>공공 API 매칭 온</div>
             </div>
         </div>
@@ -80,17 +87,6 @@
             </div>
             <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
             
-            <div id="family-sync-banner" onclick="openFamilySyncModal()" style="background: linear-gradient(135deg, #F0F7FF 0%, #E1EFFF 100%); border: 1px solid #CBE0FF; border-radius: 24px; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; cursor: pointer; transition: 0.2s;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="font-size: 32px;">🔗</div>
-                    <div>
-                        <div style="font-size: 12px; font-weight: 800; color: #3182F6; margin-bottom: 4px;">나 따로, 너 따로 육아는 그만!</div>
-                        <div style="font-size: 16.5px; font-weight: 900; color: #191F28;" id="sync-banner-title">부부 폰 실시간 연동하기</div>
-                    </div>
-                </div>
-                <span style="font-size: 15px; font-weight: 900; color: #3182F6; background: #FFFFFF; padding: 8px 14px; border-radius: 12px; box-shadow: 0 2px 4px rgba(49,130,246,0.1);">연결</span>
-            </div>
-
             <div onclick="openSOSModal()" style="background: #FFF0F1; border: 1px solid #FFE3E3; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(240, 68, 82, 0.05);">
                 <div style="display: flex; align-items: center; gap: 14px;">
                     <div style="font-size: 28px; animation: pulseSOS 1.5s infinite;">🚨</div>

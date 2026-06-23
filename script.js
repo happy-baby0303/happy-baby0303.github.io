@@ -1690,11 +1690,14 @@ window.onload = () => {
             }, 10);
         });
     });
-    
+        
     if (typeof startFeverRealtimeSync === 'function') { startFeverRealtimeSync(); } else { renderFeverTimeline(); updateHomeDashboard(); }
     if (typeof startCubeRealtimeSync === 'function') { startCubeRealtimeSync(); } else { renderCubes(); }
     if (typeof startBatonRealtimeSync === 'function') { startBatonRealtimeSync(); } else { renderBatonTasks(); }
     if (typeof startLedgerRealtimeSync === 'function') { startLedgerRealtimeSync(); } else { updateLedgerUI(); }
+
+updateSyncBadge(); 
+
 };
 
 // ==========================================
@@ -1720,6 +1723,33 @@ function closeFamilySyncModal(e) {
 window.openFamilySyncModal = openFamilySyncModal;
 window.closeFamilySyncModalForce = closeFamilySyncModalForce;
 window.closeFamilySyncModal = closeFamilySyncModal;
+
+function updateSyncBadge() {
+    // Firebase에서 연동 코드를 저장하는 키 이름('family_sync_code')에 맞췄습니다.
+    const syncCode = localStorage.getItem('family_sync_code'); 
+    
+    const badgeBtn = document.getElementById('sync-badge-btn');
+    const badgeText = document.getElementById('sync-status-text');
+    const badgeIcon = document.getElementById('sync-status-icon');
+
+    if (!badgeBtn || !badgeText) return; // 요소가 없으면 에러 안 나게 패스
+
+    if (syncCode) {
+        // 연동 되었을 때: 눈에 덜 띄는 시원한 파란색
+        badgeBtn.style.background = "#E8F0FE";
+        badgeBtn.style.color = "#1A73E8";
+        badgeText.innerText = "연동완료";
+        if(badgeIcon) badgeIcon.innerText = "🔗";
+    } else {
+        // 연동 안 되었을 때: 눈에 확 띄게 경고 (주황/빨강)
+        badgeBtn.style.background = "#FFF3CD";
+        badgeBtn.style.color = "#856404";
+        badgeText.innerText = "연동 필요!";
+        if(badgeIcon) badgeIcon.innerText = "🚨";
+    }
+}
+// 전역에 연결해두기
+window.updateSyncBadge = updateSyncBadge;
 
 // ==========================================
 // 💰 [가계부 리스너] 파이어베이스 연동 연결고리
