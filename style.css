@@ -1048,3 +1048,10 @@ body.dark-mode #family-sync-banner span {
 #sub-filter-row::-webkit-scrollbar {
     display: none;
 }
+
+.empty-message {
+    word-break: keep-all; /* 단어가 쪼개지지 않게 유지 */
+    text-align: center;
+    line-height: 1.5; /* 줄 간격을 살짝 넓혀주면 훨씬 고급스러워 보입니다 */
+    padding: 0 15px; /* 좌우 여백을 주어 숨통을 틔워주세요 */
+}
