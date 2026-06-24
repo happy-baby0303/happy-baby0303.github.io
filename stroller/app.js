@@ -134,7 +134,7 @@ function renderVS() {
 
     const i1 = strollerData[v1], i2 = strollerData[v2];
     res.innerHTML = `
-        <table class="vs-table">
+        <table class="vs-table" style="table-layout: fixed; word-break: keep-all; width: 100%;">
             <tr><th class="vs-label">대조항목</th><th style="color:#3182F6; font-weight:800;">${i1.name}</th><th style="color:#6B31F6; font-weight:800;">${i2.name}</th></tr>
             <tr><td class="vs-label">💰 공식가</td><td>${i1.price.toLocaleString()}원</td><td>${i2.price.toLocaleString()}원</td></tr>
             <tr><td class="vs-label">💸 부대비용</td><td style="color:#E32636; font-size:11px;">+${(i1.hiddenTax?.cost || 0).toLocaleString()}원</td><td style="color:#E32636; font-size:11px;">+${(i2.hiddenTax?.cost || 0).toLocaleString()}원</td></tr>
@@ -303,7 +303,7 @@ function generateCardHtml(item) {
                 </div>
             </div>
         </div>
-        <div class="insight-box"><div class="title">💡 단점 & 아쉬운 점 팩트체크</div><div class="text">${item.flaw}</div></div>
+        <div class="insight-box"><div class="title">💡 단점 & 아쉬운 점 팩트체크</div><div class="text" style="word-break: keep-all; line-height: 1.5;">${item.flaw}</div></div>
         ${buyBtnHtml}
         ${safetyGuardHtml}
         ${crossSellHtml}
@@ -337,11 +337,59 @@ function renderList(isUserAction = false) {
 
     let processedData = strollerData.map((item, index) => {
         let matched = 0, total = 0;
-        if (env !== 'all') { total++; if (item.tags.env === env) matched++; if (env === 'stairs' && item.specs.weight > 9) matched--; }
-        if (car !== 'all') { total++; const isCompactOrFlight = ['ray', 'casper', 'carnival', 'flight'].includes(car); const isSedan = ['avante', 'sonata', 'grandeur'].includes(car); if (isCompactOrFlight && (item.foldedDims[0] <= 24 || item.type === '휴대용' || item.type === '트라이크')) matched++; else if (isSedan && item.foldedDims[0] <= 35) matched++; else if (!isCompactOrFlight && !isSedan) matched++; }
-        if (baby !== 'all') { total++; if (baby === 'twins' && item.expand.includes('⭕')) matched += 2; else if (baby === 'newborn' && item.type === '디럭스') matched++; else if (baby === 'giant' && item.backrest >= 52) matched++; }
-        if (parent !== 'all') { total++; if (parent === 'joint' && item.specs.weight <= 8.7) matched++; else if (parent === 'strong' && (item.type === '디럭스' || item.type === '쌍둥이' || item.type === '웨건')) matched++; }
-        if (budget !== 'all') { total++; if (budget === 'under40' && item.price <= 400000) matched++; else if (budget === 'under100' && item.price <= 1100000) matched++; else if (budget === 'all') matched++; }
+        
+        // 🏡 1. 거주 환경
+        if (env !== 'all') { 
+            total++; 
+            if (item.tags.env === env) matched++; 
+            if (env === 'stairs' && item.specs.weight > 9) matched--; 
+        }
+        
+        // 🚗 2. 트렁크 테트리스 (SUV 무조건 합격 방지 패치!)
+        if (car !== 'all') { 
+            total++; 
+            const isCompactOrFlight = ['ray', 'casper', 'carnival', 'flight'].includes(car); 
+            const isSedan = ['avante', 'sonata', 'grandeur'].includes(car); 
+            
+            if (isCompactOrFlight && (item.foldedDims[0] <= 24 || item.type === '휴대용' || item.type === '트라이크')) {
+                matched++; 
+            } else if (isSedan && item.foldedDims[0] <= 35) {
+                matched++; 
+            } else if (!isCompactOrFlight && !isSedan) {
+                // 패치: SUV라도 부피가 150L를 넘어가는 거대 유모차는 가산점을 주지 않음
+                const strollerVol = (item.foldedDims[0] * item.foldedDims[1] * item.foldedDims[2]) / 1000;
+                if (strollerVol < 150) matched++; 
+            } 
+        }
+        
+        // 👶 3. 아기 성장 (스토케 버킷 시트 우량아 만점 방지 패치!)
+        if (baby !== 'all') { 
+            total++; 
+            if (baby === 'twins' && item.expand.includes('⭕')) matched += 2; 
+            else if (baby === 'newborn' && item.type === '디럭스') matched++; 
+            else if (baby === 'giant' && item.backrest >= 52) {
+                // 패치: 등받이가 길어도 '시트 분리형(V자 버킷시트)'이면 우량아에게 좁으므로 가산점 제외
+                if (!item.specs.folding.includes("시트 분리")) {
+                    matched++; 
+                }
+            }
+        }
+        
+        // 🦴 4. 주 양육자 체력
+        if (parent !== 'all') { 
+            total++; 
+            if (parent === 'joint' && item.specs.weight <= 8.7) matched++; 
+            else if (parent === 'strong' && (item.type === '디럭스' || item.type === '쌍둥이' || item.type === '웨건')) matched++; 
+        }
+        
+        // 💰 5. 예산 한도
+        if (budget !== 'all') { 
+            total++; 
+            if (budget === 'under40' && item.price <= 400000) matched++; 
+            else if (budget === 'under100' && item.price <= 1100000) matched++; 
+            else if (budget === 'all') matched++; 
+        }
+        
         let matchRate = total > 0 ? Math.max(5, Math.min(100, Math.round((matched / total) * 100))) : null;
         return { ...item, originalIndex: index, matchRate: matchRate };
     });
