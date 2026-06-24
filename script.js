@@ -600,17 +600,41 @@ window.sendHotdealToLedger = sendHotdealToLedger;
 // 5. 스마트 해열제 타이머 엔진 (실시간 연동형)
 // ==========================================
 function checkPillLock(type) {
-    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
-    if (records.length === 0) return { locked: false };
-    const now = new Date().getTime(), CROSS_INTERVAL = 2 * 60 * 60 * 1000, SAME_INTERVAL = 4 * 60 * 60 * 1000;
-    const lastAny = records[0], lastSame = records.find(r => r.type === type);
-    if (now - lastAny.timestamp < CROSS_INTERVAL) {
-        return { locked: true, reason: `어떤 약이든 최소 2시간(교차복용)이 지나야 합니다.\n(약 ${Math.floor((CROSS_INTERVAL - (now - lastAny.timestamp)) / 60000)}분 남음)` };
+    // 1. ✨ 로컬 스토리지에서 기록 가져오기 (이 줄이 빠졌었습니다!)
+    let currentFeverRecords = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+
+    // 2. 기록이 없으면 둘 다 즉시 복용 가능
+    if (currentFeverRecords.length === 0) {
+        return { locked: false, reason: "" };
     }
-    if (lastSame && (now - lastSame.timestamp < SAME_INTERVAL)) {
-        return { locked: true, reason: `같은 약은 최소 4시간 간격이 필요합니다.\n(약 ${Math.floor((SAME_INTERVAL - (now - lastSame.timestamp)) / 60000)}분 남음)` };
+
+    // 3. 가장 최근에 먹인 약 기록 가져오기
+    const lastRecord = currentFeverRecords[0]; 
+    
+    // 4. ✨ 시간 계산 (글씨가 아니라 저장해둔 timestamp 숫자로 정확히 계산!)
+    const lastTime = lastRecord.timestamp; 
+    const now = new Date().getTime();
+    let diffMinutes = Math.floor((now - lastTime) / (1000 * 60));
+
+    // (혹시 폰 시간 오류로 음수가 나오면 0으로 보정)
+    if (diffMinutes < 0) diffMinutes = 0;
+
+    // 5. ✨ 핵심 로직: 같은 약인지 다른 약인지 판별 ✨
+    let requiredWaitMins = 0;
+    if (lastRecord.type === type) {
+        requiredWaitMins = 240; // 🔴 같은 약이면 4시간(240분) 대기
+    } else {
+        requiredWaitMins = 120; // 🔵 다른 약(교차복용)이면 2시간(120분) 대기
     }
-    return { locked: false };
+
+    // 6. 대기 시간이 아직 안 지났다면 잠금!
+    if (diffMinutes < requiredWaitMins) {
+        const remain = requiredWaitMins - diffMinutes;
+        return { locked: true, reason: `투약 잠금\n(약 ${remain}분 남음)` };
+    }
+
+    // 시간이 다 지났으면 잠금 해제
+    return { locked: false, reason: "" };
 }
 
 function selectPill(type) {
