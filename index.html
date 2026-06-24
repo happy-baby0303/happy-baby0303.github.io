@@ -1056,11 +1056,16 @@
        // 2. 인증 및 데이터 로딩 로직 (한 번만 호출)
 signInAnonymously(auth)
     .then(() => {
-        console.log("🎉 익명 로그인 성공! 이제 데이터를 불러옵니다.");
+        console.log("🎉 익명 로그인 성공!");
         
-        // 데이터 로딩 함수 호출
+        // 1. 여기서 실시간 감시 엔진을 딱 한 번 가동합니다!
+        if (typeof window.initRealtimeSync === 'function') {
+            window.initRealtimeSync();
+        }
+
+        // 2. 기존에 쓰시던 데이터 로딩 함수도 있다면 같이 호출
         if (typeof startDataSync === 'function') {
-            startDataSync(); 
+            startDataSync();
         }
     })
     .catch((err) => {

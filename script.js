@@ -2053,3 +2053,16 @@ function openPediatricianReport() {
     if(modalWrap) modalWrap.style.display = 'flex';
 }
 window.openPediatricianReport = openPediatricianReport;
+
+// [실시간 감시 엔진 일괄 가동 스위치]
+window.initRealtimeSync = () => {
+    // 1. 여기서 각 기능의 실시간 동기화 함수를 호출합니다.
+    // ※ 주의: 파트너님 코드에 있는 실제 함수 이름으로 맞춰주세요!
+    
+    if (typeof startFeverRealtimeSync === 'function') startFeverRealtimeSync();
+    if (typeof startCubeRealtimeSync === 'function') startCubeRealtimeSync();
+    if (typeof startBatonRealtimeSync === 'function') startBatonRealtimeSync();
+    if (typeof startLedgerRealtimeSync === 'function') startLedgerRealtimeSync();
+    
+    console.log("🔥 실시간 감시 엔진 가동 완료!");
+};
