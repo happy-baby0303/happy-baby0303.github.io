@@ -36,8 +36,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         var userAgent = navigator.userAgent.toLowerCase();
+        var targetUrl = window.location.href;
+
         if (userAgent.indexOf('kakaotalk') > -1) {
-            location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(window.location.href);
+            // 카카오톡: 전용 탈출 링크로 튕겨내기
+            location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
+        } else if (userAgent.indexOf('naver') > -1 || userAgent.indexOf('instagram') > -1) {
+            // 네이버 & 인스타그램
+            if (userAgent.indexOf('android') > -1) {
+                // 안드로이드는 크롬으로 강제 납치(!)
+                location.href = 'intent://' + targetUrl.replace(/https?:\/\//i, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+            } else {
+                // iOS (아이폰)은 애플이 강제 전환을 막아놔서 친절하게 유도해야 함
+                alert("✨ 앱을 100% 활용하시려면 우측 하단 [⋮] 또는 [⋯] 버튼을 눌러 'Safari/기본 브라우저로 열기'를 선택해주세요!");
+            }
         }
     </script>
     <link rel="stylesheet" href="style.css">
