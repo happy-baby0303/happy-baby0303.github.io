@@ -49,20 +49,31 @@
 </head>
 <body>
 
-    <header class="global-header">
-        <div class="header-inner">
-            <div class="brand-logo">👣 토실이 육아 메이트 </div>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background:none; border:none; font-size:18px; cursor:pointer; padding:0;">🌙</button>
+<header class="global-header" style="padding: 15px 16px;">
+        <div class="header-inner" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+            
+            <!-- 1. 로고 이름 -->
+            <div class="brand-logo" style="font-size: 1.15rem; white-space: nowrap; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;">
+                <img src="icon-192x192.png" alt="육아메이트 로고" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                육아메이트
+            </div>
+            
+            <!-- 2. 우측 버튼들 -->
+            <div style="display:flex; align-items:center; gap:6px;">
+                <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background:none; border:none; font-size:16px; cursor:pointer; padding:0;">🌙</button>
 
-<!-- 2. ✨ 새로 추가된 부부 연동 뱃지 ✨ -->
-                <button id="sync-badge-btn" onclick="openFamilySyncModal()" style="background: #E8F0FE; color: #1A73E8; border: none; padding: 6px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
+                <!-- 부부 연동 뱃지 -->
+                <button id="sync-badge-btn" onclick="openFamilySyncModal()" style="background: #E8F0FE; color: #1A73E8; border: none; padding: 5px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
                     <span id="sync-status-icon">🔗</span>
                     <span id="sync-status-text">연동설정</span>
                 </button>
 
-                <div class="system-status"><span class="status-dot"></span>공공 API 매칭 온</div>
+                <!-- 3. 공공 API (LIVE) -->
+                <div class="system-status" style="white-space: nowrap; font-size: 11px; padding: 5px 8px; letter-spacing: -0.3px;">
+                    <span class="status-dot"></span>LIVE
+                </div>
             </div>
+            
         </div>
     </header>
 
