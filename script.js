@@ -2066,3 +2066,361 @@ window.initRealtimeSync = () => {
     
     console.log("🔥 실시간 감시 엔진 가동 완료!");
 };
+
+// ==========================================
+// 📱 원터치 육아 트래커 엔진 (맞춤형 알람 + 삭제 + 그룹핑 완결판)
+// ==========================================
+
+window.trackerState = { type: '', subType: '', status: '' };
+
+window.selectTrackerBtn = function(btn, category) {
+    const siblings = btn.parentElement.children;
+    for(let i=0; i<siblings.length; i++) {
+        siblings[i].style.setProperty('background', '#FFF', 'important');
+        siblings[i].style.setProperty('color', '#8B95A1', 'important');
+        siblings[i].style.setProperty('border', '1px solid #E5E8EB', 'important');
+        if(siblings[i].tagName === 'SPAN') siblings[i].style.setProperty('background', '#F8F9FA', 'important');
+    }
+    
+    if (category === 'feed' || category === 'diaper_pee') {
+        btn.style.setProperty('background', '#F0F7FF', 'important');
+        btn.style.setProperty('color', '#3182F6', 'important');
+        btn.style.setProperty('border', '1px solid #3182F6', 'important');
+        window.trackerState.subType = btn.innerText;
+        if(category === 'diaper_pee') {
+            const statusArea = document.getElementById('diaper-status-area');
+            if(statusArea) statusArea.style.display = 'none';
+        }
+    } else if (category === 'diaper_poop') {
+        btn.style.setProperty('background', '#FFF0F1', 'important');
+        btn.style.setProperty('color', '#D32F2F', 'important');
+        btn.style.setProperty('border', '1px solid #F04452', 'important');
+        window.trackerState.subType = '대변';
+        const statusArea = document.getElementById('diaper-status-area');
+        if(statusArea) statusArea.style.display = 'block';
+    } else if (category === 'status_yellow') {
+        btn.style.setProperty('background', '#FFF9E6', 'important');
+        btn.style.setProperty('color', '#B78103', 'important');
+        btn.style.setProperty('border', '1px solid #FFE58F', 'important');
+        window.trackerState.status = '황금변';
+    } else if (category === 'status_green') {
+        btn.style.setProperty('background', '#ECFDF5', 'important');
+        btn.style.setProperty('color', '#10B981', 'important');
+        btn.style.setProperty('border', '1px solid #10B981', 'important');
+        window.trackerState.status = '녹변';
+    }
+};
+
+window.openTrackerSheet = function(type) {
+    window.trackerState.type = type; window.trackerState.subType = ''; window.trackerState.status = '';
+    const overlay = document.getElementById('tracker-sheet-overlay');
+    const content = document.getElementById('tracker-sheet-content');
+    const title = document.getElementById('tracker-sheet-title');
+    const body = document.getElementById('tracker-sheet-body');
+    const saveBtn = document.getElementById('btn-tracker-save');
+    
+    if (!overlay || !content) return;
+    
+    overlay.style.display = 'block'; setTimeout(() => { content.style.transform = 'translateY(0)'; }, 10);
+    
+    if (type === 'feed') {
+        title.innerHTML = '🍼 수유 기록하기';
+        body.innerHTML = `
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">분유</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">모유</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">유축</button>
+            </div>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
+                <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
+                    <input type="number" id="v-feed-amount" placeholder="160" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid #E5E8EB; border-radius: 0;">
+                    <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
+                </div>
+            </div>
+        `;
+        if(saveBtn) saveBtn.style.display = 'block';
+    } else if (type === 'sleep') {
+        title.innerHTML = '💤 수면 기록하기';
+        const sleepStart = localStorage.getItem('tosil_sleep_start');
+        if (sleepStart) {
+            body.innerHTML = `
+                <div style="text-align:center; padding:20px 0;">
+                    <div style="font-size: 14px; font-weight: 800; color: #4E5968; margin-bottom: 12px;">우리아기 자는 중 🤫</div>
+                    <div id="sleep-timer-display" style="font-size: 48px; font-weight: 900; color: #A855F7; letter-spacing: 2px; font-variant-numeric: tabular-nums;">00:00:00</div>
+                </div>
+                <button class="btn-main" onclick="window.stopSleepTimer()" style="background: #191F28 !important; color: white !important; font-size: 16px; padding: 16px; width:100%; border-radius:16px;">수면 종료 및 저장</button>
+            `;
+            if(saveBtn) saveBtn.style.display = 'none';
+            
+            window.sleepInterval = setInterval(() => {
+                const diff = Math.floor((new Date().getTime() - parseInt(sleepStart)) / 1000);
+                const h = String(Math.floor(diff / 3600)).padStart(2,'0');
+                const m = String(Math.floor((diff % 3600)/60)).padStart(2,'0');
+                const s = String(diff % 60).padStart(2,'0');
+                const el = document.getElementById('sleep-timer-display');
+                if(el) el.innerText = `${h}:${m}:${s}`;
+            }, 1000);
+        } else {
+            body.innerHTML = `
+                <div style="background: #F8F9FA; border-radius: 16px; padding: 30px 20px; text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 15px; font-weight: 800; color: #4E5968; margin-bottom: 16px;">우리아기 꿀잠 타이머</div>
+                    <button class="btn-main" onclick="window.startSleepTimer()" style="background: #A855F7 !important; color: white !important; font-size: 16px; padding: 14px 30px; box-shadow: 0 4px 12px rgba(168,85,247,0.3) !important; margin:0; border-radius:14px;">▶ 낮잠 시작</button>
+                </div>
+            `;
+            if(saveBtn) saveBtn.style.display = 'none';
+        }
+    } else if (type === 'diaper') {
+        title.innerHTML = '💩 기저귀 기록하기';
+        body.innerHTML = `
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_pee')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">소변</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_poop')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">대변</button>
+            </div>
+            <div id="diaper-status-area" style="display:none; margin-bottom:10px;">
+                <div style="text-align: center; font-size: 14px; font-weight: 800; color: #4E5968; margin-bottom: 12px;">변의 상태는 어땠나요?</div>
+                <div style="display: flex; justify-content: center; gap: 8px;">
+                    <span onclick="window.selectTrackerBtn(this, 'status_yellow')" style="padding: 8px 16px; background: #F8F9FA; color: #8B95A1; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">🟨 황금변</span>
+                    <span onclick="window.selectTrackerBtn(this, 'status_green')" style="padding: 8px 16px; background: #F8F9FA; color: #8B95A1; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">🟩 녹변</span>
+                </div>
+            </div>
+        `;
+        if(saveBtn) saveBtn.style.display = 'block';
+    }
+};
+
+window.closeTrackerSheet = function() {
+    const overlay = document.getElementById('tracker-sheet-overlay');
+    const content = document.getElementById('tracker-sheet-content');
+    if (!overlay || !content) return;
+    content.style.transform = 'translateY(100%)';
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    if(window.sleepInterval) clearInterval(window.sleepInterval);
+};
+
+window.startSleepTimer = function() {
+    localStorage.setItem('tosil_sleep_start', new Date().getTime());
+    window.openTrackerSheet('sleep'); 
+    window.updateTrackerDashboard();
+};
+
+window.stopSleepTimer = function() {
+    const start = localStorage.getItem('tosil_sleep_start');
+    if(!start) return;
+    const end = new Date().getTime();
+    const durationMins = Math.floor((end - parseInt(start)) / 60000);
+    
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    let record = { id: 'trk_'+now.getTime(), time: timeStr, timestamp: now.getTime(), type: 'sleep', amount: durationMins };
+    
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    records.unshift(record);
+    if(records.length > 100) records.pop();
+    localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+    
+    localStorage.removeItem('tosil_sleep_start');
+    window.closeTrackerSheet();
+    window.updateTrackerDashboard();
+};
+
+window.saveTrackerRecord = function() {
+    if(!window.trackerState.type) return;
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    let record = { id: 'trk_'+now.getTime(), time: timeStr, timestamp: now.getTime(), type: window.trackerState.type };
+
+    if (window.trackerState.type === 'feed') {
+        if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요!');
+        const amt = document.getElementById('v-feed-amount').value;
+        if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요!');
+        record.subType = window.trackerState.subType;
+        record.amount = amt;
+    } 
+    else if (window.trackerState.type === 'diaper') {
+        if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요!');
+        record.subType = window.trackerState.subType;
+        record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
+    }
+
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    records.unshift(record);
+    if(records.length > 100) records.pop();
+    localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+
+    window.closeTrackerSheet();
+    window.updateTrackerDashboard(); 
+};
+
+// 🗑 단일 기록 삭제
+window.deleteTrackerRecord = function(id) {
+    if(!confirm("이 기록을 삭제하시겠습니까?")) return;
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    records = records.filter(r => r.id !== id);
+    localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+    window.updateTrackerDashboard();
+};
+
+// 💣 전체 초기화
+window.resetTrackerRecords = function() {
+    if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
+    localStorage.removeItem('tosil_tracker_records');
+    localStorage.removeItem('tosil_sleep_start');
+    window.updateTrackerDashboard();
+};
+
+window.isHistoryView = false;
+window.toggleTrackerHistory = function() {
+    window.isHistoryView = !window.isHistoryView;
+    window.updateTrackerDashboard();
+};
+
+// ⚙️ 설정 열고 닫고 저장하기 기능
+window.openTrackerSettings = function() {
+    const feedMins = localStorage.getItem('tosil_feed_interval') || 180;
+    const diaperMins = localStorage.getItem('tosil_diaper_interval') || 180;
+    document.getElementById('set-feed-interval').value = Math.floor(feedMins / 60);
+    document.getElementById('set-diaper-interval').value = Math.floor(diaperMins / 60);
+    document.getElementById('tracker-settings-modal').style.display = 'flex';
+};
+window.closeTrackerSettingsForce = function() { document.getElementById('tracker-settings-modal').style.display = 'none'; };
+window.closeTrackerSettings = function(e) { if(e.target.id === 'tracker-settings-modal') window.closeTrackerSettingsForce(); };
+
+window.saveTrackerSettings = function() {
+    const fHour = parseFloat(document.getElementById('set-feed-interval').value) || 3;
+    const dHour = parseFloat(document.getElementById('set-diaper-interval').value) || 3;
+    localStorage.setItem('tosil_feed_interval', fHour * 60);
+    localStorage.setItem('tosil_diaper_interval', dHour * 60);
+    window.closeTrackerSettingsForce();
+    window.updateTrackerDashboard();
+    alert("✅ 우리 아기 맞춤형 텀이 저장되었습니다!");
+};
+
+// 📊 대시보드 메인 렌더링 함수
+window.updateTrackerDashboard = function() {
+    const container = document.getElementById('tracker-stats-container');
+    if(!container) return;
+
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    const now = new Date().getTime();
+    
+    // 유저가 설정한 맞춤형 알림 텀 가져오기 (기본값: 180분)
+    const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
+    const diaperInterval = parseInt(localStorage.getItem('tosil_diaper_interval')) || 180;
+    
+    const getDiffText = (ts) => {
+        if(!ts) return '';
+        const mins = Math.floor((now - ts) / 60000);
+        return mins >= 60 ? `+ ${Math.floor(mins/60)}시간 ${mins%60}분` : `+ ${mins}분`;
+    };
+
+    // ----------------------------------------------------
+    // 1️⃣ [통계 보기 모드]: 날짜별 그룹핑 + 삭제버튼 + 전체초기화
+    // ----------------------------------------------------
+    if (window.isHistoryView) {
+        if(records.length === 0) {
+            container.innerHTML = `<div style="padding:20px 0; text-align:center; font-size:13px; color:var(--text-s);">기록된 데이터가 없습니다.</div><button class="btn-main" onclick="window.toggleTrackerHistory()" style="width:100%; margin-top:10px; padding:12px; font-size:13.5px; border-radius:12px;">닫기</button>`;
+        } else {
+            let grouped = {};
+            records.forEach(r => {
+                const d = new Date(r.timestamp);
+                const dateKey = `${d.getMonth()+1}월 ${d.getDate()}일`;
+                if(!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(r);
+            });
+
+            let historyHtml = '<div style="max-height:300px; overflow-y:auto; padding-right:4px;">';
+            for(let date in grouped) {
+                historyHtml += `<div style="font-size:12.5px; font-weight:900; color:#8B95A1; margin:16px 0 8px 0; border-bottom:1px solid #F2F5F8; padding-bottom:6px;">📅 ${date}</div>`;
+                grouped[date].forEach(r => {
+                    let icon = r.type==='feed' ? '🍼' : (r.type==='sleep' ? '💤' : '💩');
+                    let txt = '';
+                    if(r.type === 'feed') txt = `${r.subType} ${r.amount}ml`;
+                    else if(r.type === 'sleep') txt = `${r.amount}분 잠`;
+                    else if(r.type === 'diaper') txt = r.status ? `${r.subType} / ${r.status}` : `${r.subType}`;
+                    
+                    historyHtml += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #E5E8EB; border-radius:12px; margin-bottom:8px; background:#FFF; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <span style="font-size:18px;">${icon}</span>
+                                <div>
+                                    <div style="font-weight:900; color:var(--text-m); font-size:13.5px; margin-bottom:2px;">${txt}</div>
+                                    <div style="color:#8B95A1; font-weight:700; font-size:11.5px;">${r.time}</div>
+                                </div>
+                            </div>
+                            <button onclick="window.deleteTrackerRecord('${r.id}')" style="background:none; border:none; font-size:14px; color:#D1D6DB; cursor:pointer;">❌</button>
+                        </div>
+                    `;
+                });
+            }
+            historyHtml += '</div>';
+            historyHtml += `<div style="display:flex; gap:8px; margin-top:16px;">
+                <button class="btn-main" onclick="window.resetTrackerRecords()" style="flex:1; background:#FFF0F1 !important; color:#F04452 !important; border:1px solid #FFE3E3 !important; box-shadow:none !important; font-size:13px; padding:12px; border-radius:12px; margin:0;">🗑️ 전체 삭제</button>
+                <button class="btn-main" onclick="window.toggleTrackerHistory()" style="flex:1; margin:0; font-size:13px; padding:12px; border-radius:12px; box-shadow:none !important;">접기 닫기 〉</button>
+            </div>`;
+            container.innerHTML = historyHtml;
+        }
+        return; 
+    }
+
+    // ----------------------------------------------------
+    // 2️⃣ [대시보드 모드]: 맞춤형 스마트 알람 + 요약 카드
+    // ----------------------------------------------------
+    const latestFeed = records.find(r => r.type === 'feed');
+    const latestDiaper = records.find(r => r.type === 'diaper');
+    let htmlStr = '';
+
+    // 🚨 맞춤형 수유 알람
+    if(latestFeed) {
+        const diffMins = Math.floor((now - latestFeed.timestamp) / 60000);
+        if(diffMins >= feedInterval) {
+            htmlStr += `<div style="background:#FFF0F1; border:1px solid #FFE3E3; padding:12px 14px; border-radius:14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; animation:pulseSOS 2s infinite;"><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">🍼</span><div><div style="font-size:11px; color:#D32F2F; font-weight:800; margin-bottom:2px;">수유 알람</div><div style="font-size:13.5px; font-weight:900; color:#191F28;">맘마 먹은지 ${Math.floor(diffMins/60)}시간 ${diffMins%60}분 경과!</div></div></div><button onclick="window.openTrackerSheet('feed')" style="background:#F04452; color:#FFF; border:none; border-radius:10px; font-size:12px; font-weight:800; padding:8px 12px; cursor:pointer; flex-shrink:0;">기록하기</button></div>`;
+        }
+    }
+    
+    // 🚨 맞춤형 기저귀 알람
+    if(latestDiaper) {
+        const diffMins = Math.floor((now - latestDiaper.timestamp) / 60000);
+        if(diffMins >= diaperInterval) {
+            htmlStr += `<div style="background:#F8F9FA; border:1px solid #E5E8EB; padding:12px 14px; border-radius:14px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;"><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">💩</span><div><div style="font-size:11px; color:#4E5968; font-weight:800; margin-bottom:2px;">기저귀 알림</div><div style="font-size:13.5px; font-weight:900; color:#191F28;">확인한지 ${Math.floor(diffMins/60)}시간 ${diffMins%60}분 경과!</div></div></div><button onclick="window.openTrackerSheet('diaper')" style="background:#4E5968; color:#FFF; border:none; border-radius:10px; font-size:12px; font-weight:800; padding:8px 12px; cursor:pointer; flex-shrink:0;">기록하기</button></div>`;
+        }
+    }
+
+    if(records.length === 0 && !localStorage.getItem('tosil_sleep_start')) {
+        container.innerHTML = `<div style="padding:10px 0; text-align:center; font-size:13px; color:var(--text-s); font-weight:700;">아직 기록된 트래커 데이터가 없습니다.</div>`;
+        return;
+    }
+
+    htmlStr += `<div style="display:flex; gap:12px;">`;
+    
+    if (latestFeed) {
+        htmlStr += `<div style="flex:1; background:#F0F7FF; padding:12px; border-radius:14px; text-align:center;"><div style="font-size:11px; color:#3182F6; font-weight:800;">마지막 수유</div><div style="font-size:13px; font-weight:900; color:#191F28; margin:4px 0;">${latestFeed.subType} ${latestFeed.amount}ml</div><div style="font-size:11px; color:#3182F6; font-weight:700;">${getDiffText(latestFeed.timestamp)}</div></div>`;
+    } else {
+        htmlStr += `<div style="flex:1; background:#F8F9FA; padding:12px; border-radius:14px; text-align:center; color:#A0AEC0; font-size:11px; font-weight:700;">수유기록 없음</div>`;
+    }
+
+    if (latestDiaper) {
+        const diaperDisplay = latestDiaper.status ? `${latestDiaper.subType} / ${latestDiaper.status}` : latestDiaper.subType;
+        htmlStr += `<div style="flex:1; background:#FFF0F1; padding:12px; border-radius:14px; text-align:center;"><div style="font-size:11px; color:#F04452; font-weight:800;">마지막 배변</div><div style="font-size:13px; font-weight:900; color:#191F28; margin:4px 0;">${diaperDisplay}</div><div style="font-size:11px; color:#F04452; font-weight:700;">${getDiffText(latestDiaper.timestamp)}</div></div>`;
+    } else {
+        htmlStr += `<div style="flex:1; background:#F8F9FA; padding:12px; border-radius:14px; text-align:center; color:#A0AEC0; font-size:11px; font-weight:700;">배변기록 없음</div>`;
+    }
+    
+    htmlStr += `</div>`;
+
+    const sleepStart = localStorage.getItem('tosil_sleep_start');
+    if (sleepStart) {
+        const diffMins = Math.floor((now - parseInt(sleepStart)) / 60000);
+        htmlStr += `<div style="margin-top:12px; display:flex; align-items:center; justify-content:space-between; background:#F3E8FF; padding:12px 16px; border-radius:14px;"><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:20px;">💤</span><div><div style="font-size:11px; color:#A855F7; font-weight:800;">우리아기 꿀잠 중</div><div style="font-size:13px; font-weight:900; color:#191F28;">현재 ${diffMins}분 째</div></div></div><button onclick="window.openTrackerSheet('sleep')" style="background:#A855F7; color:#FFF; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">종료하기</button></div>`;
+    }
+
+    container.innerHTML = htmlStr;
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+});
+setInterval(() => {
+    if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+}, 60000);
