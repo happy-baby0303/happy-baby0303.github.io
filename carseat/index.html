@@ -62,14 +62,72 @@
                 </div>
 
               <div class="filter-group">
-                <label>🛠️ 장착/고정 방식 (내 차 호환성)</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="margin: 0;">🛠️ 장착/고정 방식 (호환성)</label>
+                    <span onclick="openInstallGuide()" style="color: #3182F6; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: underline; background: #E8F3FF; padding: 4px 8px; border-radius: 6px;">
+                        👉 내 차는 무슨 방식일까?
+                    </span>
+                </div>
                 <div class="custom-select-wrapper">
                     <select id="filter-install">
-                        <option value="all">전체 (잘 모르겠어요)</option>
-                        <option value="isofix_leg">ISOFIX + 바닥 지지대 (일반적인 최신 차량)</option>
-                        <option value="isofix_tether">ISOFIX + 탑테더 (바닥 수납함 있는 카니발/패밀리카)</option>
-                        <option value="belt">안전벨트 고정 (ISOFIX 없는 구형 차량)</option>
+                        <option value="all">전체 (가이드 보고 선택해 주세요)</option>
+                        <option value="isofix_leg">ISOFIX + 바닥 지지대 (일반적인 승용/SUV)</option>
+                        <option value="isofix_tether">ISOFIX + 탑테더 (카니발 등 패밀리카)</option>
+                        <option value="belt">안전벨트 고정 (2010년 이전 구형 차량)</option>
                     </select>
+                </div>
+            </div>
+
+           <!-- 💡 [팝업] 차알못을 위한 카시트 장착 방식 10초 가이드 -->
+       <div id="install-guide-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+                <div style="background: #FFF; width: 100%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease-out; word-break: keep-all;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; font-size: 18px; color: #191F28; font-weight: 900; letter-spacing: -0.5px;">🚘 내 차에 맞는 장착 방식은?</h3>
+                        <button onclick="closeInstallGuide()" style="background: transparent; border: none; font-size: 20px; color: #8B95A1; cursor: pointer; font-weight: bold;">✕</button>
+                    </div>
+                    
+                    <div style="font-size: 13.5px; color: #4E5968; line-height: 1.6; margin-bottom: 20px; letter-spacing: -0.3px;">
+                        
+                        <div style="background: #F0F7FF; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #D6E8F9;">
+                            <b style="color: #1B64DA; font-size: 14.5px; display: block; margin-bottom: 8px;">1️⃣ 바닥으로 기둥 내리기 (레그형)</b>
+                            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                                <span>🚗</span> 
+                                <span><b>누가 쓰나요?</b> 길에 다니는 <b>대부분의 승용차 및 SUV</b></span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <span>💡</span> 
+                                <span><b>어떤 방식?</b> 의자 틈새에 고리를 끼우고, 카시트 앞쪽에서 <b>차량 바닥으로 기둥(레그)을 뻗어서</b> 버티는 가장 기본 방식입니다.</span>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #FFF9E6; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #FDE68A;">
+                            <b style="color: #B78103; font-size: 14.5px; display: block; margin-bottom: 8px;">2️⃣ 등받이 뒤로 끈 묶기 (탑테더)</b>
+                            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                                <span>🚐</span> 
+                                <span><b>누가 쓰나요?</b> <b>카니발, 팰리세이드</b> 등 대형 패밀리카</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <span>🚨</span> 
+                                <span><b>왜 쓰나요?</b> 바닥 수납함 뚜껑이 부서질 수 있어, 기둥 대신 <b>등받이 뒤쪽으로 끈을 넘겨 묶는 방식</b>을 써야 합니다.</span>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #F2F4F6; padding: 16px; border-radius: 12px; border: 1px solid #E5E8EB;">
+                            <b style="color: #4E5968; font-size: 14.5px; display: block; margin-bottom: 8px;">3️⃣ 안전벨트 칭칭 감기</b>
+                            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                                <span>🚙</span> 
+                                <span><b>누가 쓰나요?</b> <b>2010년 이전</b>에 출고된 구형 차량</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <span>💡</span> 
+                                <span><b>어떤 방식?</b> 카시트를 꽂는 쇠고리(ISOFIX)가 없어, <b>안전벨트를 당겨 카시트를 직접 감아 고정</b>합니다.</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    <button onclick="closeInstallGuide()" style="width: 100%; padding: 14px; background: #3182F6; color: #FFF; font-weight: 900; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; letter-spacing: -0.5px;">아하, 우리 차는 뭔지 알겠어요! 👍</button>
                 </div>
             </div>
 
