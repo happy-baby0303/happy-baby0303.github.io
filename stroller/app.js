@@ -1,5 +1,5 @@
 // ==========================================
-// 🛒 육아메이트 유모차 AI 엔진 V15.5 + V3.0 (stroller/app.js)
+// 🛒 육아메이트 유모차 AI 엔진 V16.0 (강력한 감점 페널티 엔진 탑재!)
 // ==========================================
 
 let isFavViewMode = false;
@@ -111,8 +111,6 @@ function renderFavorites() {
     setTimeout(() => { document.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);
 }
 
-
-// --- 기존 5D 매칭 엔진 유지 ---
 function runMatrixEngine(isUserAction = false) { renderList(isUserAction); }
 
 function forceSwitchTab(cId, tabName) {
@@ -167,7 +165,7 @@ function toggleOthers() {
     }
 }
 
-// 🌟 디자인 겹침 해결: 찜 버튼을 글씨 옆으로 이동!
+// 🌟 카드 렌더링 엔진 (디자인 겹침 해결 & AI 감점 리포트 추가)
 function generateCardHtml(item) {
     const cId = item.originalIndex !== undefined ? item.originalIndex : Math.floor(Math.random() * 10000);
     const itemId = item.id || item.name; 
@@ -181,7 +179,7 @@ function generateCardHtml(item) {
 
     let scoreHtml = "";
     if (item.matchRate !== null && !isFavViewMode) {
-        let sColor = item.matchRate >= 80 ? "#3182F6" : (item.matchRate >= 40 ? "#F59E0B" : "#8B95A1");
+        let sColor = item.matchRate >= 80 ? "#3182F6" : (item.matchRate >= 50 ? "#F59E0B" : "#E32636");
         scoreHtml = `<div class="match-score" style="color:${sColor};">${item.matchRate}%<span>AI 매칭</span></div>`;
     }
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
@@ -198,11 +196,23 @@ function generateCardHtml(item) {
     let diffDesc = maxStrollerDim > targetDim ? `<div class="size-visual-desc warn">${targetName}보다 <b>${maxStrollerDim - targetDim}cm 더 큼</b></div>` : `<div class="size-visual-desc">${targetName}보다 <b>${targetDim - maxStrollerDim}cm 더 작음!</b></div>`;
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
+    // 💡 ✨ 여기서부터 AI 감점 사유 리포트 출력! ✨
     let aiReportHtml = `<div class="premium-empty-state"><div class="empty-icon">💡</div><div class="empty-text"><b>AI 매칭 리포트 대기 중</b><span>가족 상황을 선택하시면 분석서가 출력됩니다.</span></div></div>`;
     if (!isFavViewMode && item.matchRate !== null) {
-        if (item.matchRate >= 80) aiReportHtml = `<div class="ai-sim-report match-100"><h4>🟢 최적합 (Premium Match)</h4><p>조건에 80% 이상 완벽히 부합합니다.</p></div>`;
-        else if (item.matchRate >= 40) aiReportHtml = `<div class="ai-sim-report match-warn"><h4>⚠️ 타협 필요 (Conditional)</h4><p>리프팅 하중 및 부피 등 일부 타협이 필요합니다.</p></div>`;
-        else aiReportHtml = `<div class="ai-sim-report match-danger"><h4>🚨 비추천 (Mismatch)</h4><p>특수 상황과 충돌하여 당근마켓 처분 확률이 매우 높습니다.</p></div>`;
+        let reasonLi = '';
+        if (item.matchRate === 100) {
+            reasonLi = `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`;
+        } else if (item.matchReasons && item.matchReasons.length > 0) {
+            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px;">🚨 <b>${r}</b></li>`).join('');
+        }
+
+        if (item.matchRate >= 80) {
+            aiReportHtml = `<div class="ai-sim-report" style="background:#F0F7FF; border:1px solid #3182F6; padding:16px; border-radius:14px; margin-bottom:12px;"><h4 style="color:#1B64DA; margin:0 0 8px 0; font-size:14px;">🟢 최적합 (Premium Match)</h4><ul style="margin:0; padding-left:20px; font-size:13px; color:#1B64DA; line-height:1.5;">${reasonLi}</ul></div>`;
+        } else if (item.matchRate >= 50) {
+            aiReportHtml = `<div class="ai-sim-report" style="background:#FFF9E6; border:1px solid #F59E0B; padding:16px; border-radius:14px; margin-bottom:12px;"><h4 style="color:#B78103; margin:0 0 8px 0; font-size:14px;">⚠️ 타협 필요 (Conditional)</h4><ul style="margin:0; padding-left:20px; font-size:13px; color:#B78103; line-height:1.5;">${reasonLi}</ul></div>`;
+        } else {
+            aiReportHtml = `<div class="ai-sim-report" style="background:#FFF0F1; border:1px solid #F04452; padding:16px; border-radius:14px; margin-bottom:12px;"><h4 style="color:#D32F2F; margin:0 0 8px 0; font-size:14px;">❌ 비추천 (Mismatch)</h4><ul style="margin:0; padding-left:20px; font-size:13px; color:#D32F2F; line-height:1.5;">${reasonLi}</ul></div>`;
+        }
     }
 
     let ktxAlertHtml = '';
@@ -249,8 +259,7 @@ function generateCardHtml(item) {
         }
     }
 
-    // 🚀 카시트 크로스셀링 버튼
-   const crossSellHtml = `
+    const crossSellHtml = `
         <a href="../carseat/index.html" style="display:block; width:100%; background:#FFF; border:1px solid #3182F6; color:#3182F6; padding:14px; border-radius:12px; font-weight:800; font-size:14px; text-align:center; text-decoration:none; transition:0.2s; margin-top:12px;">
             🚘 이 유모차와 어울리는 [안전 카시트] 알아보기 ➔
         </a>
@@ -311,6 +320,7 @@ function generateCardHtml(item) {
     `;
 }
 
+// 🧠 깐깐한 감점(Penalty) AI 리포팅 엔진 (예산 칼각 패치 완료!)
 function renderList(isUserAction = false) {
     const topArea = document.getElementById('result-top-area');
     const otherArea = document.getElementById('result-other-area');
@@ -323,6 +333,7 @@ function renderList(isUserAction = false) {
     const baby = document.getElementById('mat-baby').value;
     const parent = document.getElementById('mat-parent').value;
     const budget = document.getElementById('mat-budget').value;
+    const isMatrixActive = (env !== 'all' || car !== 'all' || baby !== 'all' || parent !== 'all' || budget !== 'all');
 
     if (isUserAction) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -335,63 +346,62 @@ function renderList(isUserAction = false) {
         window.history.replaceState({}, '', newUrl);
     }
 
+    // 💡 강력한 감점 알고리즘 적용
     let processedData = strollerData.map((item, index) => {
-        let matched = 0, total = 0;
-        
-        // 🏡 1. 거주 환경
-        if (env !== 'all') { 
-            total++; 
-            if (item.tags.env === env) matched++; 
-            if (env === 'stairs' && item.specs.weight > 9) matched--; 
+        if (!isMatrixActive) return { ...item, originalIndex: index, matchRate: null, matchReasons: [] };
+
+        let score = 100;
+        let reasons = [];
+
+        // 1. 💰 절대 조건: 예산 (자비 없는 칼각 컷팅!)
+        if (budget === 'under40' && item.price > 400000) {
+            score -= 50; reasons.push(`예산 초과 (공식가 ${(item.price/10000).toFixed(0)}만 원)`);
+        } else if (budget === 'under100' && item.price > 1000000) {
+            // ✨ 110만 원에서 100만 원으로 엄격하게 수정! 100만 원 넘으면 무조건 -50점!
+            score -= 50; reasons.push(`예산 초과 (공식가 ${(item.price/10000).toFixed(0)}만 원)`);
         }
-        
-        // 🚗 2. 트렁크 테트리스 (SUV 무조건 합격 방지 패치!)
-        if (car !== 'all') { 
-            total++; 
-            const isCompactOrFlight = ['ray', 'casper', 'carnival', 'flight'].includes(car); 
-            const isSedan = ['avante', 'sonata', 'grandeur'].includes(car); 
-            
-            if (isCompactOrFlight && (item.foldedDims[0] <= 24 || item.type === '휴대용' || item.type === '트라이크')) {
-                matched++; 
-            } else if (isSedan && item.foldedDims[0] <= 35) {
-                matched++; 
-            } else if (!isCompactOrFlight && !isSedan) {
-                // 패치: SUV라도 부피가 150L를 넘어가는 거대 유모차는 가산점을 주지 않음
-                const strollerVol = (item.foldedDims[0] * item.foldedDims[1] * item.foldedDims[2]) / 1000;
-                if (strollerVol < 150) matched++; 
-            } 
+
+        // 2. 🏡 환경: 계단 없는 빌라면 무게가 깡패
+        if (env === 'stairs' && item.specs.weight > 8.5) {
+            score -= 40; reasons.push(`계단 운반에 치명적인 무게 (${item.specs.weight}kg)`);
+        } else if (env === 'mall' && item.width >= 60) {
+            score -= 15; reasons.push(`실내 주행 시 좁은 길 불편 (너비 ${item.width}cm)`);
         }
-        
-        // 👶 3. 아기 성장 (스토케 버킷 시트 우량아 만점 방지 패치!)
-        if (baby !== 'all') { 
-            total++; 
-            if (baby === 'twins' && item.expand.includes('⭕')) matched += 2; 
-            else if (baby === 'newborn' && item.type === '디럭스') matched++; 
-            else if (baby === 'giant' && item.backrest >= 52) {
-                // 패치: 등받이가 길어도 '시트 분리형(V자 버킷시트)'이면 우량아에게 좁으므로 가산점 제외
-                if (!item.specs.folding.includes("시트 분리")) {
-                    matched++; 
-                }
+
+        // 3. 🚗 차/비행기 물리적 한계
+        if (car === 'flight') {
+            if (item.specs.cabin.includes('❌')) { 
+                score -= 50; reasons.push('기내 반입 불가 (무조건 화물 위탁)'); 
+            } else if (item.specs.cabin.includes('⚠️')) { 
+                score -= 15; reasons.push('항공사(LCC) 규정에 따라 기내 반입 거절 위험'); 
             }
+        } else if (car === 'ray' || car === 'casper') {
+            const vol = getVolume(item.foldedDims);
+            if (vol > 100) { score -= 30; reasons.push('경차 트렁크 적재 시 뒷좌석 폴딩 필수'); }
+        } else if (car !== 'all' && car !== 'flight') {
+            const vol = getVolume(item.foldedDims);
+            if (vol > 200) { score -= 20; reasons.push('세단/SUV 트렁크 공간을 과도하게 차지함'); }
         }
-        
-        // 🦴 4. 주 양육자 체력
-        if (parent !== 'all') { 
-            total++; 
-            if (parent === 'joint' && item.specs.weight <= 8.7) matched++; 
-            else if (parent === 'strong' && (item.type === '디럭스' || item.type === '쌍둥이' || item.type === '웨건')) matched++; 
+
+        // 4. 👶 아기 성장 / 뼈대
+        if (baby === 'newborn' && (item.type === '휴대용' || item.type === '트라이크')) {
+            score -= 30; reasons.push('디럭스/절충형에 비해 신생아 머리 흔들림 위험 노출');
+        } else if (baby === 'giant' && item.backrest < 50) {
+            score -= 15; reasons.push('우량아에게는 등받이나 시트가 좁게 느껴질 수 있음');
+        } else if (baby === 'twins' && !item.expand.includes('⭕') && item.type !== '쌍둥이' && item.type !== '웨건') {
+            score -= 60; reasons.push('쌍둥이/연년생 동반 탑승 절대 불가');
         }
-        
-        // 💰 5. 예산 한도
-        if (budget !== 'all') { 
-            total++; 
-            if (budget === 'under40' && item.price <= 400000) matched++; 
-            else if (budget === 'under100' && item.price <= 1100000) matched++; 
-            else if (budget === 'all') matched++; 
+
+        // 5. 🦴 부모 관절
+        if (parent === 'joint' && item.specs.weight >= 9.0) {
+            score -= 30; reasons.push(`약해진 손목에 무리가 가는 무게 (${item.specs.weight}kg)`);
         }
-        
-        let matchRate = total > 0 ? Math.max(5, Math.min(100, Math.round((matched / total) * 100))) : null;
-        return { ...item, originalIndex: index, matchRate: matchRate };
+
+        // 결과 합산
+        if (score === 100) reasons.push('선택하신 모든 라이프스타일 조건에 완벽히 부합합니다!');
+        if (score < 0) score = 0; // 최소 0점 방어
+
+        return { ...item, originalIndex: index, matchRate: score, matchReasons: reasons };
     });
 
     const activeFilters = Array.from(document.querySelectorAll('.stroller-filt-btn.active')).map(btn => btn.getAttribute('data-filter'));
@@ -419,7 +429,6 @@ function renderList(isUserAction = false) {
         });
     }
 
-    const isMatrixActive = (env !== 'all' || car !== 'all' || baby !== 'all' || parent !== 'all' || budget !== 'all');
     if (isMatrixActive) processedData.sort((a, b) => b.matchRate - a.matchRate);
 
     if(processedData.length === 0) { 
@@ -529,7 +538,7 @@ if (!Kakao.isInitialized()) {
 }
 
 function shareResult() {
-    const shareUrl = window.location.href; // 현재 유저가 설정한 필터값이 포함된 URL
+    const shareUrl = window.location.href; 
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
