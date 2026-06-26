@@ -491,7 +491,7 @@
             });
         }
 
-        document.getElementById("btn-submit").addEventListener("click", async () => {
+document.getElementById("btn-submit").addEventListener("click", async () => {
             const ans = document.getElementById("my-answer").value.trim();
             if(!ans) return alert("마음을 한 줄이라도 남겨주세요! 🥺");
 
@@ -505,6 +505,10 @@
             btn.innerText = "저장 중...";
             
             await setDoc(docRef, updateData, { merge: true });
+            
+            // ✨ 여기!! 저장(setDoc)이 무사히 끝나면 "오늘 썼음 도장"을 쾅! 찍습니다!
+            localStorage.setItem('diary_last_written', new Date().toISOString().split('T')[0]);
+
             btn.innerText = "답변 등록하기";
         });
 

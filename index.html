@@ -130,12 +130,9 @@
             <span style="font-size: 14px; font-weight: 900; color: #FFF; background: #F04452; padding: 8px 14px; border-radius: 12px; box-shadow: 0 2px 4px rgba(240, 68, 82, 0.2);">긴급호출</span>
         </div>
 
-        <div class="diary-card" onclick="window.location.href='diary.html'">
-            <div>
-                <h3 class="diary-card-title"><span style="font-size: 1.3rem;">💌</span> 육아 문답</h3>
-                <p class="diary-card-desc">하루 한 줄, 오늘 우리 아기와의 기억 </p>
-            </div>
-            <div class="diary-card-btn">기록하기 ❯</div>
+<!-- 💌 육아 문답 카드 (JS가 상태를 보고 내용을 바꿔치기합니다) -->
+        <div id="home-diary-card" class="diary-card" style="display: block; cursor: default; transition: 0.2s;">
+            <!-- 내용은 자바스크립트가 알아서 채웁니다! -->
         </div>
 
         <div class="diary-card play-card" style="position: relative; overflow: hidden; min-height: 140px; display: flex; flex-direction: column; justify-content: center;">
