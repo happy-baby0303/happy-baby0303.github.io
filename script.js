@@ -1210,62 +1210,40 @@ function updateHomeDashboard() {
     const feverRecords = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     const feverText = document.getElementById('db-fever-text');
     
+// 🌡️ 해열제 위젯 로직 교체
     if (feverRecords.length > 0) {
         const latest = feverRecords[0];
-        let trendHtml = "";
+        let color = "#191F28";
+        let subText = "정상 체온";
         
-        // 1. 입체적 분석: 이전 기록과 비교 (공백 채우기 핵심!)
-        if (feverRecords.length > 1) {
-            const prev = feverRecords[1];
-            const diff = (latest.temp - prev.temp).toFixed(1);
-            const icon = diff > 0 ? "📈 상승" : (diff < 0 ? "📉 하락" : "➡️ 보합");
-            trendHtml = `<div style="font-size:12px; opacity:0.8; margin-top:4px;">이전 기록 대비 <b>${Math.abs(diff)}℃ ${icon}</b></div>`;
-        }
+        if (latest.temp >= 38.0) { color = "#E32636"; subText = "고열 주의"; } 
+        else if (latest.temp >= 37.5) { color = "#F59E0B"; subText = "미열"; }
 
-        // 2. 상태별 UI 구성 (밀도 높이기)
-        if (latest.temp >= 38.0) {
-            feverText.innerHTML = `
-                <div style="font-size:20px; font-weight:900; margin-bottom:4px;">🚨 고열 주의: ${latest.temp}℃</div>
-                <div style="font-size:13px; font-weight:700;">${latest.time} 측정 / 지금 즉시 해열제 복용을 고려하세요.</div>
-                ${trendHtml}
-            `;
-            feverText.style.color = "#E32636";
-        } else if (latest.temp >= 37.5) {
-            feverText.innerHTML = `
-                <div style="font-size:20px; font-weight:900; margin-bottom:4px;">⚠️ 미열 주의: ${latest.temp}℃</div>
-                <div style="font-size:13px; font-weight:700;">${latest.time} 측정 / 가벼운 옷차림과 수분 섭취가 필요해요.</div>
-                ${trendHtml}
-            `;
-            feverText.style.color = "#F59E0B";
-        } else {
-            feverText.innerHTML = `
-                <div style="font-size:20px; font-weight:900; margin-bottom:4px;">🤍 정상 체온: ${latest.temp}℃</div>
-                <div style="font-size:13px; font-weight:700;">${latest.time} 측정 / 우리 아기 컨디션 아주 좋아요!</div>
-                ${trendHtml}
-            `;
-            feverText.style.color = "#4E5968";
-        }
+        feverText.innerHTML = `
+            <div style="font-size:24px; font-weight:900; color:${color}; letter-spacing:-0.5px;">${latest.temp}<span style="font-size:16px; margin-left:2px;">℃</span></div>
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-top:4px;">${subText} <span style="opacity:0.6; font-weight:600;">(${latest.time})</span></div>
+        `;
     } else {
-        feverText.innerHTML = `<div style="padding:10px 0;">아직 측정된 체온 기록이 없습니다.<br>아이의 건강을 위해 첫 기록을 시작해 보세요! 🤍</div>`;
-        feverText.style.color = "#4E5968";
+        feverText.innerHTML = `<div style="font-size:13px; font-weight:800; color:#8B95A1;">체온을<br>기록해주세요</div>`;
     }
 
-    // 2. 가계부 로직 (기존과 동일)
+    // 💰 목표 저금통 위젯 로직 교체
     const ledgerCard = document.getElementById('db-ledger-card');
     if (ledgerCard) {
-        const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "목표 사기", goalAmount: 100000 };
-        const saved = localStorage.getItem('tosil_baby');
-        const babyName = saved ? JSON.parse(saved).name : "우리아기";
-        
+        const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "목표 설정하기", goalAmount: 100000 };
         const targetAmount = ledger.goalAmount || 100000;
         const percent = Math.min(Math.round((ledger.savedTotal / targetAmount) * 100), 100);
+        const goalName = ledger.goal || '공동 목표';
         
         const textEl = document.getElementById('db-ledger-text');
         const progressWrap = document.getElementById('db-ledger-progress-wrap');
         const progressBar = document.getElementById('db-ledger-progress-bar');
         
         if(textEl) {
-            textEl.innerHTML = `🎉 <strong>${babyName}의 ${ledger.goal || '공동목표'}</strong>까지 <strong>${percent}%</strong> 달성 완료!<br><span style="font-size:12.5px; color:#8B95A1; font-weight:700; display:inline-block; margin-top:4px;">(${(ledger.savedTotal).toLocaleString()}원 / ${(targetAmount).toLocaleString()}원 모음) 조금만 더 화이팅! 🔥</span>`;
+            textEl.innerHTML = `
+                <div style="font-size:22px; font-weight:900; color:#191F28; letter-spacing:-0.5px; margin-bottom:4px;">${percent}%</div>
+                <div style="font-size:12px; font-weight:800; color:var(--text-s); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${goalName}</div>
+            `;
         }
         if(progressWrap && progressBar) {
             progressWrap.style.display = 'block';
@@ -2123,9 +2101,20 @@ window.openTrackerSheet = function(type) {
     
     overlay.style.display = 'block'; setTimeout(() => { content.style.transform = 'translateY(0)'; }, 10);
     
+    // ✨ 핵심: 현재 시간을 가져와서 시간 수정 입력창 만들기
+    const now = new Date();
+    const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const timeInputHtml = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 기록할까요? (터치하여 시간 수정)</div>
+            <input type="time" id="v-tracker-time" value="${currentTimeStr}" style="border:none; background:#F2F5F8; padding:8px 16px; border-radius:12px; font-size:18px; font-weight:900; color:var(--primary); outline:none;">
+        </div>
+    `;
+    
     if (type === 'feed') {
         title.innerHTML = '🍼 수유 기록하기';
-        body.innerHTML = `
+        // ✨ 수유창에 시간 입력창 추가
+        body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">분유</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">모유</button>
@@ -2140,7 +2129,9 @@ window.openTrackerSheet = function(type) {
             </div>
         `;
         if(saveBtn) saveBtn.style.display = 'block';
+
     } else if (type === 'sleep') {
+        // 수면 코드는 기존과 동일 (실시간 타이머라 시간 수정 불필요)
         title.innerHTML = '💤 수면 기록하기';
         const sleepStart = localStorage.getItem('tosil_sleep_start');
         if (sleepStart) {
@@ -2172,7 +2163,8 @@ window.openTrackerSheet = function(type) {
         }
     } else if (type === 'diaper') {
         title.innerHTML = '💩 기저귀 기록하기';
-        body.innerHTML = `
+        // ✨ 기저귀 창에도 시간 입력창 추가
+        body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_pee')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">소변</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_poop')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">대변</button>
@@ -2227,16 +2219,31 @@ window.stopSleepTimer = function() {
 window.saveTrackerRecord = function() {
     if(!window.trackerState.type) return;
 
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    let record = { id: 'trk_'+now.getTime(), time: timeStr, timestamp: now.getTime(), type: window.trackerState.type };
+    // ✨ 핵심: 사용자가 팝업에서 수정한 시간을 긁어옵니다!
+    let timeStr = "";
+    let timestamp = new Date().getTime();
+    const timeInputEl = document.getElementById('v-tracker-time');
+    
+    if(timeInputEl && timeInputEl.value) {
+        timeStr = timeInputEl.value; // "14:30" 형태
+        const [hours, minutes] = timeStr.split(':');
+        const d = new Date();
+        d.setHours(hours); d.setMinutes(minutes); d.setSeconds(0);
+        timestamp = d.getTime(); // 수정한 시간의 timestamp를 저장!
+    } else {
+        // 수면 타이머처럼 시간 수정창이 없는 경우 현재 시간
+        const now = new Date();
+        timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    }
+
+    let record = { id: 'trk_'+new Date().getTime(), time: timeStr, timestamp: timestamp, type: window.trackerState.type };
 
     if (window.trackerState.type === 'feed') {
         if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요!');
         const amt = document.getElementById('v-feed-amount').value;
         if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요!');
         record.subType = window.trackerState.subType;
-        record.amount = amt;
+        record.amount = parseInt(amt);
     } 
     else if (window.trackerState.type === 'diaper') {
         if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요!');
@@ -2245,7 +2252,11 @@ window.saveTrackerRecord = function() {
     }
 
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-    records.unshift(record);
+    records.push(record);
+    
+    // ✨ 핵심: 과거 시간을 입력했을 수도 있으니, 시간(timestamp) 순서대로 타임라인을 예쁘게 재정렬!
+    records.sort((a, b) => b.timestamp - a.timestamp);
+    
     if(records.length > 100) records.pop();
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
 
@@ -2357,7 +2368,7 @@ window.updateTrackerDashboard = function() {
             historyHtml += '</div>';
             historyHtml += `<div style="display:flex; gap:8px; margin-top:16px;">
                 <button class="btn-main" onclick="window.resetTrackerRecords()" style="flex:1; background:#FFF0F1 !important; color:#F04452 !important; border:1px solid #FFE3E3 !important; box-shadow:none !important; font-size:13px; padding:12px; border-radius:12px; margin:0;">🗑️ 전체 삭제</button>
-                <button class="btn-main" onclick="window.toggleTrackerHistory()" style="flex:1; margin:0; font-size:13px; padding:12px; border-radius:12px; box-shadow:none !important;">접기 닫기 〉</button>
+                <button class="btn-main" onclick="window.toggleTrackerHistory()" style="flex:1; margin:0; font-size:13px; padding:12px; border-radius:12px; box-shadow:none !important;"> 닫기 〉</button>
             </div>`;
             container.innerHTML = historyHtml;
         }
