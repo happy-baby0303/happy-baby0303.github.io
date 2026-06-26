@@ -1,37 +1,29 @@
 // ==========================================
-// 🍼 육아메이트 플랫폼 엔진 V3.2 (bottle/app.js)
-// (메인화면 글로벌 데이터 자동 동기화 적용)
+// 🍼 육아메이트 플랫폼 엔진 V3.6 (bottle/app.js)
+// (매칭률에 따른 카드 테두리 및 뱃지 컬러 차등 적용)
 // ==========================================
 
 let isFavViewMode = false; 
 
-// 🚀 1. 메인 화면 데이터(tosil_startDate) 자동 동기화 로직
+// 🚀 1. 메인 화면 데이터 자동 동기화
 function applyGlobalBabyProfile() {
-    // 대표님의 메인 로직에서 저장한 Key 값 불러오기
     const birthStr = localStorage.getItem('tosil_startDate');
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
-    
-    if(!birthStr) return; // 저장된 데이터가 없으면 그냥 패스 (기본 전체 검색)
+    if(!birthStr) return; 
     
     const birthDate = new Date(birthStr);
     const today = new Date();
-    
-    let months = (today.getFullYear() - birthDate.getFullYear()) * 12;
-    months -= birthDate.getMonth();
-    months += today.getMonth();
-    if (months < 0) months = 0; // 출산 예정일인 경우 0개월 처리
+    let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+    if (months < 0) months = 0; 
 
-    // 👶 개월 수에 따른 젖병 월령 필터 매핑
     let ageFilter = 'all';
     if (months <= 3) { ageFilter = 'newborn'; }
     else if (months <= 6) { ageFilter = 'infant'; }
     else { ageFilter = 'toddler'; }
 
-    // HTML 필터 강제 변경
     const ageSelect = document.getElementById('filter-age');
     if(ageSelect) ageSelect.value = ageFilter;
 
-    // 성공 알림 배너 띄우기
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
         banner.style.display = 'flex';
@@ -91,34 +83,87 @@ function renderFavorites() {
     const favorites = JSON.parse(localStorage.getItem('favBottles')) || [];
 
     if (favorites.length === 0) {
-        resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">💔</div><div class="empty-text"><b>아직 찜한 젖병이 없어요!</b><span>마음에 드는 젖병에 하트(❤️)를 눌러보세요.</span></div></div>`;
+        resultArea.innerHTML = `<div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px;"><div class="empty-icon" style="font-size:40px; margin-bottom:12px;">💔</div><div class="empty-text"><b>아직 찜한 젖병이 없어요!</b><br><span style="font-size:13px; color:#8B95A1;">마음에 드는 젖병에 하트(❤️)를 눌러보세요.</span></div></div>`;
         return;
     }
 
     let favItems = bottleData.filter(item => favorites.includes(item.id));
-    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #E32636; margin-bottom: 16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>`;
-    htmlOutput += favItems.map(item => generateCardHTML(item, favorites)).join('');
+    let htmlOutput = `<div style="font-size: 16px; font-weight: 900; color: #E32636; margin-bottom: 16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>`;
+    htmlOutput += favItems.map(item => generateCardHTML({ ...item, matchRate: null })).join('');
     resultArea.innerHTML = htmlOutput;
 }
 
-function generateCardHTML(item, favorites) {
+// 🚀 4. 카드 생성 (✨ 매칭률에 따른 컬러 완전 분리 ✨)
+function generateCardHTML(item) {
+    const favorites = JSON.parse(localStorage.getItem('favBottles')) || [];
     const isFav = favorites.includes(item.id);
     const heartIcon = isFav ? '❤️ 찜 해제' : '🤍 찜하기';
     const heartColor = isFav ? '#FFF2F2' : '#F2F4F6';
     const heartText = isFav ? '#E32636' : '#4E5968';
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
+    // ✨ 동적 컬러 변수 세팅
+    let cardBorderColor = '#D1D5DB'; // 기본 회색
+    let scoreHtml = "";
+    let aiReportHtml = '';
+
+    if (item.matchRate !== null && !isFavViewMode && item.matchRate !== undefined) {
+        let titleColor, bgColor, borderColor, titleText;
+        
+        // 100점: 파란색 (Premium)
+        if (item.matchRate === 100) {
+            titleColor = '#1B64DA'; bgColor = '#F0F7FF'; borderColor = '#3182F6';
+            cardBorderColor = '#3182F6';
+            titleText = '🟢 최적합 (Premium Match)';
+        // 80점 이상: 녹색 (Good)
+        } else if (item.matchRate >= 80) {
+            titleColor = '#059669'; bgColor = '#ECFDF5'; borderColor = '#10B981';
+            cardBorderColor = '#10B981';
+            titleText = '🍀 우수 (Good Match)';
+        // 50점 이상: 주황색 (Warning)
+        } else if (item.matchRate >= 50) {
+            titleColor = '#B78103'; bgColor = '#FFF9E6'; borderColor = '#F59E0B';
+            cardBorderColor = '#F59E0B';
+            titleText = '⚠️ 타협 필요 (Conditional)';
+        // 50점 미만: 빨간색 (Danger)
+        } else {
+            titleColor = '#D32F2F'; bgColor = '#FFF0F1'; borderColor = '#F04452';
+            cardBorderColor = '#F04452';
+            titleText = '❌ 비추천 (Mismatch)';
+        }
+
+        scoreHtml = `<div style="font-size:14px; font-weight:800; color:${titleColor}; margin-top:4px;">매칭률 ${item.matchRate}%</div>`;
+
+        let reasonLi = item.matchRate === 100 
+            ? `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`
+            : item.matchReasons.map(r => `<li style="margin-bottom:4px;">🚨 <b>${r}</b></li>`).join('');
+
+        aiReportHtml = `
+            <div style="background:${bgColor}; border:1px solid ${borderColor}; padding:14px; border-radius:8px; margin-bottom:16px;">
+                <h4 style="color:${titleColor}; margin:0 0 6px 0; font-size:13px;">${titleText}</h4>
+                <ul style="margin:0; padding-left:20px; font-size:12.5px; color:${titleColor}; line-height:1.5;">${reasonLi}</ul>
+            </div>`;
+    }
+
+    // 찜 화면일 때는 테두리를 빨간색으로 고정
+    if (isFavViewMode) cardBorderColor = '#E32636';
+
     return `
-        <div class="stroller-card" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : '#3182F6'}; margin-bottom: 24px;">
+        <div class="stroller-card" style="border-top: 4px solid ${cardBorderColor}; margin-bottom: 24px; padding: 20px; background:#FFF; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
-                <div style="font-size: 18px; font-weight: 900; color: #191F28;">${item.brand} ${item.name}</div>
+                <div>
+                    <div style="font-size: 18px; font-weight: 900; color: #191F28;">${item.brand} ${item.name}</div>
+                    ${scoreHtml}
+                </div>
                 <button id="fav-btn-${item.id}" onclick="toggleFavorite('${item.id}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s;">
                     ${heartIcon}
                 </button>
             </div>
             
+            ${aiReportHtml}
+
             <div style="background: #F2F4F6; padding: 14px; border-radius: 8px; font-size: 13px; color: #333D4B; margin-bottom: 16px; line-height: 1.5;">
-                <b style="color:#191F28;">💡 AI 큐레이션 포인트:</b><br>${item.desc}
+                <b style="color:#191F28;">💡 큐레이션 포인트:</b><br>${item.desc}
             </div>
             
             <ul style="margin: 0 0 16px 0; padding-left: 20px; font-size: 13px; color: #4E5968; line-height: 1.8; font-weight: 600;">
@@ -139,7 +184,7 @@ function generateCardHTML(item, favorites) {
 }
 
 // ----------------------------------------------------
-// 기존 젖병 필터 엔진 로직
+// 🚀 5. 강력한 AI 감점 엔진
 // ----------------------------------------------------
 function runBottleEngine() {
     if (isFavViewMode) return; 
@@ -153,44 +198,72 @@ function runBottleEngine() {
     const sterilization = document.getElementById('filter-sterilization')?.value || 'all';
     
     const resultArea = document.getElementById('bottle-result-area');
-    const favorites = JSON.parse(localStorage.getItem('favBottles')) || []; 
+    const isFilterActive = (age !== 'all' || rejection !== 'all' || material !== 'all' || antiColic !== 'all' || compatible !== 'all' || price !== 'all' || sterilization !== 'all');
 
-    let filtered = bottleData.filter(item => {
-        if (age !== 'all' && (!item.age || !item.age.includes(age))) return false;
-        if (rejection === 'super' && item.rejection !== 'super') return false;
-        if (material !== 'all' && item.material !== material) return false;
-        if (antiColic !== 'all') {
-            if (antiColic === 'yes' && item.antiColic === 'normal') return false; 
-            if (antiColic === 'super' && item.antiColic !== 'super') return false; 
+    let processedData = bottleData.map(item => {
+        if (!isFilterActive) return { ...item, matchRate: null, matchReasons: [] };
+
+        let score = 100;
+        let reasons = [];
+
+        if (age !== 'all' && (!item.age || !item.age.includes(age))) { 
+            score -= 30; reasons.push('선택하신 아기 월령에 부적합합니다.'); 
         }
-        if (compatible !== 'all' && item.compatible !== compatible) return false;
-        if (price !== 'all' && item.price !== price) return false;
-        if (sterilization !== 'all' && item.wash !== sterilization) return false;
-        return true;
+        if (rejection === 'super' && item.rejection !== 'super') { 
+            score -= 40; reasons.push('젖꼭지 거부가 심한 아기에게는 추천하지 않습니다.'); 
+        }
+        if (material !== 'all' && item.material !== material) { 
+            score -= 20; reasons.push('선호하시는 젖병 소재와 일치하지 않습니다.'); 
+        }
+        if (antiColic === 'super' && item.antiColic !== 'super') { 
+            score -= 40; reasons.push('영아산통(배앓이) 완벽 차단 기능이 부족합니다.'); 
+        } else if (antiColic === 'yes' && item.antiColic === 'normal') {
+            score -= 20; reasons.push('일반적인 젖병으로 배앓이 특화 구조가 아닙니다.'); 
+        }
+        if (compatible === 'yes' && item.compatible !== 'yes') { 
+            score -= 30; reasons.push('더블하트/모유실감 젖꼭지와 호환되지 않습니다.'); 
+        }
+        if (sterilization === 'uv' && item.wash === 'normal') { 
+            score -= 20; reasons.push('UV 소독기 지속 사용 시 변색이나 균열 위험이 있습니다.'); 
+        }
+        if (sterilization === 'easy' && item.wash === 'uv') { 
+            score -= 15; reasons.push('입구가 좁거나 부품이 많아 설거지가 번거로운 편입니다.'); 
+        }
+        if (price !== 'all' && item.price !== price) { 
+            score -= 20; reasons.push('선택하신 가격대와 일치하지 않습니다.'); 
+        }
+
+        if(score < 0) score = 0;
+        if(score === 100) reasons.push('✨ 선택하신 모든 조건에 완벽하게 부합합니다!');
+
+        return { ...item, matchRate: score, matchReasons: reasons };
     });
 
-    if (filtered.length === 0) {
+    if (isFilterActive) processedData.sort((a, b) => b.matchRate - a.matchRate);
+
+    if (processedData.length === 0) {
         resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">🍼</div><div class="empty-text"><b>조건에 완벽하게 맞는 젖병이 없습니다.</b><span>초기화 버튼을 누르거나 필터를 완화해 보세요!</span></div></div>`;
-    } else {
-        let shuffled = filtered.sort(() => 0.5 - Math.random()); 
-        let top3Results = shuffled.slice(0, 3); 
-        let otherResults = shuffled.slice(3); 
-
-        let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #191F28; margin-bottom: 16px;">✨ AI 맞춤 젖병 세트 추천 TOP ${top3Results.length}</div>`;
-        htmlOutput += top3Results.map(item => generateCardHTML(item, favorites)).join('');
-
-        if (otherResults.length > 0) {
-            htmlOutput += `
-                <button id="bottle-show-more-btn" onclick="toggleBottleOthers()" style="display: block; width: 100%; padding: 16px; margin-top: 8px; margin-bottom: 24px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 14px; font-size: 14px; font-weight: 700; color: #4E5968; cursor: pointer;">
-                    나머지 ${otherResults.length}개 결과 보기 ▾
-                </button>
-                <div id="bottle-other-area" style="display:none; flex-direction: column;">
-                    ${otherResults.map(item => generateCardHTML(item, favorites)).join('')}
-                </div>
-            `;
-        }
-        resultArea.innerHTML = htmlOutput;
+        return;
     }
+
+    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #191F28; margin-bottom: 16px;">✨ AI 맞춤 젖병 리포트</div>`;
+    
+    let top3Results = processedData.slice(0, 3); 
+    let otherResults = processedData.slice(3); 
+    
+    htmlOutput += top3Results.map(item => generateCardHTML(item)).join('');
+
+    if (otherResults.length > 0) {
+        htmlOutput += `
+            <button id="bottle-show-more-btn" onclick="toggleBottleOthers()" style="display: block; width: 100%; padding: 16px; margin-top: 8px; margin-bottom: 24px; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 14px; font-size: 14px; font-weight: 700; color: #4E5968; cursor: pointer;">
+                나머지 ${otherResults.length}개 결과 보기 ▾
+            </button>
+            <div id="bottle-other-area" style="display:none; flex-direction: column;">
+                ${otherResults.map(item => generateCardHTML(item)).join('')}
+            </div>
+        `;
+    }
+    resultArea.innerHTML = htmlOutput;
 }
 
 function toggleBottleOthers() {
@@ -219,7 +292,6 @@ if (!Kakao.isInitialized()) {
 }
 
 function shareToHusband(searchKeyword) {
-    // 🍼 프레시 링크 삭제! -> 누르면 해당 '젖병 이름'으로 쿠팡 자동 검색되도록 똑똑하게 변경!
     const myCoupangLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(searchKeyword + ' 젖병')}`; 
     
     Kakao.Share.sendDefault({
@@ -227,7 +299,7 @@ function shareToHusband(searchKeyword) {
         content: {
             title: '여보! 우리 아기 젖병 이걸로 결정했어 🍼',
             description: `배앓이 오기 전에 세트로 쟁여놔줘! ❤️\n👉 추천 모델: ${searchKeyword}`,
-            imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png', // 썸네일 이미지
+            imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
             link: { mobileWebUrl: myCoupangLink, webUrl: myCoupangLink },
         },
         buttons: [
@@ -240,7 +312,6 @@ document.querySelectorAll('.matrix-panel select').forEach(select => {
     select.addEventListener('change', runBottleEngine);
 });
 
-// 🚀 페이지 로드 시: 동기화(applyGlobalBabyProfile) 먼저 하고 -> 엔진 실행!
 window.onload = () => { 
     applyGlobalBabyProfile(); 
     runBottleEngine(); 
