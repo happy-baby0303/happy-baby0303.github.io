@@ -543,6 +543,40 @@ window.addDailyExpense = addDailyExpense;
 window.saveGoal = saveGoal;
 window.resetMoneyAll = resetMoneyAll;
 
+// ==========================================
+// 🛍️ 스마트 핫딜 판독기 (나의 역대 최저가 갱신 시스템)
+// ==========================================
+
+const ITEM_UNITS = { diaper: '장', wipe: '팩', milk: '통' };
+
+// 카테고리 변경 시 내가 저장한 '최저가' 불러오기 & 수량 단위 텍스트 변경
+function loadPastPrice() {
+    const cat = document.getElementById('hd-category').value;
+    const pastPrice = localStorage.getItem('tosil_hd_best_' + cat);
+    const inputEl = document.getElementById('hd-standard-price');
+    const badgeEl = document.getElementById('hd-past-badge');
+    
+    // ✨ [버그 수정 완료] MARKET_STANDARD 대신 ITEM_UNITS 로 정상 호출!
+    const unitLabelEl = document.getElementById('hd-unit-label');
+    if (unitLabelEl && ITEM_UNITS[cat]) {
+        unitLabelEl.innerText = ITEM_UNITS[cat];
+    }
+
+    if (pastPrice) {
+        inputEl.value = pastPrice;
+        badgeEl.style.display = 'inline-block';
+    } else {
+        inputEl.value = '';
+        badgeEl.style.display = 'none';
+    }
+}
+window.loadPastPrice = loadPastPrice; // HTML에서 안전하게 호출되도록 전역 등록
+
+// 앱 켤 때 핫딜 초기값 로딩
+document.addEventListener("DOMContentLoaded", () => {
+    if(typeof loadPastPrice === 'function') loadPastPrice();
+});
+
 function calcHotDeal() {
     const cat = document.getElementById('hd-category').value;
     const price = Number(document.getElementById('hd-total-price').value.replace(/,/g,''));
@@ -556,35 +590,48 @@ function calcHotDeal() {
     
     const verdictEl = document.getElementById('hd-verdict');
     const commentEl = document.getElementById('hd-comment');
-    
-    let unitName = "장";
-    if (cat === 'wipe') unitName = "팩";
-    else if (cat === 'milk') unitName = "통";
-    
+    const unitName = ITEM_UNITS[cat];
+
     if (pastPrice > 0) {
-        const diff = pastPrice - unitPrice;
-        if (diff > 0) {
-            verdictEl.innerText = `🎉 지난번보다 ${unitName}당 ${diff.toLocaleString()}원 저렴해요!`;
+        const diffPast = pastPrice - unitPrice;
+        
+        if (diffPast > 0) {
+            verdictEl.innerHTML = `🎉 역대 최저가 갱신! 1${unitName}당 <span style="color:#FFF; font-weight:900;">${diffPast.toLocaleString()}원 더 싸요!</span>`;
             verdictEl.style.backgroundColor = "#00B37A"; 
-            commentEl.innerText = `총 ${count}${unitName}를 사니까, 지난번 구매할 때보다 총 ${(diff * count).toLocaleString()}원 아끼는 셈이에요. 아주 훌륭한 소비입니다!`;
-        } else if (diff < 0) {
-            verdictEl.innerText = `⚠️ 지난번보다 ${unitName}당 ${Math.abs(diff).toLocaleString()}원 비싸요.`;
+            commentEl.innerHTML = `기존 내 기록 대비 총 <strong>${(diffPast * count).toLocaleString()}원을 아꼈습니다!</strong> 역대급 핫딜 방어 성공! 👏`;
+            // 더 싸게 샀으므로 최저가 기록 갱신!
+            localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
+        } else if (diffPast < 0) {
+            verdictEl.innerHTML = `⚠️ 내 최저가보다 1${unitName}당 <span style="color:#FFF; font-weight:900;">${Math.abs(diffPast).toLocaleString()}원 비싸요.</span>`;
             verdictEl.style.backgroundColor = "#F04452"; 
-            commentEl.innerText = `이번에 사면 지난번보다 총 ${(Math.abs(diff) * count).toLocaleString()}원 더 지출하게 됩니다. 급한 게 아니라면 조금 더 기다려보는 건 어떨까요?`;
+            commentEl.innerHTML = `이전에 제일 싸게 샀을 때보다 <strong>총 ${(Math.abs(diffPast) * count).toLocaleString()}원 손해</strong>입니다. 수량이 급한 게 아니라면 조금 더 기다려보세요! 🤔`;
+            // 비싸게 샀으므로 최저가 기록은 갱신하지 않음
         } else {
-            verdictEl.innerText = `⚖️ 지난번 구매가와 완벽히 똑같아요!`;
+            verdictEl.innerHTML = `⚖️ 역대 최저가 방어 성공!`;
             verdictEl.style.backgroundColor = "#3182F6"; 
-            commentEl.innerText = "평소 사시던 가격 그대로네요. 필요하다면 지금 구매하셔도 좋습니다.";
+            commentEl.innerHTML = `이전에 가장 싸게 샀던 그 가격 그대로네요! 이번에도 스마트하게 잘 사셨습니다. 👍`;
         }
     } else {
-        verdictEl.innerText = `✅ 정확한 단가 계산 완료!`;
+        // 과거 기록이 아예 없는 첫 계산일 때
+        verdictEl.innerHTML = `✅ 첫 핫딜 기준가 등록 완료!`;
         verdictEl.style.backgroundColor = "#3182F6"; 
-        commentEl.innerText = `복잡한 쿠폰/할인 다 합쳐서 결국 1${unitName}당 ${unitPrice.toLocaleString()}원에 사시는 겁니다!`;
+        commentEl.innerHTML = `복잡한 쿠폰을 다 합친 최종 체감가는 1${unitName}당 <strong>${unitPrice.toLocaleString()}원</strong>입니다. 이 가격을 내 '역대 최저가'로 기록해 둘게요! 📝`;
+        // 첫 계산값을 기준 최저가로 등록
+        localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
     }
     
     verdictEl.style.color = "#FFF";
     const hdRes = document.getElementById('hd-result'); if(hdRes) hdRes.style.display = 'block';
-    document.getElementById('hd-action-area').innerHTML = `<button class="btn-main" style="margin-top:16px; background:#3182F6 !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(49,130,246,0.2) !important; padding:14px; font-size:14.5px; font-weight:800; border-radius:12px;" onclick="sendHotdealToLedger(${price}, '${cat}')">💰 이번 핫딜 지출 (${price.toLocaleString()}원) 가계부로 보내기 〉</button>`;
+    
+    document.getElementById('hd-action-area').innerHTML = `
+        <button class="btn-main" style="margin-top:20px; background:#191F28 !important; color:#FFF !important; border:none !important; box-shadow:none !important; padding:16px; font-size:14.5px; font-weight:800; border-radius:14px; width:100%;" onclick="sendHotdealToLedger(${price}, '${cat}')">
+            💰 ${price.toLocaleString()}원 가계부 지출로 연동하기 〉
+        </button>
+    `;
+    
+    // 계산 버튼 누르면 배지 띄워서 갱신/저장됐음을 알림
+    document.getElementById('hd-past-badge').style.display = 'inline-block';
+    loadPastPrice(); // 저장된 최저가로 input 창 최신화
 }
 
 async function sendHotdealToLedger(price, cat) {
@@ -606,11 +653,9 @@ async function sendHotdealToLedger(price, cat) {
     ledger.history.unshift({ time: timeStr, amount: price, type: 'expense' });
     
     await saveLedgerToFirebase(ledger);
-    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부에 자동 연동되었습니다!\n\n가계부 패널 하단의 [열어보기 ▾]를 눌러 카테고리별 정밀 소비 차트를 갱신하세요!`);
+    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부에 자동 연동되었습니다!\n가계부 패널을 열어 카테고리별 차트를 갱신해 보세요.`);
     directGoToolbox('money');
 }
-window.calcHotDeal = calcHotDeal;
-window.sendHotdealToLedger = sendHotdealToLedger;
 
 // ==========================================
 // 5. 스마트 해열제 타이머 엔진 (실시간 연동형)
@@ -1581,6 +1626,94 @@ function startCubeRealtimeSync() {
 
 // 전역에 연결해두어 window.onload에서 실행되게 만듦
 window.startCubeRealtimeSync = startCubeRealtimeSync;
+
+// ==========================================
+// 🧊 [안심 큐브 냉장고] 자주 쓰는 재료 커스텀 편집 엔진
+// ==========================================
+let isCubeQuickEditMode = false;
+const DEFAULT_CUBE_QUICKS = [
+    {cat: 'meat', name: '소고기'}, {cat: 'meat', name: '닭고기'},
+    {cat: 'veg', name: '애호박'}, {cat: 'veg', name: '브로콜리'}, {cat: 'veg', name: '양배추'}
+];
+
+function renderCubeQuicks() {
+    const container = document.getElementById('cube-quick-container');
+    if(!container) return;
+    
+    let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks'));
+    if(!quicks || quicks.length === 0) {
+        quicks = DEFAULT_CUBE_QUICKS;
+        localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
+    }
+
+    let html = '';
+    quicks.forEach((q, index) => {
+        const isMeat = q.cat === 'meat';
+        const bg = isMeat ? '#FFF0F1' : '#ECFDF5';
+        const color = isMeat ? '#D32F2F' : '#059669';
+        const border = isMeat ? '#FFE3E3' : '#A7F3D0';
+        const icon = isMeat ? '🥩' : '🥦';
+
+        if (isCubeQuickEditMode) {
+            // 🛠️ 편집 모드: 누르면 삭제됨 (회색 바탕에 X 표시)
+            html += `<button onclick="deleteCubeQuick(${index})" style="flex-shrink:0; padding:8px 14px; background:#F2F4F6; color:#8B95A1; border:1px dashed #D1D6DB; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; transition:0.2s;">${q.name} ❌</button>`;
+        } else {
+            // ✅ 일반 모드: 누르면 자동 입력
+            html += `<button onclick="setCubeQuick('${q.cat}', '${q.name}')" style="flex-shrink:0; padding:8px 14px; background:${bg}; color:${color}; border:1px solid ${border}; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; transition:0.2s;">${icon} ${q.name}</button>`;
+        }
+    });
+
+    if (isCubeQuickEditMode) {
+        // 편집 모드일 때 맨 끝에 [+ 새 재료 추가] 버튼 생성
+        html += `<button onclick="addCubeQuick()" style="flex-shrink:0; padding:8px 14px; background:#E8F3FF; color:#3182F6; border:1px dashed #3182F6; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">+ 새 재료 추가</button>`;
+    }
+
+    container.innerHTML = html;
+}
+
+function toggleCubeQuickEdit() {
+    isCubeQuickEditMode = !isCubeQuickEditMode;
+    renderCubeQuicks();
+}
+
+function deleteCubeQuick(index) {
+    if(!confirm("이 재료를 퀵버튼에서 삭제할까요?")) return;
+    let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks')) || [];
+    quicks.splice(index, 1);
+    localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
+    renderCubeQuicks();
+}
+
+function addCubeQuick() {
+    const name = prompt("추가할 자주 쓰는 재료의 이름을 입력하세요.\n(예: 단호박, 대구살, 오트밀 등)");
+    if(!name || !name.trim()) return;
+    
+    // 고기/단백질인지, 채소/탄수화물인지 물어봄 (아이콘/색상 세팅용)
+    const isMeat = confirm(`[${name}]\n이 재료는 고기/단백질류 인가요?\n\n- 고기면 [확인]\n- 채소면 [취소]를 눌러주세요.`);
+    const cat = isMeat ? 'meat' : 'veg';
+    
+    let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks')) || [];
+    quicks.push({cat: cat, name: name.trim()});
+    localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
+    renderCubeQuicks();
+}
+
+function setCubeQuick(cat, name) {
+    document.getElementById('cube-category').value = cat;
+    document.getElementById('cube-name').value = name;
+    document.getElementById('cube-qty').focus(); // 자동 스크롤&커서
+}
+
+window.renderCubeQuicks = renderCubeQuicks;
+window.toggleCubeQuickEdit = toggleCubeQuickEdit;
+window.deleteCubeQuick = deleteCubeQuick;
+window.addCubeQuick = addCubeQuick;
+window.setCubeQuick = setCubeQuick;
+
+// 🚀 앱 켤 때 퀵버튼 자동으로 그려주기
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(renderCubeQuicks, 100);
+});
 
 // ==========================================
 // 💌 [부부 육아 바통터치 엔진] (버그 완벽 수정본)
