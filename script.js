@@ -328,11 +328,11 @@ function drawDonutChart(d, f, e) {
     currentDonutChart = new Chart(ctx, { 
         type: 'doughnut', 
         data: { 
-            labels: ['기저귀/위생', '분유/이유식', '장난감/기타'], 
-            datasets: [{ data: [d, f, e], backgroundColor: ['#3182F6', '#56D364', '#FFCF54'], borderWidth: 0, hoverOffset: 6 }] 
+            labels: ['기저귀/위생용품', '분유/이유식/식비', '의류/장난감/기타'], 
+            datasets: [{ data: [d, f, e], backgroundColor: ['#3182F6', '#10B981', '#FF823A'], borderWidth: 0, hoverOffset: 4 }] 
         }, 
         options: { 
-            responsive: true, maintainAspectRatio: false, cutout: '72%', 
+            responsive: true, maintainAspectRatio: false, cutout: '75%', 
             plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + formatter.format(c.raw) + '원'; } } } }, 
             animation: { animateScale: true, animateRotate: true } 
         } 
@@ -341,7 +341,8 @@ function drawDonutChart(d, f, e) {
 
 function analyzeMoney() {
     const budgetInput = document.getElementById('v-budget');
-    let userBudget = 500000; if (budgetInput && budgetInput.value) { userBudget = parseInt(budgetInput.value.replace(/,/g, '')) || 500000; }
+    let userBudget = 500000; 
+    if (budgetInput && budgetInput.value) { userBudget = parseInt(budgetInput.value.replace(/,/g, '')) || 500000; }
     localStorage.setItem('tosil_budget', userBudget);
     
     const d = getV('v-diaper'), f = getV('v-food'), e = getV('v-etc');
@@ -374,30 +375,32 @@ function analyzeMoney() {
     if(moneyDiffEl) moneyDiffEl.innerHTML = diffMsg;
     
     const percent = Math.round((finalTotal / userBudget) * 100);
-    let insightHtml = `<strong style="font-size:15px; display:block; margin-bottom:8px;">📊 소비 인사이트</strong>`;
+    let insightHtml = `<strong style="font-size:14px; display:block; margin-bottom:8px;">📊 핵심 소비 인사이트</strong>`;
     
     if (detailsTotal > 0) {
         const maxVal = Math.max(d, f, e);
-        if (maxVal === d && d > 0) insightHtml += `🧻 <strong>기저귀/위생용품 비중이 1위!</strong><br>기저귀는 핫딜 뜰 때 쟁여두는 게 최고입니다!`;
-        else if (maxVal === f && f > 0) insightHtml += `🍼 <strong>식비 비중이 1위!</strong><br>아이의 성장 속도를 고려하면 정상입니다! 잘 먹는 건 축복입니다 💪`;
-        else if (maxVal === e && e > 0) insightHtml += `🧸 <strong>장난감/기타 비중이 1위!</strong><br>'당근마켓'을 적절히 섞으면 효율이 배가 됩니다 🥕`;
+        if (maxVal === d && d > 0) insightHtml += `🧻 <strong>기저귀/위생용품 지출 1위!</strong><br>기저귀는 핫딜 뜰 때 대량 쟁여두는 게 최고입니다!`;
+        else if (maxVal === f && f > 0) insightHtml += `🍼 <strong>식비 지출 비중 1위!</strong><br>아이의 성장 속도를 고려하면 정상입니다! 잘 먹는 건 축복입니다 💪`;
+        else if (maxVal === e && e > 0) insightHtml += `🧸 <strong>장난감/기타 지출 비중 1위!</strong><br>'당근마켓'을 적절히 섞으면 방어율이 엄청나게 올라갑니다 🥕`;
     } else {
-        insightHtml += `💡 <strong>실시간 투트랙 머니로그 사용 중!</strong><br>아래 세부 항목을 입력하시면 월간 소비 정밀 도넛 차트를 확인하실 수 있습니다.`;
+        insightHtml += `💡 <strong>실시간 투트랙 머니로그 사용 중!</strong><br>위의 세부 항목 칸을 채워주시면 월간 정밀 도넛 차트를 확인하실 수 있습니다.`;
     }
 
-    if(percent > 100) insightHtml += `<br><br><span style="color:var(--danger)">🚨 <strong>주의:</strong></span> 목표 예산을 초과했습니다!`;
-    else if(percent < 80) insightHtml += `<br><br><span style="color:var(--success)">🌿 <strong>우수:</strong></span> 알뜰하게 육아 중입니다!`;
+    if(percent > 100) insightHtml += `<br><br><span style="color:var(--danger)">🚨 <strong>주의:</strong></span> 이번 달 한도 예산을 초과했습니다!`;
+    else if(percent < 80) insightHtml += `<br><br><span style="color:var(--success)">🌿 <strong>우수:</strong></span> 알뜰하게 육아 중입니다! 아주 좋습니다.`;
     else insightHtml += `<br><br>👍 <strong>안정:</strong> 이상적인 육아 소비 패턴입니다.`;
     
     const moneyInsightEl = document.getElementById('money-insight-detail');
     if(moneyInsightEl) moneyInsightEl.innerHTML = insightHtml;
     
     const avgPercentEl = document.getElementById('money-avg-percent');
-    if(avgPercentEl) avgPercentEl.innerText = `설정한 목표 예산 대비 ${percent}% 수준`;
+    if(avgPercentEl) avgPercentEl.innerText = `설정한 한도 예산 대비 ${percent}% 지출`;
     
+    // 차트 화면 켜기
     const resBox = document.getElementById('money-result'); 
     if(resBox) resBox.style.display = 'block';
     
+    // 차트 렌더링 딜레이
     setTimeout(() => drawDonutChart(d, f, e), 100);
     
     ledger.total = finalTotal;
@@ -427,13 +430,6 @@ function toggleHistory() {
     }
 }
 window.toggleHistory = toggleHistory;
-
-// 🚨 차트 닫기 로직 복구
-function closeMoneyChart() {
-    const resBox = document.getElementById('money-result');
-    if(resBox) resBox.style.display = 'none';
-}
-window.closeMoneyChart = closeMoneyChart;
 
 async function addDailyExpense(isSaving) {
     const input = document.getElementById('v-input-amount');
@@ -488,38 +484,58 @@ function updateLedgerUI() {
     const amountInput = document.getElementById('v-goal-amount');
     if(amountInput && document.activeElement !== amountInput && ledger.goalAmount) amountInput.value = ledger.goalAmount.toLocaleString();
 
+    // 이번 달 예산 불러오기 (v-budget)
+    const budgetInput = document.getElementById('v-budget');
+    const savedBudget = localStorage.getItem('tosil_budget');
+    if (budgetInput && document.activeElement !== budgetInput && savedBudget) {
+        budgetInput.value = Number(savedBudget).toLocaleString();
+    }
+
     const targetAmount = ledger.goalAmount || 100000;
     const percent = Math.min(Math.round((ledger.savedTotal / targetAmount) * 100), 100);
     
     const percentEl = document.getElementById('v-goal-percent');
     if(percentEl) percentEl.innerText = percent + "%";
 
-    const insight = document.getElementById('money-insight');
-    if(insight) {
-        insight.innerHTML = `이번 달 빠른 지출: <strong>${(ledger.total || 0).toLocaleString()}원</strong> | 모은 절약금: <strong style="color:#3182F6;">${(ledger.savedTotal || 0).toLocaleString()}원</strong>`;
-    }
-
     const listContainer = document.getElementById('ledger-history-list');
     if(listContainer) {
         let html = '';
-        (ledger.history || []).forEach(h => {
-            const badge = h.type === 'saving' ? `<span style="color:#3182F6; font-weight:800;">[💰저금]</span>` : `<span style="color:var(--text-s);">[💸지출]</span>`;
-            html += `<div style="display:flex; justify-content:space-between; padding:12px 16px; background:#F8F9FA; border-radius:12px; font-size:13.5px; border:1px solid #E5E8EB;"><div>${badge} <span style="color:var(--text-s); margin-left:4px;">${h.time}</span></div><span style="font-weight:900; color:var(--text-m);">${h.amount.toLocaleString()}원</span></div>`;
-        });
+        if (!ledger.history || ledger.history.length === 0) {
+            html = `<div style="text-align:center; padding:20px; font-size:13px; color:#8B95A1;">아직 입력된 머니로그 기록이 없습니다.</div>`;
+        } else {
+            ledger.history.forEach(h => {
+                const isSave = h.type === 'saving';
+                const badge = isSave ? `<span style="color:#3182F6; font-weight:800; font-size:12px; background:#E8F3FF; padding:4px 8px; border-radius:6px;">💰 저금</span>` : `<span style="color:#4E5968; font-weight:800; font-size:12px; background:#F2F4F6; padding:4px 8px; border-radius:6px;">💸 지출</span>`;
+                const amountColor = isSave ? '#3182F6' : 'var(--text-m)';
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:14px; background:#FFF; border-radius:12px; font-size:13.5px; border:1px solid #E5E8EB; margin-bottom:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">${badge} <span style="color:var(--text-s); font-size:12.5px; font-weight:700;">${h.time}</span></div>
+                            <span style="font-weight:900; color:${amountColor}; font-size:15px;">${h.amount.toLocaleString()}원</span>
+                         </div>`;
+            });
+        }
         listContainer.innerHTML = html;
     }
 }
 
 async function resetMoneyAll() {
-    if(confirm("이번 달 기록된 모든 지출 및 저금 데이터를 리셋할까요?")) {
-        let ledger = { total: 0, savedTotal: 0, goal: document.getElementById('v-goal-text').value, goalAmount: 100000, history: [] };
+    if(confirm("이번 달 기록된 모든 '지출' 및 '저금' 데이터를 초기화하시겠습니까?\n(설정하신 예산과 저금 목표는 유지됩니다)")) {
+        let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
+        // 목표 데이터는 유지, 잔액과 히스토리만 폭파!
+        ledger.total = 0;
+        ledger.savedTotal = 0;
+        ledger.history = [];
+        
         await saveLedgerToFirebase(ledger);
         localStorage.removeItem('tosil_money_total');
+        
         document.getElementById('v-diaper').value = ''; 
         document.getElementById('v-food').value = ''; 
         document.getElementById('v-etc').value = '';
-        const resBox = document.getElementById('money-result'); if(resBox) resBox.style.display = 'none'; 
-        alert("처음부터 다시 든든하게 모아봐요! 🌿");
+        
+        const resBox = document.getElementById('money-result'); 
+        if(resBox) resBox.style.display = 'none'; 
+        
+        alert("이번 달 기록이 리셋되었습니다. 다시 든든하게 모아봐요! 🌿");
         updateHomeDashboard();
     }
 }
@@ -590,7 +606,7 @@ async function sendHotdealToLedger(price, cat) {
     ledger.history.unshift({ time: timeStr, amount: price, type: 'expense' });
     
     await saveLedgerToFirebase(ledger);
-    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부에 자동 연동되었습니다!\n가계부 패널 하단의 [소비 패턴 팩트 체크] 버튼을 눌러 정밀 차트를 갱신하세요.`);
+    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부에 자동 연동되었습니다!\n\n가계부 패널 하단의 [열어보기 ▾]를 눌러 카테고리별 정밀 소비 차트를 갱신하세요!`);
     directGoToolbox('money');
 }
 window.calcHotDeal = calcHotDeal;
@@ -883,7 +899,11 @@ function getPercentile(z) {
     return Math.round((1 / (1 + Math.exp(-z * 1.702))) * 100);
 }
 
-// 🔥 성장 진단 엔진 로직 완전 복구
+// ==========================================
+// 📈 영유아 종합 성장 마스터 (카우프 지수 + 성장 차트 연동)
+// ==========================================
+let growthChartObj = null;
+
 function calcHealthMaster() {
     const b = document.getElementById('v-birth').value;
     const gender = document.getElementById('v-gender').value;
@@ -895,7 +915,7 @@ function calcHealthMaster() {
     if (wVal) localStorage.setItem('tosil_latest_weight', wVal);
 
     if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요!");
-    if(!h && !w) return alert("정확한 백분위 진단을 위해 키 또는 몸무게 중 하나 이상을 입력해 주세요!");
+    if(!h && !w) return alert("정확한 진단을 위해 키 또는 몸무게를 하나라도 입력해 주세요!");
     
     const birthDate = new Date(b);
     const today = new Date();
@@ -909,91 +929,105 @@ function calcHealthMaster() {
     document.getElementById('res-month').innerText = month;
     document.getElementById('res-week').innerText = week;
 
+    // 원더윅스
     let curWW = wwList.find(x => week >= x.w-1 && week <= x.w+1);
     let nxtWW = wwList.find(x => x.w > week);
     let st = document.getElementById('ww-status');
-    if(!st) return;
-
-    if(curWW) { 
-        st.style.background = 'rgba(253, 104, 104, 0.1)'; st.style.borderColor = 'rgba(253, 104, 104, 0.2)';
-        st.innerHTML = `<div style="font-size:15px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> ${curWW.d}.<br>이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 엄빠의 멘탈을 꽉 잡고 아기를 많이 안아주세요!`; 
-    } else { 
-        st.style.background = 'rgba(0, 179, 122, 0.1)'; st.style.borderColor = 'rgba(0, 179, 122, 0.2)';
-        st.innerHTML = `<div style="font-size:15px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음! 평온기 유지 중</div><br><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong>' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 발달 도약 임계 매트릭스를 이수 완료했습니다.'}</span>`; 
+    if(st) {
+        if(curWW) { 
+            st.style.background = '#FFF0F1'; st.style.borderColor = '#FFE3E3';
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> ${curWW.d}.<br>이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 아기를 많이 안아주세요!`; 
+        } else { 
+            st.style.background = '#ECFDF5'; st.style.borderColor = '#A7F3D0';
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음! 평온기 유지 중</div><br><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong>' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 도약기를 이수 완료했습니다.'}</span>`; 
+        }
     }
 
-    let table = `<tr><th>주차</th><th>진단 단계</th><th>특성 지표</th></tr>`;
-    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'class="active" style="background:rgba(253, 104, 104, 0.1);"' : ''; table += `<tr ${active}><td>${x.w-1}~${x.w+1}주</td><td>${x.t}</td><td>${x.d}</td></tr>`; });
+    let table = `<tr><th style="padding:10px; background:#F2F4F6;">주차</th><th style="padding:10px; background:#F2F4F6;">진단 단계</th><th style="padding:10px; background:#F2F4F6;">특성 지표</th></tr>`;
+    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'style="background:#FFF0F1; color:#D32F2F; font-weight:800;"' : ''; table += `<tr ${active}><td style="padding:10px; border-bottom:1px solid #E5E8EB;">${x.w-1}~${x.w+1}주</td><td style="padding:10px; border-bottom:1px solid #E5E8EB;">${x.t}</td><td style="padding:10px; border-bottom:1px solid #E5E8EB; text-align:left;">${x.d}</td></tr>`; });
     document.getElementById('ww-table').innerHTML = table;
 
+    // 백신
     let vac = vaccineData.find(v => month <= v.maxMonth);
-    document.getElementById('vaccine-info').innerHTML = vac ? vac.desc : "해당 월령의 접종 정보가 없습니다.";
-    
+    document.getElementById('vaccine-info').innerHTML = vac ? vac.desc : "해당 월령 접종 정보 없음";
     let nextVacMonth = vac ? vac.maxMonth : 0;
-    let vacDdayText = "";
-    if (month === nextVacMonth) vacDdayText = "이번 달 접종 필요";
-    else if (nextVacMonth === 99) vacDdayText = "기초 접종 완료";
-    else vacDdayText = `약 ${nextVacMonth - month}개월 뒤 접종`;
-    document.getElementById('vac-dday').innerText = vacDdayText;
+    document.getElementById('vac-dday').innerText = (month === nextVacMonth) ? "이번 달 접종" : (nextVacMonth === 99 ? "기초 접종 완료" : `약 ${nextVacMonth - month}개월 뒤`);
 
-    let standardArr = growthStandard[gender];
+    // 백분위 계산
+    let standardArr = growthStandard[gender] || growthStandard['boy'];
     let std = standardArr.slice().reverse().find(x => month >= x.m);
     if(!std) std = standardArr[0]; 
 
     const sdHeight = std.h * 0.04; 
     const sdWeight = std.w * 0.12;
-
     const getDesc = (pct) => {
         if(pct >= 95) return `매우 큼 (상위 5%)`;
         if(pct >= 75) return `큰 편 (상위 25%)`;
         if(pct >= 25) return `평균 범위 (정상)`;
         if(pct >= 5) return `작은 편 (하위 25%)`;
-        return `매우 작음 (소아과 상담 요망)`;
+        return `매우 작음 (상담 요망)`;
     };
 
-    let pctHeight = null;
-    let pctWeight = null;
+    let pctHeight = null, pctWeight = null;
+    if (h) { pctHeight = getPercentile((h - std.h) / sdHeight); document.getElementById('pct-height').innerText = `상위 ${100 - pctHeight}%`; document.getElementById('desc-height').innerText = getDesc(pctHeight); } 
+    else { document.getElementById('pct-height').innerText = `-`; document.getElementById('desc-height').innerText = `미입력`; }
 
-    if (h) {
-        pctHeight = getPercentile((h - std.h) / sdHeight);
-        document.getElementById('pct-height').innerText = `상위 ${100 - pctHeight}%`;
-        document.getElementById('desc-height').innerText = getDesc(pctHeight);
-    } else {
-        document.getElementById('pct-height').innerText = `-`;
-        document.getElementById('desc-height').innerText = `미입력`;
-    }
+    if (w) { pctWeight = getPercentile((w - std.w) / sdWeight); document.getElementById('pct-weight').innerText = `상위 ${100 - pctWeight}%`; document.getElementById('desc-weight').innerText = getDesc(pctWeight); } 
+    else { document.getElementById('pct-weight').innerText = `-`; document.getElementById('desc-weight').innerText = `미입력`; }
 
-    if (w) {
-        pctWeight = getPercentile((w - std.w) / sdWeight);
-        document.getElementById('pct-weight').innerText = `상위 ${100 - pctWeight}%`;
-        document.getElementById('desc-weight').innerText = getDesc(pctWeight);
-    } else {
-        document.getElementById('pct-weight').innerText = `-`;
-        document.getElementById('desc-weight').innerText = `미입력`;
-    }
-
+    // ✨ 카우프 지수 (비만도) 연산 및 친절한 멘트 출력 ✨
+    const kaupBadge = document.getElementById('kaup-badge');
     let insightMsg = "";
-    if (w && !h) {
-        if (pctWeight > 90) insightMsg = "💪 몸무게가 10등 안에 드는 튼튼한 우량아예요! 잘 먹는 건 축복입니다.";
-        else if (pctWeight < 10) insightMsg = "🌱 체중 증가가 조금 더딘 편입니다. 영유아 검진 시 원장님과 상담해 보세요.";
-        else insightMsg = "⚖️ 몸무게가 아주 안정적인 평균 범위에서 쑥쑥 자라고 있어요!";
-    } else if (h && !w) {
-        if (pctHeight > 90) insightMsg = "🦒 키가 또래 10% 안에 들 정도로 훤칠하게 자라고 있어요!";
-        else if (pctHeight < 10) insightMsg = "🌱 키 성장이 다소 느린 편입니다. 꾸준히 지켜봐 주세요.";
-        else insightMsg = "⚖️ 키가 안정적인 평균 범위에서 건강하게 자라고 있어요!";
-    } else if (h && w) {
-        if (pctWeight > 90) insightMsg = "💪 아기는 또래 100명 중 몸무게가 10등 안에 드는 튼튼한 우량아예요! 잘 먹는 건 축복입니다.";
-        else if (pctWeight < 10) insightMsg = "🌱 몸무게 증가가 다소 느린 편입니다. 영유아 검진 시 소아과 원장님과 식단/수유량을 상담해 보시면 좋아요.";
-        else if (pctHeight > 80 && pctWeight < 50) insightMsg = "🦒 키에 비해 날씬한 모델 체형이네요! 균형 있게 아주 잘 자라고 있습니다.";
-        else insightMsg = "⚖️ 키와 몸무게 모두 완벽한 황금 밸런스로 아주 건강하게 쑥쑥 크고 있어요!";
+    
+    if (h && w) {
+        // 카우프 지수 = 체중 / (키m * 키m)
+        const heightM = h / 100;
+        const kaup = w / (heightM * heightM);
+        kaupBadge.style.display = 'inline-block';
+        
+        let kaupDesc = "";
+
+        if (kaup < 14) { 
+            kaupBadge.innerText = '⚠️ 체중 미달 우려'; kaupBadge.style.background = '#F2F4F6'; kaupBadge.style.color = '#4E5968'; 
+            kaupDesc = "키에 비해 몸무게 증가가 다소 정체되어 있어요. 수유량이나 이유식 양을 조금 더 늘려주시고, 영유아 검진 시 의사 선생님과 상담해 보세요!";
+        }
+        else if (kaup < 16) { 
+            kaupBadge.innerText = '🌱 날씬한 모델 체형'; kaupBadge.style.background = '#E8F3FF'; kaupBadge.style.color = '#3182F6'; 
+            kaupDesc = "키에 비해 체중이 적게 나가는 날씬한 체형이에요! 활동량이 많거나 기초 대사량이 높은 아기일 수 있습니다. 아주 건강하게 잘 자라고 있어요 🏃‍♂️";
+        }
+        else if (kaup <= 18) { 
+            kaupBadge.innerText = '⚖️ 완벽한 황금 밸런스'; kaupBadge.style.background = '#ECFDF5'; kaupBadge.style.color = '#059669'; 
+            kaupDesc = "키와 몸무게의 비율이 교과서처럼 완벽한 황금 밸런스예요! 지금의 식습관과 패턴 그대로 건강하게 키워주시면 됩니다 💯";
+        }
+        else if (kaup <= 20) { 
+            kaupBadge.innerText = '💪 귀여운 통통 우량아'; kaupBadge.style.background = '#FFF9E6'; kaupBadge.style.color = '#B78103'; 
+            kaupDesc = "키보다 몸무게가 묵직한 귀여운 통통 우량아예요! 아주 잘 먹고 쑥쑥 크고 있네요. 걷고 뛰기 시작하면 젖살은 자연스럽게 빠진답니다 🧸";
+        }
+        else { 
+            kaupBadge.innerText = '🚨 소아 비만 주의'; kaupBadge.style.background = '#FFF0F1'; kaupBadge.style.color = '#D32F2F'; 
+            kaupDesc = "키에 비해 체중이 꽤 많이 나가는 편이에요. 소아 비만으로 이어지지 않도록 간식이나 수유 텀을 한 번 점검해 보시는 걸 권장합니다!";
+        }
+
+        insightMsg = `
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">우리아기 체질량 지수(BMI): <span style="color:var(--text-m);">${kaup.toFixed(1)}</span></div>
+            <div style="font-size:14px; font-weight:800; color:var(--text-m); line-height:1.55; word-break:keep-all;">${kaupDesc}</div>
+        `;
+    } else {
+        kaupBadge.style.display = 'none';
+        insightMsg = "키와 몸무게를 모두 입력하시면 정확한 체형 밸런스(비만도) 진단과 맞춤 조언을 해드립니다!";
     }
 
-    let babyNameText = "아기";
-    const genderSelect = document.getElementById('v-gender');
-    if (genderSelect && genderSelect.options.length > 0) {
-        babyNameText = genderSelect.options[genderSelect.selectedIndex].text.split(' ')[1] + ' 아기';
-    }
-    document.getElementById('growth-insight').innerText = insightMsg.replace('아기', babyNameText); 
+    document.getElementById('growth-insight').innerHTML = insightMsg; 
+    
+    // 글로벌 윈도우 스코프에 결과값 임시 저장 (저장하기 버튼을 위해)
+    window.tempGrowthData = {
+        date: new Date().toISOString().split('T')[0],
+        month: month,
+        height: h || 0,
+        weight: w || 0,
+        pctHeight: pctHeight ? (100 - pctHeight) : 0,
+        pctWeight: pctWeight ? (100 - pctWeight) : 0
+    };
 
     const gRes = document.getElementById('growth-result');
     if(gRes) {
@@ -1003,6 +1037,112 @@ function calcHealthMaster() {
 }
 window.calcHealthMaster = calcHealthMaster;
 
+// ✨ 성장 기록 저장 및 파이어베이스 연동
+async function saveGrowthRecord() {
+    if (!window.tempGrowthData || (window.tempGrowthData.height === 0 && window.tempGrowthData.weight === 0)) {
+        return alert("저장할 데이터가 없습니다.");
+    }
+    
+    let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
+    // 같은 날짜 기록 덮어쓰기
+    const existIdx = records.findIndex(r => r.date === window.tempGrowthData.date);
+    if (existIdx > -1) records[existIdx] = window.tempGrowthData;
+    else records.push(window.tempGrowthData);
+
+    records.sort((a, b) => new Date(a.date) - new Date(b.date)); // 날짜순 정렬
+    
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { await setDoc(doc(db, "growth_" + syncCode, "status"), { records: records }); } catch (e) { console.error(e); }
+    }
+    
+    localStorage.setItem('tosil_growth_records', JSON.stringify(records));
+    alert("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!");
+    renderGrowthHistory();
+}
+window.saveGrowthRecord = saveGrowthRecord;
+
+function deleteGrowthRecord(dateStr) {
+    if(!confirm("이 날의 성장 기록을 삭제할까요?")) return;
+    let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
+    records = records.filter(r => r.date !== dateStr);
+    localStorage.setItem('tosil_growth_records', JSON.stringify(records));
+    renderGrowthHistory();
+}
+window.deleteGrowthRecord = deleteGrowthRecord;
+
+// ✨ 저장된 기록으로 차트 & 리스트 그리기
+function renderGrowthHistory() {
+    let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
+    const acc = document.getElementById('growth-history-accordion');
+    if (!acc) return;
+
+    if (records.length === 0) {
+        acc.style.display = 'none';
+        return;
+    }
+    
+    acc.style.display = 'block'; // 기록이 있으면 아코디언 표시!
+
+    // 1. 차트 그리기
+    const canvas = document.getElementById('growthChart'); 
+    if(canvas && typeof Chart !== 'undefined') {
+        const ctx = canvas.getContext('2d'); 
+        if(growthChartObj) growthChartObj.destroy(); 
+        
+        // 데이터 전처리 (0인 값은 차트에서 끊어지게 null 처리)
+        const labels = records.map(r => r.date.substring(5)); // MM-DD
+        const hData = records.map(r => r.height > 0 ? r.height : null);
+        const wData = records.map(r => r.weight > 0 ? r.weight : null);
+
+        growthChartObj = new Chart(ctx, { 
+            type: 'line', 
+            data: { 
+                labels: labels, 
+                datasets: [
+                    { label: '키(cm)', data: hData, borderColor: '#3182F6', backgroundColor: '#3182F6', yAxisID: 'yHeight', tension: 0.3, spanGaps: true },
+                    { label: '몸무게(kg)', data: wData, borderColor: '#10B981', backgroundColor: '#10B981', yAxisID: 'yWeight', tension: 0.3, spanGaps: true }
+                ] 
+            }, 
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                scales: { 
+                    yHeight: { type: 'linear', display: true, position: 'left', title: {display: true, text: '키(cm)'} },
+                    yWeight: { type: 'linear', display: true, position: 'right', title: {display: true, text: '몸무게(kg)'}, grid: { drawOnChartArea: false } }
+                },
+                plugins: { legend: { position: 'bottom' } } 
+            } 
+        });
+    }
+
+    // 2. 리스트 그리기
+    const listContainer = document.getElementById('growth-history-list');
+    if (listContainer) {
+        let html = '';
+        // 최신 기록이 위로 오게 뒤집어서 렌더링
+        [...records].reverse().forEach(r => {
+            html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#F8F9FA; border-radius:12px; border:1px solid #E5E8EB;">
+                    <div>
+                        <div style="font-size:12px; color:var(--text-s); font-weight:800;">${r.date} (생후 ${r.month}개월)</div>
+                        <div style="font-size:14px; font-weight:900; color:var(--text-m); margin-top:2px;">
+                            ${r.height > 0 ? `<span style="color:#3182F6;">키 ${r.height}cm</span> ` : ''} 
+                            ${r.weight > 0 ? `<span style="color:#10B981;">몸무게 ${r.weight}kg</span>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="deleteGrowthRecord('${r.date}')" style="background:none; border:none; font-size:14px; color:#D1D6DB; cursor:pointer;">❌</button>
+                </div>
+            `;
+        });
+        listContainer.innerHTML = html;
+    }
+}
+window.renderGrowthHistory = renderGrowthHistory;
+
+// 앱 로딩 시(초기화) 성장 기록 불러오기
+document.addEventListener("DOMContentLoaded", () => {
+    if(typeof window.renderGrowthHistory === 'function') window.renderGrowthHistory();
+});
 function promptBabyInfo() {
     const name = prompt("우리아기 이름(태명)을 알려주세요!", "우리아기"); if(!name) return;
     const input = prompt("아기 생년월일을 입력하세요 (예: 20260303)", "20260303"); if(!input) return;

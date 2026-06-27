@@ -212,70 +212,109 @@
             </div>
 
             <div id="panel-money" class="panel-block active" style="box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
-                <div style="background: #FFFFFF; border-radius: 20px; padding: 22px; border: 1px solid #E5E8EB; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
-                    <div style="font-size: 13.5px; font-weight: 800; color: var(--primary); margin-bottom: 8px;">🎁 이번 달 우리 가족 공동 목표 설정</div>
-                    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-                        <input type="text" id="v-goal-text" placeholder="예: 코코지하우스 구매" onchange="saveGoal()" style="background:transparent; border:none; border-bottom:1px solid #E5E8EB; color:var(--text-m); font-size: 16px; font-weight: 800; width: 100%; outline:none; padding:4px 0;">
-                        <div style="display:flex; align-items:center; border-bottom:1px solid #E5E8EB; padding:4px 0;">
-                            <span style="font-size:13px; font-weight:700; color:var(--text-s); margin-right:8px; white-space:nowrap;">목표 금액:</span>
-                            <input type="text" id="v-goal-amount" placeholder="예: 120000" onkeyup="formatNum(this); saveGoal();" style="background:transparent; border:none; color:var(--text-m); font-size: 15px; font-weight: 800; width: 100%; outline:none; text-align:right; padding-right:4px;">
-                            <span style="font-size:13px; font-weight:800; color:var(--text-m);">원</span>
+                
+                <!-- 🎯 1. 일체형 예산 & 공동 목표 대시보드 -->
+                <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                    
+                    <!-- [상단] 지출 방어: 이번 달 예산 한도 -->
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">🎯 이번 달 예산 한도</div>
+                            <!-- ✨ width를 140px로 대폭 늘려서 100만원 이상도 안 잘리고 다 보입니다! -->
+                            <div style="display:inline-flex; align-items:baseline; border-bottom: 2px solid var(--primary); padding-bottom: 2px;">
+                                <input type="text" inputmode="numeric" id="v-budget" placeholder="500,000" onkeyup="formatNum(this)" style="width: 200px; font-size:22px; font-weight:900; border:none; outline:none; background:transparent; color:var(--primary); text-align:right; padding:0;">
+                                <span style="font-size:16px; font-weight:800; color:var(--primary); margin-left:4px;">원</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 달성률 뱃지 강조 -->
+                        <div style="text-align:right; background: #ECFDF5; padding: 10px 14px; border-radius: 14px; border: 1px solid #A7F3D0;">
+                            <div style="font-size: 11px; font-weight: 800; color: #059669; margin-bottom: 4px;">🎁 저축 목표 달성률</div>
+                            <div style="font-size: 24px; font-weight: 900; color:#00B37A; line-height: 1;" id="v-goal-percent">0%</div>
                         </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#F8F9FA; padding:12px; border-radius:12px; border:1px solid #E5E8EB;">
-                        <span style="font-size: 13px; font-weight: 800; color: var(--text-m);">현재 목표 달성률</span>
-                        <span style="font-size: 20px; font-weight: 900; color:var(--primary);" id="v-goal-percent">0%</span>
+                    
+                    <!-- [하단] 저축 공격: 공동 목표 예산 -->
+                    <div style="background:#F8F9FA; border-radius:12px; padding:14px; border:1px solid #E5E8EB;">
+                        <input type="text" id="v-goal-text" placeholder="어떤 목표를 위해 모을까요? (예: 전집 구매)" onchange="saveGoal()" style="background:transparent; border:none; border-bottom:1px dashed #D1D6DB; color:var(--text-m); font-size: 14px; font-weight: 800; width: 100%; outline:none; padding:0 0 8px 0; margin-bottom:10px; box-sizing:border-box;">
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:13px; font-weight:800; color:var(--text-s);">목표 저축액:</span>
+                            <div style="display:flex; align-items:center;">
+                                <!-- ✨ 여기도 width를 120px로 여유롭게 늘렸습니다! -->
+                                <input type="text" id="v-goal-amount" placeholder="100,000" onkeyup="formatNum(this); saveGoal();" style="background:transparent; border:none; color:var(--text-m); font-size: 16px; font-weight: 800; width: 200px; outline:none; text-align:right;">
+                                <span style="font-size:14px; font-weight:800; color:var(--text-m); margin-left:4px;">원</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:12px;">💰 실시간 머니 액션박스</div>
-                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:24px; width:100%;">
-                    <input type="text" inputmode="numeric" id="v-input-amount" placeholder="금액 입력 (예: 15000)" onkeyup="formatNum(this)" style="width:100%; box-sizing:border-box; padding:14px; border-radius:12px; border:1px solid var(--border); font-size:16px; font-weight:800; text-align:right;">
+
+                <!-- 💰 2. 초압축 실시간 머니 액션박스 -->
+                <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                    <div style="font-size:14px; font-weight:900; color:var(--text-m); margin-bottom:12px;">💰 빠른 금액 입력</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <input type="text" inputmode="numeric" id="v-input-amount" placeholder="예: 15000" onkeyup="formatNum(this)" style="flex:1; min-width:0; padding:14px 12px; border-radius:12px; border:1px solid var(--border); font-size:18px; font-weight:800; text-align:right; color:var(--primary); background:#F0F7FF;">
+                        <span style="font-size:16px; font-weight:800; color:var(--text-m);">원</span>
+                    </div>
                     <div style="display:flex; gap:8px; width:100%;">
-                        <button onclick="addDailyExpense(false)" style="flex:1; padding:14px; border-radius:12px; background:#191F28 !important; color:#FFF !important; font-weight:800; font-size:14px; border:none; cursor:pointer;">💸 지출 기록</button>
-                        <button onclick="addDailyExpense(true)" style="flex:1; padding:14px; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; font-size:14px; border:none; cursor:pointer;">💰 절약해서 저금</button>
+                        <button onclick="addDailyExpense(false)" style="flex:1; padding:14px; border-radius:12px; background:#F2F4F6 !important; color:#4E5968 !important; font-weight:800; font-size:14px; border:1px solid #D1D6DB; cursor:pointer; transition:0.2s;">💸 썼어요 (지출)</button>
+                        <button onclick="addDailyExpense(true)" style="flex:1; padding:14px; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; font-size:14px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.2); cursor:pointer; transition:0.2s;">💰 아꼈어요 (저금)</button>
                     </div>
                 </div>
-                <div id="money-insight" style="font-size:14px; line-height:1.6; padding:16px; background: var(--bg-card, #FFF); border-radius:12px; border:1px solid #E5E8EB; color:var(--text-m); font-weight:600; text-align:center; margin-bottom: 32px;">절약 버튼을 누르면 저금통 게이지가 올라가고, 지출 버튼을 누르면 기록이 남습니다!</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #E5E8EB; padding-top:24px; margin-bottom:16px;">
-                    <div style="font-size:16px; font-weight:900; color:var(--text-m);">📊 정밀 소비 패턴 진단 (카테고리별)</div>
-                    <button onclick="resetMoneyAll()" style="padding: 6px 12px; background: #FFF0F1; color:#F04452; font-size:12px; border-radius:8px; font-weight:800; border:1px solid #FFE3E3; cursor:pointer;">데이터 리셋</button>
+
+                <!-- 📊 3. 아코디언 (상세 내역 접기/펼치기) -->
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    
+                    <!-- 3-1. 카테고리 소비 진단 아코디언 -->
+                    <details class="flat-accordion" style="background:#FFF; border:1px solid #E5E8EB; border-radius:20px; overflow:hidden;">
+                        <summary style="padding:16px 20px; font-size:14.5px; font-weight:800; color:var(--text-m); cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📊 정밀 소비 패턴 진단 (카테고리별)</span>
+                            <span style="font-size:12px; color:var(--primary); background:#E8F3FF; padding:4px 10px; border-radius:8px;">열어보기 ▾</span>
+                        </summary>
+                        <div class="lib-content" style="padding:0 20px 20px 20px;">
+                            <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                                <button onclick="resetMoneyAll()" style="padding: 4px 10px; background: #FFF0F1; color:#F04452; font-size:11px; border-radius:6px; font-weight:800; border:1px solid #FFE3E3; cursor:pointer;">데이터 리셋</button>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px dashed var(--border);">
+                                <div style="display:flex; align-items:center; gap:8px;"><div style="font-size:18px;">🧻</div><div style="font-size:13px; font-weight:800; color:var(--text-m);">기저귀/위생용품</div></div>
+                                <div style="display:flex; align-items:center;"><input type="text" inputmode="numeric" id="v-diaper" placeholder="0" onkeyup="formatNum(this)" style="width:100px; font-size:15px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; color:var(--text-m);"><span style="font-size:13px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px dashed var(--border);">
+                                <div style="display:flex; align-items:center; gap:8px;"><div style="font-size:18px;">🍼</div><div style="font-size:13px; font-weight:800; color:var(--text-m);">분유/이유식/식비</div></div>
+                                <div style="display:flex; align-items:center;"><input type="text" inputmode="numeric" id="v-food" placeholder="0" onkeyup="formatNum(this)" style="width:100px; font-size:15px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; color:var(--text-m);"><span style="font-size:13px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; margin-bottom: 16px;">
+                                <div style="display:flex; align-items:center; gap:8px;"><div style="font-size:18px;">🧸</div><div style="font-size:13px; font-weight:800; color:var(--text-m);">의류/장난감/기타</div></div>
+                                <div style="display:flex; align-items:center;"><input type="text" inputmode="numeric" id="v-etc" placeholder="0" onkeyup="formatNum(this)" style="width:100px; font-size:15px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; color:var(--text-m);"><span style="font-size:13px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span></div>
+                            </div>
+                            <button class="btn-main" onclick="analyzeMoney()" style="font-size:14px; padding:14px; width:100%; margin:0; background:#191F28 !important; color:#FFF !important; box-shadow:none !important;">🔍 분석 리포트 확인</button>
+                            
+                            <!-- 분석 결과 도넛 차트 영역 -->
+                            <div id="money-result" style="display:none; margin-top:20px; padding-top:20px; border-top:1px solid #E5E8EB;">
+                                <div id="capture-area" style="text-align:center;">
+                                    <div class="stat-badge" style="display:inline-block; font-size:11px; font-weight:800; background:var(--text-m); color:#FFF; padding:4px 10px; border-radius:10px; margin-bottom:8px;">월간 지출 진단</div>
+                                    <div id="money-total" style="font-size:28px; font-weight:900; letter-spacing:-1px; color:var(--primary);">0</div>
+                                    <div style="font-size:14px; font-weight:800; color:var(--text-m); margin-bottom:4px;">원 지출</div>
+                                    <div id="money-diff" style="font-size:13px; font-weight:800; margin-bottom:16px; color:var(--text-s);"></div>
+                                    <div style="width: 100%; max-width: 180px; height: 180px; margin: 0 auto 16px auto; position: relative;"><canvas id="donutChart"></canvas></div>
+                                    <div id="money-avg-percent" style="font-size:13px; font-weight:800; color:#FFF; background:var(--primary); padding:10px; border-radius:10px; margin-bottom:12px;"></div>
+                                    <div id="money-insight-detail" style="text-align:left; font-size:13px; line-height:1.6; padding:14px; background: #F8F9FA; border-radius:10px; border:1px solid var(--border); color:var(--text-m); font-weight:600; margin-bottom:16px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- 3-2. 머니로그 타임라인 아코디언 -->
+                    <details class="flat-accordion" style="background:#FFF; border:1px solid #E5E8EB; border-radius:20px; overflow:hidden;">
+                        <summary style="padding:16px 20px; font-size:14.5px; font-weight:800; color:var(--text-m); cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📋 실시간 타임라인 머니로그</span>
+                            <span style="font-size:12px; color:#4E5968; background:#F2F4F6; padding:4px 10px; border-radius:8px;">기록 보기 ▾</span>
+                        </summary>
+                        <div class="lib-content" style="padding:0 20px 20px 20px;">
+                            <div id="ledger-history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                        </div>
+                    </details>
+
                 </div>
-                <div style="margin-bottom:24px;">
-                    <label style="font-size:13.5px; font-weight:900; display:block; margin-bottom:8px; color:var(--primary);">🎯 이번 달 우리 집 한도 예산</label>
-                    <div style="display:flex; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:8px;">
-                        <input type="text" inputmode="numeric" id="v-budget" placeholder="예: 500,000" onkeyup="formatNum(this)" style="flex:1; width:100%; font-size:24px; font-weight:900; border:none; outline:none; background:transparent; text-align:right; padding-right:8px; color:var(--primary);">
-                        <span style="font-size:16px; font-weight:800; color:var(--primary);">원</span>
-                    </div>
-                </div>
-                <div style="display:flex; flex-direction:column; margin-bottom:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; border-bottom: 1px dashed var(--border);">
-                        <div style="display:flex; align-items:center; gap:12px;"><div style="font-size:22px;">🧻</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m);">기저귀 및 위생용품</div></div>
-                        <div style="display:flex; align-items:center;"><input type="text" inputmode="numeric" id="v-diaper" placeholder="0" onkeyup="formatNum(this)" style="width:120px; font-size:18px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; color:var(--text-m);"><span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; border-bottom: 1px dashed var(--border);">
-                        <div style="display:flex; align-items:center; gap:12px;"><div style="font-size:22px;">🍼</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m);">분유, 이유식, 식비</div></div>
-                        <div style="display:flex; align-items:center;"><input type="text" inputmode="numeric" id="v-food" placeholder="0" onkeyup="formatNum(this)" style="width:120px; font-size:18px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; color:var(--text-m);"><span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding: 16px 0; margin-bottom: 24px;">
-                        <div style="display:flex; align-items:center; gap:12px;"><div style="font-size:22px;">🧸</div><div style="font-size:14.5px; font-weight:800; color:var(--text-m);">의류, 장난감, 기타</div></div>
-                        <div style="display:flex; align-items:center;"><input type="text" inputmode="numeric" id="v-etc" placeholder="0" onkeyup="formatNum(this)" style="width:120px; font-size:18px; font-weight:800; border:none; outline:none; background:transparent; text-align:right; color:var(--text-m);"><span style="font-size:14.5px; color:var(--text-s); font-weight:700; margin-left:4px;">원</span></div>
-                    </div>
-                </div>
-                <button class="btn-main" onclick="analyzeMoney()" style="font-size:16px; padding:16px;">🔍 소비 패턴 팩트 체크 (차트 보기)</button>
-                <div id="money-result" style="display:none; margin-top:24px; padding-top:24px;">
-                    <div id="capture-area" class="result-card" style="background: var(--bg-sub, #F8F9FA); border-radius:20px; padding:24px; text-align:center; border:none !important; box-shadow:none !important;">
-                        <div class="stat-badge" style="display:inline-block; font-size:12px; font-weight:800; background:var(--text-m); color:#FFF; padding:5px 12px; border-radius:12px; margin-bottom:12px;">월간 지출 리포트</div>
-                        <div id="money-total" style="font-size:36px; font-weight:900; letter-spacing:-1px; color:var(--primary);">0</div>
-                        <div style="font-size:16px; font-weight:800; color:var(--text-m); margin-bottom:6px;">원 지출</div>
-                        <div id="money-diff" style="font-size:14.5px; font-weight:800; margin-bottom:20px; color:var(--text-s);"></div>
-                        <div style="width: 100%; max-width: 200px; height: 200px; margin: 0 auto 20px auto; position: relative;"><canvas id="donutChart"></canvas></div>
-                        <div id="money-avg-percent" style="font-size:14.5px; font-weight:800; color:#FFF; background:var(--primary); padding:12px; border-radius:12px; margin-bottom:16px;"></div>
-                        <div id="money-insight-detail" style="text-align:left; font-size:14px; line-height:1.6; padding:16px; background: var(--bg-card, #FFF); border-radius:12px; border:1px solid var(--border); color:var(--text-m); font-weight:600; margin-bottom:16px;"></div>
-                        <button class="btn-main" onclick="closeMoneyChart()" style="background:#E5E8EB !important; color:#4E5968 !important; border:none !important; box-shadow:none !important; padding:12px; font-size:14px; border-radius:12px;">차트 닫기 ✕</button>
-                    </div>
-                </div>
-                <div style="font-size: 14px; font-weight: 800; margin-top:32px; margin-bottom: 12px; color: #4E5968;">📋 실시간 타임라인 머니로그</div>
-                <div id="ledger-history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
             </div>
 
             <div id="panel-fever" class="panel-block" style="display:none; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
@@ -352,45 +391,118 @@
 
             <div id="panel-growth" class="panel-block" style="display:none; box-shadow:none !important; border:none !important; padding:0 !important; background:transparent !important; margin-top:24px;">
                 <div style="font-size:16.5px; font-weight:900; border-bottom:2px solid var(--success); padding-bottom:12px; margin-bottom:20px; color:var(--text-m);">📈 영유아 종합 성장/건강 마스터</div>
-                <div class="disclaimer-box" style="background: #FFF9E6; border-radius: 14px; padding: 18px; margin-bottom: 20px;">
-                    <p style="color:#B78103; font-size:13.5px; font-weight:800; margin-bottom:6px;">🚨 [의료 정보 면책 조항]</p>
-                    <p style="font-size:12.5px; color:#5C4300; line-height:1.5;">질병관리청 표준 성장도표(Z-score) 기반의 정밀 백분위 추정치입니다. 실제 발달 평가는 반드시 소아청소년과 전문의의 영유아 검진을 통해 확인하세요.</p>
+                
+                <div class="disclaimer-box" style="background: #FFF9E6; border-radius: 14px; padding: 16px; margin-bottom: 20px;">
+                    <p style="color:#B78103; font-size:13px; font-weight:800; margin-bottom:4px;">🚨 의료 정보 면책 조항</p>
+                    <p style="font-size:12px; color:#5C4300; line-height:1.5;">질병관리청 표준 성장도표 기반 추정치입니다. 실제 발달 평가는 전문의 검진을 우선하세요.</p>
                 </div>
-                <div style="background:var(--bg-sub, #F8F9FA); padding:20px; border-radius:16px; margin-bottom:24px;">
-                    <div style="font-size:13px; font-weight:800; color:var(--primary); background:rgba(49,130,246,0.06); padding:10px; border-radius:10px; margin-bottom:18px; text-align:center; border:1px dashed var(--primary);">💡 키와 몸무게는 둘 중 하나만 입력해도 또래 등수 진단이 가능해요!</div>
-                    <label style="font-size:14px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">1. 아기 생년월일</label>
-                    <div style="border-bottom: 2px solid var(--border); padding-bottom:6px; margin-bottom:16px;"><input type="date" id="v-birth" style="width:100%; border:none; outline:none; background:transparent; font-size:18px; font-weight:800; color:var(--text-m);"></div>
+
+                <details id="growth-history-accordion" class="flat-accordion" style="display:none; background:#FFF; border:1px solid #E5E8EB; border-radius:20px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.02); margin-bottom:20px;">
+                    <summary style="padding:16px 20px; font-size:14.5px; font-weight:800; color:var(--text-m); cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📊 우리 아기 누적 성장 곡선</span>
+                        <span style="font-size:12px; color:var(--success); background:#E6F7F2; padding:4px 10px; border-radius:8px;">차트 보기 ▾</span>
+                    </summary>
+                    <div class="lib-content" style="padding:0 20px 20px 20px;">
+                        <div style="width: 100%; height: 220px; margin-bottom: 16px;"><canvas id="growthChart"></canvas></div>
+                        <div id="growth-history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    </div>
+                </details>
+
+                <div style="background:#FFF; border:1px solid #E5E8EB; padding:20px; border-radius:20px; margin-bottom:16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                    <div style="font-size:12.5px; font-weight:800; color:var(--success); background:#E6F7F2; padding:8px 12px; border-radius:10px; margin-bottom:20px; text-align:center;">💡 키와 몸무게는 둘 중 하나만 넣어도 분석 가능해요!</div>
+                    
                     <div style="display:flex; gap:12px; margin-bottom:16px;">
-                        <div style="flex:1;"><label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 성별</label><select id="v-gender" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:15px; font-weight:700; background:var(--bg-card, #FFF); color:var(--text-m);"><option value="" disabled selected>성별을 선택해주세요</option><option value="boy">👦 남아</option><option value="girl">👧 여아</option></select></div>
+                        <div style="flex:1;">
+                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">1. 생년월일</label>
+                            <input type="date" id="v-birth" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; font-weight:800; color:var(--text-m); background:#F8F9FA;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 성별</label>
+                            <select id="v-gender" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; font-weight:800; color:var(--text-m); background:#F8F9FA;">
+                                <option value="" disabled selected>선택</option>
+                                <option value="boy">👦 남아</option>
+                                <option value="girl">👧 여아</option>
+                            </select>
+                        </div>
                     </div>
+                    
                     <div style="display:flex; gap:12px;">
-                        <div style="flex:1;"><label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">3. 현재 키 (cm) <span style="font-size:11px; color:var(--text-sub); font-weight:500;">(선택)</span></label><input type="number" id="v-height" step="0.1" placeholder="모르면 비워두기" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:16px; font-weight:800; text-align:center; background:var(--bg-card, #FFF); color:var(--text-m);"></div>
-                        <div style="flex:1;"><label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">4. 체중 (kg) <span style="font-size:11px; color:var(--text-sub); font-weight:500;">(선택)</span></label><input type="number" id="v-weight-growth" step="0.1" placeholder="모르면 비워두기" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:16px; font-weight:800; text-align:center; background:var(--bg-card, #FFF); color:var(--text-m);"></div>
-                    </div>
-                </div>
-                <button class="btn-main" onclick="calcHealthMaster()" style="background:var(--success) !important; box-shadow: 0 6px 16px rgba(0, 179, 122, 0.25) !important; margin-top:0;">✨ 대한민국 100명 중 몇 등? 분석하기</button>
-                <div id="growth-result" style="display:none; margin-top:30px;">
-                    <div style="text-align:center; margin-bottom:24px;"><div style="font-size:14px; color:var(--text-sub); font-weight:700;">우리아기 성장 기록일</div><div style="font-size:40px; font-weight:900; color:var(--success); letter-spacing:-1px;">D+<span id="res-dday">0</span></div><div style="display:inline-block; background:#E6F7F2; padding:6px 14px; border-radius:10px; font-size:13.5px; font-weight:800; color:var(--success); margin-top:6px;">생후 <span id="res-month">0</span>개월 (<span id="res-week">0</span>주 차)</div></div>
-                    <div style="background:var(--bg-sub, #F8F9FA); border-radius:20px; padding:20px; margin-bottom:20px;">
-                        <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:16px; display:flex; align-items:center; gap:6px;"><span style="font-size:20px;">🏅</span> 또래 100명 중 우리 아기 등수</div>
-                        <div style="display:flex; gap:12px; margin-bottom:12px;">
-                            <div style="flex:1; background:var(--bg-card, #FFF); padding:16px; border-radius:16px; border:1px solid var(--border); text-align:center;"><div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">키 (신장)</div><div style="font-size:24px; font-weight:900; color:var(--primary); margin-bottom:4px;" id="pct-height">0%</div><div style="font-size:11px; font-weight:700; color:var(--text-sub);" id="desc-height">-</div></div>
-                            <div style="flex:1; background:var(--bg-card, #FFF); padding:16px; border-radius:16px; border:1px solid var(--border); text-align:center;"><div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">몸무게 (체중)</div><div style="font-size:24px; font-weight:900; color:var(--success); margin-bottom:4px;" id="pct-weight">0%</div><div style="font-size:11px; font-weight:700; color:var(--text-sub);" id="desc-weight">-</div></div>
+                        <div style="flex:1;">
+                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">3. 현재 키 <span style="font-size:11px; color:var(--text-sub);">(cm)</span></label>
+                            <input type="number" id="v-height" step="0.1" placeholder="선택" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:16px; font-weight:800; text-align:center; background:#FFF; color:var(--text-m);">
                         </div>
-                        <div id="growth-insight" style="font-size:13px; line-height:1.5; color:var(--text-m); font-weight:700; background:var(--bg-card, #FFF); padding:12px; border-radius:12px; border-left:4px solid var(--success);"></div>
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr; gap:12px; margin-bottom:24px;">
-                        <div class="ww-status-box" id="ww-status" style="background:#FFF9E6; border:1px solid #FFE58F; border-radius:16px; padding:20px; font-size:14px; line-height:1.55; margin:0;"></div>
-                        <div style="background:var(--bg-sub, #F0F7FF); border:1px solid #E1F0FF; border-radius:16px; padding:20px;">
-                            <div style="font-size:14px; font-weight:900; color:#3182F6; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;"><span>💉 다음 예방접종 브리핑</span><span id="vac-dday" style="background:#3182F6; color:#FFF; padding:4px 8px; border-radius:8px; font-size:11px;">-</span></div>
-                            <div id="vaccine-info" style="font-size:13.5px; font-weight:700; color:var(--text-m); line-height:1.5;"></div>
+                        <div style="flex:1;">
+                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">4. 체중 <span style="font-size:11px; color:var(--text-sub);">(kg)</span></label>
+                            <input type="number" id="v-weight-growth" step="0.1" placeholder="선택" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:16px; font-weight:800; text-align:center; background:#FFF; color:var(--text-m);">
                         </div>
                     </div>
-                    <div class="result-card" style="padding:0; text-align:left; background:transparent !important; border:none !important; box-shadow:none !important;">
-                        <h3 style="font-size:15px; margin-bottom:12px; font-weight:800; color:var(--text-m);">📅 전체 원더윅스 도약기 타임라인</h3>
-                        <div style="background:var(--bg-sub, #F9FAFB); border-radius:16px; overflow:hidden;"><table class="ww-table" id="ww-table" style="width:100%; border-collapse:collapse; font-size:13.5px;"></table></div>
-                    </div>
                 </div>
+
+                <button class="btn-main" onclick="calcHealthMaster()" style="background:var(--success) !important; box-shadow: 0 6px 16px rgba(0, 179, 122, 0.25) !important; margin-top:0; border-radius:16px; padding:16px; font-size:15px;">✨ 대한민국 100명 중 몇 등? 분석하기</button>
+
+                <div id="growth-result" style="display:none; margin-top:24px;">
+                    <div style="background:#FFF; border:1px solid #E5E8EB; border-radius:20px; padding:24px; margin-bottom:16px; box-shadow:0 4px 16px rgba(0,0,0,0.02);">
+                        <div style="text-align:center; margin-bottom:24px; border-bottom:1px dashed #E5E8EB; padding-bottom:20px;">
+                            <div style="font-size:13px; color:var(--text-s); font-weight:800; margin-bottom:4px;">우리아기 성장 기록일</div>
+                            <div style="font-size:36px; font-weight:900; color:var(--success); letter-spacing:-1px; line-height:1;">D+<span id="res-dday">0</span></div>
+                            <div style="display:inline-block; background:#F8F9FA; padding:6px 14px; border-radius:10px; font-size:12.5px; font-weight:800; color:#4E5968; margin-top:12px; border:1px solid #E5E8EB;">생후 <span id="res-month">0</span>개월 (<span id="res-week">0</span>주 차)</div>
+                        </div>
+
+                        <div style="font-size:14.5px; font-weight:900; color:var(--text-m); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+                            <span><span style="font-size:18px;">🏅</span> 100명 중 우리 아기 등수</span>
+                            <span id="kaup-badge" style="display:none; font-size:12px; font-weight:800; padding:4px 10px; border-radius:8px;"></span>
+                        </div>
+                        
+                        <div style="display:flex; gap:10px; margin-bottom:16px;">
+                            <div style="flex:1; background:#F8F9FA; padding:16px 12px; border-radius:16px; border:1px solid #E5E8EB; text-align:center;">
+                                <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">키 (신장)</div>
+                                <div style="font-size:22px; font-weight:900; color:var(--primary); margin-bottom:4px;" id="pct-height">0%</div>
+                                <div style="font-size:11.5px; font-weight:700; color:var(--text-sub);" id="desc-height">-</div>
+                            </div>
+                            <div style="flex:1; background:#F8F9FA; padding:16px 12px; border-radius:16px; border:1px solid #E5E8EB; text-align:center;">
+                                <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">몸무게 (체중)</div>
+                                <div style="font-size:22px; font-weight:900; color:var(--success); margin-bottom:4px;" id="pct-weight">0%</div>
+                                <div style="font-size:11.5px; font-weight:700; color:var(--text-sub);" id="desc-weight">-</div>
+                            </div>
+                        </div>
+                        <div id="growth-insight" style="font-size:13.5px; line-height:1.5; color:var(--text-m); font-weight:700; background:#E6F7F2; padding:14px; border-radius:12px; border:1px solid #A7F3D0; text-align:center; margin-bottom:16px;"></div>
+                        
+                        <button class="btn-main" onclick="saveGrowthRecord()" style="background:#191F28 !important; color:#FFF !important; box-shadow:none !important; margin:0; width:100%; padding:14px; font-size:14px;">💾 이 기록 성장 차트에 저장하기</button>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+                        <div class="ww-status-box" id="ww-status" style="background:#FFF9E6; border:1px solid #FDE68A; border-radius:16px; padding:20px; font-size:13.5px; line-height:1.55; margin:0; box-shadow:0 4px 12px rgba(0,0,0,0.02);"></div>
+                        
+                        <div style="background:#F0F7FF; border:1px solid #D6E8F9; border-radius:16px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                            <div style="font-size:14px; font-weight:900; color:#1B64DA; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+                                <span>💉 다음 예방접종 브리핑</span>
+                                <span id="vac-dday" style="background:#3182F6; color:#FFF; padding:4px 10px; border-radius:8px; font-size:11px;">-</span>
+                            </div>
+                            <div id="vaccine-info" style="font-size:13px; font-weight:700; color:#4E5968; line-height:1.5;"></div>
+                        </div>
+                    </div>
+
+                    <details class="flat-accordion" style="background:#FFF; border:1px solid #E5E8EB; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+                        <summary style="padding:16px 20px; font-size:14.5px; font-weight:800; color:var(--text-m); cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📅 전체 원더윅스 도약기 타임라인</span>
+                            <span style="font-size:12px; color:#4E5968; background:#F2F4F6; padding:4px 10px; border-radius:8px;">표 보기 ▾</span>
+                        </summary>
+                        <div class="lib-content" style="padding:0 20px 20px 20px;">
+                            <div style="background:var(--bg-sub, #F9FAFB); border-radius:12px; overflow:hidden; border:1px solid #E5E8EB;">
+                                <table class="ww-table" id="ww-table" style="width:100%; border-collapse:collapse; font-size:13px; text-align:center;"></table>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+                
+                <script>
+                    setTimeout(() => {
+                        const savedDate = localStorage.getItem('tosil_startDate');
+                        if (savedDate && document.getElementById('v-birth')) {
+                            document.getElementById('v-birth').value = savedDate;
+                        }
+                    }, 500);
+                </script>
             </div>
 
             <div id="panel-hotdeal" class="panel-block" style="display:none; background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; margin-top:20px;">
