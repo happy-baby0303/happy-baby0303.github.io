@@ -1215,17 +1215,15 @@ function renderBabyInfo() {
         const monthAge = Math.floor(diffDays / 30.436875);
         const weekAge = Math.floor(diffDays / 7);
         
-        // 💡 [핵심] 원더윅스 및 예방접종 타이밍 자동 계산
         let curWW = null;
         if(typeof wwList !== 'undefined') {
             curWW = wwList.find(x => weekAge >= x.w-1 && weekAge <= x.w+1);
         }
         let curVac = null;
         if(typeof vaccineData !== 'undefined') {
-            curVac = vaccineData.find(v => monthAge === v.maxMonth); // 이번 달이 접종 마지노선일 때
+            curVac = vaccineData.find(v => monthAge === v.maxMonth); 
         }
 
-        // 🎯 1. 프로필 사진 속 '초압축 뱃지' (반투명 블랙으로 고급스럽게)
         let badgeHtml = "";
         if (curWW) {
             badgeHtml = `<span style="display:inline-block; font-size:12px; font-weight:800; background:rgba(0,0,0,0.55); color:#FFF; padding:4px 10px; border-radius:12px; margin-left:8px; vertical-align:middle; text-shadow:none; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.2);">⛈️ 도약기</span>`;
@@ -1245,38 +1243,45 @@ function renderBabyInfo() {
         initPlayWidget(monthAge, diffDays);
         updateMainAISensors(monthAge); 
 
-        // 🎯 2. 숨어있던 '닌자 스마트 배너' 소환술
+        // 🎯 숨어있던 '닌자 스마트 배너' 소환술
         const bannerContainer = document.getElementById('health-smart-banner');
         if (bannerContainer) {
             let bannerHtml = '';
             
-            // 예방접종 경고 배너 (시원한 파란색 그라데이션)
+            // 💉 예방접종 경고 배너 (줄맞춤 완벽 해결!)
             if (curVac) {
                 bannerHtml += `
-                    <div style="background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
-                        <div style="font-size: 28px; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2));">💉</div>
-                        <div>
-                            <div style="font-size: 12px; font-weight: 800; color: #1967D2; margin-bottom: 4px;">건강 알리미</div>
-                            <div style="font-size: 14.5px; font-weight: 900; color: #191F28; word-break:keep-all;">이번 달 <span style="color:#1967D2;">필수 예방접종</span>이 있어요! 스케줄을 확인해 보세요.</div>
+                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
+                        <div style="display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0;">
+                            <div style="font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2)); margin-top:2px;">💉</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 12px; font-weight: 800; color: #1967D2; margin-bottom: 6px;">건강 알리미 · 이번 달 필수 접종</div>
+                                <div style="font-size: 14px; font-weight: 900; color: #191F28; line-height: 1.6; word-break:keep-all;">
+                                    ${curVac.desc}
+                                </div>
+                            </div>
                         </div>
+                        <span style="flex-shrink: 0; white-space: nowrap; background: #1A73E8; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px; align-self: center;">확인하기</span>
                     </div>
                 `;
             }
             
-            // 원더윅스 경고 배너 (따뜻한 빨간색 그라데이션)
+            // ⛈️ 원더윅스 경고 배너
             if (curWW) {
                 bannerHtml += `
-                    <div style="background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FCA5A5; border-radius: 18px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 12px rgba(211,47,47,0.1);">
-                        <div style="font-size: 28px; filter: drop-shadow(0 2px 4px rgba(211,47,47,0.2));">⛈️</div>
-                        <div>
-                            <div style="font-size: 12px; font-weight: 800; color: #D32F2F; margin-bottom: 4px;">원더윅스 경보</div>
-                            <div style="font-size: 14.5px; font-weight: 900; color: #191F28; word-break:keep-all;">현재 <span style="color:#D32F2F;">도약기(폭풍우)</span>입니다. 따뜻하게 많이 안아주세요!</div>
+                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FCA5A5; border-radius: 18px; padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(211,47,47,0.1);">
+                        <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
+                            <div style="font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(211,47,47,0.2));">⛈️</div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 12px; font-weight: 800; color: #D32F2F; margin-bottom: 4px;">원더윅스 경보</div>
+                                <div style="font-size: 14.5px; font-weight: 900; color: #191F28; line-height: 1.4; word-break:keep-all;">현재 <span style="color:#D32F2F;">${curWW.t}</span> 구간!</div>
+                            </div>
                         </div>
+                        <span style="flex-shrink: 0; white-space: nowrap; background: #F04452; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">대처법 보기</span>
                     </div>
                 `;
             }
             
-            // 둘 중 하나라도 내용이 있으면 띄워주고, 없으면 다시 숨김
             if (bannerHtml !== '') {
                 bannerContainer.innerHTML = bannerHtml;
                 bannerContainer.style.display = 'block';
@@ -1289,6 +1294,7 @@ function renderBabyInfo() {
         console.error(e);
     }
 }
+
 function initPlayWidget(months, dday) {
     const badgeEl = document.getElementById('play-dday-badge'), titleEl = document.getElementById('play-title'), descEl = document.getElementById('play-desc'), effectEl = document.getElementById('play-effect');
     if (months === null || isNaN(months) || !titleEl) {
