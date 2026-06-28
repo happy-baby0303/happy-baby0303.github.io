@@ -81,7 +81,7 @@
 
 <div class="wrapper">
     <div id="tab-home" class="tab-content active">
-        <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
+<div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()">
             <img src="img.jpg" class="home-hero-img" alt="아기 사진" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
             <div class="home-hero-overlay" style="background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);">
                 <button onclick="event.stopPropagation(); promptBabyInfo();" style="position:absolute; top:12px; right:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer; padding:0; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">✎</button>
@@ -91,6 +91,8 @@
                 <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></div>
             </div>
         </div>
+        <!-- 💡 바로 요기! 카드 끝나는 태그 바로 밑에 넣어주세요! -->
+        <div id="health-smart-banner" style="display:none; margin: 20px 20px 0 20px;"></div>
         <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
         
         <div id="smart-banner-container"></div> 

@@ -1213,9 +1213,29 @@ function renderBabyInfo() {
         const data = JSON.parse(saved);
         const diffDays = Math.ceil((new Date() - new Date(data.birth)) / (1000*60*60*24));
         const monthAge = Math.floor(diffDays / 30.436875);
+        const weekAge = Math.floor(diffDays / 7);
+        
+        // 💡 [핵심] 원더윅스 및 예방접종 타이밍 자동 계산
+        let curWW = null;
+        if(typeof wwList !== 'undefined') {
+            curWW = wwList.find(x => weekAge >= x.w-1 && weekAge <= x.w+1);
+        }
+        let curVac = null;
+        if(typeof vaccineData !== 'undefined') {
+            curVac = vaccineData.find(v => monthAge === v.maxMonth); // 이번 달이 접종 마지노선일 때
+        }
+
+        // 🎯 1. 프로필 사진 속 '초압축 뱃지' (반투명 블랙으로 고급스럽게)
+        let badgeHtml = "";
+        if (curWW) {
+            badgeHtml = `<span style="display:inline-block; font-size:12px; font-weight:800; background:rgba(0,0,0,0.55); color:#FFF; padding:4px 10px; border-radius:12px; margin-left:8px; vertical-align:middle; text-shadow:none; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.2);">⛈️ 도약기</span>`;
+        } else {
+            badgeHtml = `<span style="display:inline-block; font-size:12px; font-weight:800; background:rgba(0,0,0,0.4); color:#FFF; padding:4px 10px; border-radius:12px; margin-left:8px; vertical-align:middle; text-shadow:none; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15);">☀️ 평온기</span>`;
+        }
         
         if(nameEl) nameEl.innerText = data.name + "의 공간"; 
-        if(ddayEl) ddayEl.innerText = "D+" + diffDays + "일";
+        if(ddayEl) ddayEl.innerHTML = "D+" + diffDays + "일" + badgeHtml; 
+        
         if(goalInput && !goalInput.value) goalInput.placeholder = `예: ${data.name} 코코지하우스 구매`;
         if(missionNameEl) missionNameEl.innerText = data.name;
 
@@ -1224,11 +1244,51 @@ function renderBabyInfo() {
         
         initPlayWidget(monthAge, diffDays);
         updateMainAISensors(monthAge); 
+
+        // 🎯 2. 숨어있던 '닌자 스마트 배너' 소환술
+        const bannerContainer = document.getElementById('health-smart-banner');
+        if (bannerContainer) {
+            let bannerHtml = '';
+            
+            // 예방접종 경고 배너 (시원한 파란색 그라데이션)
+            if (curVac) {
+                bannerHtml += `
+                    <div style="background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
+                        <div style="font-size: 28px; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2));">💉</div>
+                        <div>
+                            <div style="font-size: 12px; font-weight: 800; color: #1967D2; margin-bottom: 4px;">건강 알리미</div>
+                            <div style="font-size: 14.5px; font-weight: 900; color: #191F28; word-break:keep-all;">이번 달 <span style="color:#1967D2;">필수 예방접종</span>이 있어요! 스케줄을 확인해 보세요.</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 원더윅스 경고 배너 (따뜻한 빨간색 그라데이션)
+            if (curWW) {
+                bannerHtml += `
+                    <div style="background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FCA5A5; border-radius: 18px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 12px rgba(211,47,47,0.1);">
+                        <div style="font-size: 28px; filter: drop-shadow(0 2px 4px rgba(211,47,47,0.2));">⛈️</div>
+                        <div>
+                            <div style="font-size: 12px; font-weight: 800; color: #D32F2F; margin-bottom: 4px;">원더윅스 경보</div>
+                            <div style="font-size: 14.5px; font-weight: 900; color: #191F28; word-break:keep-all;">현재 <span style="color:#D32F2F;">도약기(폭풍우)</span>입니다. 따뜻하게 많이 안아주세요!</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 둘 중 하나라도 내용이 있으면 띄워주고, 없으면 다시 숨김
+            if (bannerHtml !== '') {
+                bannerContainer.innerHTML = bannerHtml;
+                bannerContainer.style.display = 'block';
+            } else {
+                bannerContainer.style.display = 'none';
+            }
+        }
+        
     } catch (e) {
         console.error(e);
     }
 }
-
 function initPlayWidget(months, dday) {
     const badgeEl = document.getElementById('play-dday-badge'), titleEl = document.getElementById('play-title'), descEl = document.getElementById('play-desc'), effectEl = document.getElementById('play-effect');
     if (months === null || isNaN(months) || !titleEl) {
