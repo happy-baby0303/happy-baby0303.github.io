@@ -156,13 +156,11 @@ function generateSubFilters(mainRegion) {
 
     if (subRegions.size === 0) { subRow.style.display = 'none'; return; }
     
-    // ✨ [수정된 부분] 가로 스크롤 & 버튼 사이 간격 적용
     subRow.style.display = 'flex';
     subRow.style.overflowX = 'auto'; 
     subRow.style.gap = '8px';
     subRow.style.paddingBottom = '8px';
 
-    // ✨ [수정된 부분] 버튼이 찌그러지지 않도록 flex-shrink:0; white-space:nowrap; 추가
     let html = `<button class="filter-btn ${currentSubRegion === 'all' ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('all', this)">시·군·구 전체</button>`;
     
     subRegions.forEach(sub => { 
@@ -801,7 +799,7 @@ async function clearFeverRecord() {
     }
     selectPill(''); 
     renderFeverTimeline(); 
-    setTimeout(updateHomeDashboard, 100);
+    setTimeout(updateHomeDashboard, 100); 
 }
 
 window.addFeverRecord = addFeverRecord;
@@ -1276,11 +1274,7 @@ window.shufflePlay = shufflePlay;
 // ==========================================
 // ✨ 5분 집중 놀이 타이머 엔진
 // ==========================================
-// ==========================================
-// ✨ 5분 집중 놀이 타이머 엔진
-// ==========================================
 function startPlayTimer() {
-    // 0. ✨ 시작 버튼을 누를 때, 현재 놀이 정보를 타이머 화면으로 복사
     const currentTitle = document.getElementById('play-title').innerText;
     const currentDesc = document.getElementById('play-desc').innerText;
     
@@ -1290,18 +1284,15 @@ function startPlayTimer() {
     if(activeTitleEl) activeTitleEl.innerText = '🧸 ' + currentTitle;
     if(activeDescEl) activeDescEl.innerText = currentDesc;
 
-    // 1. UI 구역 교체 (A 숨기고, B/C 보이기)
     document.getElementById('play-info-zone').style.display = 'none';
     document.getElementById('play-timer-zone').style.display = 'block';
     
     const progressBar = document.getElementById('play-progress-bar');
     if(progressBar) progressBar.style.display = 'block';
     
-    // 2. 타이머 초기화 (초기 텍스트 세팅)
     let timeLeft = PLAY_TIME_SEC;
-    updateTimerDisplay(timeLeft); // 👈 여기서 에러가 났던 겁니다! 이제 해결!
+    updateTimerDisplay(timeLeft); 
     
-    // 3. 진행률 바 애니메이션 (100% -> 0% 스르륵 줄어듦)
     setTimeout(() => {
         if(progressBar) {
             progressBar.style.transition = `width ${PLAY_TIME_SEC}s linear`;
@@ -1309,20 +1300,16 @@ function startPlayTimer() {
         }
     }, 50);
 
-    // 4. 1초마다 타이머 숫자 감소
     playTimerInterval = setInterval(() => {
         timeLeft--;
         updateTimerDisplay(timeLeft);
 
-        // 5분이 다 지나면 종료 처리
         if (timeLeft <= 0) {
             clearInterval(playTimerInterval);
             completePlayTimer();
         }
     }, 1000);
 }
-
-// 👇👇 아까 빼먹으신 필수 세트 메뉴 함수들입니다! 👇👇
 
 function updateTimerDisplay(seconds) {
     const min = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -1348,8 +1335,8 @@ function resetPlayUI() {
     const progressBar = document.getElementById('play-progress-bar');
     if(progressBar) {
         progressBar.style.display = 'none';
-        progressBar.style.transition = 'none'; // 애니메이션 초기화
-        progressBar.style.width = '100%';      // 게이지 꽉 찬 상태로 복구
+        progressBar.style.transition = 'none'; 
+        progressBar.style.width = '100%';      
     }
 }
 
@@ -1369,7 +1356,6 @@ function uploadPhoto(input) {
                 const ctx = canvas.getContext('2d'); 
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // 화질을 0.5에서 0.85로 상향 조정했습니다!
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.85); 
                 
                 try { 
@@ -1395,7 +1381,6 @@ function updateHomeDashboard() {
     const feverRecords = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     const feverText = document.getElementById('db-fever-text');
     
-// 🌡️ 해열제 위젯 로직 교체
     if (feverRecords.length > 0) {
         const latest = feverRecords[0];
         let color = "#191F28";
@@ -1412,7 +1397,6 @@ function updateHomeDashboard() {
         feverText.innerHTML = `<div style="font-size:13px; font-weight:800; color:#8B95A1;">체온을<br>기록해주세요</div>`;
     }
 
-    // 💰 목표 저금통 위젯 로직 교체
     const ledgerCard = document.getElementById('db-ledger-card');
     if (ledgerCard) {
         const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "목표 설정하기", goalAmount: 100000 };
@@ -1436,7 +1420,6 @@ function updateHomeDashboard() {
         }
     }
 
-    // ✨✨ 여기서 방금 만든 스마트 배너를 호출합니다! ✨✨
     if (typeof updateSmartBanner === 'function') updateSmartBanner();
 }
 
@@ -1455,36 +1438,30 @@ window.toggleDarkMode = toggleDarkMode;
 /// ==========================================
 // 🧊 [안심 큐브 냉장고 엔진] (실시간 동기화)
 // ==========================================
-// 페이지 로드 시 날짜 입력칸을 '오늘'로 자동 세팅
 document.addEventListener("DOMContentLoaded", () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('cube-date');
     if (dateInput) dateInput.value = todayStr;
 });
 
-// 유통기한 D-Day 계산 (얼린 날로부터 14일 기준)
-// 유통기한 압박 대신 '보관일수'를 보여주는 따뜻한 로직으로 변경
 function getCubeDDayText(madeDateStr) {
     const madeDate = new Date(madeDateStr); madeDate.setHours(0,0,0,0);
     const today = new Date(); today.setHours(0,0,0,0);
     
-    // 얼린 날로부터 오늘까지 며칠 지났는지 계산
     const diffDays = Math.floor((today - madeDate) / (1000 * 60 * 60 * 24));
     
-    let color = "#3182F6"; // 기본 파란색 (신선)
+    let color = "#3182F6"; 
     let bg = "#EBF4FF";
     let text = `보관 ${diffDays}일차`;
     
     if (diffDays === 0) {
         text = "오늘 얼림";
-        color = "#00B37A"; // 초록색
+        color = "#00B37A"; 
         bg = "#E6F7F2";
     } else if (diffDays > 14) {
-        // 2주가 넘어가면 조심하라는 의미로 주황색 정도로만 부드럽게 표현 (빨간색 금지)
         color = "#FF823A"; 
         bg = "#FFF0E6";
     } else if (diffDays < 0) {
-        // 혹시 미래 날짜를 잘못 입력했을 경우
         text = "날짜 오류";
         color = "#8B95A1";
         bg = "#F2F5F8";
@@ -1493,7 +1470,6 @@ function getCubeDDayText(madeDateStr) {
     return `<span style="background:${bg}; color:${color}; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid ${color};">${text}</span>`;
 }
 
-// 큐브 추가하기
 async function addCubeRecord() {
     const cat = document.getElementById('cube-category').value;
     const name = document.getElementById('cube-name').value.trim();
@@ -1516,7 +1492,6 @@ async function addCubeRecord() {
     let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
     records.push(newCube);
     
-    // 파이어베이스에 쏘기
     if (typeof db !== 'undefined') {
         const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
         try {
@@ -1530,7 +1505,6 @@ async function addCubeRecord() {
     renderCubes();
 }
 
-// 큐브 1개 사용하기 (-1 차감)
 async function useCube(id) {
     let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
     const index = records.findIndex(r => r.id === id);
@@ -1539,7 +1513,7 @@ async function useCube(id) {
     records[index].qty -= 1;
     
     if (records[index].qty <= 0) {
-        records.splice(index, 1); // 0개 되면 자동 삭제
+        records.splice(index, 1); 
     }
 
     if (typeof db !== 'undefined') {
@@ -1552,7 +1526,6 @@ async function useCube(id) {
     renderCubes();
 }
 
-// 큐브 화면에 그리기
 function renderCubes() {
     const container = document.getElementById('cube-list-container');
     if (!container) return;
@@ -1568,7 +1541,6 @@ function renderCubes() {
         return;
     }
 
-    // 날짜 임박순 정렬
     records.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     let html = '';
@@ -1610,11 +1582,9 @@ function startCubeRealtimeSync() {
     
     if(!docRef) return; 
 
-    // 기존 연결 끄기 (중복 방지)
     if (cubeUnsubscribe) cubeUnsubscribe();
     if(typeof window.onSnapshot !== 'function') return;
 
-    // 서버에 변화가 생기면 실시간으로 감지해서 화면을 다시 그림
     cubeUnsubscribe = window.onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -1623,8 +1593,6 @@ function startCubeRealtimeSync() {
         if (typeof renderCubes === 'function') renderCubes();
     });
 }
-
-// 전역에 연결해두어 window.onload에서 실행되게 만듦
 window.startCubeRealtimeSync = startCubeRealtimeSync;
 
 // ==========================================
@@ -1655,16 +1623,13 @@ function renderCubeQuicks() {
         const icon = isMeat ? '🥩' : '🥦';
 
         if (isCubeQuickEditMode) {
-            // 🛠️ 편집 모드: 누르면 삭제됨 (회색 바탕에 X 표시)
             html += `<button onclick="deleteCubeQuick(${index})" style="flex-shrink:0; padding:8px 14px; background:#F2F4F6; color:#8B95A1; border:1px dashed #D1D6DB; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; transition:0.2s;">${q.name} ❌</button>`;
         } else {
-            // ✅ 일반 모드: 누르면 자동 입력
             html += `<button onclick="setCubeQuick('${q.cat}', '${q.name}')" style="flex-shrink:0; padding:8px 14px; background:${bg}; color:${color}; border:1px solid ${border}; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; transition:0.2s;">${icon} ${q.name}</button>`;
         }
     });
 
     if (isCubeQuickEditMode) {
-        // 편집 모드일 때 맨 끝에 [+ 새 재료 추가] 버튼 생성
         html += `<button onclick="addCubeQuick()" style="flex-shrink:0; padding:8px 14px; background:#E8F3FF; color:#3182F6; border:1px dashed #3182F6; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">+ 새 재료 추가</button>`;
     }
 
@@ -1688,7 +1653,6 @@ function addCubeQuick() {
     const name = prompt("추가할 자주 쓰는 재료의 이름을 입력하세요.\n(예: 단호박, 대구살, 오트밀 등)");
     if(!name || !name.trim()) return;
     
-    // 고기/단백질인지, 채소/탄수화물인지 물어봄 (아이콘/색상 세팅용)
     const isMeat = confirm(`[${name}]\n이 재료는 고기/단백질류 인가요?\n\n- 고기면 [확인]\n- 채소면 [취소]를 눌러주세요.`);
     const cat = isMeat ? 'meat' : 'veg';
     
@@ -1701,7 +1665,7 @@ function addCubeQuick() {
 function setCubeQuick(cat, name) {
     document.getElementById('cube-category').value = cat;
     document.getElementById('cube-name').value = name;
-    document.getElementById('cube-qty').focus(); // 자동 스크롤&커서
+    document.getElementById('cube-qty').focus(); 
 }
 
 window.renderCubeQuicks = renderCubeQuicks;
@@ -1710,7 +1674,6 @@ window.deleteCubeQuick = deleteCubeQuick;
 window.addCubeQuick = addCubeQuick;
 window.setCubeQuick = setCubeQuick;
 
-// 🚀 앱 켤 때 퀵버튼 자동으로 그려주기
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(renderCubeQuicks, 100);
 });
@@ -1767,7 +1730,6 @@ async function addCustomBaton() {
 async function createBatonTask(text, reward) {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     
-    // 중복 방지 (도배 막기)
     const isDuplicate = records.some(r => r.text === text);
     if (isDuplicate) return alert("🚨 이미 똑같은 부탁이 대기 중입니다! (중복 입력 방지)");
 
@@ -1793,7 +1755,6 @@ async function completeBaton(id) {
     records.splice(idx, 1); 
     await saveBatonToFirebase(records);
 
-    // 🎁 미션 완료 팡파르 알림
     if (reward && reward !== "없음") {
         alert(`🎉 미션 해결 완료!\n\n약속된 보상 [${reward}]을(를) 당당하게 요구하세요! ㅋㅋㅋ 👍`);
     } else {
@@ -1919,7 +1880,7 @@ function toggleFoodStatus(itemName) {
 }
 
 // ==========================================
-// 💌 [바통터치] 실시간 감시 엔진 (이게 있어야 양방향 동기화됩니다)
+// 💌 [바통터치] 실시간 감시 엔진 
 // ==========================================
 let batonUnsubscribe = null;
 function startBatonRealtimeSync() {
@@ -1928,28 +1889,26 @@ function startBatonRealtimeSync() {
     
     if(!docRef) return; 
 
-    // 기존 감시 중단
     if (batonUnsubscribe) batonUnsubscribe();
     if(typeof window.onSnapshot !== 'function') return;
 
-    // 서버 변화 실시간 감시
     batonUnsubscribe = window.onSnapshot(docRef, (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             localStorage.setItem('tosil_baton_records', JSON.stringify(data.records || []));
-            renderBatonTasks(); // 서버 데이터가 바뀌면 즉시 화면 갱신!
+            renderBatonTasks(); 
         }
     });
 }
 window.startBatonRealtimeSync = startBatonRealtimeSync;
 
 // ==========================================
-// 🚀 런타임 구동 마스터 마운트 (사진 로딩 버그 수정)
+// 🚀 런타임 구동 마스터 마운트 (이부분이 날아갔었음)
 // ==========================================
 window.onload = () => { 
     loadAllExternalData(); 
     renderBabyInfo(); 
-    loadBabyPhoto(); // 🔥 여기서 사진 잊지 않고 불러옵니다!
+    loadBabyPhoto(); 
     renderCubes();
     renderBatonTasks();
     updateLedgerUI();
@@ -1982,12 +1941,11 @@ window.onload = () => {
     if (typeof startBatonRealtimeSync === 'function') { startBatonRealtimeSync(); } else { renderBatonTasks(); }
     if (typeof startLedgerRealtimeSync === 'function') { startLedgerRealtimeSync(); } else { updateLedgerUI(); }
 
-updateSyncBadge(); 
-
+    updateSyncBadge(); 
 };
 
 // ==========================================
-// 👨‍👩‍👧 가족 실시간 연동 모달 컨트롤 (복구 완료)
+// 👨‍👩‍👧 가족 실시간 연동 모달 컨트롤
 // ==========================================
 function openFamilySyncModal() {
     const m = document.getElementById('family-sync-modal'); 
@@ -2005,36 +1963,30 @@ function closeFamilySyncModal(e) {
     }
 }
 
-// HTML에서 클릭 시 무조건 인식하도록 전역(window) 연결
 window.openFamilySyncModal = openFamilySyncModal;
 window.closeFamilySyncModalForce = closeFamilySyncModalForce;
 window.closeFamilySyncModal = closeFamilySyncModal;
 
 function updateSyncBadge() {
-    // Firebase에서 연동 코드를 저장하는 키 이름('family_sync_code')에 맞췄습니다.
     const syncCode = localStorage.getItem('family_sync_code'); 
-    
     const badgeBtn = document.getElementById('sync-badge-btn');
     const badgeText = document.getElementById('sync-status-text');
     const badgeIcon = document.getElementById('sync-status-icon');
 
-    if (!badgeBtn || !badgeText) return; // 요소가 없으면 에러 안 나게 패스
+    if (!badgeBtn || !badgeText) return; 
 
     if (syncCode) {
-        // 연동 되었을 때: 눈에 덜 띄는 시원한 파란색
         badgeBtn.style.background = "#E8F0FE";
         badgeBtn.style.color = "#1A73E8";
         badgeText.innerText = "연동완료";
         if(badgeIcon) badgeIcon.innerText = "🔗";
     } else {
-        // 연동 안 되었을 때: 눈에 확 띄게 경고 (주황/빨강)
         badgeBtn.style.background = "#FFF3CD";
         badgeBtn.style.color = "#856404";
         badgeText.innerText = "연동 필요!";
         if(badgeIcon) badgeIcon.innerText = "🚨";
     }
 }
-// 전역에 연결해두기
 window.updateSyncBadge = updateSyncBadge;
 
 // ==========================================
@@ -2067,7 +2019,6 @@ function updateSmartBanner() {
     const container = document.getElementById('smart-banner-container');
     if(!container) return;
 
-    // 💌 1순위: 바통터치 SOS 확인
     const batonRecords = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     const urgentBaton = batonRecords.find(r => r.status === 'requested');
 
@@ -2088,7 +2039,6 @@ function updateSmartBanner() {
         return; 
     }
 
-    // ⚠️ 2순위: 큐브 재고 확인
     const cubeRecords = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
     const lowCube = cubeRecords.find(r => r.qty <= 2);
 
@@ -2109,25 +2059,22 @@ function updateSmartBanner() {
         return;
     }
 
-    // 🌿 3순위: 아무 이슈가 없으면 빈칸으로 만들고 숨기기
     container.innerHTML = '';
     container.style.display = 'none';
 }
 window.updateSmartBanner = updateSmartBanner;
 
 // ==========================================
-// 💩 기저귀 일기 (배변 기록기) 엔진 (완전체)
+// 💩 기저귀 일기 (배변 기록기) 엔진
 // ==========================================
 let currentPoopColor = '';
 let currentPoopTexture = '';
 
-// 입력창 열고 닫기
 function togglePoopForm() {
     const area = document.getElementById('poop-input-area');
     if(area) area.style.display = (area.style.display === 'none') ? 'block' : 'none';
 }
 
-// 색깔 선택
 function selectPoopColor(color, btn) {
     currentPoopColor = color;
     document.querySelectorAll('.poop-color-btn').forEach(b => {
@@ -2136,7 +2083,6 @@ function selectPoopColor(color, btn) {
     btn.style.border = '2px solid #3182F6'; btn.style.fontWeight = '900'; btn.style.boxShadow = '0 2px 4px rgba(49,130,246,0.2)';
 }
 
-// 상태 선택
 function selectPoopTexture(tex, btn) {
     currentPoopTexture = tex;
     document.querySelectorAll('.poop-tex-btn').forEach(b => {
@@ -2145,12 +2091,10 @@ function selectPoopTexture(tex, btn) {
     btn.style.border = '2px solid #3182F6'; btn.style.fontWeight = '900'; btn.style.boxShadow = '0 2px 4px rgba(49,130,246,0.2)';
 }
 
-// 저장 및 파이어베이스 연동 로직
 async function savePoopRecord() {
     if(!currentPoopColor || !currentPoopTexture) return alert("색깔과 상태를 모두 선택해주세요!");
 
     const now = new Date();
-    // 날짜와 시간을 보기 좋게 포맷팅 (예: 6/23 14:30)
     const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     
     const record = {
@@ -2161,10 +2105,9 @@ async function savePoopRecord() {
     };
 
     let records = JSON.parse(localStorage.getItem('tosil_poop_records')) || [];
-    records.unshift(record); // 최신 기록이 위로 오게
-    if(records.length > 20) records.pop(); // 최대 20개만 보관 (최적화)
+    records.unshift(record); 
+    if(records.length > 20) records.pop(); 
 
-    // 파이어베이스 동기화 (가족 연동)
     if (typeof db !== 'undefined' && typeof setDoc === 'function') {
         const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
         try { await setDoc(doc(db, "poop_" + syncCode, "status"), { records: records }); } catch(e){}
@@ -2172,17 +2115,14 @@ async function savePoopRecord() {
 
     localStorage.setItem('tosil_poop_records', JSON.stringify(records));
     
-    // 초기화 및 화면 닫기
     currentPoopColor = ''; currentPoopTexture = '';
     document.querySelectorAll('.poop-color-btn, .poop-tex-btn').forEach(b => {
         b.style.border = '1px solid #ddd'; b.style.fontWeight = 'normal'; b.style.boxShadow = 'none';
     });
     togglePoopForm();
-    renderPoopTimeline(); // 즉시 화면에 그리기
+    renderPoopTimeline(); 
 }
 
-// 화면에 타임라인 그리기
-// 화면에 타임라인 그리기 (❌ 삭제 버튼 추가)
 function renderPoopTimeline() {
     const container = document.getElementById('poop-timeline');
     if(!container) return;
@@ -2210,27 +2150,24 @@ function renderPoopTimeline() {
 }
 window.renderPoopTimeline = renderPoopTimeline;
 
-// 🗑️ 배변 기록 삭제 함수 새로 추가!
 async function deletePoopRecord(id) {
     if(!confirm("이 배변 기록을 삭제하시겠습니까?")) return;
 
     let records = JSON.parse(localStorage.getItem('tosil_poop_records')) || [];
     records = records.filter(r => r.id !== id);
 
-    // 파이어베이스 동기화
     if (typeof db !== 'undefined' && typeof setDoc === 'function') {
         const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
         try { await setDoc(doc(db, "poop_" + syncCode, "status"), { records: records }); } catch(e){}
     }
 
     localStorage.setItem('tosil_poop_records', JSON.stringify(records));
-    renderPoopTimeline(); // 지우고 나서 화면 즉시 새로고침
+    renderPoopTimeline(); 
 }
 window.deletePoopRecord = deletePoopRecord;
 
-// 앱 켜질 때 자동으로 그려주기 위해 window.onload 안이나 바깥에 연결
 document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(renderPoopTimeline, 300); // UI 렌더링 후 안전하게 호출
+    setTimeout(renderPoopTimeline, 300); 
 });
 
 // ==========================================
@@ -2242,14 +2179,10 @@ function openPediatricianReport() {
         return alert("아직 기록된 체온/투약 데이터가 없습니다. 건강한 상태네요! 🌿");
     }
     
-    // 체중 정보 가져오기 (약 용량 계산용)
     let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
-    
-    // 기록을 타임라인 UI로 변환
     let recordHtml = '<div style="max-height: 350px; overflow-y: auto; background:#F8F9FA; padding:16px; border-radius:12px; border:1px solid #E5E8EB; display:flex; flex-direction:column; gap:12px;">';
     
     records.forEach(r => {
-        // 약 종류에 따른 텍스트 및 색상 세팅
         let pillText = '<span style="color:#8B95A1; font-weight:700;">약 미복용</span>';
         if (r.type === 'red') {
             pillText = '<span style="color:#FF4B2B; font-weight:900;">🔴 아세트아미노펜 (빨강)</span>';
@@ -2257,10 +2190,7 @@ function openPediatricianReport() {
             pillText = '<span style="color:#3182F6; font-weight:900;">🔵 이부/덱시부프로펜 (파랑)</span>';
         }
         
-        // 동반 증상 세팅
         let symText = (r.symptoms && r.symptoms.length > 0) ? `<div style="margin-top:6px; font-size:11.5px; color:#6B7684; background:#F2F5F8; padding:4px 8px; border-radius:6px; display:inline-block;">🚨 증상: ${r.symptoms.join(', ')}</div>` : '';
-        
-        // 체온에 따른 색상 (38도 이상이면 빨간색 강조)
         let tempStyle = r.temp >= 38.0 ? 'color:#E32636; font-weight:900; font-size:16px;' : 'color:#191F28; font-weight:800; font-size:15px;';
         
         recordHtml += `
@@ -2276,7 +2206,6 @@ function openPediatricianReport() {
     });
     recordHtml += '</div>';
 
-    // 우리가 만들어둔 공용 프리미엄 모달을 불러와서 내용물만 싹 갈아끼웁니다
     const body = document.getElementById('modal-dynamic-body');
     if(!body) return;
 
@@ -2307,9 +2236,6 @@ window.openPediatricianReport = openPediatricianReport;
 
 // [실시간 감시 엔진 일괄 가동 스위치]
 window.initRealtimeSync = () => {
-    // 1. 여기서 각 기능의 실시간 동기화 함수를 호출합니다.
-    // ※ 주의: 파트너님 코드에 있는 실제 함수 이름으로 맞춰주세요!
-    
     if (typeof startFeverRealtimeSync === 'function') startFeverRealtimeSync();
     if (typeof startCubeRealtimeSync === 'function') startCubeRealtimeSync();
     if (typeof startBatonRealtimeSync === 'function') startBatonRealtimeSync();
@@ -2319,23 +2245,23 @@ window.initRealtimeSync = () => {
 };
 
 // ==========================================
-// 📱 원터치 육아 트래커 엔진 (수정 기능 ✏️ 완벽 추가본)
+// 📱 원터치 육아 트래커 엔진 (낮잠/밤잠 기능 분리 완성본)
 // ==========================================
-
 window.trackerState = { type: '', subType: '', status: '' };
-window.editingTrackerId = null; // ✨ 수정 모드인지 확인하는 전역 변수
+window.editingTrackerId = null; 
 
 window.selectTrackerBtn = function(btn, category) {
     const siblings = btn.parentElement.children;
     for(let i=0; i<siblings.length; i++) {
-        siblings[i].style.setProperty('background', '#FFF', 'important');
-        siblings[i].style.setProperty('color', '#8B95A1', 'important');
-        siblings[i].style.setProperty('border', '1px solid #E5E8EB', 'important');
-        if(siblings[i].tagName === 'SPAN') siblings[i].style.setProperty('background', '#F8F9FA', 'important');
+        // ✨ 하드코딩된 색상을 다크모드 대응 변수로 변경!
+        siblings[i].style.setProperty('background', 'var(--bg-card)', 'important');
+        siblings[i].style.setProperty('color', 'var(--text-s)', 'important');
+        siblings[i].style.setProperty('border', '1px solid var(--border)', 'important');
+        if(siblings[i].tagName === 'SPAN') siblings[i].style.setProperty('background', 'var(--bg-sub)', 'important');
     }
     
-    if (category === 'feed' || category === 'diaper_pee') {
-        btn.style.setProperty('background', '#F0F7FF', 'important');
+   if (category === 'feed' || category === 'diaper_pee') {
+        btn.style.setProperty('background', 'rgba(49,130,246,0.1)', 'important');
         btn.style.setProperty('color', '#3182F6', 'important');
         btn.style.setProperty('border', '1px solid #3182F6', 'important');
         window.trackerState.subType = btn.innerText;
@@ -2344,19 +2270,19 @@ window.selectTrackerBtn = function(btn, category) {
             if(statusArea) statusArea.style.display = 'none';
         }
     } else if (category === 'diaper_poop') {
-        btn.style.setProperty('background', '#FFF0F1', 'important');
+        btn.style.setProperty('background', 'rgba(211,47,47,0.1)', 'important');
         btn.style.setProperty('color', '#D32F2F', 'important');
         btn.style.setProperty('border', '1px solid #F04452', 'important');
         window.trackerState.subType = '대변';
         const statusArea = document.getElementById('diaper-status-area');
         if(statusArea) statusArea.style.display = 'block';
     } else if (category === 'status_yellow') {
-        btn.style.setProperty('background', '#FFF9E6', 'important');
+        btn.style.setProperty('background', 'rgba(183,129,3,0.1)', 'important');
         btn.style.setProperty('color', '#B78103', 'important');
         btn.style.setProperty('border', '1px solid #FFE58F', 'important');
         window.trackerState.status = '황금변';
     } else if (category === 'status_green') {
-        btn.style.setProperty('background', '#ECFDF5', 'important');
+        btn.style.setProperty('background', 'rgba(16,185,129,0.1)', 'important');
         btn.style.setProperty('color', '#10B981', 'important');
         btn.style.setProperty('border', '1px solid #10B981', 'important');
         window.trackerState.status = '녹변';
@@ -2374,15 +2300,26 @@ window.openTrackerSheet = function(type, editId = null) {
     const saveBtn = document.getElementById('btn-tracker-save');
     
     if (!overlay || !content) return;
+
+    // ✨ HTML 안 고치고 JS에서 강제로 모달창 배경을 다크모드 대응으로 덮어씌움!
+    content.style.backgroundColor = 'var(--bg-card)';
+    if(title) title.style.color = 'var(--text-m)';
+    if(saveBtn) {
+        saveBtn.style.backgroundColor = 'var(--primary)';
+        saveBtn.style.color = '#FFF';
+        saveBtn.style.border = 'none';
+    }
     
     overlay.style.display = 'block'; setTimeout(() => { content.style.transform = 'translateY(0)'; }, 10);
     
     const now = new Date();
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    
+    // ✨ 배경색, 테두리, 텍스트 색상을 전부 var(--css변수)로 교체
     const timeInputHtml = `
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 기록할까요? (터치하여 시간 수정)</div>
-            <input type="time" id="v-tracker-time" value="${currentTimeStr}" style="border:none; background:#F2F5F8; padding:8px 16px; border-radius:12px; font-size:18px; font-weight:900; color:var(--primary); outline:none;">
+            <input type="time" id="v-tracker-time" value="${currentTimeStr}" style="border:1px solid var(--border); background:var(--bg-sub); padding:8px 16px; border-radius:12px; font-size:18px; font-weight:900; color:var(--text-m); outline:none;">
         </div>
     `;
     
@@ -2390,14 +2327,14 @@ window.openTrackerSheet = function(type, editId = null) {
         title.innerHTML = '🍼 수유 기록하기';
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">분유</button>
-                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">모유</button>
-                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">유축</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">분유</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">모유</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">유축</button>
             </div>
             <div style="text-align: center; margin-bottom: 24px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
                 <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
-                    <input type="number" id="v-feed-amount" placeholder="160" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid #E5E8EB; border-radius: 0;">
+                    <input type="number" id="v-feed-amount" placeholder="160" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
                 </div>
             </div>
@@ -2405,15 +2342,32 @@ window.openTrackerSheet = function(type, editId = null) {
         if(saveBtn) saveBtn.style.display = 'block';
 
     } else if (type === 'sleep') {
-        title.innerHTML = '💤 수면 기록하기';
         const sleepStart = localStorage.getItem('tosil_sleep_start');
-        if (sleepStart) {
+        const sleepType = localStorage.getItem('tosil_sleep_type') || '낮잠'; 
+        
+        if (window.editingTrackerId) {
+            title.innerHTML = '💤 수면 시간 수정';
+            body.innerHTML = timeInputHtml + `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">총 수면 시간 (분)</div>
+                    <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
+                        <input type="number" id="v-sleep-amount" placeholder="120" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
+                        <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
+                    </div>
+                </div>
+            `;
+            if(saveBtn) saveBtn.style.display = 'block';
+        } 
+        else if (sleepStart) {
+            title.innerHTML = '💤 수면 기록하기';
+            const sleepEmoji = sleepType === '낮잠' ? '☀️' : '🌙';
+            const sleepColor = sleepType === '낮잠' ? '#F59E0B' : '#A855F7';
             body.innerHTML = `
                 <div style="text-align:center; padding:20px 0;">
-                    <div style="font-size: 14px; font-weight: 800; color: #4E5968; margin-bottom: 12px;">우리아기 자는 중 🤫</div>
-                    <div id="sleep-timer-display" style="font-size: 48px; font-weight: 900; color: #A855F7; letter-spacing: 2px; font-variant-numeric: tabular-nums;">00:00:00</div>
+                    <div style="font-size: 14px; font-weight: 800; color: var(--text-m); margin-bottom: 12px;">우리아기 ${sleepType} 자는 중 🤫</div>
+                    <div id="sleep-timer-display" style="font-size: 48px; font-weight: 900; color: ${sleepColor}; letter-spacing: 2px; font-variant-numeric: tabular-nums;">00:00:00</div>
                 </div>
-                <button class="btn-main" onclick="window.stopSleepTimer()" style="background: #191F28 !important; color: white !important; font-size: 16px; padding: 16px; width:100%; border-radius:16px;">수면 종료 및 저장</button>
+                <button class="btn-main" onclick="window.stopSleepTimer()" style="background: var(--primary) !important; color: white !important; font-size: 16px; padding: 16px; width:100%; border-radius:16px; border:none;">수면 종료 및 저장</button>
             `;
             if(saveBtn) saveBtn.style.display = 'none';
             
@@ -2426,10 +2380,14 @@ window.openTrackerSheet = function(type, editId = null) {
                 if(el) el.innerText = `${h}:${m}:${s}`;
             }, 1000);
         } else {
+            title.innerHTML = '💤 수면 기록하기';
             body.innerHTML = `
-                <div style="background: #F8F9FA; border-radius: 16px; padding: 30px 20px; text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 15px; font-weight: 800; color: #4E5968; margin-bottom: 16px;">우리아기 꿀잠 타이머</div>
-                    <button class="btn-main" onclick="window.startSleepTimer()" style="background: #A855F7 !important; color: white !important; font-size: 16px; padding: 14px 30px; box-shadow: 0 4px 12px rgba(168,85,247,0.3) !important; margin:0; border-radius:14px;">▶ 낮잠 시작</button>
+                <div style="background: var(--bg-sub); border-radius: 16px; padding: 24px 16px; text-align: center; margin-bottom: 20px; border:1px solid var(--border);">
+                    <div style="font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 16px;">어떤 잠을 재우시나요?</div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn-main" onclick="window.startSleepTimer('낮잠')" style="flex:1; background: var(--bg-card) !important; color: #F59E0B !important; border:1px solid var(--border) !important; font-size: 15px; padding: 16px 10px; margin:0; border-radius:14px; box-shadow:0 4px 12px rgba(245,158,11,0.1) !important;">☀️ 낮잠 시작</button>
+                        <button class="btn-main" onclick="window.startSleepTimer('밤잠')" style="flex:1; background: #6B4EFF !important; color: white !important; font-size: 15px; padding: 16px 10px; margin:0; border-radius:14px; box-shadow: 0 4px 12px rgba(107,78,255,0.2) !important; border:none !important;">🌙 밤잠 시작</button>
+                    </div>
                 </div>
             `;
             if(saveBtn) saveBtn.style.display = 'none';
@@ -2438,35 +2396,31 @@ window.openTrackerSheet = function(type, editId = null) {
         title.innerHTML = '💩 기저귀 기록하기';
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_pee')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">소변</button>
-                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_poop')" style="flex: 1; background: #FFF; color: #8B95A1; border: 1px solid #E5E8EB; box-shadow: none; margin:0; transition:0.2s;">대변</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_pee')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">소변</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_poop')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">대변</button>
             </div>
             <div id="diaper-status-area" style="display:none; margin-bottom:10px;">
-                <div style="text-align: center; font-size: 14px; font-weight: 800; color: #4E5968; margin-bottom: 12px;">변의 상태는 어땠나요?</div>
+                <div style="text-align: center; font-size: 14px; font-weight: 800; color: var(--text-m); margin-bottom: 12px;">변의 상태는 어땠나요?</div>
                 <div style="display: flex; justify-content: center; gap: 8px;">
-                    <span onclick="window.selectTrackerBtn(this, 'status_yellow')" style="padding: 8px 16px; background: #F8F9FA; color: #8B95A1; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">🟨 황금변</span>
-                    <span onclick="window.selectTrackerBtn(this, 'status_green')" style="padding: 8px 16px; background: #F8F9FA; color: #8B95A1; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">🟩 녹변</span>
+                    <span onclick="window.selectTrackerBtn(this, 'status_yellow')" style="padding: 8px 16px; background: var(--bg-sub); color: var(--text-s); border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">🟨 황금변</span>
+                    <span onclick="window.selectTrackerBtn(this, 'status_green')" style="padding: 8px 16px; background: var(--bg-sub); color: var(--text-s); border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">🟩 녹변</span>
                 </div>
             </div>
         `;
         if(saveBtn) saveBtn.style.display = 'block';
     }
 
-    // ✨✨ 핵심: '수정 모드'일 때 기존 값들을 바텀시트에 자동으로 세팅해주는 로직 ✨✨
     if (window.editingTrackerId) {
         title.innerHTML = title.innerHTML.replace('기록하기', '수정하기');
         if(saveBtn) saveBtn.innerText = '수정 완료';
-        
         let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
         let recordToEdit = records.find(r => r.id === window.editingTrackerId);
         
         if (recordToEdit) {
             setTimeout(() => {
-                // 1. 시간 세팅
                 const timeInput = document.getElementById('v-tracker-time');
                 if(timeInput) timeInput.value = recordToEdit.time;
 
-                // 2. 종류 세팅 (버튼 활성화)
                 const buttons = document.querySelectorAll('#tracker-sheet-body .btn-main');
                 buttons.forEach(btn => {
                     if (btn.innerText === recordToEdit.subType || 
@@ -2480,13 +2434,16 @@ window.openTrackerSheet = function(type, editId = null) {
                     }
                 });
 
-                // 3. 먹은 양 세팅
                 if (recordToEdit.type === 'feed') {
                     const amtInput = document.getElementById('v-feed-amount');
                     if (amtInput) amtInput.value = recordToEdit.amount;
                 }
+                
+                if (recordToEdit.type === 'sleep') {
+                    const sleepAmtInput = document.getElementById('v-sleep-amount');
+                    if (sleepAmtInput) sleepAmtInput.value = recordToEdit.amount;
+                }
 
-                // 4. 대변 상태 세팅
                 if (recordToEdit.type === 'diaper' && recordToEdit.status) {
                     const spans = document.querySelectorAll('#diaper-status-area span');
                     spans.forEach(span => {
@@ -2512,8 +2469,9 @@ window.closeTrackerSheet = function() {
     if(window.sleepInterval) clearInterval(window.sleepInterval);
 };
 
-window.startSleepTimer = function() {
+window.startSleepTimer = function(sleepType) {
     localStorage.setItem('tosil_sleep_start', new Date().getTime());
+    localStorage.setItem('tosil_sleep_type', sleepType); 
     window.openTrackerSheet('sleep'); 
     window.updateTrackerDashboard();
 };
@@ -2523,10 +2481,11 @@ window.stopSleepTimer = function() {
     if(!start) return;
     const end = new Date().getTime();
     const durationMins = Math.floor((end - parseInt(start)) / 60000);
+    const sleepType = localStorage.getItem('tosil_sleep_type') || '낮잠'; 
     
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    let record = { id: 'trk_'+now.getTime(), time: timeStr, timestamp: now.getTime(), type: 'sleep', amount: durationMins };
+    let record = { id: 'trk_'+now.getTime(), time: timeStr, timestamp: now.getTime(), type: 'sleep', subType: sleepType, amount: durationMins };
     
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     records.unshift(record);
@@ -2534,11 +2493,11 @@ window.stopSleepTimer = function() {
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
     
     localStorage.removeItem('tosil_sleep_start');
+    localStorage.removeItem('tosil_sleep_type'); 
     window.closeTrackerSheet();
     window.updateTrackerDashboard();
 };
 
-// ✨ 수정 기능이 포함된 저장 로직!
 window.saveTrackerRecord = function() {
     if(!window.trackerState.type) return;
 
@@ -2547,7 +2506,6 @@ window.saveTrackerRecord = function() {
     let timestamp = new Date().getTime();
     const timeInputEl = document.getElementById('v-tracker-time');
     
-    // 만약 기존 기록을 수정하는 중이라면, 그 기록의 '날짜'를 기준으로 잡음
     if (window.editingTrackerId) {
         const originalRecord = records.find(r => r.id === window.editingTrackerId);
         if (originalRecord) timestamp = originalRecord.timestamp; 
@@ -2556,7 +2514,7 @@ window.saveTrackerRecord = function() {
     if(timeInputEl && timeInputEl.value) {
         timeStr = timeInputEl.value; 
         const [hours, minutes] = timeStr.split(':');
-        const d = new Date(timestamp); // 기준 날짜
+        const d = new Date(timestamp); 
         d.setHours(hours); d.setMinutes(minutes); d.setSeconds(0);
         timestamp = d.getTime();
     } else {
@@ -2579,8 +2537,17 @@ window.saveTrackerRecord = function() {
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
+    // ✨ [추가] 수면 시간 수정 모드 저장
+    else if (window.trackerState.type === 'sleep') {
+        const amt = document.getElementById('v-sleep-amount');
+        if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요!');
+        record.amount = parseInt(amt.value);
+        if (window.editingTrackerId) {
+            const originalRecord = records.find(r => r.id === window.editingTrackerId);
+            if (originalRecord) record.subType = originalRecord.subType; // 기존 낮잠/밤잠 유지
+        }
+    }
 
-    // ✨ 수정 모드면 기존 기록 교체, 아니면 새로 추가
     if (window.editingTrackerId) {
         const idx = records.findIndex(r => r.id === window.editingTrackerId);
         if(idx !== -1) records[idx] = record;
@@ -2588,31 +2555,24 @@ window.saveTrackerRecord = function() {
         records.push(record);
     }
     
-    // 💡 변경된 시간에 맞춰서 타임라인 최신순으로 예쁘게 재정렬!
     records.sort((a, b) => b.timestamp - a.timestamp);
     if(records.length > 100) records.pop();
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
 
-    window.editingTrackerId = null; // 수정 모드 끝!
+    window.editingTrackerId = null; 
     window.closeTrackerSheet();
     window.updateTrackerDashboard(); 
 };
 
-// ✏️ 기록 수정하기 버튼 함수 추가
+// ✏️ 기록 수정하기 (수면 수정 제한 해제!)
 window.editTrackerRecord = function(id) {
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     let record = records.find(r => r.id === id);
     if (!record) return;
     
-    // 수면은 실시간 타이머라 수정이 어려우므로 예외처리
-    if (record.type === 'sleep') {
-        alert("수면 기록은 현재 수정할 수 없습니다. 삭제 후 다시 기록해주세요.");
-        return;
-    }
-
-    window.openTrackerSheet(record.type, id); // 두 번째 인자로 ID를 넘기면 수정 모드로 열림!
+    window.openTrackerSheet(record.type, id); 
 };
-
+    
 window.deleteTrackerRecord = function(id) {
     if(!confirm("이 기록을 삭제하시겠습니까?")) return;
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
@@ -2625,6 +2585,7 @@ window.resetTrackerRecords = function() {
     if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
     localStorage.removeItem('tosil_tracker_records');
     localStorage.removeItem('tosil_sleep_start');
+    localStorage.removeItem('tosil_sleep_type');
     window.updateTrackerDashboard();
 };
 
@@ -2687,12 +2648,13 @@ window.updateTrackerDashboard = function() {
             for(let date in grouped) {
                 historyHtml += `<div style="font-size:12.5px; font-weight:900; color:#8B95A1; margin:16px 0 8px 0; border-bottom:1px solid #F2F5F8; padding-bottom:6px;">📅 ${date}</div>`;
                 grouped[date].forEach(r => {
-                    let icon = r.type==='feed' ? '🍼' : (r.type==='sleep' ? '💤' : '💩');
+                    let icon = r.type==='feed' ? '🍼' : (r.type==='sleep' ? (r.subType==='밤잠' ? '🌙' : '☀️') : '💩');
                     let txt = '';
                     if(r.type === 'feed') txt = `${r.subType} ${r.amount}ml`;
-                    else if(r.type === 'sleep') txt = `${r.amount}분 잠`;
+                    else if(r.type === 'sleep') txt = `${r.subType || '낮잠'} ${r.amount}분`; 
                     else if(r.type === 'diaper') txt = r.status ? `${r.subType} / ${r.status}` : `${r.subType}`;
                     
+                    // ✨ [수정] 수면 기록에도 무조건 ✏️ 버튼 나오게 변경!
                     historyHtml += `
                         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #E5E8EB; border-radius:12px; margin-bottom:8px; background:#FFF; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
                             <div style="display:flex; gap:10px; align-items:center;">
@@ -2703,7 +2665,7 @@ window.updateTrackerDashboard = function() {
                                 </div>
                             </div>
                             <div style="display:flex; gap:8px;">
-                                ${r.type !== 'sleep' ? `<button onclick="window.editTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#8B95A1; cursor:pointer; padding:0;">✏️</button>` : ''}
+                                <button onclick="window.editTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#8B95A1; cursor:pointer; padding:0;">✏️</button>
                                 <button onclick="window.deleteTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#D1D6DB; cursor:pointer; padding:0;">❌</button>
                             </div>
                         </div>
@@ -2738,7 +2700,7 @@ window.updateTrackerDashboard = function() {
 
     let briefing = "오늘도 평화로운 육아팅! 🤍";
     if (todayFeedAmt > 0) briefing = `오늘 총 ${todayFeedAmt}ml 먹었어요! 튼튼해지는 중 💪`;
-    if (todaySleepMins > 120) briefing = `오늘 낮잠 ${Math.floor(todaySleepMins/60)}시간 잤어요! 꿀잠 요정 🌙`;
+    if (todaySleepMins > 120) briefing = `오늘 수면 시간 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
     if (todayDiaperCount >= 5) briefing = `오늘 기저귀를 ${todayDiaperCount}번 갈았어요! 보송보송 엉덩이 ✨`;
 
     let htmlStr = `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
@@ -2749,7 +2711,7 @@ window.updateTrackerDashboard = function() {
             <div style="font-size:14px; font-weight:900; color:#3182F6;">${todayFeedAmt}ml</div>
         </div>
         <div style="flex:1; background:#F8F9FA; padding:10px; border-radius:12px; text-align:center;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px;">오늘 낮잠</div>
+            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px;">오늘 수면</div>
             <div style="font-size:14px; font-weight:900; color:#A855F7;">${Math.floor(todaySleepMins/60)}h ${todaySleepMins%60}m</div>
         </div>
         <div style="flex:1; background:#F8F9FA; padding:10px; border-radius:12px; text-align:center;">
@@ -2783,10 +2745,10 @@ window.updateTrackerDashboard = function() {
     } else {
         const recent = records[0];
         if(recent) {
-            let icon = recent.type==='feed' ? '🍼' : (recent.type==='sleep' ? '💤' : '💩');
+            let icon = recent.type==='feed' ? '🍼' : (recent.type==='sleep' ? (recent.subType==='밤잠' ? '🌙' : '☀️') : '💩');
             let txt = '';
             if(recent.type === 'feed') txt = `${recent.subType} ${recent.amount}ml`;
-            else if(recent.type === 'sleep') txt = `${recent.amount}분 잠`;
+            else if(recent.type === 'sleep') txt = `${recent.subType || '낮잠'} ${recent.amount}분`; 
             else if(recent.type === 'diaper') txt = recent.status ? `${recent.subType} / ${recent.status}` : `${recent.subType}`;
             
             htmlStr += `<div style="text-align:center; padding:10px; background:#F8F9FA; border-radius:12px; border:1px dashed #E5E8EB; font-size:12.5px; font-weight:800; color:var(--text-s);">최근 기록: ${icon} ${txt} (${getDiffText(recent.timestamp)})</div>`;
@@ -2795,19 +2757,17 @@ window.updateTrackerDashboard = function() {
 
     const sleepStart = localStorage.getItem('tosil_sleep_start');
     if (sleepStart) {
+        const sleepType = localStorage.getItem('tosil_sleep_type') || '낮잠';
+        const sleepEmoji = sleepType === '낮잠' ? '☀️' : '🌙';
+        const sleepColor = sleepType === '낮잠' ? '#F59E0B' : '#A855F7';
+        const sleepBg = sleepType === '낮잠' ? '#FEF3C7' : '#F3E8FF';
+        
         const diffMins = Math.floor((nowTime - parseInt(sleepStart)) / 60000);
-        htmlStr += `<div style="margin-top:8px; display:flex; align-items:center; justify-content:space-between; background:#F3E8FF; padding:10px 14px; border-radius:12px;"><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">💤</span><div><div style="font-size:11px; color:#A855F7; font-weight:800;">꿀잠 자는 중</div><div style="font-size:13px; font-weight:900; color:#191F28;">현재 ${diffMins}분 째</div></div></div><button onclick="window.openTrackerSheet('sleep')" style="background:#A855F7; color:#FFF; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">종료하기</button></div>`;
+        htmlStr += `<div style="margin-top:8px; display:flex; align-items:center; justify-content:space-between; background:${sleepBg}; padding:10px 14px; border-radius:12px;"><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">${sleepEmoji}</span><div><div style="font-size:11px; color:${sleepColor}; font-weight:800;">${sleepType} 자는 중</div><div style="font-size:13px; font-weight:900; color:#191F28;">현재 ${diffMins}분 째</div></div></div><button onclick="window.openTrackerSheet('sleep')" style="background:${sleepColor}; color:#FFF; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">종료하기</button></div>`;
     }
 
     container.innerHTML = htmlStr;
 };
-
-document.addEventListener("DOMContentLoaded", () => {
-    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
-});
-setInterval(() => {
-    if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
-}, 60000);
 
 // ==========================================
 // 💌 부부 소통: 육아문답 작성 상태 감지 엔진 (감성 버전)
@@ -2821,7 +2781,6 @@ window.updateDiaryCard = function() {
     const isWrittenToday = (lastWrittenDate === todayStr);
 
     if (isWrittenToday) {
-        // ✅ [작성 완료] 감성 듬뿍 찌르기 버튼 등장!
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="window.location.href='diary.html'">
                 <div>
@@ -2838,7 +2797,6 @@ window.updateDiaryCard = function() {
             </div>
         `;
     } else {
-        // ❌ [작성 전] 평범한 상태
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="window.location.href='diary.html'">
                 <div>
@@ -2852,7 +2810,6 @@ window.updateDiaryCard = function() {
 };
 
 window.pokePartner = function() {
-    // ✨ 카톡으로 공유될 때 날아가는 감성 폭발 문구!
     const text = "[육아메이트] 오늘 하루도 정말 고생 많았어 🤍 육아 문답에 내 마음을 남겨뒀으니 얼른 와서 확인해봐!";
     const url = "https://happy-baby0303.github.io/"; 
     if (navigator.share) {
@@ -2862,10 +2819,51 @@ window.pokePartner = function() {
     }
 };
 
-// 화면 로딩/주기적 갱신
 document.addEventListener("DOMContentLoaded", () => {
     if(typeof window.updateDiaryCard === 'function') window.updateDiaryCard();
 });
 setInterval(() => {
     if(typeof window.updateDiaryCard === 'function') window.updateDiaryCard();
-}, 5000);
+}, 5000); 
+
+// ==========================================
+// 🚀 런타임 구동 마스터 마운트 (이부분이 날아갔었음)
+// ==========================================
+window.onload = () => { 
+    loadAllExternalData(); 
+    renderBabyInfo(); 
+    loadBabyPhoto(); 
+    renderCubes();
+    renderBatonTasks();
+    updateLedgerUI();
+    updateHomeDashboard();
+    initDarkMode();
+    renderFoodChecklist(); 
+    
+    const toolboxTab = document.getElementById('tab-toolbox');
+    if(toolboxTab) {
+        toolboxTab.querySelectorAll('.panel-block').forEach(p => { 
+            if(!p.classList.contains('active')) p.style.display = 'none'; 
+        });
+    }
+    
+    document.querySelectorAll('.sym-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const cb = this.previousElementSibling;
+            setTimeout(() => {
+                if (cb && cb.checked) {
+                    this.style.background = 'rgba(49, 130, 246, 0.15)'; this.style.border = '1px solid #3182F6'; this.style.color = '#3182F6';
+                } else {
+                    this.style.background = ''; this.style.border = ''; this.style.color = '';
+                }
+            }, 10);
+        });
+    });
+        
+    if (typeof startFeverRealtimeSync === 'function') { startFeverRealtimeSync(); } else { renderFeverTimeline(); updateHomeDashboard(); }
+    if (typeof startCubeRealtimeSync === 'function') { startCubeRealtimeSync(); } else { renderCubes(); }
+    if (typeof startBatonRealtimeSync === 'function') { startBatonRealtimeSync(); } else { renderBatonTasks(); }
+    if (typeof startLedgerRealtimeSync === 'function') { startLedgerRealtimeSync(); } else { updateLedgerUI(); }
+
+    updateSyncBadge(); 
+};

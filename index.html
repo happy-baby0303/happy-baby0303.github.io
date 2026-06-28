@@ -216,48 +216,42 @@
                 <!-- 🎯 1. 일체형 예산 & 공동 목표 대시보드 -->
                 <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
                     
-                    <!-- [상단] 지출 방어: 이번 달 예산 한도 -->
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
-                        <div>
-                            <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">🎯 이번 달 예산 한도</div>
-                            <!-- ✨ width를 140px로 대폭 늘려서 100만원 이상도 안 잘리고 다 보입니다! -->
-                            <div style="display:inline-flex; align-items:baseline; border-bottom: 2px solid var(--primary); padding-bottom: 2px;">
-                                <input type="text" inputmode="numeric" id="v-budget" placeholder="500,000" onkeyup="formatNum(this)" style="width: 200px; font-size:22px; font-weight:900; border:none; outline:none; background:transparent; color:var(--primary); text-align:right; padding:0;">
-                                <span style="font-size:16px; font-weight:800; color:var(--primary); margin-left:4px;">원</span>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px; gap:8px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px; white-space:nowrap;">🎯 이번 달 예산 한도</div>
+                            <div style="display:flex; align-items:baseline; border-bottom: 2px solid var(--primary); padding-bottom: 4px;">
+                                <input type="text" inputmode="numeric" id="v-budget" placeholder="500,000" onkeyup="formatNum(this)" onchange="analyzeMoney()" style="flex:1; min-width:0; font-size:24px; font-weight:900; border:none; outline:none; background:transparent; color:var(--text-m); text-align:right; padding:0;">
+                                <span style="font-size:15px; font-weight:800; color:var(--primary); margin-left:4px; flex-shrink:0;">원</span>
                             </div>
                         </div>
                         
-                        <!-- 달성률 뱃지 강조 -->
-                        <div style="text-align:right; background: #ECFDF5; padding: 10px 14px; border-radius: 14px; border: 1px solid #A7F3D0;">
-                            <div style="font-size: 11px; font-weight: 800; color: #059669; margin-bottom: 4px;">🎁 저축 목표 달성률</div>
-                            <div style="font-size: 24px; font-weight: 900; color:#00B37A; line-height: 1;" id="v-goal-percent">0%</div>
+                        <div style="text-align:center; background: #E6F7F2; padding: 10px 12px; border-radius: 12px; border: 1px solid #A7F3D0; flex-shrink:0; white-space:nowrap;">
+                            <div style="font-size: 11px; font-weight: 800; color: #059669; margin-bottom: 4px;">🎁 달성률</div>
+                            <div style="font-size: 20px; font-weight: 900; color:#00B37A; line-height: 1;" id="v-goal-percent">0%</div>
                         </div>
                     </div>
                     
-                    <!-- [하단] 저축 공격: 공동 목표 예산 -->
-                    <div style="background:#F8F9FA; border-radius:12px; padding:14px; border:1px solid #E5E8EB;">
-                        <input type="text" id="v-goal-text" placeholder="어떤 목표를 위해 모을까요? (예: 전집 구매)" onchange="saveGoal()" style="background:transparent; border:none; border-bottom:1px dashed #D1D6DB; color:var(--text-m); font-size: 14px; font-weight: 800; width: 100%; outline:none; padding:0 0 8px 0; margin-bottom:10px; box-sizing:border-box;">
-                        <div style="display:flex; align-items:center; justify-content:space-between;">
-                            <span style="font-size:13px; font-weight:800; color:var(--text-s);">목표 저축액:</span>
-                            <div style="display:flex; align-items:center;">
-                                <!-- ✨ 여기도 width를 120px로 여유롭게 늘렸습니다! -->
-                                <input type="text" id="v-goal-amount" placeholder="100,000" onkeyup="formatNum(this); saveGoal();" style="background:transparent; border:none; color:var(--text-m); font-size: 16px; font-weight: 800; width: 200px; outline:none; text-align:right;">
-                                <span style="font-size:14px; font-weight:800; color:var(--text-m); margin-left:4px;">원</span>
+                    <div style="background:#F8F9FA; border-radius:14px; padding:16px; border:1px solid #E5E8EB;">
+                        <input type="text" id="v-goal-text" placeholder="예: 우리아기 전집 세트 구매" onchange="saveGoal()" style="background:transparent; border:none; border-bottom:1px dashed #D1D6DB; color:var(--text-m); font-size: 14px; font-weight: 800; width: 100%; outline:none; padding:0 0 8px 0; margin-bottom:12px; box-sizing:border-box;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap: 8px;">
+                            <span style="font-size:13.5px; font-weight:800; color:var(--text-s); flex-shrink:0; white-space:nowrap;">목표 저축액:</span>
+                            <div style="display:flex; align-items:center; flex:1; justify-content:flex-end;">
+                                <input type="text" inputmode="numeric" id="v-goal-amount" placeholder="100,000" onkeyup="formatNum(this); saveGoal();" style="background:transparent; border:none; color:var(--text-m); font-size: 16px; font-weight: 900; width:100%; min-width:0; text-align:right; outline:none;">
+                                <span style="font-size:14px; font-weight:800; color:var(--text-m); margin-left:4px; flex-shrink:0;">원</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 💰 2. 초압축 실시간 머니 액션박스 -->
                 <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
                     <div style="font-size:14px; font-weight:900; color:var(--text-m); margin-bottom:12px;">💰 빠른 금액 입력</div>
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                        <input type="text" inputmode="numeric" id="v-input-amount" placeholder="예: 15000" onkeyup="formatNum(this)" style="flex:1; min-width:0; padding:14px 12px; border-radius:12px; border:1px solid var(--border); font-size:18px; font-weight:800; text-align:right; color:var(--primary); background:#F0F7FF;">
-                        <span style="font-size:16px; font-weight:800; color:var(--text-m);">원</span>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+                        <input type="text" inputmode="numeric" id="v-input-amount" placeholder="예: 15000" onkeyup="formatNum(this)" style="flex:1; min-width:0; padding:16px 14px; border-radius:12px; border:1px solid var(--border); font-size:18px; font-weight:800; text-align:right; color:var(--primary); background:#F0F7FF; outline:none;">
+                        <span style="font-size:16px; font-weight:800; color:var(--text-m); flex-shrink:0;">원</span>
                     </div>
-                    <div style="display:flex; gap:8px; width:100%;">
-                        <button onclick="addDailyExpense(false)" style="flex:1; padding:14px; border-radius:12px; background:#F2F4F6 !important; color:#4E5968 !important; font-weight:800; font-size:14px; border:1px solid #D1D6DB; cursor:pointer; transition:0.2s;">💸 썼어요 (지출)</button>
-                        <button onclick="addDailyExpense(true)" style="flex:1; padding:14px; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; font-size:14px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.2); cursor:pointer; transition:0.2s;">💰 아꼈어요 (저금)</button>
+                    <div style="display:flex; gap:6px; width:100%;">
+                        <button class="btn-main" onclick="addDailyExpense(false)" style="flex:1; padding:14px 4px; border-radius:12px; background:#F2F4F6 !important; color:#4E5968 !important; font-weight:800; font-size:13.5px; border:1px solid #D1D6DB; cursor:pointer; margin:0; white-space:nowrap; letter-spacing:-0.5px;">💸 썼어요(지출)</button>
+                        <button class="btn-main" onclick="addDailyExpense(true)" style="flex:1; padding:14px 4px; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; font-size:13.5px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.2); cursor:pointer; margin:0; white-space:nowrap; letter-spacing:-0.5px;">💰 아꼈어요(저금)</button>
                     </div>
                 </div>
 
@@ -411,14 +405,14 @@
                 <div style="background:#FFF; border:1px solid #E5E8EB; padding:20px; border-radius:20px; margin-bottom:16px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
                     <div style="font-size:12.5px; font-weight:800; color:var(--success); background:#E6F7F2; padding:8px 12px; border-radius:10px; margin-bottom:20px; text-align:center;">💡 키와 몸무게는 둘 중 하나만 넣어도 분석 가능해요!</div>
                     
-                    <div style="display:flex; gap:12px; margin-bottom:16px;">
-                        <div style="flex:1;">
-                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">1. 생년월일</label>
-                            <input type="date" id="v-birth" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; font-weight:800; color:var(--text-m); background:#F8F9FA;">
+                    <div style="display:flex; gap:8px; margin-bottom:16px;">
+                        <div style="flex:1; min-width:0;">
+                            <label style="font-size:12px; font-weight:800; display:block; margin-bottom:6px; color:var(--text-m); white-space:nowrap;">1. 생년월일</label>
+                            <input type="date" id="v-birth" style="width:100%; box-sizing:border-box; padding:12px 8px; border:1px solid var(--border); border-radius:12px; font-size:13px; font-weight:800; color:var(--text-m); background:#F8F9FA;">
                         </div>
-                        <div style="flex:1;">
-                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 성별</label>
-                            <select id="v-gender" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:14px; font-weight:800; color:var(--text-m); background:#F8F9FA;">
+                        <div style="flex:1; min-width:0;">
+                            <label style="font-size:12px; font-weight:800; display:block; margin-bottom:6px; color:var(--text-m); white-space:nowrap;">2. 성별</label>
+                            <select id="v-gender" style="width:100%; box-sizing:border-box; padding:12px 8px; border:1px solid var(--border); border-radius:12px; font-size:13px; font-weight:800; color:var(--text-m); background:#F8F9FA;">
                                 <option value="" disabled selected>선택</option>
                                 <option value="boy">👦 남아</option>
                                 <option value="girl">👧 여아</option>
@@ -426,14 +420,14 @@
                         </div>
                     </div>
                     
-                    <div style="display:flex; gap:12px;">
-                        <div style="flex:1;">
-                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">3. 현재 키 <span style="font-size:11px; color:var(--text-sub);">(cm)</span></label>
-                            <input type="number" id="v-height" step="0.1" placeholder="선택" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:16px; font-weight:800; text-align:center; background:#FFF; color:var(--text-m);">
+                    <div style="display:flex; gap:8px;">
+                        <div style="flex:1; min-width:0;">
+                            <label style="font-size:12px; font-weight:800; display:block; margin-bottom:6px; color:var(--text-m); white-space:nowrap;">3. 현재 키 <span style="font-size:10px; color:var(--text-sub);">(cm)</span></label>
+                            <input type="number" id="v-height" step="0.1" placeholder="모르면 비워두기" style="width:100%; box-sizing:border-box; padding:12px 6px; border:1px solid var(--border); border-radius:12px; font-size:13px; font-weight:800; text-align:center; background:#FFF; color:var(--text-m);">
                         </div>
-                        <div style="flex:1;">
-                            <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">4. 체중 <span style="font-size:11px; color:var(--text-sub);">(kg)</span></label>
-                            <input type="number" id="v-weight-growth" step="0.1" placeholder="선택" style="width:100%; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:12px; font-size:16px; font-weight:800; text-align:center; background:#FFF; color:var(--text-m);">
+                        <div style="flex:1; min-width:0;">
+                            <label style="font-size:12px; font-weight:800; display:block; margin-bottom:6px; color:var(--text-m); white-space:nowrap;">4. 체중 <span style="font-size:10px; color:var(--text-sub);">(kg)</span></label>
+                            <input type="number" id="v-weight-growth" step="0.1" placeholder="모르면 비워두기" style="width:100%; box-sizing:border-box; padding:12px 6px; border:1px solid var(--border); border-radius:12px; font-size:13px; font-weight:800; text-align:center; background:#FFF; color:var(--text-m);">
                         </div>
                     </div>
                 </div>
@@ -973,33 +967,89 @@
     </div>
 </div>
 
-<div id="sos-modal" class="modal-overlay" style="z-index: 5000; display:none;" onclick="closeSOS(event)">
-    <div class="sos-content-box" onclick="event.stopPropagation()">
-        <div id="btn-sos-close" class="sos-close-btn" onclick="closeSOSForce()">✕</div>
-        <div id="btn-sos-back" class="sos-back-btn" style="display:none;" onclick="openSOSModal()">← 뒤로</div>
-        <div id="sos-step-choice">
-            <div style="font-size:42px; margin-bottom:12px;">🚨</div>
-            <div class="sos-choice-title" style="color: var(--text-m) !important; font-weight: 900; font-size: 20px; margin-bottom: 8px;">긴급 SOS 상황 선택</div>
-            <div class="sos-choice-desc" style="color: var(--text-s) !important; font-size: 14px; margin-bottom: 20px;">현재 아기의 상태에 맞는 대처법을 누르세요.</div>
-        </div>
-        <div class="sos-btn-medical" onclick="showSosMedical()">
-            <span style="font-size:28px;">🚑</span>
-            <div style="flex-grow:1;"><div style="margin-bottom:2px;">고열 / 응급 상황</div></div>
-        </div>
-        <div class="sos-btn-cry" onclick="showSosChecklist()">
-            <span style="font-size:28px;">😭</span>
-            <div style="flex-grow:1;"><div style="margin-bottom:2px;">이유 없는 멈추지 않는 오열</div></div>
-        </div>
-        <div id="sos-step-medical" style="display:none; text-align:left;">
-            <div class="sos-detail-title"><span>🚑</span> 119 야간 의료상담 안내</div>
-            <a href="tel:119" class="btn-main" style="background:#F04452 !important; box-shadow: 0 6px 16px rgba(240, 68, 82, 0.3) !important;">🚨 119 전문의 상담 전화걸기</a>
-        </div>
-        <div id="sos-step-cry" style="display:none; text-align:left;">
-            <div class="sos-detail-title"><span>😭</span> 자지러질 때 30초 체크리스트</div>
-            <button class="btn-main" style="background:#3182F6 !important; margin-top:20px;" onclick="closeSOSForce()">확인 완료</button>
+<!-- 🚨 한밤중 긴급 SOS 센터 모달 -->
+    <div id="sos-modal" class="modal-overlay" onclick="closeSOS(event)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div class="modal-content" style="background:#FFF; width:90%; max-width:400px; border-radius:24px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.1); position:relative; max-height:85vh; overflow-y:auto;">
+            
+            <!-- 상단 뒤로가기 / 닫기 버튼 -->
+            <button id="btn-sos-back" onclick="window.openSOSModal()" style="display:none; position:absolute; top:20px; left:20px; background:#F2F5F8; border:none; padding:6px 12px; border-radius:8px; font-weight:800; color:#4E5968; cursor:pointer;">← 뒤로</button>
+            <button onclick="window.closeSOSForce()" style="position:absolute; top:20px; right:20px; background:#F2F5F8; border:none; width:30px; height:30px; border-radius:15px; font-weight:900; color:#8B95A1; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+
+<!-- 1. 첫 화면: 상황 선택 (강제 높이 고정으로 완벽한 쌍둥이 슬림핏 구현!) -->
+            <div id="sos-step-choice" style="margin-top:10px;">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <div style="font-size:32px; margin-bottom:8px;">🚨</div>
+                    <div style="font-size:18px; font-weight:900; color:#191F28;">어떤 상황인가요?</div>
+                    <div style="font-size:13px; color:#6B7684; margin-top:4px;">당황하지 마시고 해당하는 버튼을 눌러주세요.</div>
+                </div>
+                
+                <!-- 💡 양쪽 박스를 똑같은 높이(135px)로 꽉 잠가버렸습니다! -->
+                <div style="display:flex; gap:12px; width:100%;">
+                    
+                    <!-- 😭 왼쪽 버튼 -->
+                    <button class="sos-btn-cry" onclick="window.showSosChecklist()" style="flex:1; height:135px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#F0F7FF; border:1px solid #D6E8F9; border-radius:16px; text-align:center; cursor:pointer; box-shadow:0 4px 12px rgba(49,130,246,0.05); padding:10px; box-sizing:border-box;">
+                        <div style="font-size:26px; margin-bottom:8px;">😭</div>
+                        <div style="font-size:14px; font-weight:900; color:#3182F6; margin-bottom:4px; line-height:1.2; word-break:keep-all;">아기가 계속 울어요</div>
+                        <div style="font-size:11px; font-weight:800; color:#1A73E8; opacity:0.8;">30초 원인 파악</div>
+                    </button>
+
+                    <!-- 🚑 오른쪽 버튼 -->
+                    <button class="sos-btn-medical" onclick="window.showSosMedical()" style="flex:1; height:135px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#FFF0F1; border:1px solid #FFE3E3; border-radius:16px; text-align:center; cursor:pointer; box-shadow:0 4px 12px rgba(240,68,82,0.05); padding:10px; box-sizing:border-box;">
+                        <div style="font-size:26px; margin-bottom:8px;">🚑</div>
+                        <div style="font-size:14px; font-weight:900; color:#D32F2F; margin-bottom:4px; line-height:1.2; word-break:keep-all;">열이 나거나 아파요</div>
+                        <div style="font-size:11px; font-weight:800; color:#F04452; opacity:0.8;">119 의료상담</div>
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- 2. 의학적 응급 상황 (달빛병원/약국 포함) -->
+            <div id="sos-step-medical" style="display:none; margin-top:30px;">
+                <div style="text-align:center; font-size:18px; font-weight:900; margin-bottom:16px; color:#191F28;">🚑 119 야간 의료상담 안내</div>
+                <div style="background:#F8F9FA; padding:16px; border-radius:12px; font-size:13.5px; color:#4E5968; line-height:1.6; margin-bottom:20px; border:1px solid #E5E8EB; word-break:keep-all;">
+                    응급실에 가야 할지 망설여진다면 <strong>119에 전화해서 전문의(의사) 상담</strong>을 먼저 받아보세요. 24시간 친절하게 증상 상담과 대처법을 알려줍니다.
+                </div>
+                
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <a href="tel:119" style="text-align:center; display:block; background:#F04452; color:#FFF; padding:16px; border-radius:14px; font-size:15px; font-weight:900; text-decoration:none; box-shadow:0 4px 12px rgba(240,68,82,0.2);">🚨 119 전문의 상담 전화걸기</a>
+                    
+                    <div style="display:flex; gap:10px; margin-top:8px;">
+                        <a href="https://www.e-gen.or.kr/moonlight/main.do" target="_blank" style="flex:1; text-align:center; background:#FFF9E6; color:#B78103; border:1px solid #FDE68A; padding:14px 4px; border-radius:12px; font-size:13px; font-weight:900; text-decoration:none;">🌙 달빛어린이병원</a>
+                        <a href="https://www.pharm114.or.kr/" target="_blank" style="flex:1; text-align:center; background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; padding:14px 4px; border-radius:12px; font-size:13px; font-weight:900; text-decoration:none;">💊 휴일/심야 약국</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 원인불명 울음 체크리스트 -->
+            <div id="sos-step-cry" style="display:none; margin-top:30px;">
+                <div style="text-align:center; font-size:18px; font-weight:900; margin-bottom:16px; color:#191F28;">😭 자지러질 때 30초 체크리스트</div>
+                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
+                    <div style="background:#F8F9FA; padding:14px; border-radius:12px; border:1px solid #E5E8EB;">
+                        <div style="font-weight:900; color:#191F28; font-size:14px; margin-bottom:4px;">🍼 배가 고픈가요?</div>
+                        <div style="font-size:12px; color:#6B7684;">마지막 수유 시간을 확인하고 쪽쪽이를 물려보세요.</div>
+                    </div>
+                    <div style="background:#F8F9FA; padding:14px; border-radius:12px; border:1px solid #E5E8EB;">
+                        <div style="font-weight:900; color:#191F28; font-size:14px; margin-bottom:4px;">💩 기저귀가 찝찝한가요?</div>
+                        <div style="font-size:12px; color:#6B7684;">대소변을 확인하고 발진이 없는지 체크하세요.</div>
+                    </div>
+                    <div style="background:#F8F9FA; padding:14px; border-radius:12px; border:1px solid #E5E8EB;">
+                        <div style="font-weight:900; color:#191F28; font-size:14px; margin-bottom:4px;">💨 배에 가스가 찼나요? (영아산통)</div>
+                        <div style="font-size:12px; color:#6B7684;">배가 빵빵한지 만져보고, 하늘 자전거 마사지를 해주세요.</div>
+                    </div>
+                    <div style="background:#F8F9FA; padding:14px; border-radius:12px; border:1px solid #E5E8EB;">
+                        <div style="font-weight:900; color:#191F28; font-size:14px; margin-bottom:4px;">🌡️ 방이 너무 덥거나 춥나요?</div>
+                        <div style="font-size:12px; color:#6B7684;">아기 목덜미나 등을 만져보고 땀이 났는지 확인하세요.</div>
+                    </div>
+                    <div style="background:#F8F9FA; padding:14px; border-radius:12px; border:1px solid #E5E8EB;">
+                        <div style="font-weight:900; color:#191F28; font-size:14px; margin-bottom:4px;">👕 옷이나 기저귀가 불편한가요?</div>
+                        <div style="font-size:12px; color:#6B7684; word-break:keep-all;">라벨이 찌르거나, 머리카락이 발가락에 감겼는지(지혈 현상) 꼼꼼히 살피세요.</div>
+                    </div>
+                </div>
+                <button class="btn-main" onclick="window.closeSOSForce()" style="width:100%; background:#3182F6 !important; color:#FFF !important; padding:16px; border-radius:14px; font-size:15px; font-weight:900; border:none;">확인 완료</button>
+            </div>
+
         </div>
     </div>
-</div>
 
 <div id="family-sync-modal" class="modal-overlay" style="z-index: 6000; display:none;" onclick="closeFamilySyncModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
