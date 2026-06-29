@@ -1243,25 +1243,25 @@ function renderBabyInfo() {
         initPlayWidget(monthAge, diffDays);
         updateMainAISensors(monthAge); 
 
-        // 🎯 숨어있던 '닌자 스마트 배너' 소환술
+        // 🎯 숨어있던 '닌자 스마트 배너'
         const bannerContainer = document.getElementById('health-smart-banner');
         if (bannerContainer) {
             let bannerHtml = '';
             
-            // 💉 예방접종 경고 배너 (줄맞춤 완벽 해결!)
+            // 💉 예방접종 경고 배너 (갤럭시 폰트/줄바꿈 완벽 해결!)
             if (curVac) {
                 bannerHtml += `
-                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
-                        <div style="display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0;">
-                            <div style="font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2)); margin-top:2px;">💉</div>
+                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
+                        <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0;">
+                            <div style="font-size: 24px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2)); margin-top: 2px;">💉</div>
                             <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 12px; font-weight: 800; color: #1967D2; margin-bottom: 6px;">건강 알리미 · 이번 달 필수 접종</div>
-                                <div style="font-size: 14px; font-weight: 900; color: #191F28; line-height: 1.6; word-break:keep-all;">
+                                <div style="font-size: 11px; font-weight: 800; color: #1967D2; margin-bottom: 4px;">이번 달 필수 접종</div>
+                                <div style="font-size: 13px; font-weight: 900; color: #191F28; line-height: 1.4; letter-spacing: -0.5px; word-break: keep-all;">
                                     ${curVac.desc}
                                 </div>
                             </div>
                         </div>
-                        <span style="flex-shrink: 0; white-space: nowrap; background: #1A73E8; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px; align-self: center;">확인하기</span>
+                        <span style="flex-shrink: 0; white-space: nowrap; background: #1A73E8; color: white; font-size: 12px; font-weight: 900; padding: 8px 12px; border-radius: 10px; align-self: center;">확인하기</span>
                     </div>
                 `;
             }
