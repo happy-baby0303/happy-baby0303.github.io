@@ -177,10 +177,11 @@ function generateCardHtml(item) {
     const heartText = isFav ? '#E32636' : '#4E5968';
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    let scoreHtml = "";
+let scoreHtml = "";
     if (item.matchRate !== null && !isFavViewMode) {
         let sColor = item.matchRate >= 80 ? "#3182F6" : (item.matchRate >= 50 ? "#F59E0B" : "#E32636");
-        scoreHtml = `<div class="match-score" style="color:${sColor};">${item.matchRate}%<span>AI 매칭</span></div>`;
+        // ✨ top: 60px 삭제! 원래 예쁜 우측 상단 자리로 돌아가되, 버튼 뒤에 깔리도록 설정!
+        scoreHtml = `<div class="match-score" style="color:${sColor}; pointer-events: none; z-index: 0;">${item.matchRate}%<span>AI 매칭</span></div>`;
     }
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
     const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#3182F6');
