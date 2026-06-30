@@ -122,7 +122,7 @@ function generateToyHTML(toy, favs) {
         </div>` : '';
 
     // 🚀 [핵심] 빈 링크 방어(Fallback) 및 UX 텍스트 동적 변환 로직
-    const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy"; // 대표님의 쿠팡 홈 메인 링크
+    const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy"; 
     const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
     
     const finalLink = isFallback ? fallbackLink : toy.coupangLink;
@@ -132,15 +132,17 @@ function generateToyHTML(toy, favs) {
 
     return `
         <div class="report-card">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
-                <div style="display:flex; gap:16px; align-items:center;">
-                    <div class="toy-img-placeholder">${toy.imgIcon}</div>
-                    <div>
-                        <div style="font-size:20px; font-weight:900;">${toy.name}</div>
-                        <div style="font-size:13px; font-weight:800; color:#3182F6; margin-top:4px;">${toy.tags}</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; gap:8px;">
+                
+                <div style="display:flex; gap:14px; align-items:center; flex: 1; min-width: 0;">
+                    <div class="toy-img-placeholder" style="flex-shrink: 0;">${toy.imgIcon}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size:19px; font-weight:900; word-break:keep-all; line-height:1.3;">${toy.name}</div>
+                        <div style="font-size:12px; font-weight:800; color:#3182F6; margin-top:4px; word-break:keep-all;">${toy.tags}</div>
                     </div>
                 </div>
-                <button id="fav-btn-${toy.id}" onclick="toggleFavorite(${toy.id})" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">${hIcon}</button>
+                
+                <button id="fav-btn-${toy.id}" onclick="toggleFavorite(${toy.id})" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0; min-width:65px;">${hIcon}</button>
             </div>
 
             <div style="background:#FFF2F2; padding:12px; border-radius:8px; border:1px solid #FCA5A5; margin-bottom:12px;">
