@@ -61,13 +61,15 @@
                     </div>
                 </div>
 
-              <div class="filter-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <label style="margin: 0;">🛠️ 장착/고정 방식 (호환성)</label>
-                    <span onclick="openInstallGuide()" style="color: #3182F6; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: underline; background: #E8F3FF; padding: 4px 8px; border-radius: 6px;">
-                        👉 내 차는 무슨 방식일까?
-                    </span>
-                </div>
+<div class="filter-group">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px;">
+        <!-- ✨ font-weight: bold; 와 font-size를 명시해서 다른 항목들과 완전히 똑같은 굵기와 디자인으로 강제 고정! -->
+        <label style="margin: 0; font-weight: bold; font-size: 13px; color: #333D4B; word-break: keep-all; line-height: 1.4; flex: 1;">🛠️ 장착/고정 방식 (호환성)</label>
+        
+        <span onclick="openInstallGuide()" style="color: #3182F6; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; background: #E8F3FF; padding: 4px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;">
+            👉 내 차는 무슨 방식일까?
+        </span>
+    </div>
                 <div class="custom-select-wrapper">
                     <select id="filter-install">
                         <option value="all">전체 (가이드 보고 선택해 주세요)</option>
