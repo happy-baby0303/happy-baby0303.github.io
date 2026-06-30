@@ -897,29 +897,10 @@
                                     • <strong>⚪ 흰색/회색(담백색):</strong> 담도폐쇄증 의심 (아기 얼굴에 황달 동반 시 초응급 상태입니다!)
                                 </div>
                                 
-                                <!-- 📝 기저귀 일기 (기존 기능 유지) -->
-                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #E5E8EB;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                                        <strong style="font-size:14.5px; color:#191F28;">📝 기저귀 일기 (배변 기록)</strong>
-                                        <button onclick="togglePoopForm()" style="background:#FFF9E6; color:#B78103; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">+ 새 기록</button>
-                                    </div>
-                                    <div id="poop-input-area" style="display:none; background:#F8F9FA; padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid #E5E8EB;">
-                                        <div style="font-size:12px; font-weight:800; color:#4E5968; margin-bottom:8px;">1. 색깔은 어땠나요?</div>
-                                        <div style="display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px;">
-                                            <button class="poop-color-btn" onclick="selectPoopColor('🟨 황금', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; white-space:nowrap;">🟨 황금</button>
-                                            <button class="poop-color-btn" onclick="selectPoopColor('🟩 녹색', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; white-space:nowrap;">🟩 녹색</button>
-                                            <button class="poop-color-btn" onclick="selectPoopColor('🟫 갈색', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; white-space:nowrap;">🟫 갈색</button>
-                                            <button class="poop-color-btn" onclick="selectPoopColor('🚨 붉은/흰색', this)" style="padding:8px; border-radius:8px; border:1px solid #F04452; background:#FFF0F1; color:#F04452; font-size:13px; white-space:nowrap;">🚨 붉은/흰색</button>
-                                        </div>
-                                        <div style="font-size:12px; font-weight:800; color:#4E5968; margin-bottom:8px;">2. 상태(묽기)는 어땠나요?</div>
-                                        <div style="display:flex; gap:6px; margin-bottom:16px;">
-                                            <button class="poop-tex-btn" onclick="selectPoopTexture('🍦 적당함', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; flex:1;">🍦 적당함</button>
-                                            <button class="poop-tex-btn" onclick="selectPoopTexture('💧 묽음', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; flex:1;">💧 묽음</button>
-                                            <button class="poop-tex-btn" onclick="selectPoopTexture('🪨 딱딱함', this)" style="padding:8px; border-radius:8px; border:1px solid #ddd; background:#fff; font-size:13px; flex:1;">🪨 딱딱함</button>
-                                        </div>
-                                        <button onclick="savePoopRecord()" style="width:100%; padding:12px; background:#3182F6; color:white; border:none; border-radius:10px; font-weight:800; font-size:14px;">저장하기</button>
-                                    </div>
-                                    <div id="poop-timeline" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding-right:4px;"></div>
+<div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #E5E8EB;">
+                                    <button onclick="switchTab('home', document.getElementById('nav-home')); setTimeout(window.openDiaperSheet, 300);" style="width:100%; padding:14px; background:#F8F9FA; color:#3182F6; border:1px solid #D6E8F9; border-radius:12px; font-weight:800; font-size:13.5px; cursor:pointer;">
+                                        👉 홈 화면에서 기저귀 기록하기
+                                    </button>
                                 </div>
                             </div>
                         </details>
