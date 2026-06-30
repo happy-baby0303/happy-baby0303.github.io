@@ -2933,3 +2933,26 @@ window.onload = () => {
 
     updateSyncBadge(); 
 };
+
+// 🌙 새벽 3시의 감동 이스터에그 로직
+document.addEventListener('DOMContentLoaded', () => {
+    // 현재 시간 가져오기 (0 ~ 23)
+    const currentHour = new Date().getHours();
+    
+    // 💡 새벽 2시 ~ 5시 (2, 3, 4, 5)에만 작동합니다.
+    if (currentHour >= 2 && currentHour <= 5) {
+        const easterEgg = document.getElementById('easter-egg-layer');
+        if (easterEgg) {
+            easterEgg.style.display = 'flex'; // 이스터에그 짠! 나타남
+            
+            // 기존에 있던 정보들이 글씨 뒤에 겹쳐 보이지 않게 스윽 숨겨줍니다.
+            const ddayEl = document.getElementById('res-baby-dday');
+            const nameEl = document.getElementById('res-baby-name');
+            const msgEl = document.getElementById('daily-message');
+            
+            if(ddayEl) ddayEl.style.display = 'none';
+            if(nameEl) nameEl.style.display = 'none';
+            if(msgEl) msgEl.style.display = 'none';
+        }
+    }
+});

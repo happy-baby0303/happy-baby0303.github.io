@@ -88,6 +88,14 @@
                 <h2 class="home-hero-title" id="res-baby-dday" style="font-size:24px; font-weight:800; color:white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">등록 전</h2>
                 <span id="res-baby-name" style="font-size:14px; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">아기를 등록해주세요</span>
                 <div id="daily-message" style="margin-top:10px; font-size:13px; font-weight:700; color:white; opacity:0.9; text-shadow: 0 1px 2px rgba(0,0,0,0.5);"></div>
+
+<!-- ✨ [이스터에그] 새벽 2시~5시에만 켜지는 비밀 편지 레이어 (평소엔 숨김) -->
+        <div id="easter-egg-layer" style="display: none; position: absolute; inset: 0; background: linear-gradient(to top, rgba(20, 20, 30, 0.9) 0%, transparent 80%); flex-direction: column; justify-content: flex-end; padding: 20px; border-radius: 16px; z-index: 10;">
+            <h2 style="font-size:24px; font-weight:800; color:#FACC15; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0 0 4px 0;">새벽의 육아 🌙</h2>
+            <span style="font-size:14px; color:#F3F4F6; font-weight:700; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">우주에서 제일 멋진 우리 여보에게</span>
+            <div style="margin-top:10px; font-size:14px; font-weight:800; color:white; line-height: 1.5; text-shadow: 0 1px 2px rgba(0,0,0,0.8); word-break: keep-all;">오늘 밤도 안 자고 아기 보느라 정말 고생 많아.<br>여보 덕분에 우리 아기가 이렇게 건강하게 크고 있어. 항상 고맙고 사랑해 🤍</div>
+                                     </div>
+
             </div>
         </div>
         <!-- 💡 바로 요기! 카드 끝나는 태그 바로 밑에 넣어주세요! -->
@@ -111,9 +119,9 @@
                 <button onclick="window.openTrackerSheet('sleep')" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
                     <span style="font-size: 32px;">💤</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수면</span>
                 </button>
-                <button onclick="window.openTrackerSheet('diaper')" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
-                    <span style="font-size: 32px;">💩</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">기저귀</span>
-                </button>
+<button onclick="openDiaperSheet()" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
+    <span style="font-size: 32px;">💩</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">기저귀</span>
+</button>
             </div>
             <div id="tracker-stats-container" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
                 <div style="padding:10px 0; text-align:center; font-size:13px; color:var(--text-s); font-weight:700;">아직 기록된 트래커 데이터가 없습니다.</div>
@@ -1594,3 +1602,148 @@ document.addEventListener("DOMContentLoaded", () => {
 setInterval(() => {
     if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
 }, 60000);
+
+</script>
+
+<div id="diaper-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
+    <div style="background: #ffffff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">기저귀 교체 기록</h3>
+            <button onclick="closeDiaperSheet()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8B95A1; padding: 0;">✕</button>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <button onclick="saveQuickPee()" style="flex: 1; padding: 16px; border-radius: 14px; background: #F0F8FF; color: #3182F6; border: 1px solid #BAE6FD; font-weight: 800; font-size: 16px; cursor: pointer;">💧 소변</button>
+            <button onclick="showPoopAI()" style="flex: 1; padding: 16px; border-radius: 14px; background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; font-weight: 800; font-size: 16px; cursor: pointer;">💩 대변</button>
+        </div>
+
+        <div id="poop-ai-area" style="display: none; animation: fadeIn 0.3s;">
+            <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: #4E5968;">어떤 색깔인가요?</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                <button class="ai-poop-btn" onclick="analyzePoop('황금색', this, 'good')" style="background:#FBBF24;">황금</button>
+                <button class="ai-poop-btn" onclick="analyzePoop('녹색', this, 'good')" style="background:#4ADE80;">녹색</button>
+                <button class="ai-poop-btn" onclick="analyzePoop('갈색', this, 'good')" style="background:#A16207; color:white;">갈색</button>
+                <button class="ai-poop-btn" onclick="analyzePoop('흰/회색', this, 'bad')" style="background:#F3F4F6; border:1px solid #D1D5DB; color:#191F28;">흰/회색</button>
+                <button class="ai-poop-btn" onclick="analyzePoop('붉은색', this, 'bad')" style="background:#EF4444; color:white;">붉은색</button>
+                <button class="ai-poop-btn" onclick="analyzePoop('검은색', this, 'bad')" style="background:#1F2937; color:white;">검은색</button>
+            </div>
+
+            <!-- AI 판독 결과창 -->
+            <div id="ai-poop-result" style="display: none; padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;"></div>
+            
+            <!-- ✨ 의료 정보 면책 조항 추가 (새로 들어간 부분!) ✨ -->
+            <div style="font-size: 11px; color: #8B95A1; line-height: 1.5; margin-bottom: 16px; word-break: keep-all; background: #F8F9FA; padding: 10px; border-radius: 8px;">
+                <strong style="color: #D32F2F;">🚨 단순 참고용:</strong> AI 판독 결과는 일반적인 기준이며 의학적 진단을 대신할 수 없습니다. 아기 컨디션이 평소와 다르다면 반드시 전문의의 진료를 받으세요.
+            </div>
+
+            <button onclick="saveAiPoopRecord()" style="width: 100%; padding: 16px; background: #3182F6; color: white; border: none; border-radius: 14px; font-weight: 800; font-size: 16px; cursor: pointer;">기록 저장하기</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .ai-poop-btn { flex: 1; min-width: 45px; padding: 10px 0; border-radius: 10px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
+<style>
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .ai-poop-btn { flex: 1; min-width: 45px; padding: 10px 0; border-radius: 10px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
+</style>
+
+<script>
+    let selectedPoopColor = '';
+    let selectedPoopStatus = '';
+
+    window.openDiaperSheet = function() {
+        document.getElementById('diaper-bottom-sheet').style.display = 'flex';
+        document.getElementById('poop-ai-area').style.display = 'none';
+        document.getElementById('ai-poop-result').style.display = 'none';
+        
+        document.querySelectorAll('.ai-poop-btn').forEach(b => {
+            b.style.transform = 'scale(1)'; 
+            b.style.boxShadow = 'none';
+            b.style.border = b.innerText === '흰/회색' ? '1px solid #D1D5DB' : 'none';
+        });
+        selectedPoopColor = '';
+        selectedPoopStatus = '';
+    };
+
+    window.closeDiaperSheet = function() {
+        document.getElementById('diaper-bottom-sheet').style.display = 'none';
+    };
+
+    window.saveQuickPee = function() {
+        saveToMainTracker('diaper', '소변', '');
+        closeDiaperSheet();
+    };
+
+    window.showPoopAI = function() {
+        document.getElementById('poop-ai-area').style.display = 'block';
+    };
+
+    window.analyzePoop = function(color, btn, status) {
+        selectedPoopColor = color;
+        selectedPoopStatus = status;
+
+        document.querySelectorAll('.ai-poop-btn').forEach(b => {
+            b.style.transform = 'scale(1)'; 
+            b.style.boxShadow = 'none';
+        });
+        btn.style.transform = 'scale(1.1)';
+        btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+
+        const resultBox = document.getElementById('ai-poop-result');
+        resultBox.style.display = 'block';
+
+        if (status === 'good') {
+            resultBox.style.background = '#ECFDF5';
+            resultBox.style.color = '#065F46';
+            resultBox.style.border = '1px solid #A7F3D0';
+            if(color === '녹색') resultBox.innerHTML = '🟢 <b>지극히 정상입니다!</b><br>담즙이나 철분 분유의 영향일 수 있습니다. 안심하세요.';
+            else resultBox.innerHTML = `🟢 <b>완벽한 ${color} 변입니다!</b><br>아기의 소화 상태가 아주 훌륭하네요.`;
+        } else {
+            resultBox.style.background = '#FEF2F2';
+            resultBox.style.color = '#B91C1C';
+            resultBox.style.border = '1px solid #FECACA';
+            if(color === '흰/회색') resultBox.innerHTML = '🚨 <b>소아과 방문 요망!</b><br>담도폐쇄증이 의심될 수 있는 색상입니다. 기저귀를 챙겨서 병원 진료를 권장합니다.';
+            else if(color === '붉은색') resultBox.innerHTML = '🚨 <b>혈변 주의!</b><br>피가 섞여 나왔을 수 있습니다. 사진을 찍고 소아과 진료를 권장합니다.';
+            else resultBox.innerHTML = '🚨 <b>위장 출혈 의심!</b><br>위나 장 위쪽의 출혈로 인해 검게 변했을 수 있습니다. 진료가 필요합니다.';
+        }
+    };
+
+    window.saveAiPoopRecord = function() {
+        if(!selectedPoopColor) return alert("똥 색깔을 먼저 선택해주세요!");
+        saveToMainTracker('diaper', '대변', selectedPoopColor);
+        closeDiaperSheet();
+    };
+
+    function saveToMainTracker(type, subType, status) {
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        const timestamp = now.getTime();
+
+        let record = { 
+            id: 'trk_' + timestamp, 
+            time: timeStr, 
+            timestamp: timestamp, 
+            type: type,
+            subType: subType,
+            status: status 
+        };
+
+        let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+        records.push(record);
+        records.sort((a, b) => b.timestamp - a.timestamp); 
+        
+        if(records.length > 100) records.pop();
+        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+
+        if (typeof window.updateTrackerDashboard === 'function') {
+            window.updateTrackerDashboard();
+        }
+    }
+</script>
+
+</body>
+</html>
