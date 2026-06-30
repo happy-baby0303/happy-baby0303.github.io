@@ -165,7 +165,7 @@ function toggleOthers() {
     }
 }
 
-// 🌟 카드 렌더링 엔진 (디자인 겹침 해결 & AI 감점 리포트 추가)
+// 🌟 카드 렌더링 엔진 (디자인 겹침 해결 완벽 패치판!)
 function generateCardHtml(item) {
     const cId = item.originalIndex !== undefined ? item.originalIndex : Math.floor(Math.random() * 10000);
     const itemId = item.id || item.name; 
@@ -177,12 +177,13 @@ function generateCardHtml(item) {
     const heartText = isFav ? '#E32636' : '#4E5968';
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
-let scoreHtml = "";
+    // ✨ 1. 기존 CSS(absolute) 클래스를 버리고, 독자적인 인라인 스타일로 매칭률 텍스트 생성!
+    let scoreHtml = "";
     if (item.matchRate !== null && !isFavViewMode) {
         let sColor = item.matchRate >= 80 ? "#3182F6" : (item.matchRate >= 50 ? "#F59E0B" : "#E32636");
-        // ✨ top: 60px 삭제! 원래 예쁜 우측 상단 자리로 돌아가되, 버튼 뒤에 깔리도록 설정!
-        scoreHtml = `<div class="match-score" style="color:${sColor}; pointer-events: none; z-index: 0;">${item.matchRate}%<span>AI 매칭</span></div>`;
+        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 28px; font-weight: 900; color: ${sColor}; letter-spacing: -1px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 2px;">AI 매칭</div></div>`;
     }
+
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
     const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#3182F6');
     let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#1B64DA; background:#E8F3FF;' : (item.specs.cabin.includes('⚠️') ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
@@ -197,7 +198,6 @@ let scoreHtml = "";
     let diffDesc = maxStrollerDim > targetDim ? `<div class="size-visual-desc warn">${targetName}보다 <b>${maxStrollerDim - targetDim}cm 더 큼</b></div>` : `<div class="size-visual-desc">${targetName}보다 <b>${targetDim - maxStrollerDim}cm 더 작음!</b></div>`;
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
-    // 💡 ✨ 여기서부터 AI 감점 사유 리포트 출력! ✨
     let aiReportHtml = `<div class="premium-empty-state"><div class="empty-icon">💡</div><div class="empty-text"><b>AI 매칭 리포트 대기 중</b><span>가족 상황을 선택하시면 분석서가 출력됩니다.</span></div></div>`;
     if (!isFavViewMode && item.matchRate !== null) {
         let reasonLi = '';
@@ -266,19 +266,28 @@ let scoreHtml = "";
         </a>
     `;
 
+    // ✨ 2. HTML 구조 개편: 이름(왼쪽), 매칭률+찜버튼(오른쪽)으로 깔끔하게 구역 분리!
     return `
     <div class="stroller-card" id="card-${cId}" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'};">
-        <div style="position:relative;">
-            <span style="background:#F2F4F6; color:#4E5968; font-size:11px; font-weight:800; padding:6px 12px; border-radius:20px;">${item.type}</span>
-            ${scoreHtml}
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
+            <div style="flex: 1; min-width: 0;">
+                <div style="margin-bottom: 8px;">
+                    <span style="background:#F2F4F6; color:#4E5968; font-size:11px; font-weight:800; padding:6px 12px; border-radius:20px;">${item.type}</span>
+                </div>
+                <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.3;">
+                    ${item.name}
+                </div>
+            </div>
             
-            <div style="display:flex; align-items:center; gap:10px; margin:14px 0 6px;">
-                <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28;">${item.name}</div>
-                <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:6px 10px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s;">
+            <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
+                ${scoreHtml}
+                <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap; min-width:65px;">
                     ${heartIcon}
                 </button>
             </div>
         </div>
+
         ${taxHtml}
         ${tabsHtml}
         <div style="min-height: 250px;">
