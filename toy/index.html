@@ -57,17 +57,20 @@
         </div>
 
         <!-- 👶 발달 마일스톤 칩 필터 -->
-        <div class="milestone-panel">
-            <div class="panel-header-dark">👶 우리 아기 현재 발달 상태는?</div>
-            <div class="chip-group" id="milestone-filters">
-                <button class="ms-chip active" data-milestone="all">전체보기</button>
-                <button class="ms-chip" data-milestone="newborn">🐣 신생아 생존기</button>
-                <button class="ms-chip" data-milestone="tummy">🍼 터미타임 연습</button>
-                <button class="ms-chip" data-milestone="flip">🔄 엎드려 뒤집기</button>
-                <button class="ms-chip" data-milestone="crawl">🏃 배밀이/기어가기</button>
-                <button class="ms-chip" data-milestone="stand">🧗 잡고 일어서기</button>
+       <div class="panel-header-dark">👶 우리 아기 현재 발달 상태는?</div>
+            
+            <div class="chip-group" id="milestone-filters" style="display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
+                <button class="ms-chip active" data-milestone="all" style="flex-shrink: 0; white-space: nowrap;">전체보기</button>
+                <button class="ms-chip" data-milestone="newborn" style="flex-shrink: 0; white-space: nowrap;">🐣 신생아 생존기</button>
+                <button class="ms-chip" data-milestone="tummy" style="flex-shrink: 0; white-space: nowrap;">🍼 터미타임 연습</button>
+                <button class="ms-chip" data-milestone="flip" style="flex-shrink: 0; white-space: nowrap;">🔄 엎드려 뒤집기</button>
+                <button class="ms-chip" data-milestone="crawl" style="flex-shrink: 0; white-space: nowrap;">🏃 배밀이/기어가기</button>
+                <button class="ms-chip" data-milestone="stand" style="flex-shrink: 0; white-space: nowrap;">🧗 잡고 일어서기</button>
             </div>
-        </div>
+
+            <style>
+                #milestone-filters::-webkit-scrollbar { display: none; }
+            </style>
 
 <div id="toy-result-area"></div>
         
