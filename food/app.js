@@ -193,14 +193,18 @@ function generateCardHTML(item) {
     `;
 }
 
-// 🩺 기존 기능 2: 안심 이유식 매칭 엔진
+// 🩺 기존 기능 2: 안심 이유식 매칭 엔진 (미니멀리즘 + 깜빡임 완벽 해결 버전)
 function runFoodEngine() {
     if (isFavViewMode) return;
 
     const age = document.getElementById('food-age').value;
     const goal = document.getElementById('food-goal').value;
     const fridgeInput = document.getElementById('fridge-search').value.trim();
-    const activeAllergies = Array.from(document.querySelectorAll('#allergy-filters .active')).map(btn => btn.getAttribute('data-allergy'));
+    
+    // 오직 알레르기 직접 입력창의 글씨만 읽어옵니다!
+    const customAllergyInput = document.getElementById('custom-allergy-search');
+    const customAllergies = customAllergyInput && customAllergyInput.value.trim() !== '' ? customAllergyInput.value.split(/[\s,]+/).filter(i => i !== '') : [];
+
     const resultArea = document.getElementById('food-result-area');
 
     if (!age) {
@@ -212,9 +216,17 @@ function runFoodEngine() {
         if (item.age !== age) return false;
         if (goal !== 'all' && item.goal !== goal) return false;
         
-        const hasAllergy = activeAllergies.some(allergy => item.allergens.includes(allergy));
-        if (hasAllergy) return false;
+        // 1. 알레르기 차단
+        if (customAllergies.length > 0) {
+            const hasCustomAllergy = customAllergies.some(customItem => 
+                item.name.includes(customItem) || 
+                item.ingredients.includes(customItem) ||
+                (item.allergens && item.allergens.some(a => a.includes(customItem)))
+            );
+            if (hasCustomAllergy) return false;
+        }
         
+        // 2. 냉장고 파먹기
         if (fridgeInput) {
             const fridgeItems = fridgeInput.split(/[\s,]+/).filter(i => i !== '');
             const hasAllFridgeItems = fridgeItems.every(fItem => 
@@ -229,9 +241,10 @@ function runFoodEngine() {
     if (filtered.length === 0) {
         resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-text"><b>조건에 맞는 레시피가 없습니다.</b><span>냉장고 재료나 필터를 변경해 보세요.</span></div></div>`;
     } else {
-        let shuffled = filtered.sort(() => 0.5 - Math.random()); 
-        let top3Results = shuffled.slice(0, 3); 
-        let otherResults = shuffled.slice(3); 
+        // ✨ 수정한 부분: 타자 칠 때마다 섞이는 랜덤 로직을 완전히 삭제했습니다! ✨
+        // 이제 결과가 고정되어 타자를 쳐도 요동치지 않습니다.
+        let top3Results = filtered.slice(0, 3); 
+        let otherResults = filtered.slice(3); 
 
         let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #191F28; margin-bottom: 16px;">✨ 오늘의 AI 추천 식단 TOP ${top3Results.length}</div>`;
         htmlOutput += top3Results.map(item => generateCardHTML(item)).join('');
@@ -307,3 +320,243 @@ window.onload = () => {
     applyGlobalBabyProfile();
     runFoodEngine(); 
 };
+
+// 🚀 [NEW 4] 이유식 탭 전환 로직 (식단 추천 vs 캘린더)
+function switchFoodTab(tabName) {
+    const btnCuration = document.getElementById('tab-btn-curation');
+    const btnCalendar = document.getElementById('tab-btn-calendar');
+    const viewCuration = document.getElementById('view-curation');
+    const viewCalendar = document.getElementById('view-calendar');
+
+    if (tabName === 'curation') {
+        btnCuration.style.background = '#FFFFFF';
+        btnCuration.style.color = '#191F28';
+        btnCuration.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+        btnCalendar.style.background = 'transparent';
+        btnCalendar.style.color = '#8B95A1';
+        btnCalendar.style.boxShadow = 'none';
+
+        viewCuration.style.display = 'block';
+        viewCalendar.style.display = 'none';
+    } else {
+        btnCalendar.style.background = '#FFFFFF';
+        btnCalendar.style.color = '#191F28';
+        btnCalendar.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+        btnCuration.style.background = 'transparent';
+        btnCuration.style.color = '#8B95A1';
+        btnCuration.style.boxShadow = 'none';
+
+        viewCalendar.style.display = 'block';
+        viewCuration.style.display = 'none';
+    }
+}
+
+// ==========================================
+// 📅 이유식 캘린더 엔진 (Premium 인테리어 에디션)
+// ==========================================
+
+let currentDate = new Date();
+let selectedDateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    document.getElementById('cal-month-title').innerText = `${year}년 ${month + 1}월`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    
+    const grid = document.getElementById('cal-grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    
+    const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    const todayStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+
+    let monthPass = 0;
+    let monthFail = 0;
+
+    for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="cal-day empty"></div>`;
+    }
+    
+    for (let i = 1; i <= lastDate; i++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        let classNames = 'cal-day';
+        if (dateStr === todayStr) classNames += ' today';
+        if (dateStr === selectedDateStr) classNames += ' selected';
+        
+        let dotsHtml = '';
+        if (records[dateStr]) {
+            dotsHtml = '<div class="cal-dot-container">';
+            records[dateStr].forEach(r => {
+                dotsHtml += `<div class="cal-dot ${r.status}"></div>`;
+                if(r.status === 'pass') monthPass++;
+                else monthFail++;
+            });
+            dotsHtml += '</div>';
+        }
+
+        grid.innerHTML += `<div class="${classNames}" onclick="selectDate('${dateStr}')"><span style="margin-bottom:2px;">${i}</span>${dotsHtml}</div>`;
+    }
+
+    // 월간 요약 대시보드 업데이트
+    const sumPass = document.getElementById('sum-pass');
+    const sumFail = document.getElementById('sum-fail');
+    if(sumPass) sumPass.innerText = `🟢 ${monthPass}개`;
+    if(sumFail) sumFail.innerText = `🚨 ${monthFail}개`;
+
+    renderSelectedDateRecords();
+}
+
+function changeMonth(delta) {
+    currentDate.setMonth(currentDate.getMonth() + delta);
+    renderCalendar();
+}
+
+function selectDate(dateStr) {
+    selectedDateStr = dateStr;
+    renderCalendar();
+}
+
+// ✨ [AI 마법] 텍스트를 분석해서 귀여운 이모지 자동 맵핑!
+function getFoodEmoji(name) {
+    if(/소고기|돼지|닭|고기|안심|우둔/.test(name)) return '🥩';
+    if(/쌀|미음|오트밀|죽|밥|현미/.test(name)) return '🥣';
+    if(/호박|청경채|브로콜리|시금치|오이|배추|당근|무|감자|고구마|야채|채소|양배추/.test(name)) return '🥦';
+    if(/사과|바나나|배|퓨레|과일|수박|딸기|귤|포도/.test(name)) return '🍎';
+    if(/계란|노른자|달걀|흰자/.test(name)) return '🥚';
+    if(/땅콩|호두|아몬드|견과/.test(name)) return '🥜';
+    if(/치즈|우유|요거트|분유|유제품/.test(name)) return '🧀';
+    if(/새우|게|대게|랍스터|조개|갑각류/.test(name)) return '🦐';
+    if(/생선|연어|대구|광어|고등어|갈치/.test(name)) return '🐟';
+    if(/두부|콩|완두/.test(name)) return '🫘';
+    return '🍽️';
+}
+
+function renderSelectedDateRecords() {
+    const [y, m, d] = selectedDateStr.split('-');
+    const titleEl = document.getElementById('cal-selected-date-text');
+    if(titleEl) titleEl.innerText = `${parseInt(m)}월 ${parseInt(d)}일 식재료 기록`;
+    
+    const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    const dailyRecords = records[selectedDateStr] || [];
+    const listArea = document.getElementById('cal-record-list');
+    if(!listArea) return;
+    
+    if (dailyRecords.length === 0) {
+        listArea.innerHTML = `<div style="text-align: center; color: #8B95A1; font-size: 13.5px; padding: 30px 0; background: #FFF; border-radius: 14px; border: 1px dashed #D1D5DB;">아직 기록된 식재료가 없어요.<br>위의 [+ 재료 테스트]를 눌러 추가해보세요!</div>`;
+        return;
+    }
+    
+    listArea.innerHTML = dailyRecords.map((r, index) => {
+        const emoji = getFoodEmoji(r.ingredient);
+        return `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #FFF; padding: 16px; border-radius: 16px; border: 1px solid #E5E8EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 24px; background: #F8F9FA; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 12px; border: 1px solid #F2F4F6;">${emoji}</div>
+                <div>
+                    <div style="font-size: 15.5px; font-weight: 900; color: #191F28; margin-bottom: 2px;">${r.ingredient}</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #8B95A1;">${r.status === 'pass' ? '알레르기 없음' : '발진/거부 반응'}</div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                <span style="font-size: 11.5px; font-weight: 900; color: ${r.status === 'pass' ? '#059669' : '#D32F2F'}; background: ${r.status === 'pass' ? '#ECFDF5' : '#FFF0F1'}; padding: 6px 10px; border-radius: 8px;">${r.status === 'pass' ? '🟢 안심 통과' : '🚨 주의 요망'}</span>
+                <button onclick="deleteFoodRecord('${selectedDateStr}', ${index})" style="background: none; border: none; color: #D1D5DB; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: underline;">삭제</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
+function openFoodSheet() {
+    document.getElementById('food-bottom-sheet').style.display = 'flex';
+    document.getElementById('food-ing-input').value = '';
+    document.getElementById('food-ing-input').focus();
+}
+
+function closeFoodSheet() {
+    document.getElementById('food-bottom-sheet').style.display = 'none';
+}
+
+function saveFoodCalendar(status) {
+    const ingredient = document.getElementById('food-ing-input').value.trim();
+    if (!ingredient) return alert("급여한 식재료를 입력해주세요! (예: 소고기)");
+    
+    let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    if (!records[selectedDateStr]) records[selectedDateStr] = [];
+    
+    records[selectedDateStr].push({ ingredient, status });
+    localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
+    
+    closeFoodSheet();
+    renderCalendar();
+}
+
+function deleteFoodRecord(dateStr, index) {
+    if (!confirm(`'${JSON.parse(localStorage.getItem('tosil_food_calendar'))[dateStr][index].ingredient}' 기록을 삭제할까요?`)) return;
+    let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    if (records[dateStr]) {
+        records[dateStr].splice(index, 1);
+        if (records[dateStr].length === 0) delete records[dateStr];
+        localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
+    }
+    renderCalendar();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(renderCalendar, 300);
+});
+
+// 🚀 [NEW 5] 전체 누적 식재료 도감 렌더링 (안전망 포함)
+function renderTotalSummary() {
+    const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    const passedSet = new Set();
+    const failedSet = new Set();
+
+    // 1. 모든 날짜의 기록을 싹 뒤집니다
+    Object.values(records).forEach(dailyList => {
+        dailyList.forEach(r => {
+            // 양쪽 끝 공백 제거 (소고기 띄어쓰기 방지)
+            const cleanName = r.ingredient.trim(); 
+            if (r.status === 'fail') {
+                failedSet.add(cleanName);
+            } else {
+                passedSet.add(cleanName);
+            }
+        });
+    });
+
+    // 2. 🚨 가장 중요한 안전 장치!
+    // 한 번이라도 알레르기(fail)가 났던 재료는 통과(pass) 리스트에서 강제로 삭제합니다.
+    failedSet.forEach(item => passedSet.delete(item));
+
+    const passListEl = document.getElementById('summary-pass-list');
+    const failListEl = document.getElementById('summary-fail-list');
+    const passCntEl = document.getElementById('summary-pass-cnt');
+    const failCntEl = document.getElementById('summary-fail-cnt');
+
+    if(passCntEl) passCntEl.innerText = passedSet.size;
+    if(failCntEl) failCntEl.innerText = failedSet.size;
+
+    // 3. 예쁜 둥근 칩(Chip) 모양으로 그려주기
+    if(passListEl) {
+        if(passedSet.size === 0) {
+            passListEl.innerHTML = '<span style="font-size:12.5px; color:#8B95A1;">아직 통과한 재료가 없어요.</span>';
+        } else {
+            passListEl.innerHTML = Array.from(passedSet).map(ing => 
+                `<span style="background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; padding:6px 14px; border-radius:20px; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">${getFoodEmoji(ing)} ${ing}</span>`
+            ).join('');
+        }
+    }
+
+    if(failListEl) {
+        if(failedSet.size === 0) {
+            failListEl.innerHTML = '<span style="font-size:12.5px; color:#8B95A1;">알레르기 반응이 나타난 재료가 없어요! (다행이네요 😊)</span>';
+        } else {
+            failListEl.innerHTML = Array.from(failedSet).map(ing => 
+                `<span style="background:#FFF0F1; color:#D32F2F; border:1px solid #FECACA; padding:6px 14px; border-radius:20px; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">${getFoodEmoji(ing)} ${ing}</span>`
+            ).join('');
+        }
+    }
+}

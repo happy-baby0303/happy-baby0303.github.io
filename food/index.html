@@ -31,71 +31,150 @@
             <p>전문의 가이드라인 기반! 알레르기 철벽 방어</p>
         </div>
 
-        <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
-            </div>
-
-        <div class="search-box">
-            <label style="display:block; font-size:14px; font-weight:800; color:#191F28; margin-bottom:12px;">🚦 이 식재료 먹여도 될까? (신호등 판독기)</label>
-            <input type="text" id="ingredient-search" placeholder="예: 고기, 꿀, 소금, 새우 입력" onkeyup="checkIngredient()">
-            <div id="traffic-light-result" style="margin-top: 16px; display:none;"></div>
+        <div class="segment-control" style="display: flex; gap: 8px; margin-bottom: 24px; padding: 4px; background: #F2F4F6; border-radius: 14px;">
+            <button id="tab-btn-curation" onclick="switchFoodTab('curation')" style="flex: 1; padding: 12px 0; border-radius: 10px; border: none; font-size: 14px; font-weight: 800; background: #FFFFFF; color: #191F28; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s;">🍲 맞춤 식단 추천</button>
+            <button id="tab-btn-calendar" onclick="switchFoodTab('calendar')" style="flex: 1; padding: 12px 0; border-radius: 10px; border: none; font-size: 14px; font-weight: 800; background: transparent; color: #8B95A1; cursor: pointer; transition: 0.2s;">📅 이유식 달력</button>
         </div>
 
-        <div class="matrix-panel" style="background: #FFF9F9; border: 2px solid #FFE5E5;">
-            <div class="matrix-header" style="color: #E32636;">🩺 안심 식단 AI 필터링</div>
-            <div class="matrix-grid">
+        <div id="view-curation" style="display: block;">
+            <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
+            </div>
+
+            <div class="search-box">
+                <label style="display:block; font-size:14px; font-weight:800; color:#191F28; margin-bottom:12px;">🚦 이 식재료 먹여도 될까? (신호등 판독기)</label>
+                <input type="text" id="ingredient-search" placeholder="예: 고기, 꿀, 소금, 새우 입력" onkeyup="checkIngredient()">
+                <div id="traffic-light-result" style="margin-top: 16px; display:none;"></div>
+            </div>
+
+            <div class="matrix-panel" style="background: #FFF9F9; border: 2px solid #FFE5E5;">
+                <div class="matrix-header" style="color: #E32636;">🩺 안심 식단 AI 필터링</div>
+                <div class="matrix-grid">
+                    
+                    <div class="matrix-item">
+                        <label>👶 아기 월령</label>
+                        <div class="custom-select-wrapper">
+                            <select id="food-age" onchange="runFoodEngine()">
+                                <option value="">선택해주세요</option>
+                                <option value="early">생후 4~6개월 (초기)</option>
+                                <option value="mid">생후 7~9개월 (중기)</option>
+                                <option value="late">생후 10~11개월 (후기)</option>
+                                <option value="done">12개월 이상 (완료기)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="matrix-item">
+                        <label>🎯 현재 가장 큰 고민</label>
+                        <div class="custom-select-wrapper">
+                            <select id="food-goal" onchange="runFoodEngine()">
+                                <option value="all">특별한 고민 없음</option>
+                                <option value="iron">🩸 철분 보충 필수</option>
+                                <option value="poop">💩 변비 해결</option>
+                                <option value="weight">⚖️ 체중 증가</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="matrix-item full-width">
+                        <label style="color:#3182F6;">🥕 냉장고 파먹기 (반드시 포함할 재료)</label>
+                        <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; padding: 14px; border: 1px solid #3182F6; border-radius: 12px; font-size: 15px; font-weight: 600;">
+                    </div>
+
+<div class="matrix-item full-width">
+                        <label style="color:#D32F2F;">⚠️ 알레르기 차단 (입력한 재료가 포함된 레시피 제외)</label>
+                        <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid #FCA5A5; border-radius: 12px; font-size: 15px; font-weight: 600; background: #FFF0F1; color: #D32F2F; outline: none;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; margin-top: 16px;">
+                <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
+                    ❤️ 내가 찜한 식단 모아보기
+                </button>
+            </div>
+
+            <div id="food-result-area"></div>
+        </div> <div id="view-calendar" style="display: none;">
+            
+            <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <button onclick="changeMonth(-1)" style="background: #F2F4F6; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: 900; color: #4E5968; cursor: pointer; transition: 0.2s;">&lt;</button>
+                    <h3 id="cal-month-title" style="margin: 0; font-size: 18px; font-weight: 900; color: #191F28;">2026년 7월</h3>
+                    <button onclick="changeMonth(1)" style="background: #F2F4F6; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: 900; color: #4E5968; cursor: pointer; transition: 0.2s;">&gt;</button>
+                </div>
+
+                <div id="cal-monthly-summary" style="background: #F8F9FA; padding: 14px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px dashed #D1D5DB;">
+                    <div style="font-size: 13.5px; font-weight: 800; color: #4E5968;">이번 달 식재료 탐험 🚀</div>
+                    <div style="font-size: 14px; font-weight: 900;">
+                        <span id="sum-pass" style="color:#059669; background:#ECFDF5; padding:4px 8px; border-radius:6px;">🟢 0</span> 
+                        <span id="sum-fail" style="color:#D32F2F; background:#FFF0F1; padding:4px 8px; border-radius:6px; margin-left:4px;">🚨 0</span>
+                    </div>
+                </div>
                 
-                <div class="matrix-item">
-                    <label>👶 아기 월령</label>
-                    <div class="custom-select-wrapper">
-                        <select id="food-age" onchange="runFoodEngine()">
-                            <option value="">선택해주세요</option>
-                            <option value="early">생후 4~6개월 (초기)</option>
-                            <option value="mid">생후 7~9개월 (중기)</option>
-                            <option value="late">생후 10~11개월 (후기)</option>
-                            <option value="done">12개월 이상 (완료기)</option>
-                        </select>
-                    </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12.5px; font-weight: 800; color: #8B95A1; margin-bottom: 12px;">
+                    <div style="color: #E32636;">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color: #3182F6;">토</div>
                 </div>
+                
+                <div id="cal-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;"></div>
+            </div>
 
-                <div class="matrix-item">
-                    <label>🎯 현재 가장 큰 고민</label>
-                    <div class="custom-select-wrapper">
-                        <select id="food-goal" onchange="runFoodEngine()">
-                            <option value="all">특별한 고민 없음</option>
-                            <option value="iron">🩸 철분 보충 필수</option>
-                            <option value="poop">💩 변비 해결</option>
-                            <option value="weight">⚖️ 체중 증가</option>
-                        </select>
-                    </div>
+<div id="cal-detail-area" style="background: #FFF9F9; border: 2px solid #FFE5E5; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636;">7월 1일 식단 기록</div>
+                    <button onclick="openFoodSheet()" style="background: #E32636; color: #FFF; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(227,38,54,0.2);">+ 재료 테스트</button>
                 </div>
-
-                <div class="matrix-item full-width">
-                    <label style="color:#3182F6;">🥕 냉장고 파먹기 (반드시 포함할 재료)</label>
-                    <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; padding: 14px; border: 1px solid #3182F6; border-radius: 12px; font-size: 15px; font-weight: 600;">
+                <div id="cal-record-list" style="display: flex; flex-direction: column; gap: 8px;">
                 </div>
+            </div>
+            
+            <!-- ✨ [NEW] 3. 전체 누적 식재료 도감 ✨ -->
+            <div id="cal-total-summary-area" style="background: #FFFFFF; border-radius: 20px; padding: 24px 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
+                <div style="font-size: 16.5px; font-weight: 900; color: #191F28; margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
+                    <span>📚</span> 우리 아기 식재료 도감
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 13px; font-weight: 800; color: #059669; margin-bottom: 10px;">🟢 무사 통과한 재료 (<span id="summary-pass-cnt">0</span>)</div>
+                    <div id="summary-pass-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+                
+                <div style="padding-top: 16px; border-top: 1px dashed #E5E8EB;">
+                    <div style="font-size: 13px; font-weight: 800; color: #D32F2F; margin-bottom: 10px;">🚨 알레르기 주의 재료 (<span id="summary-fail-cnt">0</span>)</div>
+                    <div id="summary-fail-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+            </div>
 
-                <div class="matrix-item full-width">
-                    <label>⚠️ 알레르기 주의 식재료 차단 (해당 레시피 제외)</label>
-                    <div class="filter-btns" id="allergy-filters">
-                        <button class="allergy-filt-btn" data-allergy="egg" onclick="toggleFoodFilter(this)">🥚 계란</button>
-                        <button class="allergy-filt-btn" data-allergy="dairy" onclick="toggleFoodFilter(this)">🥛 유제품</button>
-                        <button class="allergy-filt-btn" data-allergy="shellfish" onclick="toggleFoodFilter(this)">🦐 갑각류</button>
-                        <button class="allergy-filt-btn" data-allergy="seafood" onclick="toggleFoodFilter(this)">🐟 생선류</button>
-                        <button class="allergy-filt-btn" data-allergy="soy" onclick="toggleFoodFilter(this)">🫘 콩/두부</button>
-                        <button class="allergy-filt-btn" data-allergy="peanut" onclick="toggleFoodFilter(this)">🥜 땅콩/견과류</button>
-                        <button class="allergy-filt-btn" data-allergy="flour" onclick="toggleFoodFilter(this)">🌾 밀가루</button>
-                    </div>
+        </div> <!-- view-calendar 끝 -->
+            
+        </div> <div id="food-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
+            <div style="background: #ffffff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">새로운 식재료 알레르기 테스트</h3>
+                    <button onclick="closeFoodSheet()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8B95A1; padding: 0;">✕</button>
+                </div>
+                
+                <input type="text" id="food-ing-input" placeholder="급여한 식재료 입력 (예: 소고기, 오트밀)" style="width: 100%; box-sizing: border-box; padding: 16px; border-radius: 12px; border: 1px solid #3182F6; font-size: 16px; font-weight: 800; margin-bottom: 20px; outline: none; background: #F0F7FF; color: #191F28;">
+                
+                <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: #4E5968;">반응은 어땠나요?</div>
+                <div style="display: flex; gap: 12px; margin-bottom: 10px;">
+                    <button onclick="saveFoodCalendar('pass')" style="flex: 1; padding: 16px; border-radius: 14px; background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; font-weight: 800; font-size: 15px; cursor: pointer;">🟢 무사 통과</button>
+                    <button onclick="saveFoodCalendar('fail')" style="flex: 1; padding: 16px; border-radius: 14px; background: #FFF0F1; color: #D32F2F; border: 1px solid #FECACA; font-weight: 800; font-size: 15px; cursor: pointer;">🚨 알레르기 발진</button>
                 </div>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; margin-top: 16px;">
-            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
-                ❤️ 내가 찜한 식단 모아보기
-            </button>
-        </div>
-
-        <div id="food-result-area"></div>
+        <style>
+            /* 달력 디자인 마법! */
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            .cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; border-radius: 12px; font-size: 14px; font-weight: 800; color: #191F28; cursor: pointer; transition: 0.2s; position: relative; }
+            .cal-day.today { background: #F0F7FF; color: #3182F6; }
+            .cal-day.selected { background: #191F28; color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: scale(1.05); z-index: 2; }
+            .cal-day.empty { cursor: default; }
+            .cal-dot-container { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; justify-content: center; padding: 0 4px; }
+            .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
+            .cal-dot.pass { background: #10B981; }
+            .cal-dot.fail { background: #EF4444; }
+        </style>
 
         <div class="legal-footer">
             <strong>※ 의학적 면책 조항</strong><br>
