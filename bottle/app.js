@@ -48,12 +48,16 @@ function toggleFavorite(id) {
     if (isFavViewMode) {
         renderFavorites(); 
     } else {
-        const btn = document.getElementById(`fav-btn-${id}`);
+const btn = document.getElementById(`fav-btn-${id}`);
         if (btn) {
             btn.innerHTML = isFav ? '❤️ 찜 해제' : '🤍 찜하기';
             btn.style.background = isFav ? '#FFF2F2' : '#F2F4F6';
             btn.style.color = isFav ? '#E32636' : '#4E5968';
             btn.style.borderColor = isFav ? '#FCA5A5' : '#E5E8EB';
+            
+            // 🔥 글자가 두 줄로 깨지는 현상 완벽 방어!
+            btn.style.whiteSpace = 'nowrap'; 
+            btn.style.flexShrink = '0';
         }
     }
 }
