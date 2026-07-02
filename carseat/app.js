@@ -149,9 +149,19 @@ function generateReportHTML(item) {
         ? `✅ ${item.specs.adacScore}` 
         : `✅ ADAC 테스트: ${item.specs.adacScore}`;
 
-    const reportBtn = item.reportUrl !== "#" 
-        ? `<a href="${item.reportUrl}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:#3182F6; text-decoration:underline; font-weight:700;">🔗 ADAC 충돌 테스트 원문 보기 ➔</a>` 
-        : '';
+    // [이 코드로 싹 교체하세요]
+const isOfficial = (item.reportUrl && item.reportUrl !== "#" && item.reportUrl.trim() !== "");
+
+// 1. 링크가 있으면 원문 보기, 없으면 검색하기로 텍스트 자동 변경
+const labelText = isOfficial ? "🔗 ADAC 충돌 테스트 원문 보기 ➔" : "🔍 ADAC 테스트 관련 정보 검색 ➔";
+
+// 2. 주소 설정
+const targetUrl = isOfficial 
+    ? item.reportUrl 
+    : `https://www.google.com/search?q=ADAC+${encodeURIComponent(item.brand)}+${encodeURIComponent(item.name)}`;
+
+// 3. 버튼 생성
+const reportBtn = `<a href="${targetUrl}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:#3182F6; text-decoration:underline; font-weight:700;">${labelText}</a>`;
         
     let purchaseBtn = item.purchasePlatform === 'coupang' 
         ? `<a href="${item.linkUrl}" target="_blank" style="display:block; width:100%; padding:14px; background:#0073e9; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; margin-bottom:12px; text-decoration:none;">🚀 로켓배송 최저가 확인하기</a>`
