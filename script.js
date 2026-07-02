@@ -2213,36 +2213,40 @@ window.editingTrackerId = null;
 window.selectTrackerBtn = function(btn, category) {
     const siblings = btn.parentElement.children;
     for(let i=0; i<siblings.length; i++) {
-        // ✨ 하드코딩된 색상을 다크모드 대응 변수로 변경!
-        siblings[i].style.setProperty('background', 'var(--bg-card)', 'important');
-        siblings[i].style.setProperty('color', 'var(--text-s)', 'important');
-        siblings[i].style.setProperty('border', '1px solid var(--border)', 'important');
-        if(siblings[i].tagName === 'SPAN') siblings[i].style.setProperty('background', 'var(--bg-sub)', 'important');
+        siblings[i].style.setProperty('background', '#FFF', 'important');
+        siblings[i].style.setProperty('color', '#8B95A1', 'important');
+        siblings[i].style.setProperty('border', '1px solid #E5E8EB', 'important');
+        if(siblings[i].tagName === 'SPAN') {
+            siblings[i].style.setProperty('background', '#F8F9FA', 'important');
+        }
     }
     
-   if (category === 'feed' || category === 'diaper_pee') {
-        btn.style.setProperty('background', 'rgba(49,130,246,0.1)', 'important');
+    if (category === 'feed') {
+        btn.style.setProperty('background', '#F0F7FF', 'important');
         btn.style.setProperty('color', '#3182F6', 'important');
         btn.style.setProperty('border', '1px solid #3182F6', 'important');
         window.trackerState.subType = btn.innerText;
-        if(category === 'diaper_pee') {
-            const statusArea = document.getElementById('diaper-status-area');
-            if(statusArea) statusArea.style.display = 'none';
-        }
+    } else if (category === 'diaper_pee') {
+        btn.style.setProperty('background', '#F0F7FF', 'important');
+        btn.style.setProperty('color', '#3182F6', 'important');
+        btn.style.setProperty('border', '1px solid #3182F6', 'important');
+        window.trackerState.subType = '소변';
+        const statusArea = document.getElementById('diaper-status-area');
+        if(statusArea) statusArea.style.display = 'none'; 
     } else if (category === 'diaper_poop') {
-        btn.style.setProperty('background', 'rgba(211,47,47,0.1)', 'important');
+        btn.style.setProperty('background', '#FFF0F1', 'important');
         btn.style.setProperty('color', '#D32F2F', 'important');
         btn.style.setProperty('border', '1px solid #F04452', 'important');
         window.trackerState.subType = '대변';
         const statusArea = document.getElementById('diaper-status-area');
-        if(statusArea) statusArea.style.display = 'block';
+        if(statusArea) statusArea.style.display = 'block'; 
     } else if (category === 'status_yellow') {
-        btn.style.setProperty('background', 'rgba(183,129,3,0.1)', 'important');
+        btn.style.setProperty('background', '#FFF9E6', 'important');
         btn.style.setProperty('color', '#B78103', 'important');
         btn.style.setProperty('border', '1px solid #FFE58F', 'important');
         window.trackerState.status = '황금변';
     } else if (category === 'status_green') {
-        btn.style.setProperty('background', 'rgba(16,185,129,0.1)', 'important');
+        btn.style.setProperty('background', '#ECFDF5', 'important');
         btn.style.setProperty('color', '#10B981', 'important');
         btn.style.setProperty('border', '1px solid #10B981', 'important');
         window.trackerState.status = '녹변';
@@ -2261,7 +2265,6 @@ window.openTrackerSheet = function(type, editId = null) {
     
     if (!overlay || !content) return;
 
-    // ✨ HTML 안 고치고 JS에서 강제로 모달창 배경을 다크모드 대응으로 덮어씌움!
     content.style.backgroundColor = 'var(--bg-card)';
     if(title) title.style.color = 'var(--text-m)';
     if(saveBtn) {
@@ -2275,7 +2278,6 @@ window.openTrackerSheet = function(type, editId = null) {
     const now = new Date();
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     
-    // ✨ 배경색, 테두리, 텍스트 색상을 전부 var(--css변수)로 교체
     const timeInputHtml = `
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 기록할까요? (터치하여 시간 수정)</div>
@@ -2497,14 +2499,15 @@ window.saveTrackerRecord = function() {
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
-    // ✨ [추가] 수면 시간 수정 모드 저장
     else if (window.trackerState.type === 'sleep') {
         const amt = document.getElementById('v-sleep-amount');
         if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요!');
         record.amount = parseInt(amt.value);
         if (window.editingTrackerId) {
             const originalRecord = records.find(r => r.id === window.editingTrackerId);
-            if (originalRecord) record.subType = originalRecord.subType; // 기존 낮잠/밤잠 유지
+            if (originalRecord) record.subType = originalRecord.subType; 
+        } else {
+            record.subType = '낮잠'; 
         }
     }
 
@@ -2524,7 +2527,6 @@ window.saveTrackerRecord = function() {
     window.updateTrackerDashboard(); 
 };
 
-// ✏️ 기록 수정하기 (수면 수정 제한 해제!)
 window.editTrackerRecord = function(id) {
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     let record = records.find(r => r.id === id);
@@ -2614,7 +2616,6 @@ window.updateTrackerDashboard = function() {
                     else if(r.type === 'sleep') txt = `${r.subType || '낮잠'} ${r.amount}분`; 
                     else if(r.type === 'diaper') txt = r.status ? `${r.subType} / ${r.status}` : `${r.subType}`;
                     
-                    // ✨ [수정] 수면 기록에도 무조건 ✏️ 버튼 나오게 변경!
                     historyHtml += `
                         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #E5E8EB; border-radius:12px; margin-bottom:8px; background:#FFF; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
                             <div style="display:flex; gap:10px; align-items:center;">
@@ -2660,7 +2661,7 @@ window.updateTrackerDashboard = function() {
 
     let briefing = "오늘도 평화로운 육아팅! 🤍";
     if (todayFeedAmt > 0) briefing = `오늘 총 ${todayFeedAmt}ml 먹었어요! 튼튼해지는 중 💪`;
-    if (todaySleepMins > 120) briefing = `오늘 수면 시간 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
+    if (todaySleepMins > 120) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
     if (todayDiaperCount >= 5) briefing = `오늘 기저귀를 ${todayDiaperCount}번 갈았어요! 보송보송 엉덩이 ✨`;
 
     let htmlStr = `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
@@ -2850,3 +2851,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
