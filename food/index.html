@@ -24,7 +24,6 @@
         </nav>
     </header>
 
-
     <main class="container">
         <div class="hero-title">
             <h2>우리아기 생명 지킴이<br><span class="gradient-text">안심 이유식 AI 큐레이터</span></h2>
@@ -49,7 +48,6 @@
             <div class="matrix-panel" style="background: #FFF9F9; border: 2px solid #FFE5E5;">
                 <div class="matrix-header" style="color: #E32636;">🩺 안심 식단 AI 필터링</div>
                 <div class="matrix-grid">
-                    
                     <div class="matrix-item">
                         <label>👶 아기 월령</label>
                         <div class="custom-select-wrapper">
@@ -62,7 +60,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="matrix-item">
                         <label>🎯 현재 가장 큰 고민</label>
                         <div class="custom-select-wrapper">
@@ -74,14 +71,12 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="matrix-item full-width">
                         <label style="color:#3182F6;">🥕 냉장고 파먹기 (반드시 포함할 재료)</label>
                         <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; padding: 14px; border: 1px solid #3182F6; border-radius: 12px; font-size: 15px; font-weight: 600;">
                     </div>
-
-<div class="matrix-item full-width">
-                        <label style="color:#D32F2F;">⚠️ 알레르기 차단 (입력한 재료가 포함된 레시피 제외)</label>
+                    <div class="matrix-item full-width">
+                        <label style="color:#D32F2F;">⚠️ 알레르기 차단 (제외할 재료)</label>
                         <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid #FCA5A5; border-radius: 12px; font-size: 15px; font-weight: 600; background: #FFF0F1; color: #D32F2F; outline: none;">
                     </div>
                 </div>
@@ -94,7 +89,9 @@
             </div>
 
             <div id="food-result-area"></div>
-        </div> <div id="view-calendar" style="display: none;">
+        </div>
+
+        <div id="view-calendar" style="display: none;">
             
             <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -118,19 +115,20 @@
                 <div id="cal-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;"></div>
             </div>
 
-<div id="cal-detail-area" style="background: #FFF9F9; border: 2px solid #FFE5E5; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
+           <div id="cal-detail-area" style="background: #FFF9F9; border: 2px solid #FFE5E5; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636;">7월 1일 식단 기록</div>
-                    <button onclick="openFoodSheet()" style="background: #E32636; color: #FFF; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(227,38,54,0.2);">+ 재료 테스트</button>
+                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636;">7월 1일 기록</div>
+                    <button onclick="openMealSheet()" style="background: #FFFFFF; color: #4E5968; border: 1px solid #D1D5DB; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">+ 식단 기록</button>
                 </div>
-                <div id="cal-record-list" style="display: flex; flex-direction: column; gap: 8px;">
-                </div>
+                <div id="cal-record-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
-            
-            <!-- ✨ [NEW] 3. 전체 누적 식재료 도감 ✨ -->
+
             <div id="cal-total-summary-area" style="background: #FFFFFF; border-radius: 20px; padding: 24px 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
-                <div style="font-size: 16.5px; font-weight: 900; color: #191F28; margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
-                    <span>📚</span> 우리 아기 식재료 도감
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="font-size: 16.5px; font-weight: 900; color: #191F28; display: flex; align-items: center; gap: 6px;">
+                        <span>📚</span> 우리 아기 식재료 도감
+                    </div>
+                    <button onclick="openTestSheet()" style="background: #E32636; color: #FFF; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(227,38,54,0.2);">+ 재료 테스트</button>
                 </div>
                 
                 <div style="margin-bottom: 20px;">
@@ -143,28 +141,97 @@
                     <div id="summary-fail-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                 </div>
             </div>
-
-        </div> <!-- view-calendar 끝 -->
             
-        </div> <div id="food-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
+        </div> <div id="meal-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
             <div style="background: #ffffff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">새로운 식재료 알레르기 테스트</h3>
-                    <button onclick="closeFoodSheet()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8B95A1; padding: 0;">✕</button>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">🍲 오늘의 식단 기록</h3>
+                    <button onclick="closeSheets()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8B95A1; padding: 0;">✕</button>
                 </div>
                 
-                <input type="text" id="food-ing-input" placeholder="급여한 식재료 입력 (예: 소고기, 오트밀)" style="width: 100%; box-sizing: border-box; padding: 16px; border-radius: 12px; border: 1px solid #3182F6; font-size: 16px; font-weight: 800; margin-bottom: 20px; outline: none; background: #F0F7FF; color: #191F28;">
-                
-                <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: #4E5968;">반응은 어땠나요?</div>
-                <div style="display: flex; gap: 12px; margin-bottom: 10px;">
-                    <button onclick="saveFoodCalendar('pass')" style="flex: 1; padding: 16px; border-radius: 14px; background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; font-weight: 800; font-size: 15px; cursor: pointer;">🟢 무사 통과</button>
-                    <button onclick="saveFoodCalendar('fail')" style="flex: 1; padding: 16px; border-radius: 14px; background: #FFF0F1; color: #D32F2F; border: 1px solid #FECACA; font-weight: 800; font-size: 15px; cursor: pointer;">🚨 알레르기 발진</button>
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:800; color:#4E5968; margin-bottom:8px;">어떤 메뉴를 먹였나요?</label>
+                    <input type="text" id="meal-menu-input" placeholder="예: 소고기 청경채 미음" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 15px; font-weight: 700; outline: none;">
                 </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <div style="flex: 1;">
+                        <label style="display:block; font-size:13px; font-weight:800; color:#4E5968; margin-bottom:8px;">섭취량 (ml)</label>
+                        <input type="number" id="meal-amount-input" placeholder="예: 50" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 15px; font-weight: 700; outline: none;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display:block; font-size:13px; font-weight:800; color:#4E5968; margin-bottom:8px;">아기 반응</label>
+                        <select id="meal-reaction-input" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #E5E8EB; font-size: 15px; font-weight: 700; outline: none; appearance: none; background: #FFF;">
+                            <option value="😍 완뚝">😍 완뚝 (다 먹음)</option>
+                            <option value="🤔 절반">🤔 절반 남김</option>
+                            <option value="😭 거부">😭 입 꾹 닫음</option>
+                            <option value="🤮 뱉음">🤮 푸푸 뱉음</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="saveMealRecord()" style="width: 100%; padding: 16px; border-radius: 14px; background: #191F28; color: #FFFFFF; font-weight: 900; font-size: 16px; border: none; cursor: pointer;">식단 저장하기</button>
+            </div>
+        </div>
+
+        <div id="test-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
+            <div style="background: #ffffff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">🧪 새로운 식재료 테스트</h3>
+                    <button onclick="closeSheets()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8B95A1; padding: 0;">✕</button>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display:block; font-size:13px; font-weight:800; color:#4E5968; margin-bottom:8px;">오늘 처음 먹여본 재료 (1개만)</label>
+                    <input type="text" id="test-ing-input" placeholder="예: 청경채" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #3182F6; font-size: 15px; font-weight: 700; outline: none; background:#F0F7FF;">
+                </div>
+
+                <div style="font-size: 13px; font-weight: 800; color: #4E5968; margin-bottom: 8px;">알레르기 반응 (신체 변화)</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+                    <button id="btn-al-pass" onclick="setAllergyStatus('pass')" style="flex: 1; padding: 14px; border-radius: 12px; background: #ECFDF5; color: #059669; border: 2px solid #10B981; font-weight: 800; font-size: 14px; cursor: pointer;">🟢 무사 통과</button>
+                    <button id="btn-al-fail" onclick="setAllergyStatus('fail')" style="flex: 1; padding: 14px; border-radius: 12px; background: #FFF0F1; color: #D32F2F; border: 2px solid transparent; font-weight: 800; font-size: 14px; cursor: pointer;">🚨 발진/알레르기</button>
+                </div>
+                <button onclick="saveTestRecord()" style="width: 100%; padding: 16px; border-radius: 14px; background: #E32636; color: #FFFFFF; font-weight: 900; font-size: 16px; border: none; cursor: pointer;">테스트 결과 저장</button>
+            </div>
+        </div>
+
+        <div id="cooking-mode-modal" style="display: none; position: fixed; inset: 0; background: #FFFFFF; z-index: 99999; flex-direction: column; animation: slideUp 0.3s ease-out; transition: background-color 0.5s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #E5E8EB; background: transparent;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 24px;">👨‍🍳</span>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 12px; font-weight: 800; color: #3182F6;">스마트 요리 모드</span>
+                            <span id="wake-lock-badge" style="font-size: 10px; font-weight: 800; color: #FFF; background: #10B981; padding: 2px 6px; border-radius: 4px; display: none;">☀️ 화면 켜짐 유지</span>
+                        </div>
+                        <h2 id="cook-title" style="margin: 0; font-size: 18px; font-weight: 900; color: #191F28;">소고기 미음</h2>
+                    </div>
+                </div>
+                <button onclick="closeCookingMode()" style="background: #F2F4F6; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; font-weight: 900; color: #4E5968; cursor: pointer;">✕</button>
+            </div>
+
+            <div style="background: transparent; padding: 30px 20px 20px; text-align: center; border-bottom: 1px solid #E5E8EB; position: relative;">
+                <div id="cook-timer-display" style="font-size: 64px; font-weight: 900; color: #191F28; font-variant-numeric: tabular-nums; line-height: 1; transition: 0.3s;">00:00</div>
+                <div style="width: 100%; height: 8px; background: #E5E8EB; border-radius: 4px; margin-top: 16px; overflow: hidden;">
+                    <div id="cook-progress-bar" style="width: 100%; height: 100%; background: #E5E8EB; transition: width 1s linear, background-color 0.3s;"></div>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 24px;">
+                    <button onclick="addCookTime(60)" style="padding: 10px 20px; border-radius: 12px; background: #FFFFFF; border: 1px solid #D1D5DB; font-weight: 800; font-size: 15px; color: #4E5968; cursor: pointer;">+1분</button>
+                    <button onclick="addCookTime(300)" style="padding: 10px 20px; border-radius: 12px; background: #FFFFFF; border: 1px solid #D1D5DB; font-weight: 800; font-size: 15px; color: #4E5968; cursor: pointer;">+5분</button>
+                    <button onclick="addCookTime(600)" style="padding: 10px 20px; border-radius: 12px; background: #FFFFFF; border: 1px solid #D1D5DB; font-weight: 800; font-size: 15px; color: #4E5968; cursor: pointer;">+10분</button>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 12px;">
+                    <button id="cook-timer-btn" onclick="toggleCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #3182F6; border: none; font-weight: 800; font-size: 16px; color: #FFFFFF; cursor: pointer;">▶ 시작</button>
+                    <button onclick="resetCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #FFF0F1; border: 1px solid #FECACA; font-weight: 800; font-size: 16px; color: #D32F2F; cursor: pointer;">🔄 초기화</button>
+                </div>
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; padding: 20px; background: transparent;">
+                <div style="font-size: 14px; font-weight: 800; color: #8B95A1; margin-bottom: 16px;">완료한 단계는 터치해서 지워주세요!</div>
+                <div id="cook-steps-container" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px;"></div>
             </div>
         </div>
 
         <style>
-            /* 달력 디자인 마법! */
             @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
             .cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; border-radius: 12px; font-size: 14px; font-weight: 800; color: #191F28; cursor: pointer; transition: 0.2s; position: relative; }
             .cal-day.today { background: #F0F7FF; color: #3182F6; }
@@ -174,6 +241,17 @@
             .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
             .cal-dot.pass { background: #10B981; }
             .cal-dot.fail { background: #EF4444; }
+
+            .cook-step { padding: 16px; background: #F8F9FA; border-radius: 14px; font-size: 15px; font-weight: 700; color: #191F28; line-height: 1.5; border: 1px solid #E5E8EB; cursor: pointer; transition: 0.2s; display: flex; gap: 12px; align-items: flex-start; }
+            .cook-step.checked { background: #FFFFFF; color: #B0B8C1; text-decoration: line-through; border-color: #F2F4F6; }
+            .cook-step.checked .step-box { background: #10B981; border-color: #10B981; color: #FFF; }
+
+            @keyframes alarmFlash {
+                0% { background-color: #FFFFFF; }
+                50% { background-color: #FFE5E5; }
+                100% { background-color: #FFFFFF; }
+            }
+            .alarm-active { animation: alarmFlash 1s infinite !important; }
         </style>
 
         <div class="legal-footer">
