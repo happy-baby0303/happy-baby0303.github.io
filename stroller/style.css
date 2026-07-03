@@ -1,22 +1,40 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-body { font-family: 'Pretendard', sans-serif; background: #F2F4F6; margin: 0; padding: 0; color: #191F28; letter-spacing: -0.3px; }
-.container { max-width: 600px; margin: 0 auto; padding: 0 20px 120px; } /* 하단 여백 추가 */
+* { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+    margin: 0; 
+    padding: 0; 
+    /* 🔥 카시트와 똑같이 시스템 폰트를 먼저 읽도록 강제! */
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Helvetica Neue", Arial, sans-serif; 
+}
 
-/* =========================================
-   👑 마스터 헤더 & GNB (장난감/이유식 완벽 동일 + 얇은 화살표)
-========================================= */
+body { 
+    margin: 0; 
+    background-color: #F2F4F6; 
+    color: #191F28; 
+    -webkit-font-smoothing: antialiased; 
+    
+    /* 🚀 마법의 주문: 앱 전체의 단어 쪼개짐 철벽 방어! */
+    word-break: keep-all; 
+    overflow-wrap: break-word; 
+}
+a { text-decoration: none; color: inherit; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 20px 120px; } 
+
+/* 헤더와 홈버튼 설정 */
 .app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; padding: 0; width: 100%; }
 
-/* 🔥 얇고 연한 홈버튼 화살표 강제 고정 */
-.back-btn { font-size: 14px !important; font-weight: 500 !important; color: #8B95A1 !important; text-decoration: none !important; cursor: pointer !important; z-index: 10; }
-
+/* 여기서 font-family 설정을 지워야 카시트와 똑같이 나옵니다 */
+.back-btn { 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #4E5968; 
+    cursor: pointer; 
+    text-decoration: none; }
 .pro-badge { background: #3182F6; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
-
 .gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; border-top:1px solid #f2f4f6; margin: 0; justify-content: flex-start; }
 .gnb-menu::-webkit-scrollbar { display: none; }
-
 .gnb-item { flex: 0 0 auto; padding: 14px 16px; font-size: 15px; font-weight: 700; color: #8B95A1; position: relative; display: flex; align-items: center; gap: 6px; text-decoration: none; }
 .gnb-item.active { color: #191F28; font-weight: 800; }
 .gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
