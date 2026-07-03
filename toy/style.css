@@ -2,7 +2,13 @@
    🧸 육아메이트 장난감 전용 스타일시트 (toy/style.css)
    ========================================== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #F8FAFC; color: #191F28; }
+body { 
+    font-family: 'Pretendard', -apple-system, sans-serif; 
+    background-color: #F8FAFC; 
+    color: #191F28; 
+    word-break: keep-all; /* 🔥 앱 전체의 단어 쪼개짐 철벽 방어! */
+    overflow-wrap: break-word; /* 🔥 너무 긴 영어/주소만 안전하게 줄바꿈 */
+}
 a { text-decoration: none; color: inherit; }
 
 /* ==========================================
