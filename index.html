@@ -259,9 +259,13 @@
                         <span style="font-size:16px; font-weight:800; color:var(--text-m); flex-shrink:0;">원</span>
                     </div>
                     <div style="display:flex; gap:6px; width:100%;">
-                        <button class="btn-main" onclick="addDailyExpense(false)" style="flex:1; padding:14px 4px; border-radius:12px; background:#F2F4F6 !important; color:#4E5968 !important; font-weight:800; font-size:13.5px; border:1px solid #D1D6DB; cursor:pointer; margin:0; white-space:nowrap; letter-spacing:-0.5px;">💸 썼어요(지출)</button>
-                        <button class="btn-main" onclick="addDailyExpense(true)" style="flex:1; min-width:0; padding:14px 0; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; font-size:13px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.2); cursor:pointer; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.5px;">💰 아꼈어요(저금)</button>
-                    </div>
+                        <div style="display:flex; gap:6px; width:100%;">
+    <!-- 왼쪽 지출 버튼 -->
+    <button class="btn-main" onclick="addDailyExpense(false)" style="flex:1; padding:14px 2px; border-radius:12px; background:#F2F4F6 !important; color:#4E5968 !important; font-weight:800; font-size:12.5px; border:1px solid #D1D6DB; cursor:pointer; margin:0; white-space:nowrap; letter-spacing:-1px;">💸 썼어요(지출)</button>
+        <!-- 오른쪽 저금 버튼 (넘침 방지 마법 적용) -->
+    <button class="btn-main" onclick="addDailyExpense(true)" style="flex:1; padding:14px 2px; border-radius:12px; background:#3182F6 !important; color:#FFF !important; font-weight:800; font-size:12.5px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.2); cursor:pointer; margin:0; white-space:nowrap; letter-spacing:-1px;">💰 아꼈어요(저금)</button>
+                          </div>
+                      </div>
                 </div>
 
                 <!-- 📊 3. 아코디언 (상세 내역 접기/펼치기) -->
