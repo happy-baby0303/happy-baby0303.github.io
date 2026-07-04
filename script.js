@@ -972,9 +972,11 @@ function calcHealthMaster() {
     document.getElementById('res-month').innerText = month;
     document.getElementById('res-week').innerText = week;
 
-    // 원더윅스
-    let curWW = wwList.find(x => week >= x.w-1 && week <= x.w+1);
+   // 원더윅스 로직
+    // 💡 도약기는 보통 기준(절정) 주차보다 4주 전부터 시작되므로 범위를 -4로 대폭 넓힙니다.
+    let curWW = wwList.find(x => week >= (x.w - 4) && week <= (x.w + 1));
     let nxtWW = wwList.find(x => x.w > week);
+    
     let st = document.getElementById('ww-status');
     if(st) {
         if(curWW) { 
@@ -1217,8 +1219,10 @@ function renderBabyInfo() {
         
         let curWW = null;
         if(typeof wwList !== 'undefined') {
-            curWW = wwList.find(x => weekAge >= x.w-1 && weekAge <= x.w+1);
-        }
+        // 💡 홈 화면 배지도 도약기 4주 전부터 알림이 뜨도록 범위를 -4로 대폭 넓힙니다!
+        curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
+    }
+
         let curVac = null;
         if(typeof vaccineData !== 'undefined') {
             curVac = vaccineData.find(v => monthAge === v.maxMonth); 
@@ -2194,15 +2198,6 @@ function openPediatricianReport() {
 }
 window.openPediatricianReport = openPediatricianReport;
 
-// [실시간 감시 엔진 일괄 가동 스위치]
-window.initRealtimeSync = () => {
-    if (typeof startFeverRealtimeSync === 'function') startFeverRealtimeSync();
-    if (typeof startCubeRealtimeSync === 'function') startCubeRealtimeSync();
-    if (typeof startBatonRealtimeSync === 'function') startBatonRealtimeSync();
-    if (typeof startLedgerRealtimeSync === 'function') startLedgerRealtimeSync();
-    
-    console.log("🔥 실시간 감시 엔진 가동 완료!");
-};
 
 // ==========================================
 // 📱 원터치 육아 트래커 엔진 (낮잠/밤잠 기능 분리 완성본)
@@ -2583,8 +2578,25 @@ window.updateTrackerDashboard = function() {
 
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     const now = new Date();
-    const nowTime = now.getTime();
+    const nowTime = now.getTime(); // 👈 파트너님이 찾으시던 그 녀석!
     
+    // --- 💡 [심플 버전] 팩트 폭격 순수 깨시 카운터 ---
+    const lastSleepRecord = records.find(r => r.type === 'sleep'); 
+    const isAwake = !localStorage.getItem('tosil_sleep_start');
+    let wakeTimeHtml = "";
+    
+    if (isAwake && lastSleepRecord) {
+        const awakeMins = Math.floor((nowTime - Number(lastSleepRecord.timestamp)) / 60000);
+        const hours = Math.floor(awakeMins / 60);
+        const mins = awakeMins % 60;
+
+        wakeTimeHtml = `<div style="background:#F8F9FA; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #E5E8EB; text-align:center;">
+            <div style="font-size:12.5px; font-weight:900; color:#3182F6;">⏱️ 깨어난 지 ${hours}시간 ${mins}분째</div>
+            <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">우리 아기만의 졸음 신호를 관찰해 보세요 </div>
+        </div>`;
+    }
+    // --- 카운터 끝 ---
+
     const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
     const diaperInterval = parseInt(localStorage.getItem('tosil_diaper_interval')) || 180;
     
@@ -2633,6 +2645,7 @@ window.updateTrackerDashboard = function() {
                     `;
                 });
             }
+
             historyHtml += '</div>';
             historyHtml += `<div style="display:flex; gap:8px; margin-top:16px;">
                 <button class="btn-main" onclick="window.resetTrackerRecords()" style="flex:1; background:#FFF0F1 !important; color:#F04452 !important; border:1px solid #FFE3E3 !important; box-shadow:none !important; font-size:13px; padding:12px; border-radius:12px; margin:0;">🗑️ 전체 삭제</button>
@@ -2664,7 +2677,7 @@ window.updateTrackerDashboard = function() {
     if (todaySleepMins > 120) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
     if (todayDiaperCount >= 5) briefing = `오늘 기저귀를 ${todayDiaperCount}번 갈았어요! 보송보송 엉덩이 ✨`;
 
-    let htmlStr = `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
+    let htmlStr = wakeTimeHtml + `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
 
     htmlStr += `<div style="display:flex; gap:8px; margin-bottom:12px;">
         <div style="flex:1; background:#F8F9FA; padding:10px; border-radius:12px; text-align:center;">
@@ -2852,3 +2865,276 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ==========================================
+// 🚀 앱 자동화 엔진 (새로고침 및 실시간 갱신)
+// ==========================================
+
+// 1. 앱 켜지자마자 대시보드 강제 렌더링 (새로고침 시 빈 화면 방지)
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if(window.updateTrackerDashboard) window.updateTrackerDashboard();
+        
+        // 👇 이 줄을 추가해야 앱이 켜질 때 체크리스트가 화면에 그려집니다!
+        if(window.renderRoutineChecklist) window.renderRoutineChecklist(); 
+        
+    }, 100);
+});
+
+// 2. 1분(60,000ms)마다 깨시 타이머 자동 갱신
+setInterval(() => {
+    // 히스토리(통계) 창을 보고 있지 않을 때만 배경에서 알아서 UI 업데이트
+    if(!window.isHistoryView && window.updateTrackerDashboard) {
+        window.updateTrackerDashboard();
+    }
+}, 60000);
+
+// ==========================================
+// 💊 데일리 루틴 체크리스트 (와이드 핏 센터 정렬)
+// ==========================================
+
+window.renderRoutineChecklist = function() {
+    const container = document.getElementById('routine-checklist-container');
+    if(!container) return;
+
+    const todayStr = new Date().toLocaleDateString();
+    let savedDate = localStorage.getItem('tosil_routine_date');
+    let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || { probiotics: false, vitaminD: false, nail: false };
+
+    if (savedDate !== todayStr) {
+        routineData = { probiotics: false, vitaminD: false, nail: false };
+        localStorage.setItem('tosil_routine_data', JSON.stringify(routineData));
+        localStorage.setItem('tosil_routine_date', todayStr);
+    }
+
+    const createBtn = (id, label) => {
+        const isChecked = routineData[id];
+        // 💡 디자인 포인트: 체크되면 쨍한 파란색 + 부드러운 그림자!
+        const bg = isChecked ? '#3182F6' : '#F8F9FA';
+        const color = isChecked ? '#FFF' : '#8B95A1';
+        const border = isChecked ? '1px solid #3182F6' : '1px solid #E5E8EB';
+        const shadow = isChecked ? '0 4px 10px rgba(49,130,246,0.2)' : 'none';
+
+        // flex:1 을 주어 3개의 버튼이 똑같은 크기로 꽉 차게 만듭니다
+        return `<button onclick="window.toggleRoutine('${id}')" style="flex:1; padding:12px 0; border-radius:14px; background:${bg}; color:${color}; font-size:13px; font-weight:800; border:${border}; box-shadow:${shadow}; cursor:pointer; transition:all 0.2s ease-in-out; outline:none;">
+                    ${label}
+                </button>`;
+    };
+
+    // 💡 위아래 위젯들과 똑같은 곡률(20px)의 메인 박스 안에, 제목은 가운데 정렬로 예쁘게!
+    container.innerHTML = `
+        <div style="background: var(--bg-card, #FFF); border: 1px solid var(--border, #E5E8EB); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); text-align: center;">
+            <div style="font-size: 12.5px; font-weight: 800; color: #8B95A1; margin-bottom: 14px;">✅ 우리 아기 데일리 케어</div>
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                ${createBtn('probiotics', '유산균')}
+                ${createBtn('vitaminD', '비타민D')}
+                ${createBtn('nail', '손톱')}
+            </div>
+        </div>
+    `;
+};
+
+window.toggleRoutine = function(id) {
+    let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
+    routineData[id] = !routineData[id];
+    localStorage.setItem('tosil_routine_data', JSON.stringify(routineData));
+    window.renderRoutineChecklist();
+};
+
+// ==========================================
+// 🚀 [출시용] 트래커 & 비타민 파이어베이스 실시간 연동 패치
+// ==========================================
+
+// 1️⃣ 트래커 데이터 파이어베이스 통합 저장 함수
+async function saveTrackerToFirebase(records) {
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { await setDoc(doc(db, "tracker_" + syncCode, "status"), { records: records }); } catch (e) { console.error("트래커 저장 실패", e); }
+    }
+    localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+    window.updateTrackerDashboard();
+}
+
+// 2️⃣트래커 기존 함수들을 '실시간 연동형'으로 덮어쓰기 (업그레이드)
+window.stopSleepTimer = async function() {
+    const start = localStorage.getItem('tosil_sleep_start');
+    if(!start) return;
+    const end = new Date().getTime();
+    const durationMins = Math.floor((end - parseInt(start)) / 60000);
+    const sleepType = localStorage.getItem('tosil_sleep_type') || '낮잠'; 
+    
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    let record = { id: 'trk_'+now.getTime(), time: timeStr, timestamp: now.getTime(), type: 'sleep', subType: sleepType, amount: durationMins };
+    
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    records.unshift(record);
+    if(records.length > 100) records.pop();
+    
+    await saveTrackerToFirebase(records); // 👈 파이어베이스 저장!
+    
+    localStorage.removeItem('tosil_sleep_start');
+    localStorage.removeItem('tosil_sleep_type'); 
+    window.closeTrackerSheet();
+};
+
+window.saveTrackerRecord = async function() {
+    if(!window.trackerState.type) return;
+
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    let timeStr = "";
+    let timestamp = new Date().getTime();
+    const timeInputEl = document.getElementById('v-tracker-time');
+    
+    if (window.editingTrackerId) {
+        const originalRecord = records.find(r => r.id === window.editingTrackerId);
+        if (originalRecord) timestamp = originalRecord.timestamp; 
+    }
+
+    if(timeInputEl && timeInputEl.value) {
+        timeStr = timeInputEl.value; 
+        const [hours, minutes] = timeStr.split(':');
+        const d = new Date(timestamp); 
+        d.setHours(hours); d.setMinutes(minutes); d.setSeconds(0);
+        timestamp = d.getTime();
+    } else {
+        const now = new Date();
+        timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    }
+
+    let recordId = window.editingTrackerId ? window.editingTrackerId : 'trk_'+new Date().getTime();
+    let record = { id: recordId, time: timeStr, timestamp: timestamp, type: window.trackerState.type };
+
+    if (window.trackerState.type === 'feed') {
+        if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요!');
+        const amt = document.getElementById('v-feed-amount').value;
+        if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요!');
+        record.subType = window.trackerState.subType;
+        record.amount = parseInt(amt);
+    } 
+    else if (window.trackerState.type === 'diaper') {
+        if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요!');
+        record.subType = window.trackerState.subType;
+        record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
+    }
+    else if (window.trackerState.type === 'sleep') {
+        const amt = document.getElementById('v-sleep-amount');
+        if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요!');
+        record.amount = parseInt(amt.value);
+        if (window.editingTrackerId) {
+            const originalRecord = records.find(r => r.id === window.editingTrackerId);
+            if (originalRecord) record.subType = originalRecord.subType; 
+        } else {
+            record.subType = '낮잠'; 
+        }
+    }
+
+    if (window.editingTrackerId) {
+        const idx = records.findIndex(r => r.id === window.editingTrackerId);
+        if(idx !== -1) records[idx] = record;
+    } else {
+        records.push(record);
+    }
+    
+    records.sort((a, b) => b.timestamp - a.timestamp);
+    if(records.length > 100) records.pop();
+    
+    await saveTrackerToFirebase(records); // 👈 파이어베이스 저장!
+
+    window.editingTrackerId = null; 
+    window.closeTrackerSheet();
+};
+    
+window.deleteTrackerRecord = async function(id) {
+    if(!confirm("이 기록을 삭제하시겠습니까?")) return;
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    records = records.filter(r => r.id !== id);
+    await saveTrackerToFirebase(records); // 👈 파이어베이스 저장!
+};
+
+window.resetTrackerRecords = async function() {
+    if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
+    await saveTrackerToFirebase([]); // 👈 파이어베이스 빈 배열로 덮어쓰기!
+    localStorage.removeItem('tosil_sleep_start');
+    localStorage.removeItem('tosil_sleep_type');
+};
+
+// 3️⃣ 비타민 체크리스트 '실시간 연동형' 덮어쓰기
+window.toggleRoutine = async function(id) {
+    let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
+    routineData[id] = !routineData[id];
+    
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { 
+            await setDoc(doc(db, "routine_" + syncCode, "status"), { 
+                data: routineData, 
+                date: new Date().toLocaleDateString() 
+            }); 
+        } catch(e) {}
+    }
+
+    localStorage.setItem('tosil_routine_data', JSON.stringify(routineData));
+    window.renderRoutineChecklist();
+};
+
+// 4️⃣ 파이어베이스 실시간 수신 리스너 (트래커 & 비타민) 추가
+let trackerUnsubscribe = null;
+let routineUnsubscribe = null;
+
+window.startTrackerRealtimeSync = function() {
+    const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+    const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "tracker_" + syncCode, "status") : null;
+    if(!docRef) return; 
+    if (trackerUnsubscribe) trackerUnsubscribe();
+    if(typeof window.onSnapshot !== 'function') return;
+
+    trackerUnsubscribe = window.onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            localStorage.setItem('tosil_tracker_records', JSON.stringify(data.records || []));
+        }
+        if (typeof updateTrackerDashboard === 'function') updateTrackerDashboard();
+    });
+};
+
+window.startRoutineRealtimeSync = function() {
+    const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+    const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "routine_" + syncCode, "status") : null;
+    if(!docRef) return; 
+    if (routineUnsubscribe) routineUnsubscribe();
+    if(typeof window.onSnapshot !== 'function') return;
+
+    routineUnsubscribe = window.onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const dbData = docSnap.data();
+            const todayStr = new Date().toLocaleDateString();
+            // 서버에 저장된 날짜가 오늘 날짜일 때만 체크 상태 동기화!
+            if (dbData.date === todayStr) {
+                localStorage.setItem('tosil_routine_data', JSON.stringify(dbData.data || {}));
+                localStorage.setItem('tosil_routine_date', todayStr);
+            }
+        }
+        if (typeof renderRoutineChecklist === 'function') renderRoutineChecklist();
+    });
+};
+
+// ==========================================
+// 🚀 실시간 감시 엔진 가동 스위치 (로그 삭제 버전)
+// ==========================================
+window.initRealtimeSync = () => {
+    if (typeof startFeverRealtimeSync === 'function') startFeverRealtimeSync();
+    if (typeof startCubeRealtimeSync === 'function') startCubeRealtimeSync();
+    if (typeof startBatonRealtimeSync === 'function') startBatonRealtimeSync();
+    if (typeof startLedgerRealtimeSync === 'function') startLedgerRealtimeSync();
+    
+    if (typeof startTrackerRealtimeSync === 'function') startTrackerRealtimeSync();
+    if (typeof startRoutineRealtimeSync === 'function') startRoutineRealtimeSync();
+};
+
+// 앱 로딩 시 리스너 수동 실행 방어 코드 (로그인 완료 후 initRealtimeSync가 불리도록 연결)
+document.addEventListener("DOMContentLoaded", () => {
+    // 만약 자동 로그인이 이미 되어있다면 즉시 가동
+    if (localStorage.getItem("family_sync_code")) {
+        window.initRealtimeSync();
+    }
+});
