@@ -2941,20 +2941,52 @@ window.toggleRoutine = function(id) {
 };
 
 // ==========================================
-// 🚀 [출시용] 트래커 & 비타민 파이어베이스 실시간 연동 패치
+// 🚀 [출시용] 트래커 & 비타민 실시간 연동 패치 (백그라운드 동기화 꼼수 적용!)
 // ==========================================
 
-// 1️⃣ 트래커 데이터 파이어베이스 통합 저장 함수
+let trackerNeedSync = false; // 전송 대기 깃발
+let trackerIdleTimer = null; // 1분 안전 타이머
+
+// 1️⃣    트래커 화면 즉시 갱신 & 전송 대기열 등록 (체감속도 0.1초)
 async function saveTrackerToFirebase(records) {
-    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
-        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
-        try { await setDoc(doc(db, "tracker_" + syncCode, "status"), { records: records }); } catch (e) { console.error("트래커 저장 실패", e); }
-    }
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
-    window.updateTrackerDashboard();
+    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+
+    trackerNeedSync = true; //"파이어베이스로 보낼 거 생겼음!" 깃발 꽂기
+
+    // (안전장치) 앱을 안 끄고 1분 동안 가만히 켜두면 한 번 쏴줍니다.
+    if (trackerIdleTimer) clearTimeout(trackerIdleTimer);
+    trackerIdleTimer = setTimeout(() => {
+        flushTrackerSync();
+    }, 60000); 
 }
 
-// 2️⃣트래커 기존 함수들을 '실시간 연동형'으로 덮어쓰기 (업그레이드)
+// 2️⃣      실제 파이어베이스 전송 (배달부)
+async function flushTrackerSync() {
+    if (!trackerNeedSync) return; // 보낼 거 없으면 퇴근
+
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { 
+            await setDoc(doc(db, "tracker_" + syncCode, "status"), { records: records }); 
+            trackerNeedSync = false; // 전송 성공했으니 깃발 내림
+        } catch (e) { 
+            console.error("트래커 클라우드 저장 실패", e); 
+        }
+    }
+}
+
+// 3️⃣ 🚨 대망의 핵심 꼼수 (화면 꺼짐 / 앱 전환 감지기)
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === 'hidden') {
+        flushTrackerSync(); // 숨겨지는 순간 0.1초 만에 파이어베이스로 슛!
+    }
+});
+
+// ==========================================
+// 4️⃣    트래커 기존 함수들을 '연동형'으로 업그레이드
+// ==========================================
 window.stopSleepTimer = async function() {
     const start = localStorage.getItem('tosil_sleep_start');
     if(!start) return;
@@ -2970,7 +3002,7 @@ window.stopSleepTimer = async function() {
     records.unshift(record);
     if(records.length > 100) records.pop();
     
-    await saveTrackerToFirebase(records); // 👈 파이어베이스 저장!
+    await saveTrackerToFirebase(records); 
     
     localStorage.removeItem('tosil_sleep_start');
     localStorage.removeItem('tosil_sleep_type'); 
@@ -3038,7 +3070,7 @@ window.saveTrackerRecord = async function() {
     records.sort((a, b) => b.timestamp - a.timestamp);
     if(records.length > 100) records.pop();
     
-    await saveTrackerToFirebase(records); // 👈 파이어베이스 저장!
+    await saveTrackerToFirebase(records);
 
     window.editingTrackerId = null; 
     window.closeTrackerSheet();
@@ -3048,17 +3080,19 @@ window.deleteTrackerRecord = async function(id) {
     if(!confirm("이 기록을 삭제하시겠습니까?")) return;
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     records = records.filter(r => r.id !== id);
-    await saveTrackerToFirebase(records); // 👈 파이어베이스 저장!
+    await saveTrackerToFirebase(records); 
 };
 
 window.resetTrackerRecords = async function() {
     if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
-    await saveTrackerToFirebase([]); // 👈 파이어베이스 빈 배열로 덮어쓰기!
+    await saveTrackerToFirebase([]); 
     localStorage.removeItem('tosil_sleep_start');
     localStorage.removeItem('tosil_sleep_type');
 };
 
-// 3️⃣ 비타민 체크리스트 '실시간 연동형' 덮어쓰기
+// ==========================================
+// 5️⃣     비타민 체크리스트 '실시간 연동형' 덮어쓰기
+// ==========================================
 window.toggleRoutine = async function(id) {
     let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
     routineData[id] = !routineData[id];
@@ -3077,7 +3111,9 @@ window.toggleRoutine = async function(id) {
     window.renderRoutineChecklist();
 };
 
-// 4️⃣ 파이어베이스 실시간 수신 리스너 (트래커 & 비타민) 추가
+// ==========================================
+// 6️⃣  파이어베이스 실시간 수신 리스너 (트래커 & 비타민)
+// ==========================================
 let trackerUnsubscribe = null;
 let routineUnsubscribe = null;
 
@@ -3108,7 +3144,6 @@ window.startRoutineRealtimeSync = function() {
         if (docSnap.exists()) {
             const dbData = docSnap.data();
             const todayStr = new Date().toLocaleDateString();
-            // 서버에 저장된 날짜가 오늘 날짜일 때만 체크 상태 동기화!
             if (dbData.date === todayStr) {
                 localStorage.setItem('tosil_routine_data', JSON.stringify(dbData.data || {}));
                 localStorage.setItem('tosil_routine_date', todayStr);
@@ -3119,7 +3154,7 @@ window.startRoutineRealtimeSync = function() {
 };
 
 // ==========================================
-// 🚀 실시간 감시 엔진 가동 스위치 (로그 삭제 버전)
+// 🚀 [최종 통합] 모든 실시간 감시 엔진 일괄 가동 스위치
 // ==========================================
 window.initRealtimeSync = () => {
     if (typeof startFeverRealtimeSync === 'function') startFeverRealtimeSync();
@@ -3131,9 +3166,8 @@ window.initRealtimeSync = () => {
     if (typeof startRoutineRealtimeSync === 'function') startRoutineRealtimeSync();
 };
 
-// 앱 로딩 시 리스너 수동 실행 방어 코드 (로그인 완료 후 initRealtimeSync가 불리도록 연결)
+// 앱 로딩 시 리스너 수동 실행 방어 코드
 document.addEventListener("DOMContentLoaded", () => {
-    // 만약 자동 로그인이 이미 되어있다면 즉시 가동
     if (localStorage.getItem("family_sync_code")) {
         window.initRealtimeSync();
     }
