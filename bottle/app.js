@@ -24,10 +24,16 @@ function applyGlobalBabyProfile() {
     const ageSelect = document.getElementById('filter-age');
     if(ageSelect) ageSelect.value = ageFilter;
 
+    // ✂️ 기존 파란색 큰 배너는 꼴도 보기 싫으니 숨김 처리!
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
-        banner.style.display = 'flex';
-        banner.innerHTML = `<span style="font-size:18px; margin-right:8px;">✨</span> <div><b>${babyName}</b> 아기(생후 ${months}개월)의 월령에 맞춰 AI가 젖병 필터를 자동 세팅했어요!</div>`;
+        banner.style.display = 'none'; 
+    }
+
+    // ✨ 대신 새로 만든 '쿨한 뱃지'에 아기 개월 수를 꽂아줍니다!
+    const badge = document.getElementById('dynamic-age-badge');
+    if(badge) {
+        badge.innerText = `생후 ${months}개월 맞춤`;
     }
 }
 
