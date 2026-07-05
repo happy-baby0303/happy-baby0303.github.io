@@ -4,32 +4,40 @@
 
 let isFavViewMode = false;
 
-// 🚀 글로벌 데이터 자동 동기화
+// 🚀 유모차 글로벌 데이터 자동 동기화 (야무진 다이어트 & 구조화 완료)
 function applyGlobalBabyProfile() {
     const birthStr = localStorage.getItem('tosil_startDate');
-    const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
-    if(!birthStr) return;
+    
+    // 🛡️ 야무진 포인트 1: 아기 정보가 없을 때의 방어 로직
+    // (유모차는 유저가 폼을 직접 선택해서 AI를 돌리는 구조라, 없으면 조용히 멈춥니다)
+    if (!birthStr) return; 
 
+    // 1. 개월 수 정밀 계산 (더욱 안정적인 공식으로 통일)
     const birthDate = new Date(birthStr);
     const today = new Date();
-
-    let months = (today.getFullYear() - birthDate.getFullYear()) * 12;
-    months -= birthDate.getMonth();
-    months += today.getMonth();
+    let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
     if (months < 0) months = 0;
 
+    // ✂️ 2. 촌스러운 파란색 배너는 숨기고, 세련된 뱃지에 개월 수 쏘기!
+    const banner = document.getElementById('auto-sync-banner');
+    if (banner) banner.style.display = 'none';
+
+    document.querySelectorAll('.dynamic-age-badge').forEach(b => {
+        b.innerText = `생후 ${months}개월 맞춤`;
+    });
+
+    // 🛒 3. 유모차 전용 월령 필터(Select Box) 자동 세팅 로직
     let ageFilter = 'all';
     if (months <= 6) ageFilter = 'newborn';
     else if (months > 12) ageFilter = 'giant';
 
     const matBaby = document.getElementById('mat-baby');
-    if(matBaby && ageFilter !== 'all') matBaby.value = ageFilter;
-
-    const banner = document.getElementById('auto-sync-banner');
-    if(banner) {
-        banner.style.display = 'flex';
-        banner.innerHTML = `<span style="font-size:18px; margin-right:8px;">✨</span> <div><b>${babyName}</b> 아기(생후 ${months}개월)의 월령에 맞춰 AI가 매칭 센서를 조율했어요!</div>`;
+    if (matBaby && ageFilter !== 'all') {
+        matBaby.value = ageFilter;
     }
+
+    // 💡 야무진 포인트 2: (옵션) 만약 앱 켜자마자 AI 매칭 결과를 바로 보여주고 싶다면
+    // 이 부분에 유모차 결과 렌더링 함수를 호출하세요. (예: runAIEngine(); )
 }
 
 // 🚀 찜하기 (하트 토글)

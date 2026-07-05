@@ -5,11 +5,11 @@
 
 let isFavViewMode = false; 
 
-// 🚀 1. 글로벌 데이터 자동 동기화 (파트너님 UI 패치 보존)
+// 🚀 1. 글로벌 데이터 자동 동기화 (다이어트 & 뱃지 동기화 완료)
 function applyGlobalBabyProfile() {
     const birthStr = localStorage.getItem('tosil_startDate');
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
-    if(!birthStr) return;
+    if(!birthStr) return; 
     
     const birthDate = new Date(birthStr);
     const today = new Date();
@@ -26,17 +26,17 @@ function applyGlobalBabyProfile() {
     const ageSelect = document.getElementById('filter-age');
     if(ageSelect) ageSelect.value = ageFilter;
 
+    // ✂️ 1. 촌스러운 파란색 대형 배너는 과감히 숨김 (다이어트!)
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
-        banner.style.display = 'block'; 
-        banner.style.textAlign = 'center';
-        banner.style.lineHeight = '1.6';
-        banner.style.wordBreak = 'keep-all';
-        banner.style.padding = '16px';
-        
-        const safeText = `<span style="white-space: nowrap; display: inline-block; font-weight: 800;">✨ ${babyName} 아기(생후 ${months}개월)</span>`;
-        banner.innerHTML = `${safeText}의 안전을 위해 연령 필터가 자동 세팅되었습니다!`;
+        banner.style.display = 'none'; 
     }
+
+    // ✨ 2. 화면에 있는 모든 쿨한 뱃지(class)를 싹 다 찾아서 개월 수 쏴주기!
+    const badges = document.querySelectorAll('.dynamic-age-badge');
+    badges.forEach(b => {
+        b.innerText = `생후 ${months}개월 맞춤`;
+    });
 }
 
 // 🚀 2. 찜하기 기능

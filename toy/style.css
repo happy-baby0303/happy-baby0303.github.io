@@ -125,3 +125,18 @@ body.dark-mode .gnb-item.active { color: #FFFFFF; }
     line-height: 1.5 !important;
     text-align: center !important;
 }
+
+/* 📱 모바일 제목 & 설명글 최적화 */
+.tool-header-title, 
+.tool-header-desc,
+.tool-notice-box {
+    word-break: keep-all; /* 단어 단위로만 줄바꿈 (글자 찢어짐 방지!) */
+    line-height: 1.4; /* 줄간격을 살짝 넓혀서 두 줄이 돼도 답답하지 않게 */
+}
+
+/* 핸드폰(가로 폭 500px 이하)일 때만 글자 크기 다이어트 */
+@media (max-width: 500px) {
+    .tool-header-title { font-size: 20px !important; }
+    .tool-header-desc { font-size: 13px !important; }
+    .tool-notice-box { font-size: 12.5px !important; }
+}

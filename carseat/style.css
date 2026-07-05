@@ -10,7 +10,7 @@ a { text-decoration: none; color: inherit; }
 
 /* 🚀 2. 상단 헤더 & GNB (양옆 꽉 차는 디자인, 스크롤바 제거 완벽 적용) */
 .app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; padding: 0; }
-.back-btn { font-size: 14px; font-weight: 600; color: #4E5968; cursor: pointer; text-decoration: none; }
+.back-btn { font-size: 14px; font-weight: 600; color: #4E5968; cursor: pointer; }
 .pro-badge { background: #3182F6; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
 .gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; border-top:1px solid #f2f4f6; margin: 0; }
 .gnb-menu::-webkit-scrollbar { display: none; }
@@ -65,4 +65,19 @@ a { text-decoration: none; color: inherit; }
     word-break: keep-all !important; /* 단어가 중간에 잘리지 않게 강제 유지 */
     line-height: 1.5 !important;
     text-align: center !important;
+}
+
+/* 📱 모바일 제목 & 설명글 최적화 */
+.tool-header-title, 
+.tool-header-desc,
+.tool-notice-box {
+    word-break: keep-all; /* 단어 단위로만 줄바꿈 (글자 찢어짐 방지!) */
+    line-height: 1.4; /* 줄간격을 살짝 넓혀서 두 줄이 돼도 답답하지 않게 */
+}
+
+/* 핸드폰(가로 폭 500px 이하)일 때만 글자 크기 다이어트 */
+@media (max-width: 500px) {
+    .tool-header-title { font-size: 20px !important; }
+    .tool-header-desc { font-size: 13px !important; }
+    .tool-notice-box { font-size: 12.5px !important; }
 }

@@ -4,45 +4,52 @@ if (!Kakao.isInitialized()) {
     Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
 }
 
-// 🚀 글로벌 데이터 자동 동기화 (모바일 글씨 찢어짐 완벽 방어 패치)
+// 🚀 장난감 데이터 자동 동기화 (단발성 땜질 NO, 완벽한 구조화)
 function applyGlobalBabyProfile() {
     const birthStr = localStorage.getItem('tosil_startDate');
-    const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
-    const banner = document.getElementById('auto-sync-banner');
     
-    let autoMilestone = 'all'; 
-
-    if(birthStr) {
-        const birthDate = new Date(birthStr);
-        const today = new Date();
-        let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
-        if (months < 0) months = 0;
-
-        // 🔥 핵심 수정: flex를 버리고 block으로 강제 지정, 글자 안 찢어지게 nowrap 적용
-        banner.style.display = 'block';
-        banner.style.textAlign = 'center';
-        banner.style.lineHeight = '1.6';
-        banner.style.wordBreak = 'keep-all';
-        
-        const safeText = `<span style="white-space: nowrap; display: inline-block;">${babyName} 아기(생후 ${months}개월)</span>`;
-        banner.innerHTML = `✨ <b>${safeText}</b>의 월령에 맞춰 AI가 매칭 센서를 조율했어요!`;
-
-        if (months <= 3) autoMilestone = 'tummy';
-        else if (months <= 6) autoMilestone = 'flip';
-        else if (months <= 9) autoMilestone = 'crawl';
-        else autoMilestone = 'stand';
+    // 🛡️ 야무진 포인트 1: 아기 생일 정보가 없을 때의 완벽 방어!
+    // (기존엔 정보가 없으면 함수가 그냥 죽어버려서 리스트가 안 떴습니다)
+    if (!birthStr) {
+        renderToys(toyData); // 정보가 없으면 일단 '전체 장난감'을 다 띄워줌
+        return; 
     }
 
+    // 1. 개월 수 정밀 계산
+    const birthDate = new Date(birthStr);
+    const today = new Date();
+    let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+    if (months < 0) months = 0;
+
+    // 2. 불필요한 UI 숨김 및 뱃지 업데이트
+    const banner = document.getElementById('auto-sync-banner');
+    if (banner) banner.style.display = 'none';
+
+    document.querySelectorAll('.dynamic-age-badge').forEach(b => {
+        b.innerText = `생후 ${months}개월 맞춤`;
+    });
+
+    // 3. 개월 수에 따른 AI 마일스톤(단계) 판별
+    let autoMilestone = 'all'; 
+    if (months <= 3) autoMilestone = 'tummy';
+    else if (months <= 6) autoMilestone = 'flip';
+    else if (months <= 9) autoMilestone = 'crawl';
+    else autoMilestone = 'stand';
+
+    // 4. 화면 위쪽 '발달 상태 칩(버튼)' UI 활성화 변경
     const targetChip = document.querySelector(`.ms-chip[data-milestone="${autoMilestone}"]`);
     if (targetChip) {
         document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
         targetChip.classList.add('active');
     }
 
+    // 🛡️ 야무진 포인트 2: 계산된 결과에 맞춰 정확하게 데이터 추려내기
     const initialData = autoMilestone === 'all' 
         ? toyData 
         : toyData.filter(t => t.milestone === autoMilestone || t.milestone === 'all');
-    renderToys(initialData);
+        
+    // 5. 최종적으로 추려낸 데이터를 화면에 그리기 (엔진 가동!)
+    renderToys(initialData); 
 }
 
 function toggleFavorite(id) {

@@ -5,7 +5,7 @@
 
 let isFavViewMode = false;
 
-// 🚀 [NEW 1] 글로벌 데이터 자동 동기화
+// 🚀 1. 이유식 데이터 자동 동기화 (군더더기 삭제)
 function applyGlobalBabyProfile() {
     const birthStr = localStorage.getItem('tosil_startDate');
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
@@ -19,30 +19,26 @@ function applyGlobalBabyProfile() {
     months += today.getMonth();
     if (months < 0) months = 0;
 
-    // 👶 이유식 월령 매핑 로직
-    let ageFilter = '';
-    let ageText = '';
-    
-    if (months < 4) {
-        ageFilter = 'early'; ageText = '이유식 준비기(초기)'; // 아직 시기가 안됐지만 미리보기로 초기 세팅
-    } else if (months >= 4 && months <= 6) {
-        ageFilter = 'early'; ageText = '이유식 초기(4~6개월)';
-    } else if (months >= 7 && months <= 9) {
-        ageFilter = 'mid'; ageText = '이유식 중기(7~9개월)';
-    } else if (months >= 10 && months <= 11) {
-        ageFilter = 'late'; ageText = '이유식 후기(10~11개월)';
-    } else {
-        ageFilter = 'done'; ageText = '이유식 완료기(12개월 이상)';
-    }
+    // 👶 이유식 월령 단계 (로직은 그대로 유지)
+    let ageFilter = '', ageText = '';
+    if (months < 4) { ageFilter = 'early'; ageText = '이유식 준비기'; }
+    else if (months <= 6) { ageFilter = 'early'; ageText = '이유식 초기'; }
+    else if (months <= 9) { ageFilter = 'mid'; ageText = '이유식 중기'; }
+    else if (months <= 11) { ageFilter = 'late'; ageText = '이유식 후기'; }
+    else { ageFilter = 'done'; ageText = '이유식 완료기'; }
 
     const foodAge = document.getElementById('food-age');
     if(foodAge) foodAge.value = ageFilter;
 
+    // ✂️ 1. 촌스러운 파란 배너 삭제 (다이어트!)
     const banner = document.getElementById('auto-sync-banner');
-    if(banner) {
-        banner.style.display = 'flex';
-        banner.innerHTML = `<span style="font-size:18px; margin-right:8px;">✨</span> <div><b>${babyName}</b> 아기(생후 ${months}개월)의 월령에 맞춰 AI가 <b>${ageText}</b> 식단으로 세팅했어요!</div>`;
-    }
+    if(banner) banner.style.display = 'none';
+
+    // ✨ 2. 쿨한 뱃지에 '월령' + '이유식 단계'를 한 방에 쏴주기
+    const badges = document.querySelectorAll('.dynamic-age-badge');
+    badges.forEach(b => {
+        b.innerText = `생후 ${months}개월 | ${ageText}`;
+    });
 }
 
 // 🚀 [NEW 2] 찜하기 하트 토글 로직
@@ -118,7 +114,7 @@ function renderFavorites() {
 }
 
 
-// 🚦 1. 식재료 신호등 판독기 + 영양학 팩트체크 궁합
+// 🚦 1. 식재료 신호등 판독기 + 쌍방향 영양학 팩트체크
 function checkIngredient() {
     const query = document.getElementById('ingredient-search').value.trim().replace(/\s+/g, '');
     const resultArea = document.getElementById('traffic-light-result');
@@ -150,39 +146,64 @@ function checkIngredient() {
             </div>
         `;
 
-        // ✨ 핵심: 영양학 팩트체크 (찰떡/상극 궁합) UI 결합 ✨
-        const pair = pairingDB[found.name];
-        if (pair) {
+        // ✨ 핵심: 쌍방향(Reverse) 궁합 탐색 AI 로직 ✨
+        let goodPairs = [];
+        let badPairs = [];
+
+        // 1. 본인이 메인인 경우 (정방향: 예 - '소고기' 검색 시)
+        if (pairingDB[found.name]) {
+            if (pairingDB[found.name].good) goodPairs.push(...pairingDB[found.name].good);
+            if (pairingDB[found.name].bad) badPairs.push(...pairingDB[found.name].bad);
+        }
+
+        // 2. 남의 데이터에 포함된 경우 (역방향: 예 - '청경채' 검색 시 '소고기'를 찾아냄!)
+        for (const [mainIng, data] of Object.entries(pairingDB)) {
+            if (mainIng === found.name) continue; // 정방향에서 이미 찾은 건 패스
+
+            if (data.good) {
+                data.good.forEach(g => {
+                    if (g.item.includes(found.name) && !goodPairs.some(p => p.item.includes(mainIng))) {
+                        goodPairs.push({ item: mainIng, reason: g.reason });
+                    }
+                });
+            }
+            if (data.bad) {
+                data.bad.forEach(b => {
+                    if (b.item.includes(found.name) && !badPairs.some(p => p.item.includes(mainIng))) {
+                        badPairs.push({ item: mainIng, reason: b.reason });
+                    }
+                });
+            }
+        }
+
+        // 궁합 데이터가 하나라도 있으면 렌더링!
+        if (goodPairs.length > 0 || badPairs.length > 0) {
             html += `<div style="margin-top: 16px; padding-top: 16px; border-top: 1.5px dashed #D1D5DB;">`;
             html += `<div style="font-size: 14.5px; font-weight: 900; color: #191F28; margin-bottom: 12px; display:flex; align-items:center; gap:6px;"><span>👩‍⚕️</span> 영양학 팩트체크</div>`;
             
             // 좋은 궁합 렌더링
-            if (pair.good && pair.good.length > 0) {
-                pair.good.forEach(g => {
-                    html += `
-                    <div style="display:flex; align-items:flex-start; gap:8px; background:#F0FDF4; border:1px solid #BBF7D0; padding:12px; border-radius:10px; margin-bottom:8px;">
-                        <span style="font-size:16px; margin-top:2px;">👍</span>
-                        <div>
-                            <div style="font-size:13.5px; font-weight:800; color:#166534; margin-bottom:4px;">찰떡궁합: ${g.item}</div>
-                            <div style="font-size:13px; font-weight:600; color:#15803D; line-height:1.4;">${g.reason}</div>
-                        </div>
-                    </div>`;
-                });
-            }
+            goodPairs.forEach(g => {
+                html += `
+                <div style="display:flex; align-items:flex-start; gap:8px; background:#F0FDF4; border:1px solid #BBF7D0; padding:12px; border-radius:10px; margin-bottom:8px;">
+                    <span style="font-size:16px; margin-top:2px;">👍</span>
+                    <div>
+                        <div style="font-size:13.5px; font-weight:800; color:#166534; margin-bottom:4px;">찰떡궁합: ${g.item}</div>
+                        <div style="font-size:13px; font-weight:600; color:#15803D; line-height:1.4;">${g.reason}</div>
+                    </div>
+                </div>`;
+            });
             
             // 나쁜 궁합 렌더링
-            if (pair.bad && pair.bad.length > 0) {
-                pair.bad.forEach(b => {
-                    html += `
-                    <div style="display:flex; align-items:flex-start; gap:8px; background:#FEF2F2; border:1px solid #FECACA; padding:12px; border-radius:10px; margin-bottom:0;">
-                        <span style="font-size:16px; margin-top:2px;">🙅‍♀️</span>
-                        <div>
-                            <div style="font-size:13.5px; font-weight:800; color:#991B1B; margin-bottom:4px;">주의궁합: ${b.item}</div>
-                            <div style="font-size:13px; font-weight:600; color:#B91C1C; line-height:1.4;">${b.reason}</div>
-                        </div>
-                    </div>`;
-                });
-            }
+            badPairs.forEach(b => {
+                html += `
+                <div style="display:flex; align-items:flex-start; gap:8px; background:#FEF2F2; border:1px solid #FECACA; padding:12px; border-radius:10px; margin-bottom:8px;">
+                    <span style="font-size:16px; margin-top:2px;">🙅‍♀️</span>
+                    <div>
+                        <div style="font-size:13.5px; font-weight:800; color:#991B1B; margin-bottom:4px;">주의궁합: ${b.item}</div>
+                        <div style="font-size:13px; font-weight:600; color:#B91C1C; line-height:1.4;">${b.reason}</div>
+                    </div>
+                </div>`;
+            });
             html += `</div>`;
         }
 
