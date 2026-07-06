@@ -917,7 +917,8 @@ function updateMainAISensors(months) {
     else txtCarseat.innerText = "🧒 [토들러] 앞보기 전환, 체형 맞춤형";
 
     if (months <= 3) txtBottle.innerText = "🍼 [신생아] 배앓이 방지, 젖꼭지 매칭";
-    else txtBottle.innerText = "🥛 [6개월+] 빨대컵 연습, 스스로 마시기";
+    else if (months <= 5) txtBottle.innerText = "🍼 [4~5개월] 수유량 증가, 젖꼭지 사이즈업";
+    else txtBottle.innerText = "🥛 [6개월+] 빨대컵 연습, 스스로 마시기 시작";
 
     if (months <= 6) txtFood.innerText = "🌾 [초기] 쌀미음 스타트, 식단 매칭";
     else if (months <= 9) txtFood.innerText = "🥕 [중기] 입자 업그레이드, 재료 신호등";
@@ -980,11 +981,15 @@ function calcHealthMaster() {
     let st = document.getElementById('ww-status');
     if(st) {
         if(curWW) { 
-            st.style.background = '#FFF0F1'; st.style.borderColor = '#FFE3E3';
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> ${curWW.d}.<br>이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 아기를 많이 안아주세요!`; 
+            st.className = 'ww-status-box box-tint-red'; // 🚀 스마트 클래스 적용!
+            st.removeAttribute('style'); // 촌스러운 인라인 스타일 강제 삭제
+            st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px'; 
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> <span style="color:var(--text-s);">${curWW.d}</span>.<br><span style="color:var(--text-s); margin-top:4px; display:inline-block;">이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 아기를 많이 안아주세요!</span>`; 
         } else { 
-            st.style.background = '#ECFDF5'; st.style.borderColor = '#A7F3D0';
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음! 평온기 유지 중</div><br><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong>' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 도약기를 이수 완료했습니다.'}</span>`; 
+            st.className = 'ww-status-box box-tint-green'; // 🚀 스마트 클래스 적용!
+            st.removeAttribute('style');
+            st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px';
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음! 평온기 유지 중</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 도약기를 이수 완료했습니다.'}</span>`; 
         }
     }
 
@@ -1199,6 +1204,9 @@ function promptBabyInfo() {
 }
 window.promptBabyInfo = promptBabyInfo;
 
+// ==========================================
+// 👶 아기 정보 & 메인 대시보드 렌더링 (중복 배너 제거 완료)
+// ==========================================
 function renderBabyInfo() {
     const saved = localStorage.getItem('tosil_baby'), nameEl = document.getElementById('res-baby-name'), ddayEl = document.getElementById('res-baby-dday'), msgEl = document.getElementById('daily-message'); 
     const goalInput = document.getElementById('v-goal-text');
@@ -1219,9 +1227,8 @@ function renderBabyInfo() {
         
         let curWW = null;
         if(typeof wwList !== 'undefined') {
-        // 💡 홈 화면 배지도 도약기 4주 전부터 알림이 뜨도록 범위를 -4로 대폭 넓힙니다!
-        curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
-    }
+            curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
+        }
 
         let curVac = null;
         if(typeof vaccineData !== 'undefined') {
@@ -1247,12 +1254,12 @@ function renderBabyInfo() {
         initPlayWidget(monthAge, diffDays);
         updateMainAISensors(monthAge); 
 
-        // 🎯 숨어있던 '닌자 스마트 배너'
+        // 🎯 숨어있던 '닌자 스마트 배너' (예방접종 전용으로 축소)
         const bannerContainer = document.getElementById('health-smart-banner');
         if (bannerContainer) {
             let bannerHtml = '';
             
-            // 💉 예방접종 경고 배너 (갤럭시 폰트/줄바꿈 완벽 해결!)
+            // 💉 예방접종 경고 배너 (이것만 남깁니다!)
             if (curVac) {
                 bannerHtml += `
                     <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
@@ -1270,21 +1277,7 @@ function renderBabyInfo() {
                 `;
             }
             
-            // ⛈️ 원더윅스 경고 배너
-            if (curWW) {
-                bannerHtml += `
-                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FCA5A5; border-radius: 18px; padding: 16px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(211,47,47,0.1);">
-                        <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
-                            <div style="font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(211,47,47,0.2));">⛈️</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 12px; font-weight: 800; color: #D32F2F; margin-bottom: 4px;">원더윅스 경보</div>
-                                <div style="font-size: 14.5px; font-weight: 900; color: #191F28; line-height: 1.4; word-break:keep-all;">현재 <span style="color:#D32F2F;">${curWW.t}</span> 구간!</div>
-                            </div>
-                        </div>
-                        <span style="flex-shrink: 0; white-space: nowrap; background: #F04452; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">대처법 보기</span>
-                    </div>
-                `;
-            }
+            // ❌ 여기에 있던 원더윅스 코드는 삭제 완료! (스마트 배너 엔진으로 이관) ❌
             
             if (bannerHtml !== '') {
                 bannerContainer.innerHTML = bannerHtml;
@@ -2083,12 +2076,13 @@ function startLedgerRealtimeSync() {
 window.startLedgerRealtimeSync = startLedgerRealtimeSync;
 
 // ==========================================
-// 💡 스마트 홈 배너 엔진 (우선순위: 바통터치 > 큐브)
+// 💡 스마트 홈 배너 엔진 (우선순위: 1.바통터치 > 2.원더윅스 > 3.큐브)
 // ==========================================
 function updateSmartBanner() {
     const container = document.getElementById('smart-banner-container');
     if(!container) return;
 
+    // 🚨 1순위: 바통터치 요청 확인
     const batonRecords = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     const urgentBaton = batonRecords.find(r => r.status === 'requested');
 
@@ -2106,9 +2100,40 @@ function updateSmartBanner() {
             </div>
         `;
         container.style.display = 'block';
-        return; 
+        return; // 바통터치가 있으면 여기서 끝 (아래 배너들은 무시됨)
     }
 
+    // ⛈️ 2순위: 원더윅스 경보 확인 (바통터치가 없을 때만 발동)
+    let curWW = null;
+    try {
+        const savedBaby = localStorage.getItem('tosil_baby');
+        if (savedBaby && typeof wwList !== 'undefined') {
+            const data = JSON.parse(savedBaby);
+            const diffDays = Math.ceil((new Date() - new Date(data.birth)) / (1000 * 60 * 60 * 24));
+            const weekAge = Math.floor(diffDays / 7);
+            // 도약기 4주 전부터 알림 띄우는 기존 로직 동일 적용
+            curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
+        }
+    } catch(e) { console.error(e); }
+
+    if (curWW) {
+        container.innerHTML = `
+            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FCA5A5; border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 4px 12px rgba(211,47,47,0.1);">
+                <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
+                    <div style="font-size: 28px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(211,47,47,0.2));">⛈️</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 12px; font-weight: 800; color: #D32F2F; margin-bottom: 4px;">원더윅스 경보</div>
+                        <div style="font-size: 14.5px; font-weight: 900; color: #191F28; line-height: 1.4; word-break:keep-all;">현재 <span style="color:#D32F2F;">${curWW.t}</span> 구간!</div>
+                    </div>
+                </div>
+                <span style="flex-shrink: 0; white-space: nowrap; background: #F04452; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">대처법 보기</span>
+            </div>
+        `;
+        container.style.display = 'block';
+        return; // 원더윅스가 있으면 여기서 끝
+    }
+
+    // 🧊 3순위: 이유식 큐브 부족 알림 (위의 1, 2순위가 모두 없을 때만 발동)
     const cubeRecords = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
     const lowCube = cubeRecords.find(r => r.qty <= 2);
 
@@ -2129,9 +2154,11 @@ function updateSmartBanner() {
         return;
     }
 
+    // 띄울 배너가 아무것도 없으면 깔끔하게 숨김
     container.innerHTML = '';
     container.style.display = 'none';
 }
+
 window.updateSmartBanner = updateSmartBanner;
 
 // ==========================================
