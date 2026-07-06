@@ -676,6 +676,17 @@
                 </div>
             </div>
 
+             <div style="display: flex; gap: 12px; margin-top: 12px;">
+                <div onclick="window.openEmergencyModal('heimlich')" style="flex: 1; border-radius: 16px; padding: 22px 12px; text-align: center; background: rgba(240,68,82,0.1); border: 1px solid rgba(240,68,82,0.3); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 12.5px; font-weight: 800; color: var(--danger); margin-bottom: 6px;">이물질·기도 폐쇄</div>
+                    <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">하임리히법 〉</div>
+                </div>
+                <div onclick="window.openEmergencyModal('cpr')" style="flex: 1; border-radius: 16px; padding: 22px 12px; text-align: center; background: rgba(49,130,246,0.1); border: 1px solid rgba(49,130,246,0.3); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 12.5px; font-weight: 800; color: var(--primary); margin-bottom: 6px;">의식·호흡 없을 때</div>
+                    <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">심폐소생술 〉</div>
+                </div>
+            </div>
+
             <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:32px; margin-bottom:12px; padding: 0 4px;">
                 <span>🤖 우리 아기 맞춤형 생존 처방전</span>
             </div>
@@ -1205,6 +1216,49 @@
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .ai-poop-btn { flex: 1; min-width: 45px; padding: 10px 0; border-radius: 10px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
 </style>
+
+<div id="routine-settings-modal" class="modal-overlay" style="z-index: 6500; display:none; justify-content:center; align-items:center;" onclick="window.closeRoutineSettings(event)">
+    
+    <div class="box-main" style="position: relative; width: 90%; max-width: 380px; border-radius: 24px; padding: 28px 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); box-sizing: border-box; border: none !important; background: var(--bg-card) !important;" onclick="event.stopPropagation()">
+        
+        <button onclick="window.closeRoutineSettingsForce()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 24px; color: var(--text-s); cursor: pointer; padding: 8px;">✕</button>
+        
+        <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+            <div style="font-size: 36px; margin-bottom: 10px;">💊</div>
+            <div style="font-size: 18px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">데일리 케어 커스텀</div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-s); line-height: 1.4; word-break: keep-all;">매일 잊지 않고 챙길 3가지를 적어주세요.</div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+            <div>
+                <label style="font-size:12.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px; padding-left:4px;">✅ 첫 번째 케어</label>
+                <input type="text" id="set-routine-1" class="box-sub" placeholder="예: 락토핏 유산균" style="width:100%; padding:16px 14px; border-radius:14px; font-size:15px; font-weight:800; outline:none; border:1px solid var(--border); box-sizing:border-box; color: var(--text-m); transition: 0.2s;">
+            </div>
+            <div>
+                <label style="font-size:12.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px; padding-left:4px;">✅ 두 번째 케어</label>
+                <input type="text" id="set-routine-2" class="box-sub" placeholder="예: 써니디 드롭스 (비타민D)" style="width:100%; padding:16px 14px; border-radius:14px; font-size:15px; font-weight:800; outline:none; border:1px solid var(--border); box-sizing:border-box; color: var(--text-m); transition: 0.2s;">
+            </div>
+            <div>
+                <label style="font-size:12.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px; padding-left:4px;">✅ 세 번째 케어</label>
+                <input type="text" id="set-routine-3" class="box-sub" placeholder="예: 손톱 깎기 / 코 빼기" style="width:100%; padding:16px 14px; border-radius:14px; font-size:15px; font-weight:800; outline:none; border:1px solid var(--border); box-sizing:border-box; color: var(--text-m); transition: 0.2s;">
+            </div>
+        </div>
+        
+        <button class="btn-main" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 900; background: var(--primary) !important; color: #FFF !important; border: none; box-shadow: 0 4px 12px rgba(49,130,246,0.2); cursor: pointer;" onclick="window.saveRoutineSettings()">설정 저장하기</button>
+    </div>
+</div>
+
+<div id="emergency-modal" class="modal-overlay" style="z-index: 8000; display:none; justify-content:center; align-items:center;" onclick="window.closeEmergencyModal(event)">
+    <div class="box-main" style="position: relative; width: 90%; max-width: 380px; border-radius: 24px; padding: 30px 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: none !important; background: var(--bg-card) !important; max-height: 85vh; overflow-y: auto;" onclick="event.stopPropagation()">
+        
+        <button onclick="window.closeEmergencyModalForce()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 24px; color: var(--text-s); cursor: pointer; padding: 8px;">✕</button>
+        
+        <div id="em-header" style="text-align:center; margin-bottom: 24px;"></div>
+        <div id="em-content" style="display:flex; flex-direction:column; gap: 12px;"></div>
+        
+        <button class="btn-main" style="width: 100%; margin-top: 24px; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 900; background: var(--text-m) !important; color: var(--bg-card) !important; border: none; cursor: pointer;" onclick="window.closeEmergencyModalForce()">확인 완료</button>
+    </div>
+</div>
 
 <script>
     let selectedPoopColor = '';

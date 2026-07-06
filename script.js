@@ -2916,7 +2916,7 @@ setInterval(() => {
 }, 60000);
 
 // ==========================================
-// 💊 데일리 루틴 체크리스트 (와이드 핏 센터 정렬)
+// 💊 데일리 케어 (좌측 정렬 디자인 + 커스텀 설정)
 // ==========================================
 
 window.renderRoutineChecklist = function() {
@@ -2926,6 +2926,9 @@ window.renderRoutineChecklist = function() {
     const todayStr = new Date().toLocaleDateString();
     let savedDate = localStorage.getItem('tosil_routine_date');
     let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || { probiotics: false, vitaminD: false, nail: false };
+    
+    // 유저가 설정한 이름 불러오기 (없으면 기본값)
+    let routineNames = JSON.parse(localStorage.getItem('tosil_routine_names')) || ['유산균', '비타민D', '손톱'];
 
     if (savedDate !== todayStr) {
         routineData = { probiotics: false, vitaminD: false, nail: false };
@@ -2935,34 +2938,92 @@ window.renderRoutineChecklist = function() {
 
     const createBtn = (id, label) => {
         const isChecked = routineData[id];
-        // 💡 디자인 포인트: 체크되면 쨍한 파란색 + 부드러운 그림자!
-        const bg = isChecked ? '#3182F6' : '#F8F9FA';
-        const color = isChecked ? '#FFF' : '#8B95A1';
-        const border = isChecked ? '1px solid #3182F6' : '1px solid #E5E8EB';
+        // 💡 CSS 변수를 활용해 다크모드/라이트모드 자동 대응
+        const bg = isChecked ? '#3182F6' : 'var(--bg-sub)';
+        const color = isChecked ? '#FFF' : 'var(--text-s)';
+        const border = isChecked ? '1px solid #3182F6' : '1px solid var(--border)';
         const shadow = isChecked ? '0 4px 10px rgba(49,130,246,0.2)' : 'none';
 
-        // flex:1 을 주어 3개의 버튼이 똑같은 크기로 꽉 차게 만듭니다
-        return `<button onclick="window.toggleRoutine('${id}')" style="flex:1; padding:12px 0; border-radius:14px; background:${bg}; color:${color}; font-size:13px; font-weight:800; border:${border}; box-shadow:${shadow}; cursor:pointer; transition:all 0.2s ease-in-out; outline:none;">
+        return `<button onclick="window.toggleRoutine('${id}')" style="flex:1; padding:16px 0; border-radius:16px; background:${bg}; color:${color}; font-size:13.5px; font-weight:800; border:${border}; box-shadow:${shadow}; cursor:pointer; transition:all 0.2s ease-in-out; outline:none; margin:0; word-break:keep-all;">
                     ${label}
                 </button>`;
     };
 
-    // 💡 위아래 위젯들과 똑같은 곡률(20px)의 메인 박스 안에, 제목은 가운데 정렬로 예쁘게!
+    // 💡 제목은 밖으로 빼서 왼쪽 정렬 (육아 트래커랑 똑같이!)
     container.innerHTML = `
-        <div style="background: var(--bg-card, #FFF); border: 1px solid var(--border, #E5E8EB); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); text-align: center;">
-            <div style="font-size: 12.5px; font-weight: 800; color: #8B95A1; margin-bottom: 14px;">✅ 우리 아기 데일리 케어</div>
+        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <span>✅ 데일리 케어 루틴</span>
+                <span onclick="window.openRoutineSettings()" style="font-size:14px; cursor:pointer;" title="항목 설정">⚙️</span>
+            </div>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
             <div style="display: flex; gap: 8px; justify-content: center;">
-                ${createBtn('probiotics', '유산균')}
-                ${createBtn('vitaminD', '비타민D')}
-                ${createBtn('nail', '손톱')}
+                ${createBtn('probiotics', routineNames[0])}
+                ${createBtn('vitaminD', routineNames[1])}
+                ${createBtn('nail', routineNames[2])}
             </div>
         </div>
     `;
 };
 
-window.toggleRoutine = function(id) {
+// ⚙️ 데일리 케어 설정창(모달) 열고 닫고 저장하기 로직
+window.openRoutineSettings = function() {
+    let names = JSON.parse(localStorage.getItem('tosil_routine_names')) || ['유산균', '비타민D', '손톱'];
+    document.getElementById('set-routine-1').value = names[0];
+    document.getElementById('set-routine-2').value = names[1];
+    document.getElementById('set-routine-3').value = names[2];
+    document.getElementById('routine-settings-modal').style.display = 'flex';
+};
+
+window.closeRoutineSettingsForce = function() {
+    document.getElementById('routine-settings-modal').style.display = 'none';
+};
+
+window.closeRoutineSettings = function(e) {
+    if(e.target.id === 'routine-settings-modal') window.closeRoutineSettingsForce();
+};
+
+window.saveRoutineSettings = function() {
+    const n1 = document.getElementById('set-routine-1').value || '항목1';
+    const n2 = document.getElementById('set-routine-2').value || '항목2';
+    const n3 = document.getElementById('set-routine-3').value || '항목3';
+    const newNames = [n1, n2, n3];
+    
+    localStorage.setItem('tosil_routine_names', JSON.stringify(newNames));
+    
+    // 서버 연동(부부 공유)
+    let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        setDoc(doc(db, "routine_" + syncCode, "status"), { 
+            data: routineData, 
+            date: new Date().toLocaleDateString(),
+            names: newNames // 커스텀 이름도 파이어베이스로 보냄!
+        }).catch(e=>{});
+    }
+
+    window.closeRoutineSettingsForce();
+    window.renderRoutineChecklist();
+};
+
+// 👆 체크버튼 누를 때 파이어베이스로 이름도 같이 보내도록 업데이트
+window.toggleRoutine = async function(id) {
     let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
     routineData[id] = !routineData[id];
+    let routineNames = JSON.parse(localStorage.getItem('tosil_routine_names')) || ['유산균', '비타민D', '손톱'];
+    
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try { 
+            await setDoc(doc(db, "routine_" + syncCode, "status"), { 
+                data: routineData, 
+                date: new Date().toLocaleDateString(),
+                names: routineNames // 항목 이름도 같이 동기화
+            }); 
+        } catch(e) {}
+    }
+
     localStorage.setItem('tosil_routine_data', JSON.stringify(routineData));
     window.renderRoutineChecklist();
 };
@@ -3175,6 +3236,10 @@ window.startRoutineRealtimeSync = function() {
                 localStorage.setItem('tosil_routine_data', JSON.stringify(dbData.data || {}));
                 localStorage.setItem('tosil_routine_date', todayStr);
             }
+            // 💡 추가된 핵심 로직: 서버에 커스텀 이름이 있으면 내 폰에도 적용!
+            if (dbData.names) {
+                localStorage.setItem('tosil_routine_names', JSON.stringify(dbData.names));
+            }
         }
         if (typeof renderRoutineChecklist === 'function') renderRoutineChecklist();
     });
@@ -3199,3 +3264,76 @@ document.addEventListener("DOMContentLoaded", () => {
         window.initRealtimeSync();
     }
 });
+
+// ==========================================
+// 🚨 영유아 응급처치(CPR/하임리히) 모달 제어 (실전용 업데이트)
+// ==========================================
+window.openEmergencyModal = function(type) {
+    const header = document.getElementById('em-header');
+    const content = document.getElementById('em-content');
+    
+    if (type === 'heimlich') {
+        header.innerHTML = `
+            <div style="font-size: 19px; font-weight: 900; color: var(--danger); margin-bottom: 6px; margin-top: 10px;">영아 하임리히법 (1세 미만)</div>
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">이물질로 인해 숨을 쉬지 못할 때 즉시 실시!</div>
+        `;
+        content.innerHTML = `
+            <!-- 🚨 최우선 행동 지침 -->
+            <div style="background:var(--danger); color:#FFF; padding:12px; border-radius:12px; font-weight:900; font-size:14px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(240,68,82,0.3); animation: pulseSOS 1.5s infinite;">
+                📞 119에 신고하고 "스피커폰"을 켜세요!
+            </div>
+            
+            <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--danger); margin-bottom: 8px;">
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">1️⃣ 등 압박 5회</div>
+                <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">아기 얼굴을 아래로 향하게 엎드려 눕힌 후, 양쪽 날개뼈 사이를 <b>강하고 빠르게 5회</b> 두드립니다.</div>
+            </div>
+            <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--danger); margin-bottom: 8px;">
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">2️⃣ 가슴 압박 5회</div>
+                <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">아기를 앞으로 돌려 눕히고, 양 젖꼭지 정중앙 바로 아래를 <b>두 손가락으로 5회</b> 강하게 누릅니다.</div>
+            </div>
+            
+            <div class="box-tint-red" style="padding: 14px; border-radius: 16px; text-align:center; margin-bottom: 16px;">
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--danger);">이물질이 나올 때까지 1, 2번 무한 반복!</div>
+            </div>
+
+            <!-- 🎥 평소 학습용 유튜브 링크 -->
+            <a href="https://www.youtube.com/results?search_query=영아+하임리히법+소방청" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#FF0000; color:#FFF; padding:14px; border-radius:12px; font-weight:900; font-size:14px; text-decoration:none;">
+                <span>▶️</span> 1분 영상으로 정확한 자세 보기
+            </a>
+        `;
+    } else if (type === 'cpr') {
+        header.innerHTML = `
+            <div style="font-size: 19px; font-weight: 900; color: var(--primary); margin-bottom: 6px; margin-top: 10px;">영아 심폐소생술 (1세 미만)</div>
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">의식과 호흡이 없을 때 즉시 실시!</div>
+        `;
+        content.innerHTML = `
+            <!-- 🚨 최우선 행동 지침 -->
+            <div style="background:var(--primary); color:#FFF; padding:12px; border-radius:12px; font-weight:900; font-size:14px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(49,130,246,0.3); animation: pulseSOS 1.5s infinite;">
+                📞 119에 신고하고 "스피커폰"을 켜세요!
+            </div>
+            
+            <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary); margin-bottom: 8px;">
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">1️⃣ 의식 확인 (발바닥 때리기)</div>
+                <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">아기 <b>발바닥</b>을 때리며 반응 확인. 반응이 없으면 주변에 AED(자동심장충격기)를 요청하세요.</div>
+            </div>
+            <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary); margin-bottom: 8px;">
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">2️⃣ 가슴 압박 30회</div>
+                <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">양 젖꼭지 정중앙 <b>바로 아래쪽</b>을 두 손가락으로 <b>4cm 깊이로 빠르고 강하게 30회</b> 누릅니다.</div>
+            </div>
+            <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary); margin-bottom: 16px;">
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">3️⃣ 인공호흡 2회</div>
+                <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">아기의 <b>입과 코를 한 번에 덮고</b> 가슴이 부풀어 오를 정도로 1초씩 2회 숨을 불어넣습니다.</div>
+            </div>
+
+            <!-- 🎥 평소 학습용 유튜브 링크 -->
+            <a href="https://www.youtube.com/results?search_query=영아+심폐소생술+소방청" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#FF0000; color:#FFF; padding:14px; border-radius:12px; font-weight:900; font-size:14px; text-decoration:none;">
+                <span>▶️</span> 1분 영상으로 정확한 자세 보기
+            </a>
+        `;
+    }
+    
+    document.getElementById('emergency-modal').style.display = 'flex';
+}
+
+window.closeEmergencyModalForce = function() { document.getElementById('emergency-modal').style.display = 'none'; };
+window.closeEmergencyModal = function(e) { if(e.target.id === 'emergency-modal') window.closeEmergencyModalForce(); };
