@@ -376,16 +376,22 @@
                         </div>
                         <label style="font-size:14px; font-weight:800; display:block; margin-bottom:10px; color:var(--text-m);">3. 동반 증상 <span style="font-size:12px; font-weight:600; color:var(--text-s);">(선택)</span></label>
                         <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
-                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-cough" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">🤧 기침/콧물</div></label>
-                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-vomit" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">🤮 구토</div></label>
-                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-diarrhea" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">💩 설사</div></label>
-                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-nofood" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">😰 밥 거부</div></label>
+                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-cough" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">🤧  기침/콧물</div></label>
+                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-vomit" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">🤮  구토</div></label>
+                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-diarrhea" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">💩  설사</div></label>
+                            <label style="flex:1; min-width:70px;"><input type="checkbox" id="sym-nofood" style="display:none;"><div class="sym-btn box-main" style="padding:10px 6px; border-radius:10px; font-size:12.5px;">😰  밥 거부</div></label>
                         </div>
-                        <button class="btn-main" onclick="addFeverRecord()" style="font-size:15px; padding:16px;">⏱️ 차트에 기록 추가하기</button>
+                        <button class="btn-main" onclick="addFeverRecord()" 
+            style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #5D5FEF; color: white; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(93,95,239,0.3); transition: transform 0.1s;">
+            ⏱️ 차트에 기록 추가하기
+        </button>
                     </div>
                     <div id="fever-chart-container" style="display:none; height:180px; margin-bottom:20px;"><canvas id="feverChart"></canvas></div>
                     <div id="fever-timeline" style="margin-bottom:20px; overflow:hidden;"></div>
-                    <button class="btn-main btn-capture" onclick="downloadFeverReport()">📸 소아과 제출용 리포트 캡처 (저장)</button>
+                    <button onclick="downloadFeverReport()" 
+        style="width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #DDD; background: white; color: #666; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; margin-top: 5px;">
+    📸 소아과 제출용 리포트 캡처 (저장)
+</button>
                     <button class="btn-main" style="margin-top:10px; background:var(--success) !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(0,179,122,0.2) !important; padding:16px; font-size:15px; font-weight:800; border-radius:14px; width:100%; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="openPediatricianReport()"> 👨‍⚕️ 소아과 진료용 요약 리포트 열기</button>
                     <button class="btn-main" style="background:transparent !important; color:var(--text-sub) !important; border:1px solid var(--border) !important; font-size:13px; margin-top:10px; box-shadow:none !important;" onclick="clearFeverRecord()">전체 기록 지우기 (열 다 내림)</button>
                 </div>
