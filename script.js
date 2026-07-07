@@ -3407,6 +3407,27 @@ window.closeReceiptModal = function() {
     document.getElementById('receipt-modal').style.display = 'none';
 }
 
+// 영수증 이미지 저장 함수 (버튼의 onclick 이름과 정확히 일치시켰습니다)
+window.downloadReceipt = function() {
+    const target = document.getElementById('receipt-content'); 
+
+    if (!target) {
+        alert("저장할 영수증 내용을 찾을 수 없습니다. (ID 확인 필요)");
+        return;
+    }
+
+    html2canvas(target, {
+        scale: 2, 
+        backgroundColor: '#ffffff' 
+    }).then(canvas => {
+        // 2. 캔버스를 이미지 파일로 변환하여 다운로드
+        const link = document.createElement("a");
+        link.download = "우리아기_하루_영수증.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+};
+
 // ==========================================
 // 👁️ 영수증 버튼 숨기기/보여주기 검사관 (최종본)
 // ==========================================
@@ -3432,3 +3453,20 @@ window.checkReceiptVisibility = function() {
 window.addEventListener('load', function() {
     window.checkReceiptVisibility();
 });
+
+//영수증 캡쳐//
+window.saveReceiptAsImage = function() {
+    // 1. 영수증 영역(아이디)을 지정합니다. (꼭 영수증 전체를 감싸는 ID를 쓰세요!)
+    const target = document.getElementById('receipt-modal-content'); 
+
+    html2canvas(target, {
+        scale: 2, // 화질을 더 선명하게 만듭니다
+        backgroundColor: '#ffffff' // 배경색 흰색 설정
+    }).then(canvas => {
+        // 2. 캔버스를 이미지 파일로 변환
+        const link = document.createElement("a");
+        link.download = "토실이_하루_영수증.png"; // 저장될 파일 이름
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+};
