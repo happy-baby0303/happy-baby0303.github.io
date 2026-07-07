@@ -3105,11 +3105,13 @@ window.saveTrackerRecord = async function() {
     let timestamp = new Date().getTime();
     const timeInputEl = document.getElementById('v-tracker-time');
     
+    // 기록 편집 중인지 확인
     if (window.editingTrackerId) {
         const originalRecord = records.find(r => r.id === window.editingTrackerId);
         if (originalRecord) timestamp = originalRecord.timestamp; 
     }
 
+    // 시간 입력 처리
     if(timeInputEl && timeInputEl.value) {
         timeStr = timeInputEl.value; 
         const [hours, minutes] = timeStr.split(':');
@@ -3121,9 +3123,11 @@ window.saveTrackerRecord = async function() {
         timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     }
 
+    // 데이터 객체 생성
     let recordId = window.editingTrackerId ? window.editingTrackerId : 'trk_'+new Date().getTime();
     let record = { id: recordId, time: timeStr, timestamp: timestamp, type: window.trackerState.type };
 
+    // 타입별 상세 데이터 처리
     if (window.trackerState.type === 'feed') {
         if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요!');
         const amt = document.getElementById('v-feed-amount').value;
@@ -3148,6 +3152,7 @@ window.saveTrackerRecord = async function() {
         }
     }
 
+    // 데이터 배열 업데이트
     if (window.editingTrackerId) {
         const idx = records.findIndex(r => r.id === window.editingTrackerId);
         if(idx !== -1) records[idx] = record;
@@ -3158,24 +3163,17 @@ window.saveTrackerRecord = async function() {
     records.sort((a, b) => b.timestamp - a.timestamp);
     if(records.length > 100) records.pop();
     
+    // 1. 서버에 데이터 저장
     await saveTrackerToFirebase(records);
 
+    // 2. 기록 저장 직후 버튼 상태 업데이트
+    if (window.checkReceiptVisibility) {
+        window.checkReceiptVisibility();
+    }
+
+    // 3. 마무리 (상태 초기화 및 창 닫기)
     window.editingTrackerId = null; 
     window.closeTrackerSheet();
-};
-    
-window.deleteTrackerRecord = async function(id) {
-    if(!confirm("이 기록을 삭제하시겠습니까?")) return;
-    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-    records = records.filter(r => r.id !== id);
-    await saveTrackerToFirebase(records); 
-};
-
-window.resetTrackerRecords = async function() {
-    if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
-    await saveTrackerToFirebase([]); 
-    localStorage.removeItem('tosil_sleep_start');
-    localStorage.removeItem('tosil_sleep_type');
 };
 
 // ==========================================
@@ -3337,3 +3335,100 @@ window.openEmergencyModal = function(type) {
 
 window.closeEmergencyModalForce = function() { document.getElementById('emergency-modal').style.display = 'none'; };
 window.closeEmergencyModal = function(e) { if(e.target.id === 'emergency-modal') window.closeEmergencyModalForce(); };
+
+// ==========================================
+// 🧾 영수증 띄우기 (데이터 0 방어 + 외부 파일 랜덤 연동 완료!)
+// ==========================================
+window.openReceiptModal = function() {
+    const today = new Date();
+    document.getElementById('receipt-date').innerText = `${today.getFullYear()}. ${today.getMonth()+1}. ${today.getDate()}`;
+    
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+
+    let totalMilk = 0;
+    let totalPoop = 0;
+    let totalSleepMins = 0;
+
+ // [이 부분만 수정하세요!]
+records.forEach(record => {
+    if (record.timestamp >= startOfToday) {
+        if (record.type === 'feed' && record.amount) {
+            totalMilk += parseInt(record.amount);
+        } 
+        // 🚨 [수정!] === 대신 .includes()를 써서 "대변" 글자가 들어있으면 다 찾게 합니다.
+        else if (record.type === 'diaper' && record.subType && record.subType.includes('대변')) {
+            totalPoop += 1;
+        } 
+        else if (record.type === 'sleep' && record.amount) {
+            totalSleepMins += parseInt(record.amount);
+        }
+    }
+});
+
+    let totalSleepHours = (totalSleepMins / 60).toFixed(1); 
+    if (totalSleepHours.endsWith('.0')) totalSleepHours = parseInt(totalSleepHours);
+
+    document.getElementById('receipt-milk').innerText = `${totalMilk} ml`;
+    document.getElementById('receipt-poop').innerText = `${totalPoop} 회`;
+    document.getElementById('receipt-sleep').innerText = `${totalSleepHours} 시간`;
+
+    // 2. 랜덤 뽑기 함수 (receiptData 창고에서 무작위로 하나 꺼내기)
+    const pickRandom = (array) => array[Math.floor(Math.random() * array.length)];
+
+    let diaryText = "";
+    
+    // 3. 🚨 기록이 0일 때는 안내 멘트!
+    if (totalMilk === 0 && totalPoop === 0 && totalSleepMins === 0) {
+        diaryText = "아직 오늘 기록된 데이터가 없어요! 😅\n우리아기가 오늘 얼마나 먹고 잤는지 트래커에 먼저 기록해 주세요 ✍️🤍";
+    } else {
+        // 4. 🚨 기록이 있으면 receiptData 창고에서 랜덤으로 쏙쏙 뽑아오기!
+        diaryText += pickRandom(receiptData.intro); // 오프닝
+
+        if (totalSleepHours >= 3) diaryText += pickRandom(receiptData.sleepGood);
+        else diaryText += pickRandom(receiptData.sleepBad);
+
+        if (totalMilk >= 700) diaryText += pickRandom(receiptData.feedMuch);
+        else if (totalMilk > 0) diaryText += pickRandom(receiptData.feedLittle);
+        else diaryText += pickRandom(receiptData.feedZero);
+
+        if (totalPoop > 0) diaryText += pickRandom(receiptData.poopMuch);
+        else diaryText += pickRandom(receiptData.poopZero);
+
+        diaryText += pickRandom(receiptData.outro); // 엔딩
+    }
+
+    document.getElementById('receipt-diary').innerText = diaryText;
+    document.getElementById('receipt-modal').style.display = 'flex';
+}
+
+// 닫기 버튼
+window.closeReceiptModal = function() {
+    document.getElementById('receipt-modal').style.display = 'none';
+}
+
+// ==========================================
+// 👁️ 영수증 버튼 숨기기/보여주기 검사관 (최종본)
+// ==========================================
+window.checkReceiptVisibility = function() {
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+
+    const todayRecordsCount = records.filter(record => record.timestamp >= startOfToday).length;
+
+    const receiptBtn = document.getElementById('receipt-banner-btn');
+    if (!receiptBtn) return;
+
+    // 🚨 조건 수정: 기록이 3개 이상 '이면서(AND)' 저녁 8시가 넘었을 때만!
+    if (todayRecordsCount >= 3 && today.getHours() >= 20) {
+        receiptBtn.style.display = 'flex'; // 보여주기
+    } else {
+        receiptBtn.style.display = 'none'; // 숨기기
+    }
+}
+
+// 앱이 켜질 때 & 기록이 저장/삭제될 때마다 검사
+window.addEventListener('load', function() {
+    window.checkReceiptVisibility();
+});

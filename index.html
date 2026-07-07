@@ -110,7 +110,7 @@
                 </div>
                 <span onclick="window.toggleTrackerHistory()" class="box-tint-blue" style="font-size: 12px; color: var(--primary); font-weight: 800; border:none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">통계·기록 보기 〉</span>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
                 <button onclick="window.openTrackerSheet('feed')" class="box-main" style="border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
                     <span style="font-size: 32px;">🍼</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수유</span>
                 </button>
@@ -121,6 +121,12 @@
                     <span style="font-size: 32px;">💩</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">기저귀</span>
                 </button>
             </div>                     
+
+            <!-- 🧾 여기에 가로형 영수증 롱~버튼 추가! 🧾 -->
+            <button id="receipt-banner-btn" onclick="window.openReceiptModal()" style="display: none; width: 100%; background: linear-gradient(135deg, #FFF9F0, #FFF3E0); color: #FF8F00; border: 1px solid #FFE0B2; padding: 14px; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,152,0,0.1); margin-bottom: 16px; transition: 0.2s;">
+    ✨ 오늘 하루 요약, 영수증으로 뽑기 🧾
+</button>
+
             <div id="tracker-stats-container" class="box-main" style="border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
                 <div style="padding:10px 0; text-align:center; font-size:13px; color:var(--text-s); font-weight:700;">아직 기록된 트래커 데이터가 없습니다.</div>
             </div>
@@ -1062,24 +1068,37 @@
 
 <!-- ⚙️ 트래커 설정 모달 -->
 <div id="tracker-settings-modal" class="modal-overlay" style="z-index: 6500; display:none;" onclick="window.closeTrackerSettings(event)">
-    <div class="sos-content-box box-main" onclick="event.stopPropagation()">
-        <div class="sos-close-btn box-sub" onclick="window.closeTrackerSettingsForce()">✕</div>
-        <div style="text-align:center; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+    <div class="sos-content-box box-main" style="border-radius: 28px; padding: 32px 24px 24px 24px; position: relative;" onclick="event.stopPropagation()">
+        
+        <!-- 우측 상단 X 닫기 버튼 -->
+        <div class="sos-close-btn box-sub" style="position: absolute; top: 16px; right: 16px; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 14px;" onclick="window.closeTrackerSettingsForce()">✕</div>
+        
+        <!-- 헤더 영역 -->
+        <div style="text-align:center; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
             <div style="font-size:32px; margin-bottom:8px;">⚙️</div>
-            <div class="sos-choice-title" style="color:var(--text-m);">알림 텀 설정</div>
-            <div class="sos-choice-desc" style="color:var(--text-s);">우리아기 패턴에 맞게 알림을 설정하세요.</div>
+            <div class="sos-choice-title" style="color:var(--text-m); font-size: 18px; font-weight: 900; margin-bottom: 6px;">알림 텀 설정</div>
+            <div class="sos-choice-desc" style="color:var(--text-s); font-size: 13px; font-weight: 600;">우리아기 패턴에 맞게 알림을 설정하세요.</div>
         </div>
-        <div style="padding: 20px 0;">
-            <div style="margin-bottom:16px;">
-                <label style="font-size:13px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">🍼 수유 알림 텀 (시간)</label>
-                <input type="number" id="set-feed-interval" class="box-sub" placeholder="예: 3" style="width:100%; padding:12px; border-radius:10px; font-weight:800; outline:none;">
-            </div>
+
+        <!-- 입력 영역 -->
+        <div style="padding: 20px 0; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 수유 텀 -->
             <div>
-                <label style="font-size:13px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">💩 기저귀 확인 텀 (시간)</label>
-                <input type="number" id="set-diaper-interval" class="box-sub" placeholder="예: 2" style="width:100%; padding:12px; border-radius:10px; font-weight:800; outline:none;">
+                <label style="font-size:13.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">🍼 수유 알림 텀 (시간)</label>
+                <!-- 🚨 원본 ID(set-feed-interval) 복구 완료 -->
+                <input type="number" id="set-feed-interval" class="box-sub" placeholder="예: 3" style="width: 100%; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--border); background: transparent; font-size: 16px; font-weight: 700; color: var(--text-m); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary)';" onblur="this.style.borderColor='var(--border)';">
+            </div>
+            
+            <!-- 기저귀 텀 -->
+            <div>
+                <label style="font-size:13.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">💩 기저귀 확인 텀 (시간)</label>
+                <!-- 🚨 원본 ID(set-diaper-interval) 복구 완료 -->
+                <input type="number" id="set-diaper-interval" class="box-sub" placeholder="예: 2" style="width: 100%; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--border); background: transparent; font-size: 16px; font-weight: 700; color: var(--text-m); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary)';" onblur="this.style.borderColor='var(--border)';">
             </div>
         </div>
-        <button class="btn-main" style="width: 100%; margin-top:0; background:var(--text-m) !important; color:var(--bg-card) !important;" onclick="window.saveTrackerSettings()">저장하기</button>
+
+        <!-- 저장 버튼 (원본 클래스와 onclick 기능 완벽 유지) -->
+        <button class="btn-main" style="width: 100%; padding: 16px; margin-top: 0; border-radius: 18px; background: var(--text-m) !important; color: var(--bg-card) !important; font-size: 15px; font-weight: 800; border: none; cursor: pointer;" onclick="window.saveTrackerSettings()">저장하기</button>
     </div>
 </div>
 
@@ -1098,6 +1117,7 @@
 
 <script src="script.js"></script>
 <script src="playdata.js"></script>
+<script src="receiptData.js"></script>
 
 <!-- Firebase 로직 유지 -->
 <script type="module">
@@ -1259,6 +1279,60 @@
         <button class="btn-main" style="width: 100%; margin-top: 24px; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 900; background: var(--text-m) !important; color: var(--bg-card) !important; border: none; cursor: pointer;" onclick="window.closeEmergencyModalForce()">확인 완료</button>
     </div>
 </div>
+
+<!-- 🚨 영수증 생성을 위한 필수 라이브러리 및 폰트 🚨 -->
+    <script src="./html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+
+    <!-- 🧾 영수증 모달창 -->
+    <div id="receipt-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px);">
+        <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px;">
+            
+            <!-- 📸 영수증 본체 (여기가 이미지로 캡처됩니다!) -->
+            <div id="receipt-content" style="background: #FFFDF8; border-radius: 4px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; font-family: 'Courier New', Courier, monospace; color: #333;">
+                
+                <div style="text-align: center; border-bottom: 2px dashed #D3C5B8; padding-bottom: 16px; margin-bottom: 16px;">
+                    <div style="font-size: 28px; margin-bottom: 8px;">🧾</div>
+                    <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.5px; font-family: sans-serif;">토실이의 하루 영수증</div>
+                    <div style="font-size: 12px; color: #888; margin-top: 4px;" id="receipt-date">2026. 00. 00</div>
+                </div>
+
+                <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 12px; font-family: sans-serif;">[오늘의 결제 내역]</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold;">
+                    <span>🍼 분유 라떼</span>
+                    <span id="receipt-milk">0 ml</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold;">
+                    <span>💩 황금 변</span>
+                    <span id="receipt-poop">0 회</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: bold;">
+                    <span>💤 낮잠 충전</span>
+                    <span id="receipt-sleep">0 시간</span>
+                </div>
+
+                <div style="border-top: 2px dashed #D3C5B8; padding-top: 16px; margin-top: 16px;">
+                    <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 8px; font-family: sans-serif;">📝 아기 시점 일기</div>
+                    <!-- ✨ 일기 영역: 귀여운 손글씨 폰트 적용 -->
+                    <div id="receipt-diary" style="font-family: 'Nanum Pen Script', cursive; font-size: 22px; line-height: 1.4; color: #4A4A4A; background: rgba(255,152,0,0.08); padding: 14px; border-radius: 8px; letter-spacing: 0.5px;">
+                        (일기 내용이 여기에 생성됩니다.)
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #AAA; font-weight: bold; font-family: sans-serif;">
+                    육아메이트와 함께한 소중한 하루 🤍
+                </div>
+            </div>
+
+            <!-- 닫기 & 캡처 버튼 (이 버튼들은 캡처에 안 나옵니다) -->
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="window.closeReceiptModal()" style="flex: 1; padding: 14px; border-radius: 12px; border: none; background: #FFF; color: #333; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">닫기</button>
+                <button onclick="window.downloadReceipt()" style="flex: 2; padding: 14px; border-radius: 12px; border: none; background: #FF9800; color: #FFF; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(255,152,0,0.2);">
+                    📸 이미지로 저장하기
+                </button>
+                    </div>
+        </div>
+    </div>
 
 <script>
     let selectedPoopColor = '';
