@@ -2324,6 +2324,18 @@ window.selectTrackerBtn = function(btn, category) {
         btn.style.setProperty('color', '#10B981', 'important');
         btn.style.setProperty('border', '1px solid #10B981', 'important');
         window.trackerState.status = '녹변';
+    } 
+    // 👇 수면(낮잠/밤잠) 선택 로직 추가!
+    else if (category === 'sleep_day') {
+        btn.style.setProperty('background', '#FFF9E6', 'important');
+        btn.style.setProperty('color', '#B78103', 'important');
+        btn.style.setProperty('border', '1px solid #FFE58F', 'important');
+        window.trackerState.subType = '낮잠';
+    } else if (category === 'sleep_night') {
+        btn.style.setProperty('background', '#F3E8FF', 'important');
+        btn.style.setProperty('color', '#7C3AED', 'important');
+        btn.style.setProperty('border', '1px solid #C4B5FD', 'important');
+        window.trackerState.subType = '밤잠';
     }
 };
 
@@ -2378,57 +2390,47 @@ window.openTrackerSheet = function(type, editId = null) {
         if(saveBtn) saveBtn.style.display = 'block';
 
     } else if (type === 'sleep') {
-        const sleepStart = localStorage.getItem('tosil_sleep_start');
-        const sleepType = localStorage.getItem('tosil_sleep_type') || '낮잠'; 
-        
-        if (window.editingTrackerId) {
-            title.innerHTML = '💤 수면 시간 수정';
-            body.innerHTML = timeInputHtml + `
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">총 수면 시간 (분)</div>
-                    <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
-                        <input type="number" id="v-sleep-amount" placeholder="120" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
-                        <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
-                    </div>
+        title.innerHTML = window.editingTrackerId ? '💤 수면 기록 수정' : '💤 수면 기록하기';
+        const now = new Date();
+        const nowStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+        body.innerHTML = `
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_day')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">☀️ 낮잠</button>
+                <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_night')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">🌙 밤잠</button>
+            </div>
+
+            <div style="background:var(--bg-sub); padding:16px; border-radius:16px; margin-bottom:20px; border:1px solid var(--border);">
+                <div style="font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:12px; text-align:center;">언제 잠들었나요?</div>
+                <div style="text-align:center; margin-bottom:12px;">
+                    <input type="time" id="v-sleep-start-time" value="${nowStr}" style="border:1px solid #D1D6DB; background:#FFF; padding:10px 20px; border-radius:12px; font-size:22px; font-weight:900; color:var(--primary); outline:none;">
                 </div>
-            `;
-            if(saveBtn) saveBtn.style.display = 'block';
-        } 
-        else if (sleepStart) {
-            title.innerHTML = '💤 수면 기록하기';
-            const sleepEmoji = sleepType === '낮잠' ? '☀️' : '🌙';
-            const sleepColor = sleepType === '낮잠' ? '#F59E0B' : '#A855F7';
-            body.innerHTML = `
-                <div style="text-align:center; padding:20px 0;">
-                    <div style="font-size: 14px; font-weight: 800; color: var(--text-m); margin-bottom: 12px;">우리아기 ${sleepType} 자는 중 🤫</div>
-                    <div id="sleep-timer-display" style="font-size: 48px; font-weight: 900; color: ${sleepColor}; letter-spacing: 2px; font-variant-numeric: tabular-nums;">00:00:00</div>
+                <button onclick="window.calcSleepToNow()" style="width:100%; padding:14px; background:#E8F3FF; color:#3182F6; border:1px dashed #3182F6; border-radius:12px; font-size:14px; font-weight:900; cursor:pointer; transition:0.2s;">
+                    ⏰ 방금 깼어요! (현재시간까지 자동계산)
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">총 수면 시간 (분)</div>
+                <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
+                    <input type="number" id="v-sleep-amount" placeholder="120" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0; transition:0.3s;">
+                    <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
                 </div>
-                <button class="btn-main" onclick="window.stopSleepTimer()" style="background: var(--primary) !important; color: white !important; font-size: 16px; padding: 16px; width:100%; border-radius:16px; border:none;">수면 종료 및 저장</button>
-            `;
-            if(saveBtn) saveBtn.style.display = 'none';
-            
-            window.sleepInterval = setInterval(() => {
-                const diff = Math.floor((new Date().getTime() - parseInt(sleepStart)) / 1000);
-                const h = String(Math.floor(diff / 3600)).padStart(2,'0');
-                const m = String(Math.floor((diff % 3600)/60)).padStart(2,'0');
-                const s = String(diff % 60).padStart(2,'0');
-                const el = document.getElementById('sleep-timer-display');
-                if(el) el.innerText = `${h}:${m}:${s}`;
-            }, 1000);
-        } else {
-            title.innerHTML = '💤 수면 기록하기';
-            body.innerHTML = `
-                <div style="background: var(--bg-sub); border-radius: 16px; padding: 24px 16px; text-align: center; margin-bottom: 20px; border:1px solid var(--border);">
-                    <div style="font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 16px;">어떤 잠을 재우시나요?</div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn-main" onclick="window.startSleepTimer('낮잠')" style="flex:1; background: var(--bg-card) !important; color: #F59E0B !important; border:1px solid var(--border) !important; font-size: 15px; padding: 16px 10px; margin:0; border-radius:14px; box-shadow:0 4px 12px rgba(245,158,11,0.1) !important;">☀️ 낮잠 시작</button>
-                        <button class="btn-main" onclick="window.startSleepTimer('밤잠')" style="flex:1; background: #6B4EFF !important; color: white !important; font-size: 15px; padding: 16px 10px; margin:0; border-radius:14px; box-shadow: 0 4px 12px rgba(107,78,255,0.2) !important; border:none !important;">🌙 밤잠 시작</button>
-                    </div>
-                </div>
-            `;
-            if(saveBtn) saveBtn.style.display = 'none';
-        }
+                <div style="font-size:11.5px; color:#8B95A1; margin-top:8px;">* 직접 시간을 입력하셔도 됩니다.</div>
+            </div>
+        `;
+        if(saveBtn) saveBtn.style.display = 'block';
+
+        // 기본으로 낮잠 선택되게 딜레이 설정
+        setTimeout(() => {
+            const btns = document.querySelectorAll('#tracker-sheet-body .btn-main');
+            btns.forEach(btn => {
+               if(btn.innerText.includes('낮잠') && !window.editingTrackerId) window.selectTrackerBtn(btn, 'sleep_day');
+            });
+        }, 50);
+
     } else if (type === 'diaper') {
+
         title.innerHTML = '💩 기저귀 기록하기';
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -3171,6 +3173,7 @@ window.stopSleepTimer = async function() {
     window.closeTrackerSheet();
 };
 
+// 💾 트래커 기록 저장 함수 (낮잠/밤잠 선택 및 토스트 팝업 완벽 패치)
 window.saveTrackerRecord = async function() {
     if(!window.trackerState.type) return;
 
@@ -3179,13 +3182,11 @@ window.saveTrackerRecord = async function() {
     let timestamp = new Date().getTime();
     const timeInputEl = document.getElementById('v-tracker-time');
     
-    // 기록 편집 중인지 확인
     if (window.editingTrackerId) {
         const originalRecord = records.find(r => r.id === window.editingTrackerId);
         if (originalRecord) timestamp = originalRecord.timestamp; 
     }
 
-    // 시간 입력 처리
     if(timeInputEl && timeInputEl.value) {
         timeStr = timeInputEl.value; 
         const [hours, minutes] = timeStr.split(':');
@@ -3197,36 +3198,35 @@ window.saveTrackerRecord = async function() {
         timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     }
 
-    // 데이터 객체 생성
     let recordId = window.editingTrackerId ? window.editingTrackerId : 'trk_'+new Date().getTime();
     let record = { id: recordId, time: timeStr, timestamp: timestamp, type: window.trackerState.type };
 
-    // 타입별 상세 데이터 처리
     if (window.trackerState.type === 'feed') {
-        if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요!');
+        if(!window.trackerState.subType) return showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요!');
         const amt = document.getElementById('v-feed-amount').value;
-        if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요!');
+        if(!amt) return showToast('⚠️ 먹은 양(ml)을 입력해주세요!');
         record.subType = window.trackerState.subType;
         record.amount = parseInt(amt);
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요!');
+        if(!window.trackerState.subType) return showToast('⚠️ 소변인지 대변인지 선택해주세요!');
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
     else if (window.trackerState.type === 'sleep') {
         const amt = document.getElementById('v-sleep-amount');
-        if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요!');
+        if(!amt || !amt.value) return showToast('⚠️ 수면 시간(분)을 정확히 입력해주세요!');
         record.amount = parseInt(amt.value);
+        
+        // 👇 낮잠/밤잠 선택한 값이 정확히 저장되도록 수정!
         if (window.editingTrackerId) {
             const originalRecord = records.find(r => r.id === window.editingTrackerId);
             if (originalRecord) record.subType = originalRecord.subType; 
         } else {
-            record.subType = '낮잠'; 
+            record.subType = window.trackerState.subType || '낮잠'; 
         }
     }
 
-    // 데이터 배열 업데이트
     if (window.editingTrackerId) {
         const idx = records.findIndex(r => r.id === window.editingTrackerId);
         if(idx !== -1) records[idx] = record;
@@ -3237,17 +3237,18 @@ window.saveTrackerRecord = async function() {
     records.sort((a, b) => b.timestamp - a.timestamp);
     if(records.length > 100) records.pop();
     
-    // 1. 서버에 데이터 저장
-    await saveTrackerToFirebase(records);
-
-    // 2. 기록 저장 직후 버튼 상태 업데이트
-    if (window.checkReceiptVisibility) {
-        window.checkReceiptVisibility();
+    if (typeof saveTrackerToFirebase === 'function') {
+        await saveTrackerToFirebase(records);
+    } else {
+        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+        if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
     }
 
-    // 3. 마무리 (상태 초기화 및 창 닫기)
+    if (window.checkReceiptVisibility) window.checkReceiptVisibility();
+
     window.editingTrackerId = null; 
     window.closeTrackerSheet();
+    showToast("💾 기록이 저장되었습니다!"); // 👈 예쁜 알림창 팝업!
 };
 
 // ==========================================
@@ -3576,4 +3577,41 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
     btnCancel.onclick = function() {
         modal.style.display = 'none'; // 취소 누르면 그냥 창 닫기
     };
+};
+
+// ==========================================
+// 💡 수면시간 자동 계산 엔진 (반드시 다른 함수들 바깥 빈 공간에 넣으세요!)
+// ==========================================
+window.calcSleepToNow = function() {
+    const startInput = document.getElementById('v-sleep-start-time');
+    const amountInput = document.getElementById('v-sleep-amount');
+    if(!startInput || !amountInput) return;
+
+    const [sHour, sMin] = startInput.value.split(':').map(Number);
+    const now = new Date();
+    let startObj = new Date();
+    startObj.setHours(sHour, sMin, 0, 0);
+
+    // 자정을 넘겨서 잤을 경우 (예: 어제 밤 11시에 자서 오늘 아침에 깬 경우)
+    if (startObj > now) {
+        startObj.setDate(startObj.getDate() - 1);
+    }
+
+    const diffMins = Math.floor((now - startObj) / 60000);
+    
+    if (diffMins < 0) {
+        return showToast("⚠️ 시작 시간이 잘못 설정되었습니다.");
+    }
+
+    amountInput.value = diffMins;
+    
+    // 계산됐다는 쾌감을 주는 통통 튀는 애니메이션 효과!
+    amountInput.style.transform = 'scale(1.2)';
+    amountInput.style.color = '#3182F6';
+    setTimeout(() => { 
+        amountInput.style.transform = 'scale(1)'; 
+        amountInput.style.color = 'var(--text-m)';
+    }, 300);
+
+    showToast(`✅ ${diffMins}분 수면으로 계산되었습니다!`);
 };
