@@ -1271,6 +1271,24 @@
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .ai-poop-btn { flex: 1; min-width: 45px; padding: 10px 0; border-radius: 10px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
+
+@keyframes toastFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    
+    .toast-msg {
+        background: rgba(25, 31, 40, 0.85); /* 반투명 다크그레이 */
+        color: #FFF;
+        padding: 12px 24px;
+        border-radius: 100px;
+        font-size: 13.5px;
+        font-weight: 800;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        backdrop-filter: blur(8px);
+        animation: toastFadeIn 0.3s ease-out forwards;
+        text-align: center;
+        white-space: nowrap;
+    }
 </style>
 
 <div id="routine-settings-modal" class="modal-overlay" style="z-index: 6500; display:none; justify-content:center; align-items:center;" onclick="window.closeRoutineSettings(event)">
@@ -1369,6 +1387,19 @@
                     </div>
         </div>
     </div>
+
+<div id="toast-container" style="position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;"></div>
+
+<div id="custom-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: var(--bg-card, #FFF); width: 85%; max-width: 320px; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+        <div id="confirm-icon" style="font-size: 36px; margin-bottom: 12px;">🚨</div>
+        <div id="confirm-message" style="font-size: 15px; font-weight: 800; color: var(--text-m, #191F28); line-height: 1.5; word-break: keep-all; margin-bottom: 24px;">정말 삭제하시겠습니까?</div>
+        <div style="display: flex; gap: 10px;">
+            <button id="btn-confirm-cancel" style="flex: 1; padding: 14px; border-radius: 14px; border: none; background: var(--bg-sub, #F2F5F8); color: var(--text-s, #4E5968); font-size: 14.5px; font-weight: 800; cursor: pointer;">취소</button>
+            <button id="btn-confirm-ok" style="flex: 1; padding: 14px; border-radius: 14px; border: none; background: var(--primary, #3182F6); color: #FFF; font-size: 14.5px; font-weight: 800; cursor: pointer;">확인</button>
+        </div>
+    </div>
+</div>
 
 <script>
     let selectedPoopColor = '';

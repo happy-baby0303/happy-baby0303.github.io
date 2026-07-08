@@ -445,10 +445,12 @@ window.toggleHistory = function() {
     }
 };
 
+// 가계부 입력 - ✨ 토스트 팝업 적용 완료 ✨
 async function addDailyExpense(isSaving) {
     const input = document.getElementById('v-input-amount');
     const amount = parseInt(input.value.replace(/,/g, '')) || 0;
-    if(amount <= 0) return alert("금액을 정확히 입력해주세요!");
+    
+    if(amount <= 0) return showToast("⚠️ 금액을 정확히 입력해주세요!"); // 👈 alert 대신 showToast!
 
     let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "", goalAmount: 100000, history: [] };
     
@@ -459,11 +461,11 @@ async function addDailyExpense(isSaving) {
     if(isSaving) {
         ledger.savedTotal += amount;
         ledger.history.unshift({ time: timeStr, amount: amount, type: 'saving' });
-        alert(`🎉 대박! ${amount.toLocaleString()}원 절약 및 저금 완료!`);
+        showToast(`🎉 대박! ${amount.toLocaleString()}원 절약 및 저금 완료!`); // 👈 alert 대신 showToast!
     } else {
         ledger.total += amount;
         ledger.history.unshift({ time: timeStr, amount: amount, type: 'expense' });
-        alert(`✅ 지출 ${amount.toLocaleString()}원 기록 완료!`);
+        showToast(`✅ 지출 ${amount.toLocaleString()}원 기록 완료!`); // 👈 alert 대신 showToast!
     }
     
     if(ledger.history.length > 20) ledger.history.pop(); 
@@ -666,6 +668,7 @@ function calcHotDeal() {
     loadPastPrice(); // 저장된 최저가로 input 창 최신화
 }
 
+// 핫딜을 가계부로 연동 - ✨ 토스트 팝업 적용 완료 ✨
 async function sendHotdealToLedger(price, cat) {
     let targetId = 'v-etc';
     if(cat === 'diaper' || cat === 'wipe') targetId = 'v-diaper';
@@ -685,7 +688,8 @@ async function sendHotdealToLedger(price, cat) {
     ledger.history.unshift({ time: timeStr, amount: price, type: 'expense' });
     
     await saveLedgerToFirebase(ledger);
-    alert(`✅ 핫딜 결제액 ${price.toLocaleString()}원이 가계부에 자동 연동되었습니다!\n가계부 패널을 열어 카테고리별 차트를 갱신해 보세요.`);
+    
+    showToast(`✅ 핫딜 결제액 ${price.toLocaleString()}원 연동 완료!`); // 👈 엄청 길었던 alert 문구를 깔끔한 토스트로 변경!
     directGoToolbox('money');
 }
 
@@ -823,17 +827,24 @@ function updateFeverTimer(records) {
     if (blueBtn) { blueBtn.style.cursor = 'pointer'; blueBtn.style.opacity = blueLock.locked ? '0.3' : '1'; }
 }
 
+// 해열제 기록 전체 지우기 - ✨ 퀄리티업 완료 ✨
 async function clearFeverRecord() {
-    if(!confirm('전체 투약 기록을 지우시겠습니까?')) return;
-    localStorage.removeItem('tosil_fever_records'); 
-    
-    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
-        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
-        try { await setDoc(doc(db, "fever_" + syncCode, "status"), { records: [] }); } catch (e) {}
-    }
-    selectPill(''); 
-    renderFeverTimeline(); 
-    setTimeout(updateHomeDashboard, 100); 
+    showConfirm("전체 투약 기록을 지우시겠습니까?", async function() {
+        
+        localStorage.removeItem('tosil_fever_records'); 
+        
+        if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+            const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+            try { await setDoc(doc(db, "fever_" + syncCode, "status"), { records: [] }); } catch (e) {}
+        }
+        
+        selectPill(''); 
+        renderFeverTimeline(); 
+        setTimeout(updateHomeDashboard, 100); 
+        
+        showToast("💊 해열제 투약 기록이 초기화되었습니다!");
+        
+    }, "🧹", "초기화", "#F04452");
 }
 
 window.addFeverRecord = addFeverRecord;
@@ -1121,10 +1132,10 @@ function calcHealthMaster() {
 }
 window.calcHealthMaster = calcHealthMaster;
 
-// ✨ 성장 기록 저장 및 파이어베이스 연동
+// ✨ 성장 기록 저장 및 파이어베이스 연동 (토스트 적용)
 async function saveGrowthRecord() {
     if (!window.tempGrowthData || (window.tempGrowthData.height === 0 && window.tempGrowthData.weight === 0)) {
-        return alert("저장할 데이터가 없습니다.");
+        return showToast("⚠️ 저장할 데이터가 없습니다.");
     }
     
     let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
@@ -1141,17 +1152,20 @@ async function saveGrowthRecord() {
     }
     
     localStorage.setItem('tosil_growth_records', JSON.stringify(records));
-    alert("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!");
+    showToast("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!"); // 👈 촌스러운 알림창 교체!
     renderGrowthHistory();
 }
 window.saveGrowthRecord = saveGrowthRecord;
 
+// ✨ 성장 기록 삭제 (모달 적용)
 function deleteGrowthRecord(dateStr) {
-    if(!confirm("이 날의 성장 기록을 삭제할까요?")) return;
-    let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
-    records = records.filter(r => r.date !== dateStr);
-    localStorage.setItem('tosil_growth_records', JSON.stringify(records));
-    renderGrowthHistory();
+    showConfirm("이 날의 성장 기록을 삭제할까요?", function() {
+        let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
+        records = records.filter(r => r.date !== dateStr);
+        localStorage.setItem('tosil_growth_records', JSON.stringify(records));
+        renderGrowthHistory();
+        showToast("🗑️ 성장 기록이 삭제되었습니다!");
+    }, "🗑️", "삭제", "#F04452");
 }
 window.deleteGrowthRecord = deleteGrowthRecord;
 
@@ -1567,6 +1581,7 @@ function getCubeDDayText(madeDateStr) {
     return `<span style="background:${bg}; color:${color}; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid ${color};">${text}</span>`;
 }
 
+// 🧊 큐브 기록 추가 (토스트 적용)
 async function addCubeRecord() {
     const cat = document.getElementById('cube-category').value;
     const name = document.getElementById('cube-name').value.trim();
@@ -1574,32 +1589,24 @@ async function addCubeRecord() {
     const qty = parseInt(document.getElementById('cube-qty').value);
 
     if (!name || !date || isNaN(qty) || qty <= 0) {
-        return alert("큐브 이름, 날짜, 수량을 정확히 입력해주세요!");
+        return showToast("⚠️ 큐브 이름, 날짜, 수량을 정확히 입력해주세요!"); // 👈 교체
     }
 
-    const newCube = {
-        id: "cube_" + new Date().getTime(),
-        cat: cat,
-        name: name,
-        date: date,
-        qty: qty,
-        timestamp: new Date().getTime()
-    };
+    const newCube = { id: "cube_" + new Date().getTime(), cat: cat, name: name, date: date, qty: qty, timestamp: new Date().getTime() };
 
     let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
     records.push(newCube);
     
     if (typeof db !== 'undefined') {
         const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
-        try {
-            await setDoc(doc(db, "cube_" + syncCode, "status"), { records: records });
-        } catch (e) { console.error(e); }
+        try { await setDoc(doc(db, "cube_" + syncCode, "status"), { records: records }); } catch (e) { console.error(e); }
     }
 
     localStorage.setItem('tosil_cube_records', JSON.stringify(records));
     document.getElementById('cube-name').value = '';
     document.getElementById('cube-qty').value = '';
     renderCubes();
+    showToast("🧊 큐브가 냉장고에 쏙! 저장되었습니다."); // 👈 추가
 }
 
 async function useCube(id) {
@@ -1738,13 +1745,18 @@ function toggleCubeQuickEdit() {
     renderCubeQuicks();
 }
 
+// 🧊 큐브 퀵버튼 삭제 (모달 적용)
 function deleteCubeQuick(index) {
-    if(!confirm("이 재료를 퀵버튼에서 삭제할까요?")) return;
-    let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks')) || [];
-    quicks.splice(index, 1);
-    localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
-    renderCubeQuicks();
+    showConfirm("이 재료를 자주 쓰는 목록에서 삭제할까요?", function() {
+        let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks')) || [];
+        quicks.splice(index, 1);
+        localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
+        renderCubeQuicks();
+        showToast("✂️ 삭제되었습니다.");
+    }, "✂️", "삭제", "#F04452");
 }
+window.addCubeRecord = addCubeRecord;
+window.deleteCubeQuick = deleteCubeQuick;
 
 function addCubeQuick() {
     const name = prompt("추가할 자주 쓰는 재료의 이름을 입력하세요.\n(예: 단호박, 대구살, 오트밀 등)");
@@ -1824,15 +1836,17 @@ async function addCustomBaton() {
     }
 }
 
+// 💌 바통터치 생성 (토스트 적용)
 async function createBatonTask(text, reward) {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     
     const isDuplicate = records.some(r => r.text === text);
-    if (isDuplicate) return alert("🚨 이미 똑같은 부탁이 대기 중입니다! (중복 입력 방지)");
+    if (isDuplicate) return showToast("🚨 이미 똑같은 부탁이 대기 중입니다!"); // 👈 교체
 
     const now = new Date(), timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     records.unshift({ id: "baton_"+now.getTime(), text, reward, time: timeStr, status: "requested" });
     await saveBatonToFirebase(records);
+    showToast("💌 바통터치 요청이 성공적으로 전달되었습니다!"); // 👈 추가
 }
 
 async function acceptBaton(id) {
@@ -1843,6 +1857,7 @@ async function acceptBaton(id) {
     await saveBatonToFirebase(records);
 }
 
+// 💌 바통터치 완료 (토스트 적용)
 async function completeBaton(id) {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     const idx = records.findIndex(r => r.id === id);
@@ -1853,18 +1868,24 @@ async function completeBaton(id) {
     await saveBatonToFirebase(records);
 
     if (reward && reward !== "없음") {
-        alert(`🎉 미션 해결 완료!\n\n약속된 보상 [${reward}]을(를) 당당하게 요구하세요! ㅋㅋㅋ 👍`);
+        showToast(`🎉 미션 해결!\n약속된 보상 [${reward}]을(를) 당당하게 요구하세요! 👍`); // 👈 교체
     } else {
-        alert("🎉 미션 해결 완료! 든든한 육아메이트 최고입니다 👍");
+        showToast("🎉 미션 해결 완료! 든든한 육아메이트 최고입니다 👍"); // 👈 교체
     }
 }
 
+// 💌 바통터치 취소 (모달 적용)
 async function cancelBaton(id) {
-    if (!confirm("이 부탁을 취소하시겠습니까?")) return;
-    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
-    records = records.filter(r => r.id !== id);
-    await saveBatonToFirebase(records);
+    showConfirm("이 부탁을 취소하시겠습니까?", async function() {
+        let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+        records = records.filter(r => r.id !== id);
+        await saveBatonToFirebase(records);
+        showToast("🕊️ 부탁이 취소되었습니다.");
+    }, "🤔", "취소", "#8B95A1");
 }
+window.createBatonTask = createBatonTask;
+window.completeBaton = completeBaton;
+window.cancelBaton = cancelBaton;
 
 function renderBatonTasks() {
     const container = document.getElementById('baton-list-container');
@@ -2588,38 +2609,42 @@ window.editTrackerRecord = function(id) {
     window.openTrackerSheet(record.type, id); 
 };
     
-// 1. 개별 기록 삭제 (휴지통 버튼 ❌)
-window.deleteTrackerRecord = async function(id) {
-    if(!confirm("이 기록을 삭제하시겠습니까?")) return;
-    
-    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-    records = records.filter(r => r.id !== id);
-    
-    // 🚨 [핵심 수정] 내 폰에만 지우는 게 아니라 서버 연동 함수를 호출합니다!
-    if (typeof saveTrackerToFirebase === 'function') {
-        await saveTrackerToFirebase(records);
-        flushTrackerSync(); // 지우는 건 중요하니까 1분 안 기다리고 파이어베이스로 즉시 슛!
-    } else {
-        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
-        window.updateTrackerDashboard();
-    }
+window.deleteTrackerRecord = function(id) {
+    showConfirm("이 기록을 정말 삭제하시겠습니까?", async function() {
+        let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+        records = records.filter(r => r.id !== id);
+        
+        // 👇 파트너님이 걱정하신 그 부분! 여기 안전하게 잘 들어있습니다! 👇
+        if (typeof saveTrackerToFirebase === 'function') {
+            await saveTrackerToFirebase(records);
+            flushTrackerSync(); 
+        } else {
+            localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+            window.updateTrackerDashboard();
+        }
+        
+        showToast("🗑️ 기록이 깔끔하게 삭제되었습니다!");
+    }, "🗑️", "삭제", "#F04452");
 };
 
-// 2. 전체 삭제 (모두 싹 지우기)
-window.resetTrackerRecords = async function() {
-    if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
-    
-    localStorage.removeItem('tosil_sleep_start');
-    localStorage.removeItem('tosil_sleep_type');
-    
-    // 🚨 [핵심 수정] 빈 배열([])을 서버에 덮어씌워서 서버 기록까지 아예 폭파시킵니다!
-    if (typeof saveTrackerToFirebase === 'function') {
-        await saveTrackerToFirebase([]);
-        flushTrackerSync(); // 파이어베이스로 즉시 슛!
-    } else {
-        localStorage.removeItem('tosil_tracker_records');
-        window.updateTrackerDashboard();
-    }
+// 2. 전체 삭제 (모두 싹 지우기) - ✨ 퀄리티업 완료 ✨
+window.resetTrackerRecords = function() {
+    showConfirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)", async function() {
+        
+        localStorage.removeItem('tosil_sleep_start');
+        localStorage.removeItem('tosil_sleep_type');
+        
+        if (typeof saveTrackerToFirebase === 'function') {
+            await saveTrackerToFirebase([]);
+            flushTrackerSync(); 
+        } else {
+            localStorage.removeItem('tosil_tracker_records');
+            window.updateTrackerDashboard();
+        }
+        
+        showToast("🧹 트래커 기록이 싹 비워졌습니다!");
+        
+    }, "⚠️", "전체 삭제", "#F04452");
 };
 
 window.isHistoryView = false;
@@ -3508,3 +3533,47 @@ window.addEventListener('load', function() {
     window.checkReceiptVisibility();
 });
 
+// 🍞 토스트 팝업 띄우기 함수 (alert 대체)
+window.showToast = function(message) {
+    const container = document.getElementById('toast-container');
+    if(!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerHTML = message;
+    
+    container.appendChild(toast);
+    
+    // 2.5초 뒤에 스르륵 사라짐
+    setTimeout(() => {
+        toast.style.animation = 'toastFadeOut 0.3s ease-in forwards';
+        setTimeout(() => { toast.remove(); }, 300);
+    }, 2500);
+};
+
+// 🚨 커스텀 확인창 띄우기 함수 (confirm 대체)
+window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '확인', confirmColor = 'var(--primary)') {
+    const modal = document.getElementById('custom-confirm-modal');
+    const msgEl = document.getElementById('confirm-message');
+    const iconEl = document.getElementById('confirm-icon');
+    const btnOk = document.getElementById('btn-confirm-ok');
+    const btnCancel = document.getElementById('btn-confirm-cancel');
+    
+    if(!modal) return;
+    
+    msgEl.innerHTML = message.replace(/\n/g, '<br>');
+    iconEl.innerHTML = icon;
+    btnOk.innerText = confirmText;
+    btnOk.style.background = confirmColor;
+    
+    modal.style.display = 'flex';
+    
+    btnOk.onclick = function() {
+        modal.style.display = 'none';
+        if(typeof onConfirm === 'function') onConfirm(); // 👈 확인 누르면 약속된 작업 실행!
+    };
+    
+    btnCancel.onclick = function() {
+        modal.style.display = 'none'; // 취소 누르면 그냥 창 닫기
+    };
+};

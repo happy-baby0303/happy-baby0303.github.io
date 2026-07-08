@@ -500,3 +500,22 @@ body.dark-mode #smart-banner-container > div span[style*="background: #F59E0B"] 
     color: #0050b3 !important;            /* 강제로 글자색 적용 */
     font-weight: 900 !important;          /* 강제로 굵게 적용 */
 }
+
+/* 동반증상 버튼 완벽 중앙 정렬 */
+.sym-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 14px 10px !important;
+    background: #FFFFFF;
+    border: 1px solid #E5E8EB;
+    border-radius: 12px;
+    color: #4E5968;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%; /* 그리드 안에서 꽉 차게 */
+    box-sizing: border-box;
+}
