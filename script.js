@@ -406,28 +406,44 @@ function analyzeMoney() {
     updateHomeDashboard(); 
 }
 window.analyzeMoney = analyzeMoney;
-
-function toggleHistory() {
+window.toggleHistory = function() {
     const area = document.getElementById('history-list-area');
     if(!area) return;
-    if(area.style.display === 'block') { area.style.display = 'none'; } 
-    else {
+    
+    if(area.style.display === 'block') { 
+        area.style.display = 'none'; 
+    } else {
         const history = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
-        const items = document.getElementById('history-items'); if(!items) return; items.innerHTML = "";
+        const items = document.getElementById('history-items'); 
+        if(!items) return; 
+        
+        items.innerHTML = "";
         const sortedKeys = Object.keys(history).sort().reverse();
+        
         if(sortedKeys.length === 0) { 
             items.innerHTML = `
                 <div style="text-align:center; padding:30px 10px;">
                     <div style="font-size:32px; margin-bottom:10px;">💨</div>
-                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">텅~ 비어있네요! 지출 방어 성공?</div>
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">기록이 텅~ 비어있네요!</div>
                     <div style="font-size:12.5px; color:var(--text-s);">아직 지난달에 기록하신 가계부 내역이 없어요.</div>
                 </div>`; 
-        } 
-        else { sortedKeys.forEach(k => { items.innerHTML += `<div class="history-item" style="display:flex; justify-content:space-between; font-size:14px; border-bottom:1px dashed var(--border); padding:10px 2px;"><span>${k}</span><span style="font-weight:800; color:var(--text-m);">${history[k].toLocaleString()}원</span></div>`; }); }
+        } else { 
+            let html = '<div style="margin-top: 12px;">';
+            sortedKeys.forEach(k => { 
+                // k는 "2026-7" 형태이므로 연/월로 쪼갭니다.
+                const [year, month] = k.split('-');
+                html += `
+                <div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#F8F9FA; border-radius:12px; margin-bottom:8px; border:1px solid #E5E8EB;">
+                    <span style="font-weight:900; color:#4E5968; font-size:14px;">📅 ${year}년 ${month}월</span>
+                    <span style="font-weight:900; color:#3182F6; font-size:16px;">${history[k].toLocaleString()}원</span>
+                </div>`; 
+            }); 
+            html += '</div>';
+            items.innerHTML = html;
+        }
         area.style.display = 'block';
     }
-}
-window.toggleHistory = toggleHistory;
+};
 
 async function addDailyExpense(isSaving) {
     const input = document.getElementById('v-input-amount');
@@ -516,26 +532,44 @@ function updateLedgerUI() {
 }
 
 async function resetMoneyAll() {
-    if(confirm("이번 달 기록된 모든 '지출' 및 '저금' 데이터를 초기화하시겠습니까?\n(설정하신 예산과 저금 목표는 유지됩니다)")) {
-        let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
-        // 목표 데이터는 유지, 잔액과 히스토리만 폭파!
-        ledger.total = 0;
-        ledger.savedTotal = 0;
-        ledger.history = [];
-        
-        await saveLedgerToFirebase(ledger);
-        localStorage.removeItem('tosil_money_total');
-        
-        document.getElementById('v-diaper').value = ''; 
-        document.getElementById('v-food').value = ''; 
-        document.getElementById('v-etc').value = '';
-        
-        const resBox = document.getElementById('money-result'); 
-        if(resBox) resBox.style.display = 'none'; 
-        
-        alert("이번 달 기록이 리셋되었습니다. 다시 든든하게 모아봐요! 🌿");
-        updateHomeDashboard();
+    // 1단계: 이번 달 데이터 지우기 확인
+    if(!confirm("이번 달 기록된 '지출' 및 '저금' 데이터를 초기화하시겠습니까?\n(설정하신 예산과 목표는 유지됩니다)")) return;
+    
+    let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
+    ledger.total = 0;
+    ledger.savedTotal = 0;
+    ledger.history = [];
+    
+    await saveLedgerToFirebase(ledger);
+    localStorage.removeItem('tosil_money_total');
+    
+    // 👇 [버그 수정] 월별 통계에서 '이번 달' 기록 확실하게 지우기
+    const date = new Date();
+    const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    let localHistory = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
+    if (localHistory[monthKey]) {
+        delete localHistory[monthKey]; 
+        localStorage.setItem('TosilBabyApp', JSON.stringify(localHistory));
     }
+
+    // 👇 [추가 기능] 과거 데이터까지 싹 다 날릴지 한 번 더 물어보기! (테스트용)
+    if(confirm("입력된 '과거 월별 통계(지난달 등)' 기록까지 전부 다 삭제할까요?")) {
+        localStorage.removeItem('TosilBabyApp');
+    }
+    
+    // 화면 입력칸 초기화
+    document.getElementById('v-diaper').value = ''; 
+    document.getElementById('v-food').value = ''; 
+    document.getElementById('v-etc').value = '';
+    
+    // 차트 화면 및 통계 화면 닫기
+    const resBox = document.getElementById('money-result'); 
+    if(resBox) resBox.style.display = 'none'; 
+    const area = document.getElementById('history-list-area');
+    if(area) area.style.display = 'none';
+    
+    alert("데이터가 깔끔하게 리셋되었습니다! 다시 든든하게 모아봐요! 🌿");
+    updateHomeDashboard();
 }
 window.addDailyExpense = addDailyExpense;
 window.saveGoal = saveGoal;
@@ -1966,7 +2000,7 @@ function startBatonRealtimeSync() {
 window.startBatonRealtimeSync = startBatonRealtimeSync;
 
 // ==========================================
-// 🚀 런타임 구동 마스터 마운트 (이부분이 날아갔었음)
+// 🚀 런타임 구동 마스터 마운트 (중복 실행 방지 완벽 패치)
 // ==========================================
 window.onload = () => { 
     loadAllExternalData(); 
@@ -1999,11 +2033,8 @@ window.onload = () => {
         });
     });
         
-    if (typeof startFeverRealtimeSync === 'function') { startFeverRealtimeSync(); } else { renderFeverTimeline(); updateHomeDashboard(); }
-    if (typeof startCubeRealtimeSync === 'function') { startCubeRealtimeSync(); } else { renderCubes(); }
-    if (typeof startBatonRealtimeSync === 'function') { startBatonRealtimeSync(); } else { renderBatonTasks(); }
-    if (typeof startLedgerRealtimeSync === 'function') { startLedgerRealtimeSync(); } else { updateLedgerUI(); }
-
+    // 🚨 파이어베이스 중복 호출 방지! (리스너는 따로 켜지므로 여기선 기본 화면만 그림)
+    renderFeverTimeline();
     updateSyncBadge(); 
 };
 
@@ -2557,20 +2588,38 @@ window.editTrackerRecord = function(id) {
     window.openTrackerSheet(record.type, id); 
 };
     
-window.deleteTrackerRecord = function(id) {
+// 1. 개별 기록 삭제 (휴지통 버튼 ❌)
+window.deleteTrackerRecord = async function(id) {
     if(!confirm("이 기록을 삭제하시겠습니까?")) return;
+    
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     records = records.filter(r => r.id !== id);
-    localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
-    window.updateTrackerDashboard();
+    
+    // 🚨 [핵심 수정] 내 폰에만 지우는 게 아니라 서버 연동 함수를 호출합니다!
+    if (typeof saveTrackerToFirebase === 'function') {
+        await saveTrackerToFirebase(records);
+        flushTrackerSync(); // 지우는 건 중요하니까 1분 안 기다리고 파이어베이스로 즉시 슛!
+    } else {
+        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+        window.updateTrackerDashboard();
+    }
 };
 
-window.resetTrackerRecords = function() {
+// 2. 전체 삭제 (모두 싹 지우기)
+window.resetTrackerRecords = async function() {
     if(!confirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)")) return;
-    localStorage.removeItem('tosil_tracker_records');
+    
     localStorage.removeItem('tosil_sleep_start');
     localStorage.removeItem('tosil_sleep_type');
-    window.updateTrackerDashboard();
+    
+    // 🚨 [핵심 수정] 빈 배열([])을 서버에 덮어씌워서 서버 기록까지 아예 폭파시킵니다!
+    if (typeof saveTrackerToFirebase === 'function') {
+        await saveTrackerToFirebase([]);
+        flushTrackerSync(); // 파이어베이스로 즉시 슛!
+    } else {
+        localStorage.removeItem('tosil_tracker_records');
+        window.updateTrackerDashboard();
+    }
 };
 
 window.isHistoryView = false;
@@ -3177,7 +3226,7 @@ window.saveTrackerRecord = async function() {
 };
 
 // ==========================================
-// 5️⃣     비타민 체크리스트 '실시간 연동형' 덮어쓰기
+// 5️⃣    비타민 체크리스트  !!  '실시간 연동형'
 // ==========================================
 window.toggleRoutine = async function(id) {
     let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
@@ -3215,7 +3264,12 @@ window.startTrackerRealtimeSync = function() {
             const data = docSnap.data();
             localStorage.setItem('tosil_tracker_records', JSON.stringify(data.records || []));
         }
-        if (typeof updateTrackerDashboard === 'function') updateTrackerDashboard();
+        
+        // 🚨 [수정 1] 앞에 window. 를 붙여야 다른 폰에서 화면(대시보드)이 즉시 갱신됩니다!
+        if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+        
+        // 🎁 [수정 2 - 보너스] 남편분이 3번째 기록을 쓰면, 아내분 폰에도 영수증 버튼이 바로 '짠!' 하고 뜨게 만듭니다.
+        if (typeof window.checkReceiptVisibility === 'function') window.checkReceiptVisibility();
     });
 };
 
@@ -3454,19 +3508,3 @@ window.addEventListener('load', function() {
     window.checkReceiptVisibility();
 });
 
-//영수증 캡쳐//
-window.saveReceiptAsImage = function() {
-    // 1. 영수증 영역(아이디)을 지정합니다. (꼭 영수증 전체를 감싸는 ID를 쓰세요!)
-    const target = document.getElementById('receipt-modal-content'); 
-
-    html2canvas(target, {
-        scale: 2, // 화질을 더 선명하게 만듭니다
-        backgroundColor: '#ffffff' // 배경색 흰색 설정
-    }).then(canvas => {
-        // 2. 캔버스를 이미지 파일로 변환
-        const link = document.createElement("a");
-        link.download = "토실이_하루_영수증.png"; // 저장될 파일 이름
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    });
-};
