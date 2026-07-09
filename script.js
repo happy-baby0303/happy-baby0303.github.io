@@ -1546,13 +1546,26 @@ function toggleDarkMode() {
 }
 window.toggleDarkMode = toggleDarkMode;
 
-/// ==========================================
+// ==========================================
 // 🧊 [안심 큐브 냉장고 엔진] (실시간 동기화)
 // ==========================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('cube-date');
     if (dateInput) dateInput.value = todayStr;
+
+    // 🔥 핵심: 이유식 화면에서 남긴 '차감 비밀 메모'가 있는지 확인!
+    let pendingSync = localStorage.getItem('tosil_cube_pending_sync');
+    if (pendingSync && typeof db !== 'undefined') {
+        let records = JSON.parse(pendingSync);
+        const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
+        try {
+            // 메모가 있으면 파이어베이스 클라우드 서버에 1개 줄어든 상태를 냅다 덮어씌웁니다!
+            await setDoc(doc(db, "cube_" + syncCode, "status"), { records: records });
+            // 업로드 완료 후 메모 찢어버리기
+            localStorage.removeItem('tosil_cube_pending_sync'); 
+        } catch(e) { console.error("차감 동기화 에러:", e); }
+    }
 });
 
 function getCubeDDayText(madeDateStr) {
@@ -2033,6 +2046,7 @@ window.onload = () => {
     updateHomeDashboard();
     initDarkMode();
     renderFoodChecklist(); 
+    renderMilestones();
     
     const toolboxTab = document.getElementById('tab-toolbox');
     if(toolboxTab) {
@@ -3615,3 +3629,96 @@ window.calcSleepToNow = function() {
 
     showToast(`✅ ${diffMins}분 수면으로 계산되었습니다!`);
 };
+
+// ==========================================
+// 🏆 마일스톤 보관함 배지 데이터 & 엔진 (여기서부터 복사!)
+// ==========================================
+const milestoneData = [
+    { id: "m_smile", title: "첫 진짜 미소", icon: "😊" },
+    { id: "m_turn", title: "첫 뒤집기", icon: "🐢" },
+    { id: "m_tooth", title: "첫 아랫니", icon: "🦷" },
+    { id: "m_sit", title: "혼자 앉기", icon: "🧘" },
+    { id: "m_crawl", title: "첫 네발기기", icon: "🐛" },
+    { id: "m_stand", title: "첫 일어서기", icon: "🦒" },
+    { id: "m_walk", title: "첫 걸음마", icon: "👣" },
+    { id: "m_word", title: "첫 단어", icon: "💬" },
+    { id: "m_sleep", title: "100일 통잠", icon: "🌙" },
+    { id: "m_food", title: "첫 이유식", icon: "🥣" },
+    { id: "m_poop", title: "첫 유아 변기", icon: "🚽" },
+    { id: "m_travel", title: "첫 장거리 여행", icon: "🚗" }
+];
+
+window.renderMilestones = function() {
+    const grid = document.getElementById('milestone-grid');
+    if(!grid) return;
+    
+    let savedMilestones = JSON.parse(localStorage.getItem('tosil_milestones')) || {};
+    let earnedCount = 0;
+    let html = '';
+
+    milestoneData.forEach(m => {
+        const isEarned = savedMilestones[m.id]; 
+        
+        if (isEarned) {
+            earnedCount++;
+            html += `
+            <div onclick="unlockMilestone('${m.id}')" style="background: linear-gradient(135deg, #FFF9E6 0%, #FFF3C4 100%); border: 1px solid #FFE58F; border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.15); transition: 0.2s; position: relative;">
+                <div style="font-size: 32px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">${m.icon}</div>
+                <div style="font-size: 11px; font-weight: 900; color: #B78103; margin-bottom: 4px; line-height: 1.3; word-break: keep-all;">${m.title}</div>
+                <div style="font-size: 10px; font-weight: 800; color: #D97706; background: rgba(255,255,255,0.6); padding: 3px 6px; border-radius: 6px; display: inline-block;">${isEarned}</div>
+            </div>`;
+        } else {
+            html += `
+            <div onclick="unlockMilestone('${m.id}')" style="background: #F8F9FA; border: 1px dashed #D1D6DB; border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; transition: 0.2s; filter: grayscale(100%); opacity: 0.6;">
+                <div style="font-size: 32px; margin-bottom: 8px;">${m.icon}</div>
+                <div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-bottom: 4px; line-height: 1.3; word-break: keep-all;">${m.title}</div>
+                <div style="font-size: 10px; font-weight: 700; color: #A3AAB3;">미달성 🔒</div>
+            </div>`;
+        }
+    });
+
+    grid.innerHTML = html;
+
+    const total = milestoneData.length;
+    const percent = Math.round((earnedCount / total) * 100);
+    
+    const countEl = document.getElementById('milestone-count');
+    const percentEl = document.getElementById('milestone-percent');
+    const barEl = document.getElementById('milestone-progress-bar');
+    
+    if(countEl) countEl.innerText = earnedCount;
+    if(percentEl) percentEl.innerText = percent;
+    if(barEl) barEl.style.width = percent + "%";
+};
+
+window.unlockMilestone = function(id) {
+    const m = milestoneData.find(x => x.id === id);
+    let savedMilestones = JSON.parse(localStorage.getItem('tosil_milestones')) || {};
+    const isEarned = savedMilestones[id];
+    
+    if (isEarned) {
+        showConfirm(`[${m.title}]\n\n이 배지는 ${isEarned}에 달성했습니다!\n기록을 삭제하고 다시 잠글까요?`, function() {
+            delete savedMilestones[id];
+            localStorage.setItem('tosil_milestones', JSON.stringify(savedMilestones));
+            window.renderMilestones();
+            showToast("🔒 배지가 다시 잠겼습니다.");
+        }, "🤔", "기록 지우기", "#F04452");
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const dateStr = prompt(`🎉 [${m.title}]\n\n축하합니다! 우리 아기가 이 멋진 순간을 언제 해냈나요?\n(날짜를 YYYY-MM-DD 형식으로 적어주세요)`, today);
+    
+    if (dateStr && dateStr.trim() !== '') {
+        savedMilestones[id] = dateStr.trim();
+        localStorage.setItem('tosil_milestones', JSON.stringify(savedMilestones));
+        window.renderMilestones();
+        showToast("✨ 빛나는 첫 순간이 예쁜 배지로 저장되었습니다!");
+    }
+};
+
+// 💡 앱이 켜질 때 자동으로 도화지에 배지를 그리도록 지시!
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(window.renderMilestones, 200);
+});
+// ==========================================
