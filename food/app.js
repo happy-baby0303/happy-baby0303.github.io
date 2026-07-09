@@ -463,9 +463,16 @@ function renderCalendar() {
         if (records[dateStr]) {
             dotsHtml = '<div class="cal-dot-container">';
             records[dateStr].forEach(r => {
-                dotsHtml += `<div class="cal-dot ${r.status}"></div>`;
-                if(r.status === 'pass') monthPass++;
-                else monthFail++;
+                // ✨ 수정된 로직: 식단 기록은 파란 점! 카운트 안 함!
+                if (r.type === 'meal' || (r.menu && !r.ingredient)) {
+                    dotsHtml += `<div class="cal-dot" style="background:#3182F6;"></div>`;
+                } 
+                // 재료 테스트는 기존처럼 초록/빨강 점! 카운트 함!
+                else {
+                    dotsHtml += `<div class="cal-dot ${r.status}"></div>`;
+                    if(r.status === 'pass') monthPass++;
+                    else if(r.status === 'fail') monthFail++;
+                }
             });
             dotsHtml += '</div>';
         }
@@ -894,9 +901,13 @@ function saveMealRecord() {
     const amount = document.getElementById('meal-amount-input').value.trim();
     const reaction = document.getElementById('meal-reaction-input').value;
     
-    if (!menu || !amount) return alert('메뉴와 섭취량을 모두 입력해주세요!');
+    // ✨ 깐깐한 amount 검사 삭제! 메뉴 이름만 적으면 무조건 통과!
+    if (!menu) return alert('메뉴 이름은 꼭 입력해주세요! (예: 소고기 미음)');
 
-    saveToCalendarDB({ type: 'meal', menu, amount, reaction });
+    // 입력 안 했으면 '양 모름', 입력했으면 '50ml' 식으로 알아서 포맷팅
+    const finalAmount = amount ? `${amount}ml` : '양 모름';
+
+    saveToCalendarDB({ type: 'meal', menu, amount: finalAmount, reaction });
     closeSheets();
 }
 
@@ -942,7 +953,7 @@ function renderSelectedDateRecords() {
     listArea.innerHTML = dailyRecords.map((r, i) => {
         let contentHtml = '';
 
-        // 1. 식단 기록용 UI
+       // 1. 식단 기록용 UI (ml 글자를 빼고 r.amount 그대로 출력하게 수정)
         if (r.type === 'meal' || (r.menu && !r.ingredient)) {
             contentHtml = `
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
@@ -950,7 +961,7 @@ function renderSelectedDateRecords() {
                     <span style="font-weight: 900; font-size: 15px; color: #191F28;">🍲 ${r.menu}</span>
                 </div>
                 <div style="display:flex; gap:6px;">
-                    <span style="background:#F0F7FF; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#3182F6;">${r.amount}ml</span>
+                    <span style="background:#F0F7FF; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#3182F6;">${r.amount}</span>
                     <span style="background:#F2F4F6; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#4E5968;">${r.reaction}</span>
                 </div>
             `;
@@ -1032,3 +1043,101 @@ function renderTotalSummary() {
             : Array.from(failedSet).map(ing => `<span style="background:#FFF0F1; color:#D32F2F; border:1px solid #FECACA; padding:6px 14px; border-radius:20px; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">${getFoodEmoji(ing)} ${ing}</span>`).join('');
     }
 }
+
+// ==========================================
+// 🤖 AI 큐브 자동 차감 스캐너 엔진 (🚨 이름표 완벽 매칭 버전!!! 🔑)
+// ==========================================
+let matchedCubesForDeduction = [];
+
+// 💡 큐브 데이터 파싱용 안전 함수
+function getCubeName(c) { return c.name || c.itemName || c.title || c.ingredient || c.text || c.foodName || "이름모름"; }
+function getCubeQty(c) { 
+    let rawQty = c.qty !== undefined ? c.qty : (c.quantity !== undefined ? c.quantity : (c.count !== undefined ? c.count : 0));
+    if (typeof rawQty === 'string') return parseInt(rawQty.replace(/[^0-9]/g, '')) || 0;
+    return parseInt(rawQty) || 0;
+}
+
+window.triggerAutoDeduction = function() {
+    const menuName = document.getElementById('meal-menu-input').value.trim();
+
+    if (!menuName) {
+        return alert('어떤 메뉴를 먹였는지 입력해주세요!');
+    }
+
+    // ✨ 드디어 찾은 진짜 이름표! 'tosil_cube_records' 로 열어봅니다!
+    let cubes = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
+    
+    if(cubes.length === 0) {
+        saveMealRecord();
+        return;
+    }
+
+    const safeMenuName = menuName.replace(/\s+/g, ''); 
+
+    matchedCubesForDeduction = cubes.filter(cube => {
+        const rawName = getCubeName(cube);
+        const rawQty = getCubeQty(cube);
+        if(rawName === "이름모름") return false;
+
+        const safeCubeName = String(rawName).replace(/\s+/g, '');
+        return safeMenuName.includes(safeCubeName) && rawQty > 0;
+    });
+
+    if(matchedCubesForDeduction.length > 0) {
+        let listHtml = '';
+        matchedCubesForDeduction.forEach(cube => {
+            const rawName = getCubeName(cube);
+            const rawQty = getCubeQty(cube);
+            const icon = (String(rawName).includes('고기') || String(rawName).includes('소') || String(rawName).includes('닭') || cube.cat === 'meat') ? '🥩' : '🥦';
+            
+            listHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px; background: #F8F9FA; border-radius: 12px; border: 1px solid #E5E8EB; margin-bottom: 8px;">
+                <div style="font-size: 14.5px; font-weight: 800; color: #191F28;">${icon} ${rawName}</div>
+                <div style="font-size: 14px; font-weight: 800; color: #8B95A1;">
+                    잔여 <span style="text-decoration: line-through;">${rawQty}개</span> 👉 <span style="color: #3182F6; font-size: 16px;">${parseInt(rawQty) - 1}개</span>
+                </div>
+            </div>
+            `;
+        });
+        document.getElementById('ai-deduction-list').innerHTML = listHtml;
+        document.getElementById('ai-deduction-modal').style.display = 'flex';
+    } else {
+        saveMealRecord();
+    }
+};
+
+// [✅ 차감하고 저장] 눌렀을 때
+window.confirmDeduction = function() {
+    let cubes = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
+    
+    matchedCubesForDeduction.forEach(match => {
+        const matchName = getCubeName(match);
+        const idx = cubes.findIndex(c => getCubeName(c) === matchName);
+
+        if(idx !== -1) {
+            let currentQty = getCubeQty(cubes[idx]);
+            if (currentQty > 0) {
+                if(cubes[idx].qty !== undefined) cubes[idx].qty = currentQty - 1; 
+                else if(cubes[idx].quantity !== undefined) cubes[idx].quantity = currentQty - 1;
+                else if(cubes[idx].count !== undefined) cubes[idx].count = currentQty - 1;
+                else if(cubes[idx].amount !== undefined) cubes[idx].amount = currentQty - 1;
+            }
+        }
+    });
+    
+    localStorage.setItem('tosil_cube_records', JSON.stringify(cubes));
+    
+    // 🔥 핵심: 메인 화면이 클라우드에 덮어쓸 수 있도록 '비밀 메모' 남기기!
+    localStorage.setItem('tosil_cube_pending_sync', JSON.stringify(cubes));
+
+    document.getElementById('ai-deduction-modal').style.display = 'none';
+    
+    saveMealRecord();
+    setTimeout(() => { alert("🤖 냉장고 큐브 재고가 1개 차감되었습니다!"); }, 300);
+};
+
+// [건너뛰기] 눌렀을 때
+window.skipDeduction = function() {
+    document.getElementById('ai-deduction-modal').style.display = 'none';
+    saveMealRecord();
+};
