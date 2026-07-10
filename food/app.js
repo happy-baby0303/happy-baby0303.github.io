@@ -1141,3 +1141,51 @@ window.skipDeduction = function() {
     document.getElementById('ai-deduction-modal').style.display = 'none';
     saveMealRecord();
 };
+
+// ==========================================
+// 📸 [마케팅 원기옥] 맘카페 자랑용 식단표 이미지 캡처 엔진
+// ==========================================
+window.downloadCalendarImage = function() {
+    // 1. 찰칵! 소리와 함께 캡처 중이라는 걸 보여줍니다.
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ 예쁘게 이미지를 굽는 중...';
+    btn.style.background = '#8B95A1';
+    btn.disabled = true;
+
+    // 2. 캡처할 타겟: 캘린더 전체 화면!
+    const targetEl = document.getElementById('view-calendar');
+
+    // 3. 카메라(html2canvas) 작동!
+    html2canvas(targetEl, {
+        scale: 2, // 화질 2배 뻥튀기 (인스타/카페 업로드용 고화질)
+        backgroundColor: "#F2F4F6", // 배경색 예쁘게 깔아주기
+        useCORS: true 
+    }).then(canvas => {
+        // ✨ 마케팅 핵심: 캡처된 사진 우측 하단에 '워터마크' 강제 삽입!
+        const ctx = canvas.getContext('2d');
+        ctx.font = "900 24px 'Malgun Gothic', sans-serif";
+        ctx.fillStyle = "#8B95A1";
+        ctx.textAlign = "right";
+        ctx.fillText("✨ Designed by 육아메이트 AI", canvas.width - 30, canvas.height - 30);
+
+        // 4. 이미지 다운로드 실행
+        const link = document.createElement('a');
+        link.download = `육아메이트_우리아기_식단표_${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        // 5. 버튼 원상복구
+        btn.innerHTML = originalText;
+        btn.style.background = '#191F28';
+        btn.disabled = false;
+        
+        setTimeout(() => { alert("📸 갤러리에 식단표가 저장되었습니다! 맘카페에 자랑해보세요!"); }, 300);
+    }).catch(err => {
+        console.error("캡처 실패:", err);
+        alert("🚨 앗, 이미지 저장에 실패했어요. 다시 시도해주세요!");
+        btn.innerHTML = originalText;
+        btn.style.background = '#191F28';
+        btn.disabled = false;
+    });
+};

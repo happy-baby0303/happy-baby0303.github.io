@@ -108,6 +108,14 @@
 
         <div id="view-calendar" style="display: none;">
             
+            <!-- 📸 마법의 코드 추가: data-html2canvas-ignore="true" (사진 찍힐 때 이 버튼은 안 보임!) -->
+            <div data-html2canvas-ignore="true" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                <button onclick="downloadCalendarImage()" style="background: #191F28; color: #FFF; padding: 12px 20px; border-radius: 12px; font-weight: 900; font-size: 14.5px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; transition: 0.2s;">
+                    📸 식단표 이미지로 저장
+                </button>
+            </div>
+
+            <!-- 겹쳐있던 div 태그 중복 제거 완료! -->
             <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <button onclick="changeMonth(-1)" style="background: #F2F4F6; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: 900; color: #4E5968; cursor: pointer; transition: 0.2s;">&lt;</button>
@@ -296,7 +304,8 @@
             이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
         </div>
     </main>
-    
+
+    <script src="../html2canvas.min.js"></script>
     <script src="data.js"></script>
     <script src="app.js?v=999"></script>
 </body>
