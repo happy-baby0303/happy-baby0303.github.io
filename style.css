@@ -519,3 +519,12 @@ body.dark-mode #smart-banner-container > div span[style*="background: #F59E0B"] 
     width: 100%; /* 그리드 안에서 꽉 차게 */
     box-sizing: border-box;
 }
+
+/* ==========================================
+   프리미엄 모달(팝업창) 전체 외곽선 둥글게 깎기
+   ========================================== */
+#premium-modal > div,
+.modal-content {
+    border-radius: 24px !important; /* 빵빵하게 둥근 모서리 */
+    overflow: hidden !important;    /* 둥근 모서리 밖으로 삐져나가는 것들 숨김 */
+}

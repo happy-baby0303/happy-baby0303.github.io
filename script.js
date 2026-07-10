@@ -2267,23 +2267,31 @@ function openPediatricianReport() {
     if(!body) return;
 
     body.innerHTML = `
-        <div class="modal-header-wrap" style="margin-bottom:8px;">
-            <span class="modal-emoji">👨‍⚕️</span>
-            <div class="modal-title">소아과 진료 브리핑</div>
-        </div>
-        <div style="font-size:13px; color:#6B7684; margin-bottom:20px; line-height:1.5;">
-            의사 선생님께 스마트폰을 이대로 보여주세요.<br>최근 체중과 투약 기록이 시간순으로 정리되어 있습니다.
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 36px; margin-bottom: 8px;">👨‍⚕️</div>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #191F28;">소아과 진료 브리핑</h3>
+            <p style="margin: 0; font-size: 13px; font-weight: 600; color: #8B95A1; line-height: 1.5;">
+                의사 선생님께 스마트폰을 이대로 보여주세요.<br>최근 체중과 투약 기록이 요약되어 있습니다.
+            </p>
         </div>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; background:#EBF4FF; padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid #D3E4FD;">
-            <span style="color:#1A73E8; font-weight:800; font-size:14px;">⚖️ 최근 계측 체중</span>
-            <span style="color:#1A73E8; font-weight:900; font-size:18px;">${weight}${weight !== '미입력' ? ' kg' : ''}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #F2F4F6; padding: 18px 20px; border-radius: 16px; margin-bottom: 16px;">
+            <span style="color: #4E5968; font-weight: 800; font-size: 14px;"> 최근 계측 체중</span>
+            <span style="color: #191F28; font-weight: 900; font-size: 20px;">${weight}${weight !== '미입력' ? ' <span style="font-size:14px; color:#8B95A1;">kg</span>' : ''}</span>
         </div>
 
-        <div style="font-size:14px; font-weight:800; color:#191F28; margin-bottom:10px;">📊 최근 타임라인 요약</div>
-        ${recordHtml}
+        <div style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size: 13px; font-weight: 800; color: #8B95A1; margin-bottom: 12px; border-bottom: 1px dashed #E5E8EB; padding-bottom: 12px;">
+                📊 최근 타임라인 요약
+            </div>
+            <div style="max-height: 250px; overflow-y: auto;">
+                ${recordHtml}
+            </div>
+        </div>
 
-        <button class="btn-main" style="width:100%; margin-top:20px; padding:16px; border-radius:14px; background:#3182F6 !important; color:#FFF !important; font-weight:900; font-size:15px; border:none; cursor:pointer;" onclick="closeFestivalModalForce()">확인 완료</button>
+        <button style="width: 100%; padding: 18px; border-radius: 16px; background: #191F28; color: #FFFFFF; font-weight: 800; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s;" onclick="closeFestivalModalForce()">
+            확인 완료
+        </button>
     `;
 
     const modalWrap = document.getElementById('premium-modal');
