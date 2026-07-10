@@ -1241,16 +1241,6 @@ window.renderGrowthHistory = renderGrowthHistory;
 document.addEventListener("DOMContentLoaded", () => {
     if(typeof window.renderGrowthHistory === 'function') window.renderGrowthHistory();
 });
-function promptBabyInfo() {
-    const name = prompt("우리아기 이름(태명)을 알려주세요!", "우리아기"); if(!name) return;
-    const input = prompt("아기 생년월일을 입력하세요 (예: 20260303)", "20260303"); if(!input) return;
-    const clean = input.replace(/[^0-9]/g, ''); const formattedDate = clean.length === 8 ? `${clean.substring(0,4)}-${clean.substring(4,6)}-${clean.substring(6,8)}` : input;
-    if (isNaN(new Date(formattedDate).getTime())) return alert("날짜 형식이 올바르지 않습니다."); 
-    localStorage.setItem('tosil_baby', JSON.stringify({name: name, birth: formattedDate}));
-    localStorage.setItem('tosil_babyName', name); localStorage.setItem('tosil_startDate', formattedDate);
-    alert("아기 정보가 찰떡같이 저장되었습니다! 🤍"); location.reload(); 
-}
-window.promptBabyInfo = promptBabyInfo;
 
 // ==========================================
 // 👶 아기 정보 & 메인 대시보드 렌더링 (중복 배너 제거 완료)
@@ -3730,3 +3720,191 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(window.renderMilestones, 200);
 });
 // ==========================================
+
+// ==========================================
+// 🚀 [온보딩 & 정보수정 엔진] 최종 완성본 (이것만 남기세요!)
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    const savedName = localStorage.getItem('tosil_babyName');
+    const savedDate = localStorage.getItem('tosil_startDate');
+    
+    // 🔥 무한 반복 버그 해결 완!
+    if (savedName && savedDate) {
+        document.getElementById('onboarding-overlay').style.display = 'none';
+        updateBabyDashboard(); 
+    } else {
+        document.getElementById('onboarding-overlay').style.display = 'flex';
+    }
+});
+
+// 🔄 다음/이전 단계 연결
+window.nextOnboardingStep = function(step) {
+    if (step === 2) {
+        const name = document.getElementById('ob-name').value.trim();
+        if (!name) return alert('우리 아기의 예쁜 이름을 입력해주세요! 😊');
+        
+        document.getElementById('ob-greeting-name').innerHTML = `<span style="color:#3182F6;">${name}</span>의 생일은<br>언제인가요?`;
+        document.getElementById('onboarding-step-1').style.display = 'none';
+        document.getElementById('onboarding-step-2').style.display = 'flex';
+        document.getElementById('onboarding-step-3').style.display = 'none';
+    } else if (step === 3) {
+        const date = document.getElementById('ob-date').value;
+        if (!date) return alert('생일(또는 예정일)을 꼭 선택해주세요! 🎂');
+        
+        const name = document.getElementById('ob-name').value.trim();
+        document.getElementById('ob-stage-name').innerText = name; 
+        
+        document.getElementById('onboarding-step-2').style.display = 'none';
+        document.getElementById('onboarding-step-3').style.display = 'flex';
+    } else if (step === 1) {
+        document.getElementById('onboarding-step-2').style.display = 'none';
+        document.getElementById('onboarding-step-1').style.display = 'flex';
+        document.getElementById('onboarding-step-3').style.display = 'none';
+    }
+};
+
+// 🎉 온보딩 완료 및 토스식 로딩 마술 발동! (여기가 핵심!)
+window.finishOnboarding = function(feedingStage) {
+    const name = document.getElementById('ob-name').value.trim();
+    const date = document.getElementById('ob-date').value;
+    
+    // 1. 기존 화면(3단계)을 숨기고 비밀의 로딩 화면을 켭니다!
+    document.getElementById('onboarding-step-3').style.display = 'none';
+    document.getElementById('onboarding-step-loading').style.display = 'flex';
+    
+    const loadingText = document.getElementById('loading-text');
+
+    // ⏱️ 0초: 첫 번째 멘트
+    loadingText.innerHTML = `<span style="color:#3182F6">${name}</span>의<br>생일 데이터를 동기화하는 중...`;
+    
+    // ⏱️ 1.2초 뒤: 두 번째 멘트
+    setTimeout(() => {
+        loadingText.innerHTML = `현재 월령에 맞는<br>성장 구간 분석 중...`;
+    }, 1200);
+
+    // ⏱️ 2.4초 뒤: 세 번째 멘트
+    setTimeout(() => {
+        loadingText.innerHTML = `[${feedingStage}]에 딱 맞는<br>육아메이트 세팅 완료! 🎉`;
+    }, 2400);
+
+    // ⏱️ 3.5초 뒤: 마술이 끝나면 그제야 데이터를 저장하고 새로고침!
+    setTimeout(() => {
+        localStorage.setItem('tosil_babyName', name);
+        localStorage.setItem('tosil_startDate', date);
+        localStorage.setItem('tosil_feedingStage', feedingStage);
+        localStorage.setItem('tosil_baby', JSON.stringify({name: name, birth: date, stage: feedingStage}));
+
+        document.getElementById('onboarding-overlay').style.display = 'none';
+        location.reload(); 
+    }, 3500); 
+};
+
+// ✏️ 메인화면에서 연필 눌러서 수정할 때
+window.promptBabyInfo = function() {
+    document.getElementById('ob-name').value = localStorage.getItem('tosil_babyName') || '';
+    document.getElementById('ob-date').value = localStorage.getItem('tosil_startDate') || '';
+    
+    document.getElementById('onboarding-step-1').style.display = 'flex';
+    document.getElementById('onboarding-step-2').style.display = 'none';
+    document.getElementById('onboarding-step-3').style.display = 'none';
+    const loadingObj = document.getElementById('onboarding-step-loading');
+    if(loadingObj) loadingObj.style.display = 'none';
+    
+    document.getElementById('onboarding-overlay').style.display = 'flex';
+};
+
+// ==========================================
+// 👶 [홈 화면 엔진] 아기 이름 & D-Day & 맞춤형 큐레이션
+// ==========================================
+window.updateBabyDashboard = function() {
+    const savedName = localStorage.getItem('tosil_babyName');
+    const savedDate = localStorage.getItem('tosil_startDate');
+    const savedStage = localStorage.getItem('tosil_feedingStage');
+
+    if (!savedName || !savedDate) return;
+
+    const nameEl = document.getElementById('res-baby-name');
+    if (nameEl) nameEl.innerText = `${savedName}의 공간`;
+
+    const birthDate = new Date(savedDate);
+    birthDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = today.getTime() - birthDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    const ddayEl = document.getElementById('res-baby-dday');
+    if (ddayEl) {
+        let ddayText = diffDays > 0 ? `D+${diffDays}일` : diffDays < 0 ? `D${diffDays}일` : `D-Day`;
+        ddayEl.innerHTML = `${ddayText} <span style="font-size:13px; background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:12px; vertical-align:middle; margin-left:6px; font-weight:800;">🚀 도약기</span>`;
+    }
+
+    const msgEl = document.getElementById('daily-message');
+    if (msgEl && savedStage) {
+        let stageMessage = "";
+        if (savedStage.includes('모유/분유')) {
+            stageMessage = "🍼 쑥쑥 크는 수유기! 오늘도 수유량 꼼꼼히 기록해볼까요?";
+        } else if (savedStage.includes('초기')) {
+            stageMessage = "🥣 초기 이유식 중! 알레르기 반응을 주의 깊게 체크해주세요.";
+        } else if (savedStage.includes('중후기')) {
+            stageMessage = "🥄 중/후기 이유식! 오늘은 어떤 맛있는 큐브를 조합해줄까요?";
+        }
+
+        msgEl.innerHTML = `
+            <div style="margin-top: 10px; display: inline-block; background: rgba(255,255,255,0.25); padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.4); font-weight: 800; font-size: 13.5px; backdrop-filter: blur(4px);">
+                ${stageMessage}
+            </div>
+        `;
+    }
+};
+// ==========================================
+
+// ==========================================
+// 🎣 [바이럴 엔진] 남편 강제 소환 (평생 1번만 등장)
+// ==========================================
+window.showInviteNudge = function() {
+    // 핸드폰 창고를 뒤져서 '이전에 본 적이 있는지' 확인! (평생 1번만 띄움)
+    if (!localStorage.getItem('tosil_has_seen_invite')) {
+        const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
+        const nameEl = document.getElementById('invite-baby-name');
+        if(nameEl) nameEl.innerText = babyName;
+
+        // 앱 켜지고 1.5초 뒤에 기습적으로 스르륵 등장!
+        setTimeout(() => {
+            const sheet = document.getElementById('invite-bottom-sheet');
+            if(sheet) sheet.style.display = 'flex';
+        }, 1500);
+    }
+};
+
+// 나중에 할게요 누르면 팝업 닫고 평생 안 보여줌
+window.closeInviteSheet = function() {
+    localStorage.setItem('tosil_has_seen_invite', 'true');
+    document.getElementById('invite-bottom-sheet').style.display = 'none';
+};
+
+// 카톡 초대 버튼 누르면 ➡️ 진짜 공유창 띄우기!
+window.sendKakaoInvite = function() {
+    // 초대 버튼을 눌렀으니 다시는 안 뜨게 도장 쾅!
+    localStorage.setItem('tosil_has_seen_invite', 'true');
+    document.getElementById('invite-bottom-sheet').style.display = 'none';
+    
+    const text = "여보! 우리 아기 맞춤형 육아 비서 [육아메이트]로 나랑 같이 육아 기록 공유하자 🤍 지금 바로 접속해 봐!";
+    const url = "https://happy-baby0303.github.io/"; 
+    
+    if (navigator.share) {
+        // 스마트폰일 때: 핸드폰 자체 공유창 띄우기
+        navigator.share({
+            title: '육아메이트 초대장',
+            text: text,
+            url: url
+        }).then(() => {
+            if(typeof openFamilySyncModal === 'function') openFamilySyncModal();
+        }).catch(console.error);
+    } else {
+        // PC일 때: 알림창 띄우기
+        prompt("아래 초대장을 복사해서 카톡으로 보내주세요!", text + " " + url);
+        if(typeof openFamilySyncModal === 'function') openFamilySyncModal();
+    }
+};
