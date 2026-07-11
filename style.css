@@ -528,3 +528,43 @@ body.dark-mode #smart-banner-container > div span[style*="background: #F59E0B"] 
     border-radius: 24px !important; /* 빵빵하게 둥근 모서리 */
     overflow: hidden !important;    /* 둥근 모서리 밖으로 삐져나가는 것들 숨김 */
 }
+
+/* 🧰 툴박스 상단 버튼 디자인 (대기업 타일형) */
+.tool-chip {
+    background: #FFFFFF !important; 
+    color: #4E5968 !important; 
+    border: 1px solid #F2F5F8 !important; 
+    border-radius: 18px !important; 
+    padding: 16px 0 !important; 
+    display: flex !important; 
+    flex-direction: column !important; 
+    align-items: center !important; 
+    justify-content: center !important; 
+    gap: 8px !important; 
+    cursor: pointer !important; 
+    transition: 0.2s !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important; 
+}
+.tool-chip.active {
+    background: #3182F6 !important; 
+    color: #FFFFFF !important; 
+    border: 1px solid #3182F6 !important;
+    box-shadow: 0 4px 12px rgba(49,130,246,0.2) !important; 
+}
+.tool-chip .t-icon { font-size: 26px !important; line-height: 1 !important; margin-bottom: 2px !important;}
+.tool-chip .t-label { font-size: 13px !important; font-weight: 800 !important; }
+.tool-chip.active .t-label { color: #FFFFFF !important; }
+
+/* 🌟 마법의 투명 망토: 선택 안 된 툴박스 내용 숨기기 */
+#tool-money, #tool-fever, #tool-growth, #tool-hotdeal, #tool-cube, #tool-baton {
+    display: none; /* 일단 전부 숨기기 */
+}
+
+#tool-money.active, 
+#tool-fever.active, 
+#tool-growth.active, 
+#tool-hotdeal.active, 
+#tool-cube.active, 
+#tool-baton.active {
+    display: block; /* 눌린(active) 녀석만 짠! 하고 나타나기 */
+}

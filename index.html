@@ -143,10 +143,10 @@
 <header class="global-header" style="padding: 15px 16px;">
     <div class="header-inner" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
         
-        <h1 class="brand-logo" style="font-size: 1.15rem; margin: 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;">
-            <img src="icon-192x192.png" alt="육아메이트 로고" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            육아메이트
-        </h1>
+        <div class="brand-logo" style="font-size: 1.15rem; margin: 0; font-weight: normal; white-space: nowrap; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px;">
+    <img src="icon-192x192.png" alt="육아메이트 로고" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    육아메이트
+</div>
         
         <div style="display:flex; align-items:center; gap:6px;">
             <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background:none; border:none; font-size:16px; cursor:pointer; padding:0;">🌙</button>
@@ -316,9 +316,10 @@
     </div>
 
     <div id="tab-toolbox" class="tab-content">
-        <div class="app-box box-main" style="padding-top:28px;">
-            <h2 class="app-title">🧰 필수 육아 툴박스</h2>
-            <p class="app-desc" style="margin-bottom:24px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
+        <!-- 🌟 감옥 탈출! (box-main 클래스를 지워서 배경을 투명하게 날렸습니다) -->
+        <div style="padding-top:20px; padding-bottom: 4px;">
+            <h2 class="app-title" style="font-size: 24px; font-weight: 900; color: #191F28; margin: 0 0 6px 0; letter-spacing: -0.5px;">🧰 필수 육아 툴박스</h2>
+            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #8B95A1; margin-bottom:24px; letter-spacing: -0.3px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
 
             <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
                 <div id="btn-tool-money" class="tool-chip active" onclick="switchTool('money', this)"><span class="t-icon">💰</span><span class="t-label">가계부</span></div>
@@ -773,9 +774,10 @@
     </div>
 
     <div id="tab-hotplace" class="tab-content">
-        <div class="app-box box-main" style="padding-top:28px; padding-bottom:24px;">
-            <h1 class="app-title">토실이네 주말</h1>
-            <p class="app-desc" style="margin-bottom: 20px;">👶 아이와 함께하는 안심 주말 지도</p>
+        <!-- 🌟 감옥 탈출! (app-box와 box-main을 지워서 투명하게 만들고 여백만 남겼습니다) -->
+        <div style="padding-top:24px; padding-bottom: 4px;">
+            <h2 class="app-title" style="font-size: 24px; font-weight: 900; color: #191F28; margin: 0 0 6px 0; letter-spacing: -0.5px;">주말 나들이</h2>
+            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #8B95A1; margin-bottom: 24px; letter-spacing: -0.3px;">👶 아이와 함께하는 안심 주말 지도</p>
 
             <div class="segment-control">
                 <button id="seg-event" class="segment-btn active" onclick="switchOutingSubTab('event')">📅 이번주 주말 행사</button>
@@ -816,9 +818,10 @@
     </div> 
 
     <div id="tab-info" class="tab-content">
-        <div class="app-box box-main" style="padding-top:28px;">
-            <h2 class="app-title">📚 육아 백과사전</h2>
-            <p class="app-desc" style="margin-bottom: 24px;">위급 상황 대처 및 맞춤형 육아 정보</p>
+        <!-- 🌟 마지막 감옥 탈출! 완벽한 디자인 통일 -->
+        <div style="padding-top:24px; padding-bottom: 4px;">
+            <h2 class="app-title" style="font-size: 24px; font-weight: 900; color: #191F28; margin: 0 0 6px 0; letter-spacing: -0.5px;">📚 육아 백과사전</h2>
+            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #8B95A1; margin-bottom: 24px; letter-spacing: -0.3px;">위급 상황 대처 및 맞춤형 육아 정보</p>
 
             <div class="sos-banner box-tint-red" onclick="openSOSModal()" style="border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 16px; cursor: pointer;">
                 <div class="sos-banner-icon" style="font-size: 38px;">🚨</div>
