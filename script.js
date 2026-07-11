@@ -944,7 +944,7 @@ window.closeChecklistForce = closeChecklistForce;
 window.closeChecklist = closeChecklist;
 
 // ==========================================
-// 🚨 7. 아기 발달 센서 엔진 & 대시보드 갱신
+// 🚨 7. 아기 발달 센서 엔진 (초압축 한줄 카피)
 // ==========================================
 function updateMainAISensors(months) {
     const txtStroller = document.getElementById('main-txt-stroller');
@@ -954,23 +954,27 @@ function updateMainAISensors(months) {
     const txtToy = document.getElementById('main-txt-toy');
     if(!txtStroller) return;
 
-    if (months <= 6) txtStroller.innerText = "👶 [디럭스] 흔들림 없는 안전 승차감";
-    else if (months <= 12) txtStroller.innerText = "🏃 [절충형] 혼자 앉는 시기 가성비템";
-    else txtStroller.innerText = "⚡ [휴대용] 가볍고 신속한 외출 전용";
+    if (months <= 6) txtStroller.innerText = "👶 디럭스 (안전한 승차감)";
+    else if (months <= 12) txtStroller.innerText = "🏃 절충형 (혼자 앉는 시기)";
+    else txtStroller.innerText = "⚡ 휴대용 (가벼운 외출용)";
 
-    if (months <= 12) txtCarseat.innerText = "🛡️ [신생아] 뒤보기 필수, 목 보호 안전";
-    else txtCarseat.innerText = "🧒 [토들러] 앞보기 전환, 체형 맞춤형";
+    if (months <= 12) txtCarseat.innerText = "🛡️ 신생아용 (뒤보기 필수)";
+    else txtCarseat.innerText = "🧒 토들러용 (앞보기 전환)";
 
-    if (months <= 3) txtBottle.innerText = "🍼 [신생아] 배앓이 방지, 젖꼭지 매칭";
-    else if (months <= 5) txtBottle.innerText = "🍼 [4~5개월] 수유량 증가, 젖꼭지 사이즈업";
-    else txtBottle.innerText = "🥛 [6개월+] 빨대컵 연습, 스스로 마시기 시작";
+    if (months <= 3) txtBottle.innerText = "🍼 신생아 (배앓이 방지)";
+    else if (months <= 5) txtBottle.innerText = "🍼 4~5개월 (젖꼭지 업)";
+    else txtBottle.innerText = "🥛 6개월+ (빨대컵 연습)";
 
-    if (months <= 6) txtFood.innerText = "🌾 [초기] 쌀미음 스타트, 식단 매칭";
-    else if (months <= 9) txtFood.innerText = "🥕 [중기] 입자 업그레이드, 재료 신호등";
-    else txtFood.innerText = "🍽️ [완료기] 유아식 진화, 영양소 체크";
+    if (months <= 6) txtFood.innerText = "🌾 초기 (쌀미음 스타트)";
+    else if (months <= 9) txtFood.innerText = "🥕 중기 (입자 크기 업)";
+    else txtFood.innerText = "🍽️ 완료기 (유아식 진화)";
 
-    if (months <= 5) txtToy.innerText = "💪 [터미타임] 고개 가누기 완구";
-    else txtToy.innerText = "🏃 [걸음마] 잡고 일어서는 완구";
+   // 🧸 장난감 센서 (아기 발달 단계 세분화 완벽 적용!)
+    if (months <= 4) txtToy.innerText = "💪 터미타임 (고개 가누기)";
+    else if (months <= 6) txtToy.innerText = "🐛 배밀기 (전신 근육 발달)";
+    else if (months <= 9) txtToy.innerText = "🐾 기어다니기 (활동 반경 확장)";
+    else if (months <= 12) txtToy.innerText = "🏃 걸음마 (잡고 일어서기)";
+    else txtToy.innerText = "🧩 소근육 놀이 (블록·조작북)";
 }
 
 function setDefaultMainAISensors() {
@@ -1241,94 +1245,6 @@ window.renderGrowthHistory = renderGrowthHistory;
 document.addEventListener("DOMContentLoaded", () => {
     if(typeof window.renderGrowthHistory === 'function') window.renderGrowthHistory();
 });
-
-// ==========================================
-// 👶 아기 정보 & 메인 대시보드 렌더링 (중복 배너 제거 완료)
-// ==========================================
-function renderBabyInfo() {
-    const saved = localStorage.getItem('tosil_baby'), nameEl = document.getElementById('res-baby-name'), ddayEl = document.getElementById('res-baby-dday'), msgEl = document.getElementById('daily-message'); 
-    const goalInput = document.getElementById('v-goal-text');
-    const missionNameEl = document.getElementById('mission-baby-name');
-    
-    if(!saved) {
-        if(nameEl) nameEl.innerText = "이름을 눌러 등록해주세요"; 
-        if(ddayEl) ddayEl.innerText = "D+0일";
-        initPlayWidget(null, 0);
-        setDefaultMainAISensors();
-        return;
-    }
-    try {
-        const data = JSON.parse(saved);
-        const diffDays = Math.ceil((new Date() - new Date(data.birth)) / (1000*60*60*24));
-        const monthAge = Math.floor(diffDays / 30.436875);
-        const weekAge = Math.floor(diffDays / 7);
-        
-        let curWW = null;
-        if(typeof wwList !== 'undefined') {
-            curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
-        }
-
-        let curVac = null;
-        if(typeof vaccineData !== 'undefined') {
-            curVac = vaccineData.find(v => monthAge === v.maxMonth); 
-        }
-
-        let badgeHtml = "";
-        if (curWW) {
-            badgeHtml = `<span style="display:inline-block; font-size:12px; font-weight:800; background:rgba(0,0,0,0.55); color:#FFF; padding:4px 10px; border-radius:12px; margin-left:8px; vertical-align:middle; text-shadow:none; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.2);">⛈️ 도약기</span>`;
-        } else {
-            badgeHtml = `<span style="display:inline-block; font-size:12px; font-weight:800; background:rgba(0,0,0,0.4); color:#FFF; padding:4px 10px; border-radius:12px; margin-left:8px; vertical-align:middle; text-shadow:none; backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,0.15);">☀️ 평온기</span>`;
-        }
-        
-        if(nameEl) nameEl.innerText = data.name + "의 공간"; 
-        if(ddayEl) ddayEl.innerHTML = "D+" + diffDays + "일" + badgeHtml; 
-        
-        if(goalInput && !goalInput.value) goalInput.placeholder = `예: ${data.name} 코코지하우스 구매`;
-        if(missionNameEl) missionNameEl.innerText = data.name;
-
-        const tipObj = babyTips.find(item => monthAge >= item.min && monthAge <= item.max);
-        if(msgEl) msgEl.innerText = tipObj ? tipObj.tip : `오늘도 ${data.name}와(과) 행복한 하루 되세요! 🤍`;
-        
-        initPlayWidget(monthAge, diffDays);
-        updateMainAISensors(monthAge); 
-
-        // 🎯 숨어있던 '닌자 스마트 배너' (예방접종 전용으로 축소)
-        const bannerContainer = document.getElementById('health-smart-banner');
-        if (bannerContainer) {
-            let bannerHtml = '';
-            
-            // 💉 예방접종 경고 배너 (이것만 남깁니다!)
-            if (curVac) {
-                bannerHtml += `
-                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
-                        <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0;">
-                            <div style="font-size: 24px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2)); margin-top: 2px;">💉</div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 11px; font-weight: 800; color: #1967D2; margin-bottom: 4px;">이번 달 필수 접종</div>
-                                <div style="font-size: 13px; font-weight: 900; color: #191F28; line-height: 1.4; letter-spacing: -0.5px; word-break: keep-all;">
-                                    ${curVac.desc}
-                                </div>
-                            </div>
-                        </div>
-                        <span style="flex-shrink: 0; white-space: nowrap; background: #1A73E8; color: white; font-size: 12px; font-weight: 900; padding: 8px 12px; border-radius: 10px; align-self: center;">확인하기</span>
-                    </div>
-                `;
-            }
-            
-            // ❌ 여기에 있던 원더윅스 코드는 삭제 완료! (스마트 배너 엔진으로 이관) ❌
-            
-            if (bannerHtml !== '') {
-                bannerContainer.innerHTML = bannerHtml;
-                bannerContainer.style.display = 'block';
-            } else {
-                bannerContainer.style.display = 'none';
-            }
-        }
-        
-    } catch (e) {
-        console.error(e);
-    }
-}
 
 function initPlayWidget(months, dday) {
     const badgeEl = document.getElementById('play-dday-badge'), titleEl = document.getElementById('play-title'), descEl = document.getElementById('play-desc'), effectEl = document.getElementById('play-effect');
@@ -2957,28 +2873,45 @@ window.onload = () => {
     updateSyncBadge(); 
 };
 
-// 🌙 새벽 3시의 감동 이스터에그 로직
-document.addEventListener('DOMContentLoaded', () => {
-    // 현재 시간 가져오기 (0 ~ 23)
+// ==========================================
+// 🌤️ [감성 엔진] 시간대별 인사말 & 새벽 이스터에그 통합판
+// ==========================================
+window.applyTimeBasedGreeting = function(babyName) {
     const currentHour = new Date().getHours();
+    const greetingEl = document.getElementById('ai-time-greeting');
+    const subEl = document.getElementById('ai-time-sub');
     
-    // 💡 새벽 2시 ~ 5시 (2, 3, 4, 5)에만 작동합니다.
+    // 1. 🌙 새벽 이스터에그
     if (currentHour >= 2 && currentHour <= 5) {
         const easterEgg = document.getElementById('easter-egg-layer');
         if (easterEgg) {
-            easterEgg.style.display = 'flex'; // 이스터에그 짠! 나타남
-            
-            // 기존에 있던 정보들이 글씨 뒤에 겹쳐 보이지 않게 스윽 숨겨줍니다.
-            const ddayEl = document.getElementById('res-baby-dday');
-            const nameEl = document.getElementById('res-baby-name');
-            const msgEl = document.getElementById('daily-message');
-            
-            if(ddayEl) ddayEl.style.display = 'none';
-            if(nameEl) nameEl.style.display = 'none';
-            if(msgEl) msgEl.style.display = 'none';
+            easterEgg.style.display = 'flex';
+            ['res-baby-dday', 'res-baby-name', 'daily-message'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.style.display = 'none';
+            });
         }
+        return; 
     }
-});
+
+    // 2. ☀️ 평상시 시간대별 인사말 (토스 스타일의 큰 헤더)
+    if (greetingEl) {
+        let title = ""; let sub = "";
+        
+        if (currentHour >= 6 && currentHour < 11) {
+            title = `상쾌한 아침이에요 ☀️`; sub = `간밤에 ${babyName}는 푹 잤나요?`;
+        } else if (currentHour >= 11 && currentHour < 17) {
+            title = `활기찬 오후네요 🌤️`; sub = `육아 틈틈이 커피 한 잔의 여유를!`;
+        } else if (currentHour >= 17 && currentHour < 22) {
+            title = `고생 많은 저녁이에요 🌙`; sub = `오늘 하루도 ${babyName} 돌보느라 수고하셨어요 🤍`;
+        } else {
+            title = `새벽에도 깨어계시군요 🦉`; sub = `늦은 시간까지 아기 곁을 지키는 엄마 최고예요 👍`;
+        }
+        
+        greetingEl.innerText = title;
+        if(subEl) subEl.innerText = sub;
+    }
+};
 
 // ==========================================
 // 🚀 앱 자동화 엔진 (새로고침 및 실시간 갱신)
@@ -3813,52 +3746,6 @@ window.promptBabyInfo = function() {
     document.getElementById('onboarding-overlay').style.display = 'flex';
 };
 
-// ==========================================
-// 👶 [홈 화면 엔진] 아기 이름 & D-Day & 맞춤형 큐레이션
-// ==========================================
-window.updateBabyDashboard = function() {
-    const savedName = localStorage.getItem('tosil_babyName');
-    const savedDate = localStorage.getItem('tosil_startDate');
-    const savedStage = localStorage.getItem('tosil_feedingStage');
-
-    if (!savedName || !savedDate) return;
-
-    const nameEl = document.getElementById('res-baby-name');
-    if (nameEl) nameEl.innerText = `${savedName}의 공간`;
-
-    const birthDate = new Date(savedDate);
-    birthDate.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const diffTime = today.getTime() - birthDate.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    const ddayEl = document.getElementById('res-baby-dday');
-    if (ddayEl) {
-        let ddayText = diffDays > 0 ? `D+${diffDays}일` : diffDays < 0 ? `D${diffDays}일` : `D-Day`;
-        ddayEl.innerHTML = `${ddayText} <span style="font-size:13px; background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:12px; vertical-align:middle; margin-left:6px; font-weight:800;">🚀 도약기</span>`;
-    }
-
-    const msgEl = document.getElementById('daily-message');
-    if (msgEl && savedStage) {
-        let stageMessage = "";
-        if (savedStage.includes('모유/분유')) {
-            stageMessage = "🍼 쑥쑥 크는 수유기! 오늘도 수유량 꼼꼼히 기록해볼까요?";
-        } else if (savedStage.includes('초기')) {
-            stageMessage = "🥣 초기 이유식 중! 알레르기 반응을 주의 깊게 체크해주세요.";
-        } else if (savedStage.includes('중후기')) {
-            stageMessage = "🥄 중/후기 이유식! 오늘은 어떤 맛있는 큐브를 조합해줄까요?";
-        }
-
-        msgEl.innerHTML = `
-            <div style="margin-top: 10px; display: inline-block; background: rgba(255,255,255,0.25); padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.4); font-weight: 800; font-size: 13.5px; backdrop-filter: blur(4px);">
-                ${stageMessage}
-            </div>
-        `;
-    }
-};
-// ==========================================
 
 // ==========================================
 // 🎣 [바이럴 엔진] 남편 강제 소환 (평생 1번만 등장)
@@ -3908,3 +3795,112 @@ window.sendKakaoInvite = function() {
         if(typeof openFamilySyncModal === 'function') openFamilySyncModal();
     }
 };
+
+// ==========================================
+// 👶 [홈 화면 통합 엔진] 아기 정보 & 맞춤형 큐레이션 & 시간대 인사말
+// ==========================================
+window.renderBabyInfo = function() {
+    const savedName = localStorage.getItem('tosil_babyName');
+    const savedDate = localStorage.getItem('tosil_startDate');
+    const savedStage = localStorage.getItem('tosil_feedingStage');
+
+    const nameEl = document.getElementById('res-baby-name');
+    const ddayEl = document.getElementById('res-baby-dday');
+    const msgEl = document.getElementById('daily-message');
+    const missionNameEl = document.getElementById('mission-baby-name');
+
+    // 1. 정보가 없을 때 (온보딩 전)
+    if (!savedName || !savedDate) {
+        if(nameEl) nameEl.innerText = "아기를 등록해주세요"; 
+        if(ddayEl) ddayEl.innerText = "등록 전";
+        if(typeof initPlayWidget === 'function') initPlayWidget(null, 0);
+        if(typeof setDefaultMainAISensors === 'function') setDefaultMainAISensors();
+        return;
+    }
+
+    // 2. 날짜 및 D-Day 계산
+    const birthDate = new Date(savedDate);
+    birthDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = today.getTime() - birthDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const monthAge = Math.floor(diffDays / 30.436875);
+
+    // 3. 이름 & D-Day 뿌리기 (뱃지 크기 밸런스 조정)
+    if(nameEl) nameEl.innerText = `${savedName}의 공간`; 
+    if(missionNameEl) missionNameEl.innerText = savedName;
+
+    let ddayText = diffDays > 0 ? `D+${diffDays}일` : diffDays < 0 ? `D${diffDays}일` : `D-Day`;
+    if(ddayEl) ddayEl.innerHTML = `${ddayText} <span style="font-size:14px; background:rgba(0,0,0,0.5); padding:6px 12px; border-radius:12px; vertical-align:middle; margin-left:8px; font-weight:800; text-shadow:none; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2);">🚀 도약기</span>`; 
+
+    // 4. 시간대별 감성 인사말 띄우기
+    if(typeof applyTimeBasedGreeting === 'function') applyTimeBasedGreeting(savedName);
+
+   // 5. 🔥 이유식 뱃지 (단순한 버튼이 아닌, 정보형 카드 UI로 변경)
+    if (msgEl) {
+        if (savedStage) {
+            let stageTitle = ""; let stageSub = ""; let stageIcon = "";
+            if (savedStage.includes('모유/분유')) { stageTitle = "쑥쑥 크는 수유기!"; stageSub = "오늘도 수유량 꼼꼼히 기록해볼까요?"; stageIcon = "🍼"; }
+            else if (savedStage.includes('초기')) { stageTitle = "초기 이유식 중!"; stageSub = "알레르기 반응을 주의 깊게 체크해주세요."; stageIcon = "🥣"; }
+            else if (savedStage.includes('중후기')) { stageTitle = "중/후기 이유식!"; stageSub = "오늘은 어떤 큐브를 조합할까요?"; stageIcon = "🥄"; }
+
+            msgEl.innerHTML = `
+                <div style="font-size:28px; line-height:1; flex-shrink:0;">${stageIcon}</div> 
+                <div style="flex:1; min-width:0;">
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:2px;">${stageTitle}</div>
+                    <div style="font-size:12.5px; font-weight:600; color:var(--text-s); word-break:keep-all;">${stageSub}</div>
+                </div>`;
+        } else {
+            const tipObj = typeof babyTips !== 'undefined' ? babyTips.find(item => monthAge >= item.min && monthAge <= item.max) : null;
+            msgEl.innerHTML = `
+                <div style="font-size:28px; line-height:1; flex-shrink:0;">💡</div> 
+                <div style="flex:1; min-width:0;">
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:2px;">오늘의 육아 팁</div>
+                    <div style="font-size:12.5px; font-weight:600; color:var(--text-s); word-break:keep-all;">${tipObj ? tipObj.tip : `오늘도 ${savedName}와(과) 행복한 하루 되세요! 🤍`}</div>
+                </div>`;
+        }
+        msgEl.style.display = 'flex'; 
+    }
+
+    // 6. 하단 위젯 & 센서 가동
+    if(typeof initPlayWidget === 'function') initPlayWidget(monthAge, diffDays);
+    if(typeof updateMainAISensors === 'function') updateMainAISensors(monthAge); 
+
+    // 7. 예방접종 배너 띄우기
+    const bannerContainer = document.getElementById('health-smart-banner');
+    if (bannerContainer && typeof vaccineData !== 'undefined') {
+        let curVac = vaccineData.find(v => monthAge === v.maxMonth); 
+        if (curVac) {
+            bannerContainer.innerHTML = `
+                <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="cursor:pointer; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 4px 12px rgba(26,115,232,0.1);">
+                    <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0;">
+                        <div style="font-size: 24px; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(26,115,232,0.2)); margin-top: 2px;">💉</div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-size: 11px; font-weight: 800; color: #1967D2; margin-bottom: 4px;">이번 달 필수 접종</div>
+                            <div style="font-size: 13px; font-weight: 900; color: #191F28; line-height: 1.4; letter-spacing: -0.5px; word-break: keep-all;">${curVac.desc}</div>
+                        </div>
+                    </div>
+                    <span style="flex-shrink: 0; white-space: nowrap; background: #1A73E8; color: white; font-size: 12px; font-weight: 900; padding: 8px 12px; border-radius: 10px; align-self: center;">확인하기</span>
+                </div>
+            `;
+            bannerContainer.style.display = 'block';
+        } else {
+            bannerContainer.style.display = 'none';
+        }
+    }
+};
+
+// 🚨 온보딩 체크 후 renderBabyInfo 호출 (앱 맨 밑쪽에 있는 DOMContentLoaded 덮어쓰기)
+document.addEventListener("DOMContentLoaded", () => {
+    const savedName = localStorage.getItem('tosil_babyName');
+    const savedDate = localStorage.getItem('tosil_startDate');
+    
+    if (savedName && savedDate) {
+        document.getElementById('onboarding-overlay').style.display = 'none';
+        renderBabyInfo(); // 👈 여기서 하나로 통합된 엔진 실행!
+    } else {
+        document.getElementById('onboarding-overlay').style.display = 'flex';
+    }
+});
