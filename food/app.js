@@ -214,7 +214,7 @@ function checkIngredient() {
     }
 }
 
-// 🌟 공통 카드 렌더링 함수 (요리 모드 버튼 추가!)
+// 🌟 공통 카드 렌더링 함수 (대기업 프리미엄 템플릿 완벽 적용 + 녹색 띠 제거)
 function generateCardHTML(item) {
     const itemId = item.name;
     const favorites = JSON.parse(localStorage.getItem('favFoods')) || [];
@@ -225,34 +225,45 @@ function generateCardHTML(item) {
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
     return `
-        <div class="stroller-card" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : '#10B981'}; margin-bottom: 24px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
-                <div style="font-size: 18px; font-weight: 800; color: #191F28;">🍲 ${item.name}</div>
-                <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s;">
-                    ${heartIcon}
-                </button>
-            </div>
-            <div style="font-size: 13.5px; color: #4E5968; margin-bottom: 16px; font-weight: 600;">💡 ${item.desc}</div>
+        <div class="stroller-card" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'}; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8;">
             
-            <div style="background: #F2F4F6; padding: 12px; border-radius: 8px; font-size: 13px; color: #333D4B; margin-bottom: 12px;">
-                <b>👨‍🍳 입자:</b> ${item.texture}<br>
-                <b style="color:#3182F6; display:inline-block; margin-top:6px;">🛒 필요 재료:</b> ${item.ingredients}
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; gap: 12px;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">
+                        🍲 ${item.name}
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
+                    <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
+                        ${heartIcon}
+                    </button>
+                </div>
+            </div>
+            
+            <div style="font-size: 13.5px; color: #4E5968; margin-bottom: 20px; font-weight: 600; line-height: 1.5;">💡 ${item.desc}</div>
+            
+            <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
+                <div style="font-size: 13.5px; color: #4E5968; line-height: 1.6; font-weight: 600;">
+                    <span style="display:block; margin-bottom:6px;"><b>👨‍🍳 입자:</b> ${item.texture}</span>
+                    <span style="color:#3182F6; display:block;"><b>🛒 필요 재료:</b> ${item.ingredients}</span>
+                </div>
             </div>
 
-            <!-- ✨ 요리 모드 시작 버튼 ✨ -->
-            <button onclick="openCookingMode('${item.name}')" style="width:100%; background:#191F28; color:#FFFFFF; border:none; padding:16px; border-radius:12px; font-weight:900; font-size:15px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <span style="font-size:20px;">👨‍🍳</span> 스마트 요리 모드 시작
+            <!-- ✨ 까만색 묵직한 프리미엄 요리 시작 버튼 -->
+            <button onclick="openCookingMode('${item.name}')" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#191F28; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 16px; transition: 0.2s;">
+                👨‍🍳 스마트 요리 모드 시작 〉
             </button>
             
-            <div class="recipe-box" style="background: #FFF; border: 1px solid #E5E8EB; padding: 16px; border-radius: 8px; margin-bottom:16px;">
-                <div style="font-weight: 800; font-size: 14px; margin-bottom: 8px;">조리 순서 미리보기</div>
+            <div class="recipe-box" style="background: #FFF; border: 1px solid #E5E8EB; padding: 16px; border-radius: 14px; margin-bottom:16px;">
+                <div style="font-weight: 800; font-size: 13.5px; color: #191F28; margin-bottom: 8px;">조리 순서 미리보기</div>
                 <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #4E5968; line-height: 1.6;">
-                    ${item.recipe.map(step => `<li>${step}</li>`).join('')}
+                    ${item.recipe.map(step => `<li style="margin-bottom:4px;">${step}</li>`).join('')}
                 </ul>
             </div>
 
-            <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="width:100%; background:#FEE500; color:#191919; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:15px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom:8px;">
-                <span style="font-size:18px;">💬</span> 남편에게 장보기 전송 (쿠팡)
+            <!-- ✨ 카카오톡 노란색 장보기 공유 버튼 -->
+            <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="display:block; width:100%; background:#FEE500; border:none; color:#191919; padding:16px; border-radius:14px; font-weight:900; font-size:15px; text-align:center; transition:0.2s; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);">
+                💬 남편에게 장보기 전송 (쿠팡)
             </button>
         </div>
     `;
@@ -1180,7 +1191,7 @@ window.downloadCalendarImage = function() {
         btn.style.background = '#191F28';
         btn.disabled = false;
         
-        setTimeout(() => { alert("📸 갤러리에 식단표가 저장되었습니다! 맘카페에 자랑해보세요!"); }, 300);
+        setTimeout(() => { alert("📸 갤러리에 식단표가 저장되었습니다!"); }, 300);
     }).catch(err => {
         console.error("캡처 실패:", err);
         alert("🚨 앗, 이미지 저장에 실패했어요. 다시 시도해주세요!");

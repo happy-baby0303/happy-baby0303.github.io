@@ -98,7 +98,7 @@ function renderFavorites() {
     resultArea.innerHTML = htmlOutput;
 }
 
-// 🚀 3. 강력해진 AI 카드 렌더링 엔진
+// 🚀 3. 강력해진 AI 카드 렌더링 엔진 (대기업 템플릿 적용)
 function generateReportHTML(item) {
     const favorites = JSON.parse(localStorage.getItem('favCarseats')) || [];
     const isFav = favorites.includes(item.id);
@@ -107,8 +107,7 @@ function generateReportHTML(item) {
     const heartText = isFav ? '#E32636' : '#4E5968';
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // ✨ AI 매칭률 점수 및 컬러 세팅
-    let cardBorderColor = '#D1D5DB'; 
+    // ✨ AI 매칭률 점수
     let scoreHtml = "";
     let aiReportHtml = '';
 
@@ -116,80 +115,76 @@ function generateReportHTML(item) {
         let titleColor, bgColor, borderColor, titleText;
         
         if (item.matchRate === 100) {
-            titleColor = '#1B64DA'; bgColor = '#F0F7FF'; borderColor = '#3182F6';
-            cardBorderColor = '#3182F6'; titleText = '🟢 최적합 (Premium Match)';
+            titleColor = '#3182F6'; bgColor = '#F9FAFB'; borderColor = '#E5E8EB'; titleText = '🟢 AI 최적합 판정';
         } else if (item.matchRate >= 80) {
-            titleColor = '#059669'; bgColor = '#ECFDF5'; borderColor = '#10B981';
-            cardBorderColor = '#10B981'; titleText = '🍀 우수 (Good Match)';
+            titleColor = '#059669'; bgColor = '#F9FAFB'; borderColor = '#E5E8EB'; titleText = '🍀 AI 우수 판정';
         } else if (item.matchRate >= 50) {
-            titleColor = '#B78103'; bgColor = '#FFF9E6'; borderColor = '#F59E0B';
-            cardBorderColor = '#F59E0B'; titleText = '⚠️ 장착 주의 (Conditional)';
+            titleColor = '#F59E0B'; bgColor = '#F9FAFB'; borderColor = '#E5E8EB'; titleText = '⚠️ AI 조건부 추천';
         } else {
-            titleColor = '#D32F2F'; bgColor = '#FFF0F1'; borderColor = '#F04452';
-            cardBorderColor = '#F04452'; titleText = '❌ 호환 불가/비추천 (Mismatch)';
+            titleColor = '#E32636'; bgColor = '#F9FAFB'; borderColor = '#E5E8EB'; titleText = '❌ AI 비추천 판정';
         }
 
-        scoreHtml = `<div style="font-size:14px; font-weight:800; color:${titleColor}; margin-top:4px;">매칭률 ${item.matchRate}%</div>`;
+        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 28px; font-weight: 900; color: ${titleColor}; letter-spacing: -1px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 2px;">AI 매칭</div></div>`;
 
         let reasonLi = item.matchRate === 100 
             ? `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`
-            : item.matchReasons.map(r => `<li style="margin-bottom:4px;">🚨 <b>${r}</b></li>`).join('');
+            : item.matchReasons.map(r => `<li style="margin-bottom:4px; color:#4E5968;">🚨 <b>${r}</b></li>`).join('');
 
         aiReportHtml = `
-            <div style="background:${bgColor}; border:1px solid ${borderColor}; padding:14px; border-radius:8px; margin-bottom:16px;">
-                <h4 style="color:${titleColor}; margin:0 0 6px 0; font-size:13px;">${titleText}</h4>
-                <ul style="margin:0; padding-left:20px; font-size:12.5px; color:${titleColor}; line-height:1.5;">${reasonLi}</ul>
+            <div style="background:${bgColor}; border:1px solid ${borderColor}; padding:16px; border-radius:14px; margin-bottom:16px;">
+                <h4 style="color:${titleColor}; margin:0 0 10px 0; font-size:14px; font-weight:800;">${titleText}</h4>
+                <ul style="margin:0; padding-left:20px; font-size:13px; color:#4E5968; line-height:1.5; font-weight: 600;">${reasonLi}</ul>
             </div>`;
     }
-
-    if (isFavViewMode) cardBorderColor = '#E32636';
 
     const safetyChecks = item.safety.map(s => `✅ ${s.toUpperCase()} 최고 등급 인증`).join('<br>');
     const adacText = item.specs.adacScore.includes('미참여') 
         ? `✅ ${item.specs.adacScore}` 
         : `✅ ADAC 테스트: ${item.specs.adacScore}`;
 
-    // [이 코드로 싹 교체하세요]
-const isOfficial = (item.reportUrl && item.reportUrl !== "#" && item.reportUrl.trim() !== "");
-
-// 1. 링크가 있으면 원문 보기, 없으면 검색하기로 텍스트 자동 변경
-const labelText = isOfficial ? "🔗 ADAC 충돌 테스트 원문 보기 ➔" : "🔍 ADAC 테스트 관련 정보 검색 ➔";
-
-// 2. 주소 설정
-const targetUrl = isOfficial 
-    ? item.reportUrl 
-    : `https://www.google.com/search?q=ADAC+${encodeURIComponent(item.brand)}+${encodeURIComponent(item.name)}`;
-
-// 3. 버튼 생성
-const reportBtn = `<a href="${targetUrl}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:#3182F6; text-decoration:underline; font-weight:700;">${labelText}</a>`;
+    const isOfficial = (item.reportUrl && item.reportUrl !== "#" && item.reportUrl.trim() !== "");
+    const labelText = isOfficial ? "🔗 ADAC 충돌 테스트 원문 보기 ➔" : "🔍 ADAC 테스트 관련 정보 검색 ➔";
+    const targetUrl = isOfficial ? item.reportUrl : `https://www.google.com/search?q=ADAC+${encodeURIComponent(item.brand)}+${encodeURIComponent(item.name)}`;
+    const reportBtn = `<a href="${targetUrl}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:#3182F6; text-decoration:underline; font-weight:700;">${labelText}</a>`;
         
+    // 6. 구매버튼 및 방어 멘트
     let purchaseBtn = item.purchasePlatform === 'coupang' 
-        ? `<a href="${item.linkUrl}" target="_blank" style="display:block; width:100%; padding:14px; background:#0073e9; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; margin-bottom:12px; text-decoration:none;">🚀 로켓배송 최저가 확인하기</a>`
-        : `<a href="${item.linkUrl}" target="_blank" style="display:block; width:100%; padding:14px; background:#191F28; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; margin-bottom:12px; text-decoration:none;">👑 브랜드 공식 스토어 가기</a>`;
+        ? `<a href="${item.linkUrl}" target="_blank" class="buy-btn coupang">🚀 쿠팡에서 구매/상세정보 확인 〉</a>
+           <div class="coupang-safety-guard" style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 10px; line-height: 1.5; word-break: keep-all;">
+               ※ 육아메이트는 원활한 반품/교환을 위해 <b>[로켓배송]</b> 링크를 우선 제공합니다.<br>
+               (교환/환불 및 A/S 규정은 쿠팡 및 제조사 정책을 따르므로 구매 전 반드시 확인하세요)
+           </div>`
+        : `<a href="${item.linkUrl}" target="_blank" class="buy-btn official">👑 브랜드 공식 스토어 가기 〉</a>`;
 
     const techSpecHTML = item.specs.sideProtection ? `✅ <b>기술 스펙:</b> ${item.specs.sideProtection}<br>` : ``;
 
     return `
-        <div class="report-card" style="border-top: 4px solid ${cardBorderColor}; padding: 20px; background:#FFF; border-radius:16px; margin-bottom:24px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 6px;">
-                <div>
-                    <div style="font-size: 20px; font-weight: 900; color: #191F28;">[${item.brand}] ${item.name}</div>
-                    ${scoreHtml}
+        <div class="report-card" id="card-${item.id}" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'};">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px;">
+                <div style="flex: 1; min-width: 0;">
+                    <!-- ✨ 매의 눈 수정: margin-bottom을 16px로 대폭 늘려서 숨통을 틔움! -->
+                    <div style="margin-bottom: 16px;">
+                        <span style="background:#F2F5F8; color:#4E5968; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.bodySpec}</span>
+                    </div>
+                    <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">
+                        [${item.brand}] ${item.name}
+                    </div>
                 </div>
-                <button id="fav-btn-${item.id}" onclick="toggleFavorite('${item.id}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s;">
-                    ${heartIcon}
-                </button>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
+                    ${scoreHtml}
+                    <button id="fav-btn-${item.id}" onclick="toggleFavorite('${item.id}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
+                        ${heartIcon}
+                    </button>
+                </div>
             </div>
             
             ${aiReportHtml}
 
-            <div style="font-size: 13px; font-weight: 800; color: #3182F6; margin-bottom: 16px;">
-                ${item.bodySpec}
-            </div>
-            
-            <div class="safety-box" style="background:#F8F9FA; padding:16px; border-radius:10px; margin-bottom:16px;">
-                <div style="font-weight: 800; color: #2F9E44; margin-bottom: 8px;">🛡️ 인증 리포트 & 장착 방식</div>
-                <div style="font-size: 14px; line-height: 1.6; color: #333D4B;">
+            <!-- 인증 리포트 (통일된 회색 박스) -->
+            <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
+                <div style="font-weight: 800; color: #191F28; margin-bottom: 8px;">🛡️ 인증 리포트 & 장착 방식</div>
+                <div style="font-size: 13.5px; line-height: 1.6; color: #4E5968; font-weight: 600;">
                     ${safetyChecks}<br>
                     ${adacText}<br>
                     ✅ <b>안전 장치:</b> ${item.specs.reboundStopper}<br>
@@ -197,18 +192,21 @@ const reportBtn = `<a href="${targetUrl}" target="_blank" style="display:inline-
                 </div>
             </div>
 
-            <div style="font-size: 14px; color: #4E5968; margin-bottom: 20px; line-height: 1.5;">
-                <b style="color: #191F28;">💡 전문가 소견:</b><br>${item.desc}
+            <!-- 전문가 소견 (통일된 회색 박스) -->
+            <div class="insight-box" style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
+                <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 전문가 소견</div>
+                <div style="font-size: 13.5px; color: #4E5968; line-height: 1.5; font-weight: 600; word-break: keep-all;">${item.desc}</div>
             </div>
 
             ${purchaseBtn}
 
-            <button onclick="shareToHusband('${item.id}')" style="width:100%; padding:14px; background:#2F9E44; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; margin-bottom: 12px;">
+            <button onclick="shareToHusband('${item.id}')" style="display:block; width:100%; background:#F9FAFB; border:1px solid #E5E8EB; color:#4E5968; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
                 🟢 남편에게 이 '안전 리포트' 전송하기
             </button>
 
-            <div style="background: #FFFBEB; padding: 14px; border-radius: 10px; font-size: 13px; color: #8A6D3B; border: 1px dashed #FDE68A; line-height: 1.5;">
-                <b style="color: #D97706;">💡 AI 카시트 설치 필수 꿀팁:</b><br>
+            <!-- 필수 꿀팁 (크로스셀링) -->
+            <div style="background: #FFFBEB; padding: 16px; border-radius: 14px; font-size: 13px; color: #B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top: 16px;">
+                <b style="color: #D97706; font-size: 13.5px; display:block; margin-bottom:4px;">💡 AI 카시트 설치 필수 꿀팁:</b>
                 새 카시트 장착 시 <b>차량 가죽시트 눌림 및 영구 파손</b>이 100% 발생합니다. 카시트 도착 전, 후방거울과 보호매트를 꼭 미리 세팅해 두세요!<br>
                 <a href="https://link.coupang.com/a/eEtXJsuJxc" target="_blank" style="display:inline-block; margin-top:8px; color: #D97706; font-weight: 800; text-decoration: underline;">👉 보호매트+거울 세트 로켓배송 담기</a>
             </div>

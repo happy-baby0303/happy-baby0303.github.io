@@ -51,40 +51,46 @@
 
         <div id="auto-sync-banner" class="sync-banner"></div>
 
-        <!-- 🚨 부모 생존 SOS 테마 (다크 패널) -->
-        <div class="sos-theme-panel">
-            <div class="panel-header">🚨 엄마아빠 SOS 긴급 처방전</div>
-            <div class="theme-scroll-wrapper" id="theme-filters">
-                <button class="theme-card" data-theme="sos-meal">
-                    <div class="theme-emoji">🍚</div>
-                    <div class="theme-text">엄마 밥 먹을 시간<br><b>20분 벌어주는 템</b></div>
-                </button>
-                <button class="theme-card" data-theme="sos-sleep">
-                    <div class="theme-emoji">⚡</div>
-                    <div class="theme-text">오늘 밤 기절 보장<br><b>체력 완전 방전템</b></div>
-                </button>
-                <button class="theme-card" data-theme="sos-out">
-                    <div class="theme-emoji">🚘</div>
-                    <div class="theme-text">식당/카시트<br><b>절대 얌전 보장템</b></div>
-                </button>
-                <button class="theme-card" data-theme="sos-shower">
-                    <div class="theme-emoji">🚿</div>
-                    <div class="theme-text">엄마 씻을 시간<br><b>안전 화장실 보장템</b></div>
-                </button>
-            </div>
-            <button class="btn-secondary" onclick="toggleFavView()" id="btn-show-fav" style="margin-top: 20px; width: 100%;">❤️ 내가 찜한 장난감 모아보기</button>
+    <!-- 🚨 부모 생존 SOS 테마 (다크 패널) -->
+    <div class="sos-theme-panel">
+        <div class="panel-header">🚨 엄마아빠 SOS 긴급 처방전</div>
+        <div class="theme-scroll-wrapper" id="theme-filters">
+            <button class="theme-card" data-theme="sos-meal">
+                <div class="theme-emoji">🍚</div>
+                <div class="theme-text">엄마 밥 먹을 시간<br><b>20분 벌어주는 템</b></div>
+            </button>
+            <button class="theme-card" data-theme="sos-sleep">
+                <div class="theme-emoji">⚡</div>
+                <div class="theme-text">오늘 밤 기절 보장<br><b>체력 완전 방전템</b></div>
+            </button>
+            <button class="theme-card" data-theme="sos-out">
+                <div class="theme-emoji">🚘</div>
+                <div class="theme-text">식당/카시트<br><b>절대 얌전 보장템</b></div>
+            </button>
+            <button class="theme-card" data-theme="sos-shower">
+                <div class="theme-emoji">🚿</div>
+                <div class="theme-text">엄마 씻을 시간<br><b>안전 화장실 보장템</b></div>
+            </button>
         </div>
+    </div> <!-- 🚨 [여기가 핵심!!] 까만색 패널의 문을 여기서 닫아줍니다! -->
+
+    <!-- ✨ 까만 패널 밖으로 탈출한 핑크색 찜하기 버튼 -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
+        <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 12px 18px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(227, 38, 54, 0.15); transition: 0.2s;">
+            ❤️ 내가 찜한 장난감 모아보기
+        </button>
+    </div>
 
         <!-- 👶 발달 마일스톤 칩 필터 -->
        <div class="panel-header-dark">👶 우리 아기 현재 발달 상태는?</div>
             
             <div class="chip-group" id="milestone-filters" style="display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
                 <button class="ms-chip active" data-milestone="all" style="flex-shrink: 0; white-space: nowrap;">전체보기</button>
-                <button class="ms-chip" data-milestone="newborn" style="flex-shrink: 0; white-space: nowrap;">🐣 신생아 생존기</button>
-                <button class="ms-chip" data-milestone="tummy" style="flex-shrink: 0; white-space: nowrap;">🍼 터미타임 연습</button>
-                <button class="ms-chip" data-milestone="flip" style="flex-shrink: 0; white-space: nowrap;">🔄 엎드려 뒤집기</button>
-                <button class="ms-chip" data-milestone="crawl" style="flex-shrink: 0; white-space: nowrap;">🏃 배밀이/기어가기</button>
-                <button class="ms-chip" data-milestone="stand" style="flex-shrink: 0; white-space: nowrap;">🧗 잡고 일어서기</button>
+                <button class="ms-chip" data-milestone="newborn" style="flex-shrink: 0; white-space: nowrap;"> 신생아 생존기</button>
+                <button class="ms-chip" data-milestone="tummy" style="flex-shrink: 0; white-space: nowrap;"> 터미타임 연습</button>
+                <button class="ms-chip" data-milestone="flip" style="flex-shrink: 0; white-space: nowrap;"> 엎드려 뒤집기</button>
+                <button class="ms-chip" data-milestone="crawl" style="flex-shrink: 0; white-space: nowrap;"> 배밀이/기어가기</button>
+                <button class="ms-chip" data-milestone="stand" style="flex-shrink: 0; white-space: nowrap;"> 잡고 일어서기</button>
             </div>
 
             <style>

@@ -71,17 +71,24 @@ function toggleFavorite(id) {
     }
 }
 
+// 🚀 장난감 전용 찜 보관함 전환 (오류 완벽 해결 & 핑크색 버튼 변환)
 function toggleFavView() {
     isFavViewMode = !isFavViewMode;
     const btn = document.getElementById('btn-show-fav');
+    
     if (isFavViewMode) {
         btn.innerHTML = '🔙 검색 화면으로 돌아가기';
-        btn.style.background = '#4E5968'; btn.style.color = '#FFFFFF';
+        btn.style.background = '#F2F4F6'; 
+        btn.style.color = '#4E5968'; 
+        btn.style.borderColor = '#D1D5DB';
         renderFavorites();
     } else {
         btn.innerHTML = '❤️ 내가 찜한 장난감 모아보기';
-        btn.style.background = '#333D4B'; btn.style.color = '#FFFFFF';
+        btn.style.background = '#FFF2F2'; 
+        btn.style.color = '#E32636'; 
+        btn.style.borderColor = '#FCA5A5';
         
+        // 🔥 파트너님 원본 로직: 검색 화면으로 돌아갈 때 발달단계 다시 그리기
         const activeChip = document.querySelector('.ms-chip.active');
         const ms = activeChip ? activeChip.getAttribute('data-milestone') : 'all';
         const filteredData = ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all');
@@ -89,15 +96,25 @@ function toggleFavView() {
     }
 }
 
+// 🚀 장난감 전용 찜 보관함 렌더링 (이유식과 100% 동일한 귀여운 빈 화면 적용!)
 function renderFavorites() {
     const resultArea = document.getElementById('toy-result-area');
     const favs = JSON.parse(localStorage.getItem('favToys')) || [];
+    
     if (favs.length === 0) {
-        resultArea.innerHTML = `<div style="text-align:center; padding:40px; color:#8B95A1;">아직 찜한 장난감이 없어요!</div>`;
+        resultArea.innerHTML = `
+            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB; margin-top: 16px;">
+                <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">💔</div>
+                <div class="empty-text">
+                    <b style="font-size:16px; color:#191F28; font-weight:800; display:block; margin-bottom:6px;">아직 찜한 장난감이 없어요!</b>
+                    <span style="font-size:13px; color:#8B95A1;">마음에 드는 장난감에 하트(❤️)를 눌러보세요.</span>
+                </div>
+            </div>`;
         return;
     }
+    
     const favItems = toyData.filter(item => favs.includes(item.id));
-    resultArea.innerHTML = `<div style="font-weight:800; color:#E32636; margin-bottom:16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>` 
+    resultArea.innerHTML = `<div style="font-weight:900; color:#E32636; margin-bottom:16px; margin-top:16px; font-size:16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>` 
                            + favItems.map(item => generateToyHTML(item, favs)).join('');
 }
 
@@ -121,52 +138,68 @@ function generateToyHTML(toy, favs) {
     const hCol = isFav ? '#E32636' : '#4E5968';
     const hBor = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // 🔋 건전지 크로스셀링 로직
+    // 🔋 건전지 크로스셀링 로직 (프리미엄 박스로 업그레이드)
     let batteryHtml = toy.battery !== "건전지 필요 없음" ? `
-        <div style="background:#FFFBEB; padding:12px; border-radius:8px; font-size:13px; color:#8A6D3B; margin-top:12px;">
-            <b style="color:#D97706;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b><br>
-            <a href="${toy.batteryLink}" target="_blank" style="color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
+        <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:20px;">
+            <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b>
+            <a href="${toy.batteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
         </div>` : '';
 
-    // 🚀 [핵심] 빈 링크 방어(Fallback) 및 UX 텍스트 동적 변환 로직
-    const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy"; 
+    // 🚀 [핵심] 빈 링크 방어(Fallback) 및 UX 텍스트 동적 변환 로직 (파트너스 링크로 업데이트)
+    const fallbackLink = "https://link.coupang.com/a/fjYmJ0ojVk"; 
     const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
     
     const finalLink = isFallback ? fallbackLink : toy.coupangLink;
     const btnText = isFallback 
-        ? `🔍 쿠팡에서 '${toy.name}' 검색해보기` 
-        : `🚀 로켓배송 최저가 확인하기`;
+        ? `🔍 쿠팡에서 '${toy.name}' 검색해보기 〉` 
+        : `🚀 로켓배송 최저가 확인하기 〉`;
 
     return `
-        <div class="report-card">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; gap:8px;">
-                
-                <div style="display:flex; gap:14px; align-items:center; flex: 1; min-width: 0;">
+        <div class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8;">
+            
+            <!-- 타이틀 및 찜하기 영역 -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
+                <div style="display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0;">
                     <div class="toy-img-placeholder" style="flex-shrink: 0;">${toy.imgIcon}</div>
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-size:19px; font-weight:900; word-break:keep-all; line-height:1.3;">${toy.name}</div>
-                        <div style="font-size:12px; font-weight:800; color:#3182F6; margin-top:4px; word-break:keep-all;">${toy.tags}</div>
+                        <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">${toy.name}</div>
+                        <div style="color: #3182F6; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${toy.tags}</div>
                     </div>
                 </div>
-                
-                <button id="fav-btn-${toy.id}" onclick="toggleFavorite(${toy.id})" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0; min-width:65px;">${hIcon}</button>
+                <button id="fav-btn-${toy.id}" onclick="toggleFavorite(${toy.id})" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
+                    ${hIcon}
+                </button>
             </div>
 
-            <div style="background:#FFF2F2; padding:12px; border-radius:8px; border:1px solid #FCA5A5; margin-bottom:12px;">
-                <span style="font-weight:900; color:#E32636; font-size:13px;">🚨 AI 팩트폭격</span>
-                <div style="font-size:13px; color:#333D4B; margin-top:4px; font-weight:700;">${toy.fomo}</div>
-            </div>
-            
-            <div class="safety-box">
-                <div style="font-weight:800; color:#2F9E44; margin-bottom:8px; font-size:14px;">⏳ 시간 확보 리포트</div>
-                <div style="font-size:14px; color:#333D4B;">✅ <b>자유시간:</b> 약 ${toy.freeTime} 확보</div>
+            <!-- 🚨 AI 팩트폭격 (여백 늘리고 깔끔하게 분리) -->
+            <div style="background: #FFF0F1; border: 1px solid #FECACA; padding: 18px; border-radius: 14px; margin-bottom: 16px;">
+                <div style="font-weight: 900; color: #E32636; font-size: 13.5px; margin-bottom: 8px;">🚨 AI 팩트폭격</div>
+                <div style="font-size: 13.5px; color: #D32F2F; line-height: 1.5; font-weight: 600;">${toy.fomo}</div>
             </div>
 
-            <a href="${finalLink}" target="_blank" style="display:block; width:100%; padding:14px; background:#3182F6; color:white; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; text-align:center; text-decoration:none;">${btnText}</a>
-            
-            <button onclick="shareToHusband(${toy.id})" style="width:100%; padding:14px; background:#FEE500; color:#3C1E1E; border:none; border-radius:10px; font-weight:900; font-size:14px; cursor:pointer; margin-top:8px;">💬 남편에게 내 '자유시간' 사달라고 톡 보내기</button>
+            <!-- ✨ 시간 확보 리포트 (연회색 수납 박스 + 초록색 뱃지) -->
+            <div style="background: #F9FAFB; padding: 20px 18px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 24px;">
+                <div style="font-weight: 900; color: #191F28; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                    <span>⏳</span> 시간 확보 리포트
+                </div>
+                <div style="font-size: 14px; color: #059669; font-weight: 800; background: #ECFDF5; display: inline-block; padding: 8px 14px; border-radius: 10px; border: 1px solid #A7F3D0;">
+                    ✅ 자유시간: 약 ${toy.freeTime} 확보
+                </div>
+            </div>
+
+            <!-- 🛒 수익화 버튼 1: 까만색 쿠팡 집중 버튼 -->
+            <a href="${finalLink}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#191F28; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 12px; text-decoration: none; transition: 0.2s;">
+                ${btnText}
+            </a>
+
+            <!-- 💬 수익화 버튼 2: 노란색 카톡 공유 버튼 -->
+            <button onclick="shareToHusband(${toy.id})" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#FEE500; color:#191919; border:none; padding:16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2); transition:0.2s;">
+                <span style="font-size:18px;">💬</span> 남편에게 내 '자유시간' 사달라고 톡 보내기
+            </button>
+
             ${batteryHtml}
-        </div>`;
+        </div>
+    `;
 }
 
 function shareToHusband(id) {

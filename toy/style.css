@@ -1,95 +1,81 @@
-/* ==========================================
-   🧸 육아메이트 장난감 전용 스타일시트 (toy/style.css)
-   ========================================== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+* { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+    margin: 0; 
+    padding: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Helvetica Neue", Arial, sans-serif; 
+}
+
 body { 
-    font-family: 'Pretendard', -apple-system, sans-serif; 
-    background-color: #F8FAFC; 
+    margin: 0; 
+    background-color: #F2F4F6; 
     color: #191F28; 
-    word-break: keep-all; /* 🔥 앱 전체의 단어 쪼개짐 철벽 방어! */
-    overflow-wrap: break-word; /* 🔥 너무 긴 영어/주소만 안전하게 줄바꿈 */
+    -webkit-font-smoothing: antialiased; 
+    word-break: keep-all; 
+    overflow-wrap: break-word; 
 }
 a { text-decoration: none; color: inherit; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 20px 120px; } 
 
-/* ==========================================
-   👑 마스터 헤더 & GNB (이유식/카시트 완벽 동일)
-   ========================================== */
-.app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; padding: 0; width: 100%; }
+/* 👑 헤더와 홈버튼 설정 */
+.app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; padding: 0; width: 100%; }
 .back-btn { font-size: 14px; font-weight: 600; color: #4E5968; cursor: pointer; text-decoration: none; }
 .pro-badge { background: #3182F6; color: #FFFFFF; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; }
 .gnb-menu { display: flex; width: 100%; overflow-x: auto; background: #FFF; padding: 0 16px; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none; border-top:1px solid #f2f4f6; margin: 0; justify-content: flex-start; }
 .gnb-menu::-webkit-scrollbar { display: none; }
-
 .gnb-item { flex: 0 0 auto; padding: 14px 16px; font-size: 15px; font-weight: 700; color: #8B95A1; position: relative; display: flex; align-items: center; gap: 6px; text-decoration: none; }
 .gnb-item.active { color: #191F28; font-weight: 800; }
 .gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 3px; background: #3182F6; border-radius: 3px 3px 0 0; }
 
-/* 🌙 다크모드 헤더 대응 */
-body.dark-mode .app-header, body.dark-mode .gnb-menu { background: var(--bg-card, #1E2024); border-color: var(--border, #333842); }
-body.dark-mode .back-btn { color: #E5E8EB; }
-body.dark-mode h1 { color: #FFFFFF; }
-body.dark-mode .gnb-item { color: #8B95A1; }
-body.dark-mode .gnb-item.active { color: #FFFFFF; }
+/* 🛒 메인 타이틀 영역 */
+.hero-title { padding: 32px 0 24px; text-align: center; }
+.hero-title h2 { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.35; color: #191F28; letter-spacing: -0.5px; }
+.gradient-text { background: linear-gradient(135deg, #3182F6, #6B31F6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-title p { margin: 8px 0 0; color: #8B95A1; font-weight: 600; font-size: 14px; }
 
-/* ==========================================
-   🧸 장난감 메인 컨텐츠 영역
-   ========================================== */
-.container { max-width: 800px; margin: 0 auto; padding: 40px 20px 120px; min-height: 100vh; }
-.hero-title { text-align: center; margin-bottom: 24px; }
-.hero-title h2 { font-size: 26px; line-height: 1.4; color: #191F28; }
-.highlight { color: #3182F6; }
-.subtitle { color: #8B95A1; font-size: 15px; margin-top: 8px; }
+/* ✨ 매트릭스 패널 (하얀색 고급 카드 공통) */
+.matrix-panel, .milestone-panel { background: #FFFFFF; padding: 28px 24px; border-radius: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); margin-bottom: 32px; border: 1px solid #F2F5F8; }
+.matrix-header, .panel-header-dark { font-size: 16px; font-weight: 900; color: #191F28; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+.matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
+.matrix-item { display: flex; flex-direction: column; }
+.matrix-item.full-width { grid-column: 1 / -1; }
+.matrix-item label { font-size: 13px; color: #4E5968; font-weight: 800; margin-bottom: 8px; }
 
-/* --- [수정 3번 반영] AI 매칭 센서 알림창 줄바꿈 보호 --- */
-.sync-banner { 
-    background: #E8F3FF; 
-    color: #1B64DA; 
-    padding: 16px; 
-    border-radius: 12px; 
-    font-size: 14px; 
-    font-weight: 700; 
-    display: none; 
-    align-items: center; 
-    justify-content: center; 
-    border: 1px solid #C9E2FF; 
-    margin-bottom: 32px; 
-    word-break: keep-all; /* 🔥 단어가 중간에 잘리지 않게 강제 보호! */
-    line-height: 1.5;
-    text-align: center;
-}
+/* ✨ 선택 박스 (공통) */
+.custom-select-wrapper { position: relative; width: 100%; }
+.custom-select-wrapper select { width: 100%; padding: 16px; border-radius: 14px; background-color: #F9FAFB; border: 1px solid #E5E8EB; color: #191F28; font-family: 'Pretendard'; font-size: 14px; font-weight: 700; appearance: none; outline: none; transition: 0.2s ease; cursor: pointer; }
+.custom-select-wrapper select:focus { border-color: #3182F6; background-color: #FFFFFF; box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1); }
+.custom-select-wrapper::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238B95A1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
 
-/* SOS 테마 패널 (다크) */
-.sos-theme-panel { background: #191F28; padding: 32px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-.panel-header { color: #FFFFFF; font-size: 16px; font-weight: 800; margin-bottom: 20px; }
-.theme-scroll-wrapper { display: flex; gap: 12px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
-.theme-scroll-wrapper::-webkit-scrollbar { display: none; }
-.theme-card { flex: 0 0 150px; background: #333D4B; border: 1px solid #4E5968; border-radius: 12px; padding: 16px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 8px; }
-.theme-card:hover, .theme-card.active { background: #3182F6; border-color: #3182F6; }
-.theme-card .theme-emoji { font-size: 28px; }
-.theme-card .theme-text { color: #B0B8C1; font-size: 13px; line-height: 1.4; }
-.theme-card .theme-text b { font-size: 14px; font-weight: 800; color: #FFFFFF; }
-.btn-secondary { padding: 16px; background: #333D4B; color: #FFFFFF; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 20px; }
+/* ✨ 공통 버튼 */
+.btn-reset { flex: 1; background: #F2F5F8; color: #4E5968; border: none; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; }
+.btn-search { flex: 2; background: #3182F6; color: #FFF; border: none; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.25); transition: transform 0.2s; }
+.btn-reset:active, .btn-search:active { transform: scale(0.96); }
 
-/* --- [수정 2번 반영] 마일스톤 버튼 가로 정렬 강제 (안 찌그러지게) --- */
-.milestone-panel { background: #FFFFFF; padding: 24px; border-radius: 16px; margin-bottom: 32px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-.panel-header-dark { color: #191F28; font-size: 16px; font-weight: 800; margin-bottom: 16px; }
-
+/* 🧸 장난감 전용: 마일스톤(발달단계) 버튼 (가로 스와이프 복구!) */
 .chip-group { 
     display: flex; 
-    flex-direction: row; 
-    flex-wrap: wrap; /* 🔥 공간 모자라면 아랫줄로 넘김 */
+    flex-wrap: nowrap !important; /* 줄바꿈 강제 금지 */
+    overflow-x: auto; /* 가로 스크롤 활성화 */
     gap: 8px; 
-    justify-content: flex-start;
-    margin-top: 10px;
+    justify-content: flex-start; 
+    margin-top: 8px; 
+    padding-bottom: 4px; /* 스크롤할 때 잘리지 않게 여유 공간 */
+    -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+    scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
 }
+.chip-group::-webkit-scrollbar { display: none; } /* 크롬, 사파리 스크롤바 완벽 숨김 */
 
 .ms-chip { 
-    flex: 0 0 auto; /* 🔥 버튼 길이에 맞춰서 자동 조절 */
-    margin: 0;
-    background: #F2F4F6; 
+    flex: 0 0 auto !important; /* 버튼 글자 길이에 맞춰서 찌그러지지 않게 보호 */
+    white-space: nowrap !important; 
+    margin: 0 !important; 
+    background: #F9FAFB; 
     border: 1px solid #E5E8EB; 
-    padding: 12px 18px; 
-    border-radius: 100px; 
+    padding: 14px 18px; 
+    border-radius: 14px; 
     font-size: 14px; 
     font-weight: 700; 
     color: #4E5968; 
@@ -97,46 +83,75 @@ body.dark-mode .gnb-item.active { color: #FFFFFF; }
     transition: 0.2s; 
 }
 .ms-chip.active { background: #191F28; color: #FFFFFF; border-color: #191F28; }
+/* 🧸 장난감 전용: 긴급(SOS) 테마 패널 - 프리미엄 다크 테마 */
+.sos-theme-panel { background: #191F28; padding: 28px 24px; border-radius: 24px; margin-bottom: 32px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.panel-header { color: #FFFFFF; font-size: 16px; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;}
+.theme-scroll-wrapper { display: flex; gap: 12px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; padding-bottom: 8px; }
+.theme-scroll-wrapper::-webkit-scrollbar { display: none; }
+.theme-card { flex: 0 0 150px; background: #333D4B; border: 1px solid #4E5968; border-radius: 16px; padding: 18px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 12px; }
+.theme-card:active { transform: scale(0.96); }
+.theme-card.active { background: #3182F6; border-color: #3182F6; box-shadow: 0 4px 12px rgba(49,130,246,0.3); }
+.theme-card .theme-emoji { font-size: 28px; }
+.theme-card .theme-text { color: #B0B8C1; font-size: 13px; line-height: 1.4; }
+.theme-card .theme-text b { font-size: 14px; font-weight: 800; color: #FFFFFF; display: block; margin-bottom: 4px; }
+.btn-secondary { padding: 16px; background: #333D4B; color: #FFFFFF; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 6px;}
 
-/* 결과 카드 */
-.report-card { background: #FFFFFF; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #E5E8EB; }
-.toy-img-placeholder { width: 70px; height: 70px; background: #F9FAFB; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 36px; border: 1px solid #E5E8EB; }
-.safety-box { background: #F9FAFB; padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+/* 결과 카드 (공통) */
+.result-area { display: flex; flex-direction: column; gap: 24px; }
+.stroller-card, .report-card { background: #FFFFFF; padding: 28px 24px; border-radius: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); position: relative; border: 1px solid #F2F5F8; margin-bottom: 24px; }
+.premium-empty-state { display: flex; flex-direction: column; gap: 16px; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 16px; padding: 32px 24px; align-items: center; justify-content: center; margin-bottom: 16px; text-align: center; }
+.empty-icon { font-size: 32px; background: #FFF; padding: 12px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.empty-text { display: flex; flex-direction: column; gap: 6px; }
+.empty-text b { font-size: 16px; color: #191F28; font-weight: 800; }
+.empty-text span { font-size: 13.5px; color: #8B95A1; font-weight: 600; line-height: 1.5; word-break: keep-all; }
 
-/* --- 모바일 줄바꿈 방어 및 버튼 가로 정렬 --- */
+/* 🌟 단점 박스 공통 */
+.insight-box { margin-bottom: 16px; background: #F9FAFB !important; padding: 18px; border-radius: 14px; border: 1px solid #E5E8EB !important; }
+.insight-box .title { font-size: 13px; font-weight: 900; color: #191F28; margin-bottom: 8px; }
+.insight-box .text { font-size: 13.5px; color: #4E5968; line-height: 1.6; font-weight: 600; word-break: keep-all; }
 
-/* 1. 장난감/카시트 버튼들이 세로로 길게 늘어서지 않게 (flex-wrap) */
-.filter-btns, .category-buttons, .stage-buttons {
-    display: flex;
-    flex-wrap: wrap !important; /* 공간이 모자라면 자연스럽게 다음 줄로 넘김 */
-    gap: 8px;
-    justify-content: flex-start;
-}
+/* 🧸 장난감 이미지 홀더 */
+.toy-img-placeholder { width: 70px; height: 70px; background: #F9FAFB; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 36px; border: 1px solid #E5E8EB; flex-shrink: 0;}
 
-.filter-btns button, .category-buttons button, .stage-buttons button {
-    flex: 0 0 auto !important; /* 글자 길이에 맞춰 버튼 크기 조절 */
-    white-space: nowrap !important; /* 버튼 안의 글자는 줄바꿈 금지 */
-    margin: 0 !important;
-}
+/* ✨ 수익화 제휴 버튼 (공통 까만색) */
+.buy-btn { display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; padding: 18px; border-radius: 14px; text-decoration: none; font-size: 15px; margin-top: 24px; transition: 0.2s; width: 100%; box-sizing: border-box; }
+.buy-btn:active { transform: scale(0.97); }
+.buy-btn.coupang { background: #191F28; color: #FFFFFF; box-shadow: 0 4px 14px rgba(0,0,0,0.1); } 
+.buy-btn.official { background: #191F28; color: #FFF; border: 1px solid #000; } 
+.buy-btn.naver { background: #F2F5F8; color: #4E5968; border: 1px solid #E5E8EB; } 
+.coupang-safety-guard { font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all; }
+.coupang-safety-guard b { color: #3182F6; font-weight: 800; }
 
-/* 2. 파란색 알림 배너 (이름과 나이가 찢어지지 않게) */
-.sync-banner, #auto-sync-banner {
-    word-break: keep-all !important; /* 단어가 중간에 잘리지 않게 강제 유지 */
-    line-height: 1.5 !important;
-    text-align: center !important;
-}
+/* 파란색 배너 통일 */
+.sync-banner, #auto-sync-banner { background: #F0F7FF; color: #1B64DA; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 800; display: none; align-items: center; justify-content: center; border: 1px solid #C9E2FF; margin-bottom: 32px; word-break: keep-all; line-height: 1.5; text-align: center; }
 
-/* 📱 모바일 제목 & 설명글 최적화 */
-.tool-header-title, 
-.tool-header-desc,
-.tool-notice-box {
-    word-break: keep-all; /* 단어 단위로만 줄바꿈 (글자 찢어짐 방지!) */
-    line-height: 1.4; /* 줄간격을 살짝 넓혀서 두 줄이 돼도 답답하지 않게 */
-}
+/* 🛡️ 법적 고지 푸터 */
+.legal-footer { margin-top: 40px; padding: 24px 20px; background: #F9FAFB; border-top: 1px solid #E5E8EB; border-radius: 16px; text-align: left; }
+.legal-footer p, .legal-footer { font-size: 11px; color: #8B95A1; line-height: 1.6; margin: 0 0 8px 0; word-break: keep-all; }
+.legal-footer strong { color: #4E5968; font-weight: 700; }
 
-/* 핸드폰(가로 폭 500px 이하)일 때만 글자 크기 다이어트 */
+/* 모바일 호환성 */
 @media (max-width: 500px) {
-    .tool-header-title { font-size: 20px !important; }
-    .tool-header-desc { font-size: 13px !important; }
-    .tool-notice-box { font-size: 12.5px !important; }
+    .hero-title h2 { font-size: 20px !important; }
+    .hero-title p { font-size: 13px !important; }
 }
+
+/* ✨ 매트릭스(필터) 제목과 발달상태(마일스톤) 제목의 간격을 분리했습니다! */
+.matrix-header { font-size: 16px; font-weight: 900; color: #191F28; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+
+/* 1. 발달 상태 제목: 밑 여백을 24px -> 10px로 대폭 줄여서 버튼을 위로 당깁니다 */
+.panel-header-dark { font-size: 16px; font-weight: 900; color: #191F28; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+
+/* 2. 칩 그룹(버튼): 위 여백(margin-top)을 0으로 없애서 제목에 착 붙게 만듭니다 */
+.chip-group { 
+    display: flex; 
+    flex-wrap: nowrap !important; 
+    overflow-x: auto; 
+    gap: 8px; 
+    justify-content: flex-start; 
+    margin-top: 0; /* 위쪽 여백 완전 제거! */
+    padding-bottom: 4px; 
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+}
+.chip-group::-webkit-scrollbar { display: none; }

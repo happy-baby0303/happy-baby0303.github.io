@@ -173,7 +173,7 @@ function toggleOthers() {
     }
 }
 
-// 🌟 카드 렌더링 엔진 (디자인 겹침 해결 완벽 패치판!)
+// 🌟 카드 렌더링 엔진 (대기업 템플릿 + 스펙/팩트 탭 완벽 복구판!)
 function generateCardHtml(item) {
     const cId = item.originalIndex !== undefined ? item.originalIndex : Math.floor(Math.random() * 10000);
     const itemId = item.id || item.name; 
@@ -185,13 +185,14 @@ function generateCardHtml(item) {
     const heartText = isFav ? '#E32636' : '#4E5968';
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // ✨ 1. 기존 CSS(absolute) 클래스를 버리고, 독자적인 인라인 스타일로 매칭률 텍스트 생성!
+    // 1. 매칭률
     let scoreHtml = "";
     if (item.matchRate !== null && !isFavViewMode) {
         let sColor = item.matchRate >= 80 ? "#3182F6" : (item.matchRate >= 50 ? "#F59E0B" : "#E32636");
         scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 28px; font-weight: 900; color: ${sColor}; letter-spacing: -1px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 2px;">AI 매칭</div></div>`;
     }
 
+    // 2. 무게 및 크기 시각화 (기존 로직 유지)
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
     const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#3182F6');
     let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#1B64DA; background:#E8F3FF;' : (item.specs.cabin.includes('⚠️') ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
@@ -206,24 +207,26 @@ function generateCardHtml(item) {
     let diffDesc = maxStrollerDim > targetDim ? `<div class="size-visual-desc warn">${targetName}보다 <b>${maxStrollerDim - targetDim}cm 더 큼</b></div>` : `<div class="size-visual-desc">${targetName}보다 <b>${targetDim - maxStrollerDim}cm 더 작음!</b></div>`;
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
+    // 3. AI 리포트 (깔끔한 회색톤 개편)
     let aiReportHtml = `<div class="premium-empty-state"><div class="empty-icon">💡</div><div class="empty-text"><b>AI 매칭 리포트 대기 중</b><span>가족 상황을 선택하시면 분석서가 출력됩니다.</span></div></div>`;
     if (!isFavViewMode && item.matchRate !== null) {
         let reasonLi = '';
         if (item.matchRate === 100) {
             reasonLi = `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`;
         } else if (item.matchReasons && item.matchReasons.length > 0) {
-            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px;">🚨 <b>${r}</b></li>`).join('');
+            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px; color: #4E5968;">🚨 <b>${r}</b></li>`).join('');
         }
+        let reportTitle = item.matchRate >= 80 ? '🟢 AI 최적합 판정' : (item.matchRate >= 50 ? '⚠️ AI 조건부 추천' : '❌ AI 비추천 판정');
+        let titleColor = item.matchRate >= 80 ? '#3182F6' : (item.matchRate >= 50 ? '#F59E0B' : '#E32636');
 
-        if (item.matchRate >= 80) {
-            aiReportHtml = `<div class="ai-sim-report" style="background:#F0F7FF; border:1px solid #3182F6; padding:16px; border-radius:14px; margin-bottom:12px;"><h4 style="color:#1B64DA; margin:0 0 8px 0; font-size:14px;">🟢 최적합 (Premium Match)</h4><ul style="margin:0; padding-left:20px; font-size:13px; color:#1B64DA; line-height:1.5;">${reasonLi}</ul></div>`;
-        } else if (item.matchRate >= 50) {
-            aiReportHtml = `<div class="ai-sim-report" style="background:#FFF9E6; border:1px solid #F59E0B; padding:16px; border-radius:14px; margin-bottom:12px;"><h4 style="color:#B78103; margin:0 0 8px 0; font-size:14px;">⚠️ 타협 필요 (Conditional)</h4><ul style="margin:0; padding-left:20px; font-size:13px; color:#B78103; line-height:1.5;">${reasonLi}</ul></div>`;
-        } else {
-            aiReportHtml = `<div class="ai-sim-report" style="background:#FFF0F1; border:1px solid #F04452; padding:16px; border-radius:14px; margin-bottom:12px;"><h4 style="color:#D32F2F; margin:0 0 8px 0; font-size:14px;">❌ 비추천 (Mismatch)</h4><ul style="margin:0; padding-left:20px; font-size:13px; color:#D32F2F; line-height:1.5;">${reasonLi}</ul></div>`;
-        }
+        aiReportHtml = `
+            <div style="background:#F9FAFB; border:1px solid #E5E8EB; padding:16px; border-radius:14px; margin-bottom:16px;">
+                <h4 style="color:${titleColor}; margin:0 0 10px 0; font-size:14px; font-weight: 800;">${reportTitle}</h4>
+                <ul style="margin:0; padding-left:20px; font-size:13px; color:#4E5968; line-height:1.5; font-weight: 600;">${reasonLi}</ul>
+            </div>`;
     }
 
+    // 4. KTX 및 게이트 (기존 로직)
     let ktxAlertHtml = '';
     const car = document.getElementById('mat-car') ? document.getElementById('mat-car').value : 'all';
     if (car === 'flight') {
@@ -246,51 +249,54 @@ function generateCardHtml(item) {
 
     const tabsHtml = `<div class="card-tabs"><div id="btn-${cId}-spec" class="tab-btn active" onclick="forceSwitchTab(${cId}, 'spec')">📊 기본스펙</div><div id="btn-${cId}-fact" class="tab-btn" onclick="forceSwitchTab(${cId}, 'fact')">🚨 실전팩트</div><div id="btn-${cId}-sim" class="tab-btn sim-tab-btn" onclick="forceSwitchTab(${cId}, 'sim')">🧬 AI리포트</div></div>`;
 
+    // 5. 가격 영수증
     const realPrice = item.price + (item.hiddenTax?.cost || 0);
-    let taxHtml = (item.hiddenTax?.cost > 0) 
-        ? `<div class="receipt-box"><div class="receipt-row"><span>공식 출고가</span><span>${item.price.toLocaleString()}원</span></div><div class="receipt-row tax"><span>+ 옵션추가</span><span>+${item.hiddenTax.cost.toLocaleString()}원</span></div><div class="receipt-desc">※ ${item.hiddenTax.items}</div><div class="receipt-total"><span>💸 체감 결제액</span><span>${realPrice.toLocaleString()}원</span></div></div>`
-        : `<div class="receipt-box" style="border-color:#A7F3D0; background:#ECFDF5;"><div class="receipt-row" style="color:#065F46;"><span>공식 출고가</span><span>${item.price.toLocaleString()}원</span></div><div class="receipt-desc" style="color:#059669;">※ ${item.hiddenTax?.items || '추가비용 없음'} (옵션질 없음 쾌적!)</div><div class="receipt-total" style="color:#065F46; border-top-color:#A7F3D0;"><span>💸 체감 결제액</span><span>${realPrice.toLocaleString()}원</span></div></div>`;
+    let taxHtml = `<div class="receipt-box"><div class="receipt-row"><span>공식 출고가</span><span>${item.price.toLocaleString()}원</span></div>`;
+    if (item.hiddenTax?.cost > 0) {
+        taxHtml += `<div class="receipt-row" style="color:#E32636;"><span>+ 필수 추가비용</span><span>+${item.hiddenTax.cost.toLocaleString()}원</span></div><div class="receipt-desc">※ ${item.hiddenTax.items}</div>`;
+    } else {
+        taxHtml += `<div class="receipt-desc" style="color:#059669;">※ 추가비용 없음 (옵션질 없음 쾌적!)</div>`;
+    }
+    taxHtml += `<div class="receipt-total"><span>💸 최종 체감 결제액</span><span style="color:#3182F6;">${realPrice.toLocaleString()}원</span></div></div>`;
 
     const asClass = item.asInfo?.status === 'good' ? 'as-good' : (item.asInfo?.status === 'warn' ? 'as-warn' : 'as-bad');
     const asTitle = item.asInfo?.status === 'good' ? 'A/S 안심 보장' : (item.asInfo?.status === 'warn' ? 'A/S 체크포인트' : 'A/S 리스크 경고');
     const asIcon = item.asInfo?.status === 'good' ? '🛡️' : (item.asInfo?.status === 'warn' ? '👀' : '🚨');
 
+  // 6. 구매버튼 및 크로스셀
     let naverSearchUrl = `https://search.naver.com/search.naver?query=${encodeURIComponent(item.name + ' 유모차')}`;
-    let buyBtnHtml = `<a href="${naverSearchUrl}" target="_blank" class="buy-btn naver">네이버 최저가 검색 〉</a>`;
+    
+    // 👇 투명했던 네이버 버튼에 연회색 배경과 테두리를 칠해줬습니다!
+    let buyBtnHtml = `<a href="${naverSearchUrl}" target="_blank" class="buy-btn" style="background: #F2F5F8; color: #4E5968; border: 1px solid #E5E8EB;">🔍 네이버 최저가 검색 〉</a>`;
+    
     let safetyGuardHtml = '';
 
     if (item.affiliate) {
-        let finalUrl = item.affiliate.url;
-        if (item.affiliate.type === 'naver' || !finalUrl || finalUrl === '') finalUrl = naverSearchUrl;
-        buyBtnHtml = `<a href="${finalUrl}" target="_blank" class="buy-btn ${item.affiliate.type}">${item.affiliate.label} 〉</a>`;
+        let finalUrl = item.affiliate.url || naverSearchUrl;
         if (item.affiliate.type === 'coupang') {
-            safetyGuardHtml = `<div class="coupang-safety-guard">※ 육아메이트는 본사 A/S가 보장되는 로켓배송 링크를 우선 제공합니다.<br>단품 구매 시 반드시 <b>[로켓배송] 마크</b>를 확인하세요.</div>`;
+            buyBtnHtml = `<a href="${finalUrl}" target="_blank" class="buy-btn coupang">🚀 쿠팡에서 안전하게 구매하기 〉</a>`;
+            safetyGuardHtml = `<div class="coupang-safety-guard">※ 육아메이트는 정품 A/S가 보장되는 로켓배송 링크를 최우선 제공합니다.<br>단품 구매 시 반드시 <b>[로켓배송] 마크</b>를 확인하세요.</div>`;
         }
     }
 
-    const crossSellHtml = `
-        <a href="../carseat/index.html" style="display:block; width:100%; background:#FFF; border:1px solid #3182F6; color:#3182F6; padding:14px; border-radius:12px; font-weight:800; font-size:14px; text-align:center; text-decoration:none; transition:0.2s; margin-top:12px;">
-            🚘 이 유모차와 어울리는 [안전 카시트] 알아보기 ➔
-        </a>
-    `;
+    const crossSellHtml = `<a href="../carseat/index.html" style="display:block; width:100%; background:#F9FAFB; border:1px solid #E5E8EB; color:#4E5968; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; text-decoration:none; transition:0.2s; margin-top:12px;">🚘 이 유모차와 어울리는 [안전 카시트] 알아보기 ➔</a>`;
 
-    // ✨ 2. HTML 구조 개편: 이름(왼쪽), 매칭률+찜버튼(오른쪽)으로 깔끔하게 구역 분리!
+    // 7. 최종 렌더링
     return `
-    <div class="stroller-card" id="card-${cId}" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'};">
+    <div class="stroller-card" id="card-${cId}">
         
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
             <div style="flex: 1; min-width: 0;">
                 <div style="margin-bottom: 8px;">
-                    <span style="background:#F2F4F6; color:#4E5968; font-size:11px; font-weight:800; padding:6px 12px; border-radius:20px;">${item.type}</span>
+                    <span style="background:#F2F5F8; color:#4E5968; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.type}</span>
                 </div>
                 <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.3;">
                     ${item.name}
                 </div>
             </div>
-            
             <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
                 ${scoreHtml}
-                <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap; min-width:65px;">
+                <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
                     ${heartIcon}
                 </button>
             </div>
@@ -298,6 +304,7 @@ function generateCardHtml(item) {
 
         ${taxHtml}
         ${tabsHtml}
+        
         <div style="min-height: 250px;">
             <div id="content-${cId}-spec" class="tab-content" style="display:block;">
                 <div class="spec-list">
@@ -324,13 +331,18 @@ function generateCardHtml(item) {
                 <div class="adapter-container">
                     <div class="adapter-title">🔩 카시트 트래블 호환 부품</div>
                     <div class="adapter-list">
-                        ${renderAdapterCard('싸이벡스/뉴나 규격', item.adapter.maxi)}
-                        ${renderAdapterCard('스토케 비세이프 규격', item.adapter.stokke)}
+                        ${renderAdapterCard('싸이벡스/뉴나 규격', item.adapter?.maxi)}
+                        ${renderAdapterCard('스토케 비세이프 규격', item.adapter?.stokke)}
                     </div>
                 </div>
             </div>
         </div>
-        <div class="insight-box"><div class="title">💡 단점 & 아쉬운 점 팩트체크</div><div class="text" style="word-break: keep-all; line-height: 1.5;">${item.flaw}</div></div>
+
+        <div class="insight-box">
+            <div class="title">💡 단점 & 아쉬운 점 팩트체크</div>
+            <div class="text">${item.flaw}</div>
+        </div>
+
         ${buyBtnHtml}
         ${safetyGuardHtml}
         ${crossSellHtml}
