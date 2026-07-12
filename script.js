@@ -1136,28 +1136,59 @@ function calcHealthMaster() {
 }
 window.calcHealthMaster = calcHealthMaster;
 
-// ✨ 성장 기록 저장 및 파이어베이스 연동 (토스트 적용)
+// ✨ 성장 기록 저장 및 파이어베이스 연동 (안전장치 완비)
 async function saveGrowthRecord() {
+    console.log("1. 저장 버튼 클릭됨! 데이터 확인:", window.tempGrowthData);
+
+    // 🚨 방어 1: 저장할 데이터가 제대로 안 넘어왔을 때
     if (!window.tempGrowthData || (window.tempGrowthData.height === 0 && window.tempGrowthData.weight === 0)) {
-        return showToast("⚠️ 저장할 데이터가 없습니다.");
+        if (typeof showToast === 'function') {
+            return showToast("⚠️ 먼저 '분석하기' 버튼을 눌러주세요.");
+        } else {
+            alert("⚠️ 먼저 '분석하기' 버튼을 눌러주세요.");
+            return;
+        }
     }
     
     let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
+    
     // 같은 날짜 기록 덮어쓰기
     const existIdx = records.findIndex(r => r.date === window.tempGrowthData.date);
-    if (existIdx > -1) records[existIdx] = window.tempGrowthData;
-    else records.push(window.tempGrowthData);
+    if (existIdx > -1) {
+        records[existIdx] = window.tempGrowthData;
+    } else {
+        records.push(window.tempGrowthData);
+    }
 
     records.sort((a, b) => new Date(a.date) - new Date(b.date)); // 날짜순 정렬
     
-    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+    // 🚨 방어 2: 파이어베이스 에러 때문에 로컬 저장까지 멈추는 현상 방지
+    if (typeof db !== 'undefined' && typeof setDoc === 'function' && typeof doc === 'function') {
         const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
-        try { await setDoc(doc(db, "growth_" + syncCode, "status"), { records: records }); } catch (e) { console.error(e); }
+        try { 
+            await setDoc(doc(db, "growth_" + syncCode, "status"), { records: records }); 
+        } catch (e) { 
+            console.warn("파이어베이스 연동 실패 (하지만 기기에는 저장됩니다):", e); 
+        }
     }
     
+    // 핵심! 로컬 스토리지에 무조건 저장
     localStorage.setItem('tosil_growth_records', JSON.stringify(records));
-    showToast("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!"); // 👈 촌스러운 알림창 교체!
-    renderGrowthHistory();
+    console.log("2. 로컬 스토리지 저장 완료:", records);
+    
+    // 🚨 방어 3: showToast 함수가 없어서 멈추는 현상 방지
+    if (typeof showToast === 'function') {
+        showToast("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!"); 
+    } else {
+        alert("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!");
+    }
+    
+    // 🚨 방어 4: 차트 그리는 함수가 아직 없거나 에러 날 때 방지
+    if (typeof renderGrowthHistory === 'function') {
+        renderGrowthHistory();
+    } else {
+        console.warn("renderGrowthHistory 함수가 없습니다. 차트를 갱신하려면 이 함수가 필요합니다.");
+    }
 }
 window.saveGrowthRecord = saveGrowthRecord;
 
@@ -2775,7 +2806,7 @@ window.updateTrackerDashboard = function() {
 };
 
 // ==========================================
-// 💌 부부 소통: 육아문답 작성 상태 감지 엔진 (감성 버전)
+// 💌 부부 소통: 육아문답 작성 상태 감지 엔진 (감성 100% 복구 버전)
 // ==========================================
 window.updateDiaryCard = function() {
     const card = document.getElementById('home-diary-card');
@@ -2794,10 +2825,14 @@ window.updateDiaryCard = function() {
                 </div>
                 <div class="diary-card-btn" style="margin: 0; background: #FFF0F1; color: #F04452; box-shadow: none;">내 답변 보기 ❯</div>
             </div>
-            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(240, 68, 82, 0.2); display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 12.5px; font-weight: 800; color: #D32F2F; opacity: 0.85;">"당신의 하루는 어땠어? 대답 기다릴게 💌"</div>
-                <button onclick="window.pokePartner(); event.stopPropagation();" style="background: #FFF; color: #F04452; border: 1px solid #FFE3E3; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 2px 4px rgba(240, 68, 82, 0.05); transition: 0.2s;">
-                    👉 카톡 찌르기
+            
+            <!-- 👇 딱 이 부분만 예쁘게 다듬었습니다! (gap 추가, 텍스트 줄바꿈, 버튼 찌그러짐 방지) -->
+            <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(240, 68, 82, 0.2); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="font-size: 12.5px; font-weight: 800; color: #D32F2F; opacity: 0.85; line-height: 1.4; word-break: keep-all;">
+                    오늘 하루 어땠어?<br>대답 기다릴게 💌"
+                </div>
+                <button onclick="window.pokePartner(); event.stopPropagation();" style="background: #FEE500; color: #191F28; border: none; padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 2px 8px rgba(254, 229, 0, 0.2); transition: 0.2s; white-space: nowrap; flex-shrink: 0;">
+                    👉 찌르기
                 </button>
             </div>
         `;
@@ -2829,7 +2864,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 setInterval(() => {
     if(typeof window.updateDiaryCard === 'function') window.updateDiaryCard();
-}, 5000); 
+}, 5000);
 
 // ==========================================
 // 🚀 런타임 구동 마스터 마운트 (이부분이 날아갔었음)
@@ -3903,4 +3938,19 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         document.getElementById('onboarding-overlay').style.display = 'flex';
     }
+});
+
+// ✨ 햅틱 진동 모듈 (모바일 기기에서 '톡!' 하는 손맛)
+document.addEventListener('DOMContentLoaded', () => {
+    // 앱 내의 모든 버튼과 클릭 가능한 카드들을 찾음
+    const allButtons = document.querySelectorAll('button, .ai-matrix-card, .sym-btn, select, input[type="checkbox"]');
+    
+    allButtons.forEach(btn => {
+        // 모바일 터치 시작 시 미세 진동 (안드로이드 지원)
+        btn.addEventListener('touchstart', () => {
+            if (navigator.vibrate) {
+                navigator.vibrate(10); // 10ms의 아주 짧고 경쾌한 진동
+            }
+        }, { passive: true });
+    });
 });

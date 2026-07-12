@@ -568,3 +568,13 @@ body.dark-mode #smart-banner-container > div span[style*="background: #F59E0B"] 
 #tool-baton.active {
     display: block; /* 눌린(active) 녀석만 짠! 하고 나타나기 */
 }
+
+/* ✨ 대기업 앱의 쫀득한 버튼 터치감 */
+button, .btn-main, .segment-btn, .pill-btn, .sym-btn, .ai-matrix-card {
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s !important;
+}
+
+/* 터치(클릭)하는 순간 4% 작아지게 만들기 */
+button:active, .btn-main:active, .segment-btn:active, .pill-btn:active, .sym-btn:active, .ai-matrix-card:active {
+    transform: scale(0.96) !important;
+}
