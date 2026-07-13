@@ -174,10 +174,10 @@ function generateToyHTML(toy, favs) {
                 </button>
             </div>
 
-            <!-- 🚨 AI 팩트폭격 -->
-            <div style="background: #FFF0F1; border: 1px solid #FECACA; padding: 18px; border-radius: 14px; margin-bottom: 16px;">
-                <div style="font-weight: 900; color: #E32636; font-size: 13.5px; margin-bottom: 8px;">🚨 AI 팩트폭격</div>
-                <div style="font-size: 13.5px; color: #D32F2F; line-height: 1.5; font-weight: 600;">${toy.fomo}</div>
+            <!-- 💡 AI 팩트체크 (다른 탭들과 통일된 프리미엄 회색 박스 적용) -->
+            <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
+                <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 AI 팩트체크</div>
+                <div style="font-size: 13.5px; color: #4E5968; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
             </div>
 
             <!-- ✨ 시간 확보 리포트 -->
