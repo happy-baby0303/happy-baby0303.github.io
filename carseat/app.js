@@ -126,7 +126,7 @@ function generateReportHTML(item) {
         scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 22px; font-weight: 900; color: ${titleColor}; letter-spacing: -0.5px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 4px;">AI 매칭</div></div>`;
 
         let reasonLi = item.matchRate === 100 
-            ? `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`
+            ? `<li style="margin-bottom:4px;"> ${item.matchReasons[0]}</li>`
             : item.matchReasons.map(r => `<li style="margin-bottom:4px; color:#4E5968;">🚨 <b>${r}</b></li>`).join('');
 
         aiReportHtml = `
