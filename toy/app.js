@@ -138,21 +138,24 @@ function generateToyHTML(toy, favs) {
     const hCol = isFav ? '#E32636' : '#4E5968';
     const hBor = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // 🔋 건전지 크로스셀링 로직 (프리미엄 박스로 업그레이드)
+    // 🔋 건전지 크로스셀링 로직
     let batteryHtml = toy.battery !== "건전지 필요 없음" ? `
-        <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:20px;">
+        <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
             <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b>
             <a href="${toy.batteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
         </div>` : '';
 
-    // 🚀 [핵심] 빈 링크 방어(Fallback) 및 UX 텍스트 동적 변환 로직 (파트너스 링크로 업데이트)
-    const fallbackLink = "https://link.coupang.com/a/fjYmJ0ojVk"; 
-    const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
+    // ✨ [핵심] 빈 링크 방어 & 100% 수익화 자동 검색 로직
+    const partnerCode = "flDiNnqr00"; // 파트너님 고유 코드
+    const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&afag=${partnerCode}`;
     
-    const finalLink = isFallback ? fallbackLink : toy.coupangLink;
+    // 파트너님이 직접 넣은 링크가 없으면(`""`) -> 자동으로 검색 링크(autoSearchLink)로 대체!
+    const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
+    const finalLink = isFallback ? autoSearchLink : toy.coupangLink;
+    
     const btnText = isFallback 
-        ? `🔍 쿠팡에서 '${toy.name}' 검색해보기 〉` 
-        : `🚀 로켓배송 최저가 확인하기 〉`;
+        ? `🔍 쿠팡에서 '${toy.name}' 최저가 찾기 〉` 
+        : `🚀 로켓배송 최저가 바로가기 〉`;
 
     return `
         <div class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8;">
@@ -160,7 +163,7 @@ function generateToyHTML(toy, favs) {
             <!-- 타이틀 및 찜하기 영역 -->
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
                 <div style="display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0;">
-                    <div class="toy-img-placeholder" style="flex-shrink: 0;">${toy.imgIcon}</div>
+                    <div class="toy-img-placeholder" style="flex-shrink: 0; font-size: 32px;">${toy.imgIcon}</div>
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">${toy.name}</div>
                         <div style="color: #3182F6; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${toy.tags}</div>
@@ -171,13 +174,13 @@ function generateToyHTML(toy, favs) {
                 </button>
             </div>
 
-            <!-- 🚨 AI 팩트폭격 (여백 늘리고 깔끔하게 분리) -->
+            <!-- 🚨 AI 팩트폭격 -->
             <div style="background: #FFF0F1; border: 1px solid #FECACA; padding: 18px; border-radius: 14px; margin-bottom: 16px;">
                 <div style="font-weight: 900; color: #E32636; font-size: 13.5px; margin-bottom: 8px;">🚨 AI 팩트폭격</div>
                 <div style="font-size: 13.5px; color: #D32F2F; line-height: 1.5; font-weight: 600;">${toy.fomo}</div>
             </div>
 
-            <!-- ✨ 시간 확보 리포트 (연회색 수납 박스 + 초록색 뱃지) -->
+            <!-- ✨ 시간 확보 리포트 -->
             <div style="background: #F9FAFB; padding: 20px 18px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 24px;">
                 <div style="font-weight: 900; color: #191F28; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                     <span>⏳</span> 시간 확보 리포트
@@ -187,7 +190,7 @@ function generateToyHTML(toy, favs) {
                 </div>
             </div>
 
-            <!-- 🛒 수익화 버튼 1: 까만색 쿠팡 집중 버튼 -->
+            <!-- 🛒 수익화 버튼 1: 까만색 쿠팡 집중 버튼 (링크 없으면 자동 검색으로 이동!) -->
             <a href="${finalLink}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#191F28; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 12px; text-decoration: none; transition: 0.2s;">
                 ${btnText}
             </a>
@@ -196,6 +199,12 @@ function generateToyHTML(toy, favs) {
             <button onclick="shareToHusband(${toy.id})" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#FEE500; color:#191919; border:none; padding:16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2); transition:0.2s;">
                 <span style="font-size:18px;">💬</span> 남편에게 내 '자유시간' 사달라고 톡 보내기
             </button>
+
+            <!-- ✨ CS 철벽 방어용 면책 조항 추가 (장난감도 필수!) -->
+            <div style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; word-break: keep-all;">
+                ※ 아이 입에 들어가는 장난감은 <b>[로켓배송]</b> 등 검증된 판매처 구매를 권장합니다.<br>
+                (상품의 A/S 및 교환/환불 규정은 해당 판매처의 정책을 따릅니다)
+            </div>
 
             ${batteryHtml}
         </div>
@@ -206,9 +215,11 @@ function shareToHusband(id) {
     const toy = toyData.find(t => t.id === id);
     if(!toy) return;
 
-    const fallbackLink = "https://link.coupang.com/a/eH6x2qqnMy";
-    const isFallback = (!toy.coupangLink || toy.coupangLink === '#' || toy.coupangLink.trim() === '');
-    const finalLink = isFallback ? fallbackLink : toy.coupangLink;
+    // 카톡 공유 시에도 링크가 비어있으면 '자동 검색' 링크를 쏴줍니다!
+    const partnerCode = "flDiNnqr00";
+    const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&afag=${partnerCode}`;
+    const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
+    const finalLink = isFallback ? autoSearchLink : toy.coupangLink;
 
     Kakao.Share.sendDefault({
         objectType: 'feed',

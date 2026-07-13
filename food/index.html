@@ -67,11 +67,11 @@
                         <label>👶 아기 월령</label>
                         <div class="custom-select-wrapper">
                             <select id="food-age" onchange="runFoodEngine()">
-                                <option value="">선택해주세요</option>
-                                <option value="early">생후 4~6개월 (초기)</option>
-                                <option value="mid">생후 7~9개월 (중기)</option>
-                                <option value="late">생후 10~11개월 (후기)</option>
-                                <option value="done">12개월 이상 (완료기)</option>
+                                <!-- ✨ 핵심 키워드(초기/중기/후기)를 맨 앞으로 빼서 잘리더라도 무조건 보이게 방어! -->
+                                <option value="early">초기 (생후 4~6개월)</option>
+                                <option value="mid">중기 (생후 7~9개월)</option>
+                                <option value="late">후기 (생후 10~11개월)</option>
+                                <option value="done">완료기 (12개월 이상)</option>
                             </select>
                         </div>
                     </div>

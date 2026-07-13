@@ -364,27 +364,24 @@ if (!Kakao.isInitialized()) {
     Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
 }
 
-// 🛒 남편 아바타 조종기 (파트너스 링크 자동 결합 버전)
+// 🛒 남편 아바타 조종기 (상업적 멘트 싹 빼고 자연스러운 아내 말투로 변경!)
 function shareToHusband(recipeName, ingredients) {
-    // 파트너님의 고유 파트너스 코드 (주신 링크에서 추출)
-    const partnerCode = "e2f58ZVlhQ"; 
+    // ✨ 파트너님의 100% 수익 보장 쿠팡 단축 링크 (뒤에서 조용히 일합니다)
+    const partnerLink = "https://link.coupang.com/a/e2f58ZVlhQ"; 
     
     const items = ingredients.split(',').map(i => i.trim());
-    let shareText = `여보! 오늘 우리 아기 맘마는 [${recipeName}] 해줄 거야 👶❤️\n\n퇴근길에 장 좀 봐줘! 아래 링크 클릭하면 바로 살 수 있어!\n\n`;
+    let shareText = `여보! 오늘 우리 아기 맘마는 [${recipeName}] 해줄 거야 👶❤️\n\n퇴근길에 로켓프레시로 장 좀 봐줘!\n\n📋 [오늘의 장바구니]\n`;
 
+    // 재료 리스트 추출
     items.forEach(item => {
         const cleanName = item.replace(/[0-9]+(g|ml|T|t|개|장|마리|쪽|알|스푼|분|방울).*/g, '').replace(/\(.*\)/g, '').trim();
-        
         if(cleanName) {
-            // 핵심: 쿠팡 검색 결과 뒤에 파트너스 코드(?afag=...)를 붙여서 수익 링크로 변환!
-            const baseUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('로켓프레시 ' + cleanName)}`;
-            const partnerLink = `${baseUrl}&afag=${partnerCode}`; // 파트너스 추적 코드 결합
-            
-            shareText += `🛒 ${item}\n👉 ${partnerLink}\n\n`;
+            shareText += `🛒 ${item}\n`;
         }
     });
 
-    shareText += `고마워 내사랑! 알라뷰 🥰`;
+    // ✨ 완벽하게 자연스러운 아내의 멘트로 수정 (수익 얘기 100% 삭제)
+    shareText += `\n👇 아래 링크 눌러서 쿠팡 장바구니에 싹 담아주면 돼!\n👉 ${partnerLink}\n\n고마워 내사랑! 조심해서 와 🥰`;
 
     if (navigator.share) {
         navigator.share({
@@ -393,7 +390,8 @@ function shareToHusband(recipeName, ingredients) {
         }).catch(console.error);
     } else {
         navigator.clipboard.writeText(shareText).then(() => {
-            alert("✅ 수익 생성용 쿠팡 링크가 복사되었습니다!\n남편 카톡에 붙여넣기 해주세요.");
+            // ✨ 팝업창에서도 '수익'이라는 단어 싹 삭제!
+            alert("✅ 남편에게 보낼 장보기 리스트가 복사되었습니다!\n카카오톡에 붙여넣기 해주세요.");
         });
     }
 }

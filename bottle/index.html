@@ -57,9 +57,10 @@
                     <div class="custom-select-wrapper">
                         <select id="filter-age">
                             <option value="all">전체 월령</option>
-                            <option value="newborn">신생아 (0~3개월) - 배앓이 집중</option>
-                            <option value="infant">영아 (4~6개월) - 혼합수유 적응</option>
-                            <option value="toddler">유아 (6개월 이상) - 스스로 잡기</option>
+                            <!-- ✂️ 부연설명 삭제! 직관적으로 변경 -->
+                            <option value="newborn">신생아 (0~3개월)</option>
+                            <option value="infant">영아 (4~6개월)</option>
+                            <option value="toddler">유아 (6개월 이상)</option>
                         </select>
                     </div>
                 </div>
@@ -68,8 +69,9 @@
                     <label>🛡️ 젖꼭지 거부 성향</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-rejection">
-                            <option value="all">아무거나 잘 무는 편이에요</option>
-                            <option value="super">🚨 거부가 심해요 (모유실감/실리콘 필수)</option>
+                            <!-- ✂️ 핵심만 굵게 남기기 -->
+                            <option value="all">잘 무는 편이에요</option>
+                            <option value="super">거부가 심해요</option>
                         </select>
                     </div>
                 </div>
@@ -79,10 +81,10 @@
                     <div class="custom-select-wrapper">
                         <select id="filter-material">
                             <option value="all">전체 (상관없음)</option>
-                            <option value="ppsu">가볍고 튼튼한 국민 소재 (PPSU)</option>
-                            <option value="glass">미세플라스틱 완벽 차단 (내열유리)</option>
-                            <option value="silicone">말랑말랑 엄마 가슴 촉감 (실리콘)</option>
-                            <option value="pa">유리처럼 투명하고 가벼움 (PA)</option>
+                            <option value="ppsu">국민 소재 (PPSU)</option>
+                            <option value="glass">플라스틱 제로 (유리)</option>
+                            <option value="silicone">말랑한 촉감 (실리콘)</option>
+                            <option value="pa">투명하고 가벼움 (PA)</option>
                         </select>
                     </div>
                 </div>
@@ -91,19 +93,19 @@
                     <label>😭 배앓이 방지력</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-anticolic">
-                            <option value="all">일반적인 수준 (상관없음)</option>
-                            <option value="yes">공기 흡입 최소화 (배앓이 특화)</option>
-                            <option value="super">영아산통 완벽 차단 (설거지는 힘듦)</option>
+                            <option value="all">일반적인 수준</option>
+                            <option value="yes">배앓이 방지 특화</option>
+                            <option value="super">영아산통 완벽 차단</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>🔄 타사 젖꼭지 호환 여부</label>
+                    <label>🔄 젖꼭지 호환</label> <!-- 제목도 짧게! -->
                     <div class="custom-select-wrapper">
                         <select id="filter-compatible">
-                            <option value="all">상관없음 (전용 젖꼭지도 괜찮음)</option>
-                            <option value="yes">더블하트(모유실감) 젖꼭지 완벽 호환</option>
+                            <option value="all">상관없음 (전용 가능)</option>
+                            <option value="yes">모유실감 완벽 호환</option>
                         </select>
                     </div>
                 </div>
@@ -115,28 +117,28 @@
                             <option value="all">전체 가격대</option>
                             <option value="low">1만 원대 (가성비)</option>
                             <option value="mid">2만 원대 (표준)</option>
-                            <option value="high">3만 원 이상 (프리미엄)</option>
+                            <option value="high">3만 원 이상 (고급)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- 🧼 7. 소독 및 세척 방식 -->
+                <!-- 🧼 소독 및 세척 방식 -->
                 <div class="matrix-item">
-                    <label>🧼 소독 및 세척 방식</label>
+                    <label>🧼 소독 및 세척</label> <!-- 제목 다이어트 -->
                     <div class="custom-select-wrapper">
                         <select id="filter-sterilization">
-                            <option value="all">상관없음 (열탕 소독 할게요)</option>
-                            <option value="uv">UV 소독기 맘 편히 돌려도 되는 것</option>
-                            <option value="easy">손목 아파요! 입구 넓어 설거지 편한 것</option>
+                            <!-- ✂️ 긴 문장을 앱스럽게 단축! -->
+                            <option value="all">상관없음 (열탕 가능)</option>
+                            <option value="uv">UV 소독기 자유롭게</option>
+                            <option value="easy">입구 넓어 세척 편리</option>
                         </select>
                     </div>
                 </div>
                 
-                <!-- 🔄 8. 필터 초기화 버튼 (높이 완벽 핏 맞춤) -->
+                <!-- 🔄 필터 초기화 버튼 (아까 픽셀 완벽하게 맞춘 그 코드 그대로!) -->
                 <div class="matrix-item">
-                    <!-- 왼쪽과 높이를 맞추기 위한 투명 라벨 -->
-                    <label style="visibility: hidden;">빈칸</label>
-                    <button class="btn-reset" onclick="resetBottleFilters()" style="width: 100%; padding: 16px; background: #F2F5F8; color: #4E5968; border: 1px solid #E5E8EB; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; box-sizing: border-box; display: flex; justify-content: center; align-items: center; margin: 0;">
+                    <label style="visibility: hidden;">높이맞춤용</label>
+                    <button onclick="resetBottleFilters()" style="width: 100%; flex: 1; margin: 0; padding: 0; border-radius: 14px; background: #F2F5F8; color: #4E5968; border: 1px solid #E5E8EB; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; box-sizing: border-box; display: flex; justify-content: center; align-items: center;">
                         🔄 필터 한 번에 초기화
                     </button>
                 </div>

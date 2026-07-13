@@ -107,7 +107,6 @@ function generateReportHTML(item) {
     const heartText = isFav ? '#E32636' : '#4E5968';
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // ✨ AI 매칭률 점수
     let scoreHtml = "";
     let aiReportHtml = '';
 
@@ -124,7 +123,7 @@ function generateReportHTML(item) {
             titleColor = '#E32636'; bgColor = '#F9FAFB'; borderColor = '#E5E8EB'; titleText = '❌ AI 비추천 판정';
         }
 
-        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 28px; font-weight: 900; color: ${titleColor}; letter-spacing: -1px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 2px;">AI 매칭</div></div>`;
+        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 22px; font-weight: 900; color: ${titleColor}; letter-spacing: -0.5px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 4px;">AI 매칭</div></div>`;
 
         let reasonLi = item.matchRate === 100 
             ? `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`
@@ -147,32 +146,48 @@ function generateReportHTML(item) {
     const targetUrl = isOfficial ? item.reportUrl : `https://www.google.com/search?q=ADAC+${encodeURIComponent(item.brand)}+${encodeURIComponent(item.name)}`;
     const reportBtn = `<a href="${targetUrl}" target="_blank" style="display:inline-block; margin-top:8px; font-size:12px; color:#3182F6; text-decoration:underline; font-weight:700;">${labelText}</a>`;
         
-    // 6. 구매버튼 및 방어 멘트
+    // ✨ 자동 검색 URL + 파트너스 코드
+    const partnerCode = "flDiNnqr00";
+    const coupangSearchUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent(item.brand + ' ' + item.name)}&afag=${partnerCode}`;
+    const matMirrorUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('카시트 보호매트 거울 세트')}&afag=${partnerCode}`;
+
+    // ✨ 파트너님이 주신 워딩으로 쿠팡 방어 멘트 교체 완료!
     let purchaseBtn = item.purchasePlatform === 'coupang' 
-        ? `<a href="${item.linkUrl}" target="_blank" class="buy-btn coupang">🚀 쿠팡에서 구매/상세정보 확인 〉</a>
+        ? `<div style="margin-top: 24px;">
+               <a href="${coupangSearchUrl}" target="_blank" class="buy-btn coupang" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 0; background: #191F28; color: #FFF; border: 1px solid #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
+                   🚀 쿠팡 최저가 검색하기 〉
+               </a>
+           </div>
            <div class="coupang-safety-guard" style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 10px; line-height: 1.5; word-break: keep-all;">
-               ※ 육아메이트는 원활한 반품/교환을 위해 <b>[로켓배송]</b> 링크를 우선 제공합니다.<br>
-               (교환/환불 및 A/S 규정은 쿠팡 및 제조사 정책을 따르므로 구매 전 반드시 확인하세요)
+               ※ 안전하고 빠른 교환/환불을 위해 구매 시 가급적 <b>[로켓배송]</b> 마크가 있는 상품을 선택하시길 권장합니다.<br>
+               (A/S 및 교환/환불 규정은 해당 판매처 및 제조사 정책을 따릅니다)
            </div>`
-        : `<a href="${item.linkUrl}" target="_blank" class="buy-btn official">👑 브랜드 공식 스토어 가기 〉</a>`;
+        : `<div style="margin-top: 24px;">
+               <a href="${item.linkUrl}" target="_blank" class="buy-btn official" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 0; background: #F9FAFB; color: #191F28; border: 1px solid #D1D5DB; font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
+                   👑 브랜드 공식 스토어 가기 〉
+               </a>
+           </div>`;
 
     const techSpecHTML = item.specs.sideProtection ? `✅ <b>기술 스펙:</b> ${item.specs.sideProtection}<br>` : ``;
+
+    const specBadges = item.bodySpec.split('/').map(s => 
+        `<span style="background: #F2F4F6; color: #4E5968; font-size: 11.5px; font-weight: 700; padding: 6px 10px; border-radius: 8px; white-space: nowrap;">${s.trim()}</span>`
+    ).join('');
 
     return `
         <div class="report-card" id="card-${item.id}" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'};">
             
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
                 <div style="flex: 1; min-width: 0;">
-                    <!-- ✨ 매의 눈 수정: margin-bottom을 16px로 대폭 늘려서 숨통을 틔움! -->
-                    <div style="margin-bottom: 16px;">
-                        <span style="background:#F2F5F8; color:#4E5968; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.bodySpec}</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;">
+                        ${specBadges}
                     </div>
                     <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">
                         [${item.brand}] ${item.name}
                     </div>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
-                    ${scoreHtml}
+                
+                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;">
                     <button id="fav-btn-${item.id}" onclick="toggleFavorite('${item.id}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
                         ${heartIcon}
                     </button>
@@ -181,7 +196,6 @@ function generateReportHTML(item) {
             
             ${aiReportHtml}
 
-            <!-- 인증 리포트 (통일된 회색 박스) -->
             <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
                 <div style="font-weight: 800; color: #191F28; margin-bottom: 8px;">🛡️ 인증 리포트 & 장착 방식</div>
                 <div style="font-size: 13.5px; line-height: 1.6; color: #4E5968; font-weight: 600;">
@@ -192,7 +206,6 @@ function generateReportHTML(item) {
                 </div>
             </div>
 
-            <!-- 전문가 소견 (통일된 회색 박스) -->
             <div class="insight-box" style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
                 <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 전문가 소견</div>
                 <div style="font-size: 13.5px; color: #4E5968; line-height: 1.5; font-weight: 600; word-break: keep-all;">${item.desc}</div>
@@ -204,11 +217,16 @@ function generateReportHTML(item) {
                 🟢 남편에게 이 '안전 리포트' 전송하기
             </button>
 
-            <!-- 필수 꿀팁 (크로스셀링) -->
+            <!-- ✨ 필수 꿀팁 (보호매트/거울 주의사항 체크포인트 추가!) -->
             <div style="background: #FFFBEB; padding: 16px; border-radius: 14px; font-size: 13px; color: #B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top: 16px;">
                 <b style="color: #D97706; font-size: 13.5px; display:block; margin-bottom:4px;">💡 AI 카시트 설치 필수 꿀팁:</b>
                 새 카시트 장착 시 <b>차량 가죽시트 눌림 및 영구 파손</b>이 100% 발생합니다. 카시트 도착 전, 후방거울과 보호매트를 꼭 미리 세팅해 두세요!<br>
-                <a href="https://link.coupang.com/a/eEtXJsuJxc" target="_blank" style="display:inline-block; margin-top:8px; color: #D97706; font-weight: 800; text-decoration: underline;">👉 보호매트+거울 세트 로켓배송 담기</a>
+                <div style="font-size: 11.5px; color: #B45309; margin-top: 8px; margin-bottom: 4px; padding: 8px; background: #FEF3C7; border-radius: 8px;">
+                    ⚠️ <b>구매 시 체크포인트:</b><br>
+                    1. 내 차 헤드레스트에 거울 끈이 묶이는 형태인지 확인!<br>
+                    2. 매트에 카시트가 밀리지 않도록 미끄럼 방지(논슬립) 처리가 되어 있는지 확인!
+                </div>
+                <a href="${matMirrorUrl}" target="_blank" style="display:inline-block; margin-top:8px; color: #D97706; font-weight: 800; text-decoration: underline;">👉 보호매트+거울 세트 검색하기</a>
             </div>
         </div>
     `;
@@ -323,12 +341,15 @@ if (!Kakao.isInitialized()) {
     Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
 }
 
+// 🚀 카카오톡 공유 시에도 '자동 검색 링크' 적용 완료!
 function shareToHusband(id) {
     const item = carseatData.find(d => d.id === id);
     if(!item) return;
 
-    const myLink = item.linkUrl.includes("여기에") 
-        ? `https://www.coupang.com/np/search?q=${encodeURIComponent(item.searchKeyword)}`
+    // ✨ 카톡 공유 버튼을 눌렀을 때도 남편이 메인홈이 아닌 검색창으로 바로 가도록 수정
+    const partnerCode = "flDiNnqr00"; 
+    const myLink = item.purchasePlatform === 'coupang' 
+        ? `https://www.coupang.com/np/search?q=${encodeURIComponent(item.brand + ' ' + item.name)}&afag=${partnerCode}`
         : item.linkUrl; 
         
     Kakao.Share.sendDefault({

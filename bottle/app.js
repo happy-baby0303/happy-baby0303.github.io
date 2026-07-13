@@ -100,7 +100,6 @@ function generateCardHTML(item) {
     const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
 
     let cardBorderColor = '#D1D5DB';
-    let scoreHtml = "";
     let aiReportHtml = '';
 
     if (item.matchRate !== null && !isFavViewMode && item.matchRate !== undefined) {
@@ -119,7 +118,7 @@ function generateCardHTML(item) {
             cardBorderColor = '#F04452'; titleText = '❌ 비추천 (Mismatch)';
         }
 
-        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 28px; font-weight: 900; color: ${titleColor}; letter-spacing: -1px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-top: 2px;">AI 매칭</div></div>`;
+        // ✨ scoreHtml(100% 매칭 변수) 삭제 완료!
 
         let reasonLi = item.matchRate === 100 
             ? `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`
@@ -134,38 +133,38 @@ function generateCardHTML(item) {
 
     if (isFavViewMode) cardBorderColor = '#E32636';
 
-   // ✨ 수익화 올인 전략: 네이버 이탈 경로 삭제 + 쿠팡 100% 집중!
-    let searchKeyword = item.searchKeyword || (item.brand + ' ' + item.name);
-    let myCoupangLink = "https://link.coupang.com/a/fjYmJ0ojVk";
-    
-    let purchaseBtn = `
-        <div style="margin-top: 24px;">
-            <a href="${myCoupangLink}" target="_blank" class="buy-btn" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 0; background: #191F28; color: #FFF; border: 1px solid #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
-                🚀 쿠팡 최저가 검색하기 〉
-            </a>
-        </div>
-        
-        <!-- ✨ 팩트 폭행 수정본 유지 (책임은 판매처에!) -->
-        <div class="coupang-safety-guard" style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
-            ※ 안전하고 빠른 교환/환불을 위해 구매 시 가급적 <b>[로켓배송]</b> 마크가 있는 상품을 선택하시길 권장합니다.<br>
-            (A/S 및 교환/환불 규정은 해당 판매처 및 제조사 정책을 따릅니다)
-        </div>
-    `;
+ // ✨ 젖병 전용: 유저가 누른 젖병(브랜드+제품명)으로 알아서 검색해주는 다이렉트 링크!
+   const searchKeyword = `${item.brand} ${item.name}`; 
+   let myCoupangLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(searchKeyword)}`;
+   
+   let purchaseBtn = `
+       <div style="margin-top: 24px;">
+           <a href="${myCoupangLink}" target="_blank" class="buy-btn" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 0; background: #191F28; color: #FFF; border: 1px solid #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
+               🚀 쿠팡 최저가 검색하기 〉
+           </a>
+       </div>
+       
+       <div class="coupang-safety-guard" style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
+           ※ 안전하고 빠른 교환/환불을 위해 구매 시 가급적 <b>[로켓배송]</b> 마크가 있는 상품을 선택하시길 권장합니다.<br>
+           (A/S 및 교환/환불 규정은 해당 판매처 및 제조사 정책을 따릅니다)
+       </div>
+   `;
 
     return `
         <div class="stroller-card" style="border-top: 4px solid ${cardBorderColor}; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8;">
             
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
                 <div style="flex: 1; min-width: 0;">
-                    <div style="margin-bottom: 12px;">
-                        <span style="background:#F2F5F8; color:#4E5968; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.brand}</span>
+                    <!-- ✨ margin-bottom 16px로 변경해서 뱃지와 제목 사이 간격 넓힘! -->
+                    <div style="margin-bottom: 16px;">
+                        <span style="background:#F2F5F8; color:#4E5968; font-size:12.5px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.brand}</span>
                     </div>
                     <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">
                         ${item.name}
                     </div>
                 </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
-                    ${scoreHtml}
+                <!-- ✨ 100% 삭제 완료! 오직 찜하기 버튼만 우측에 깔끔하게 배치! -->
+                <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;">
                     <button id="fav-btn-${item.id}" onclick="toggleFavorite('${item.id}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
                         ${heartIcon}
                     </button>
@@ -191,7 +190,6 @@ function generateCardHTML(item) {
 
             ${purchaseBtn}
 
-            <!-- ✨ 남편에게는 쿠팡이 아니라 '우리 앱' 링크를 보내서 유입을 유도합니다! -->
             <button onclick="shareToHusband('${item.id}', '${item.brand}', '${item.name}')" style="display:block; width:100%; background:#F9FAFB; border:1px solid #E5E8EB; color:#4E5968; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
                 💬 남편에게 이 [AI 분석 리포트] 공유하기
             </button>
