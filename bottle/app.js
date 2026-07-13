@@ -121,7 +121,7 @@ function generateCardHTML(item) {
         // ✨ scoreHtml(100% 매칭 변수) 삭제 완료!
 
         let reasonLi = item.matchRate === 100 
-            ? `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`
+            ? `<li style="margin-bottom:4px;"> ${item.matchReasons[0]}</li>`
             : item.matchReasons.map(r => `<li style="margin-bottom:4px; color:#4E5968;">🚨 <b>${r}</b></li>`).join('');
 
         aiReportHtml = `
