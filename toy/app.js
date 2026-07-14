@@ -1,55 +1,288 @@
+// ==========================================
+// ⚙️ 코어 로직 및 카카오 초기화
+// ==========================================
 let isFavViewMode = false; 
 
 if (!Kakao.isInitialized()) {
-    Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
+    Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b'); // 파트너님 키
 }
 
-// 🚀 장난감 데이터 자동 동기화 (단발성 땜질 NO, 완벽한 구조화)
-function applyGlobalBabyProfile() {
-    const birthStr = localStorage.getItem('tosil_startDate');
+let globalMilestone = 'all'; // 전역으로 아기 발달단계 저장
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyGlobalBabyProfile(); // 아기 개월수 세팅 및 초기 렌더링
     
-    // 🛡️ 야무진 포인트 1: 아기 생일 정보가 없을 때의 완벽 방어!
-    // (기존엔 정보가 없으면 함수가 그냥 죽어버려서 리스트가 안 떴습니다)
-    if (!birthStr) {
-        renderToys(toyData); // 정보가 없으면 일단 '전체 장난감'을 다 띄워줌
-        return; 
-    }
+    // (장난감 탭) 마일스톤 칩 클릭 이벤트
+    const msChips = document.querySelectorAll('.ms-chip');
+    const themeCards = document.querySelectorAll('.theme-card');
 
-    // 1. 개월 수 정밀 계산
-    const birthDate = new Date(birthStr);
-    const today = new Date();
-    let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
-    if (months < 0) months = 0;
-
-    // 2. 불필요한 UI 숨김 및 뱃지 업데이트
-    const banner = document.getElementById('auto-sync-banner');
-    if (banner) banner.style.display = 'none';
-
-    document.querySelectorAll('.dynamic-age-badge').forEach(b => {
-        b.innerText = `생후 ${months}개월 맞춤`;
+    msChips.forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            msChips.forEach(c => c.classList.remove('active'));
+            themeCards.forEach(c => c.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const ms = e.target.getAttribute('data-milestone');
+            renderToys(ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all'));
+        });
     });
 
-    // 3. 개월 수에 따른 AI 마일스톤(단계) 판별
-    let autoMilestone = 'all'; 
-    if (months <= 3) autoMilestone = 'tummy';
-    else if (months <= 6) autoMilestone = 'flip';
-    else if (months <= 9) autoMilestone = 'crawl';
-    else autoMilestone = 'stand';
+    // (장난감 탭) SOS 테마 카드 클릭 이벤트
+    themeCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            themeCards.forEach(c => c.classList.remove('active'));
+            msChips.forEach(c => c.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            
+            const theme = e.currentTarget.getAttribute('data-theme');
+            renderToys(toyData.filter(t => t.theme === theme));
+        });
+    });
+});
 
-    // 4. 화면 위쪽 '발달 상태 칩(버튼)' UI 활성화 변경
-    const targetChip = document.querySelector(`.ms-chip[data-milestone="${autoMilestone}"]`);
-    if (targetChip) {
-        document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
-        targetChip.classList.add('active');
+function applyGlobalBabyProfile() {
+    const birthStr = localStorage.getItem('tosil_startDate');
+    let autoMilestone = 'all'; 
+
+    if (birthStr) {
+        const birthDate = new Date(birthStr);
+        const today = new Date();
+        let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+        if (months < 0) months = 0;
+
+        const banner = document.getElementById('auto-sync-banner');
+        if (banner) banner.style.display = 'none';
+
+        document.querySelectorAll('.dynamic-age-badge').forEach(b => {
+            b.innerText = `생후 ${months}개월 맞춤`;
+        });
+
+        if (months <= 3) autoMilestone = 'tummy';
+        else if (months <= 6) autoMilestone = 'flip';
+        else if (months <= 9) autoMilestone = 'crawl';
+        else autoMilestone = 'stand';
+        
+        globalMilestone = autoMilestone;
+
+        const targetChip = document.querySelector(`.ms-chip[data-milestone="${autoMilestone}"]`);
+        if (targetChip) {
+            document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
+            targetChip.classList.add('active');
+        }
     }
 
-    // 🛡️ 야무진 포인트 2: 계산된 결과에 맞춰 정확하게 데이터 추려내기
-    const initialData = autoMilestone === 'all' 
+    // 초기 화면 렌더링 (놀이 처방전 & 장난감 모두)
+    renderPlays(); 
+    
+    const initialToyData = autoMilestone === 'all' 
         ? toyData 
         : toyData.filter(t => t.milestone === autoMilestone || t.milestone === 'all');
+    renderToys(initialToyData); 
+}
+
+// ==========================================
+// 🔀 투 트랙 UI 스위치 로직
+// ==========================================
+function switchToyMainTab(tabId) {
+    const btnPlay = document.getElementById('tab-btn-play');
+    const btnGear = document.getElementById('tab-btn-gear');
+    const viewPlay = document.getElementById('view-toy-play');
+    const viewGear = document.getElementById('view-toy-gear');
+
+    if (tabId === 'play') {
+        btnPlay.style.background = '#FFFFFF'; btnPlay.style.color = '#191F28'; btnPlay.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+        btnGear.style.background = 'transparent'; btnGear.style.color = '#8B95A1'; btnGear.style.boxShadow = 'none';
+        viewPlay.style.display = 'block';
+        viewGear.style.display = 'none';
+    } else {
+        btnGear.style.background = '#FFFFFF'; btnGear.style.color = '#191F28'; btnGear.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+        btnPlay.style.background = 'transparent'; btnPlay.style.color = '#8B95A1'; btnPlay.style.boxShadow = 'none';
+        viewPlay.style.display = 'none';
+        viewGear.style.display = 'block';
+    }
+}
+
+// ==========================================
+// 🎈 TRACK 1: 놀이 처방전 (생존 엔진)
+// ==========================================
+let currentPlayCategory = 'all';
+
+function filterPlays(category, btnEl) {
+    document.querySelectorAll('.play-filter-btn').forEach(btn => {
+        btn.style.background = '#FFFFFF'; btn.style.color = '#4E5968'; btn.style.border = '1px solid #E5E8EB';
+    });
+    btnEl.style.background = '#191F28'; btnEl.style.color = '#FFFFFF'; btnEl.style.border = 'none';
+    currentPlayCategory = category;
+    renderPlays();
+}
+
+function renderPlays() {
+    const container = document.getElementById('play-result-area');
+    
+    // 💡 미친 니치: 카테고리 필터링 + 아기 월령(globalMilestone) 자동 필터링 교집합!
+    const filtered = playData.filter(p => {
+        const catMatch = currentPlayCategory === 'all' || p.category === currentPlayCategory;
+        const ageMatch = globalMilestone === 'all' || p.targetAge.includes(globalMilestone);
+        return catMatch && ageMatch;
+    });
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:#8B95A1; background:#F9FAFB; border-radius:16px;">현재 개월수에 맞는 해당 놀이가 없습니다.</div>`;
+        return;
+    }
+
+    let html = '';
+    filtered.forEach(p => {
+        // 🎨 카테고리별 다이나믹 뱃지 컬러 & 텍스트 (여기 완벽하게 적용되었습니다!)
+        let badgeColor = '#3182F6', badgeBg = '#E8F3FF', badgeText = '🧸 장난감 뽕뽑기';
         
-    // 5. 최종적으로 추려낸 데이터를 화면에 그리기 (엔진 가동!)
-    renderToys(initialData); 
+        if (p.category === 'zero') { badgeColor = '#00B37A'; badgeBg = '#E2F5EB'; badgeText = '🏠 0원 집구석 놀이'; }
+        else if (p.category === 'dad') { badgeColor = '#E32636'; badgeBg = '#FFF2F2'; badgeText = '🏋️ 아빠 육체노동'; }
+        else if (p.category === 'lieDown') { badgeColor = '#8B5CF6'; badgeBg = '#F5F3FF'; badgeText = '🛌 합법적 눕육아'; }
+        else if (p.category === 'poop') { badgeColor = '#B45309'; badgeBg = '#FEF3C7'; badgeText = '💩 장운동 쾌변 놀이'; }
+        else if (p.category === 'sick') { badgeColor = '#EA580C'; badgeBg = '#FFEDD5'; badgeText = '🤒 껌딱지 진정 놀이'; }
+
+        const stepsHtml = p.steps.map(step => `<li style="margin-bottom: 8px;">${step}</li>`).join('');
+
+        html += `
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div style="display: inline-block; padding: 6px 10px; border-radius: 8px; background: ${badgeBg}; color: ${badgeColor}; font-size: 12px; font-weight: 800; margin-bottom: 12px;">${badgeText}</div>
+            
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #191F28;">${p.title}</h3>
+            <p style="margin: 0 0 16px 0; font-size: 13.5px; font-weight: 600; color: #8B95A1; line-height: 1.4;">${p.desc}</p>
+            
+            <div style="background: #F9FAFB; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #F2F5F8;">
+                <div style="font-size: 13px; color: #4E5968; margin-bottom: 6px;"><b>준비물:</b> ${p.targetItem}</div>
+                <div style="font-size: 13px; color: #4E5968;"><b>체력소모:</b> ${p.energyDrain}</div>
+            </div>
+
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; font-size: 14.5px; font-weight: 700; color: #191F28; line-height: 1.6;">
+                ${stepsHtml}
+            </ul>
+
+            <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 14px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="font-size: 12px; font-weight: 900; color: #D97706; margin-bottom: 4px;">👨‍🔧 아빠의 역할</div>
+                <div style="font-size: 13px; font-weight: 700; color: #B45309;">${p.dadRole}</div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1.2; padding: 14px; border-radius: 12px; background: #191F28; color: #FFF; font-weight: 800; font-size: 14px; border: none; cursor: pointer; transition: 0.2s;">
+                    ⏱️ ${p.playTime}분 버티기 시작
+                </button>
+                <button onclick="sharePlayMission('${p.id}')" style="flex: 1; padding: 14px; border-radius: 12px; background: #FEE500; color: #191919; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    💬 아빠 미션전송
+                </button>
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+// ⏳ 생존 놀이 인라인 타이머 기믹
+let playTimers = {};
+function startPlayTimer(playId, minutes) {
+    const btn = document.getElementById(`timer-btn-${playId}`);
+    const p = playData.find(x => x.id === playId); // 💡 현재 실행 중인 놀이 정보 찾기!
+    
+    if (playTimers[playId]) {
+        clearInterval(playTimers[playId]);
+        delete playTimers[playId];
+        btn.innerHTML = `⏱️ ${minutes}분 버티기 시작`;
+        btn.style.background = '#191F28'; btn.style.color = '#FFF'; btn.style.border = 'none';
+        btn.style.boxShadow = 'none';
+        btn.style.opacity = '1';
+        return;
+    }
+
+    let secondsLeft = minutes * 60;
+    btn.style.background = '#F0F7FF';
+    btn.style.color = '#3182F6';
+    btn.style.border = '1px solid #3182F6';
+
+    playTimers[playId] = setInterval(() => {
+        secondsLeft--;
+        const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+        const s = (secondsLeft % 60).toString().padStart(2, '0');
+        
+        // 1분 남으면 긴급하게 빨간색으로 변경!
+        if(secondsLeft <= 60 && secondsLeft > 0) {
+            btn.style.background = '#FFF2F2';
+            btn.style.color = '#E32636';
+            btn.style.border = '1px solid #FCA5A5';
+        }
+
+        btn.innerHTML = `⏳ <b>${m}:${s}</b> 버티는 중... (터치 시 정지)`;
+
+        // 🎉 타이머 완료 시 도파민 폭발 이펙트!
+        if (secondsLeft <= 0) {
+            clearInterval(playTimers[playId]);
+            delete playTimers[playId];
+            
+            // 💡 [핵심] 아빠 놀이는 아빠 칭찬, 눕육아는 엄마 충전! 상황별 맞춤 멘트!
+            let successText = '🎉 미션 완료! 엄마 아빠 최고! 💖';
+            if (p) {
+                if (p.category === 'dad') successText = '🎉 미션 완료! 아빠 체력 진짜 최고! 💪';
+                else if (p.category === 'lieDown') successText = '🎉 눕육아 성공! 엄마 체력 충전 완료 🔋';
+                else if (p.category === 'poop') successText = '🎉 미션 완료! 쾌변 기저귀 확인 요망 💩';
+                else if (p.category === 'sick') successText = '🎉 미션 완료! 아기 컨디션 회복 💖';
+            }
+            
+            btn.innerHTML = successText;
+            btn.style.background = '#00B37A'; 
+            btn.style.color = '#FFF'; 
+            btn.style.border = 'none';
+            btn.style.boxShadow = '0 0 15px rgba(0, 179, 122, 0.4)'; // 빛나는 효과
+            
+            // 0.5초마다 글씨가 깜빡이는 효과 (진짜 해낸 것 같은 성취감!)
+            let blink = false;
+            let blinkInterval = setInterval(() => {
+                btn.style.opacity = blink ? '1' : '0.8';
+                blink = !blink;
+            }, 500);
+            
+            // 3초 뒤에 깜빡임 멈추기
+            setTimeout(() => clearInterval(blinkInterval), 3000);
+        }
+    }, 1000);
+}
+
+// 💬 아빠 카톡 미션 전송
+function sharePlayMission(playId) {
+    const p = playData.find(x => x.id === playId);
+    if (!p) return;
+
+    Kakao.Share.sendDefault({
+        objectType: 'text',
+        text: `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘!\n\n🎈 놀이명: ${p.title}\n⏱️ 목표 시간: ${p.playTime}분\n👨‍🔧 당신의 역할: ${p.dadRole}`,
+        link: {
+            mobileWebUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html',
+            webUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html',
+        },
+        buttons: [{ title: '미션 수락하기 🫡', link: { mobileWebUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html', webUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html' } }],
+    });
+}
+
+
+// ==========================================
+// 🛒 TRACK 2: 육아는 템빨 (기존 장난감 렌더링 및 찜하기)
+// ==========================================
+function toggleFavView() {
+    isFavViewMode = !isFavViewMode;
+    const btn = document.getElementById('btn-show-fav');
+    
+    if (isFavViewMode) {
+        btn.innerHTML = '🔙 검색 화면으로 돌아가기';
+        btn.style.background = '#F2F4F6'; btn.style.color = '#4E5968'; btn.style.borderColor = '#D1D5DB';
+        renderFavorites();
+    } else {
+        btn.innerHTML = '❤️ 내가 찜한 장난감 모아보기';
+        btn.style.background = '#FFF2F2'; btn.style.color = '#E32636'; btn.style.borderColor = '#FCA5A5';
+        
+        const activeChip = document.querySelector('.ms-chip.active');
+        const ms = activeChip ? activeChip.getAttribute('data-milestone') : 'all';
+        const filteredData = ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all');
+        renderToys(filteredData);
+    }
 }
 
 function toggleFavorite(id) {
@@ -71,32 +304,6 @@ function toggleFavorite(id) {
     }
 }
 
-// 🚀 장난감 전용 찜 보관함 전환 (오류 완벽 해결 & 핑크색 버튼 변환)
-function toggleFavView() {
-    isFavViewMode = !isFavViewMode;
-    const btn = document.getElementById('btn-show-fav');
-    
-    if (isFavViewMode) {
-        btn.innerHTML = '🔙 검색 화면으로 돌아가기';
-        btn.style.background = '#F2F4F6'; 
-        btn.style.color = '#4E5968'; 
-        btn.style.borderColor = '#D1D5DB';
-        renderFavorites();
-    } else {
-        btn.innerHTML = '❤️ 내가 찜한 장난감 모아보기';
-        btn.style.background = '#FFF2F2'; 
-        btn.style.color = '#E32636'; 
-        btn.style.borderColor = '#FCA5A5';
-        
-        // 🔥 파트너님 원본 로직: 검색 화면으로 돌아갈 때 발달단계 다시 그리기
-        const activeChip = document.querySelector('.ms-chip.active');
-        const ms = activeChip ? activeChip.getAttribute('data-milestone') : 'all';
-        const filteredData = ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all');
-        renderToys(filteredData);
-    }
-}
-
-// 🚀 장난감 전용 찜 보관함 렌더링 (이유식과 100% 동일한 귀여운 빈 화면 적용!)
 function renderFavorites() {
     const resultArea = document.getElementById('toy-result-area');
     const favs = JSON.parse(localStorage.getItem('favToys')) || [];
@@ -112,7 +319,6 @@ function renderFavorites() {
             </div>`;
         return;
     }
-    
     const favItems = toyData.filter(item => favs.includes(item.id));
     resultArea.innerHTML = `<div style="font-weight:900; color:#E32636; margin-bottom:16px; margin-top:16px; font-size:16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>` 
                            + favItems.map(item => generateToyHTML(item, favs)).join('');
@@ -124,7 +330,7 @@ function renderToys(filteredData) {
     const favs = JSON.parse(localStorage.getItem('favToys')) || [];
     
     if (filteredData.length === 0) {
-        resultArea.innerHTML = `<div style="text-align:center; padding:40px; color:#8B95A1;">해당 상황에 맞는 구원템이 없습니다.</div>`;
+        resultArea.innerHTML = `<div style="text-align:center; padding:40px; color:#8B95A1;">해당 상황에 맞는 장난감이 없습니다.</div>`;
         return;
     }
     resultArea.innerHTML = `<div style="font-weight:800; color:#191F28; margin-bottom:16px;">✨ 시간 확보 추천 라인업 (${filteredData.length}개)</div>` 
@@ -138,29 +344,40 @@ function generateToyHTML(toy, favs) {
     const hCol = isFav ? '#E32636' : '#4E5968';
     const hBor = isFav ? '#FCA5A5' : '#E5E8EB';
 
-    // 🔋 건전지 크로스셀링 로직
-    let batteryHtml = toy.battery !== "건전지 필요 없음" ? `
-        <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
-            <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b>
-            <a href="${toy.batteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
-        </div>` : '';
+    const partnerCode = "flDiNnqr00"; // 파트너님 고유 파트너스 코드
 
-    // ✨ [핵심] 빈 링크 방어 & 100% 수익화 자동 검색 로직
-    const partnerCode = "flDiNnqr00"; // 파트너님 고유 코드
-    const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&afag=${partnerCode}`;
+    // ⚡ 1. 건전지 종류에 따른 파트너스 링크 스마트 자동 할당 & 필요 없는 경우 완전 숨김
+    let batteryHtml = '';
     
-    // 파트너님이 직접 넣은 링크가 없으면(`""`) -> 자동으로 검색 링크(autoSearchLink)로 대체!
+    // "없음" 이라는 단어가 배터리 정보에 안 들어있을 때만 렌더링!
+    if (toy.battery && !toy.battery.includes("없음")) {
+        let actualBatteryLink = "";
+        if (toy.battery.includes("C형")) {
+            actualBatteryLink = "https://link.coupang.com/a/fnbuI6bwpU"; // 파트너님 C형
+        } else if (toy.battery.includes("AAA")) {
+            actualBatteryLink = "https://link.coupang.com/a/fnb4qGk95o"; // 파트너님 AAA (신규 추가!)
+        } else if (toy.battery.includes("AA")) {
+            actualBatteryLink = "https://link.coupang.com/a/fnbqrsnU2C"; // 파트너님 AA
+        } else {
+            actualBatteryLink = toy.batteryLink || `https://www.coupang.com/np/search?q=건전지&afag=${partnerCode}`;
+        }
+
+        batteryHtml = `
+            <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
+                <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b>
+                <a href="${actualBatteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
+            </div>`;
+    }
+
+    // 🛒 2. 메인 장난감 쿠팡 링크 자동 할당
+    const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&afag=${partnerCode}`;
     const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
     const finalLink = isFallback ? autoSearchLink : toy.coupangLink;
-    
-    const btnText = isFallback 
-        ? `🔍 쿠팡에서 '${toy.name}' 최저가 찾기 〉` 
-        : `🚀 로켓배송 최저가 바로가기 〉`;
+    const btnText = isFallback ? `🔍 쿠팡에서 '${toy.name}' 최저가 찾기 〉` : `🚀 로켓배송 최저가 바로가기 〉`;
 
     return `
         <div class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8;">
             
-            <!-- 타이틀 및 찜하기 영역 -->
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
                 <div style="display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0;">
                     <div class="toy-img-placeholder" style="flex-shrink: 0; font-size: 32px;">${toy.imgIcon}</div>
@@ -174,13 +391,11 @@ function generateToyHTML(toy, favs) {
                 </button>
             </div>
 
-            <!-- 💡 AI 팩트체크 (다른 탭들과 통일된 프리미엄 회색 박스 적용) -->
             <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
                 <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 AI 팩트체크</div>
                 <div style="font-size: 13.5px; color: #4E5968; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
             </div>
 
-            <!-- ✨ 시간 확보 리포트 -->
             <div style="background: #F9FAFB; padding: 20px 18px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 24px;">
                 <div style="font-weight: 900; color: #191F28; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                     <span>⏳</span> 시간 확보 리포트
@@ -190,20 +405,16 @@ function generateToyHTML(toy, favs) {
                 </div>
             </div>
 
-            <!-- 🛒 수익화 버튼 1: 까만색 쿠팡 집중 버튼 (링크 없으면 자동 검색으로 이동!) -->
             <a href="${finalLink}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#191F28; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 12px; text-decoration: none; transition: 0.2s;">
                 ${btnText}
             </a>
 
-            <!-- 💬 수익화 버튼 2: 노란색 카톡 공유 버튼 -->
-            <button onclick="shareToHusband(${toy.id})" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#FEE500; color:#191919; border:none; padding:16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2); transition:0.2s;">
+            <button onclick="shareToHusbandToy(${toy.id})" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#FEE500; color:#191919; border:none; padding:16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2); transition:0.2s;">
                 <span style="font-size:18px;">💬</span> 남편에게 내 '자유시간' 사달라고 톡 보내기
             </button>
 
-            <!-- ✨ CS 철벽 방어용 면책 조항 추가 (장난감도 필수!) -->
             <div style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; word-break: keep-all;">
-                ※ 아이 입에 들어가는 장난감은 <b>[로켓배송]</b> 등 검증된 판매처 구매를 권장합니다.<br>
-                (상품의 A/S 및 교환/환불 규정은 해당 판매처의 정책을 따릅니다)
+                ※ 아이 입에 들어가는 장난감은 <b>[로켓배송]</b> 등 검증된 판매처 구매를 권장합니다.
             </div>
 
             ${batteryHtml}
@@ -211,11 +422,10 @@ function generateToyHTML(toy, favs) {
     `;
 }
 
-function shareToHusband(id) {
+function shareToHusbandToy(id) {
     const toy = toyData.find(t => t.id === id);
     if(!toy) return;
 
-    // 카톡 공유 시에도 링크가 비어있으면 '자동 검색' 링크를 쏴줍니다!
     const partnerCode = "flDiNnqr00";
     const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&afag=${partnerCode}`;
     const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
@@ -232,32 +442,3 @@ function shareToHusband(id) {
         buttons: [{ title: `💳 여보 찬스로 바로 결제하기`, link: { mobileWebUrl: finalLink, webUrl: finalLink } }]
     });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    applyGlobalBabyProfile();
-
-    const msChips = document.querySelectorAll('.ms-chip');
-    const themeCards = document.querySelectorAll('.theme-card');
-
-    msChips.forEach(chip => {
-        chip.addEventListener('click', (e) => {
-            msChips.forEach(c => c.classList.remove('active'));
-            themeCards.forEach(c => c.classList.remove('active'));
-            e.target.classList.add('active');
-            
-            const ms = e.target.getAttribute('data-milestone');
-            renderToys(ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all'));
-        });
-    });
-
-    themeCards.forEach(card => {
-        card.addEventListener('click', (e) => {
-            themeCards.forEach(c => c.classList.remove('active'));
-            msChips.forEach(c => c.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-            
-            const theme = e.currentTarget.getAttribute('data-theme');
-            renderToys(toyData.filter(t => t.theme === theme));
-        });
-    });
-});

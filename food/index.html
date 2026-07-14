@@ -26,7 +26,7 @@
             <a href="../carseat/index.html" class="gnb-item">🚘 카시트</a>
             <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
             <a href="#" class="gnb-item active">🥦 이유식</a>
-            <a href="../toy/index.html" class="gnb-item">🧸 장난감</a>
+            <a href="../toy/index.html" class="gnb-item">🧸 놀이/장난감</a>
         </nav>
     </header>
 
@@ -53,6 +53,59 @@
         <div id="view-curation" style="display: block;">
             <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
             </div>
+
+           <!-- ========================================== -->
+            <!-- 💧 스마트 배죽(물 양) 계산기 (접이식 아코디언) -->
+            <!-- ========================================== -->
+            <div style="margin-bottom: 24px; background: #FFFFFF; border-radius: 16px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden;">
+                <!-- 닫혀있을 때 보이는 헤더 (터치 영역) -->
+                <div onclick="toggleFoodCalc()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; background: #F4F8FF; transition: 0.2s;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="font-size: 22px; background: #FFFFFF; width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(49,130,246,0.1);">💧</div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 800; color: #1B64DA;">이유식 배죽(물 양) 계산기</div>
+                            <div style="font-size: 12px; font-weight: 600; color: #3182F6; margin-top: 2px;">초기 쌀가루부터 후기 진밥까지 완벽 계산</div>
+                        </div>
+                    </div>
+                    <div id="food-calc-chevron" style="color: #3182F6; font-weight: 900; font-size: 14px; transition: transform 0.3s ease;">▼</div>
+                </div>
+
+                <!-- 터치하면 열리는 계산기 본체 -->
+                <div id="food-calc-body" style="display: none; padding: 20px; border-top: 1px solid #E5E8EB;">
+                    <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #4E5968;">1. 어떤 재료로 만드나요?</label>
+                    <select id="food-base-type" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; background: #F9FAFB; border: 1px solid #E5E8EB; outline: none; margin-bottom: 16px; color: #191F28;">
+                        <option value="flour">🍚 쌀가루 (초기/중기)</option>
+                        <option value="raw">🌾 불린 쌀 (초기/중기)</option>
+                        <option value="cooked">🍙 이미 지어진 밥 (후기/완료기)</option>
+                    </select>
+
+                    <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #4E5968;">2. 원하는 농도</label>
+                    <select id="food-ratio-type" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; background: #F9FAFB; border: 1px solid #E5E8EB; outline: none; margin-bottom: 16px; color: #191F28;">
+                        <option value="10">주르륵 흐르는 10배죽 (초기)</option>
+                        <option value="8">마요네즈 농도 8배죽 (초기 후반)</option>
+                        <option value="7">묽은 7배죽 (중기)</option>
+                        <option value="5">일반 5배죽 (중기 후반)</option>
+                        <option value="4">무른 4배죽 (후기)</option>
+                        <option value="3">촉촉한 3배죽 (후기 후반 진밥)</option>
+                    </select>
+                    
+                    <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #4E5968;">3. 베이스 재료의 무게 (g)</label>
+                    <div style="display: flex; align-items: center; background: #F9FAFB; border: 1px solid #E5E8EB; border-radius: 12px; padding-right: 16px; margin-bottom: 20px;">
+                        <input type="number" id="food-base-weight" placeholder="예: 30" style="flex: 1; width: 100%; padding: 14px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; font-size: 16px; color: #3182F6;">
+                        <span style="font-size: 14px; font-weight: 800; color: #8B95A1;">g</span>
+                    </div>
+                    
+                    <button onclick="calcBabyFoodWater()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 12px; border: none; background: #3182F6; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(49,130,246,0.2);">물 양 계산하기</button>
+                    
+                    <!-- 결과창 -->
+                    <div id="food-calc-result" style="display: none; margin-top: 16px; background: #F0F7FF; padding: 16px; border-radius: 12px; border: 1px solid #CBE0FF; text-align: center;">
+                        <div style="font-size: 12px; font-weight: 800; color: #1B64DA; margin-bottom: 4px;">냄비에 부어야 할 물(육수)의 양</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #191F28;">약 <span id="res-water-ml" style="font-size: 26px; font-weight: 900; color: #3182F6;">0</span> ml</div>
+                        <div id="res-food-tip" style="margin-top: 12px; font-size: 11.5px; font-weight: 700; color: #4E5968; line-height: 1.5; word-break: keep-all; background: #FFFFFF; padding: 10px; border-radius: 8px;"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- ========================================== -->
 
             <div class="search-box">
                 <label style="display:block; font-size:14px; font-weight:800; color:#191F28; margin-bottom:12px;">🚦 이 식재료 먹여도 될까? (신호등 판독기)</label>

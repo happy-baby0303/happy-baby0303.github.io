@@ -1198,3 +1198,60 @@ window.downloadCalendarImage = function() {
         btn.disabled = false;
     });
 };
+
+// ==========================================
+// 💧 이유식 배죽 계산기 로직 (핵심 니치: 재료별 수분량 팩트체크 반영)
+// ==========================================
+
+function toggleFoodCalc() {
+    const body = document.getElementById('food-calc-body');
+    const chevron = document.getElementById('food-calc-chevron');
+    
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        chevron.style.transform = 'rotate(180deg)';
+    } else {
+        body.style.display = 'none';
+        chevron.style.transform = 'rotate(0deg)';
+    }
+}
+
+function calcBabyFoodWater() {
+    const type = document.getElementById('food-base-type').value;
+    const ratio = parseFloat(document.getElementById('food-ratio-type').value);
+    const weightVal = document.getElementById('food-base-weight').value;
+    
+    if (!weightVal) {
+        alert("⚠️ 베이스 재료의 무게를 숫자로 입력해주세요!");
+        return;
+    }
+    
+    const weight = parseFloat(weightVal);
+    let waterMl = 0;
+    
+    // 💡 핵심 니치: 재료별 수분 머금는 양이 완전히 다름!
+    if (type === 'flour') {
+        // [쌀가루] 수분이 0이라 10배죽 농도를 내려면 물을 2배(20배) 넣어야 함!
+        waterMl = Math.round(weight * (ratio * 2));
+    } else if (type === 'raw') {
+        // [불린 쌀] 공식 배수 그대로 적용
+        waterMl = Math.round(weight * ratio);
+    } else if (type === 'cooked') {
+        // [지은 밥] 이미 물을 먹은 상태라 절반만 넣어야 한강이 안 됨!
+        waterMl = Math.round(weight * (ratio / 2));
+    }
+    
+    document.getElementById('res-water-ml').innerText = waterMl.toLocaleString();
+    
+    // 재료별 맞춤 팩트체크 꿀팁
+    const tipEl = document.getElementById('res-food-tip');
+    if (type === 'flour') {
+        tipEl.innerHTML = `💡 <strong>육아메이트 팩트체크:</strong> 쌀가루로 원하는 농도를 내려면 <strong>표기된 배수의 2배의 물</strong>을 넣어야 떡이 되지 않습니다! (계산기에 이미 2배로 자동 반영되었습니다.)`;
+    } else if (type === 'cooked') {
+        tipEl.innerHTML = `💡 <strong>육아메이트 팩트체크:</strong> 지은 밥은 이미 수분을 머금고 있어 <strong>물을 절반만 넣어야</strong> 한강이 되지 않습니다! (계산기에 자동 반영됨)`;
+    } else {
+        tipEl.innerHTML = `💡 <strong>육아메이트 꿀팁:</strong> 고기육수나 채소(무, 배추 등)를 듬뿍 넣는다면 수분이 나오니 계산된 물양보다 20~30ml 적게 넣고 끓이면서 맞추세요.`;
+    }
+    
+    document.getElementById('food-calc-result').style.display = 'block';
+}

@@ -9,15 +9,10 @@ let hotplacesData = [];
 let currentSubRegion = 'all'; 
 
 let checklistData = [];
-let currentAvailablePlays = [];
-let currentDday = 0;
 let selectedPillType = ''; 
 let feverChartObj = null; 
 let feverTimerInterval = null; 
-let currentDonutChart = null; 
-let playTimerInterval = null;
-
-const PLAY_TIME_SEC = 300; // 5분 = 300초
+let currentDonutChart = null;
 const babyTips = [
     { min: 0, max: 1, tip: "지금은 아이와 눈 맞춤을 연습할 시간이에요! 🤍" }, 
     { min: 2, max: 3, tip: "목 가누기 연습! 하루 5분 터미타임을 시도해보세요. 💪" }, 
@@ -1276,120 +1271,6 @@ window.renderGrowthHistory = renderGrowthHistory;
 document.addEventListener("DOMContentLoaded", () => {
     if(typeof window.renderGrowthHistory === 'function') window.renderGrowthHistory();
 });
-
-function initPlayWidget(months, dday) {
-    const badgeEl = document.getElementById('play-dday-badge'), titleEl = document.getElementById('play-title'), descEl = document.getElementById('play-desc'), effectEl = document.getElementById('play-effect');
-    if (months === null || isNaN(months) || !titleEl) {
-        if(badgeEl) badgeEl.innerText = "0"; if(titleEl) titleEl.innerText = "아기 정보를 등록해주세요!";
-        if(descEl) descEl.innerText = "상단 연필 버튼을 눌러 생일을 입력하면 놀이가 추천됩니다.";
-        if(effectEl) effectEl.style.display = "none";
-        currentAvailablePlays = []; return;
-    }
-    if(badgeEl) badgeEl.innerText = dday > 0 ? dday : 0; currentDday = dday > 0 ? dday : 0;
-    currentAvailablePlays = playDB.filter(p => months >= p.minM && months <= p.maxM);
-    renderPlay(0); 
-}
-
-function renderPlay(index) {
-    const titleEl = document.getElementById('play-title'), descEl = document.getElementById('play-desc'), effectEl = document.getElementById('play-effect');
-    if(!titleEl) return;
-    if(currentAvailablePlays.length > 0) {
-        const play = currentAvailablePlays[index % currentAvailablePlays.length];
-        titleEl.innerText = play.title; descEl.innerText = play.desc;
-        if(effectEl) { effectEl.innerText = play.effect; effectEl.style.display = "inline-block"; }
-    } else {
-        titleEl.innerText = "온 집안이 놀이터! 🏃‍♂️"; descEl.innerText = "오늘은 아기가 좋아하는 장난감으로 맘껏 놀아주세요!";
-        if(effectEl) effectEl.style.display = "none";
-    }
-}
-
-function shufflePlay() {
-    if(currentAvailablePlays.length > 1) {
-        const titleEl = document.getElementById('play-title');
-        let newIndex;
-        let attempts = 0;
-        do {
-            newIndex = Math.floor(Math.random() * currentAvailablePlays.length);
-            attempts++;
-        } while (currentAvailablePlays[newIndex].title === titleEl.innerText && attempts < 10);
-        renderPlay(newIndex);
-        const btn = document.getElementById('btn-shuffle-play');
-        if(btn) { btn.style.transform = 'rotate(180deg)'; btn.style.transition = 'transform 0.3s ease'; setTimeout(() => { btn.style.transform = 'rotate(0deg)'; btn.style.transition = 'none'; }, 300); }
-    }
-}
-window.shufflePlay = shufflePlay;
-
-// ==========================================
-// ✨ 5분 집중 놀이 타이머 엔진
-// ==========================================
-function startPlayTimer() {
-    const currentTitle = document.getElementById('play-title').innerText;
-    const currentDesc = document.getElementById('play-desc').innerText;
-    
-    const activeTitleEl = document.getElementById('active-play-title');
-    const activeDescEl = document.getElementById('active-play-desc');
-    
-    if(activeTitleEl) activeTitleEl.innerText = '🧸 ' + currentTitle;
-    if(activeDescEl) activeDescEl.innerText = currentDesc;
-
-    document.getElementById('play-info-zone').style.display = 'none';
-    document.getElementById('play-timer-zone').style.display = 'block';
-    
-    const progressBar = document.getElementById('play-progress-bar');
-    if(progressBar) progressBar.style.display = 'block';
-    
-    let timeLeft = PLAY_TIME_SEC;
-    updateTimerDisplay(timeLeft); 
-    
-    setTimeout(() => {
-        if(progressBar) {
-            progressBar.style.transition = `width ${PLAY_TIME_SEC}s linear`;
-            progressBar.style.width = '0%';
-        }
-    }, 50);
-
-    playTimerInterval = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay(timeLeft);
-
-        if (timeLeft <= 0) {
-            clearInterval(playTimerInterval);
-            completePlayTimer();
-        }
-    }, 1000);
-}
-
-function updateTimerDisplay(seconds) {
-    const min = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const sec = String(seconds % 60).padStart(2, '0');
-    const display = document.getElementById('play-timer-display');
-    if(display) display.innerText = `${min}:${sec}`;
-}
-
-function stopPlayTimer() {
-    clearInterval(playTimerInterval);
-    resetPlayUI();
-}
-
-function completePlayTimer() {
-    alert("🎉 5분 놀이 완료! 오늘도 아기에게 즐거운 시간을 선물하셨네요!");
-    resetPlayUI();
-}
-
-function resetPlayUI() {
-    document.getElementById('play-info-zone').style.display = 'block';
-    document.getElementById('play-timer-zone').style.display = 'none';
-    
-    const progressBar = document.getElementById('play-progress-bar');
-    if(progressBar) {
-        progressBar.style.display = 'none';
-        progressBar.style.transition = 'none'; 
-        progressBar.style.width = '100%';      
-    }
-}
-
-window.startPlayTimer = startPlayTimer;
-window.stopPlayTimer = stopPlayTimer;
 
 function uploadPhoto(input) {
     if (input.files && input.files[0]) {
@@ -2940,7 +2821,7 @@ window.applyTimeBasedGreeting = function(babyName) {
         } else if (currentHour >= 17 && currentHour < 22) {
             title = `고생 많은 저녁이에요 🌙`; sub = `오늘 하루도 ${babyName} 돌보느라 수고하셨어요 🤍`;
         } else {
-            title = `새벽에도 깨어계시군요 🦉`; sub = `늦은 시간까지 아기 곁을 지키는 엄마 최고예요 👍`;
+            title = `새벽에도 깨어계시군요 🦉`; sub = `늦은 시간까지 아기 곁을 지키는 당신이 최고예요 👍`;
         }
         
         greetingEl.innerText = title;
@@ -3596,98 +3477,6 @@ window.calcSleepToNow = function() {
     showToast(`✅ ${diffMins}분 수면으로 계산되었습니다!`);
 };
 
-// ==========================================
-// 🏆 마일스톤 보관함 배지 데이터 & 엔진 (여기서부터 복사!)
-// ==========================================
-const milestoneData = [
-    { id: "m_smile", title: "첫 진짜 미소", icon: "😊" },
-    { id: "m_turn", title: "첫 뒤집기", icon: "🐢" },
-    { id: "m_tooth", title: "첫 아랫니", icon: "🦷" },
-    { id: "m_sit", title: "혼자 앉기", icon: "🧘" },
-    { id: "m_crawl", title: "첫 네발기기", icon: "🐛" },
-    { id: "m_stand", title: "첫 일어서기", icon: "🦒" },
-    { id: "m_walk", title: "첫 걸음마", icon: "👣" },
-    { id: "m_word", title: "첫 단어", icon: "💬" },
-    { id: "m_sleep", title: "100일 통잠", icon: "🌙" },
-    { id: "m_food", title: "첫 이유식", icon: "🥣" },
-    { id: "m_poop", title: "첫 유아 변기", icon: "🚽" },
-    { id: "m_travel", title: "첫 장거리 여행", icon: "🚗" }
-];
-
-window.renderMilestones = function() {
-    const grid = document.getElementById('milestone-grid');
-    if(!grid) return;
-    
-    let savedMilestones = JSON.parse(localStorage.getItem('tosil_milestones')) || {};
-    let earnedCount = 0;
-    let html = '';
-
-    milestoneData.forEach(m => {
-        const isEarned = savedMilestones[m.id]; 
-        
-        if (isEarned) {
-            earnedCount++;
-            html += `
-            <div onclick="unlockMilestone('${m.id}')" style="background: linear-gradient(135deg, #FFF9E6 0%, #FFF3C4 100%); border: 1px solid #FFE58F; border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.15); transition: 0.2s; position: relative;">
-                <div style="font-size: 32px; margin-bottom: 8px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">${m.icon}</div>
-                <div style="font-size: 11px; font-weight: 900; color: #B78103; margin-bottom: 4px; line-height: 1.3; word-break: keep-all;">${m.title}</div>
-                <div style="font-size: 10px; font-weight: 800; color: #D97706; background: rgba(255,255,255,0.6); padding: 3px 6px; border-radius: 6px; display: inline-block;">${isEarned}</div>
-            </div>`;
-        } else {
-            html += `
-            <div onclick="unlockMilestone('${m.id}')" style="background: #F8F9FA; border: 1px dashed #D1D6DB; border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; transition: 0.2s; filter: grayscale(100%); opacity: 0.6;">
-                <div style="font-size: 32px; margin-bottom: 8px;">${m.icon}</div>
-                <div style="font-size: 11px; font-weight: 800; color: #8B95A1; margin-bottom: 4px; line-height: 1.3; word-break: keep-all;">${m.title}</div>
-                <div style="font-size: 10px; font-weight: 700; color: #A3AAB3;">미달성 🔒</div>
-            </div>`;
-        }
-    });
-
-    grid.innerHTML = html;
-
-    const total = milestoneData.length;
-    const percent = Math.round((earnedCount / total) * 100);
-    
-    const countEl = document.getElementById('milestone-count');
-    const percentEl = document.getElementById('milestone-percent');
-    const barEl = document.getElementById('milestone-progress-bar');
-    
-    if(countEl) countEl.innerText = earnedCount;
-    if(percentEl) percentEl.innerText = percent;
-    if(barEl) barEl.style.width = percent + "%";
-};
-
-window.unlockMilestone = function(id) {
-    const m = milestoneData.find(x => x.id === id);
-    let savedMilestones = JSON.parse(localStorage.getItem('tosil_milestones')) || {};
-    const isEarned = savedMilestones[id];
-    
-    if (isEarned) {
-        showConfirm(`[${m.title}]\n\n이 배지는 ${isEarned}에 달성했습니다!\n기록을 삭제하고 다시 잠글까요?`, function() {
-            delete savedMilestones[id];
-            localStorage.setItem('tosil_milestones', JSON.stringify(savedMilestones));
-            window.renderMilestones();
-            showToast("🔒 배지가 다시 잠겼습니다.");
-        }, "🤔", "기록 지우기", "#F04452");
-        return;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const dateStr = prompt(`🎉 [${m.title}]\n\n축하합니다! 우리 아기가 이 멋진 순간을 언제 해냈나요?\n(날짜를 YYYY-MM-DD 형식으로 적어주세요)`, today);
-    
-    if (dateStr && dateStr.trim() !== '') {
-        savedMilestones[id] = dateStr.trim();
-        localStorage.setItem('tosil_milestones', JSON.stringify(savedMilestones));
-        window.renderMilestones();
-        showToast("✨ 빛나는 첫 순간이 예쁜 배지로 저장되었습니다!");
-    }
-};
-
-// 💡 앱이 켜질 때 자동으로 도화지에 배지를 그리도록 지시!
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(window.renderMilestones, 200);
-});
-// ==========================================
 
 // ==========================================
 // 🚀 [온보딩 & 정보수정 엔진] 최종 완성본 (이것만 남기세요!)
@@ -3848,7 +3637,6 @@ window.renderBabyInfo = function() {
     if (!savedName || !savedDate) {
         if(nameEl) nameEl.innerText = "아기를 등록해주세요"; 
         if(ddayEl) ddayEl.innerText = "등록 전";
-        if(typeof initPlayWidget === 'function') initPlayWidget(null, 0);
         if(typeof setDefaultMainAISensors === 'function') setDefaultMainAISensors();
         return;
     }
@@ -3900,8 +3688,7 @@ window.renderBabyInfo = function() {
     }
 
     // 6. 하단 위젯 & 센서 가동
-    if(typeof initPlayWidget === 'function') initPlayWidget(monthAge, diffDays);
-    if(typeof updateMainAISensors === 'function') updateMainAISensors(monthAge); 
+        if(typeof updateMainAISensors === 'function') updateMainAISensors(monthAge); 
 
     // 7. 예방접종 배너 띄우기
     const bannerContainer = document.getElementById('health-smart-banner');
@@ -3953,4 +3740,284 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, { passive: true });
     });
+});
+
+// ==========================================
+// 🍼 [툴박스] 퐁당맘마 (수유량/갈아타기) 모듈
+// ==========================================
+function calcFormulaAmount() {
+    const wVal = document.getElementById('calc-weight').value;
+    const cntVal = document.getElementById('calc-count').value;
+    
+    if (!wVal || !cntVal) return showToast("⚠️ 아기 몸무게와 수유 횟수를 입력해주세요!");
+
+    const weight = parseFloat(wVal);
+    const count = parseInt(cntVal);
+    
+    // ✨ 범위 계산 (몸무게 * 130 ~ 150ml)
+    let minMl = Math.round(weight * 130);
+    let maxMl = Math.round(weight * 150);
+    const warningEl = document.getElementById('formula-warning');
+    
+    let displayTotal = "";
+    let displayOne = "";
+    
+    // 🚨 1,000ml 안전 잠금장치 및 텍스트 유연화
+    if (minMl >= 1000) {
+        // 1. 최소량조차 1000을 넘는 우량아 (약 7.7kg 이상) -> 무조건 최대 1000으로 고정
+        warningEl.style.display = 'block';
+        displayTotal = "최대 1,000";
+        displayOne = `최대 ${Math.round(1000 / count).toLocaleString()}`;
+    } else if (maxMl > 1000) {
+        // 2. 최대량만 1000을 넘는 경우 (약 6.7kg ~ 7.6kg) -> 최소치 ~ 최대 1000
+        warningEl.style.display = 'block';
+        displayTotal = `${minMl.toLocaleString()} ~ 최대 1,000`;
+        displayOne = `${Math.round(minMl / count).toLocaleString()} ~ 최대 ${Math.round(1000 / count).toLocaleString()}`;
+    } else {
+        // 3. 1000을 넘지 않는 뽀시래기 시절 -> 정상 범위 출력
+        warningEl.style.display = 'none';
+        displayTotal = `${minMl.toLocaleString()} ~ ${maxMl.toLocaleString()}`;
+        displayOne = `${Math.round(minMl / count).toLocaleString()} ~ ${Math.round(maxMl / count).toLocaleString()}`;
+    }
+
+    // ✨ 결과 출력
+    document.getElementById('res-total-ml').innerText = displayTotal;
+    document.getElementById('res-one-ml').innerText = displayOne;
+    
+    document.getElementById('formula-amount-result').style.display = 'block';
+    
+    // 몸무게 동기화
+    localStorage.setItem('tosil_latest_weight', weight);
+}
+
+// 퐁당퐁당 상태 변수
+let currentPongMode = 'ratio'; // 'ratio'(비율 섞기) or 'count'(횟수 섞기)
+
+function switchPongTab(mode) {
+    currentPongMode = mode;
+    const tabRatio = document.getElementById('pong-tab-ratio');
+    const tabCount = document.getElementById('pong-tab-count');
+    const desc = document.getElementById('pong-desc');
+    const label = document.getElementById('pong-input-label');
+    const input = document.getElementById('pong-input-val');
+    const unit = document.getElementById('pong-input-unit');
+
+    // 🚨 탭 바꿀 때 무조건 입력값 리셋! (200회 버그 해결)
+    input.value = '';
+
+    // 탭 디자인 변경
+    if (mode === 'ratio') {
+        tabRatio.style.background = '#FFFFFF'; tabRatio.style.color = '#191F28'; tabRatio.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
+        tabCount.style.background = 'transparent'; tabCount.style.color = '#8B95A1'; tabCount.style.boxShadow = 'none';
+        
+        desc.innerHTML = '💡 <strong>국산 분유끼리 바꿀 때(스푼당 조유량이 같을 때)</strong><br>한 젖병에 가루를 비율대로 섞어 먹이는 방식입니다.';
+        label.innerText = '1회 총 수유량';
+        input.placeholder = '예: 160';
+        unit.innerText = 'ml';
+    } else {
+        tabCount.style.background = '#FFFFFF'; tabCount.style.color = '#191F28'; tabCount.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
+        tabRatio.style.background = 'transparent'; tabRatio.style.color = '#8B95A1'; tabRatio.style.boxShadow = 'none';
+        
+        desc.innerHTML = '🚨 <strong>수입 분유가 포함될 때(스푼당 조유량이 다를 때)</strong><br>가루를 섞으면 농도가 깨져 배앓이를 합니다.<br>하루 수유 병 횟수를 교차해서 먹여야 합니다!';
+        label.innerText = '하루 총 수유 횟수';
+        input.placeholder = '예: 5';
+        unit.innerText = '회 (병)';
+    }
+
+    // 결과창 숨기기 & 칩 리셋
+    document.getElementById('pong-result').style.display = 'none';
+    document.querySelectorAll('.pong-btn').forEach(b => {
+        b.style.background = 'var(--bg-card)';
+        b.style.color = 'var(--text-m)';
+        b.style.border = '1px solid var(--border)';
+    });
+}
+
+function calcPong(step, btnEl) {
+    // 버튼 UI 업데이트
+    document.querySelectorAll('.pong-btn').forEach(b => {
+        b.style.background = 'var(--bg-card)';
+        b.style.color = 'var(--text-m)';
+        b.style.border = '1px solid var(--border)';
+    });
+    btnEl.style.background = '#F0F7FF';
+    btnEl.style.color = '#3182F6';
+    btnEl.style.border = '1px solid #3182F6';
+
+    const inputVal = parseInt(document.getElementById('pong-input-val').value);
+    
+    if (!inputVal) {
+        return showToast(currentPongMode === 'ratio' ? "⚠️ 1회 수유량(ml)을 입력해주세요!" : "⚠️ 하루 총 수유 횟수를 입력해주세요!");
+    }
+
+    const titleEl = document.getElementById('pong-res-title');
+    const oldValEl = document.getElementById('pong-old-val');
+    const newValEl = document.getElementById('pong-new-val');
+    const oldUnitEl = document.getElementById('pong-old-unit');
+    const newUnitEl = document.getElementById('pong-new-unit');
+
+    if (currentPongMode === 'ratio') {
+        // [비율 가루 섞기]
+        let newRatio = step === 1 ? 0.3 : (step === 2 ? 0.5 : 0.7);
+        const newMl = Math.round(inputVal * newRatio);
+        const oldMl = inputVal - newMl;
+
+        titleEl.innerText = "한 젖병에 이렇게 가루를 타주세요!";
+        oldValEl.innerText = oldMl; newValEl.innerText = newMl;
+        oldUnitEl.innerText = 'ml'; newUnitEl.innerText = 'ml';
+    } else {
+        // [병 횟수 교차하기]
+        let newCount = 0;
+        if (inputVal === 4) {
+            newCount = step === 1 ? 1 : (step === 2 ? 2 : 3);
+        } else if (inputVal === 5) {
+            newCount = step === 1 ? 1 : (step === 2 ? 2 : 4);
+        } else if (inputVal >= 6) {
+            newCount = step === 1 ? 2 : (step === 2 ? 3 : inputVal - 1);
+        } else {
+            newCount = step; // 수유 횟수가 너무 적을 경우 예외처리
+        }
+        
+        const oldCount = Math.max(inputVal - newCount, 0);
+
+        titleEl.innerText = `오늘 하루 총 ${inputVal}회 중, 이렇게 교차로 먹이세요!`;
+        oldValEl.innerText = oldCount; newValEl.innerText = newCount;
+        oldUnitEl.innerText = '회'; newUnitEl.innerText = '회';
+    }
+
+    document.getElementById('pong-result').style.display = 'block';
+}
+
+window.calcFormulaAmount = calcFormulaAmount;
+window.calcPong = calcPong;
+window.switchPongTab = switchPongTab;
+
+// ==========================================
+// 🗓️ [툴박스] 언제깠지 (개봉일 추적기) 모듈
+// ==========================================
+function addOpenRecord() {
+    const typeSelect = document.getElementById('open-item-type');
+    const dateInput = document.getElementById('open-item-date');
+    
+    const typeVal = typeSelect.value;
+    const typeText = typeSelect.options[typeSelect.selectedIndex].text.split(' ')[1]; 
+    const emoji = typeSelect.options[typeSelect.selectedIndex].text.split(' ')[0];
+    const dateVal = dateInput.value;
+    
+    if (!dateVal) return showToast("⚠️ 뜯은 날짜를 선택해주세요!");
+
+    // 권장 유통기한(일수) 맵핑
+   const limitMap = {
+        'formula': 21,    // 분유: 3주
+        'fever': 30,      // 뚜껑 연 병 시럽: 1달
+        'tub_oint': 30,   // 약국 소분 통 연고: 1달
+        'tube_oint': 180, // 비판텐 등 튜브 연고: 6개월
+        'eye_drop': 30,   // 안약: 1달
+        'cream': 180,     // 아기 로션/크림: 6개월
+        'puree': 2        // 침 안 닿은 퓨레: 2일
+    };
+
+    const newRecord = {
+        id: 'open_' + new Date().getTime(),
+        type: typeVal,
+        name: typeText,
+        emoji: emoji,
+        openDate: dateVal,
+        limitDays: limitMap[typeVal]
+    };
+
+    let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
+    records.push(newRecord);
+    localStorage.setItem('tosil_open_records', JSON.stringify(records));
+    
+    renderOpenRecords();
+    showToast("✍️ 라벨 스티커가 등록되었습니다!");
+}
+
+function deleteOpenRecord(id) {
+    showConfirm("이 품목을 삭제하시겠습니까? (다 썼거나 폐기한 경우)", function() {
+        let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
+        records = records.filter(r => r.id !== id);
+        localStorage.setItem('tosil_open_records', JSON.stringify(records));
+        renderOpenRecords();
+        showToast("🗑️ 삭제 완료!");
+    }, "🗑️", "삭제", "#F04452");
+}
+
+function renderOpenRecords() {
+    const container = document.getElementById('open-list-container');
+    if (!container) return;
+
+    let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
+    
+    const dateInput = document.getElementById('open-item-date');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    if (records.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
+                <div style="font-size:24px; margin-bottom:10px;">✨</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">아직 기록된 개봉품이 없습니다.<br>통에 적지 말고 여기에 저장하세요!</div>
+            </div>`;
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    let html = '';
+    
+    records.sort((a, b) => {
+        const endA = new Date(a.openDate).getTime() + (a.limitDays * 24 * 60 * 60 * 1000);
+        const endB = new Date(b.openDate).getTime() + (b.limitDays * 24 * 60 * 60 * 1000);
+        return endA - endB;
+    });
+
+    records.forEach(r => {
+        const openD = new Date(r.openDate);
+        openD.setHours(0,0,0,0);
+        
+        const passedDays = Math.floor((today - openD) / (1000 * 60 * 60 * 24));
+        const remainDays = r.limitDays - passedDays;
+
+        let statusHtml = '';
+        let borderColor = 'var(--border)';
+
+        if (remainDays < 0) {
+            statusHtml = `<span style="color:#F04452; font-weight:900; font-size:12.5px;">🚨 기한 만료 (폐기 권장)</span>`;
+            borderColor = '#FCA5A5';
+        } else if (remainDays <= 5) {
+            statusHtml = `<span style="color:#FF823A; font-weight:800; font-size:12.5px;">⚠️ D-${remainDays} (곧 만료)</span>`;
+            borderColor = '#FDBA74';
+        } else {
+            statusHtml = `<span style="color:#00B37A; font-weight:800; font-size:12.5px;">✅ D-${remainDays} (여유)</span>`;
+        }
+
+        html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#FFFFFF; border:1px solid ${borderColor}; border-radius:16px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="font-size:24px; background:var(--bg-sub); width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">${r.emoji}</div>
+                <div>
+                    <div style="font-size:14.5px; font-weight:900; color:var(--text-m); margin-bottom:4px;">${r.name}</div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        ${statusHtml}
+                        <span style="font-size:11.5px; color:var(--text-s); font-weight:600;">(오픈: ${r.openDate})</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="deleteOpenRecord('${r.id}')" style="background:#F2F5F8; border:none; border-radius:10px; width:40px; height:40px; color:#8B95A1; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center;">❌</button>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+window.addOpenRecord = addOpenRecord;
+window.deleteOpenRecord = deleteOpenRecord;
+window.renderOpenRecords = renderOpenRecords;
+
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(renderOpenRecords, 300);
 });
