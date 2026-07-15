@@ -25,43 +25,7 @@
         "review": "축제장 안에 미니 놀이공원, 동물농장, 레일바이크까지 있어서 하루 종일 에너자이저 아기들 힘 빼기 최적의 요새입니다.",
         "query": "곡성 섬진강기차마을"
     },
-    {
-        "isEvent": true,
-        "region": "gyeonggi",
-        "locText": "경기 수원",
-        "title": "수원화성 미디어아트쇼",
-        "datetime": "2026.05.23(토) ~ 05.24(일)",
-        "emoji": "🎇",
-        "desc": "수원시 주관 주말 야간 미디어아트 및 플리마켓",
-        "tags": [{"c": "green", "t": "🌳 야외 행사"}],
-        "review": "유모차 산책하기 아주 나이스합니다.",
-        "query": "수원화성행궁"
-    },
-    {
-        "isEvent": true,
-        "region": "gyeonggi",
-        "locText": "경기 화성",
-        "title": "동탄 호수 루나쇼",
-        "datetime": "2026.05.23(토)",
-        "emoji": "⛲",
-        "desc": "화성시 주관 음악분수쇼",
-        "tags": [{"c": "green", "t": "🌳 호수공원"}],
-        "review": "치킨 배달시켜서 돗자리 펴고 보면 꿀맛입니다.",
-        "query": "동탄호수공원 루나쇼"
-    },
-    {
-        "isEvent": true,
-        "region": "seoul",
-        "locText": "서울 시청",
-        "title": "서울스퀘어 가족 축제",
-        "datetime": "2026.05.23(토)",
-        "emoji": "🎪",
-        "desc": "영유아 잔디 정원 및 무료 놀이공간",
-        "tags": [{"c": "blue", "t": "🎫 전면 무료"}],
-        "review": "유모차 군단 대거 출격 예정지입니다.",
-        "query": "서울광장"
-    },
-    {
+     {
         "isEvent": false,
         "region": "gyeonggi",
         "locText": "동탄",

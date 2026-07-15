@@ -172,11 +172,16 @@ function setSubRegion(sub, btn) {
 
 function filterPlaces() {
     const searchInput = document.getElementById('spot-search');
-    const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '', container = document.getElementById('hotplace-container');
-    if(!container) return; container.innerHTML = ''; 
-    const todayStr = new Date().toISOString().split('T')[0], todayNum = parseInt(todayStr.replace(/-/g,''));
+    const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const container = document.getElementById('hotplace-container');
+    if(!container) return; 
+    container.innerHTML = ''; // 화면 깨짐 방지용 초기화
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayNum = parseInt(todayStr.replace(/-/g,''));
 
     if (currentSubTab === 'event') {
+        // [1. 이번주 주말 행사 로직 - 기존 코드 완벽하게 100% 유지]
         let eventSource = Array.from(new Map([...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].map(i => [i.title, i])).values());
         const filteredEvents = eventSource.filter(p => {
             let addr = p.addr1 || p.addr || p.locText || '', title = p.title || '';
@@ -210,17 +215,55 @@ function filterPlaces() {
             card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
             gridEl.appendChild(card);
         }); container.appendChild(gridEl);
+
     } else {
+        // [2. 검증 육아지도 로직 - 카드형 딥링크 디자인으로 진화!]
         const filteredPlaces = hotplacesData.filter(p => {
             if (p.expiryDate && todayStr > p.expiryDate) return false;
             return !p.isEvent && (currentRegion === 'all' || p.region === currentRegion) && `${p.title} ${p.desc} ${p.locText}`.toLowerCase().includes(keyword);
         });
-        if(filteredPlaces.length === 0) { container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 아직 등록된 검증 육아지도가 없습니다.</p>`; return; }
-        filteredPlaces.forEach((p, index) => {
-            let tagsHTML = p.tags ? p.tags.map(tag => `<span class="tag ${tag.c}">${tag.t}</span>`).join('') : '';
-            let timeHTML = p.datetime ? `<div style="font-size: 12.5px; color: var(--primary); font-weight: 800; margin-bottom: 8px; background: rgba(49,130,246,0.06); padding: 6px 10px; border-radius: 8px; display: inline-block;">⏰ ${p.datetime}</div>` : '';
-            container.innerHTML += `<div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(${index})"><div class="accordion-title-wrap"><span class="place-loc">${p.locText}</span><strong style="color:var(--text-m); font-weight:800; font-size:15px;">${p.title}</strong><span style="font-size: 14.5px;">${p.emoji || '📍'}</span></div><span id="acc-arrow-${index}" class="accordion-arrow">▼</span></div><div id="acc-body-${index}" class="accordion-body">${timeHTML}<div class="place-desc">${p.desc}</div><div>${tagsHTML}</div><div class="place-review"><strong>💬 팩트 검증 피드:</strong> "${p.review}"</div><button class="btn-main" style="margin-top:16px; font-size:14px; padding:12px;" onclick="openFestivalModal('${p.title}', '${p.datetime || '상시 운영'}', '${p.locText}', '정보없음', '${p.review}', '${p.query}', '')">🚗 내비게이션 길찾기 및 상세 정보 열기 〉</button></div></div>`;
+
+        if(filteredPlaces.length === 0) { 
+            container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 아직 등록된 검증 육아지도가 없습니다.</p>`; 
+            return; 
+        }
+
+        let htmlString = ''; // 화면 깨짐 방지를 위해 카드를 모아두는 바구니
+
+        filteredPlaces.forEach((p) => {
+            // 태그 배열 데이터 안전하게 호환
+            let tagsHTML = '';
+            if (p.tags && Array.isArray(p.tags)) {
+                tagsHTML = p.tags.map(tag => `<span style="background:#F2F5F8; color:#4E5968; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid #E5E8EB; margin-right:4px; display:inline-block; margin-bottom:4px;">#${tag.t || tag}</span>`).join('');
+            }
+            
+            // 카카오맵 딥링크 URL 생성 (검색어 기반)
+            let mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(p.query || p.title)}`;
+
+            htmlString += `
+                <div class="box-main" style="border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border); text-align: left; background: var(--bg-card);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="background:#EBF4FF; color:#3182F6; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:900;">${p.locText || '지역'}</span>
+                            <div style="font-size: 17px; font-weight: 900; color: var(--text-m);">${p.title} ${p.emoji || '📍'}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 13.5px; color: var(--text-s); font-weight: 600; margin-bottom: 12px; line-height: 1.5; word-break: keep-all;">
+                        ${p.desc || ''}
+                    </div>
+                    <div style="margin-bottom: 12px;">${tagsHTML}</div>
+                    <div class="place-review" style="font-size:12.5px; color:var(--text-s); background:var(--bg-sub); padding:12px; border-radius:10px; margin-bottom:16px;">
+                        <strong>💬 토실이 검증:</strong> "${p.review || '유모차와 함께하기 좋은 곳이에요!'}"
+                    </div>
+                    <a href="${mapUrl}" target="_blank" style="display: block; width: 100%; text-align: center; padding: 14px; background: #FEE500; color: #191F28; border-radius: 12px; font-weight: 900; font-size: 14.5px; text-decoration: none; box-shadow: 0 2px 8px rgba(254, 229, 0, 0.2);">
+                        📍 카카오맵으로 위치/길찾기 〉
+                    </a>
+                </div>
+            `;
         });
+        
+        // 조립된 카드들을 화면에 한 번에 그려주기 (안전!)
+        container.innerHTML = htmlString;
     }
 }
 
