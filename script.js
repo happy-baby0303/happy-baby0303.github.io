@@ -1688,7 +1688,7 @@ async function acceptBaton(id) {
     await saveBatonToFirebase(records);
 }
 
-// 💌 바통터치 완료 (토스트 적용)
+// 💌 바통터치 완료 (토스트 적용 + 🎮 경험치 획득 추가!)
 async function completeBaton(id) {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     const idx = records.findIndex(r => r.id === id);
@@ -1699,10 +1699,13 @@ async function completeBaton(id) {
     await saveBatonToFirebase(records);
 
     if (reward && reward !== "없음") {
-        showToast(`🎉 미션 해결!\n약속된 보상 [${reward}]을(를) 당당하게 요구하세요! 👍`); // 👈 교체
+        showToast(`🎉 미션 해결!\n약속된 보상 [${reward}]을(를) 당당하게 요구하세요! 👍`);
     } else {
-        showToast("🎉 미션 해결 완료! 든든한 육아메이트 최고입니다 👍"); // 👈 교체
+        showToast("🎉 미션 해결 완료! 든든한 육아메이트 최고입니다 👍");
     }
+
+    // 👇 이 마법의 한 줄이 남편의 경험치를 20만큼 올려줍니다!
+    if(typeof gainDadExp === 'function') gainDadExp(20); 
 }
 
 // 💌 바통터치 취소 (모달 적용)
@@ -3654,6 +3657,7 @@ window.renderBabyInfo = function() {
     // 3. 이름 & D-Day 뿌리기 (뱃지 크기 밸런스 조정)
     if(nameEl) nameEl.innerText = `${savedName}의 공간`; 
     if(missionNameEl) missionNameEl.innerText = savedName;
+    if(document.getElementById('play-dday-badge')) document.getElementById('play-dday-badge').innerText = diffDays > 0 ? diffDays : 0;
 
     let ddayText = diffDays > 0 ? `D+${diffDays}일` : diffDays < 0 ? `D${diffDays}일` : `D-Day`;
     if(ddayEl) ddayEl.innerHTML = `${ddayText} <span style="font-size:14px; background:rgba(0,0,0,0.5); padding:6px 12px; border-radius:12px; vertical-align:middle; margin-left:8px; font-weight:800; text-shadow:none; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2);">🚀 도약기</span>`; 
@@ -4020,4 +4024,215 @@ window.renderOpenRecords = renderOpenRecords;
 
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(renderOpenRecords, 300);
+});
+
+// ==========================================
+// 🎮 짝꿍 육아 레벨링 시스템 (부부 공용 + 레벨업 보상)
+// ==========================================
+
+// 1. 레벨별 요구 경험치, 공용 칭호, 그리고 🎁[레벨업 보상] 추가!
+const mateLevelData = [
+    { level: 1, reqExp: 0, title: "초보 육아메이트 🐣", reward: null },
+    { level: 2, reqExp: 100, title: "기저귀 교환 요정 🧚", reward: null },
+    { level: 3, reqExp: 300, title: "분유 타기 장인 🍼", reward: "☕ 달콤한 커피 타임 (배우자 결제)" },
+    { level: 4, reqExp: 600, title: "트림 유도 마스터 🌬️", reward: null },
+    { level: 5, reqExp: 1000, title: "수면 의식 지배자 🌙", reward: "💆 시원한 전신 마사지 30분권" },
+    { level: 6, reqExp: 1500, title: "이유식 마스터셰프 👨‍🍳", reward: null },
+    { level: 7, reqExp: 2200, title: "인간 놀이기구 🎢", reward: "🎮 나만의 힐링/자유시간 2시간!" },
+    { level: 8, reqExp: 3000, title: "가족의 든든한 방패 🛡️", reward: null },
+    { level: 9, reqExp: 4200, title: "육아의 신 👼", reward: "🍗 오늘 저녁은 내가 원하는 배달 음식!" },
+    { level: 10, reqExp: 6000, title: "전설의 빛과 소금 ✨ (MAX)", reward: "🎫 묻지도 따지지도 않는 절대 소원권 1장!" }
+];
+
+function updateMateLevelUI() {
+    let currentExp = parseInt(localStorage.getItem('tosil_partner_exp')) || parseInt(localStorage.getItem('tosil_dad_exp')) || 0;
+
+    let currentLevelObj = mateLevelData[0];
+    let nextLevelObj = null;
+
+    // 현재 경험치로 내 레벨 찾기
+    for (let i = 0; i < mateLevelData.length; i++) {
+        if (currentExp >= mateLevelData[i].reqExp) {
+            currentLevelObj = mateLevelData[i];
+            nextLevelObj = mateLevelData[i + 1] || null;
+        } else { break; }
+    }
+
+    let levelBadge = document.getElementById('dad-level-badge');
+    let levelTitle = document.getElementById('dad-level-title');
+    let expText = document.getElementById('dad-exp-text');
+    let expBar = document.getElementById('dad-exp-bar');
+
+    if(levelBadge) {
+        levelBadge.innerText = `Lv.${currentLevelObj.level}`;
+        levelTitle.innerText = currentLevelObj.title;
+
+        if (nextLevelObj) {
+            let levelExp = currentExp - currentLevelObj.reqExp;
+            let reqLevelExp = nextLevelObj.reqExp - currentLevelObj.reqExp;
+            let percentExp = Math.floor((levelExp / reqLevelExp) * 100);
+
+            expText.innerText = `${currentExp} / ${nextLevelObj.reqExp} EXP`;
+            expBar.style.width = `${percentExp}%`;
+        } else {
+            expText.innerText = `${currentExp} (MAX)`;
+            expBar.style.width = `100%`;
+        }
+    }
+}
+
+function gainMateExp(amount) {
+    let currentExp = parseInt(localStorage.getItem('tosil_partner_exp')) || parseInt(localStorage.getItem('tosil_dad_exp')) || 0;
+    
+    // 🌟 경험치 오르기 전의 '원래 레벨' 계산
+    let oldLevel = 1;
+    for (let i = 0; i < mateLevelData.length; i++) {
+        if (currentExp >= mateLevelData[i].reqExp) oldLevel = mateLevelData[i].level;
+    }
+
+    // 경험치 추가!
+    currentExp += amount;
+    localStorage.setItem('tosil_partner_exp', currentExp);
+    localStorage.setItem('tosil_dad_exp', currentExp); // 혹시 모를 호환성 유지
+    updateMateLevelUI();
+
+    // 🌟 경험치 오른 후의 '새로운 레벨' 계산
+    let newLevel = 1;
+    let newReward = null;
+    for (let i = 0; i < mateLevelData.length; i++) {
+        if (currentExp >= mateLevelData[i].reqExp) {
+            newLevel = mateLevelData[i].level;
+            if (mateLevelData[i].reward) newReward = mateLevelData[i].reward;
+        }
+    }
+
+    // 🚀 만약 레벨이 올랐다면 축하 팝업 띄우기!
+    if (newLevel > oldLevel) {
+        setTimeout(() => {
+            let congratsMsg = `🎊 레벨업! [Lv.${newLevel}] 달성! 🎊`;
+            if (newReward && (mateLevelData[newLevel-1].reward !== null)) {
+                congratsMsg += `\n\n🎁 특별 보상 언락:\n[${newReward}]\n지금 바로 배우자에게 청구하세요!`;
+            } else {
+                congratsMsg += `\n\n육아 마스터를 향해 한 걸음 더 나아갔습니다!`;
+            }
+            alert(congratsMsg);
+        }, 300); // 게이지 차는 거 보여주고 0.3초 뒤에 팝업 띄움
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => { updateMateLevelUI(); });
+
+// ==========================================
+// 💌 바통터치 완료 (차등 경험치 + 이스터에그)
+// ==========================================
+async function completeBaton(id) {
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    const idx = records.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    
+    const taskText = records[idx].text || "";
+    const reward = records[idx].reward; 
+    records.splice(idx, 1); 
+    await saveBatonToFirebase(records);
+
+    let earnedExp = 20; 
+    let expMsg = "(+20 EXP 획득!)";
+
+    if (taskText.includes("새벽 수유")) {
+        earnedExp = 50; expMsg = "(난이도 극악! +50 EXP 획득🔥)";
+    } else if (taskText.includes("아기 재우기")) {
+        earnedExp = 40; expMsg = "(체력 소모! +40 EXP 획득💪)";
+    } else if (taskText.includes("장보기")) {
+        earnedExp = 30; expMsg = "(가족의 식량 보급! +30 EXP 획득🛒)";
+    } else if (taskText.includes("기저귀")) {
+        earnedExp = 15; expMsg = "(기본 소양! +15 EXP 획득💩)";
+    }
+
+    if (taskText.includes("커피") || taskText.includes("마사지") || taskText.includes("자유시간") || taskText.includes("쉬어")) {
+        earnedExp = 100;
+        expMsg = "(🎉 히든 퀘스트 달성! 짝꿍 감동 보너스 +100 EXP 잭팟!! 🎊)";
+    }
+
+    if (reward && reward !== "없음") {
+        showToast(`🎉 미션 해결! ${expMsg}\n약속된 보상 [${reward}]을(를) 당당히 요구하세요! 👍`);
+    } else {
+        showToast(`🎉 미션 해결 완료! ${expMsg}`);
+    }
+
+    // 경험치 지급 쏴라!
+    gainMateExp(earnedExp); 
+}
+
+// ==========================================
+// 💌 주간 육아 리포트 열고 닫는 엔진
+// ==========================================
+
+function openWeeklyReport() {
+    const modal = document.getElementById('weekly-report-modal');
+    if(modal) {
+        modal.style.display = 'flex';
+        // 선택 사항: 폭죽 터지는 효과음이나 애니메이션을 넣으면 더 감동적입니다!
+    } else {
+        console.error("주간 리포트 모달창을 찾을 수 없습니다.");
+    }
+}
+
+function closeWeeklyReport() {
+    const modal = document.getElementById('weekly-report-modal');
+    if(modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// 버튼에서 클릭(onclick)할 때 함수를 잘 찾을 수 있도록 창문에 걸어두기
+window.openWeeklyReport = openWeeklyReport;
+window.closeWeeklyReport = closeWeeklyReport;
+
+// ==========================================
+// 💌 주간 육아 리포트 자동 계산 & 스케줄링 엔진
+// ==========================================
+
+function initWeeklyReport() {
+    // 1. 일요일(0)과 월요일(1)에만 버튼 짠! 하고 나타나게 하기
+    const dayOfWeek = new Date().getDay();
+    const reportBtn = document.getElementById('weekly-report-btn');
+    
+    if (reportBtn) {
+        if (dayOfWeek === 0 || dayOfWeek === 1) {
+            reportBtn.style.display = 'flex'; // 일/월에는 보여줌
+        } else {
+            reportBtn.style.display = 'none'; // 화~토에는 숨김
+        }
+    }
+
+    // 2. 지난 7일 동안의 트래커 데이터 싹 다 가져와서 계산하기
+    let trackers = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    let oneWeekAgo = new Date().getTime() - (7 * 24 * 60 * 60 * 1000); // 정확히 7일 전 시간
+    
+    let feedCount = 0;
+    let diaperCount = 0;
+    
+    trackers.forEach(t => {
+        if (t.timestamp >= oneWeekAgo) {
+            if (t.type === 'feed') feedCount++;
+            if (t.type === 'diaper') diaperCount++;
+        }
+    });
+
+    // 바통터치 완료 횟수 가져오기
+    let batonCount = parseInt(localStorage.getItem('tosil_baton_done_count')) || 0;
+
+    // 3. 계산된 숫자를 HTML 이름표(id) 자리에 꽂아 넣기
+    const elFeed = document.getElementById('rep-feed');
+    const elDiaper = document.getElementById('rep-diaper');
+    const elBaton = document.getElementById('rep-baton');
+
+    if(elFeed) elFeed.innerText = feedCount;
+    if(elDiaper) elDiaper.innerText = diaperCount;
+    if(elBaton) elBaton.innerText = batonCount;
+}
+
+// 앱이 처음 켜질 때 자동으로 위 계산을 실행하도록 예약
+document.addEventListener("DOMContentLoaded", () => {
+    initWeeklyReport();
 });
