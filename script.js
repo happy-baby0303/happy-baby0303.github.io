@@ -267,6 +267,9 @@ function filterPlaces() {
     }
 }
 
+// ==========================================
+// 🎪 행사 모달창 프리미엄 UI 패치 (열기 + 닫기 완벽 세트)
+// ==========================================
 function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const body = document.getElementById('modal-dynamic-body');
     if(!body) return;
@@ -274,35 +277,89 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
     const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query);
     
-    const telLink = tel && tel !== '정보없음' 
-        ? `<a href="tel:${tel}" style="flex:1; display:flex; justify-content:center; align-items:center; background:#F2F5F8; color:#4E5968; border-radius:14px; font-size:14px; font-weight:800; text-decoration:none; white-space:nowrap;">📞 전화 문의</a>` 
-        : `<div style="flex:1; display:flex; justify-content:center; align-items:center; background:#F2F5F8; color:#A0AEC0; border-radius:14px; font-size:14px; font-weight:800; white-space:nowrap; opacity:0.6;">📞 번호 없음</div>`;
+    // 전화번호 버튼
+    const telBtn = tel && tel !== '정보없음' 
+        ? `<button onclick="window.location.href='tel:${tel}'" style="flex:1; padding:16px; background:#F2F5F8; color:#4E5968; border-radius:14px; font-weight:900; font-size:15px; border:none; cursor:pointer;">📞 전화 문의</button>` 
+        : `<button disabled style="flex:1; padding:16px; background:#F2F5F8; color:#A0AEC0; border-radius:14px; font-weight:900; font-size:15px; border:none; opacity:0.6;">📞 번호 없음</button>`;
         
-    const modalImgHtml = (image && !image.startsWith('⚙️')) ? `<img src="${image}" style="width:100%; height:160px; object-fit:cover; border-radius:18px; margin-bottom:16px;" onerror="this.style.display='none'">` : '';
+    // 메인 사진
+    const modalImgHtml = (image && !image.startsWith('⚙️')) 
+        ? `<div style="width:100%; height:200px; border-radius:18px; overflow:hidden; margin-bottom:20px; box-shadow:0 4px 16px rgba(0,0,0,0.06); position:relative;">
+             <img src="${image}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+             <div style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:#FFF; font-size:11px; font-weight:800; padding:4px 8px; border-radius:8px; backdrop-filter:blur(4px);">행사 전경</div>
+           </div>` 
+        : `<div style="width:100%; height:140px; border-radius:18px; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); margin-bottom:20px; display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:0 4px 16px rgba(0,0,0,0.06);">🎪</div>`;
 
+    // 토스 스타일 전체 UI 렌더링
     body.innerHTML = `
-        <div class="modal-header-wrap"><span class="modal-emoji">🌲</span><div class="modal-title">${title}</div></div>
-        ${modalImgHtml}
-        <div class="modal-meta-box">
-            <div class="modal-meta-row"><span class="modal-meta-label">🗓️ 기간</span><span class="modal-meta-value">${dateText}</span></div>
-            <div class="modal-meta-row"><span class="modal-meta-label">📍 장소</span><span class="modal-meta-value">${addr}</span></div>
-        </div>
-        <div class="place-review" style="margin-top:0; margin-bottom:20px; background:#F2F5F8; border-radius:14px;"><strong>💬 토실이 팩트 체크:</strong> "${review || '맞춤형 주말 안전 인프라입니다.'}"</div>
-        <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:8px;">🚗 아기랑 모바일 길찾기 서비스</div>
-        <div class="modal-navi-container">
-            <a href="${naverUrl}" target="_blank" class="modal-navi-item"><div class="navi-badge-icon naver">N</div><span>네이버 지도</span></a>
-            <a href="${tmapUrl}" target="_blank" class="modal-navi-item"><div class="navi-badge-icon tmap">T</div><span>티맵(TMap)</span></a>
-            <a href="${kakaoUrl}" target="_blank" class="modal-navi-item"><div class="navi-badge-icon kakao">K</div><span>카카오내비</span></a>
-        </div>
-        <div class="modal-action-grid" style="display:flex; gap:10px;">
-            ${telLink}
-            <button class="btn-main" style="flex:1; margin-top:0; padding:16px; border-radius:14px; background:#3182F6 !important; color:#FFF !important; font-weight:900; border:none; white-space:nowrap; cursor:pointer;" onclick="closeFestivalModalForce()">확인 완료</button>
+        <div style="padding: 10px 4px;">
+            <!-- 🏷️ 제목 영역 -->
+            <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:16px;">
+                <span style="font-size:26px; background:#F2F5F8; padding:8px; border-radius:14px; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);">🌲</span>
+                <div style="font-size:20px; font-weight:900; color:#191F28; letter-spacing:-0.5px; line-height:1.3; word-break:keep-all; margin-top:2px;">${title}</div>
+            </div>
+
+            <!-- 📸 메인 이미지 -->
+            ${modalImgHtml}
+
+            <!-- 🗓️ 기본 정보 박스 -->
+            <div style="background:#F8F9FA; padding:18px; border-radius:16px; margin-bottom:20px; border:1px solid #E5E8EB;">
+                <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
+                    <span style="font-size:18px; margin-top:2px;">🗓️</span>
+                    <div>
+                        <div style="font-size:11.5px; font-weight:800; color:#8B95A1; margin-bottom:4px;">행사 기간</div>
+                        <div style="font-size:14.5px; font-weight:800; color:#333D4B;">${dateText}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                    <span style="font-size:18px; margin-top:2px;">📍</span>
+                    <div>
+                        <div style="font-size:11.5px; font-weight:800; color:#8B95A1; margin-bottom:4px;">행사 장소</div>
+                        <div style="font-size:14.5px; font-weight:800; color:#333D4B; line-height:1.4; word-break:keep-all;">${addr}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 💡 팩트 체크 박스 (보라색 포인트로 시선 집중) -->
+            <div style="background:linear-gradient(135deg, #F4F0FF 0%, #F9F7FF 100%); padding:18px; border-radius:16px; margin-bottom:24px; border:1px solid #EBE5FF; display:flex; gap:12px; align-items:flex-start;">
+                <span style="font-size:20px; margin-top:2px;">💡</span>
+                <div>
+                    <div style="font-size:12.5px; font-weight:900; color:#6B4EFF; margin-bottom:6px;">토실이 팩트 체크</div>
+                    <div style="font-size:14px; font-weight:800; color:#4E5968; line-height:1.5; word-break:keep-all;">"${review || '맞춤형 주말 안전 인프라입니다.'}"</div>
+                </div>
+            </div>
+
+            <!-- 🚗 길찾기 영역 -->
+            <div style="font-size:13.5px; font-weight:900; color:#191F28; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                <span>🚗</span> 아기랑 모바일 길찾기
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:24px;">
+                <a href="${naverUrl}" target="_blank" style="flex:1; padding:12px 0; background:#FFF; border:1px solid #E5E8EB; border-radius:14px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02); text-decoration:none;">
+                    <div style="width:36px; height:36px; background:#03C75A; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#FFF; font-weight:900; font-size:18px;">N</div>
+                    <span style="font-size:11.5px; font-weight:800; color:#4E5968;">네이버 지도</span>
+                </a>
+                <a href="${tmapUrl}" target="_blank" style="flex:1; padding:12px 0; background:#FFF; border:1px solid #E5E8EB; border-radius:14px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02); text-decoration:none;">
+                    <div style="width:36px; height:36px; background:#111111; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#FFF; font-weight:900; font-size:18px;">T</div>
+                    <span style="font-size:11.5px; font-weight:800; color:#4E5968;">티맵</span>
+                </a>
+                <a href="${kakaoUrl}" target="_blank" style="flex:1; padding:12px 0; background:#FFF; border:1px solid #E5E8EB; border-radius:14px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02); text-decoration:none;">
+                    <div style="width:36px; height:36px; background:#FEE500; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#191F28; font-weight:900; font-size:18px;">K</div>
+                    <span style="font-size:11.5px; font-weight:800; color:#4E5968;">카카오내비</span>
+                </a>
+            </div>
+
+            <!-- ✅ 하단 액션 버튼 -->
+            <div style="display:flex; gap:10px;">
+                ${telBtn}
+                <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
+            </div>
         </div>
     `;
     const modalWrap = document.getElementById('premium-modal');
     if(modalWrap) modalWrap.style.display = 'flex';
 }
 
+// 👇 절대 지우면 안 되는 모달 닫기 함수들! (안전하게 같이 둡니다)
 function closeFestivalModalForce() { const m = document.getElementById('premium-modal'); if(m) m.style.display = 'none'; }
 function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
 
@@ -2006,25 +2063,30 @@ function startLedgerRealtimeSync() {
 window.startLedgerRealtimeSync = startLedgerRealtimeSync;
 
 // ==========================================
-// 💡 스마트 홈 배너 엔진 (이전 디자인 폰트/버튼 완벽 복구 버전)
+// 💡 스마트 홈 배너 엔진 (유령 테두리 완벽 제거 버전)
 // ==========================================
 function updateSmartBanner() {
     const container = document.getElementById('smart-banner-container');
     if(!container) return;
 
+    // 👇 1차 방어막: 컨테이너 자체가 가지고 있는 숨은 테두리를 강제로 없앱니다!
+    container.style.setProperty('border', 'none', 'important');
+    container.style.setProperty('outline', 'none', 'important');
+    container.style.setProperty('background', 'transparent', 'important');
+    container.style.setProperty('box-shadow', 'none', 'important');
+
     let banners = [];
 
-    // 🚨 1. 바통터치 (보라색 + 교대하기 버튼)
     const batonRecords = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     const urgentBaton = batonRecords.find(r => r.status === 'requested');
     if (urgentBaton) {
         banners.push(`
-            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('baton'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: linear-gradient(135deg, #F4F0FF 0%, #EBE5FF 100%); border: 1px solid #D9CFFF; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(107,78,255,0.12); box-sizing: border-box;">
+            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('baton'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: var(--bg-card); border: 1px solid #6B4EFF; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box;">
                 <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
                     <div style="font-size: 26px; flex-shrink: 0;">💌</div>
                     <div style="flex: 1; min-width: 0; text-align: left;">
                         <div style="font-size: 12px; font-weight: 800; color: #6B4EFF; margin-bottom: 4px;">짝꿍의 SOS 요청!</div>
-                        <div style="font-size: 15.5px; font-weight: 900; color: #191F28; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">"${urgentBaton.text}"</div>
+                        <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">"${urgentBaton.text}"</div>
                     </div>
                 </div>
                 <span style="flex-shrink: 0; white-space: nowrap; background: #6B4EFF; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">교대하기</span>
@@ -2032,16 +2094,15 @@ function updateSmartBanner() {
         `);
     }
 
-    // 💌 2. 주간 육아 리포트 (분홍색 + 리포트 보기 버튼)
     const dayOfWeek = new Date().getDay();
     if (dayOfWeek === 0 || dayOfWeek === 1) {
         banners.push(`
-            <div onclick="window.openWeeklyReport()" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: linear-gradient(135deg, #FFF0F1 0%, #FFE5E5 100%); border: 1px solid #FFD1D1; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(240,68,82,0.1); box-sizing: border-box;">
+            <div onclick="window.openWeeklyReport()" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: var(--bg-card); border: 1px solid #F04452; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box;">
                 <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
                     <div style="font-size: 26px; flex-shrink: 0;">🎉</div>
                     <div style="flex: 1; min-width: 0; text-align: left;">
                         <div style="font-size: 12px; font-weight: 800; color: #F04452; margin-bottom: 4px;">수고했어요, 짝꿍!</div>
-                        <div style="font-size: 15.5px; font-weight: 900; color: #D32F2F; letter-spacing: -0.3px;">이번 주 육아 리포트 발행</div>
+                        <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); letter-spacing: -0.3px;">이번 주 육아 리포트 발행</div>
                     </div>
                 </div>
                 <span style="flex-shrink: 0; white-space: nowrap; background: #F04452; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">리포트 보기</span>
@@ -2049,7 +2110,6 @@ function updateSmartBanner() {
         `);
     }
 
-    // ⛈️ 3. 원더윅스 경보 (이전 폰트 스펙 및 '대처법 보기' 버튼 완벽 복구!)
     try {
         const savedBaby = localStorage.getItem('tosil_baby');
         if (savedBaby && typeof wwList !== 'undefined') {
@@ -2059,12 +2119,12 @@ function updateSmartBanner() {
             const curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
             if (curWW) {
                 banners.push(`
-                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: linear-gradient(135deg, #FFF0F1 0%, #FFE3E3 100%); border: 1px solid #FCA5A5; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
+                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: var(--bg-card); border: 1px solid #F04452; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
                         <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
                             <div style="font-size: 26px; flex-shrink: 0;">⛈️</div>
                             <div style="flex: 1; min-width: 0; text-align: left;">
                                 <div style="font-size: 12px; font-weight: 800; color: #D32F2F; margin-bottom: 4px;">원더윅스 경보</div>
-                                <div style="font-size: 15.5px; font-weight: 900; color: #191F28; letter-spacing: -0.3px;">현재 4차 원더윅스 구간!</div>
+                                <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); letter-spacing: -0.3px;">현재 4차 원더윅스 구간!</div>
                             </div>
                         </div>
                         <span style="flex-shrink: 0; white-space: nowrap; background: #F04452; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">대처법 보기</span>
@@ -2074,7 +2134,6 @@ function updateSmartBanner() {
         }
     } catch(e) {}
 
-    // 💉 4. 예방접종 알림 (파란색 + 확인하기 버튼)
     try {
         const savedBaby = localStorage.getItem('tosil_baby');
         if (savedBaby && typeof vaccineData !== 'undefined') {
@@ -2084,12 +2143,12 @@ function updateSmartBanner() {
             const curVac = vaccineData.find(v => monthAge === v.maxMonth);
             if (curVac) {
                 banners.push(`
-                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%); border: 1px solid #AECBFA; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
+                    <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: var(--bg-card); border: 1px solid #3182F6; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
                         <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
                             <div style="font-size: 26px; flex-shrink: 0;">💉</div>
                             <div style="flex: 1; min-width: 0; text-align: left;">
                                 <div style="font-size: 12px; font-weight: 800; color: #1967D2; margin-bottom: 4px;">이번 달 필수 접종</div>
-                                <div style="font-size: 15.5px; font-weight: 900; color: #191F28; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${curVac.desc}</div>
+                                <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${curVac.desc}</div>
                             </div>
                         </div>
                         <span style="flex-shrink: 0; white-space: nowrap; background: #1A73E8; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">확인하기</span>
@@ -2099,17 +2158,16 @@ function updateSmartBanner() {
         }
     } catch(e) {}
 
-    // 🧊 5. 큐브 부족 알림 (노란색 + 채우기 버튼)
     const cubeRecords = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
     const lowCube = cubeRecords.find(r => r.qty <= 2);
     if (lowCube) {
         banners.push(`
-            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('cube'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: linear-gradient(135deg, #FFF9E6 0%, #FFF3C4 100%); border: 1px solid #FFE58F; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
+            <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('cube'), 50);" style="flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: var(--bg-card); border: 1px solid #F59E0B; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
                 <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0;">
                     <div style="font-size: 26px; flex-shrink: 0;">🧊</div>
                     <div style="flex: 1; min-width: 0; text-align: left;">
                         <div style="font-size: 12px; font-weight: 800; color: #B78103; margin-bottom: 4px;">큐브 충전 필요</div>
-                        <div style="font-size: 15.5px; font-weight: 900; color: #191F28; letter-spacing: -0.3px;">${lowCube.name} 큐브가 ${lowCube.qty}개 남았어요!</div>
+                        <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); letter-spacing: -0.3px;">${lowCube.name} 큐브가 ${lowCube.qty}개 남았어요!</div>
                     </div>
                 </div>
                 <span style="flex-shrink: 0; white-space: nowrap; background: #F59E0B; color: white; font-size: 13px; font-weight: 900; padding: 8px 14px; border-radius: 12px;">채우기</span>
@@ -2117,17 +2175,17 @@ function updateSmartBanner() {
         `);
     }
 
-    // 🌟 화면 그리기
     if (banners.length > 0) {
         const dynamicWidth = banners.length === 1 ? '100%' : '88%';
         const finalBanners = banners.map(b => b.replace(/__WIDTH__/g, dynamicWidth));
         
+        // 👇 2차 방어막: 안쪽 레이아웃 박스들에도 border:none !important를 때려박아서 철벽 방어!
         container.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important;">
                 <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s);">🔔 맞춤 알림 <span style="color:#3182F6">${banners.length}</span></div>
-                ${banners.length > 1 ? `<div style="font-size: 11px; font-weight: 700; color: #A0AEC0; background: #F2F5F8; padding: 2px 8px; border-radius: 10px;">옆으로 넘겨보세요 👉</div>` : ''}
+                ${banners.length > 1 ? `<div style="font-size: 11px; font-weight: 700; color: var(--text-s); background: var(--bg-sub); padding: 2px 8px; border-radius: 10px;">옆으로 넘겨보세요 👉</div>` : ''}
             </div>
-            <div style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 8px; scrollbar-width: none;">
+            <div style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 8px; scrollbar-width: none; border: none !important; outline: none !important; background: transparent !important; box-shadow: none !important;">
                 ${finalBanners.join('')}
             </div>
         `;
@@ -2333,27 +2391,30 @@ window.openTrackerSheet = function(type, editId = null) {
     } else if (type === 'sleep') {
         title.innerHTML = window.editingTrackerId ? '💤 수면 기록 수정' : '💤 수면 기록하기';
         
-        // ✨ 수면 시간 입력부: 시간 입력칸은 맨 위로 합치고, 계산 버튼만 남겼습니다!
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_day')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">☀️ 낮잠</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_night')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">🌙 밤잠</button>
             </div>
 
-            <div style="background:var(--bg-sub); padding:16px; border-radius:16px; margin-bottom:20px; border:1px solid var(--border); margin-top:16px;">
-                <div style="font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:8px; text-align:center;">아기가 방금 깨어났다면?</div>
-                <button onclick="window.calcSleepToNow()" style="width:100%; padding:14px; background:#E8F3FF; color:#3182F6; border:1px dashed #3182F6; border-radius:12px; font-size:14px; font-weight:900; cursor:pointer; transition:0.2s;">
-                    ⏰ 방금 깼어요! (위의 시간 ~ 현재 계산)
+            <!-- 👇 다크모드 대응 완료: 하얀색 박스 대신 어두운 배경(var(--bg-sub)) 적용 -->
+            <div style="background:var(--bg-sub); padding:18px; border-radius:16px; margin-bottom:20px; border:1px solid var(--border); text-align:center;">
+                <div style="font-size:12.5px; font-weight:800; color:#3182F6; margin-bottom:8px;">아기가 지금 막 일어났나요?</div>
+                <button onclick="window.calcSleepToNow()" style="width:100%; padding:14px; background:var(--bg-card); color:#3182F6; border:1px solid var(--border); border-radius:12px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.05); transition:0.2s;">
+                    ⏰ 방금 깼어요! (알아서 계산)
                 </button>
             </div>
 
             <div style="text-align: center; margin-bottom: 24px;">
-                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">총 수면 시간 (분)</div>
-                <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
-                    <input type="number" id="v-sleep-amount" placeholder="0" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0; transition:0.3s;">
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">총 수면 시간 (분)</div>
+                <div style="display: flex; justify-content: center; align-items: baseline; gap: 6px;">
+                    <input type="number" id="v-sleep-amount" placeholder="0" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition:0.3s;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
                 </div>
-                <div style="font-size:11.5px; color:#3182F6; margin-top:8px; font-weight:800;">* 지금 자고 있다면 '0'으로 저장해두세요!</div>
+                <!-- ✅ 수정된 코드 (다크모드 완벽 호환) -->
+                <div style="margin-top: 14px;">
+                    <span style="background:var(--bg-sub); color:var(--text-m); font-size:11.5px; font-weight:800; padding:6px 12px; border-radius:20px; border:1px solid var(--border);">💡 자는 중이라면 빈칸으로 두고 [저장] 누르세요!</span>
+                </div>
             </div>
         `;
         if(saveBtn) saveBtn.style.display = 'block';
@@ -2366,6 +2427,7 @@ window.openTrackerSheet = function(type, editId = null) {
         }, 50);
 
     } else if (type === 'diaper') {
+
         title.innerHTML = '💩 기저귀 기록하기';
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 8px; margin-bottom: 20px;">
@@ -3184,12 +3246,16 @@ window.saveTrackerRecord = async function() {
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
+    // 👇 여기서부터 덮어쓰기! (빈칸을 허용하고 0으로 알아서 바꿔주는 마법)
     else if (window.trackerState.type === 'sleep') {
         const amt = document.getElementById('v-sleep-amount');
-        // ✨ 핵심! 값이 아예 비어있을 때만 막고, '0'을 적으면 통과시킵니다!
-        if(!amt || amt.value === '') return window.showToast('⚠️ 수면 시간(분)을 입력해주세요! (자는 중이면 0 입력)');
         
-        record.amount = parseInt(amt.value);
+        // ✨ 핵심: 빈칸이거나 입력이 없으면 0으로 처리 (자는 중)
+        let sleepAmount = 0;
+        if (amt && amt.value !== '') {
+            sleepAmount = parseInt(amt.value);
+        }
+        record.amount = sleepAmount;
         
         if (window.editingTrackerId) {
             const originalRecord = records.find(r => r.id === window.editingTrackerId);
