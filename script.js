@@ -4596,7 +4596,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 🔐 카카오 로그인 & 로그아웃 엔진
+// 🔐 카카오 로그인 & 로그아웃 엔진 (안드로이드 에러 완벽 해결판!)
 // ==========================================
 window.loginWithKakao = function() {
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
@@ -4605,6 +4605,7 @@ window.loginWithKakao = function() {
     }
 
     Kakao.Auth.login({
+        throughTalk: false, // 👈 [핵심 해결책] 카카오톡 앱 전환을 막고 브라우저 내부에서 안전하게 띄웁니다!
         success: function(authObj) {
             // 로그인 성공 시 유저 정보(프로필, 닉네임) 가져오기
             Kakao.API.request({
@@ -4632,26 +4633,6 @@ window.loginWithKakao = function() {
         }
     });
 };
-
-window.logoutKakao = function() {
-    showConfirm("로그아웃 하시겠습니까?", function() {
-        // 내 폰에 저장된 프로필 지우기
-        localStorage.removeItem('kakao_nickname');
-        localStorage.removeItem('kakao_profile_image');
-        
-        // 카카오 서버에서도 로그아웃 처리
-        if (typeof Kakao !== 'undefined' && Kakao.Auth.getAccessToken()) {
-            Kakao.Auth.logout(function() {
-                showToast("👋 로그아웃 되었습니다.");
-                window.renderSettingsTab();
-            });
-        } else {
-            showToast("👋 로그아웃 되었습니다.");
-            window.renderSettingsTab();
-        }
-    }, "👋", "로그아웃", "#8B95A1");
-};
-
 
 // ==========================================
 // ⚙️ [설정 탭] 전체 UI 렌더링 엔진 (풀옵션 장착 🚀)
