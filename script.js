@@ -4710,8 +4710,8 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m);">👨‍👩‍👧 가족 연동 완료</div>
                     <span style="background: #EBF4FF; color: #3182F6; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px;">상태: ON</span>
                 </div>
-                <div style="font-size: 12.5px; color: var(--text-s); font-weight: 600; margin-bottom: 12px;">현재 짝꿍과 육아 데이터를 공유 중입니다.</div>
-                <button style="width: 100%; padding: 12px; border-radius: 12px; background: #F2F5F8; color: #8B95A1; font-size: 13.5px; font-weight: 800; border: none; cursor: pointer;">연동 해제하기</button>
+                <div style="font-size: 12.5px; color: var(--text-s); font-weight: 600; margin-bottom: 12px;">현재 가족간 육아 데이터를 공유 중입니다.</div>
+                <button onclick="window.unlinkFamilySync()" style="width: 100%; padding: 12px; border-radius: 12px; background: #F2F5F8; color: #8B95A1; font-size: 13.5px; font-weight: 800; border: none; cursor: pointer;">연동 해제하기</button>
             </div>
         `;
     } else {
@@ -4856,4 +4856,28 @@ window.openPoopAI = function(type) {
     if(typeof showPoopAI === 'function') {
         showPoopAI(); 
     }
+};
+
+// ==========================================
+// 🔗 부부 연동 해지 기능
+// ==========================================
+window.unlinkFamilySync = function() {
+    showConfirm(
+        "정말 가족 연동을 해지하시겠습니까?<br><span style='font-size:12px; color:#8B95A1; font-weight:600;'>해지해도 내 폰의 기록은 지워지지 않지만, 더 이상 가족간 실시간으로 공유되지 않습니다.</span>",
+        function() {
+            // 1. 로컬 스토리지에서 가족 동기화 코드 삭제 (연결 고리 끊기)
+            localStorage.removeItem("family_sync_code");
+            
+            // 2. 알림 띄우기
+            window.showToast("💔 가족 연동이 안전하게 해제되었습니다.");
+            
+            // 3. 1초 뒤에 앱을 새로고침해서 완전 초기화된 상태로 만듦
+            setTimeout(() => {
+                location.reload(); 
+            }, 1000);
+        },
+        "🔗", // 아이콘
+        "해지하기", // 버튼 이름
+        "#F04452" // 버튼 색상 (빨간색)
+    );
 };
