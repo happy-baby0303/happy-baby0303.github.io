@@ -4780,8 +4780,8 @@ window.renderSettingsTab = function() {
                 </div>
                 
                 <!-- 3. 개인정보 처리방침 -->
-                <div onclick="alert('개인정보 처리방침 페이지 준비 중입니다.')" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
-                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">🛡️ 개인정보 처리방침</div>
+                <div onclick="location.href='privacy.html'" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
+                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">🛡️ 개인정보 처리방침 및 이용약관</div>
                     <div style="color: #8B95A1; font-size: 12px;">〉</div>
                 </div>
                 
