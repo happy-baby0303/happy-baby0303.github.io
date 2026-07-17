@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- 카카오톡 SDK (이게 있어야 카톡이 뜹니다!) -->
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/1.43.1/kakao.min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N8JZ91ZQHR"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -149,8 +151,8 @@
 </div>
         
         <div style="display:flex; align-items:center; gap:6px;">
-            <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="background:none; border:none; font-size:16px; cursor:pointer; padding:0;">🌙</button>
-            <button id="sync-badge-btn" onclick="openFamilySyncModal()" class="box-tint-blue" style="border: none; padding: 5px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
+            <button onclick="switchTab('settings', null); window.renderSettingsTab();" style="background:none; border:none; font-size:16px; cursor:pointer; padding:0;">⚙️</button>
+             <button id="sync-badge-btn" onclick="openFamilySyncModal()" class="box-tint-blue" style="border: none; padding: 5px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); white-space: nowrap;">
                 <span id="sync-status-icon">🔗</span><span id="sync-status-text">연동설정</span>
             </button>
             <div class="system-status box-tint-blue" style="white-space: nowrap; font-size: 11px; padding: 5px 8px; border:none; letter-spacing: -0.3px;"><span class="status-dot"></span>LIVE</div>
@@ -916,8 +918,8 @@
                 <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                     <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #191F28; letter-spacing: -0.5px;">🍼 분유 갈아타기 (퐁당퐁당)</h2>
                     <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #F2F5F8; padding: 4px; border-radius: 14px;">
-                        <button id="pong-tab-ratio" onclick="switchPongTab('ratio')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: #FFFFFF; color: #191F28; box-shadow: 0 2px 6px rgba(0,0,0,0.05); cursor:pointer; transition:0.2s;">국산 (가루 섞기)</button>
-                        <button id="pong-tab-count" onclick="switchPongTab('count')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: #8B95A1; cursor:pointer; transition:0.2s;">수입 (횟수 교차)</button>
+                        <button id="pong-tab-ratio" onclick="switchPongTab('ratio')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: #FFFFFF; color: #191F28; box-shadow: 0 2px 6px rgba(0,0,0,0.05); cursor:pointer; transition:0.2s;">비율 섞기 (조유량 같음)</button>
+<button id="pong-tab-count" onclick="switchPongTab('count')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: #8B95A1; cursor:pointer; transition:0.2s;">교차 수유 (조유량 다름)</button>
                     </div>
                     <div id="pong-desc" style="background: #FFF9E6; padding: 14px; border-radius: 14px; margin-bottom: 20px; font-size: 12.5px; font-weight: 700; color: #B78103; line-height: 1.5; word-break: keep-all; text-align: center;">
                         💡 <strong>국산 분유끼리 바꿀 때(스푼당 조유량이 같을 때)</strong><br>한 젖병에 가루를 비율대로 섞어 먹이는 방식입니다.
@@ -960,16 +962,22 @@
                     <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #191F28; letter-spacing: -0.5px;">✍️ 개봉일 네임펜 스티커</h2>
                     <p style="font-size: 13px; font-weight: 700; color: #8B95A1; margin-bottom: 20px; word-break: keep-all;">통에 적어둔 날짜가 지워져서 찝찝하셨죠? 터치 몇 번으로 안전하게 기록하세요.</p>
                     <div style="margin-bottom: 24px;">
-                        <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">1. 어떤 물건을 뜯으셨나요?</label>
-                        <select id="open-item-type" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 14.5px; font-weight: 800; outline: none; background: #F9FAFB; border: 1px solid #E5E8EB; color: var(--text-m); margin-bottom: 20px;">
-                            <option value="formula">🍼 분유통 (보통 딱 3주 권장)</option>
-                            <option value="fever">💊 병 시럽약/해열제 (보통 1달)</option>
-                            <option value="tub_oint">💊 약국 소분 둥근 통 연고 (보통 1달)</option>
-                            <option value="tube_oint">🩹 비판텐 등 밀봉 튜브 연고 (보통 6개월)</option>
-                            <option value="eye_drop">🩹 안약/안연고 (세균위험! 무조건 1달)</option>
-                            <option value="cream">🧴 아기 로션/크림 (보통 6개월)</option>
-                            <option value="puree">🥣 덜어먹은 시판 퓨레/이유식 (냉장 2일)</option>
+                       <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">1. 어떤 물건을 뜯으셨나요?</label>
+                        <!-- 👇 글씨를 짧고 명확하게 바꿨습니다 -->
+                        <select id="open-item-type" onchange="window.updateOpenItemGuide()" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #F9FAFB; border: 1px solid #E5E8EB; color: var(--text-m); margin-bottom: 12px;">
+                            <option value="formula">🍼 분유</option>
+                            <option value="fever">💊 시럽약 (해열제/항생제)</option>
+                            <option value="tub_oint">🧴 소분 통 연고 (약국)</option>
+                            <option value="tube_oint">🩹 튜브형 연고 (비판텐 등)</option>
+                            <option value="eye_drop">👁️ 안약/안연고</option>
+                            <option value="cream">🧴 아기 로션/크림/오일</option>
+                            <option value="puree">🥣 시판 퓨레/이유식</option>
+                            <option value="wipe">🧼 소독티슈/물티슈</option>
                         </select>
+                        <!-- 👇 선택할 때마다 바뀌는 스마트 말풍선 추가! -->
+                        <div id="open-item-guide" style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #3182F6; background: #E8F3FF; padding: 12px 14px; border-radius: 12px; word-break: keep-all; line-height: 1.4;">
+                            💡 습기에 취약해요! 개봉 후 3주(21일) 이내 소진을 권장합니다.
+                        </div>
                         <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">2. 언제 뜯었나요? (기본: 오늘)</label>
                         <input type="date" id="open-item-date" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #F9FAFB; border: 1px solid #E5E8EB; color: var(--text-m); box-sizing: border-box;">
                     </div>
@@ -1281,7 +1289,7 @@
                             </div>
                         </details>
 
-                        <details class="lib-item" style="border-bottom: none;">
+                        <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
                                 <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">💩 당황하지 마세요! 아기 똥 색깔 건강법</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
@@ -1299,7 +1307,6 @@
                                     • <strong>⚫ 검은색(흑색변):</strong> 위, 십이지장 등 상부 위장관 출혈 의심<br>
                                     • <strong>⚪ 흰색/회색(담백색):</strong> 담도폐쇄증 의심 (아기 얼굴에 황달 동반 시 초응급 상태입니다!)
                                 </div>
-                                
                                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);">
                                     <button class="box-tint-blue" onclick="switchTab('home', document.getElementById('nav-home')); setTimeout(window.openDiaperSheet, 300);" style="width:100%; padding:14px; color:var(--primary); border-radius:12px; font-weight:800; font-size:13.5px; cursor:pointer;">
                                         👉 홈 화면에서 기저귀 기록하기
@@ -1307,19 +1314,56 @@
                                 </div>
                             </div>
                         </details>
+
+                        <!-- 🌟 새로 추가된 개봉일 가이드 아코디언 -->
+                        <details class="lib-item" style="border-bottom: none;">
+                            <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">🗓️ 약, 연고, 화장품 개봉 후 언제까지 쓸까?</div>
+                                <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
+                            </summary>
+                            <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
+                                <div class="box-tint-blue" style="padding: 14px; border-radius: 12px; margin-bottom: 12px;">
+                                    <strong style="color: var(--primary); font-size:14px; margin-bottom:4px; display:block;">💧 1달 이내 폐기 (세균 번식 위험)</strong>
+                                    • <strong>시럽약/해열제:</strong> 개봉 후 1달 (처방받은 조제 시럽약은 1주일)<br>
+                                    • <strong>소독티슈/물티슈:</strong> 수분이 마르기 쉬워 1달 권장<br>
+                                    • <strong>안연고/안약:</strong> 눈에 직접 닿으므로 무조건 1달 이내<br>
+                                    • <strong>소분 연고:</strong> 약국에서 덜어준 둥근 통 연고 1달 이내
+                                </div>
+                                <div class="box-tint-green" style="padding: 14px; border-radius: 12px; margin-bottom: 12px;">
+                                    <strong style="color: var(--success); font-size:14px; margin-bottom:4px; display:block;">🌿 6개월 이내 폐기 (보존제 함유)</strong>
+                                    • <strong>튜브형 연고:</strong> 비판텐, 리도맥스 등 밀봉된 연고<br>
+                                    • <strong>아기 로션/크림:</strong> 개봉 후 6개월 권장
+                                </div>
+                                <div class="box-tint-yellow" style="padding: 14px; border-radius: 12px;">
+                                    <strong style="color: #B78103; font-size:14px; margin-bottom:4px; display:block;">🍼 식품류</strong>
+                                    • <strong>분유:</strong> 개봉 후 3주 (습기에 취약하므로 냉장고 보관 금지!)<br>
+                                    • <strong>시판 퓨레/이유식:</strong> 침이 닿지 않게 덜어서 냉장 보관 시 2일
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- 🚨 라이브러리 내부를 모두 아우르는 강력한 종합 면책 조항 -->
+                        <div style="margin: 8px 0 24px 0; padding: 16px; background: #F2F4F6; border-radius: 12px; border: 1px solid #E5E8EB;">
+                            <div style="font-size: 11px; font-weight: 900; color: #8B95A1; margin-bottom: 4px;">⚠️ 육아메이트 의료 및 안전 면책 안내</div>
+                            <div style="font-size: 12.5px; font-weight: 600; color: #8B95A1; line-height: 1.5; word-break: keep-all;">
+                                본 앱에서 제공하는 모든 <strong>의학적 지침(응급처치, 해열제 등) 및 약품 등 권장 기한</strong> 정보는 소아과학회와 식약처의 일반적인 가이드라인을 요약한 것입니다. <br><br>
+                                보관 환경이나 아기의 체질에 따라 결과가 다를 수 있으므로, 본 앱은 <strong>단순 참고용 보조 도구</strong>로만 사용해 주세요. 아기에게 이상 증세가 있거나 변질이 의심되는 경우 즉시 사용을 중단하고 <strong>반드시 전문의(소아과)의 진단</strong>을 받으시길 바랍니다. 육아메이트는 사용자의 판단으로 인한 결과에 법적 책임을 지지 않습니다.
+                            </div>
+                        </div>
+
                     </div>
                 </details>
-            </div>                   
+            </div>
         </div>
     </div> <!-- 여기까지가 기존 4번째 육아정보 탭 끝 -->
+
+      <div id="tab-settings" class="tab-content"></div>
+
 </div> <!-- 여기가 전체 화면(wrapper) 닫히는 곳! -->
 
 <footer style="text-align: center; padding: 40px 16px 80px 16px; font-size: 11px; color: var(--text-s); line-height: 1.6; margin-top: 40px; border-top: 1px solid var(--border);">
     <div style="margin-bottom: 24px;">
-        <a href="https://blog.naver.com/radiant_ly" target="_blank" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">📝 블로그</a> |
-        <a href="https://www.instagram.com/ggoom_e2" target="_blank" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">📸 인스타</a> |
-        <a href="privacy.html" style="color: var(--text-s); text-decoration: none; font-weight: 800; margin: 0 8px;">🔒 개인정보처리방침</a>
-    </div>
+            
     <div style="font-size: 10.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">
         <p style="margin-bottom: 6px; font-weight: 800;">© 2026. 토실이 육아 메이트. All rights reserved.</p>
     </div>
@@ -1583,19 +1627,21 @@
 <div id="diaper-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
     <div class="box-main" style="border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-m);">기저귀 교체 기록</h3>
+            <!-- 🌟 제목 부드럽게 변경! -->
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-m);">어떤 기저귀를 갈았나요?</h3>
             <button onclick="closeDiaperSheet()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-s); padding: 0;">✕</button>
         </div>
         
         <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-            <button onclick="saveQuickPee()" class="box-tint-blue" style="flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 16px; cursor: pointer; color:var(--primary);">💧 소변</button>
-            <button onclick="showPoopAI()" class="box-tint-red" style="flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 16px; cursor: pointer; color:var(--danger);">💩 대변</button>
+            <button onclick="saveQuickPee()" class="box-tint-blue" style="flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; color:var(--primary);">💧 소변</button>
+            <!-- 🌟 둘 다 openPoopAI 함수를 쓰도록 변경! -->
+            <button onclick="window.openPoopAI('대변')" class="box-tint-red" style="flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; color:var(--danger);">💩 대변</button>
+            <button onclick="window.openPoopAI('소변+대변')" style="flex: 1; padding: 16px; border-radius: 14px; background: #F3E8FF; border: 1px solid #C4B5FD; color: #7C3AED; font-weight: 800; font-size: 15px; cursor: pointer;">💧+💩 둘 다</button>
         </div>
 
         <div id="poop-ai-area" style="display: none; animation: fadeIn 0.3s;">
             <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: var(--text-s);">어떤 색깔인가요?</div>
             <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
-                <!-- 똥 색깔 버튼들은 고유의 색상이므로 하드코딩 유지! (흰/회색만 스마트 클래스 처리) -->
                 <button class="ai-poop-btn" onclick="analyzePoop('황금색', this, 'good')" style="background:#FBBF24;">황금</button>
                 <button class="ai-poop-btn" onclick="analyzePoop('녹색', this, 'good')" style="background:#4ADE80;">녹색</button>
                 <button class="ai-poop-btn" onclick="analyzePoop('갈색', this, 'good')" style="background:#A16207; color:white;">갈색</button>
@@ -1619,13 +1665,12 @@
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .ai-poop-btn { flex: 1; min-width: 45px; padding: 10px 0; border-radius: 10px; border: none; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; }
-
-@keyframes toastFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes toastFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
     @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     
     .toast-msg {
-        background: rgba(25, 31, 40, 0.85); /* 반투명 다크그레이 */
+        background: rgba(25, 31, 40, 0.85);
         color: #FFF;
         padding: 12px 24px;
         border-radius: 100px;
@@ -1637,7 +1682,6 @@
         text-align: center;
         white-space: nowrap;
     }
-
 /* ========================================== */
         /* 🌙 1단계: 고집불통 인라인 스타일까지 씹어먹는 강력 다크모드 (최종완성) */
         /* ========================================== */
@@ -1807,6 +1851,8 @@
             border-color: #333D4B !important;
         }
 
+      
+
 </style>
 
 <div id="routine-settings-modal" class="modal-overlay" style="z-index: 6500; display:none; justify-content:center; align-items:center;" onclick="window.closeRoutineSettings(event)">
@@ -1910,9 +1956,16 @@
 <div id="toast-container" style="position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;"></div>
 
 <div id="custom-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-    <div style="background: var(--bg-card, #FFF); width: 85%; max-width: 320px; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+    <div style="background: var(--bg-card, #FFF); width: 85%; max-width: 320px; border-radius: 24px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
         <div id="confirm-icon" style="font-size: 36px; margin-bottom: 12px;">🚨</div>
-        <div id="confirm-message" style="font-size: 15px; font-weight: 800; color: var(--text-m, #191F28); line-height: 1.5; word-break: keep-all; margin-bottom: 24px;">정말 삭제하시겠습니까?</div>
+        <div id="confirm-message" style="font-size: 15px; font-weight: 800; color: var(--text-m, #191F28); line-height: 1.5; word-break: keep-all; margin-bottom: 20px;">정말 삭제하시겠습니까?</div>
+        
+        <!-- 👇 안전 잠금 입력창 추가! -->
+        <div id="confirm-input-area" style="display: none; margin-bottom: 20px;">
+            <div style="font-size: 12px; color: var(--danger); margin-bottom: 8px; font-weight: 700;">진행하시려면 아래 칸에 '삭제'라고 입력해주세요.</div>
+            <input type="text" id="confirm-keyword-input" placeholder="삭제" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #E5E8EB; background: #F9FAFB; text-align: center; font-weight: 900; font-size: 16px; outline: none; color: #191F28;">
+        </div>
+
         <div style="display: flex; gap: 10px;">
             <button id="btn-confirm-cancel" style="flex: 1; padding: 14px; border-radius: 14px; border: none; background: var(--bg-sub, #F2F5F8); color: var(--text-s, #4E5968); font-size: 14.5px; font-weight: 800; cursor: pointer;">취소</button>
             <button id="btn-confirm-ok" style="flex: 1; padding: 14px; border-radius: 14px; border: none; background: var(--primary, #3182F6); color: #FFF; font-size: 14.5px; font-weight: 800; cursor: pointer;">확인</button>
@@ -1983,6 +2036,9 @@
 <script>
     let selectedPoopColor = '';
     let selectedPoopStatus = '';
+    
+    // 🌟 지금 누른 버튼이 '대변'인지 '소변+대변'인지 기억해두는 메모장!
+    window.currentPoopType = '대변'; 
 
     window.openDiaperSheet = function() {
         document.getElementById('diaper-bottom-sheet').style.display = 'flex';
@@ -2009,12 +2065,16 @@
     window.saveQuickPee = function() {
         saveToMainTracker('diaper', '소변', '');
         closeDiaperSheet();
+        window.showToast("💧 소변 기록이 저장되었습니다!");
     };
 
-    window.showPoopAI = function() {
+    // 🌟 대변 & 둘 다 버튼을 눌렀을 때 켜지는 AI 엔진
+    window.openPoopAI = function(type) {
+        window.currentPoopType = type; // '대변' 또는 '소변+대변' 저장해둠
         document.getElementById('poop-ai-area').style.display = 'block';
     };
 
+    // 🌟 파트너님의 AI 판독 로직 100% 원본 그대로 유지!
     window.analyzePoop = function(color, btn, status) {
         selectedPoopColor = color;
         selectedPoopStatus = status;
@@ -2043,13 +2103,18 @@
         }
     };
 
+    // 🌟 하드코딩 되어있던 '대변' 글자를 떼어내고, currentPoopType을 꽂아줌!
     window.saveAiPoopRecord = function() {
         if(!selectedPoopColor) return alert("똥 색깔을 먼저 선택해주세요!");
-        saveToMainTracker('diaper', '대변', selectedPoopColor);
+        saveToMainTracker('diaper', window.currentPoopType, selectedPoopColor);
         closeDiaperSheet();
+        
+        let msg = window.currentPoopType === '소변+대변' ? "💧💩 소변과 대변 기록이 저장되었습니다!" : "💩 대변 기록이 저장되었습니다!";
+        window.showToast(msg);
     };
 
-    function saveToMainTracker(type, subType, status) {
+    // 🌟 파이어베이스 실시간 연동 & 영수증 띄우기가 추가된 통합 저장 엔진!
+    async function saveToMainTracker(type, subType, status) {
         const now = new Date();
         const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         const timestamp = now.getTime();
@@ -2068,11 +2133,17 @@
         records.sort((a, b) => b.timestamp - a.timestamp); 
         
         if(records.length > 100) records.pop();
-        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
-
-        if (typeof window.updateTrackerDashboard === 'function') {
-            window.updateTrackerDashboard();
+        
+        // 부부 폰 연동 (파이어베이스 슛!)
+        if (typeof saveTrackerToFirebase === 'function') {
+            await saveTrackerToFirebase(records);
+        } else {
+            localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+            if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
         }
+        
+        // 3번 이상 쓰면 🧾 영수증 버튼 띄우기
+        if (typeof window.checkReceiptVisibility === 'function') window.checkReceiptVisibility();
     }
 </script>
 </body>
