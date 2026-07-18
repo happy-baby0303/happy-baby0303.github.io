@@ -837,9 +837,18 @@ function selectPill(type) {
     const redBtn = document.getElementById('btn-pill-red'), blueBtn = document.getElementById('btn-pill-blue');
     if(redBtn) redBtn.classList.remove('active');
     if(blueBtn) blueBtn.classList.remove('active');
+    
     if (!type) { selectedPillType = ''; return; }
+    
     const lockStatus = checkPillLock(type);
-    if (lockStatus.locked) { alert('🚨 [투약 불가] ' + lockStatus.reason); return; }
+    
+    // 💡 변경 전: alert('🚨 [투약 불가] ' + lockStatus.reason);
+    // 💡 변경 후: 아래처럼 showToast를 사용하면 앱이 멈추지 않고 더 예쁘게 알림이 뜹니다!
+    if (lockStatus.locked) { 
+        showToast('🚨 ' + lockStatus.reason.replace(/\n/g, '<br>')); 
+        return; 
+    }
+    
     selectedPillType = type;
     if (type === 'red' && redBtn) redBtn.classList.add('active');
     else if (type === 'blue' && blueBtn) blueBtn.classList.add('active');
@@ -2309,68 +2318,82 @@ window.openPediatricianReport = openPediatricianReport;
 window.trackerState = { type: '', subType: '', status: '' };
 window.editingTrackerId = null; 
 
+// 1. 상태 관리에 가슴 방향(breastSide) 추가를 위해 기존 버튼 로직 수정
 window.selectTrackerBtn = function(btn, category) {
     const siblings = btn.parentElement.children;
     for(let i=0; i<siblings.length; i++) {
         siblings[i].style.setProperty('background', 'var(--bg-card)', 'important');
         siblings[i].style.setProperty('color', 'var(--text-s)', 'important');
         siblings[i].style.setProperty('border', '1px solid var(--border)', 'important');
-        if(siblings[i].tagName === 'SPAN') {
-            siblings[i].style.setProperty('background', 'var(--bg-sub)', 'important');
-        }
     }
     
+    // 버튼 활성화 디자인
+    if (category.includes('feed') || category.includes('breast')) {
+        btn.style.setProperty('background', '#F0F7FF', 'important');
+        btn.style.setProperty('color', '#3182F6', 'important');
+        btn.style.setProperty('border', '1px solid #3182F6', 'important');
+    } else if (category.includes('diaper_pee') || category === 'status_green') {
+        btn.style.setProperty('background', '#ECFDF5', 'important');
+        btn.style.setProperty('color', '#10B981', 'important');
+        btn.style.setProperty('border', '1px solid #10B981', 'important');
+    } else if (category.includes('diaper_poop') || category === 'status_yellow') {
+        btn.style.setProperty('background', '#FFF9E6', 'important');
+        btn.style.setProperty('color', '#B78103', 'important');
+        btn.style.setProperty('border', '1px solid #FFE58F', 'important');
+    } else if (category === 'diaper_both' || category === 'sleep_night') {
+        btn.style.setProperty('background', '#F3E8FF', 'important');
+        btn.style.setProperty('color', '#7C3AED', 'important');
+        btn.style.setProperty('border', '1px solid #C4B5FD', 'important');
+    } else if (category === 'sleep_day') {
+        btn.style.setProperty('background', '#FFF9E6', 'important');
+        btn.style.setProperty('color', '#B78103', 'important');
+        btn.style.setProperty('border', '1px solid #FFE58F', 'important');
+    }
+
+    // 💡 [핵심] 모유 수유 클릭 시 UI 동적 변경
     if (category === 'feed') {
-        btn.style.setProperty('background', '#F0F7FF', 'important');
-        btn.style.setProperty('color', '#3182F6', 'important');
-        btn.style.setProperty('border', '1px solid #3182F6', 'important');
         window.trackerState.subType = btn.innerText;
-    } else if (category === 'diaper_pee') {
-        btn.style.setProperty('background', '#F0F7FF', 'important');
-        btn.style.setProperty('color', '#3182F6', 'important');
-        btn.style.setProperty('border', '1px solid #3182F6', 'important');
+        const mlArea = document.getElementById('feed-ml-area');
+        const breastArea = document.getElementById('feed-breast-area');
+        
+        if (btn.innerText === '모유') {
+            if(mlArea) mlArea.style.display = 'none';
+            if(breastArea) breastArea.style.display = 'block';
+        } else {
+            if(mlArea) mlArea.style.display = 'block';
+            if(breastArea) breastArea.style.display = 'none';
+            window.trackerState.status = ''; // 분유/유축은 status 비움
+        }
+    } else if (category === 'breast_left') {
+        window.trackerState.status = '왼쪽';
+    } else if (category === 'breast_right') {
+        window.trackerState.status = '오른쪽';
+    } 
+    // 기저귀 로직 (기존 유지)
+    else if (category === 'diaper_pee') {
         window.trackerState.subType = '소변';
         const statusArea = document.getElementById('diaper-status-area');
         if(statusArea) statusArea.style.display = 'none'; 
     } else if (category === 'diaper_poop') {
-        btn.style.setProperty('background', '#FFF0F1', 'important');
-        btn.style.setProperty('color', '#D32F2F', 'important');
-        btn.style.setProperty('border', '1px solid #F04452', 'important');
         window.trackerState.subType = '대변';
         const statusArea = document.getElementById('diaper-status-area');
         if(statusArea) statusArea.style.display = 'block'; 
     } else if (category === 'diaper_both') {
-        // ✨ 아내분 CS 반영: "둘 다" 버튼 동작
-        btn.style.setProperty('background', '#F3E8FF', 'important');
-        btn.style.setProperty('color', '#7C3AED', 'important');
-        btn.style.setProperty('border', '1px solid #C4B5FD', 'important');
         window.trackerState.subType = '소변+대변';
         const statusArea = document.getElementById('diaper-status-area');
-        if(statusArea) statusArea.style.display = 'block'; // 대변 포함이므로 상태 확인
+        if(statusArea) statusArea.style.display = 'block'; 
     } else if (category === 'status_yellow') {
-        btn.style.setProperty('background', '#FFF9E6', 'important');
-        btn.style.setProperty('color', '#B78103', 'important');
-        btn.style.setProperty('border', '1px solid #FFE58F', 'important');
         window.trackerState.status = '황금변';
     } else if (category === 'status_green') {
-        btn.style.setProperty('background', '#ECFDF5', 'important');
-        btn.style.setProperty('color', '#10B981', 'important');
-        btn.style.setProperty('border', '1px solid #10B981', 'important');
         window.trackerState.status = '녹변';
-    } 
-    else if (category === 'sleep_day') {
-        btn.style.setProperty('background', '#FFF9E6', 'important');
-        btn.style.setProperty('color', '#B78103', 'important');
-        btn.style.setProperty('border', '1px solid #FFE58F', 'important');
+    } else if (category === 'sleep_day') {
         window.trackerState.subType = '낮잠';
     } else if (category === 'sleep_night') {
-        btn.style.setProperty('background', '#F3E8FF', 'important');
-        btn.style.setProperty('color', '#7C3AED', 'important');
-        btn.style.setProperty('border', '1px solid #C4B5FD', 'important');
         window.trackerState.subType = '밤잠';
     }
 };
 
+// 2. 모달창 HTML 렌더링 수정 (모유 영역 추가)
 window.openTrackerSheet = function(type, editId = null) {
     window.editingTrackerId = (typeof editId === 'string') ? editId : null;
     window.trackerState.type = type; window.trackerState.subType = ''; window.trackerState.status = '';
@@ -2396,7 +2419,6 @@ window.openTrackerSheet = function(type, editId = null) {
     const now = new Date();
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     
-    // ✨ 모든 탭 공통: 시간 입력칸 하나로 통일!
     const timeInputHtml = `
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 기록할까요? (터치하여 시간 수정)</div>
@@ -2406,17 +2428,32 @@ window.openTrackerSheet = function(type, editId = null) {
     
     if (type === 'feed') {
         title.innerHTML = '🍼 수유 기록하기';
+        // 💡 [핵심] 분유/유축을 위한 ml 영역과, 모유를 위한 좌/우+분 영역을 분리!
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">분유</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">모유</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'feed')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">유축</button>
             </div>
-            <div style="text-align: center; margin-bottom: 24px;">
+            
+            <div id="feed-ml-area" style="text-align: center; margin-bottom: 24px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
                 <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
                     <input type="number" id="v-feed-amount" placeholder="160" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
+                </div>
+            </div>
+
+            <div id="feed-breast-area" style="display: none; text-align: center; margin-bottom: 24px;">
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">어느 쪽을 먹였나요?</div>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_left')" style="width: 80px; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">왼쪽 (L)</button>
+                    <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_right')" style="width: 80px; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">오른쪽 (R)</button>
+                </div>
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">수유 시간 (분)</div>
+                <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
+                    <input type="number" id="v-breast-amount" placeholder="15" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
+                    <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
                 </div>
             </div>
         `;
@@ -2424,35 +2461,29 @@ window.openTrackerSheet = function(type, editId = null) {
 
     } else if (type === 'sleep') {
         title.innerHTML = window.editingTrackerId ? '💤 수면 기록 수정' : '💤 수면 기록하기';
-        
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_day')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">☀️ 낮잠</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_night')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">🌙 밤잠</button>
             </div>
-
-            <!-- 👇 다크모드 대응 완료: 하얀색 박스 대신 어두운 배경(var(--bg-sub)) 적용 -->
             <div style="background:var(--bg-sub); padding:18px; border-radius:16px; margin-bottom:20px; border:1px solid var(--border); text-align:center;">
                 <div style="font-size:12.5px; font-weight:800; color:#3182F6; margin-bottom:8px;">아기가 지금 막 일어났나요?</div>
                 <button onclick="window.calcSleepToNow()" style="width:100%; padding:14px; background:var(--bg-card); color:#3182F6; border:1px solid var(--border); border-radius:12px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.05); transition:0.2s;">
                     ⏰ 방금 깼어요! (알아서 계산)
                 </button>
             </div>
-
             <div style="text-align: center; margin-bottom: 24px;">
                 <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">총 수면 시간 (분)</div>
                 <div style="display: flex; justify-content: center; align-items: baseline; gap: 6px;">
                     <input type="number" id="v-sleep-amount" placeholder="0" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition:0.3s;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
                 </div>
-                <!-- ✅ 수정된 코드 (다크모드 완벽 호환) -->
                 <div style="margin-top: 14px;">
                     <span style="background:var(--bg-sub); color:var(--text-m); font-size:11.5px; font-weight:800; padding:6px 12px; border-radius:20px; border:1px solid var(--border);">💡 자는 중이라면 빈칸으로 두고 [저장] 누르세요!</span>
                 </div>
             </div>
         `;
         if(saveBtn) saveBtn.style.display = 'block';
-
         setTimeout(() => {
             const btns = document.querySelectorAll('#tracker-sheet-body .btn-main');
             btns.forEach(btn => {
@@ -2461,7 +2492,6 @@ window.openTrackerSheet = function(type, editId = null) {
         }, 50);
 
     } else if (type === 'diaper') {
-
         title.innerHTML = '💩 기저귀 기록하기';
         body.innerHTML = timeInputHtml + `
             <div style="display: flex; gap: 8px; margin-bottom: 20px;">
@@ -2498,7 +2528,8 @@ window.openTrackerSheet = function(type, editId = null) {
                        (recordToEdit.subType === '대변' && btn.innerText === '대변') ||
                        (recordToEdit.subType === '소변+대변' && btn.innerText === '둘 다')) {
                         let cat = '';
-                        if (recordToEdit.type === 'feed') cat = 'feed';
+                        if (recordToEdit.type === 'feed' && recordToEdit.subType === '모유') cat = 'feed';
+                        else if (recordToEdit.type === 'feed') cat = 'feed';
                         else if (recordToEdit.type === 'diaper' && recordToEdit.subType === '소변') cat = 'diaper_pee';
                         else if (recordToEdit.type === 'diaper' && recordToEdit.subType === '대변') cat = 'diaper_poop';
                         else if (recordToEdit.type === 'diaper' && recordToEdit.subType === '소변+대변') cat = 'diaper_both';
@@ -2507,8 +2538,14 @@ window.openTrackerSheet = function(type, editId = null) {
                 });
 
                 if (recordToEdit.type === 'feed') {
-                    const amtInput = document.getElementById('v-feed-amount');
-                    if (amtInput) amtInput.value = recordToEdit.amount;
+                    if (recordToEdit.subType === '모유') {
+                        document.getElementById('v-breast-amount').value = recordToEdit.amount;
+                        if (recordToEdit.status === '왼쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_left']"), 'breast_left');
+                        if (recordToEdit.status === '오른쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_right']"), 'breast_right');
+                    } else {
+                        const amtInput = document.getElementById('v-feed-amount');
+                        if (amtInput) amtInput.value = recordToEdit.amount;
+                    }
                 }
                 
                 if (recordToEdit.type === 'sleep') {
@@ -2721,38 +2758,27 @@ window.updateTrackerDashboard = function() {
     const now = new Date();
     const nowTime = now.getTime(); 
     
-   // --- 💡 수면/깨시 카운터 로직 (완벽 패치) ---
     const lastSleepRecord = records.find(r => r.type === 'sleep'); 
-    
     const sleepStartTime = localStorage.getItem('tosil_sleep_start');
-    
-    // 🔥 여기가 핵심입니다! (undefined 대신 0으로 변경)
-    // 1. tosil_sleep_start 값이 있거나
-    // 2. 마지막 수면 기록의 amount가 0(자는 중)이라면 자는 중으로 인식!
     const isSleeping = sleepStartTime || (lastSleepRecord && lastSleepRecord.amount === 0); 
     const isAwake = !isSleeping;
     
     let wakeTimeHtml = "";
-    
     if (isAwake) {
         if (lastSleepRecord) {
-            // 깨어난 시간 계산 
             const awakeMins = Math.max(0, Math.floor((nowTime - Number(lastSleepRecord.timestamp)) / 60000));
             const hours = Math.floor(awakeMins / 60);
             const mins = awakeMins % 60;
-            
             wakeTimeHtml = `<div style="background:#F8F9FA; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #E5E8EB; text-align:center;">
                 <div style="font-size:12.5px; font-weight:900; color:#3182F6;">⏰ 깨어난 지 ${hours}시간 ${mins}분째</div>
                 <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">우리 아기만의 졸음 신호를 관찰해 보세요 👀</div>
             </div>`;
         }
     } else {
-        // 🔥 이제 이 보라색 코드가 완벽하게 뜹니다!
         const currentSleepStart = sleepStartTime ? Number(sleepStartTime) : Number(lastSleepRecord.timestamp);
         const sleepMins = Math.max(0, Math.floor((nowTime - currentSleepStart) / 60000));
         const hours = Math.floor(sleepMins / 60);
         const mins = sleepMins % 60;
-        
         wakeTimeHtml = `<div style="background:#F3F0FF; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #D8C6FE; text-align:center;">
             <div style="font-size:12.5px; font-weight:900; color:#6C31F6;">💤 잠든 지 ${hours}시간 ${mins}분째</div>
             <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">쉿, 우리 아기가 꿀잠을 자고 있어요 🌙</div>
@@ -2761,8 +2787,6 @@ window.updateTrackerDashboard = function() {
 
     const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
     const diaperInterval = parseInt(localStorage.getItem('tosil_diaper_interval')) || 180;
-    
-    // 알림 끈 지 4시간(14400000ms)이 안 지났으면 숨김 처리
     const dismissedFeed = parseInt(localStorage.getItem('tosil_dismiss_alarm_feed')) || 0;
     const dismissedDiaper = parseInt(localStorage.getItem('tosil_dismiss_alarm_diaper')) || 0;
     const isFeedDismissed = (nowTime - dismissedFeed < 14400000);
@@ -2791,7 +2815,11 @@ window.updateTrackerDashboard = function() {
                 grouped[date].forEach(r => {
                     let icon = r.type==='feed' ? '🍼' : (r.type==='sleep' ? (r.subType==='밤잠' ? '🌙' : '☀️') : '💩');
                     let txt = '';
-                    if(r.type === 'feed') txt = `${r.subType} ${r.amount}ml`;
+                    // 💡 [히스토리] 모유 수유일 경우 UI 변경
+                    if(r.type === 'feed') {
+                        if (r.subType === '모유') txt = `모유 (${r.status}) ${r.amount}분`;
+                        else txt = `${r.subType} ${r.amount}ml`;
+                    }
                     else if(r.type === 'sleep') txt = (r.amount === 0) ? `<span style="color:#3182F6">${r.subType || '낮잠'} (자는 중 💤)</span>` : `${r.subType || '낮잠'} ${r.amount}분`; 
                     else if(r.type === 'diaper') txt = r.status ? `${r.subType} / ${r.status}` : `${r.subType}`;
                     
@@ -2828,35 +2856,91 @@ window.updateTrackerDashboard = function() {
     }
 
     const todayRecords = records.filter(r => new Date(r.timestamp).getDate() === now.getDate());
-    let todayFeedAmt = 0; let todaySleepMins = 0; let todayDiaperCount = 0;
+    
+    // 📊 [핵심 기능] 24시간 패턴 바 그래프 그리기
+    let timelineHtml = `<div style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:6px; padding:0 4px;">
+            <span>오늘의 하루 패턴</span>
+            <div style="display:flex; gap:8px;">
+                <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#D8C6FE; border-radius:2px;"></div>수면</span>
+                <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#3182F6; border-radius:2px;"></div>수유</span>
+                <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#F04452; border-radius:2px;"></div>기저귀</span>
+            </div>
+        </div>
+        <div style="width:100%; height:16px; background:#F2F5F8; border-radius:8px; position:relative; overflow:hidden;">`;
+
     todayRecords.forEach(r => {
-        if(r.type === 'feed') todayFeedAmt += r.amount;
+        const d = new Date(r.timestamp);
+        const startPercent = ((d.getHours() * 60) + d.getMinutes()) / 1440 * 100; // 0~100% 위치
+        
+        if (r.type === 'sleep') {
+            const duration = (r.amount === 0) ? Math.floor((nowTime - r.timestamp) / 60000) : r.amount; // 자는 중이면 현재까지 시간
+            const widthPercent = Math.min((duration / 1440 * 100), 100 - startPercent); // 24시를 넘지 않게 자름
+            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background:rgba(168, 85, 247, 0.4); border-radius:4px;"></div>`;
+        } else if (r.type === 'feed') {
+            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:3px; height:100%; background:#3182F6; border-radius:2px;"></div>`;
+        } else if (r.type === 'diaper') {
+            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:3px; height:100%; background:#F04452; border-radius:2px;"></div>`;
+        }
+    });
+    
+    timelineHtml += `</div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:#B0B8C1; font-weight:800; margin-top:4px; padding:0 2px;">
+            <span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span>
+        </div>
+    </div>`;
+
+    // 총합 계산
+    let todayFeedAmt = 0; let todayFeedMins = 0; let todaySleepMins = 0; let todayDiaperCount = 0;
+    todayRecords.forEach(r => {
+        if(r.type === 'feed') {
+            if (r.subType === '모유') todayFeedMins += r.amount;
+            else todayFeedAmt += r.amount;
+        }
         if(r.type === 'sleep') todaySleepMins += r.amount;
         if(r.type === 'diaper') todayDiaperCount++;
     });
 
-    // ✨ 컬러 뱃지 시스템 도입! ✨
-    let fBadge = todayFeedAmt > 0 ? `<span style="background:#E6F7F2; color:#00B37A; padding:2px 6px; border-radius:6px; font-size:10px;">기록중</span>` : '';
+    let fBadge = (todayFeedAmt > 0 || todayFeedMins > 0) ? `<span style="background:#E6F7F2; color:#00B37A; padding:2px 6px; border-radius:6px; font-size:10px;">기록중</span>` : '';
     let sBadge = todaySleepMins > 0 ? `<span style="background:#E8F3FF; color:#3182F6; padding:2px 6px; border-radius:6px; font-size:10px;">기록중</span>` : '';
     let dBadge = '';
     if(todayDiaperCount > 0 && todayDiaperCount < 5) dBadge = `<span style="background:#F2F4F6; color:#8B95A1; padding:2px 6px; border-radius:6px; font-size:10px;">부족</span>`;
     else if(todayDiaperCount >= 5 && todayDiaperCount <= 9) dBadge = `<span style="background:#E6F7F2; color:#00B37A; padding:2px 6px; border-radius:6px; font-size:10px;">적정</span>`;
     else if(todayDiaperCount > 9) dBadge = `<span style="background:#FFF4ED; color:#FF823A; padding:2px 6px; border-radius:6px; font-size:10px;">많음</span>`;
 
+   // ----------------------------------------------------
+    // ✨ [수정할 부분] 스마트 브리핑 시스템 (현실 컷트라인 적용)
+    // ----------------------------------------------------
     let briefing = "오늘도 평화로운 육아팅! 🤍";
-    if (todayFeedAmt > 0) briefing = `오늘 총 ${todayFeedAmt}ml 먹었어요! 튼튼해지는 중 💪`;
-    if (todaySleepMins > 120) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
-    if (todayDiaperCount >= 5) briefing = `오늘 기저귀를 ${todayDiaperCount}번 갈았어요! 보송보송 엉덩이 ✨`;
 
-    let htmlStr = wakeTimeHtml + `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
+    if (todaySleepMins >= 240) { 
+        // 1순위: 낮잠 4시간 이상 (최고 난이도 달성)
+        briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 완전 꿀잠 요정 🌙`;
+    } else if (todayFeedAmt >= 800 || todayFeedMins >= 90) { 
+        // 2순위: 수유 빵빵 (분유 800ml 또는 모유 90분)
+        briefing = `오늘 수유 빵빵하게 채우는 중! 튼튼 아기 💪`;
+    } else if (todaySleepMins >= 120) { 
+        // 3순위: 낮잠 2시간 이상 (적정 수면 달성)
+        briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 쑥쑥 크는 중 💤`;
+    } else if (todayDiaperCount >= 5) { 
+        // 4순위: 기저귀 5번 이상 (적정 배변 달성)
+        briefing = `오늘 기저귀 ${todayDiaperCount}번 클리어! 보송보송 엉덩이 ✨`;
+    } else if (todayFeedAmt > 0 || todayFeedMins > 0) { 
+        // 5순위: 기록 시작
+        briefing = `오늘 수유 완벽 체크 중! 맘마 요정 🍼`;
+    }
+    // ----------------------------------------------------
 
-   // (이 윗부분의 뱃지 로직 let fBadge, sBadge, dBadge는 그대로 두시면 됩니다!)
+    let htmlStr = wakeTimeHtml + timelineHtml + `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
 
-    // ✨ UI 붕괴 방지 & 텍스트 다이어트 완료 ✨
+    // 💡 [UI 수정] 모유/분유 혼합 시 텍스트 깨짐 방지를 위해 총합 텍스트 유연화
+    let feedDisp = todayFeedAmt > 0 ? `${todayFeedAmt}ml` : `${todayFeedMins}분`;
+    if (todayFeedAmt > 0 && todayFeedMins > 0) feedDisp = `${todayFeedAmt}ml+모유`;
+
     htmlStr += `<div style="display:flex; gap:8px; margin-bottom:12px;">
         <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
             <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">수유 ${fBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#3182F6; white-space:nowrap;">${todayFeedAmt}ml</div>
+            <div style="font-size:14px; font-weight:900; color:#3182F6; white-space:nowrap;">${feedDisp}</div>
         </div>
         <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
             <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">수면 ${sBadge}</div>
@@ -2905,7 +2989,12 @@ window.updateTrackerDashboard = function() {
         if(recent) {
             let icon = recent.type==='feed' ? '🍼' : (recent.type==='sleep' ? (recent.subType==='밤잠' ? '🌙' : '☀️') : '💩');
             let txt = '';
-            if(recent.type === 'feed') txt = `${recent.subType} ${recent.amount}ml`;
+            
+            // 💡 [대시보드 최근기록] 모유 수유일 경우 텍스트 변경
+            if(recent.type === 'feed') {
+                if (recent.subType === '모유') txt = `모유 (${recent.status}) ${recent.amount}분`;
+                else txt = `${recent.subType} ${recent.amount}ml`;
+            }
             else if(recent.type === 'sleep') txt = (recent.amount === 0) ? `<span style="color:#3182F6">${recent.subType || '낮잠'} (자는 중 💤)</span>` : `${recent.subType || '낮잠'} ${recent.amount}분`; 
             else if(recent.type === 'diaper') txt = recent.status ? `${recent.subType} / ${recent.status}` : `${recent.subType}`;
             
@@ -3287,25 +3376,33 @@ window.saveTrackerRecord = async function() {
 
     if (window.trackerState.type === 'feed') {
         if(!window.trackerState.subType) return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요!');
-        const amt = document.getElementById('v-feed-amount').value;
-        if(!amt) return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요!');
-        record.subType = window.trackerState.subType;
-        record.amount = parseInt(amt);
+        
+        // 💡 [핵심] 모유일 때와 아닐 때를 다르게 저장
+        if (window.trackerState.subType === '모유') {
+            const bAmt = document.getElementById('v-breast-amount').value;
+            if(!bAmt) return window.showToast('⚠️ 수유 시간(분)을 입력해주세요!');
+            if(!window.trackerState.status) return window.showToast('⚠️ 왼쪽/오른쪽을 선택해주세요!');
+            
+            record.subType = '모유';
+            record.amount = parseInt(bAmt);
+            record.status = window.trackerState.status; // '왼쪽' or '오른쪽' 저장
+        } else {
+            const amt = document.getElementById('v-feed-amount').value;
+            if(!amt) return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요!');
+            record.subType = window.trackerState.subType;
+            record.amount = parseInt(amt);
+            record.status = '';
+        }
     } 
     else if (window.trackerState.type === 'diaper') {
         if(!window.trackerState.subType) return window.showToast('⚠️ 소변인지 대변인지 선택해주세요!');
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
-    // 👇 여기서부터 덮어쓰기! (빈칸을 허용하고 0으로 알아서 바꿔주는 마법)
     else if (window.trackerState.type === 'sleep') {
         const amt = document.getElementById('v-sleep-amount');
-        
-        // ✨ 핵심: 빈칸이거나 입력이 없으면 0으로 처리 (자는 중)
         let sleepAmount = 0;
-        if (amt && amt.value !== '') {
-            sleepAmount = parseInt(amt.value);
-        }
+        if (amt && amt.value !== '') sleepAmount = parseInt(amt.value);
         record.amount = sleepAmount;
         
         if (window.editingTrackerId) {
