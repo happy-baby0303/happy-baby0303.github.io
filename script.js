@@ -353,6 +353,10 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
+            
+            <!-- 🚨 여기에 투명 쿠션 60px 추가! (스와이프 바 간섭 방지) -->
+            <div style="height: 60px; width: 100%; flex-shrink: 0;"></div>
+            
         </div>
     `;
     const modalWrap = document.getElementById('premium-modal');
@@ -1583,20 +1587,21 @@ function renderCubes() {
         const icon = r.cat === 'meat' ? '🥩' : '🥦';
         const dDayHtml = getCubeDDayText(r.date);
         
+        // 🚨 핵심 수정: white-space: nowrap 과 flex-shrink: 0 적용으로 줄바꿈 원천 차단!
         html += `
-        <div style="background:var(--bg-card); border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:24px; background:var(--bg-sub); width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;">${icon}</div>
-                <div>
-                    <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:4px;">${r.name}</div>
-                    <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s);">
+        <div style="background:var(--bg-card); border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                <div style="font-size:24px; background:var(--bg-sub); width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${icon}</div>
+                <div style="min-width:0;">
+                    <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.name}</div>
+                    <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s); white-space:nowrap; flex-wrap:nowrap;">
                         ${dDayHtml} <span style="opacity:0.7;">(${r.date} 제조)</span>
                     </div>
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:18px; font-weight:900; color:var(--primary);">${r.qty}<span style="font-size:12px; color:var(--text-s);">개</span></div>
-                <button onclick="useCube('${r.id}')" style="background:#F2F5F8; color:#4E5968; border:none; border-radius:10px; width:44px; height:44px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🥄</button>
+            <div style="display:flex; align-items:center; gap:12px; flex-shrink:0; margin-left:8px;">
+                <div style="font-size:18px; font-weight:900; color:var(--primary); white-space:nowrap;">${r.qty}<span style="font-size:12px; color:var(--text-s);">개</span></div>
+                <button onclick="useCube('${r.id}')" style="background:#F2F5F8; color:#4E5968; border:none; border-radius:10px; width:44px; height:44px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">🥄</button>
             </div>
         </div>`;
     });
@@ -2703,26 +2708,38 @@ window.updateTrackerDashboard = function() {
     const now = new Date();
     const nowTime = now.getTime(); 
     
-    // --- 💡 수면/깨시 카운터 로직 ---
+   // --- 💡 수면/깨시 카운터 로직 (완벽 패치) ---
     const lastSleepRecord = records.find(r => r.type === 'sleep'); 
+    
     const sleepStartTime = localStorage.getItem('tosil_sleep_start');
-    const isAwake = !sleepStartTime;
+    
+    // 🔥 여기가 핵심입니다! (undefined 대신 0으로 변경)
+    // 1. tosil_sleep_start 값이 있거나
+    // 2. 마지막 수면 기록의 amount가 0(자는 중)이라면 자는 중으로 인식!
+    const isSleeping = sleepStartTime || (lastSleepRecord && lastSleepRecord.amount === 0); 
+    const isAwake = !isSleeping;
+    
     let wakeTimeHtml = "";
     
     if (isAwake) {
         if (lastSleepRecord) {
-            const awakeMins = Math.floor((nowTime - Number(lastSleepRecord.timestamp)) / 60000);
+            // 깨어난 시간 계산 
+            const awakeMins = Math.max(0, Math.floor((nowTime - Number(lastSleepRecord.timestamp)) / 60000));
             const hours = Math.floor(awakeMins / 60);
             const mins = awakeMins % 60;
+            
             wakeTimeHtml = `<div style="background:#F8F9FA; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #E5E8EB; text-align:center;">
                 <div style="font-size:12.5px; font-weight:900; color:#3182F6;">⏰ 깨어난 지 ${hours}시간 ${mins}분째</div>
                 <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">우리 아기만의 졸음 신호를 관찰해 보세요 👀</div>
             </div>`;
         }
     } else {
-        const sleepMins = Math.floor((nowTime - Number(sleepStartTime)) / 60000);
+        // 🔥 이제 이 보라색 코드가 완벽하게 뜹니다!
+        const currentSleepStart = sleepStartTime ? Number(sleepStartTime) : Number(lastSleepRecord.timestamp);
+        const sleepMins = Math.max(0, Math.floor((nowTime - currentSleepStart) / 60000));
         const hours = Math.floor(sleepMins / 60);
         const mins = sleepMins % 60;
+        
         wakeTimeHtml = `<div style="background:#F3F0FF; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #D8C6FE; text-align:center;">
             <div style="font-size:12.5px; font-weight:900; color:#6C31F6;">💤 잠든 지 ${hours}시간 ${mins}분째</div>
             <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">쉿, 우리 아기가 꿀잠을 자고 있어요 🌙</div>
@@ -2820,18 +2837,21 @@ window.updateTrackerDashboard = function() {
 
     let htmlStr = wakeTimeHtml + `<div style="text-align:center; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:14px; background:rgba(49,130,246,0.05); padding:8px; border-radius:12px;">${briefing}</div>`;
 
+   // (이 윗부분의 뱃지 로직 let fBadge, sBadge, dBadge는 그대로 두시면 됩니다!)
+
+    // ✨ UI 붕괴 방지 & 텍스트 다이어트 완료 ✨
     htmlStr += `<div style="display:flex; gap:8px; margin-bottom:12px;">
-        <div style="flex:1; background:#F8F9FA; padding:10px; border-radius:12px; text-align:center;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px;">오늘 수유 ${fBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#3182F6;">${todayFeedAmt}ml</div>
+        <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
+            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">수유 ${fBadge}</div>
+            <div style="font-size:14px; font-weight:900; color:#3182F6; white-space:nowrap;">${todayFeedAmt}ml</div>
         </div>
-        <div style="flex:1; background:#F8F9FA; padding:10px; border-radius:12px; text-align:center;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px;">오늘 수면 ${sBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#A855F7;">${Math.floor(todaySleepMins/60)}h ${todaySleepMins%60}m</div>
+        <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
+            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">수면 ${sBadge}</div>
+            <div style="font-size:14px; font-weight:900; color:#A855F7; white-space:nowrap;">${Math.floor(todaySleepMins/60)}h ${todaySleepMins%60}m</div>
         </div>
-        <div style="flex:1; background:#F8F9FA; padding:10px; border-radius:12px; text-align:center;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px;">기저귀 ${dBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#F04452;">${todayDiaperCount}회</div>
+        <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
+            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">기저귀 ${dBadge}</div>
+            <div style="font-size:14px; font-weight:900; color:#F04452; white-space:nowrap;">${todayDiaperCount}회</div>
         </div>
     </div>`;
 
@@ -3174,48 +3194,23 @@ window.toggleRoutine = async function(id) {
 };
 
 // ==========================================
-// 🚀 [출시용] 트래커 & 비타민 실시간 연동 패치 (백그라운드 동기화 꼼수 적용!)
+// 🚀 트래커 실시간 연동 (앱 끄자마자 즉시 저장!)
 // ==========================================
-
-let trackerNeedSync = false; // 전송 대기 깃발
-let trackerIdleTimer = null; // 1분 안전 타이머
-
-// 1️⃣    트래커 화면 즉시 갱신 & 전송 대기열 등록 (체감속도 0.1초)
-async function saveTrackerToFirebase(records) {
+window.saveTrackerToFirebase = async function(records) {
+    // 1. 내 폰에 먼저 저장해서 화면은 0.1초 만에 바뀌게 (체감속도 유지)
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
 
-    trackerNeedSync = true; //"파이어베이스로 보낼 거 생겼음!" 깃발 꽂기
-
-    // (안전장치) 앱을 안 끄고 1분 동안 가만히 켜두면 한 번 쏴줍니다.
-    if (trackerIdleTimer) clearTimeout(trackerIdleTimer);
-    trackerIdleTimer = setTimeout(() => {
-        flushTrackerSync();
-    }, 60000); 
-}
-
-// 2️⃣      실제 파이어베이스 전송 (배달부)
-async function flushTrackerSync() {
-    if (!trackerNeedSync) return; // 보낼 거 없으면 퇴근
-
-    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    // 2. 지연 시간 1초도 없이 곧바로 파이어베이스로 슛! (육퇴 후 바로 앱을 꺼도 무조건 저장됨)
     if (typeof db !== 'undefined' && typeof setDoc === 'function') {
         const syncCode = localStorage.getItem("family_sync_code") || "unlinked_local_diary";
         try { 
             await setDoc(doc(db, "tracker_" + syncCode, "status"), { records: records }); 
-            trackerNeedSync = false; // 전송 성공했으니 깃발 내림
         } catch (e) { 
             console.error("트래커 클라우드 저장 실패", e); 
         }
     }
-}
-
-// 3️⃣ 🚨 대망의 핵심 꼼수 (화면 꺼짐 / 앱 전환 감지기)
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === 'hidden') {
-        flushTrackerSync(); // 숨겨지는 순간 0.1초 만에 파이어베이스로 슛!
-    }
-});
+};
 
 // ==========================================
 // 4️⃣    트래커 기존 함수들을 '연동형'으로 업그레이드
@@ -4372,6 +4367,12 @@ window.updateOpenItemGuide = function() {
 
     if(guideEl && guides[val]) {
         guideEl.innerHTML = guides[val];
+        
+        // 🚨 핵심 패치: 단어 단위 줄바꿈 및 위아래 여백 강제 고정!
+        guideEl.style.wordBreak = 'keep-all';
+        guideEl.style.lineHeight = '1.5';
+        guideEl.style.padding = '14px 16px'; 
+        
         // 위험한 안약이나 퓨레는 빨간색 경고창으로 띄워주기!
         if(val === 'eye_drop' || val === 'puree') {
             guideEl.style.color = '#D32F2F';
@@ -4387,7 +4388,6 @@ window.updateOpenItemGuide = function() {
 document.addEventListener("DOMContentLoaded", () => {
     if(typeof window.updateOpenItemGuide === 'function') window.updateOpenItemGuide();
 });
-
 
 // ==========================================
 // 🎮 짝꿍 육아 레벨링 시스템 (부부 공용 + 레벨업 보상)
@@ -4658,7 +4658,7 @@ window.renderSettingsTab = function() {
                     ${imgTag}
                 </div>
                 <div style="flex: 1;">
-                    <div style="font-size: 12px; font-weight: 800; color: #3182F6; margin-bottom: 4px;">✅ 육아메이트 인증 완료</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #3182F6; margin-bottom: 4px;"> 육아메이트 인증 완료</div>
                     <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">${savedNickname} <span style="font-size: 13.5px; font-weight: 600; color: var(--text-s);">님</span></div>
                 </div>
                 <button onclick="window.logoutKakao()" style="padding: 6px 12px; border-radius: 8px; background: #F2F5F8; color: #8B95A1; font-size: 12px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s;">
