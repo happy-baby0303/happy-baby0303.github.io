@@ -1595,8 +1595,8 @@ function renderCubes() {
                 <div style="min-width:0;">
                     <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.name}</div>
                     <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s); white-space:nowrap; flex-wrap:nowrap;">
-                        ${dDayHtml} <span style="opacity:0.7;">(${r.date} 제조)</span>
-                    </div>
+    ${dDayHtml} <span style="opacity:0.7;">(${r.date.substring(5).replace('-', '.')} 제조)</span>
+</div>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:12px; flex-shrink:0; margin-left:8px;">

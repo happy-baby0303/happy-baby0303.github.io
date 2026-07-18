@@ -164,3 +164,50 @@ a { text-decoration: none; color: inherit; }
 .theme-card.active { background: #E8F3FF; border-color: #3182F6; box-shadow: none; }
 .theme-card .theme-text { color: #4E5968; font-size: 13px; line-height: 1.4; }
 .theme-card .theme-text b { color: #191F28; }
+
+/* ========================================== */
+        /* 🧸 장난감 탭 다크모드: 브라우저 농간 완벽 방어판 */
+        /* ========================================== */
+
+        /* 1. 상단 탭 & 카드 본체 다크모드 (이건 잘 먹히고 있음) */
+        body.dark-mode .segment-control { background-color: #191F28 !important; border: 1px solid #333D4B !important; }
+        body.dark-mode #tab-btn-play, body.dark-mode #tab-btn-gear { background-color: transparent !important; color: #8B95A1 !important; }
+        body.dark-mode #tab-btn-play[style*="background"], body.dark-mode #tab-btn-gear[style*="background"] { background-color: #333D4B !important; color: #F9FAFB !important; box-shadow: none !important; }
+        body.dark-mode .toy-card, body.dark-mode .sos-theme-panel, body.dark-mode .theme-card { background-color: #191F28 !important; border: 1px solid #333D4B !important; box-shadow: none !important; }
+        body.dark-mode .ms-chip:not(.active), body.dark-mode .play-filter-btn:not(.active) { background-color: #202632 !important; color: #B0B8C1 !important; border: 1px solid #333D4B !important; }
+
+        /* 2. 스크롤 띠 (Sticky) 하얀 배경 제거 -> 'position: sticky' 속성으로 때려잡기 */
+        body.dark-mode div[style*="position: sticky"], 
+        body.dark-mode div[style*="position:sticky"] {
+            background-color: #000000 !important;
+        }
+
+        /* 3. 아빠의 역할 (노란 박스) -> HEX와 RGB 두 가지 모두 저격 */
+        body.dark-mode [style*="FFF9E6"], body.dark-mode [style*="255, 249, 230"] {
+            background-color: #3B2E15 !important; border-color: #4D3C1C !important; color: #FBBF24 !important;
+        }
+        body.dark-mode [style*="FFF9E6"] *, body.dark-mode [style*="255, 249, 230"] * { color: #FBBF24 !important; }
+
+        /* 4. 시간 확보 리포트 (초록 뱃지) -> HEX와 RGB 두 가지 모두 저격 */
+        body.dark-mode [style*="E6F7F2"], body.dark-mode [style*="230, 247, 242"] {
+            background-color: #064E3B !important; border: none !important; color: #34D399 !important;
+        }
+        body.dark-mode [style*="00B37A"], body.dark-mode [style*="0, 179, 122"] { color: #34D399 !important; }
+
+        /* 5. 찜하기 버튼 & 장난감 이미지 박스 (클래스 이름으로 정확히 때려잡기) */
+        body.dark-mode .toy-img-placeholder,
+        body.dark-mode #toy-result-area button[style*="F2F4F6"],
+        body.dark-mode #toy-result-area button[style*="242, 244, 246"] {
+            background-color: #202632 !important; border: 1px solid #333D4B !important; color: #F9FAFB !important;
+        }
+
+        /* 6. 카카오톡 노란색 버튼 채도 낮추기 */
+        body.dark-mode [style*="FEE500"], body.dark-mode [style*="254, 229, 0"] {
+            background-color: #3B3200 !important; color: #FEE500 !important; border: 1px solid #5C4F00 !important;
+        }
+
+        /* 7. 기타 숨어버린 하얀색 카드 본체 및 글씨들 구출 */
+        body.dark-mode #play-result-area > div, body.dark-mode #toy-result-area > div {
+            background-color: #191F28 !important; border: 1px solid #333D4B !important; box-shadow: none !important; color: #F9FAFB !important;
+        }
+        body.dark-mode .toy-card-title, body.dark-mode .theme-text { color: #F9FAFB !important; }
