@@ -2022,6 +2022,9 @@ window.openFamilySyncModal = openFamilySyncModal;
 window.closeFamilySyncModalForce = closeFamilySyncModalForce;
 window.closeFamilySyncModal = closeFamilySyncModal;
 
+// ==========================================
+// 🔗 상단 연동 상태 배지 업데이트 (오터치 방지 적용!)
+// ==========================================
 function updateSyncBadge() {
     const syncCode = localStorage.getItem('family_sync_code'); 
     const badgeBtn = document.getElementById('sync-badge-btn');
@@ -2031,15 +2034,25 @@ function updateSyncBadge() {
     if (!badgeBtn || !badgeText) return; 
 
     if (syncCode) {
+        // ✅ [연동 완료 상태]
         badgeBtn.style.background = "#E8F0FE";
         badgeBtn.style.color = "#1A73E8";
         badgeText.innerText = "연동완료";
         if(badgeIcon) badgeIcon.innerText = "🔗";
+        
+        // 💡 [핵심 해결책] 연동 완료 시에는 클릭(터치)을 무시하도록 설정!
+        // 이렇게 하면 톱니바퀴를 누를 때 겹치더라도 톱니바퀴가 정상적으로 눌립니다.
+        badgeBtn.style.pointerEvents = "none"; 
+        
     } else {
+        // ❌ [연동 필요 상태]
         badgeBtn.style.background = "#FFF3CD";
         badgeBtn.style.color = "#856404";
         badgeText.innerText = "연동 필요!";
         if(badgeIcon) badgeIcon.innerText = "🚨";
+        
+        // 연동 전에는 배지를 눌러서 설정창 등으로 이동해야 하므로 터치 활성화
+        badgeBtn.style.pointerEvents = "auto"; 
     }
 }
 window.updateSyncBadge = updateSyncBadge;
@@ -4596,7 +4609,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 🔐 카카오 로그인 & 로그아웃 엔진 (안드로이드 에러 완벽 해결판!)
+// 🔐 카카오 로그인 & 로그아웃 엔진 (Firestore 맞춤 불사조 백업 패치!)
 // ==========================================
 window.loginWithKakao = function() {
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
@@ -4605,23 +4618,60 @@ window.loginWithKakao = function() {
     }
 
     Kakao.Auth.login({
-        throughTalk: false, // 👈 [핵심 해결책] 카카오톡 앱 전환을 막고 브라우저 내부에서 안전하게 띄웁니다!
+        throughTalk: false, 
         success: function(authObj) {
-            // 로그인 성공 시 유저 정보(프로필, 닉네임) 가져오기
             Kakao.API.request({
                 url: '/v2/user/me',
                 success: function(res) {
                     const nickname = res.properties.nickname;
                     const profileImage = res.properties.profile_image;
+                    const kakaoId = res.id; // 절대 안 바뀌는 카카오 고유 ID
 
-                    // 폰에 닉네임과 사진 저장!
+                    // 1. 폰에 기본 정보 싹 저장
                     localStorage.setItem('kakao_nickname', nickname);
+                    localStorage.setItem('kakao_id', kakaoId); 
                     if (profileImage) {
                         localStorage.setItem('kakao_profile_image', profileImage);
                     }
 
-                    showToast(`🎉 ${nickname}님 환영합니다!`);
-                    window.renderSettingsTab(); // 프로필 화면 즉시 새로고침
+                    // ----------------------------------------------------
+                    // 🪄 [Firestore 불사조 마법] 카카오 ID로 내 연동 코드 찾아오기!
+                    const db = window.db || firebase.firestore(); 
+                    // 'kakao_users'라는 폴더를 하나 만들어서 카카오ID와 연동코드를 매칭해둡니다.
+                    const userRef = db.collection('kakao_users').doc(String(kakaoId));
+
+                    userRef.get().then((doc) => {
+                        const currentLocalSyncCode = localStorage.getItem('family_sync_code');
+
+                        if (doc.exists && doc.data().family_sync_code) {
+                            // 🌟 [시나리오 A] 캐시가 날아갔는데 다시 로그인한 경우 -> 연동 코드 복구!
+                            localStorage.setItem('family_sync_code', doc.data().family_sync_code);
+                            showToast(`🎉 ${nickname}님 환영합니다! (연동 복구 완료✨)`);
+                            
+                            // 복구 후 파이어베이스 데이터 다시 불러오기 (파트너님 함수명에 맞게 호출)
+                            if(typeof window.initFirebaseSync === 'function') window.initFirebaseSync(); 
+                            
+                        } else if (currentLocalSyncCode) {
+                            // 🌟 [시나리오 B] 이미 연동해서 쓰다가 처음으로 카카오 로그인한 경우 -> DB에 백업!
+                            userRef.set({
+                                family_sync_code: currentLocalSyncCode,
+                                nickname: nickname
+                            }, { merge: true });
+                            showToast(`🎉 ${nickname}님 환영합니다! (클라우드 백업 완료☁️)`);
+                        } else {
+                            // 🌟 [시나리오 C] 연동도 안 했고, 첫 방문인 경우
+                            showToast(`🎉 ${nickname}님 환영합니다!`);
+                        }
+
+                        // 설정 탭 화면 즉시 새로고침
+                        window.renderSettingsTab(); 
+
+                    }).catch((error) => {
+                        console.error("자동 복구 에러:", error);
+                        showToast(`🎉 ${nickname}님 환영합니다!`);
+                        window.renderSettingsTab();
+                    });
+                    // ----------------------------------------------------
                 },
                 fail: function(error) {
                     alert('프로필 정보를 가져오는데 실패했습니다: ' + JSON.stringify(error));
@@ -4680,7 +4730,7 @@ window.renderSettingsTab = function() {
         `;
     }
 
-    // 🌟 2. 가족 연동 섹션
+    // 🌟 2. 가족 연동 섹션 (🚨 해제 버튼 빨간색 + 잠금 장치 추가)
     const syncCode = localStorage.getItem('family_sync_code');
     let syncHtml = '';
 
@@ -4692,7 +4742,11 @@ window.renderSettingsTab = function() {
                     <span style="background: #EBF4FF; color: #3182F6; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px;">상태: ON</span>
                 </div>
                 <div style="font-size: 12.5px; color: var(--text-s); font-weight: 600; margin-bottom: 12px;">현재 가족간 육아 데이터를 공유 중입니다.</div>
-                <button onclick="window.unlinkFamilySync()" style="width: 100%; padding: 12px; border-radius: 12px; background: #F2F5F8; color: #8B95A1; font-size: 13.5px; font-weight: 800; border: none; cursor: pointer;">연동 해제하기</button>
+                
+                <!-- 🔥 빨간색 경고 디자인으로 변경 및 safeUnlinkFamilySync 호출 -->
+                <button onclick="window.safeUnlinkFamilySync()" style="width: 100%; padding: 12px; border-radius: 12px; background: #FFF0F1; color: #F04452; font-size: 13.5px; font-weight: 900; border: 1px solid #FFE5E8; cursor: pointer; box-shadow: 0 2px 4px rgba(240,68,82,0.05);">
+                    🚨 연동 해제하기
+                </button>
             </div>
         `;
     } else {
@@ -4707,7 +4761,7 @@ window.renderSettingsTab = function() {
         `;
     }
 
-    // 🌟 3. 전체 화면 조립하기 (디테일 탭 추가)
+    // 🌟 3. 전체 화면 조립하기 
     container.innerHTML = `
         <div style="padding: 20px;">
             <div style="font-size: 22px; font-weight: 900; color: var(--text-m); margin-bottom: 24px;">설정</div>
@@ -4748,13 +4802,13 @@ window.renderSettingsTab = function() {
             <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px; margin-left: 4px;">고객 지원 및 약관</div>
             <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px;">
                 
-                <!-- 1. 인스타그램 연결 (ggoom_e2) -->
+                <!-- 1. 인스타그램 연결 -->
                 <div onclick="window.open('https://www.instagram.com/ggoom_e2', '_blank')" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">💬 인스타그램 DM으로 문의하기</div>
                     <div style="color: #8B95A1; font-size: 12px;">〉</div>
                 </div>
                 
-                <!-- 2. 네이버 블로그 연결 (radiant_ly) -->
+                <!-- 2. 네이버 블로그 연결 -->
                 <div onclick="window.open('https://blog.naver.com/radiant_ly', '_blank')" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">📝 육아메이트 블로그 구경하기</div>
                     <div style="color: #8B95A1; font-size: 12px;">〉</div>
@@ -4861,4 +4915,25 @@ window.unlinkFamilySync = function() {
         "해지하기", // 버튼 이름
         "#F04452" // 버튼 색상 (빨간색)
     );
+};
+
+// ==========================================
+// 🛡️ [가족 연동 해제 안전장치] 실수 방지용 3중 자물쇠
+// ==========================================
+window.safeUnlinkFamilySync = function() {
+    const answer = prompt("⚠️ 정말 짝꿍과의 가족 연동을 끊으시겠습니까?\n해제하시려면 아래 입력창에 '해제'라고 정확히 적어주세요.");
+    
+    if (answer === '해제') {
+        // 기존 해제 함수가 있으면 안전하게 호출
+        if (typeof window.unlinkFamilySync === 'function') {
+            window.unlinkFamilySync(); 
+        } else {
+            // 강제 해제 로직 (Fallback)
+            localStorage.removeItem('family_sync_code');
+            alert("가족 연동이 안전하게 해제되었습니다.");
+            window.renderSettingsTab();
+        }
+    } else if (answer !== null) {
+        alert("입력한 단어가 일치하지 않아 취소되었습니다.");
+    }
 };
