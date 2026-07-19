@@ -48,14 +48,22 @@ function directGoToolbox(toolType) {
     switchTool(toolType, targetChip);
 }
 
+// 🚨 [패치 완료] 행사/핫플 탭 전환 시 지역 필터 연동
 function switchOutingSubTab(type) {
     document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
     const segBtn = document.getElementById('seg-' + type);
     if(segBtn) segBtn.classList.add('active');
-    currentSubTab = type; currentSubRegion = 'all';
+    
+    currentSubTab = type; 
+    currentSubRegion = 'all'; // 탭 바꿀 때 서브 지역 초기화
+
     const subRow = document.getElementById('sub-filter-row');
-    if (type === 'event' && currentRegion !== 'all') { generateSubFilters(currentRegion); } 
-    else { if(subRow) subRow.style.display = 'none'; }
+    if (currentRegion !== 'all') { 
+        generateSubFilters(currentRegion); 
+    } else { 
+        if(subRow) subRow.style.display = 'none'; 
+    }
+    
     filterPlaces();
 }
 
@@ -116,11 +124,20 @@ async function loadAllExternalData() {
     } catch (e) { console.warn("데이터 로드 실패 - 앱은 정상 작동 중"); }
 }
 
+// 🚨 [패치 완료] 큰 지역 누를 때 세부 지역 필터 재생성
 function setRegion(region, btn) {
     currentRegion = region;
     document.querySelectorAll('.filter-wrap .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if (currentSubTab === 'event') { generateSubFilters(region); currentSubRegion = 'all'; }
+    
+    currentSubRegion = 'all'; 
+    if (currentRegion !== 'all') { 
+        generateSubFilters(region); 
+    } else {
+        const subRow = document.getElementById('sub-filter-row');
+        if(subRow) subRow.style.display = 'none'; 
+    }
+    
     filterPlaces();
 }
 
@@ -132,21 +149,39 @@ function toggleAccordion(index) {
 }
 
 function openGoogleForm() { window.open('https://forms.gle/gWYhuNrwiKNvyCEQA', '_blank'); }
+
+// 🚨 [패치 완료] 핫플 탭에서도 세부 지역 필터 나오게 수정
 function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row'), subRegions = new Set();
     if(!subRow) return;
 
-    let source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)];
+    let source = [];
+    if (currentSubTab === 'event') {
+        source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)];
+    } else {
+        source = hotplacesData.filter(p => !p.isEvent);
+    }
+
     source.forEach(item => {
-        const addr = item.addr1 || item.addr || ''; let isMatched = false;
-        if (mainRegion === 'seoul' && addr.includes('서울')) isMatched = true;
-        if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천'))) isMatched = true;
+        const addr = item.locText || item.addr1 || item.addr || item.region || ''; 
+        let isMatched = false;
+        
+        if (mainRegion === 'seoul' && (addr.includes('서울') || addr === 'seoul')) isMatched = true;
+        if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천') || addr === 'gyeonggi' || addr === 'incheon')) isMatched = true;
         if (mainRegion === 'chungcheong' && (addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종'))) isMatched = true;
         if (mainRegion === 'gangwon' && addr.includes('강원')) isMatched = true;
         if (mainRegion === 'jeolla' && (addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주'))) isMatched = true;
         if (mainRegion === 'gyeongsang' && (addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산'))) isMatched = true;
         if (mainRegion === 'jeju' && addr.includes('제주')) isMatched = true;
-        if (isMatched) { const parts = addr.split(' '); if (parts[1]) subRegions.add(parts[1]); }
+        
+        if (isMatched) { 
+            if (item.locText && item.locText !== '경기외곽' && item.locText !== '서울' && item.locText !== '경기' && item.locText !== '인천') {
+                subRegions.add(item.locText);
+            } else {
+                const parts = addr.split(' '); 
+                if (parts[1] && parts[1].length > 1 && !parts[1].includes('도')) subRegions.add(parts[1]); 
+            }
+        }
     });
 
     if (subRegions.size === 0) { subRow.style.display = 'none'; return; }
@@ -158,36 +193,55 @@ function generateSubFilters(mainRegion) {
 
     let html = `<button class="filter-btn ${currentSubRegion === 'all' ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('all', this)">시·군·구 전체</button>`;
     
-    subRegions.forEach(sub => { 
+    Array.from(subRegions).sort().forEach(sub => { 
         html += `<button class="filter-btn ${currentSubRegion === sub ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('${sub}', this)">${sub}</button>`; 
     });
     
     subRow.innerHTML = html;
 }
 
+// 🚨 [패치 완료] 세부 지역 탭핑 시 적용
 function setSubRegion(sub, btn) {
     document.querySelectorAll('#sub-filter-row .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active'); currentSubRegion = sub; filterPlaces();
+    btn.classList.add('active'); 
+    currentSubRegion = sub; 
+    filterPlaces();
 }
 
+// 🚨 [패치 완료] 끝난 행사 숨기기 + 먼 행사 숨기기 + 핫플 지역 필터 적용
 function filterPlaces() {
     const searchInput = document.getElementById('spot-search');
     const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
     const container = document.getElementById('hotplace-container');
     if(!container) return; 
-    container.innerHTML = ''; // 화면 깨짐 방지용 초기화
+    container.innerHTML = ''; 
     
-    const todayStr = new Date().toISOString().split('T')[0];
-    const todayNum = parseInt(todayStr.replace(/-/g,''));
+    const now = new Date();
+    const todayNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'')); 
+    const currentMonthNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'').substring(0, 6));
 
     if (currentSubTab === 'event') {
-        // [1. 이번주 주말 행사 로직 - 기존 코드 완벽하게 100% 유지]
         let eventSource = Array.from(new Map([...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].map(i => [i.title, i])).values());
+        
         const filteredEvents = eventSource.filter(p => {
-            let addr = p.addr1 || p.addr || p.locText || '', title = p.title || '';
-            if (p.expiryDate && todayStr > p.expiryDate) return false; 
-            let rawEndDate = p.eventenddate || p.endDate || '';
-            if (rawEndDate) { let endStr = String(rawEndDate).replace(/[^0-9]/g, ''); if (endStr.length >= 8 && parseInt(endStr.substring(0, 8)) < todayNum) return false; }
+            let addr = p.addr1 || p.addr || p.locText || '';
+            let title = p.title || '';
+            
+            let rawStartDate = String(p.eventstartdate || p.datetime || '').replace(/[^0-9]/g, '');
+            let rawEndDate = String(p.eventenddate || p.endDate || '').replace(/[^0-9]/g, '');
+            
+            // 끝난 행사 필터링
+            if (rawEndDate && rawEndDate.length >= 8 && parseInt(rawEndDate.substring(0, 8)) < todayNum) return false; 
+            
+            // 너무 먼 미래의 행사 필터링 (이번 달 시작이 아니면 숨김)
+            if (rawStartDate && rawStartDate.length >= 8) {
+                const startMonthNum = parseInt(rawStartDate.substring(0, 6));
+                const startDayNum = parseInt(rawStartDate.substring(0, 8));
+                if (startDayNum > todayNum && startMonthNum > currentMonthNum) {
+                    return false; 
+                }
+            }
+
             let matchesRegion = false;
             if (currentRegion === 'all') { matchesRegion = true; } 
             else {
@@ -199,28 +253,46 @@ function filterPlaces() {
                 if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산');
                 if (currentRegion === 'jeju') matchesRegion = addr.includes('제주');
             }
+            
             return matchesRegion && (currentSubRegion === 'all' || addr.includes(currentSubRegion)) && `${title} ${addr}`.toLowerCase().includes(keyword);
         });
         
-        if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 예정된 주말 행사가 없습니다.</p>`; return; }
+        if(filteredEvents.length === 0) { 
+            container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 예정된 주말 행사가 없습니다.</p>`; 
+            return; 
+        }
+        
         const gridEl = document.createElement('div'); gridEl.className = 'festival-grid';
         filteredEvents.forEach(item => {
             const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = item.firstimage || '';
             let sd = item.eventstartdate || item.datetime || '', ed = item.eventenddate || '';
-            if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
+            if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; 
+            if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
             const dateText = ed ? `${sd} ~ ${ed}` : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
             const card = document.createElement('div'); card.className = 'fest-card';
             let imgHtml = rawImg ? `<img src="${rawImg}" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
             card.onclick = () => openFestivalModal(title, dateText, addr, item.tel || '정보없음', item.review || '', title, rawImg || '⚙️GRAPHIC');
             card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
             gridEl.appendChild(card);
-        }); container.appendChild(gridEl);
+        }); 
+        container.appendChild(gridEl);
 
     } else {
-        // [2. 검증 육아지도 로직 - 카드형 딥링크 디자인으로 진화!]
+        // [2. 검증 육아지도 로직 - 지역 필터 완벽 적용!]
         const filteredPlaces = hotplacesData.filter(p => {
-            if (p.expiryDate && todayStr > p.expiryDate) return false;
-            return !p.isEvent && (currentRegion === 'all' || p.region === currentRegion) && `${p.title} ${p.desc} ${p.locText}`.toLowerCase().includes(keyword);
+            if (p.isEvent) return false;
+            
+            let matchesRegion = false;
+            if (currentRegion === 'all') { matchesRegion = true; } 
+            else if (currentRegion === 'seoul') matchesRegion = p.region === 'seoul' || (p.locText && p.locText.includes('서울'));
+            else if (currentRegion === 'gyeonggi') matchesRegion = p.region === 'gyeonggi' || p.region === 'incheon' || (p.locText && (p.locText.includes('경기') || p.locText.includes('인천')));
+
+            let matchesSubRegion = true;
+            if (currentSubRegion !== 'all') {
+                matchesSubRegion = (p.locText && p.locText.includes(currentSubRegion));
+            }
+
+            return matchesRegion && matchesSubRegion && `${p.title} ${p.desc} ${p.locText}`.toLowerCase().includes(keyword);
         });
 
         if(filteredPlaces.length === 0) { 
@@ -228,16 +300,13 @@ function filterPlaces() {
             return; 
         }
 
-        let htmlString = ''; // 화면 깨짐 방지를 위해 카드를 모아두는 바구니
-
+        let htmlString = ''; 
         filteredPlaces.forEach((p) => {
-            // 태그 배열 데이터 안전하게 호환
             let tagsHTML = '';
             if (p.tags && Array.isArray(p.tags)) {
                 tagsHTML = p.tags.map(tag => `<span style="background:#F2F5F8; color:#4E5968; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid #E5E8EB; margin-right:4px; display:inline-block; margin-bottom:4px;">#${tag.t || tag}</span>`).join('');
             }
             
-            // 카카오맵 딥링크 URL 생성 (검색어 기반)
             let mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(p.query || p.title)}`;
 
             htmlString += `
@@ -262,7 +331,6 @@ function filterPlaces() {
             `;
         });
         
-        // 조립된 카드들을 화면에 한 번에 그려주기 (안전!)
         container.innerHTML = htmlString;
     }
 }
@@ -354,8 +422,10 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
             
-            <!-- 🚨 여기에 투명 쿠션 60px 추가! (스와이프 바 간섭 방지) -->
-            <div style="height: 60px; width: 100%; flex-shrink: 0;"></div>
+            // ... (버튼들 코드) ...
+            
+            <!-- 🚨 하단 짤림(네비게이션 바 간섭) 완벽 방지용 무적 쿠션! -->
+            <div style="height: 100px; width: 100%; flex-shrink: 0; background: transparent; padding-bottom: 30px;"></div>
             
         </div>
     `;
@@ -2419,10 +2489,11 @@ window.openTrackerSheet = function(type, editId = null) {
     const now = new Date();
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     
+    // 1. 입력창 가운데 정렬 패치 (text-align: center 추가)
     const timeInputHtml = `
         <div style="text-align: center; margin-bottom: 20px;">
-            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 기록할까요? (터치하여 시간 수정)</div>
-            <input type="time" id="v-tracker-time" value="${currentTimeStr}" style="border:1px solid var(--border); background:var(--bg-sub); padding:8px 16px; border-radius:12px; font-size:18px; font-weight:900; color:var(--text-m); outline:none;">
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 잠들었나요? (터치하여 시간 수정)</div>
+            <input type="time" id="v-tracker-time" value="${currentTimeStr}" onchange="window.updateSleepPreview()" style="text-align:center; border:1px solid var(--border); background:var(--bg-sub); padding:8px 16px; border-radius:12px; font-size:18px; font-weight:900; color:var(--text-m); outline:none;">
         </div>
     `;
     
@@ -2446,9 +2517,10 @@ window.openTrackerSheet = function(type, editId = null) {
 
             <div id="feed-breast-area" style="display: none; text-align: center; margin-bottom: 24px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">어느 쪽을 먹였나요?</div>
-                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                    <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_left')" style="width: 80px; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">왼쪽 (L)</button>
-                    <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_right')" style="width: 80px; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">오른쪽 (R)</button>
+                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;">
+                    <!-- 🚨 width를 110px로 늘리고, white-space: nowrap을 추가해 절대 안 깨지게 패치! -->
+                    <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_left')" style="width: 110px; padding: 14px 0; white-space: nowrap; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s; font-size: 14.5px;">왼쪽 (L)</button>
+                    <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_right')" style="width: 110px; padding: 14px 0; white-space: nowrap; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s; font-size: 14.5px;">오른쪽 (R)</button>
                 </div>
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">수유 시간 (분)</div>
                 <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
@@ -2459,9 +2531,19 @@ window.openTrackerSheet = function(type, editId = null) {
         `;
         if(saveBtn) saveBtn.style.display = 'block';
 
-    } else if (type === 'sleep') {
+   // 2. 수면 기록 시트 UI 패치 (실시간 미리보기 영역 추가)
+   } else if (type === 'sleep') {
         title.innerHTML = window.editingTrackerId ? '💤 수면 기록 수정' : '💤 수면 기록하기';
-        body.innerHTML = timeInputHtml + `
+        body.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">언제 자고 언제 일어났나요?</div>
+                <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+                    <input type="time" id="v-tracker-time" value="${currentTimeStr}" onchange="window.calcSleepFromTimes()" style="flex:1; text-align:center; border:1px solid var(--border); background:var(--bg-sub); padding:8px 10px; border-radius:12px; font-size:18px; font-weight:900; color:var(--text-m); outline:none;">
+                    <span style="font-size:18px; font-weight:900; color:var(--text-s);">~</span>
+                    <input type="time" id="v-sleep-end-time" value="${currentTimeStr}" onchange="window.calcSleepFromTimes()" style="flex:1; text-align:center; border:1px solid var(--border); background:var(--bg-sub); padding:8px 10px; border-radius:12px; font-size:18px; font-weight:900; color:var(--text-m); outline:none;">
+                </div>
+            </div>
+            
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_day')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">☀️ 낮잠</button>
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'sleep_night')" style="flex: 1; background: var(--bg-card); color: var(--text-s); border: 1px solid var(--border); box-shadow: none; margin:0; transition:0.2s;">🌙 밤잠</button>
@@ -2472,14 +2554,20 @@ window.openTrackerSheet = function(type, editId = null) {
                     ⏰ 방금 깼어요! (알아서 계산)
                 </button>
             </div>
+
+            <!-- 🚨 [디자인 변경] 총 수면 시간을 시간/분 두 칸으로 나눔 -->
             <div style="text-align: center; margin-bottom: 24px;">
-                <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">총 수면 시간 (분)</div>
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">총 수면 시간</div>
                 <div style="display: flex; justify-content: center; align-items: baseline; gap: 6px;">
-                    <input type="number" id="v-sleep-amount" placeholder="0" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition:0.3s;">
+                    <input type="number" id="v-sleep-hours" value="0" oninput="window.calcEndTimeFromAmount()" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 70px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition:0.3s;">
+                    <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">시간</span>
+                    <input type="number" id="v-sleep-mins" value="0" oninput="window.calcEndTimeFromAmount()" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 70px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition:0.3s;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
                 </div>
+                <!-- 몰래 데이터 저장해두는 투명 주머니 -->
+                <input type="hidden" id="v-sleep-amount" value="0">
                 <div style="margin-top: 14px;">
-                    <span style="background:var(--bg-sub); color:var(--text-m); font-size:11.5px; font-weight:800; padding:6px 12px; border-radius:20px; border:1px solid var(--border);">💡 자는 중이라면 빈칸으로 두고 [저장] 누르세요!</span>
+                    <span style="background:var(--bg-sub); color:var(--text-m); font-size:11.5px; font-weight:800; padding:6px 12px; border-radius:20px; border:1px solid var(--border);">💡 자는 중이라면 시간을 똑같이 두고 [저장] 누르세요!</span>
                 </div>
             </div>
         `;
@@ -2548,11 +2636,26 @@ window.openTrackerSheet = function(type, editId = null) {
                     }
                 }
                 
+              // 👉 1. 수정된 수면(sleep) 로직 (시간/분 자동 분리)
                 if (recordToEdit.type === 'sleep') {
                     const sleepAmtInput = document.getElementById('v-sleep-amount');
+                    const hoursInput = document.getElementById('v-sleep-hours');
+                    const minsInput = document.getElementById('v-sleep-mins');
+
+                    // 데이터 분배 (총 분 -> 시간 & 분 쪼개기)
                     if (sleepAmtInput) sleepAmtInput.value = recordToEdit.amount;
+                    if (hoursInput) hoursInput.value = Math.floor(recordToEdit.amount / 60);
+                    if (minsInput) minsInput.value = recordToEdit.amount % 60;
+                    
+                    // 종료 시간 자동 세팅
+                    const endInput = document.getElementById('v-sleep-end-time');
+                    if (endInput && recordToEdit.amount > 0) {
+                        const d = new Date(recordToEdit.timestamp + (recordToEdit.amount * 60000));
+                        endInput.value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                    }
                 }
 
+                // 👉 2. 기존 기저귀(diaper) 로직 (이 부분은 지워지지 않게 그대로 유지!)
                 if (recordToEdit.type === 'diaper' && recordToEdit.status) {
                     const spans = document.querySelectorAll('#diaper-status-area span');
                     spans.forEach(span => {
@@ -2754,6 +2857,7 @@ window.updateTrackerDashboard = function() {
     const container = document.getElementById('tracker-stats-container');
     if(!container) return;
 
+   // (이전 코드 동일...)
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     const now = new Date();
     const nowTime = now.getTime(); 
@@ -2766,15 +2870,21 @@ window.updateTrackerDashboard = function() {
     let wakeTimeHtml = "";
     if (isAwake) {
         if (lastSleepRecord) {
-            const awakeMins = Math.max(0, Math.floor((nowTime - Number(lastSleepRecord.timestamp)) / 60000));
+            // 🚨 [핵심 버그 수정] 수면 시작 시간 + 잔 시간(amount) = "진짜 깨어난 시간"
+            const sleepEndTime = Number(lastSleepRecord.timestamp) + (lastSleepRecord.amount * 60000);
+            
+            // 깨어난 시간부터 지금까지의 시간 계산
+            const awakeMins = Math.max(0, Math.floor((nowTime - sleepEndTime) / 60000));
             const hours = Math.floor(awakeMins / 60);
             const mins = awakeMins % 60;
+            
             wakeTimeHtml = `<div style="background:#F8F9FA; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #E5E8EB; text-align:center;">
                 <div style="font-size:12.5px; font-weight:900; color:#3182F6;">⏰ 깨어난 지 ${hours}시간 ${mins}분째</div>
                 <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">우리 아기만의 졸음 신호를 관찰해 보세요 👀</div>
             </div>`;
         }
     } else {
+        // (이하 기존 코드 동일...)
         const currentSleepStart = sleepStartTime ? Number(sleepStartTime) : Number(lastSleepRecord.timestamp);
         const sleepMins = Math.max(0, Math.floor((nowTime - currentSleepStart) / 60000));
         const hours = Math.floor(sleepMins / 60);
@@ -2815,13 +2925,31 @@ window.updateTrackerDashboard = function() {
                 grouped[date].forEach(r => {
                     let icon = r.type==='feed' ? '🍼' : (r.type==='sleep' ? (r.subType==='밤잠' ? '🌙' : '☀️') : '💩');
                     let txt = '';
-                    // 💡 [히스토리] 모유 수유일 경우 UI 변경
+                    let displayTime = r.time; // 화면에 보여줄 시간 변수 추가
+                    
                     if(r.type === 'feed') {
                         if (r.subType === '모유') txt = `모유 (${r.status}) ${r.amount}분`;
                         else txt = `${r.subType} ${r.amount}ml`;
                     }
-                    else if(r.type === 'sleep') txt = (r.amount === 0) ? `<span style="color:#3182F6">${r.subType || '낮잠'} (자는 중 💤)</span>` : `${r.subType || '낮잠'} ${r.amount}분`; 
-                    else if(r.type === 'diaper') txt = r.status ? `${r.subType} / ${r.status}` : `${r.subType}`;
+                    else if(r.type === 'diaper') {
+                        txt = r.status ? `${r.subType} / ${r.status}` : `${r.subType}`;
+                    }
+                    else if(r.type === 'sleep') {
+                        if (r.amount === 0) {
+                            txt = `<span style="color:#3182F6">${r.subType || '낮잠'} (자는 중 💤)</span>`;
+                        } else {
+                            // 🚨 [수면 표시 UI 혁명] 670분 -> 11시간 10분 변환
+                            let h = Math.floor(r.amount / 60);
+                            let m = r.amount % 60;
+                            let durText = h > 0 ? `${h}시간 ${m}분` : `${m}분`;
+                            txt = `${r.subType || '낮잠'} <span style="color:#A855F7;">${durText}</span>`;
+                            
+                            // 🚨 시작 시간 ~ 끝난 시간 계산
+                            let dEnd = new Date(r.timestamp + (r.amount * 60000));
+                            let endStr = `${String(dEnd.getHours()).padStart(2,'0')}:${String(dEnd.getMinutes()).padStart(2,'0')}`;
+                            displayTime = `${r.time} ~ ${endStr}`; // "20:05 ~ 06:55" 포맷
+                        }
+                    }
                     
                     historyHtml += `
                         <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #E5E8EB; border-radius:12px; margin-bottom:8px; background:#FFF; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
@@ -2829,7 +2957,7 @@ window.updateTrackerDashboard = function() {
                                 <span style="font-size:18px;">${icon}</span>
                                 <div>
                                     <div style="font-weight:900; color:var(--text-m); font-size:13.5px; margin-bottom:2px;">${txt}</div>
-                                    <div style="color:#8B95A1; font-weight:700; font-size:11.5px;">${r.time}</div>
+                                    <div style="color:#8B95A1; font-weight:700; font-size:11.5px;">${displayTime}</div> <!-- 변경된 시간 적용 -->
                                 </div>
                             </div>
                             <div style="display:flex; gap:8px;">
@@ -5033,4 +5161,93 @@ window.safeUnlinkFamilySync = function() {
     } else if (answer !== null) {
         alert("입력한 단어가 일치하지 않아 취소되었습니다.");
     }
+};
+
+// ==========================================
+// 💡 수면시간 양방향 자동 계산 엔진 (시작~종료 <-> 시간/분)
+// ==========================================
+
+// 1. [시간 박스]를 건드렸을 때 -> [시간/분]을 알아서 쪼개서 계산
+window.calcSleepFromTimes = function() {
+    const startInput = document.getElementById('v-tracker-time');
+    const endInput = document.getElementById('v-sleep-end-time');
+    const amountInput = document.getElementById('v-sleep-amount');
+    const hoursInput = document.getElementById('v-sleep-hours');
+    const minsInput = document.getElementById('v-sleep-mins');
+
+    if(!startInput || !endInput || !amountInput || !hoursInput || !minsInput) return;
+
+    const [sH, sM] = startInput.value.split(':').map(Number);
+    const [eH, eM] = endInput.value.split(':').map(Number);
+
+    let startMins = sH * 60 + sM;
+    let endMins = eH * 60 + eM;
+
+    // 밤을 새서 종료 시간이 시작 시간보다 작다면 하루(1440분) 더해줌
+    if (endMins < startMins) {
+        endMins += 24 * 60; 
+    }
+
+    const diffMins = endMins - startMins;
+    
+    // 숨겨진 원본 분(min) 저장 & 시각적 분할
+    amountInput.value = diffMins; 
+    hoursInput.value = Math.floor(diffMins / 60);
+    minsInput.value = diffMins % 60;
+};
+
+// 2. [시간 / 분 박스]를 직접 타이핑했을 때 -> [종료 시간]을 알아서 계산
+window.calcEndTimeFromAmount = function() {
+    const startInput = document.getElementById('v-tracker-time');
+    const endInput = document.getElementById('v-sleep-end-time');
+    const amountInput = document.getElementById('v-sleep-amount');
+    const hoursInput = document.getElementById('v-sleep-hours');
+    const minsInput = document.getElementById('v-sleep-mins');
+
+    if(!startInput || !endInput || !amountInput || !hoursInput || !minsInput) return;
+
+    const h = parseInt(hoursInput.value) || 0;
+    const m = parseInt(minsInput.value) || 0;
+    const totalMins = (h * 60) + m;
+    
+    // 숨겨진 원본 분(min) 저장
+    amountInput.value = totalMins;
+
+    const [sH, sM] = startInput.value.split(':').map(Number);
+    let startMins = sH * 60 + sM;
+    let endMins = startMins + totalMins;
+
+    const eH = Math.floor(endMins / 60) % 24; 
+    const eM = endMins % 60;
+
+    endInput.value = `${String(eH).padStart(2,'0')}:${String(eM).padStart(2,'0')}`; 
+};
+
+// 3. [⏰ 방금 깼어요!] 버튼을 눌렀을 때
+window.calcSleepToNow = function() {
+    const endInput = document.getElementById('v-sleep-end-time');
+    const hoursInput = document.getElementById('v-sleep-hours');
+    const minsInput = document.getElementById('v-sleep-mins');
+    if(!endInput) return;
+
+    // 1. 종료 시간 박스에 '현재 시간' 세팅
+    const now = new Date();
+    endInput.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    
+    // 2. 알아서 계산 돌려버리기!
+    window.calcSleepFromTimes();
+    
+    // 3. 시각적 효과 (글씨 커졌다가 돌아옴)
+    if(hoursInput) {
+        hoursInput.style.transform = 'scale(1.2)';
+        hoursInput.style.color = '#A855F7';
+        setTimeout(() => { hoursInput.style.transform = 'scale(1)'; hoursInput.style.color = 'var(--text-m)'; }, 300);
+    }
+    if(minsInput) {
+        minsInput.style.transform = 'scale(1.2)';
+        minsInput.style.color = '#A855F7';
+        setTimeout(() => { minsInput.style.transform = 'scale(1)'; minsInput.style.color = 'var(--text-m)'; }, 300);
+    }
+
+    window.showToast(`✅ 방금 깬 시간으로 자동 셋팅되었습니다!`);
 };
