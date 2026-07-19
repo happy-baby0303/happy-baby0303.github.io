@@ -225,6 +225,9 @@
         <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
         
         <div id="smart-banner-container"></div> 
+
+        <!-- 👇 여기에 아빠 전용 대시보드가 들어갑니다 👇 -->
+            <div id="dad-quest-container" style="display:none; margin-bottom: 24px;"></div>
         
         <div id="tracker-section" style="margin-bottom: 24px;">
             <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
@@ -2072,36 +2075,83 @@
         document.getElementById('poop-ai-area').style.display = 'block';
     };
 
-    // 🌟 파트너님의 AI 판독 로직 100% 원본 그대로 유지!
-    window.analyzePoop = function(color, btn, status) {
+// 🌟 대변 색깔 분석 엔진 (수유 단계별 스마트 판독 + 회색 필터 완벽 적용!)
+    window.analyzePoop = function(color, btn, defaultStatus) {
         selectedPoopColor = color;
-        selectedPoopStatus = status;
 
+        // 1. 모든 버튼을 회색빛으로 죽이기
         document.querySelectorAll('.ai-poop-btn').forEach(b => {
             b.style.transform = 'scale(1)'; 
             b.style.boxShadow = 'none';
+            b.style.opacity = '0.35'; 
+            b.style.filter = 'grayscale(100%)'; 
+            b.style.border = 'none';
+            if(b.innerText.includes('흰')) b.style.border = '1px solid #E5E8EB'; 
         });
-        btn.style.transform = 'scale(1.1)';
+
+        // 2. 누른 버튼만 생기 돌게 팝업!
+        btn.style.transform = 'scale(1.05)';
         btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        btn.style.opacity = '1';
+        btn.style.filter = 'grayscale(0%)';
+        btn.style.border = '2px solid #191F28'; 
 
         const resultBox = document.getElementById('ai-poop-result');
         resultBox.style.display = 'block';
 
-        if (status === 'good') {
+        // 💡 3. 핵심 로직: 현재 아기의 수유 단계 가져오기
+        const feedingStage = localStorage.getItem('tosil_feedingStage') || '모유/분유';
+        const isSolidFood = feedingStage.includes('이유식');
+
+        let finalStatus = defaultStatus;
+        let resultHtml = '';
+
+        // 4. 색상별 스마트 판독 텍스트 (이유식 단계에 따른 갈색 변 분기)
+        if (color === '황금색' || color === '황금') {
+            finalStatus = 'good';
+            resultHtml = '🟢 <b>완벽한 황금 변입니다!</b><br>아기의 소화 상태가 아주 훌륭하네요.';
+        } 
+        else if (color === '녹색') {
+            finalStatus = 'good';
+            resultHtml = '🟢 <b>지극히 정상입니다!</b><br>담즙, 철분 분유 또는 녹색 채소의 영향일 수 있습니다.';
+        } 
+        else if (color === '갈색') {
+            // 🚨 수유 단계에 따른 [갈색 변] 분기 처리!
+            if (isSolidFood) {
+                finalStatus = 'good';
+                resultHtml = '🟢 <b>건강한 갈색 변입니다!</b><br>이유식을 먹으면서 어른처럼 변이 짙어지는 자연스러운 과정입니다.';
+            } else {
+                finalStatus = 'bad';
+                resultHtml = '⚠️ <b>수분 부족 / 변비 의심!</b><br>모유/분유만 먹는데 짙은 갈색에 딱딱하다면 수분 부족일 수 있습니다. (배 마사지 권장)';
+            }
+        } 
+        else if (color === '흰/회색') {
+            finalStatus = 'bad';
+            resultHtml = '🚨 <b>소아과 방문 요망!</b><br>담도폐쇄증이 의심될 수 있는 색상입니다. 기저귀를 챙겨 병원 진료를 권장합니다.';
+        } 
+        else if (color === '붉은색') {
+            finalStatus = 'bad';
+            resultHtml = '🚨 <b>혈변 주의!</b><br>피가 섞여 나왔을 수 있습니다. 사진을 찍고 소아과 진료를 권장합니다.';
+        } 
+        else if (color === '검은색') {
+            finalStatus = 'bad';
+            resultHtml = '🚨 <b>위장 출혈 의심!</b><br>위나 장 위쪽의 출혈로 인해 검게 변했을 수 있습니다. 진료가 필요합니다.';
+        }
+
+        selectedPoopStatus = finalStatus;
+
+        // 5. 결과창 디자인 입히기
+        if (finalStatus === 'good') {
             resultBox.className = 'box-tint-green';
             resultBox.style.color = 'var(--success)';
-            if(color === '녹색') resultBox.innerHTML = '🟢 <b>지극히 정상입니다!</b><br>담즙이나 철분 분유의 영향일 수 있습니다. 안심하세요.';
-            else resultBox.innerHTML = `🟢 <b>완벽한 ${color} 변입니다!</b><br>아기의 소화 상태가 아주 훌륭하네요.`;
         } else {
             resultBox.className = 'box-tint-red';
             resultBox.style.color = 'var(--danger)';
-            if(color === '흰/회색') resultBox.innerHTML = '🚨 <b>소아과 방문 요망!</b><br>담도폐쇄증이 의심될 수 있는 색상입니다. 기저귀를 챙겨서 병원 진료를 권장합니다.';
-            else if(color === '붉은색') resultBox.innerHTML = '🚨 <b>혈변 주의!</b><br>피가 섞여 나왔을 수 있습니다. 사진을 찍고 소아과 진료를 권장합니다.';
-            else resultBox.innerHTML = '🚨 <b>위장 출혈 의심!</b><br>위나 장 위쪽의 출혈로 인해 검게 변했을 수 있습니다. 진료가 필요합니다.';
         }
+        resultBox.innerHTML = resultHtml;
     };
 
-    // 🌟 하드코딩 되어있던 '대변' 글자를 떼어내고, currentPoopType을 꽂아줌!
+    // 🌟 하드코딩 되어있던 '대변' 글자를 떼어내고, currentPoopType을 꽂아줌! (대표님 코드 원본 그대로 안전 유지)
     window.saveAiPoopRecord = function() {
         if(!selectedPoopColor) return alert("똥 색깔을 먼저 선택해주세요!");
         saveToMainTracker('diaper', window.currentPoopType, selectedPoopColor);
