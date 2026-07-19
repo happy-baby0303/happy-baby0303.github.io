@@ -54,16 +54,15 @@ function switchOutingSubTab(type) {
     const segBtn = document.getElementById('seg-' + type);
     if(segBtn) segBtn.classList.add('active');
     
-    currentSubTab = type; 
-    currentSubRegion = 'all'; // 탭 바꿀 때 서브 지역 초기화
-
+    currentSubTab = type; currentSubRegion = 'all';
+    
+    // 🚨 [핵심] 행사뿐만 아니라 핫플 탭이어도 지역을 선택했다면 무조건 서브 필터(가로 스크롤) 등장!
     const subRow = document.getElementById('sub-filter-row');
     if (currentRegion !== 'all') { 
         generateSubFilters(currentRegion); 
     } else { 
         if(subRow) subRow.style.display = 'none'; 
     }
-    
     filterPlaces();
 }
 
@@ -155,6 +154,7 @@ function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row'), subRegions = new Set();
     if(!subRow) return;
 
+    // 🚨 [핵심] 탭이 행사냐 핫플이냐에 따라 필터링 소스를 다르게 가져옵니다.
     let source = [];
     if (currentSubTab === 'event') {
         source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)];
@@ -163,11 +163,9 @@ function generateSubFilters(mainRegion) {
     }
 
     source.forEach(item => {
-        const addr = item.locText || item.addr1 || item.addr || item.region || ''; 
-        let isMatched = false;
-        
-        if (mainRegion === 'seoul' && (addr.includes('서울') || addr === 'seoul')) isMatched = true;
-        if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천') || addr === 'gyeonggi' || addr === 'incheon')) isMatched = true;
+        const addr = item.locText || item.addr1 || item.addr || ''; let isMatched = false;
+        if (mainRegion === 'seoul' && addr.includes('서울')) isMatched = true;
+        if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천') || addr.includes('용인') || addr.includes('동탄') || addr.includes('수원'))) isMatched = true;
         if (mainRegion === 'chungcheong' && (addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종'))) isMatched = true;
         if (mainRegion === 'gangwon' && addr.includes('강원')) isMatched = true;
         if (mainRegion === 'jeolla' && (addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주'))) isMatched = true;
@@ -175,11 +173,12 @@ function generateSubFilters(mainRegion) {
         if (mainRegion === 'jeju' && addr.includes('제주')) isMatched = true;
         
         if (isMatched) { 
-            if (item.locText && item.locText !== '경기외곽' && item.locText !== '서울' && item.locText !== '경기' && item.locText !== '인천') {
+            // locText(예: 동탄, 수원)가 있으면 우선 적용, 없으면 주소에서 파싱
+            if (item.locText && item.locText.length > 1 && !item.locText.includes('경기') && !item.locText.includes('서울')) {
                 subRegions.add(item.locText);
             } else {
                 const parts = addr.split(' '); 
-                if (parts[1] && parts[1].length > 1 && !parts[1].includes('도')) subRegions.add(parts[1]); 
+                if (parts[1] && parts[1].length > 1) subRegions.add(parts[1]); 
             }
         }
     });
@@ -193,6 +192,7 @@ function generateSubFilters(mainRegion) {
 
     let html = `<button class="filter-btn ${currentSubRegion === 'all' ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('all', this)">시·군·구 전체</button>`;
     
+    // 가나다 순으로 정렬해서 출력
     Array.from(subRegions).sort().forEach(sub => { 
         html += `<button class="filter-btn ${currentSubRegion === sub ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('${sub}', this)">${sub}</button>`; 
     });
@@ -216,31 +216,28 @@ function filterPlaces() {
     if(!container) return; 
     container.innerHTML = ''; 
     
+    // 시간 계산용 변수 세팅
     const now = new Date();
-    const todayNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'')); 
-    const currentMonthNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'').substring(0, 6));
+    const todayNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'')); // 예: 20260719
+    const currentMonthNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'').substring(0, 6)); // 예: 202607
 
     if (currentSubTab === 'event') {
         let eventSource = Array.from(new Map([...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].map(i => [i.title, i])).values());
-        
         const filteredEvents = eventSource.filter(p => {
-            let addr = p.addr1 || p.addr || p.locText || '';
-            let title = p.title || '';
+            let addr = p.addr1 || p.addr || p.locText || '', title = p.title || '';
+            if (p.expiryDate && now.toISOString().split('T')[0] > p.expiryDate) return false; 
             
             let rawStartDate = String(p.eventstartdate || p.datetime || '').replace(/[^0-9]/g, '');
             let rawEndDate = String(p.eventenddate || p.endDate || '').replace(/[^0-9]/g, '');
             
-            // 끝난 행사 필터링
-            if (rawEndDate && rawEndDate.length >= 8 && parseInt(rawEndDate.substring(0, 8)) < todayNum) return false; 
+            let sMonth = rawStartDate.length >= 8 ? parseInt(rawStartDate.substring(0, 6)) : 0;
+            let eDate = rawEndDate.length >= 8 ? parseInt(rawEndDate.substring(0, 8)) : 0;
+
+            // 🚨 1. 종료일이 오늘보다 과거면 끝난 행사! 칼같이 컷
+            if (eDate && eDate < todayNum) return false; 
             
-            // 너무 먼 미래의 행사 필터링 (이번 달 시작이 아니면 숨김)
-            if (rawStartDate && rawStartDate.length >= 8) {
-                const startMonthNum = parseInt(rawStartDate.substring(0, 6));
-                const startDayNum = parseInt(rawStartDate.substring(0, 8));
-                if (startDayNum > todayNum && startMonthNum > currentMonthNum) {
-                    return false; 
-                }
-            }
+            // 🚨 2. 시작일의 달(Month)이 이번 달보다 미래(예: 8월, 9월)면 칼같이 컷!
+            if (sMonth && sMonth > currentMonthNum) return false;
 
             let matchesRegion = false;
             if (currentRegion === 'all') { matchesRegion = true; } 
@@ -253,50 +250,39 @@ function filterPlaces() {
                 if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산');
                 if (currentRegion === 'jeju') matchesRegion = addr.includes('제주');
             }
-            
             return matchesRegion && (currentSubRegion === 'all' || addr.includes(currentSubRegion)) && `${title} ${addr}`.toLowerCase().includes(keyword);
         });
         
-        if(filteredEvents.length === 0) { 
-            container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 예정된 주말 행사가 없습니다.</p>`; 
-            return; 
-        }
-        
+        if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 이번 달에 예정된 행사가 없습니다.</p>`; return; }
         const gridEl = document.createElement('div'); gridEl.className = 'festival-grid';
         filteredEvents.forEach(item => {
             const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = item.firstimage || '';
             let sd = item.eventstartdate || item.datetime || '', ed = item.eventenddate || '';
-            if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; 
-            if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
+            if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
             const dateText = ed ? `${sd} ~ ${ed}` : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
             const card = document.createElement('div'); card.className = 'fest-card';
             let imgHtml = rawImg ? `<img src="${rawImg}" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
             card.onclick = () => openFestivalModal(title, dateText, addr, item.tel || '정보없음', item.review || '', title, rawImg || '⚙️GRAPHIC');
-            card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
+            card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 이번달 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
             gridEl.appendChild(card);
-        }); 
-        container.appendChild(gridEl);
+        }); container.appendChild(gridEl);
 
     } else {
-        // [2. 검증 육아지도 로직 - 지역 필터 완벽 적용!]
+        // [검증 육아지도 로직]
         const filteredPlaces = hotplacesData.filter(p => {
             if (p.isEvent) return false;
-            
             let matchesRegion = false;
-            if (currentRegion === 'all') { matchesRegion = true; } 
-            else if (currentRegion === 'seoul') matchesRegion = p.region === 'seoul' || (p.locText && p.locText.includes('서울'));
-            else if (currentRegion === 'gyeonggi') matchesRegion = p.region === 'gyeonggi' || p.region === 'incheon' || (p.locText && (p.locText.includes('경기') || p.locText.includes('인천')));
-
-            let matchesSubRegion = true;
-            if (currentSubRegion !== 'all') {
-                matchesSubRegion = (p.locText && p.locText.includes(currentSubRegion));
-            }
-
-            return matchesRegion && matchesSubRegion && `${p.title} ${p.desc} ${p.locText}`.toLowerCase().includes(keyword);
+            let addr = p.locText || p.addr || '';
+            
+            if (currentRegion === 'all') { matchesRegion = true; }
+            else if (currentRegion === 'seoul') matchesRegion = p.region === 'seoul' || addr.includes('서울');
+            else if (currentRegion === 'gyeonggi') matchesRegion = p.region === 'gyeonggi' || p.region === 'incheon' || addr.includes('경기') || addr.includes('인천') || addr.includes('동탄') || addr.includes('수원');
+            
+            return matchesRegion && (currentSubRegion === 'all' || addr.includes(currentSubRegion)) && `${p.title} ${p.desc} ${p.locText}`.toLowerCase().includes(keyword);
         });
 
         if(filteredPlaces.length === 0) { 
-            container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 아직 등록된 검증 육아지도가 없습니다.</p>`; 
+            container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 해당 지역에 아직 등록된 검증 핫플이 없습니다.</p>`; 
             return; 
         }
 
@@ -306,9 +292,7 @@ function filterPlaces() {
             if (p.tags && Array.isArray(p.tags)) {
                 tagsHTML = p.tags.map(tag => `<span style="background:#F2F5F8; color:#4E5968; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid #E5E8EB; margin-right:4px; display:inline-block; margin-bottom:4px;">#${tag.t || tag}</span>`).join('');
             }
-            
             let mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(p.query || p.title)}`;
-
             htmlString += `
                 <div class="box-main" style="border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border); text-align: left; background: var(--bg-card);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
@@ -330,7 +314,6 @@ function filterPlaces() {
                 </div>
             `;
         });
-        
         container.innerHTML = htmlString;
     }
 }
@@ -345,12 +328,10 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const tmapUrl = 'https://search.tmap.co.kr/search.html?keyword=' + encodeURIComponent(query);
     const kakaoUrl = 'https://map.kakao.com/?q=' + encodeURIComponent(query);
     
-    // 전화번호 버튼
     const telBtn = tel && tel !== '정보없음' 
         ? `<button onclick="window.location.href='tel:${tel}'" style="flex:1; padding:16px; background:#F2F5F8; color:#4E5968; border-radius:14px; font-weight:900; font-size:15px; border:none; cursor:pointer;">📞 전화 문의</button>` 
         : `<button disabled style="flex:1; padding:16px; background:#F2F5F8; color:#A0AEC0; border-radius:14px; font-weight:900; font-size:15px; border:none; opacity:0.6;">📞 번호 없음</button>`;
         
-    // 메인 사진
     const modalImgHtml = (image && !image.startsWith('⚙️')) 
         ? `<div style="width:100%; height:200px; border-radius:18px; overflow:hidden; margin-bottom:20px; box-shadow:0 4px 16px rgba(0,0,0,0.06); position:relative;">
              <img src="${image}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
@@ -358,7 +339,6 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
            </div>` 
         : `<div style="width:100%; height:140px; border-radius:18px; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); margin-bottom:20px; display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:0 4px 16px rgba(0,0,0,0.06);">🎪</div>`;
 
-    // 토스 스타일 전체 UI 렌더링
     body.innerHTML = `
         <div style="padding: 10px 4px;">
             <!-- 🏷️ 제목 영역 -->
@@ -388,7 +368,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 </div>
             </div>
 
-            <!-- 💡 팩트 체크 박스 (보라색 포인트로 시선 집중) -->
+            <!-- 💡 팩트 체크 박스 -->
             <div style="background:linear-gradient(135deg, #F4F0FF 0%, #F9F7FF 100%); padding:18px; border-radius:16px; margin-bottom:24px; border:1px solid #EBE5FF; display:flex; gap:12px; align-items:flex-start;">
                 <span style="font-size:20px; margin-top:2px;">💡</span>
                 <div>
@@ -422,10 +402,8 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
             
-            // ... (버튼들 코드) ...
-            
-            <!-- 🚨 하단 짤림(네비게이션 바 간섭) 완벽 방지용 무적 쿠션! -->
-            <div style="height: 100px; width: 100%; flex-shrink: 0; background: transparent; padding-bottom: 30px;"></div>
+            <!-- 🚨 [최종 보스] 안드로이드 시스템 바 및 웹브라우저 하단바 무조건 밀어내는 150px 투명 기둥! -->
+            <div style="display:block; clear:both; width:100%; height:150px; background:transparent;"></div>
             
         </div>
     `;
