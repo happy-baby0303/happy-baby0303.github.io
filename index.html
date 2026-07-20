@@ -52,13 +52,43 @@
         }
     </script>
     <link rel="stylesheet" href="style.css?v=20260706">
-    <style>
+   
+ <style>
         .panel-block { transition: opacity 0.3s ease; }
         #cube-list-container .timeline-item, #baton-list-container .timeline-item { 
             background: #FFF; border: 1px solid #E5E8EB; border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; 
         }
         input:focus, select:focus { outline: 2px solid #3182F6 !important; border-color: #3182F6 !important; }
-    </style>
+
+/* ==========================================
+   🎭 엄마/아빠 비대칭 UI 트래픽 컨트롤러
+   ========================================== */
+/* 1. 기본 상태 (엄마 모드): 아빠 전용 숨김, 엄마 전용 보임 */
+.show-on-dad-block { display: none !important; }
+.show-on-mom-block { display: block !important; }
+
+/* 2. 아빠 모드 켜졌을 때: 반대로 작동! */
+body.mode-dad .show-on-dad-block { display: block !important; }
+body.mode-dad .show-on-mom-block { display: none !important; }
+
+/* ==========================================
+   👨‍🍼 아빠 모드 전용 UI 컨트롤 (순정 완벽 버전)
+   ========================================== */
+
+/* 1. 아빠 화면에서는 통계창을 '기본으로' 닫아둡니다. 
+   🚨 주의: 절대 !important를 붙이지 마세요! 붙이면 버튼이 먹통됩니다. */
+body.mode-dad #tracker-stats-container {
+    display: none; 
+}    
+
+/* 데일리 케어 버튼 다크모드 클릭(활성화) 상태 */
+body.dark-mode .routine-btn.active,
+body.dark-mode .care-btn.active {
+    background: rgba(49, 130, 246, 0.2) !important; /* 은은한 파란색 배경 */
+    color: #3182F6 !important; /* 쨍한 파란색 글씨 */
+    border: 1px solid #3182F6 !important;
+}
+</style>
 </head>
 
 <body>
@@ -163,52 +193,73 @@
 
 <div class="wrapper">
     <div id="tab-home" class="tab-content active">
-     <!-- 🌟 대기업 감성: 헤더 + 사진 + 팁 (좌우 너비 하단 배너들과 100% 일치) -->
-        <div style="margin-bottom: 24px;">
-            
-            <!-- 1. 시간대별 감성 헤더 (좌우 여백 제거) -->
-            <div style="padding: 24px 0 16px 0;">
-                <h1 id="ai-time-greeting" style="font-size: 24px; font-weight: 900; color: #191F28; margin: 0 0 6px 0; line-height: 1.3; letter-spacing: -0.5px;">반가워요!</h1>
-                <div style="font-size: 15px; font-weight: 600; color: #8B95A1; letter-spacing: -0.3px;" id="ai-time-sub">오늘도 육아메이트와 함께 육아팅!</div>
-            </div>
-
-            <!-- 2. 메인 아기 사진 (연필 버튼 제거 및 깔끔하게 깎음!) -->
-            <div style="padding: 0;">
-                <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()" style="position: relative; border-radius: 28px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.04); height: 240px; display: flex; flex-direction: column; cursor:pointer;">
-                    <img src="img.jpg" class="home-hero-img" alt="아기 사진" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
-                    
-                    <!-- 검은 그림자는 글씨가 있는 맨 밑에만 살짝! -->
-                    <div class="home-hero-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 40%); padding: 20px; display: flex; flex-direction: column; justify-content: flex-end;">
-                        
-                        <!-- 🚨 기존에 있던 ✎ 연필 버튼 코드는 싹 지웠습니다! -->
-
-                        <div>
-                            <div style="display:flex; align-items:center; margin-bottom:4px;">
-                                <h2 class="home-hero-title" id="res-baby-dday" style="font-size:28px; font-weight:900; color:white; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.3); letter-spacing: -1px;">등록 전</h2>
-                            </div>
-                            <span id="res-baby-name" style="font-size:14px; color:rgba(255,255,255,0.9); font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.3);">아기를 등록해주세요</span>
-                        </div>
-                    </div>
-
-                    <!-- 이스터에그 -->
-                    <div id="easter-egg-layer" style="display: none; position: absolute; inset: 0; background: linear-gradient(to top, rgba(20, 20, 30, 0.95) 0%, transparent 80%); flex-direction: column; justify-content: flex-end; padding: 24px; z-index: 10;">
-                        <h2 style="font-size:24px; font-weight:900; color:#FACC15; margin: 0 0 6px 0;">새벽의 육아 🌙</h2>
-                        <span style="font-size:14px; color:#F3F4F6; font-weight:700;">우주에서 제일 멋진 우리 여보에게</span>
-                        <div style="margin-top:12px; font-size:14.5px; font-weight:800; color:white; line-height: 1.5; word-break: keep-all;">오늘 밤도 안 자고 아기 보느라 정말 고생 많아.<br>여보 덕분에 우리 아기가 이렇게 건강하게 크고 있어. 항상 고맙고 사랑해 🤍</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. 이유식/수유 맞춤 팁 (좌우 여백 제거 -> 배너랑 똑같은 너비) -->
-            <div style="padding: 0; margin-top: 12px;">
-                <div id="daily-message" class="box-main" style="border-radius: 20px; padding: 16px 20px; display: none; align-items: center; gap: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border);">
-                </div>
-            </div>
-            
+    <div style="margin-bottom: 24px;">
+        
+        <!-- 1. 시간대별 감성 헤더 -->
+        <div class="show-on-mom-block" style="padding: 24px 0 16px 0;">
+            <h1 id="ai-time-greeting" style="font-size: 24px; font-weight: 900; color: #191F28; margin: 0 0 6px 0;">반가워요!</h1>
+            <div style="font-size: 15px; font-weight: 600; color: #8B95A1;">오늘도 육아메이트와 함께 육아팅!</div>
         </div>
+
+        <!-- 2. 메인 아기 사진 (엄마/아빠 누구나 1순위로 이게 보여야 예쁩니다!) -->
+        <div style="padding: 0;">
+            <div class="home-hero-card" id="baby-dashboard" onclick="document.getElementById('baby-photo-input').click()" style="position: relative; border-radius: 28px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.04); height: 240px; display: flex; flex-direction: column; cursor:pointer;">
+                <img src="img.jpg" class="home-hero-img" alt="아기 사진" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+                <div class="home-hero-overlay" style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 40%); padding: 20px; display: flex; flex-direction: column; justify-content: flex-end;">
+                    <div>
+                        <div style="display:flex; align-items:center; margin-bottom:4px;">
+                            <h2 class="home-hero-title" id="res-baby-dday" style="font-size:28px; font-weight:900; color:white; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">등록 전</h2>
+                        </div>
+                        <span id="res-baby-name" style="font-size:14px; color:rgba(255,255,255,0.9); font-weight: 700;">아기를 등록해주세요</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🦸‍♂️ 3. [위치 이동 완료!] 아기 사진 바로 밑에 들어오는 아빠 전용 대시보드 -->
+        <div class="show-on-dad-block" style="margin-top: 16px;">
+            <div class="dad-hero-card" style="background: linear-gradient(135deg, #191F28 0%, #333D4B 100%); border-radius: 24px; padding: 24px; color: #FFF; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); position: relative; overflow: hidden;">
+                <div style="font-size: 13px; font-weight: 800; color: #3182F6; margin-bottom: 4px;">TODAY'S BRIEFING</div>
+                <h2 style="font-size: 22px; font-weight: 900; margin: 0 0 20px 0; line-height: 1.4; color: #FFF;">
+                    수고했어요!<br>오늘 <span style="color:#3182F6;" id="dad-brief-name">우리아기</span>는 이렇게 보냈어요.
+                </h2>
+                
+                <!-- 오늘 하루 요약 미니 스탯 -->
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                    <div style="flex: 1; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 20px; margin-bottom: 4px;">🍼</div>
+                        <div style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7);">총 수유</div>
+                        <div style="font-size: 15px; font-weight: 900; margin-top: 2px; color: #FFF;" id="dad-brief-feed">0 ml</div>
+                    </div>
+                    <div style="flex: 1; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 20px; margin-bottom: 4px;">💩</div>
+                        <div style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7);">기저귀</div>
+                        <div style="font-size: 15px; font-weight: 900; margin-top: 2px; color: #FFF;" id="dad-brief-diaper">0 회</div>
+                    </div>
+                    <div style="flex: 1; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 20px; margin-bottom: 4px;">💤</div>
+                        <div style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7);">수면</div>
+                        <div style="font-size: 15px; font-weight: 900; margin-top: 2px; color: #FFF;" id="dad-brief-sleep">0 번</div>
+                    </div>
+                </div>
+
+<!-- 기존 경험치 바 지우고 이걸로 교체! (id="dad-brief-msg" 연동 완료) -->
+<div style="background: rgba(49, 130, 246, 0.1); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-top: 16px;">
+    <span style="font-size: 18px;">💡</span>
+    <span id="dad-brief-msg" style="font-size: 13px; font-weight: 800; color: #3182F6;">데이터를 불러오는 중...</span>
+</div>
+            </div>
+        </div>
+
+        <!-- 4. 이유식 팁 배너 -->
+        <div style="padding: 0; margin-top: 12px;">
+            <div id="daily-message" class="box-main" style="border-radius: 20px; padding: 16px 20px; display: none; align-items: center; gap: 14px; border: 1px solid var(--border);"></div>
+        </div>
+    </div>
+    
+    <!-- (이하 기존 트래커 및 하단 콘텐츠 유지) -->
          
       <!-- ▼▼▼ 주간 육아 리포트 버튼 ▼▼▼ -->
-        <!-- 버튼에 id="weekly-report-btn" 추가, display:none 으로 평소엔 숨겨둡니다 -->
         <button id="weekly-report-btn" onclick="window.openWeeklyReport()" style="display: none; width: 100%; background: linear-gradient(135deg, #FFF0F1, #FFE5E5); color: #F04452; border: 1px solid #FFD1D1; padding: 16px; border-radius: 20px; font-size: 15px; font-weight: 800; cursor: pointer; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(240,68,82,0.1); margin-bottom: 24px; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">💌</span>
@@ -219,40 +270,59 @@
             </div>
             <span style="font-size: 20px;">🎉</span>
         </button>
-        <!-- ▲▲▲ 주간 육아 리포트 버튼 끝 ▲▲▲ -->
 
         <div id="health-smart-banner" style="display:none; margin: 20px 20px 0 20px;"></div>
         <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
         
         <div id="smart-banner-container"></div> 
 
-        <!-- 👇 여기에 아빠 전용 대시보드가 들어갑니다 👇 -->
-            <div id="dad-quest-container" style="display:none; margin-bottom: 24px;"></div>
-        
-        <div id="tracker-section" style="margin-bottom: 24px;">
-            <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <span>⏱️ 실시간 육아 트래커</span>
-                    <span onclick="window.openTrackerSettings()" style="font-size:14px; cursor:pointer;" title="알림 텀 설정">⚙️</span>
-                </div>
-                <span onclick="window.toggleTrackerHistory()" class="box-tint-blue" style="font-size: 12px; color: var(--primary); font-weight: 800; border:none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">통계·기록 보기 〉</span>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
-                <button onclick="window.openTrackerSheet('feed')" class="box-main" style="border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
-                    <span style="font-size: 32px;">🍼</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수유</span>
-                </button>
-                <button onclick="window.openTrackerSheet('sleep')" class="box-main" style="border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
-                    <span style="font-size: 32px;">💤</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수면</span>
-                </button>
-                <button onclick="openDiaperSheet()" class="box-main" style="border-radius: 18px; padding: 18px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
-                    <span style="font-size: 32px;">💩</span><span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">기저귀</span>
-                </button>
-            </div>                     
+<!-- 👨‍👩‍👧 5. 공통: 실시간 육아 트래커 (대표님 순정 코드 베이스!) -->
+<div id="tracker-section" style="margin-bottom: 24px;">
+    <!-- 트래커 헤더 -->
+    <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+            <span>⏱️ 실시간 육아 트래커</span>
+            <span onclick="window.openTrackerSettings()" style="font-size:14px; cursor:pointer;" title="알림 텀 설정">⚙️</span>
+        </div>
+        <!-- 💡 아빠 모드에서 숨기기 위해 id="tracker-history-btn" 추가 -->
+        <span id="tracker-history-btn" onclick="window.toggleTrackerHistory()" class="box-tint-blue" style="font-size: 12px; color: var(--primary); font-weight: 800; border:none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">통계·기록 보기 〉</span>
+    </div>
+    
+    <!-- 입력 버튼 3개 (id="btn-sub-..." 추가 완료!) -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+        <button onclick="window.openTrackerSheet('feed')" class="box-main" style="border-radius: 18px; padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
+            <span style="font-size: 28px; line-height: 1;">🍼</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수유</span>
+            <span id="btn-sub-feed" style="font-size: 11px; font-weight: 700; color: #3182F6;">-</span>
+        </button>
+        <button onclick="window.openTrackerSheet('sleep')" class="box-main" style="border-radius: 18px; padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
+            <span style="font-size: 28px; line-height: 1;">💤</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수면</span>
+            <span id="btn-sub-sleep" style="font-size: 11px; font-weight: 700; color: #A855F7;">-</span>
+        </button>
+        <button onclick="openDiaperSheet()" class="box-main" style="border-radius: 18px; padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
+            <span style="font-size: 28px; line-height: 1;">💩</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">기저귀</span>
+            <span id="btn-sub-diaper" style="font-size: 11px; font-weight: 700; color: #F04452;">-</span>
+        </button>
+    </div>
 
-            <!-- 🧾 여기에 가로형 영수증 롱~버튼 추가! 🧾 -->
+    <!-- 🌙 꿈나라 루틴 원터치 버튼 (트래커 3구 버튼 바로 아래에 추가) -->
+<div id="dream-routine-btn" onclick="executeDreamRoutine()" style="margin-top: 4px; margin-bottom: 16px; background: linear-gradient(135deg, #2B32B2 0%, #1488CC 100%); border-radius: 16px; padding: 22px; color: white; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 8px 24px rgba(20, 136, 204, 0.25); transition: transform 0.2s ease;">
+    <div>
+        <div style="font-size: 13px; font-weight: 800; color: #90CAF9; margin-bottom: 6px;">육아 퇴근 프리패스 🎫</div>
+        <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px;"> 꿈나라 루틴 시작하기</div>
+        <div style="font-size: 13px; color: rgba(255,255,255,0.8); font-weight: 500;">기저귀+ 막수 + 수면을 한 번에 기록</div>
+    </div>
+    <div style="font-size: 34px; background: rgba(255,255,255,0.15); width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); box-shadow: inset 0 2px 10px rgba(255,255,255,0.1);">
+        🌙
+    </div>
+</div>
+    
+            <!-- 가로형 영수증 롱버튼 -->
             <button id="receipt-banner-btn" onclick="window.openReceiptModal()" style="display: none; width: 100%; background: linear-gradient(135deg, #FFF9F0, #FFF3E0); color: #FF8F00; border: 1px solid #FFE0B2; padding: 14px; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,152,0,0.1); margin-bottom: 16px; transition: 0.2s;">
-    ✨ 오늘 하루 요약, 영수증으로 뽑기 🧾
-</button>
+            ✨ 오늘 하루 요약, 영수증으로 뽑기 🧾
+            </button>
 
             <div id="tracker-stats-container" class="box-main" style="border-radius: 20px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
                 <div style="padding:10px 0; text-align:center; font-size:13px; color:var(--text-s); font-weight:700;">아직 기록된 트래커 데이터가 없습니다.</div>
@@ -260,6 +330,22 @@
             <div id="routine-checklist-container" style="margin-top: 16px;"></div>
         </div>
 
+      <!-- 🦸‍♂️ 6. 아빠 전용: 바통터치 미션 보드 (아빠 모드에서만 보임!) -->
+<div class="show-on-dad-block" style="margin-bottom: 24px; width: 100%;">
+    <div style="font-size: 16px; font-weight: 900; color: var(--text-m); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; padding: 0 4px;">
+        <span>💌 아내의 바통터치 미션</span>
+        <span style="font-size: 12px; color: var(--primary); background: #EBF4FF; padding: 4px 8px; border-radius: 8px; font-weight: 800;">수락 대기중</span>
+    </div>
+    <!-- JS에서 여기에 바통 리스트를 렌더링 해줄 겁니다 -->
+    <div id="home-dad-baton-list" style="display:flex; flex-direction:column; gap:10px;">
+        <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
+            <div style="font-size:24px; margin-bottom:10px;">🕊️</div>
+            <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중! 🤍</div>
+        </div>
+    </div>
+</div>
+
+        <!-- 공통: SOS 버튼 및 다이어리 -->
         <div onclick="openSOSModal()" class="box-tint-red" style="border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(240, 68, 82, 0.05);">
             <div style="display: flex; align-items: center; gap: 14px;">
                 <div style="font-size: 28px; animation: pulseSOS 1.5s infinite;">🚨</div>
@@ -274,8 +360,8 @@
         <div id="home-diary-card" class="diary-card" style="display: block; cursor: default; transition: 0.2s;">
             </div>
 
-        <!-- 🚀 홈 화면 ➔ 놀이 탭 트래픽 깔때기(Funnel) 배너 -->
-        <div id="play-banner-card" onclick="location.href='./toy/index.html'" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid #FDE68A; border-radius: 20px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.05); cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s; margin-bottom: 24px;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+        <!-- 공통: 놀이 탭 배너 -->
+        <div id="play-banner-card" onclick="location.href='./toy/index.html'" style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid #FDE68A; border-radius: 20px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.05); cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s; margin-bottom: 24px;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
             <div>
                 <div style="font-size: 0.8rem; color: #D97706; font-weight: 800; margin-bottom: 6px;">
                     D+<span id="play-dday-badge">0</span> 맞춤 놀이 처방
@@ -293,6 +379,7 @@
             </div>
         </div>
 
+        <!-- 공통: 건강 & 경제 관리 -->
         <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-top:32px; margin-bottom:12px; padding: 0 4px;">
             <span>📊 건강 & 경제 관리</span>
         </div>
@@ -320,7 +407,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- tab-home 끝 -->
 
     <div id="tab-toolbox" class="tab-content">
         <!-- 🌟 감옥 탈출! (box-main 클래스를 지워서 배경을 투명하게 날렸습니다) -->
@@ -1344,13 +1431,14 @@
                         </details>
 
                         <!-- 🚨 라이브러리 내부를 모두 아우르는 강력한 종합 면책 조항 -->
-                        <div style="margin: 8px 0 24px 0; padding: 16px; background: #F2F4F6; border-radius: 12px; border: 1px solid #E5E8EB;">
-                            <div style="font-size: 11px; font-weight: 900; color: #8B95A1; margin-bottom: 4px;">⚠️ 육아메이트 의료 및 안전 면책 안내</div>
-                            <div style="font-size: 12.5px; font-weight: 600; color: #8B95A1; line-height: 1.5; word-break: keep-all;">
-                                본 앱에서 제공하는 모든 <strong>의학적 지침(응급처치, 해열제 등) 및 약품 등 권장 기한</strong> 정보는 소아과학회와 식약처의 일반적인 가이드라인을 요약한 것입니다. <br><br>
-                                보관 환경이나 아기의 체질에 따라 결과가 다를 수 있으므로, 본 앱은 <strong>단순 참고용 보조 도구</strong>로만 사용해 주세요. 아기에게 이상 증세가 있거나 변질이 의심되는 경우 즉시 사용을 중단하고 <strong>반드시 전문의(소아과)의 진단</strong>을 받으시길 바랍니다. 육아메이트는 사용자의 판단으로 인한 결과에 법적 책임을 지지 않습니다.
-                            </div>
-                        </div>
+                        <!-- 🚨 면책조항 수정 완료 (다크모드 완벽 대응) -->
+<div style="margin: 8px 0 24px 0; padding: 16px; background: var(--bg-sub); border-radius: 12px; border: 1px solid var(--border);">
+    <div style="font-size: 11px; font-weight: 900; color: #8B95A1; margin-bottom: 4px;">⚠️ 육아메이트 의료 및 안전 면책 안내</div>
+    <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s); line-height: 1.5; word-break: keep-all;">
+        본 앱에서 제공하는 모든 <strong>의학적 지침(응급처치, 해열제 등) 및 약품 등 권장 기한</strong> 정보는 소아과학회와 식약처의 일반적인 가이드라인을 요약한 것입니다. <br><br>
+        보관 환경이나 아기의 체질에 따라 결과가 다를 수 있으므로, 본 앱은 <strong>단순 참고용 보조 도구</strong>로만 사용해 주세요. 아기에게 이상 증세가 있거나 변질이 의심되는 경우 즉시 사용을 중단하고 <strong>반드시 전문의(소아과)의 진단</strong>을 받으시길 바랍니다. 육아메이트는 사용자의 판단으로 인한 결과에 법적 책임을 지지 않습니다.
+    </div>
+</div>
 
                     </div>
                 </details>
@@ -1905,54 +1993,52 @@
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 
     <!-- 🧾 영수증 모달창 -->
-    <div id="receipt-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px);">
-        <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px;">
+<div id="receipt-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px);">
+    
+    <!-- 전체 내용을 감싸는 플렉스 박스 -->
+    <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- 📸 1. 영수증 본체 (여기가 이미지로 캡처됩니다!) -->
+        <div id="receipt-content" style="background: var(--bg-card); border-radius: 8px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; font-family: 'Courier New', Courier, monospace; color: var(--text-m); border: 1px solid var(--border);">
             
-            <!-- 📸 영수증 본체 (여기가 이미지로 캡처됩니다!) -->
-            <div id="receipt-content" style="background: #FFFDF8; border-radius: 4px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; font-family: 'Courier New', Courier, monospace; color: #333;">
-                
-                <div style="text-align: center; border-bottom: 2px dashed #D3C5B8; padding-bottom: 16px; margin-bottom: 16px;">
-                    <div style="font-size: 28px; margin-bottom: 8px;">🧾</div>
-                    <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.5px; font-family: sans-serif;">우리아기의 하루 영수증</div>
-                    <div style="font-size: 12px; color: #888; margin-top: 4px;" id="receipt-date">2026. 00. 00</div>
-                </div>
-
-                <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 12px; font-family: sans-serif;">[오늘의 결제 내역]</div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold;">
-                    <span>🍼 분유 라떼</span>
-                    <span id="receipt-milk">0 ml</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold;">
-                    <span>💩 황금 변</span>
-                    <span id="receipt-poop">0 회</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: bold;">
-                    <span>💤 낮잠 충전</span>
-                    <span id="receipt-sleep">0 시간</span>
-                </div>
-
-                <div style="border-top: 2px dashed #D3C5B8; padding-top: 16px; margin-top: 16px;">
-                    <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 8px; font-family: sans-serif;">📝 아기 시점 일기</div>
-                    <!-- ✨ 일기 영역: 귀여운 손글씨 폰트 적용 -->
-                    <div id="receipt-diary" style="font-family: 'Nanum Pen Script', cursive; font-size: 22px; line-height: 1.4; color: #4A4A4A; background: rgba(255,152,0,0.08); padding: 14px; border-radius: 8px; letter-spacing: 0.5px;">
-                        (일기 내용이 여기에 생성됩니다.)
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #AAA; font-weight: bold; font-family: sans-serif;">
-                    육아메이트와 함께한 소중한 하루 🤍
-                </div>
+            <div style="text-align: center; border-bottom: 2px dashed var(--border); padding-bottom: 16px; margin-bottom: 16px;">
+                <div style="font-size: 28px; margin-bottom: 8px;">🧾</div>
+                <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.5px; font-family: sans-serif; color: var(--text-m);">우리아기의 하루 영수증</div>
+                <div style="font-size: 12px; color: var(--text-s); margin-top: 4px;" id="receipt-date">2026. 00. 00</div>
             </div>
 
-            <!-- 닫기 & 캡처 버튼 (이 버튼들은 캡처에 안 나옵니다) -->
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button onclick="window.closeReceiptModal()" style="flex: 1; padding: 14px; border-radius: 12px; border: none; background: #FFF; color: #333; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">닫기</button>
-                <button onclick="window.downloadReceipt()" style="flex: 2; padding: 14px; border-radius: 12px; border: none; background: #FF9800; color: #FFF; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(255,152,0,0.2);">
-                    📸 이미지로 저장하기
-                </button>
-                    </div>
+            <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 12px; font-family: sans-serif; color: var(--text-m);">[오늘의 결제 내역]</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; color: var(--text-m);">
+                <span>🍼 분유 라떼</span>
+                <span id="receipt-milk">0 ml</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; color: var(--text-m);">
+                <span>💩 황금 변</span>
+                <span id="receipt-poop">0 회</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: bold; color: var(--text-m);">
+                <span>💤 낮잠 충전</span>
+                <span id="receipt-sleep">0 시간</span>
+            </div>
+
+            <div style="border-top: 2px dashed var(--border); padding-top: 16px; margin-top: 16px;">
+                <div style="font-size: 13.5px; font-weight: bold; margin-bottom: 8px; font-family: sans-serif; color: var(--text-m);">📝 아기 시점 일기</div>
+                <!-- ✨ 일기 영역 -->
+                <div id="receipt-diary" style="font-family: 'Nanum Pen Script', cursive; font-size: 22px; line-height: 1.4; color: var(--text-m); background: var(--bg-sub); padding: 14px; border-radius: 8px; letter-spacing: 0.5px;">
+                    (일기 내용이 여기에 생성됩니다.)
+                </div>
+            </div>
         </div>
+        
+        <!-- 🔘 2. 하단 버튼 영역 (저장하기 & 닫기) -->
+        <div style="display: flex; gap: 12px; width: 100%;">
+            <!-- 참고: 닫기 버튼과 저장 버튼의 onclick 함수명은 대표님의 기존 JS 파일과 동일해야 합니다. -->
+            <button onclick="document.getElementById('receipt-modal').style.display='none'" style="flex: 1; padding: 14px; background: var(--bg-sub); color: var(--text-m); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer;">닫기</button>
+            <button onclick="downloadReceipt()" style="flex: 2; padding: 14px; background: #3182F6; color: #FFF; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(49,130,246,0.2);">📸 이미지 저장</button>
+        </div>
+
     </div>
+</div>
 
 <div id="toast-container" style="position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none;"></div>
 

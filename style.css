@@ -578,3 +578,30 @@ button, .btn-main, .segment-btn, .pill-btn, .sym-btn, .ai-matrix-card {
 button:active, .btn-main:active, .segment-btn:active, .pill-btn:active, .sym-btn:active, .ai-matrix-card:active {
     transform: scale(0.96) !important;
 }
+
+/* ========================================== */
+/* 🎭 엄마/아빠 모드 UI 분리 마법진 */
+/* ========================================== */
+
+/* 기본 설정: 엄마 모드 (아빠 전용 UI 숨김) */
+.show-on-dad { display: none !important; }
+.show-on-mom { display: flex !important; } /* 상황에 따라 block으로 써도 됨 */
+.show-on-mom-block { display: block !important; }
+
+/* 아빠 모드가 켜졌을 때 (엄마 UI 숨기고 아빠 UI 켬) */
+body.mode-dad .show-on-dad { display: flex !important; }
+body.mode-dad .show-on-dad-block { display: block !important; }
+body.mode-dad .show-on-mom,
+body.mode-dad .show-on-mom-block { display: none !important; }
+
+/* 🦸‍♂️ 아빠 전용 대시보드 카드 스타일 (토스/게임 스타일) */
+.dad-hero-card {
+    background: linear-gradient(135deg, #191F28 0%, #333D4B 100%);
+    border-radius: 24px;
+    padding: 24px;
+    color: #FFF;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}

@@ -1180,7 +1180,7 @@ function calcHealthMaster() {
 
    // 원더윅스 로직
     // 💡 도약기는 보통 기준(절정) 주차보다 4주 전부터 시작되므로 범위를 -4로 대폭 넓힙니다.
-    let curWW = wwList.find(x => week >= (x.w - 4) && week <= (x.w + 1));
+    let curWW = wwList.find(x => week >= (x.w - 1) && week <= (x.w + 1));
     let nxtWW = wwList.find(x => x.w > week);
     
     let st = document.getElementById('ww-status');
@@ -2207,7 +2207,7 @@ function updateSmartBanner() {
 
             // 3. 원더윅스
             if (typeof wwList !== 'undefined') {
-                const curWW = wwList.find(x => weekAge >= (x.w - 4) && weekAge <= (x.w + 1));
+                const curWW = wwList.find(x => weekAge >= (x.w - 1) && weekAge <= (x.w + 1));
                 if (curWW && !isDismissed('wonderweek')) {
                     banners.push(`
                         <div onclick="switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() => switchTool('growth'), 50);" style="position: relative; flex-shrink: 0; width: __WIDTH__; scroll-snap-align: start; background: var(--bg-card); border: 1px solid #F04452; border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; box-sizing: border-box;">
@@ -2927,8 +2927,9 @@ window.saveTrackerSettings = function() {
     alert("✅ 우리 아기 맞춤형 텀이 저장되었습니다!");
 };
 
-// 📊 트래커 대시보드 (통계 화면 + 이모티콘 분리 + 중복 제거 완벽본)
-// 3. 📊 트래커 대시보드 및 리스트 (색상 입히기 전체 코드)
+// ==========================================
+// 👑 [엄마 모드 고도화] 초직관적 하이엔드 트래커 대시보드
+// ==========================================
 window.updateTrackerDashboard = function() {
     const container = document.getElementById('tracker-stats-container');
     if(!container) return;
@@ -2949,6 +2950,7 @@ window.updateTrackerDashboard = function() {
         return 'var(--text-m)';
     };
 
+    // [통계·기록 보기] 버튼을 눌렀을 때 (isHistoryView === true)
     if (window.isHistoryView) {
         if(records.length === 0) {
             container.innerHTML = `<div style="padding:20px 0; text-align:center; font-size:13px; color:var(--text-s);">기록된 데이터가 없습니다.</div><button class="btn-main" onclick="window.toggleTrackerHistory()" style="width:100%; margin-top:10px; padding:12px; font-size:13.5px; border-radius:12px;">닫기</button>`;
@@ -2981,7 +2983,6 @@ window.updateTrackerDashboard = function() {
                         else txt = `${r.subType} ${r.amount}ml`;
                     }
                     else if(r.type === 'diaper') {
-                        // 🚨 대변 상태에 따라 색상 입히기 적용!
                         if (r.status) {
                             const sColor = getStatusColor(r.status);
                             txt = `${r.subType} / <span style="color:${sColor}; font-weight:900;">${r.status}</span>`;
@@ -3027,12 +3028,13 @@ window.updateTrackerDashboard = function() {
             </div>`;
             container.innerHTML = historyHtml;
         }
+        container.style.display = 'block';
         return; 
     }
 
     // =================================================================
-    // 🚨 대시보드 기본 화면 (절대 생략 안 함!)
-    // =================================================================
+    // 🎨 [고도화 디자인 적용] 대시보드 기본 화면
+    // ==========================================
     const lastSleepRecord = records.find(r => r.type === 'sleep'); 
     const sleepStartTime = localStorage.getItem('tosil_sleep_start');
     const isSleeping = sleepStartTime || (lastSleepRecord && lastSleepRecord.amount === 0); 
@@ -3048,9 +3050,15 @@ window.updateTrackerDashboard = function() {
             const hours = Math.floor(awakeMins / 60);
             const mins = awakeMins % 60;
             
-            wakeTimeHtml = `<div style="background:#F8F9FA; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #E5E8EB; text-align:center;">
-                <div style="font-size:12.5px; font-weight:900; color:#3182F6;">⏰ 깨어난 지 ${hours}시간 ${mins}분째</div>
-                <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">우리 아기만의 졸음 신호를 관찰해 보세요 👀</div>
+            wakeTimeHtml = `<div style="background:var(--bg-card); padding:14px 18px; border-radius:16px; margin-bottom:14px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:20px;">⏰</span>
+                    <div>
+                        <div style="font-size:11px; font-weight:800; color:#8B95A1; margin-bottom:2px;">기상 후 경과 시간</div>
+                        <div style="font-size:15px; font-weight:900; color:#3182F6;">${hours}시간 ${mins}분째 깨어있어요</div>
+                    </div>
+                </div>
+                <div style="font-size:11.5px; font-weight:700; color:#8B95A1; background:var(--bg-sub); padding:6px 10px; border-radius:10px;">졸음 신호 👀</div>
             </div>`;
         }
     } else {
@@ -3058,176 +3066,169 @@ window.updateTrackerDashboard = function() {
         const sleepMins = Math.max(0, Math.floor((nowTime - currentSleepStart) / 60000));
         const hours = Math.floor(sleepMins / 60);
         const mins = sleepMins % 60;
-        wakeTimeHtml = `<div style="background:#F3F0FF; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #D8C6FE; text-align:center;">
-            <div style="font-size:12.5px; font-weight:900; color:#6C31F6;">💤 잠든 지 ${hours}시간 ${mins}분째</div>
-            <div style="font-size:11.5px; font-weight:700; color:#8B95A1; margin-top:4px;">쉿, 우리 아기가 꿀잠을 자고 있어요 🌙</div>
+        wakeTimeHtml = `<div style="background:linear-gradient(135deg, #F3F0FF, #EDE9FE); padding:14px 18px; border-radius:16px; margin-bottom:14px; border:1px solid #D8C6FE; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:20px;">🌙</span>
+                <div>
+                    <div style="font-size:11px; font-weight:800; color:#7C3AED; margin-bottom:2px;">꿀잠 타임</div>
+                    <div style="font-size:15px; font-weight:900; color:#6C31F6;">잠든 지 ${hours}시간 ${mins}분째 푹 자는 중</div>
+                </div>
+            </div>
+            <div style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿! 🤫</div>
         </div>`;
     }
 
-    const todayRecords = records.filter(r => new Date(r.timestamp).getDate() === now.getDate());
-    let timelineHtml = `<div style="margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:6px; padding:0 4px;">
-            <span>오늘의 하루 패턴</span>
-            <div style="display:flex; gap:8px;">
-                <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#D8C6FE; border-radius:2px;"></div>수면</span>
-                <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#3182F6; border-radius:2px;"></div>수유</span>
-                <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#F04452; border-radius:2px;"></div>기저귀</span>
-            </div>
+   const todayRecords = records.filter(r => new Date(r.timestamp).getDate() === now.getDate());
+let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-s); font-weight:800; margin-bottom:10px; padding:0 2px;">
+        <span>📊 오늘의 하루 타임라인 패턴</span>
+        <div style="display:flex; gap:10px;">
+            <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#D8C6FE; border-radius:2px;"></div>수면</span>
+            <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#3182F6; border-radius:2px;"></div>수유</span>
+            <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#F04452; border-radius:2px;"></div>기저귀</span>
         </div>
-        <div style="width:100%; height:16px; background:#F2F5F8; border-radius:8px; position:relative; overflow:hidden;">`;
+    </div>
+    <div style="width:100%; height:16px; background:var(--bg-sub); border-radius:8px; position:relative; overflow:hidden; margin-bottom:10px;">`;
 
-    todayRecords.forEach(r => {
-        const d = new Date(r.timestamp);
-        const startPercent = ((d.getHours() * 60) + d.getMinutes()) / 1440 * 100;
-        if (r.type === 'sleep') {
-            const duration = (r.amount === 0) ? Math.floor((nowTime - r.timestamp) / 60000) : r.amount; 
-            const widthPercent = Math.min((duration / 1440 * 100), 100 - startPercent); 
-            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background:rgba(168, 85, 247, 0.4); border-radius:4px;"></div>`;
-        } else if (r.type === 'feed') {
-            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:3px; height:100%; background:#3182F6; border-radius:2px;"></div>`;
-        } else if (r.type === 'diaper') {
-            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:3px; height:100%; background:#F04452; border-radius:2px;"></div>`;
-        }
-    });
-    timelineHtml += `</div><div style="display:flex; justify-content:space-between; font-size:10px; color:#B0B8C1; font-weight:800; margin-top:4px; padding:0 2px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div></div>`;
+const timeOverlapMap = {}; 
+todayRecords.forEach(r => {
+    const d = new Date(r.timestamp);
+    const startPercent = ((d.getHours() * 60) + d.getMinutes()) / 1440 * 100;
+    const timeKey = `${d.getHours()}:${d.getMinutes()}`;
+    if (!timeOverlapMap[timeKey]) timeOverlapMap[timeKey] = 0;
+    const overlapCount = timeOverlapMap[timeKey];
+    timeOverlapMap[timeKey]++; 
+    const offsetPx = overlapCount * 4;
+    const zIndex = 10 + overlapCount;
 
-    let todayFeedAmt = 0; let todayFeedMins = 0; let todaySleepMins = 0; let todayDiaperCount = 0;
-    todayRecords.forEach(r => {
-        if(r.type === 'feed') { if (r.subType === '모유') todayFeedMins += r.amount; else todayFeedAmt += r.amount; }
-        if(r.type === 'sleep') todaySleepMins += r.amount;
-        if(r.type === 'diaper') todayDiaperCount++;
-    });
+    if (r.type === 'sleep') {
+        const duration = (r.amount === 0) ? Math.floor((nowTime - r.timestamp) / 60000) : r.amount; 
+        const widthPercent = Math.min((duration / 1440 * 100), 100 - startPercent); 
+        timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background:rgba(168, 85, 247, 0.4); border-radius:4px; z-index:5;"></div>`;
+    } else if (r.type === 'feed') {
+        timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#3182F6; border-radius:2px; z-index:${zIndex};"></div>`;
+    } else if (r.type === 'diaper') {
+        timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#F04452; border-radius:2px; z-index:${zIndex};"></div>`;
+    }
+});
+
+timelineHtml += `</div><div style="display:flex; justify-content:space-between; font-size:10px; color:#8B95A1; font-weight:800; padding:0 2px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div></div>`;
+
+let todayFeedAmt = 0; let todayFeedMins = 0; let todaySleepMins = 0; let todayDiaperCount = 0;
+todayRecords.forEach(r => {
+    if(r.type === 'feed') { if (r.subType === '모유') todayFeedMins += r.amount; else todayFeedAmt += r.amount; }
+    if(r.type === 'sleep') todaySleepMins += r.amount;
+    if(r.type === 'diaper') todayDiaperCount++;
+});
 
     const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
     const diaperInterval = parseInt(localStorage.getItem('tosil_diaper_interval')) || 180;
-    const dismissedFeed = parseInt(localStorage.getItem('tosil_dismiss_alarm_feed')) || 0;
-    const dismissedDiaper = parseInt(localStorage.getItem('tosil_dismiss_alarm_diaper')) || 0;
-    const isFeedDismissed = (nowTime - dismissedFeed < 14400000);
-    const isDiaperDismissed = (nowTime - dismissedDiaper < 14400000);
-
     const latestFeed = records.find(r => r.type === 'feed');
     const latestDiaper = records.find(r => r.type === 'diaper');
     let diffFeedMins = latestFeed ? Math.floor((nowTime - latestFeed.timestamp) / 60000) : 0;
     let diffDiaperMins = latestDiaper ? Math.floor((nowTime - latestDiaper.timestamp) / 60000) : 0;
 
-    let briefBg = "rgba(49,130,246,0.05)";
+    let briefBg = "var(--bg-card)";
     let briefColor = "var(--text-m)";
-    let briefBorder = "transparent";
+    let briefBorder = "var(--border)";
     let briefing = "오늘도 평화로운 육아팅! 🤍";
-    let briefAction = ""; 
 
-    if (todaySleepMins >= 240) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 완전 꿀잠 요정 🌙`;
-    else if (todayFeedAmt >= 800 || todayFeedMins >= 90) briefing = `오늘 수유 빵빵하게 채우는 중! 튼튼 아기 💪`;
-    else if (todaySleepMins >= 120) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 쑥쑥 크는 중 💤`;
-    else if (todayDiaperCount >= 5) briefing = `오늘 기저귀 ${todayDiaperCount}번 클리어! 보송보송 엉덩이 ✨`;
-    else if (todayFeedAmt > 0 || todayFeedMins > 0) briefing = `오늘 수유 완벽 체크 중! 🍼`;
+    if (todaySleepMins >= 240) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
+    else if (todayFeedAmt >= 800 || todayFeedMins >= 90) briefing = `오늘 수유 빵빵하게 채우는 중! 💪`;
+    else if (todayDiaperCount >= 5) briefing = `기저귀 ${todayDiaperCount}번 클리어! 보송보송 ✨`;
+    else if (todayFeedAmt > 0 || todayFeedMins > 0) briefing = `오늘 수유 체크 완벽 진행 중! 🍼`;
 
-    if (isAwake && awakeMins >= 120) {
-        briefBg = "#F3E8FF"; briefColor = "#7C3AED"; briefBorder = "#E9D5FF";
-        briefing = `🥱 아기가 깬 지 ${Math.floor(awakeMins/60)}시간! 슬슬 졸려할 시간이에요`;
+    if (latestFeed && diffFeedMins >= feedInterval) {
+        briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
+        briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과! 확인해주세요`;
     }
-    if (latestFeed && diffFeedMins >= (feedInterval - 30) && diffFeedMins < feedInterval && !isFeedDismissed) {
-        briefBg = "#E8F3FF"; briefColor = "#1A73E8"; briefBorder = "#BFDBFE";
-        briefing = `💡 슬슬 맘마 타임! (다음 수유까지 ${feedInterval - diffFeedMins}분 전)`;
-    }
-    if (latestFeed && diffFeedMins >= feedInterval && !isFeedDismissed) {
-        briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FECACA";
+
+// 💡 [수정] 평상시 배지와 경고 시 배지를 다르게 설정합니다.
+    let briefBadge = `<div style="font-size:11px; font-weight:800; color:var(--primary); background:var(--bg-sub); padding:4px 8px; border-radius:8px;">실시간 연동</div>`;
+
+    if (latestFeed && diffFeedMins >= feedInterval) {
+        briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
         briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과!`;
-        briefAction = `<div style="display:flex; gap:6px;"><button onclick="window.openTrackerSheet('feed')" style="background:#F04452; color:#FFF; border:none; padding:4px 10px; border-radius:8px; font-size:11.5px; font-weight:900; cursor:pointer;">기록</button><button onclick="window.dismissTrackerAlarm('feed')" style="background:transparent; color:#F04452; border:none; padding:2px 4px; font-size:14px; font-weight:900; cursor:pointer;" title="알람 끄기">✕</button></div>`;
-    }
-    if (latestDiaper && diffDiaperMins >= diaperInterval && !isDiaperDismissed) {
-        briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FECACA";
-        briefing = `🚨 기저귀 안 간 지 ${Math.floor(diffDiaperMins/60)}시간! (발진주의)`;
-        briefAction = `<div style="display:flex; gap:6px;"><button onclick="window.openTrackerSheet('diaper')" style="background:#F04452; color:#FFF; border:none; padding:4px 10px; border-radius:8px; font-size:11.5px; font-weight:900; cursor:pointer;">기록</button><button onclick="window.dismissTrackerAlarm('diaper')" style="background:transparent; color:#F04452; border:none; padding:2px 4px; font-size:14px; font-weight:900; cursor:pointer;" title="알람 끄기">✕</button></div>`;
+        
+        // 🚨 3시간 넘었을 때만 나타나는 빨간색 '기록' 버튼과 'X' 버튼! (진짜 함수 연결 완료)
+        briefBadge = `
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#EF5350; padding:6px 14px; border-radius:8px; cursor:pointer; box-shadow: 0 2px 4px rgba(239,83,80,0.3);">기록</div>
+                <div onclick="this.parentElement.parentElement.style.display='none'" style="font-size:16px; color:#EF5350; cursor:pointer; font-weight:bold;">✕</div>
+            </div>
+        `;
     }
 
     let briefingBarHtml = `
-        <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:800; color:${briefColor}; margin-bottom:14px; background:${briefBg}; padding:${briefAction ? '8px 12px' : '10px 12px'}; border-radius:12px; border:1px solid ${briefBorder}; transition:all 0.3s ease;">
-            <span style="${briefAction ? '' : 'width:100%; text-align:center;'}">${briefing}</span>
-            ${briefAction}
+        <div style="background:${briefBg}; border:1px solid ${briefBorder}; border-radius:16px; padding:14px 18px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size:13.5px; font-weight:900; color:${briefColor};">${briefing}</div>
+            ${briefBadge}
         </div>
     `;
-
-    let htmlStr = wakeTimeHtml + timelineHtml + briefingBarHtml;
-
-    let fBadge = (todayFeedAmt > 0 || todayFeedMins > 0) ? `<span style="background:#E6F7F2; color:#00B37A; padding:2px 6px; border-radius:6px; font-size:10px;">기록중</span>` : '';
-    let sBadge = todaySleepMins > 0 ? `<span style="background:#E8F3FF; color:#3182F6; padding:2px 6px; border-radius:6px; font-size:10px;">기록중</span>` : '';
-    let dBadge = '';
-    if(todayDiaperCount > 0 && todayDiaperCount < 5) dBadge = `<span style="background:#F2F4F6; color:#8B95A1; padding:2px 6px; border-radius:6px; font-size:10px;">부족</span>`;
-    else if(todayDiaperCount >= 5 && todayDiaperCount <= 9) dBadge = `<span style="background:#E6F7F2; color:#00B37A; padding:2px 6px; border-radius:6px; font-size:10px;">적정</span>`;
-    else if(todayDiaperCount > 9) dBadge = `<span style="background:#FFF4ED; color:#FF823A; padding:2px 6px; border-radius:6px; font-size:10px;">많음</span>`;
 
     let feedDisp = todayFeedAmt > 0 ? `${todayFeedAmt}ml` : `${todayFeedMins}분`;
     if (todayFeedAmt > 0 && todayFeedMins > 0) feedDisp = `${todayFeedAmt}ml+모유`;
 
-    htmlStr += `<div style="display:flex; gap:8px; margin-bottom:12px;">
-        <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">수유 ${fBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#3182F6; white-space:nowrap;">${feedDisp}</div>
+    let statsHtml = `<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:14px;">
+        <div style="background:var(--bg-card); border:1px solid var(--border); padding:16px 8px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size:11.5px; color:#8B95A1; font-weight:800; margin-bottom:6px;">총 수유량</div>
+            <div style="font-size:16px; font-weight:900; color:#3182F6;">${feedDisp}</div>
         </div>
-        <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">수면 ${sBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#A855F7; white-space:nowrap;">${Math.floor(todaySleepMins/60)}h ${todaySleepMins%60}m</div>
+        <div style="background:var(--bg-card); border:1px solid var(--border); padding:16px 8px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size:11.5px; color:#8B95A1; font-weight:800; margin-bottom:6px;">총 수면시간</div>
+            <div style="font-size:16px; font-weight:900; color:#A855F7;">${Math.floor(todaySleepMins/60)}h ${todaySleepMins%60}m</div>
         </div>
-        <div style="flex:1; background:#F8F9FA; padding:10px 4px; border-radius:12px; text-align:center; min-width:0;">
-            <div style="font-size:11px; color:#8B95A1; font-weight:800; margin-bottom:4px; display:flex; justify-content:center; align-items:center; gap:4px; white-space:nowrap; word-break:keep-all;">기저귀 ${dBadge}</div>
-            <div style="font-size:14px; font-weight:900; color:#F04452; white-space:nowrap;">${todayDiaperCount}회</div>
+        <div style="background:var(--bg-card); border:1px solid var(--border); padding:16px 8px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size:11.5px; color:#8B95A1; font-weight:800; margin-bottom:6px;">기저귀 교체</div>
+            <div style="font-size:16px; font-weight:900; color:#F04452;">${todayDiaperCount}회</div>
         </div>
     </div>`;
 
-    const getDiffText = (ts) => {
-        if(!ts) return '';
-        const mins = Math.floor((nowTime - ts) / 60000);
-        return mins >= 60 ? `+ ${Math.floor(mins/60)}시간 ${mins%60}분` : `+ ${mins}분`;
+    let htmlStr = wakeTimeHtml + timelineHtml + briefingBarHtml + statsHtml;
+
+    // 🌟 [최고의 하이라이트] 버튼 위에 '몇 분 전' 띄워주는 함수 추가!
+    const getRelativeTime = (latestRecord) => {
+        if (!latestRecord) return '기록 없음';
+        const m = Math.floor((nowTime - latestRecord.timestamp) / 60000);
+        if (m < 1) return '방금 전';
+        if (m < 60) return `${m}분 전`;
+        return `${Math.floor(m/60)}시간 전`;
     };
 
-    const recent = records[0];
-    if(recent) {
-        let icon = '✨';
-        if (recent.type === 'feed') icon = '🍼';
-        else if (recent.type === 'sleep') icon = (recent.subType === '밤잠' ? '🌙' : '☀️');
-        else if (recent.type === 'diaper') {
-            if (recent.subType === '소변') icon = '💧';
-            else if (recent.subType === '대변') icon = '💩';
-            else icon = '💧💩';
-        }
+    const latestSleep = records.find(r => r.type === 'sleep');
+    const latestPee = records.find(r => r.type === 'diaper');
 
-        let txt = '';
-        if(recent.type === 'feed') {
-            if (recent.subType === '모유') txt = `모유 (${recent.status}) ${recent.amount}분`;
-            else txt = `${recent.subType} ${recent.amount}ml`;
-        }
-        else if(recent.type === 'sleep') txt = (recent.amount === 0) ? `<span style="color:#3182F6">${recent.subType || '낮잠'} (자는 중 💤)</span>` : `${recent.subType || '낮잠'} ${recent.amount}분`; 
-        else if(recent.type === 'diaper') {
-            if (recent.status) {
-                const sColor = getStatusColor(recent.status);
-                txt = `${recent.subType} / <span style="color:${sColor}; font-weight:900;">${recent.status}</span>`;
-            } else {
-                txt = `${recent.subType}`;
-            }
-        }
-        
-        const mins = Math.floor((nowTime - recent.timestamp) / 60000);
-        const diffText = mins >= 60 ? `+ ${Math.floor(mins/60)}시간 ${mins%60}분` : `+ ${mins}분`;
-        htmlStr += `<div style="text-align:center; padding:10px; background:#F8F9FA; border-radius:12px; border:1px dashed #E5E8EB; font-size:12.5px; font-weight:800; color:var(--text-s);">최근 기록: ${icon} ${txt} (${diffText})</div>`;
-    }
+    // 💡 메인 수유/수면/기저귀 버튼 3개의 서브 텍스트를 실시간으로 갈아끼우기 위해 DOM을 직접 살짝 터치합니다!
+    // (HTML 구조를 깨지 않고 유저 경험만 극대화하는 센스!)
+    setTimeout(() => {
+        const feedBtnSub = document.getElementById('btn-sub-feed');
+        const sleepBtnSub = document.getElementById('btn-sub-sleep');
+        const diaperBtnSub = document.getElementById('btn-sub-diaper');
 
-    if (sleepStartTime) {
-        const sleepType = localStorage.getItem('tosil_sleep_type') || '낮잠';
-        const sleepEmoji = sleepType === '낮잠' ? '☀️' : '🌙';
-        const sleepColor = sleepType === '낮잠' ? '#F59E0B' : '#A855F7';
-        const sleepBg = sleepType === '낮잠' ? '#FEF3C7' : '#F3E8FF';
-        
-        const diffMins = Math.floor((nowTime - parseInt(sleepStartTime)) / 60000);
-        htmlStr += `<div style="margin-top:8px; display:flex; align-items:center; justify-content:space-between; background:${sleepBg}; padding:10px 14px; border-radius:12px;"><div style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">${sleepEmoji}</span><div><div style="font-size:11px; color:${sleepColor}; font-weight:800;">${sleepType} 자는 중</div><div style="font-size:13px; font-weight:900; color:#191F28;">현재 ${diffMins}분 째</div></div></div><button onclick="window.openTrackerSheet('sleep')" style="background:${sleepColor}; color:#FFF; border:none; padding:6px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer;">종료하기</button></div>`;
-    }
+        if(feedBtnSub) feedBtnSub.innerText = getRelativeTime(latestFeed);
+        if(sleepBtnSub) sleepBtnSub.innerText = isSleeping ? '자는 중 💤' : getRelativeTime(latestSleep);
+        if(diaperBtnSub) diaperBtnSub.innerText = getRelativeTime(latestPee);
+    }, 50);
 
     container.innerHTML = htmlStr;
+    container.style.display = ''; 
 
-    // 💡 [핵심] 바로 여기에 들어가야 합니다! (함수 닫는 괄호 안쪽)
+// 👇👇👇 [여기 추가!] 저녁 6시(18시) ~ 새벽 5시까지만 꿈나라 버튼 띄우기 👇👇👇
+    const dreamBtn = document.getElementById('dream-routine-btn');
+    if (dreamBtn) {
+        const currentHour = new Date().getHours();
+        // 18시~23시 이거나, 0시~5시 일 때만 보이게!
+        if (currentHour >= 18 || currentHour <= 5) {
+            dreamBtn.style.display = 'flex';
+        } else {
+            dreamBtn.style.display = 'none';
+        }
+    }
+    // 👆👆👆 ======================================================= 👆👆👆
+
     if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
-
-}; // 👈 이 괄호가 updateTrackerDashboard 함수를 닫는 진짜 괄호입니다!
+    if(typeof window.updateDadBriefing === 'function') window.updateDadBriefing();
+};
 
 // ==========================================
 // 💌 부부 소통: 육아문답 작성 상태 감지 엔진 (감성 100% 복구 버전)
@@ -4292,66 +4293,27 @@ window.renderBabyInfo = function() {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const monthAge = Math.floor(diffDays / 30.436875);
 
-    // 3. 이름 & D-Day 뿌리기 (뱃지 크기 밸런스 조정)
+  // 3. 이름 & D-Day 뿌리기 (뱃지 크기 밸런스 조정)
     if(nameEl) nameEl.innerText = `${savedName}의 공간`; 
     if(missionNameEl) missionNameEl.innerText = savedName;
     if(document.getElementById('play-dday-badge')) document.getElementById('play-dday-badge').innerText = diffDays > 0 ? diffDays : 0;
 
     let ddayText = diffDays > 0 ? `D+${diffDays}일` : diffDays < 0 ? `D${diffDays}일` : `D-Day`;
-    if(ddayEl) ddayEl.innerHTML = `${ddayText} <span style="font-size:14px; background:rgba(0,0,0,0.5); padding:6px 12px; border-radius:12px; vertical-align:middle; margin-left:8px; font-weight:800; text-shadow:none; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2);">🚀 도약기</span>`; 
+    
+    // ✨ [수정됨] 뱃지 상태 동적 계산 (도약기 vs 평온기)
+    let badgeText = "🚀 도약기"; // 기본값
+    if (typeof wwList !== 'undefined') {
+        let currentWeek = Math.floor(diffDays / 7); // 현재 주차 계산
+        let isWonderWeek = wwList.some(x => currentWeek >= (x.w - 1) && currentWeek <= (x.w + 1));
+        badgeText = isWonderWeek ? "🚀 도약기" : "☀️ 평온기";
+    }
+
+    if(ddayEl) ddayEl.innerHTML = `${ddayText} <span style="font-size:14px; background:rgba(0,0,0,0.5); padding:6px 12px; border-radius:12px; vertical-align:middle; margin-left:8px; font-weight:800; text-shadow:none; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2); color:#FFF;">${badgeText}</span>`; 
 
     // 4. 시간대별 감성 인사말 띄우기
     if(typeof applyTimeBasedGreeting === 'function') applyTimeBasedGreeting(savedName);
 
-   // 5. 🔥 이유식 뱃지 (단순한 버튼이 아닌, 정보형 카드 UI로 변경)
-      if (msgEl) {
-        if (savedStage) {
-            let stageTitle = ""; let stageSub = ""; let stageIcon = "";
-            
-            // 👇 3단계였던 걸 7단계로 엄청나게 디테일하게 쪼갰습니다!
-            if (savedStage.includes('모유/분유')) { 
-                stageTitle = "쑥쑥 크는 수유기!"; stageSub = "오늘도 수유량 꼼꼼히 기록해볼까요?"; stageIcon = "🍼"; 
-            }
-            else if (savedStage.includes('초기')) { 
-                stageTitle = "초기 이유식 시작!"; stageSub = "미음부터 천천히! 알레르기 반응을 꼭 체크해주세요."; stageIcon = "🥄"; 
-            }
-            else if (savedStage.includes('중기')) { 
-                stageTitle = "오물오물 중기 이유식!"; stageSub = "작은 알갱이에 적응하는 시기예요. 큐브를 활용해 보세요!"; stageIcon = "🥄"; 
-            }
-            else if (savedStage.includes('후기')) { 
-                stageTitle = "냠냠 후기 이유식!"; stageSub = "하루 세 끼 연습! 철분 섭취(소고기)에 신경 써주세요."; stageIcon = "🥄"; 
-            }
-            else if (savedStage.includes('완료기')) { 
-                stageTitle = "이유식 완료기 진입!"; stageSub = "진밥과 반찬의 콜라보! 자기 주도 식사를 응원해 주세요."; stageIcon = "🍚"; 
-            }
-            else if (savedStage.includes('유아식')) { 
-                stageTitle = "어엿한 유아식!"; stageSub = "어른 밥과 비슷해졌어요. 다양한 식재료를 경험하게 해주세요!"; stageIcon = "🍚"; 
-            }
-            else { 
-                // 위 항목에 안 걸리는 예외의 경우 (기본값)
-                stageTitle = "우리아기 맘마 타임!"; stageSub = "골고루 먹고 튼튼하게 자라렴! 🤍"; stageIcon = "🍎"; 
-            }
-
-            msgEl.innerHTML = `
-                <div style="font-size:28px; line-height:1; flex-shrink:0;">${stageIcon}</div> 
-                <div style="flex:1; min-width:0;">
-                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:2px;">${stageTitle}</div>
-                    <div style="font-size:12.5px; font-weight:600; color:var(--text-s); word-break:keep-all;">${stageSub}</div>
-                </div>`;
-        } else {
-            // (이후 기존 코드와 동일) ...
-            const tipObj = typeof babyTips !== 'undefined' ? babyTips.find(item => monthAge >= item.min && monthAge <= item.max) : null;
-            msgEl.innerHTML = `
-                <div style="font-size:28px; line-height:1; flex-shrink:0;">💡</div> 
-                <div style="flex:1; min-width:0;">
-                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:2px;">오늘의 육아 팁</div>
-                    <div style="font-size:12.5px; font-weight:600; color:var(--text-s); word-break:keep-all;">${tipObj ? tipObj.tip : `오늘도 ${savedName}와(과) 행복한 하루 되세요! 🤍`}</div>
-                </div>`;
-        }
-        msgEl.style.display = 'flex'; 
-    }
-
-    // 6. 하단 위젯 & 센서 가동
+      // 6. 하단 위젯 & 센서 가동
         if(typeof updateMainAISensors === 'function') updateMainAISensors(monthAge); 
 
     // 7. 예방접종 배너 띄우기
@@ -5155,21 +5117,26 @@ window.renderSettingsTab = function() {
     `;
 };
 
-// 🌟 역할 변경 기능 함수 (위 함수 바로 밑에 찰싹 붙여주세요!)
+// ==========================================
+// 🌟 역할 변경 기능 함수 (설정 탭 스위치)
+// ==========================================
 window.changeUserRole = function(role) {
-    localStorage.setItem('user_role', role); // 엄마인지 아빠인지 저장!
-    window.renderSettingsTab(); // 스위치 색상 즉시 변경되게 다시 그리기
+    localStorage.setItem('user_role', role); 
+    if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab(); 
     
-    if(typeof window.updateTrackerDashboard === 'function') {
-        window.updateTrackerDashboard(); // 홈 화면의 트래커/아빠 대시보드 새로고침
-    }
-    
-    // 귀여운 알림 띄워주기
     if (role === 'dad') {
-        window.showToast("👨‍✈️ 아빠 모드 활성화! 홈 화면을 확인해 보세요.");
+        document.body.classList.add('mode-dad');
+        window.showToast("👨‍🍼 아빠 모드로 변경되었습니다.");
     } else {
+        document.body.classList.remove('mode-dad');
         window.showToast("👩‍🍼 엄마 모드로 변경되었습니다.");
     }
+
+    // 화면 새로고침 (에러 안 나게 방어 코드 추가)
+    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+    if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
+    if(typeof window.updateDadBriefing === 'function') window.updateDadBriefing();
+    if(typeof window.renderHomeBatonList === 'function') window.renderHomeBatonList();
 };
 
 // ==========================================
@@ -5398,8 +5365,10 @@ window.adjustFeedAmount = function(change) {
 };
 
 // ==========================================
-// 🚀 1. 앱 최초 실행 시 [엄마/아빠 역할 선택 온보딩 팝업]
+// 🚀 [통합본] 온보딩 + 아빠 모드 + 경험치 + 브리핑 엔진
 // ==========================================
+
+// 1. 엄마/아빠 역할 선택 온보딩 팝업
 window.showRoleOnboarding = function() {
     if(localStorage.getItem('user_role')) return;
 
@@ -5419,7 +5388,7 @@ window.showRoleOnboarding = function() {
                     <div style="font-size:16px; font-weight:900; color:#F04452;">엄마</div>
                 </button>
                 <button onclick="window.selectRoleOnboarding('dad')" style="flex:1; padding:24px 10px; background:#EBF4FF; border:2px solid #D3E4FF; border-radius:18px; cursor:pointer; transition:all 0.2s;">
-                    <div style="font-size:36px; margin-bottom:10px;">👨‍✈️</div>
+                    <div style="font-size:36px; margin-bottom:10px;">👨‍🍼</div>
                     <div style="font-size:16px; font-weight:900; color:#3182F6;">아빠</div>
                 </button>
             </div>
@@ -5434,66 +5403,50 @@ window.showRoleOnboarding = function() {
 
 window.selectRoleOnboarding = function(role) {
     localStorage.setItem('user_role', role);
-    document.getElementById('role-onboarding-overlay').remove();
-    if (typeof window.showToast === 'function') {
-        window.showToast(role === 'dad' ? "👨‍✈️ 아빠 모드로 시작합니다!" : "👩‍🍼 엄마 모드로 시작합니다!");
+    const overlay = document.getElementById('role-onboarding-overlay');
+    if(overlay) overlay.remove();
+    
+    if (role === 'dad') {
+        document.body.classList.add('mode-dad');
+        window.showToast("👨‍🍼 아빠 모드로 시작합니다!");
+    } else {
+        document.body.classList.remove('mode-dad');
+        window.showToast("👩‍🍼 엄마 모드로 시작합니다!");
     }
+    
     if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+    if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
 };
 setTimeout(window.showRoleOnboarding, 500);
 
+// 2. 통합 경험치(EXP) 엔진
+window.getMateLevelInfo = function() {
+    let totalExp = parseInt(localStorage.getItem('tosil_mate_exp') || '0');
+    let level = Math.floor(totalExp / 100) + 1;
+    let currentLevelExp = totalExp % 100; 
+    let percent = currentLevelExp; 
 
-// ==========================================
-// 🚀 1. 앱 최초 실행 시 [엄마/아빠 역할 선택 온보딩 팝업]
-// ==========================================
-window.showRoleOnboarding = function() {
-    if(localStorage.getItem('user_role')) return;
+    let title = "👶 신입 육아 요원"; let color = "#94A3B8";
+    if (level >= 10) { title = "👑 육아의 신"; color = "#F59E0B"; }
+    else if (level >= 7) { title = "💎 베테랑 요원"; color = "#8B5CF6"; }
+    else if (level >= 4) { title = "⚔️ 정예 요원"; color = "#3182F6"; }
+    else if (level >= 2) { title = "🛡️ 일병 아빠"; color = "#2DD4BF"; }
 
-    const overlay = document.createElement('div');
-    overlay.id = 'role-onboarding-overlay';
-    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);';
-
-    overlay.innerHTML = `
-        <div style="background:var(--bg-card, #fff); width:100%; max-width:340px; border-radius:24px; padding:36px 24px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.25); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <div style="font-size:45px; margin-bottom:16px; animation: bounce 2s infinite;">👋</div>
-            <div style="font-size:22px; font-weight:900; color:var(--text-m, #191f28); margin-bottom:10px;">반가워요, 육아동지님!</div>
-            <div style="font-size:14px; font-weight:600; color:var(--text-s, #8b95a1); margin-bottom:32px; line-height:1.5;">최적화된 화면을 준비해 드릴게요.<br>어떤 역할을 맡고 계신가요?</div>
-            
-            <div style="display:flex; gap:12px;">
-                <button onclick="window.selectRoleOnboarding('mom')" style="flex:1; padding:24px 10px; background:#FFF0F1; border:2px solid #FFE5E8; border-radius:18px; cursor:pointer; transition:all 0.2s;">
-                    <div style="font-size:36px; margin-bottom:10px;">👩‍🍼</div>
-                    <div style="font-size:16px; font-weight:900; color:#F04452;">엄마</div>
-                </button>
-                <button onclick="window.selectRoleOnboarding('dad')" style="flex:1; padding:24px 10px; background:#EBF4FF; border:2px solid #D3E4FF; border-radius:18px; cursor:pointer; transition:all 0.2s;">
-                    <div style="font-size:36px; margin-bottom:10px;">👨‍✈️</div>
-                    <div style="font-size:16px; font-weight:900; color:#3182F6;">아빠</div>
-                </button>
-            </div>
-        </div>
-        <style>
-            @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-            @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
-        </style>
-    `;
-    document.body.appendChild(overlay);
+    return { totalExp, level, currentLevelExp, percent, title, color };
 };
 
-window.selectRoleOnboarding = function(role) {
-    localStorage.setItem('user_role', role);
-    document.getElementById('role-onboarding-overlay').remove();
-    if (typeof window.showToast === 'function') {
-        window.showToast(role === 'dad' ? "👨‍✈️ 아빠 모드로 시작합니다!" : "👩‍🍼 엄마 모드로 시작합니다!");
-    }
-    if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
-    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+window.updateMateExp = function(amount) {
+    let currentExp = parseInt(localStorage.getItem('tosil_mate_exp') || '0');
+    currentExp += amount;
+    if (currentExp < 0) currentExp = 0; 
+    localStorage.setItem('tosil_mate_exp', currentExp);
+    
+    if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
+    if(typeof window.updateDadBriefing === 'function') window.updateDadBriefing();
 };
-setTimeout(window.showRoleOnboarding, 500);
 
-
-// ==========================================
-// 👨‍✈️ [아빠 모드] 실전 트래커 연동 + RPG 대시보드
-// ==========================================
+// 3. 아빠 모드: 메인 대시보드 렌더링 (아기 상태 + 아내 HP + 히어로 모드)
 window.renderDadQuests = function() {
     const role = localStorage.getItem('user_role');
     const container = document.getElementById('dad-quest-container');
@@ -5505,121 +5458,280 @@ window.renderDadQuests = function() {
     }
     container.style.display = 'block';
 
-    // 1. 일일 퀘스트 (기본값) 및 자정 리셋
-    let quests = JSON.parse(localStorage.getItem('tosil_dad_quests')) || [
-        { id: 'q1', text: '🍼 퇴근 후 아기 분유/이유식 1번 먹이기', done: false },
-        { id: 'q2', text: '🛁 아기 목욕 전담하기', done: false },
-        { id: 'q3', text: '🗑️ 기저귀 쓰레기통 비우기', done: false },
-        { id: 'q4', text: '💪 엄마에게 30분 온전한 휴식시간 주기', done: false }
-    ];
-    
-    const todayStr = new Date().toDateString();
-    if (localStorage.getItem('tosil_dad_quest_date') !== todayStr) {
-        quests.forEach(q => q.done = false);
-        localStorage.setItem('tosil_dad_quests', JSON.stringify(quests));
-        localStorage.setItem('tosil_dad_quest_date', todayStr);
-    }
+    let isCollapsed = localStorage.getItem('tosil_dad_dashboard_collapsed') === 'true';
+    const levelInfo = window.getMateLevelInfo();
 
-    // 2. 오늘의 아빠 전투 실적 계산 (진짜 트래커 기록 기반!)
+    // 트래커 데이터 분석
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    const now = new Date().getTime();
     const startOfToday = new Date().setHours(0,0,0,0);
-    let todayFeed = 0; let todayDiaper = 0;
+    let todayEvents = 0; 
+    let lastFeed = null; let lastDiaper = null; let lastSleep = null;
     
     records.forEach(r => {
-        if(r.timestamp >= startOfToday) {
-            if(r.type === 'feed') todayFeed++;
-            if(r.type === 'diaper') todayDiaper++;
-        }
+        if(r.timestamp >= startOfToday) todayEvents++;
+        if(!lastFeed && r.type === 'feed') lastFeed = r;
+        if(!lastDiaper && r.type === 'diaper') lastDiaper = r;
+        if(!lastSleep && r.type === 'sleep') lastSleep = r;
     });
 
-    // 3. 🔥 경험치(EXP) 및 레벨 계산 로직
-    let questCompletedCount = quests.filter(q => q.done).length;
-    // 공식: (수유 1회당 15점) + (기저귀 1회당 10점) + (퀘스트 완료 1개당 20점)
-    let totalExp = (todayFeed * 15) + (todayDiaper * 10) + (questCompletedCount * 20);
+    let babyStatusHtml = "";
+    let feedDiff = lastFeed ? Math.floor((now - lastFeed.timestamp) / 60000) : 0;
+    let diaperDiff = lastDiaper ? Math.floor((now - lastDiaper.timestamp) / 60000) : 0;
+    const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
     
-    let level = 1; let title = "👶 훈련병 아빠"; let maxExp = 100; let barColor = "#94A3B8";
-    if (totalExp >= 300) { level = 4; title = "👑 육아 마스터"; maxExp = 500; barColor = "#F59E0B"; } // 금색
-    else if (totalExp >= 150) { level = 3; title = "⚔️ 정예 요원"; maxExp = 300; barColor = "#3182F6"; } // 파랑
-    else if (totalExp >= 50) { level = 2; title = "🛡️ 일병 아빠"; maxExp = 150; barColor = "#2DD4BF"; } // 민트
-    
-    const expPercent = Math.min(100, Math.floor((totalExp / maxExp) * 100));
+    if (feedDiff >= feedInterval - 30) {
+        babyStatusHtml += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><div style="font-size:20px;">🚨</div><div style="font-size:13.5px; color:#F87171; font-weight:800;">맘마 먹은지 ${Math.floor(feedDiff/60)}시간 ${feedDiff%60}분째!<br><span style="font-size:11.5px; color:#94A3B8;">집에 가자마자 분유를 타주세요!</span></div></div>`;
+    } else {
+        babyStatusHtml += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;"><div style="font-size:20px;">🍼</div><div style="font-size:13.5px; color:#E2E8F0; font-weight:800;">마지막 수유: ${feedDiff >= 60 ? Math.floor(feedDiff/60)+'시간 ' : ''}${feedDiff%60}분 전<br><span style="font-size:11.5px; color:#94A3B8;">아직 배고플 시간은 아니에요.</span></div></div>`;
+    }
 
-    // 4. UI 그리기 (다크톤 RPG 스타일 + 대표님의 체크리스트 융합)
+    if (diaperDiff >= 180) {
+        babyStatusHtml += `<div style="display:flex; align-items:center; gap:8px;"><div style="font-size:20px;">💩</div><div style="font-size:13.5px; color:#F87171; font-weight:800;">기저귀 안 간지 ${Math.floor(diaperDiff/60)}시간 넘음!<br><span style="font-size:11.5px; color:#94A3B8;">엉덩이 발진 주의! 확인해 보세요.</span></div></div>`;
+    } else {
+        babyStatusHtml += `<div style="display:flex; align-items:center; gap:8px;"><div style="font-size:20px;">✨</div><div style="font-size:13.5px; color:#E2E8F0; font-weight:800;">엉덩이 뽀송뽀송 (마지막 교체: ${diaperDiff}분 전)</div></div>`;
+    }
+
+    let momHpText = ""; let momHpColor = "";
+    if (todayEvents >= 15) { momHpText = "극도 피로 🥵 (디저트 포장 강력 추천!)"; momHpColor = "#F87171"; } 
+    else if (todayEvents >= 8) { momHpText = "지침 😮‍💨 (따뜻한 말 한마디 필수)"; momHpColor = "#FBBF24"; } 
+    else { momHpText = "보통 🙂 (퇴근 후 육아 교대는 필수!)"; momHpColor = "#34D399"; }
+
+    const isHeroToday = localStorage.getItem('tosil_hero_mode_date') === new Date().toDateString();
+
     let html = `
-        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 12px; padding: 0 4px;">👨‍✈️ 아빠 요원 실적 보고서</div>
-        <div style="background: linear-gradient(135deg, #1E293B, #0F172A); border-radius: 20px; padding: 22px; color: #fff; box-shadow: 0 10px 25px rgba(15,23,42,0.25); position: relative; overflow: hidden; margin-bottom: 16px;">
-            
-            <!-- 배경 데코 -->
-            <div style="position: absolute; right: -15px; top: -15px; font-size: 80px; opacity: 0.05; transform: rotate(15deg); pointer-events: none;">🎮</div>
-
-            <!-- 레벨 & 경험치 바 -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; position: relative; z-index: 2;">
+        <div style="background: linear-gradient(135deg, #1E293B, #0F172A); border-radius: 20px; padding: 20px; color: #fff; box-shadow: 0 10px 25px rgba(15,23,42,0.25); position: relative; margin-bottom: 24px;">
+            <div onclick="window.toggleDadDashboard()" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; position: relative; z-index: 2;">
                 <div>
-                    <div style="font-size: 19px; font-weight: 900; color: #fff;">Lv.${level} <span style="color: ${barColor};">${title}</span></div>
+                    <div style="font-size: 13px; color: #94A3B8; font-weight: 800; margin-bottom: 4px;">👨‍🍼 아빠 작전 상황판</div>
+                    <div style="font-size: 20px; font-weight: 900; color: #fff;">Lv.${levelInfo.level} <span style="color: ${levelInfo.color};">${levelInfo.title}</span></div>
                 </div>
-                <div style="font-size: 12px; font-weight: 900; color: #E2E8F0; background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px;">
-                    ${totalExp} EXP
-                </div>
-            </div>
-            <div style="background: rgba(255,255,255,0.1); height: 12px; border-radius: 6px; margin-bottom: 8px; overflow: hidden; position: relative; z-index: 2;">
-                <div style="width: ${expPercent}%; height: 100%; background: ${barColor}; border-radius: 6px; transition: width 0.8s; box-shadow: 0 0 10px ${barColor};"></div>
-            </div>
-            <div style="text-align: right; font-size: 11.5px; font-weight: 700; color: #64748B; margin-bottom: 24px;">
-                다음 승급까지 ${maxExp - totalExp > 0 ? (maxExp - totalExp) + ' EXP' : 'MAX 달성!'}
-            </div>
-
-            <!-- 전투 실적 박스 (트래커 기반) -->
-            <div style="display:flex; justify-content:space-between; margin-bottom:24px; background:rgba(255,255,255,0.06); padding:16px; border-radius:16px; border: 1px solid rgba(255,255,255,0.05);">
-                <div style="text-align:center; flex:1; border-right:1px dashed rgba(255,255,255,0.1);">
-                    <div style="font-size:12px; font-weight:800; color:#94A3B8; margin-bottom:4px;">오늘 참전 수유</div>
-                    <div style="font-size:20px; font-weight:900; color:#60A5FA;">${todayFeed}회</div>
-                </div>
-                <div style="text-align:center; flex:1;">
-                    <div style="font-size:12px; font-weight:800; color:#94A3B8; margin-bottom:4px;">기저귀 처리</div>
-                    <div style="font-size:20px; font-weight:900; color:#F87171;">${todayDiaper}회</div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="font-size: 13px; font-weight: 900; color: #E2E8F0; background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px;">${levelInfo.totalExp} EXP</div>
+                    <div style="font-size: 20px; color: #94A3B8; transform: rotate(${isCollapsed ? '180deg' : '0deg'}); transition: transform 0.3s;">▲</div>
                 </div>
             </div>
-
-            <!-- 퀘스트 체크리스트 -->
-            <div style="font-size: 13.5px; font-weight: 800; color: #F8FAFC; margin-bottom: 12px;">🔥 오늘의 필수 퀘스트</div>
-            <div style="display:flex; flex-direction:column; gap:10px; position: relative; z-index: 2;">
     `;
 
-    quests.forEach((q, index) => {
-        const bg = q.done ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.1)';
-        const color = q.done ? '#64748B' : '#fff';
-        const border = q.done ? 'transparent' : '1px solid rgba(255,255,255,0.1)';
-        const textDeco = q.done ? 'line-through' : 'none';
-        const icon = q.done ? '✅' : '⬜';
-        const opacity = q.done ? '0.5' : '1';
-
+    if (!isCollapsed) {
         html += `
-            <div onclick="window.toggleDadQuest(${index})" style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:${bg}; border:${border}; cursor:pointer; transition:0.2s; opacity:${opacity};">
-                <div style="font-size:16px;">${icon}</div>
-                <div style="font-size:13.5px; font-weight:700; color:${color}; text-decoration:${textDeco}; flex:1;">${q.text}</div>
-                <div style="font-size:11px; font-weight:800; color:#10B981;">+20 EXP</div>
+            <div style="margin-top: 16px; margin-bottom: 24px;">
+                <div style="background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden;">
+                    <div style="width: ${levelInfo.percent}%; height: 100%; background: ${levelInfo.color}; border-radius: 5px; transition: width 0.5s;"></div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #64748B; margin-top: 6px;">다음 승급까지 ${100 - levelInfo.currentLevelExp} EXP</div>
             </div>
+            <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-size: 12px; font-weight: 800; color: #94A3B8; margin-bottom: 12px;">📊 현재 아기 상태 요약</div>
+                ${babyStatusHtml}
+            </div>
+            <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-size: 12px; font-weight: 800; color: #94A3B8; margin-bottom: 6px;">❤️ 오늘의 아내 체력(HP) 예상</div>
+                <div style="font-size: 14px; font-weight: 800; color: ${momHpColor};">${momHpText}</div>
+            </div>
+            ${isHeroToday ? `
+                <div style="text-align:center; padding:16px; background:rgba(16, 185, 129, 0.15); border-radius:16px; border:1px solid rgba(16, 185, 129, 0.3);">
+                    <div style="font-size:24px; margin-bottom:4px;">👨‍🍼</div>
+                    <div style="font-size:14px; font-weight:900; color:#34D399;">오늘의 메인 육아 참전 완료!</div>
+                </div>
+            ` : `
+                <button onclick="window.activateHeroMode()" style="width:100%; padding:18px; border-radius:16px; background:#3182F6; color:#fff; font-size:15px; font-weight:900; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(49,130,246,0.4); display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <span>👨‍🍼</span> 퇴근 완료! 지금부턴 내가 전담할게
+                </button>
+            `}
         `;
-    });
-
-    html += `</div></div>`;
+    }
+    html += `</div>`;
     container.innerHTML = html;
 };
 
-// 퀘스트 체크 토글 함수
-window.toggleDadQuest = function(index) {
-    let quests = JSON.parse(localStorage.getItem('tosil_dad_quests')) || [];
-    if(!quests[index]) return;
+window.toggleDadDashboard = function() {
+    let isCollapsed = localStorage.getItem('tosil_dad_dashboard_collapsed') === 'true';
+    localStorage.setItem('tosil_dad_dashboard_collapsed', !isCollapsed);
+    window.renderDadQuests();
+};
 
-    quests[index].done = !quests[index].done;
-    localStorage.setItem('tosil_dad_quests', JSON.stringify(quests));
+window.activateHeroMode = function() {
+    localStorage.setItem('tosil_hero_mode_date', new Date().toDateString());
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    if (typeof window.showToast === 'function') window.showToast("👨‍🍼 멋진 아빠 등장! 아내에게 자유시간을 선물하세요. (+50 EXP)");
+    
+    window.updateMateExp(50);
+    window.renderDadQuests();
+    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+};
 
-    if (quests[index].done) {
-        if (typeof window.showToast === 'function') {
-            window.showToast("🎉 미션 클리어! 짝꿍 감동 지수 상승! (+20 EXP)");
+// 4. 아빠 모드: 상단 브리핑 (오늘 먹은 양 / 잔 횟수 등 계산)
+window.updateDadBriefing = function() {
+    const now = new Date();
+    // 오늘 자정의 타임스탬프(숫자) 값을 구합니다.
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    let todayFeed = 0; let todayDiaper = 0; let todaySleep = 0;
+
+    records.forEach(r => {
+        // 타임스탬프(숫자)로 오늘 기록이 맞는지 정확하게 판별!
+        if(r.timestamp >= startOfToday) {
+            if(r.type === 'feed' || r.type === '수유') {
+                let amt = parseInt(String(r.amount || '0').replace(/[^0-9]/g, ''));
+                todayFeed += amt || 0; 
+            } else if (r.type === 'diaper' || r.type === '기저귀') {
+                todayDiaper++;
+            } else if (r.type === 'sleep' || r.type === '수면') {
+                todaySleep++;
+            }
         }
+    });
+
+    // HTML 업데이트
+    const feedEl = document.getElementById('dad-brief-feed');
+    const diaperEl = document.getElementById('dad-brief-diaper');
+    const sleepEl = document.getElementById('dad-brief-sleep');
+    if(feedEl) feedEl.innerText = todayFeed > 0 ? `${todayFeed} ml` : '0 ml';
+    if(diaperEl) diaperEl.innerText = todayDiaper > 0 ? `${todayDiaper} 회` : '0 회';
+    if(sleepEl) sleepEl.innerText = todaySleep > 0 ? `${todaySleep} 번` : '0 번';
+
+    let babyName = localStorage.getItem('tosil_babyName') || '우리아기';
+    const nameEl = document.getElementById('dad-brief-name');
+    if(nameEl) nameEl.innerText = babyName;
+
+    // 🚨 [추가된 부분] 경험치 삭제 후 '한 줄 평' 업데이트 로직
+    let statusMessage = "오늘도 평화로운 육아팅! 아내를 도와주세요 💪";
+    if (todayFeed >= 800) statusMessage = "오늘 맘마를 아주 든든하게 먹었어요! 🍼";
+    else if (todayDiaper >= 6) statusMessage = "오늘 기저귀를 많이 갈았어요. 엉덩이 케어 필수! ✨";
+    else if (todaySleep >= 3) statusMessage = "오늘 잠을 푹 자고 있어요. 조심조심! 🤫";
+    else if (todayFeed > 0 || todayDiaper > 0) statusMessage = "오늘 하루도 육아 미션 순항 중! 🚀";
+
+    const msgEl = document.getElementById('dad-brief-msg');
+    if(msgEl) msgEl.innerText = statusMessage;
+};
+
+// 5. 아빠 모드: 홈 화면용 바통터치 리스트 렌더링
+window.renderHomeBatonList = function() {
+    const container = document.getElementById('home-dad-baton-list');
+    if (!container) return;
+    
+    let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    let activeRecords = records.filter(r => r.status === 'requested' || r.status === 'accepted');
+
+    if (activeRecords.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
+                <div style="font-size:24px; margin-bottom:10px;">🕊️</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 미션이 없습니다.<br>오늘 하루도 평화롭네요! 🤍</div>
+            </div>`;
+        return;
+    }
+
+    let html = '';
+    activeRecords.forEach(r => {
+        let statusHtml = r.status === 'requested' 
+            ? `<span style="background:#FFF0F1; color:#F04452; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid #F04452;">⏳ 요청중</span>`
+            : `<span style="background:#EBF4FF; color:#3182F6; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid #3182F6;">🏃‍♂️ 처리중</span>`;
+            
+        let actionBtn = r.status === 'requested'
+            ? `<button onclick="acceptBaton('${r.id}'); renderHomeBatonList(); if(typeof renderBatonTasks==='function') renderBatonTasks();" style="padding:10px 14px; background:#3182F6; color:#FFF; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">🫡 미션접수</button>`
+            : `<button onclick="completeBaton('${r.id}'); renderHomeBatonList(); if(typeof renderBatonTasks==='function') renderBatonTasks(); window.updateDadBriefing();" style="padding:10px 14px; background:#00B37A; color:#FFF; border:none; border-radius:10px; font-size:12.5px; font-weight:800; cursor:pointer;">✅ 해결완료</button>`;
+
+        let rewardHtml = (r.reward && r.reward !== "없음") ? `<div style="margin-top:6px; color:#B78103; font-size:11.5px; font-weight:800;">🎁 보상: ${r.reward}</div>` : '';
+
+        html += `
+        <div style="background:#FFFFFF; border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.01); margin-bottom:8px;">
+            <div>
+                <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">${r.text}</div>
+                <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s);">
+                    ${statusHtml} <span>⏱️ ${r.time}</span>
+                </div>
+                ${rewardHtml}
+            </div>
+            <div style="margin-left:12px;">${actionBtn}</div>
+        </div>`;
+    });
+    container.innerHTML = html;
+};
+
+// 6. 앱 초기 구동 시 역할/모드 자동 세팅 및 UI 동기화
+window.addEventListener('DOMContentLoaded', () => {
+    const savedRole = localStorage.getItem('user_role') || 'mom';
+    
+    if (savedRole === 'dad') {
+        document.body.classList.add('mode-dad');
+    } else {
+        document.body.classList.remove('mode-dad');
     }
     
-    // 다시 그려서 경험치 바 올라가는거 보여주기!
-    window.renderDadQuests();
+    // 약간의 딜레이를 주어 안전하게 데이터 렌더링
+    setTimeout(() => {
+        if(typeof window.updateDadBriefing === 'function') window.updateDadBriefing();
+        if(typeof window.renderHomeBatonList === 'function') window.renderHomeBatonList();
+        if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
+    }, 300); 
+});
+
+// 🌙 꿈나라 루틴 원터치 실행 함수 (스마트 분유량 측정 + 기저귀 교체)
+window.executeDreamRoutine = async function() {
+    // 1. 기존 트래커 기록에서 '최근에 먹은 분유량' 찾아오기
+    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    let feedRecords = records.filter(r => r.type === 'feed' && r.subType !== '모유' && r.amount > 0);
+    let recentAmt = feedRecords.length > 0 ? feedRecords[0].amount : 160; // 기본값 160
+
+    const isConfirm = confirm(`목욕 후 새 기저귀, 막수(${recentAmt}ml), 밤잠 타이머를 한 번에 켤까요?\n오늘 하루도 정말 고생 많으셨습니다! 🤍`);
+    if (!isConfirm) return;
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const timestamp = now.getTime();
+
+    // 2. 새 기저귀 기록 (목욕 후 뽀송뽀송)
+    records.unshift({ 
+        id: 'trk_' + (timestamp + 2), 
+        time: timeStr, 
+        timestamp: timestamp + 2, 
+        type: 'diaper', 
+        subType: '소변', 
+        status: ''
+    });
+
+    // 3. 막수 기록 (최근 먹은 양 자동 적용!)
+    records.unshift({ 
+        id: 'trk_' + (timestamp + 1), 
+        time: timeStr, 
+        timestamp: timestamp + 1, 
+        type: 'feed', 
+        subType: '분유', 
+        amount: recentAmt,
+        status: ''
+    });
+
+    // 4. 밤잠 시작
+    records.unshift({ 
+        id: 'trk_' + timestamp, 
+        time: timeStr, 
+        timestamp: timestamp, 
+        type: 'sleep', 
+        subType: '밤잠', 
+        amount: 0 
+    });
+
+    // 배열 정렬 및 100개 제한 보정
+    records.sort((a, b) => b.timestamp - a.timestamp);
+    while(records.length > 100) records.pop();
+
+    // 🚀 5. 파이어베이스 및 로컬 동기화
+    if (typeof window.saveTrackerToFirebase === 'function') {
+        await window.saveTrackerToFirebase(records);
+    } else {
+        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
+        if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
+    }
+
+    // 6. 밤잠 '타이머' 켜짐 상태로 만들기
+    localStorage.setItem('tosil_sleep_start', timestamp);
+    localStorage.setItem('tosil_sleep_type', '밤잠');
+
+    // 7. 영수증 버튼 표시 여부 체크
+    if (typeof window.checkReceiptVisibility === 'function') window.checkReceiptVisibility();
+
+    window.showToast(`🌙 뽀송한 기저귀, 막수(${recentAmt}ml), 밤잠 시작 완료!\n육퇴를 축하합니다 🎉`);
 };
