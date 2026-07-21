@@ -2927,9 +2927,7 @@ window.saveTrackerSettings = function() {
     alert("✅ 우리 아기 맞춤형 텀이 저장되었습니다!");
 };
 
-// ==========================================
 // 👑 [엄마 모드 고도화] 초직관적 하이엔드 트래커 대시보드
-// ==========================================
 window.updateTrackerDashboard = function() {
     const container = document.getElementById('tracker-stats-container');
     if(!container) return;
@@ -2938,7 +2936,6 @@ window.updateTrackerDashboard = function() {
     const now = new Date();
     const nowTime = now.getTime(); 
     
-    // 똥 색깔 판별기 함수
     const getStatusColor = (status) => {
         if(!status) return 'var(--text-m)';
         if(status.includes('황금')) return '#F59E0B';
@@ -2950,7 +2947,6 @@ window.updateTrackerDashboard = function() {
         return 'var(--text-m)';
     };
 
-    // [통계·기록 보기] 버튼을 눌렀을 때 (isHistoryView === true)
     if (window.isHistoryView) {
         if(records.length === 0) {
             container.innerHTML = `<div style="padding:20px 0; text-align:center; font-size:13px; color:var(--text-s);">기록된 데이터가 없습니다.</div><button class="btn-main" onclick="window.toggleTrackerHistory()" style="width:100%; margin-top:10px; padding:12px; font-size:13.5px; border-radius:12px;">닫기</button>`;
@@ -3032,11 +3028,20 @@ window.updateTrackerDashboard = function() {
         return; 
     }
 
-    // =================================================================
-    // 🎨 [고도화 디자인 적용] 대시보드 기본 화면
-    // ==========================================
     const lastSleepRecord = records.find(r => r.type === 'sleep'); 
-    const sleepStartTime = localStorage.getItem('tosil_sleep_start');
+    let sleepStartTime = localStorage.getItem('tosil_sleep_start');
+    
+    // 🚨 [자동 치료 엔진] 기록상으론 깼는데, 타이머가 버그로 남아있다면?
+    // 수학적으로 증명(종료 시간이 타이머 시작 시간보다 최신임)해서 좀비 타이머 강제 처형!
+    if (sleepStartTime && lastSleepRecord && lastSleepRecord.amount > 0) {
+        const sleepEndTime = lastSleepRecord.timestamp + (lastSleepRecord.amount * 60000);
+        if (sleepEndTime > parseInt(sleepStartTime)) {
+            localStorage.removeItem('tosil_sleep_start');
+            localStorage.removeItem('tosil_sleep_type');
+            sleepStartTime = null; 
+        }
+    }
+
     const isSleeping = sleepStartTime || (lastSleepRecord && lastSleepRecord.amount === 0); 
     const isAwake = !isSleeping;
     
@@ -3078,48 +3083,48 @@ window.updateTrackerDashboard = function() {
         </div>`;
     }
 
-   const todayRecords = records.filter(r => new Date(r.timestamp).getDate() === now.getDate());
-let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
-    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-s); font-weight:800; margin-bottom:10px; padding:0 2px;">
-        <span>📊 오늘의 하루 타임라인 패턴</span>
-        <div style="display:flex; gap:10px;">
-            <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#D8C6FE; border-radius:2px;"></div>수면</span>
-            <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#3182F6; border-radius:2px;"></div>수유</span>
-            <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#F04452; border-radius:2px;"></div>기저귀</span>
+    const todayRecords = records.filter(r => new Date(r.timestamp).getDate() === now.getDate());
+    let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-s); font-weight:800; margin-bottom:10px; padding:0 2px;">
+            <span>📊 오늘의 하루 타임라인 패턴</span>
+            <div style="display:flex; gap:10px;">
+                <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#D8C6FE; border-radius:2px;"></div>수면</span>
+                <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#3182F6; border-radius:2px;"></div>수유</span>
+                <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#F04452; border-radius:2px;"></div>기저귀</span>
+            </div>
         </div>
-    </div>
-    <div style="width:100%; height:16px; background:var(--bg-sub); border-radius:8px; position:relative; overflow:hidden; margin-bottom:10px;">`;
+        <div style="width:100%; height:16px; background:var(--bg-sub); border-radius:8px; position:relative; overflow:hidden; margin-bottom:10px;">`;
 
-const timeOverlapMap = {}; 
-todayRecords.forEach(r => {
-    const d = new Date(r.timestamp);
-    const startPercent = ((d.getHours() * 60) + d.getMinutes()) / 1440 * 100;
-    const timeKey = `${d.getHours()}:${d.getMinutes()}`;
-    if (!timeOverlapMap[timeKey]) timeOverlapMap[timeKey] = 0;
-    const overlapCount = timeOverlapMap[timeKey];
-    timeOverlapMap[timeKey]++; 
-    const offsetPx = overlapCount * 4;
-    const zIndex = 10 + overlapCount;
+    const timeOverlapMap = {}; 
+    todayRecords.forEach(r => {
+        const d = new Date(r.timestamp);
+        const startPercent = ((d.getHours() * 60) + d.getMinutes()) / 1440 * 100;
+        const timeKey = `${d.getHours()}:${d.getMinutes()}`;
+        if (!timeOverlapMap[timeKey]) timeOverlapMap[timeKey] = 0;
+        const overlapCount = timeOverlapMap[timeKey];
+        timeOverlapMap[timeKey]++; 
+        const offsetPx = overlapCount * 4;
+        const zIndex = 10 + overlapCount;
 
-    if (r.type === 'sleep') {
-        const duration = (r.amount === 0) ? Math.floor((nowTime - r.timestamp) / 60000) : r.amount; 
-        const widthPercent = Math.min((duration / 1440 * 100), 100 - startPercent); 
-        timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background:rgba(168, 85, 247, 0.4); border-radius:4px; z-index:5;"></div>`;
-    } else if (r.type === 'feed') {
-        timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#3182F6; border-radius:2px; z-index:${zIndex};"></div>`;
-    } else if (r.type === 'diaper') {
-        timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#F04452; border-radius:2px; z-index:${zIndex};"></div>`;
-    }
-});
+        if (r.type === 'sleep') {
+            const duration = (r.amount === 0) ? Math.floor((nowTime - r.timestamp) / 60000) : r.amount; 
+            const widthPercent = Math.min((duration / 1440 * 100), 100 - startPercent); 
+            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background:rgba(168, 85, 247, 0.4); border-radius:4px; z-index:5;"></div>`;
+        } else if (r.type === 'feed') {
+            timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#3182F6; border-radius:2px; z-index:${zIndex};"></div>`;
+        } else if (r.type === 'diaper') {
+            timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#F04452; border-radius:2px; z-index:${zIndex};"></div>`;
+        }
+    });
 
-timelineHtml += `</div><div style="display:flex; justify-content:space-between; font-size:10px; color:#8B95A1; font-weight:800; padding:0 2px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div></div>`;
+    timelineHtml += `</div><div style="display:flex; justify-content:space-between; font-size:10px; color:#8B95A1; font-weight:800; padding:0 2px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div></div>`;
 
-let todayFeedAmt = 0; let todayFeedMins = 0; let todaySleepMins = 0; let todayDiaperCount = 0;
-todayRecords.forEach(r => {
-    if(r.type === 'feed') { if (r.subType === '모유') todayFeedMins += r.amount; else todayFeedAmt += r.amount; }
-    if(r.type === 'sleep') todaySleepMins += r.amount;
-    if(r.type === 'diaper') todayDiaperCount++;
-});
+    let todayFeedAmt = 0; let todayFeedMins = 0; let todaySleepMins = 0; let todayDiaperCount = 0;
+    todayRecords.forEach(r => {
+        if(r.type === 'feed') { if (r.subType === '모유') todayFeedMins += r.amount; else todayFeedAmt += r.amount; }
+        if(r.type === 'sleep') todaySleepMins += r.amount;
+        if(r.type === 'diaper') todayDiaperCount++;
+    });
 
     const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
     const diaperInterval = parseInt(localStorage.getItem('tosil_diaper_interval')) || 180;
@@ -3138,19 +3143,11 @@ todayRecords.forEach(r => {
     else if (todayDiaperCount >= 5) briefing = `기저귀 ${todayDiaperCount}번 클리어! 보송보송 ✨`;
     else if (todayFeedAmt > 0 || todayFeedMins > 0) briefing = `오늘 수유 체크 완벽 진행 중! 🍼`;
 
-    if (latestFeed && diffFeedMins >= feedInterval) {
-        briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
-        briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과! 확인해주세요`;
-    }
-
-// 💡 [수정] 평상시 배지와 경고 시 배지를 다르게 설정합니다.
     let briefBadge = `<div style="font-size:11px; font-weight:800; color:var(--primary); background:var(--bg-sub); padding:4px 8px; border-radius:8px;">실시간 연동</div>`;
 
     if (latestFeed && diffFeedMins >= feedInterval) {
         briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
         briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과!`;
-        
-        // 🚨 3시간 넘었을 때만 나타나는 빨간색 '기록' 버튼과 'X' 버튼! (진짜 함수 연결 완료)
         briefBadge = `
             <div style="display:flex; align-items:center; gap:10px;">
                 <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#EF5350; padding:6px 14px; border-radius:8px; cursor:pointer; box-shadow: 0 2px 4px rgba(239,83,80,0.3);">기록</div>
@@ -3186,7 +3183,6 @@ todayRecords.forEach(r => {
 
     let htmlStr = wakeTimeHtml + timelineHtml + briefingBarHtml + statsHtml;
 
-    // 🌟 [최고의 하이라이트] 버튼 위에 '몇 분 전' 띄워주는 함수 추가!
     const getRelativeTime = (latestRecord) => {
         if (!latestRecord) return '기록 없음';
         const m = Math.floor((nowTime - latestRecord.timestamp) / 60000);
@@ -3198,8 +3194,6 @@ todayRecords.forEach(r => {
     const latestSleep = records.find(r => r.type === 'sleep');
     const latestPee = records.find(r => r.type === 'diaper');
 
-    // 💡 메인 수유/수면/기저귀 버튼 3개의 서브 텍스트를 실시간으로 갈아끼우기 위해 DOM을 직접 살짝 터치합니다!
-    // (HTML 구조를 깨지 않고 유저 경험만 극대화하는 센스!)
     setTimeout(() => {
         const feedBtnSub = document.getElementById('btn-sub-feed');
         const sleepBtnSub = document.getElementById('btn-sub-sleep');
@@ -3212,19 +3206,6 @@ todayRecords.forEach(r => {
 
     container.innerHTML = htmlStr;
     container.style.display = ''; 
-
-// 👇👇👇 [여기 추가!] 저녁 6시(18시) ~ 새벽 5시까지만 꿈나라 버튼 띄우기 👇👇👇
-    const dreamBtn = document.getElementById('dream-routine-btn');
-    if (dreamBtn) {
-        const currentHour = new Date().getHours();
-        // 18시~23시 이거나, 0시~5시 일 때만 보이게!
-        if (currentHour >= 18 || currentHour <= 5) {
-            dreamBtn.style.display = 'flex';
-        } else {
-            dreamBtn.style.display = 'none';
-        }
-    }
-    // 👆👆👆 ======================================================= 👆👆👆
 
     if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
     if(typeof window.updateDadBriefing === 'function') window.updateDadBriefing();
@@ -3561,6 +3542,7 @@ window.stopSleepTimer = async function() {
 };
 
 // 💾 트래커 기록 저장 함수 (낮잠/밤잠 선택 및 토스트 팝업 완벽 패치)
+// 💾 트래커 기록 저장 함수 (수면 타이머 찌꺼기 완벽 제거 패치)
 window.saveTrackerRecord = async function() {
     if(!window.trackerState.type) return;
 
@@ -3591,7 +3573,6 @@ window.saveTrackerRecord = async function() {
     if (window.trackerState.type === 'feed') {
         if(!window.trackerState.subType) return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요!');
         
-        // 💡 [핵심] 모유일 때와 아닐 때를 다르게 저장
         if (window.trackerState.subType === '모유') {
             const bAmt = document.getElementById('v-breast-amount').value;
             if(!bAmt) return window.showToast('⚠️ 수유 시간(분)을 입력해주세요!');
@@ -3599,7 +3580,7 @@ window.saveTrackerRecord = async function() {
             
             record.subType = '모유';
             record.amount = parseInt(bAmt);
-            record.status = window.trackerState.status; // '왼쪽' or '오른쪽' 저장
+            record.status = window.trackerState.status; 
         } else {
             const amt = document.getElementById('v-feed-amount').value;
             if(!amt) return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요!');
@@ -3618,6 +3599,13 @@ window.saveTrackerRecord = async function() {
         let sleepAmount = 0;
         if (amt && amt.value !== '') sleepAmount = parseInt(amt.value);
         record.amount = sleepAmount;
+        
+        // 🚨 [핵심 버그 픽스] 수면 시간이 1분이라도 있다면 (즉, 아기가 깼다면)
+        // 백그라운드에서 몰래 돌고 있던 '좀비 타이머'를 무조건 삭제합니다!
+        if (sleepAmount > 0) {
+            localStorage.removeItem('tosil_sleep_start');
+            localStorage.removeItem('tosil_sleep_type');
+        }
         
         if (window.editingTrackerId) {
             const originalRecord = records.find(r => r.id === window.editingTrackerId);
@@ -5561,50 +5549,120 @@ window.activateHeroMode = function() {
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
 };
 
-// 4. 아빠 모드: 상단 브리핑 (오늘 먹은 양 / 잔 횟수 등 계산)
+// 4. 아빠 모드: 상단 브리핑 (아내 HP + 퇴근길 지령 + 1순위 미션)
 window.updateDadBriefing = function() {
     const now = new Date();
-    // 오늘 자정의 타임스탬프(숫자) 값을 구합니다.
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-    let todayFeed = 0; let todayDiaper = 0; let todaySleep = 0;
+    let todayFeedAmt = 0; let todayFeedCount = 0; 
+    let todayDiaperCount = 0; let todaySleepCount = 0;
+    
+    let lastFeed = null; let lastDiaper = null; let lastSleep = null;
 
     records.forEach(r => {
-        // 타임스탬프(숫자)로 오늘 기록이 맞는지 정확하게 판별!
         if(r.timestamp >= startOfToday) {
             if(r.type === 'feed' || r.type === '수유') {
                 let amt = parseInt(String(r.amount || '0').replace(/[^0-9]/g, ''));
-                todayFeed += amt || 0; 
+                todayFeedAmt += amt || 0; 
+                todayFeedCount++;
+                if(!lastFeed || r.timestamp > lastFeed.timestamp) lastFeed = r;
             } else if (r.type === 'diaper' || r.type === '기저귀') {
-                todayDiaper++;
+                todayDiaperCount++;
+                if(!lastDiaper || r.timestamp > lastDiaper.timestamp) lastDiaper = r;
             } else if (r.type === 'sleep' || r.type === '수면') {
-                todaySleep++;
+                todaySleepCount++;
+                if(!lastSleep || r.timestamp > lastSleep.timestamp) lastSleep = r;
             }
         }
     });
 
-    // HTML 업데이트
     const feedEl = document.getElementById('dad-brief-feed');
     const diaperEl = document.getElementById('dad-brief-diaper');
     const sleepEl = document.getElementById('dad-brief-sleep');
-    if(feedEl) feedEl.innerText = todayFeed > 0 ? `${todayFeed} ml` : '0 ml';
-    if(diaperEl) diaperEl.innerText = todayDiaper > 0 ? `${todayDiaper} 회` : '0 회';
-    if(sleepEl) sleepEl.innerText = todaySleep > 0 ? `${todaySleep} 번` : '0 번';
+    if(feedEl) feedEl.innerText = todayFeedAmt > 0 ? `${todayFeedAmt} ml` : '0 ml';
+    if(diaperEl) diaperEl.innerText = todayDiaperCount > 0 ? `${todayDiaperCount} 회` : '0 회';
+    if(sleepEl) sleepEl.innerText = todaySleepCount > 0 ? `${todaySleepCount} 번` : '0 번';
 
-    let babyName = localStorage.getItem('tosil_babyName') || '우리아기';
+    const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
     const nameEl = document.getElementById('dad-brief-name');
     if(nameEl) nameEl.innerText = babyName;
 
-    // 🚨 [추가된 부분] 경험치 삭제 후 '한 줄 평' 업데이트 로직
-    let statusMessage = "오늘도 평화로운 육아팅! 아내를 도와주세요 💪";
-    if (todayFeed >= 800) statusMessage = "오늘 맘마를 아주 든든하게 먹었어요! 🍼";
-    else if (todayDiaper >= 6) statusMessage = "오늘 기저귀를 많이 갈았어요. 엉덩이 케어 필수! ✨";
-    else if (todaySleep >= 3) statusMessage = "오늘 잠을 푹 자고 있어요. 조심조심! 🤫";
-    else if (todayFeed > 0 || todayDiaper > 0) statusMessage = "오늘 하루도 육아 미션 순항 중! 🚀";
+    let hpBg = "#10B981"; 
+    let hpMsg = "아내 HP 양호 🌿 퇴근 후 육아 교대 필수!";
 
-    const msgEl = document.getElementById('dad-brief-msg');
-    if(msgEl) msgEl.innerText = statusMessage;
+    const totalLabor = todayFeedCount + todayDiaperCount; 
+
+    if (totalLabor >= 12 || todayDiaperCount >= 7) {
+        hpBg = "#EF4444"; 
+        hpMsg = "방전 직전 🚨 빈손 귀가 금지! 디저트 필수";
+    } else if (totalLabor >= 8 || todayFeedCount >= 5) {
+        hpBg = "#F59E0B"; 
+        hpMsg = "HP 주의 😮‍💨 아내에게 커피 수혈 요망";
+    }
+
+    let missionBg = "#3182F6"; 
+    let missionMsg = "";
+    
+    let sleepStartTime = localStorage.getItem('tosil_sleep_start');
+    
+    // 🚨 [자동 치료 엔진] 아빠 모드에서도 좀비 타이머 강제 처형!
+    if (sleepStartTime && lastSleep && lastSleep.amount > 0) {
+        const sleepEndTime = lastSleep.timestamp + (lastSleep.amount * 60000);
+        if (sleepEndTime > parseInt(sleepStartTime)) {
+            localStorage.removeItem('tosil_sleep_start');
+            localStorage.removeItem('tosil_sleep_type');
+            sleepStartTime = null;
+        }
+    }
+
+    const isSleeping = sleepStartTime || (lastSleep && lastSleep.amount === 0);
+
+    if (isSleeping) {
+        missionBg = "#A855F7"; 
+        missionMsg = "🤫 아기 수면중! 도어락 무음+발소리 주의";
+    } else {
+        const nowTime = now.getTime();
+        let feedDiffMins = lastFeed ? Math.floor((nowTime - lastFeed.timestamp) / 60000) : 0;
+        let diaperDiffMins = lastDiaper ? Math.floor((nowTime - lastDiaper.timestamp) / 60000) : 0;
+        const feedInterval = parseInt(localStorage.getItem('tosil_feed_interval')) || 180;
+
+        if (lastFeed && feedDiffMins >= feedInterval - 30) {
+            missionBg = "#3182F6"; 
+            missionMsg = "🍼 수유 임박! 문 열자마자 젖병 세팅";
+        } else if (lastDiaper && diaperDiffMins >= 180) {
+            missionBg = "#F04452"; 
+            missionMsg = "💩 기저귀 3시간 경과! 엉덩이 확인 요망";
+        } else {
+            missionBg = "#00B37A"; 
+            missionMsg = "🧸 손 씻고 아내에게 자유시간 1시간 선물하기";
+        }
+    }
+
+    const msgEl = document.getElementById('dad-brief-msg'); 
+    
+    if(msgEl) {
+        const parentDiv = msgEl.parentElement;
+        parentDiv.style.background = "rgba(0, 0, 0, 0.25)";
+        parentDiv.style.border = "1px solid rgba(255, 255, 255, 0.05)";
+        parentDiv.style.borderRadius = "12px";
+        parentDiv.style.padding = "14px";
+        parentDiv.style.flexDirection = "column"; 
+        parentDiv.style.alignItems = "stretch"; 
+        parentDiv.style.gap = "10px"; 
+
+        parentDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span style="background: ${hpBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">아내상태</span>
+                <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${hpMsg}</span>
+            </div>
+            <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.08);"></div>
+            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span style="background: ${missionBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">1순위미션</span>
+                <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${missionMsg}</span>
+            </div>
+        `;
+    }
 };
 
 // 5. 아빠 모드: 홈 화면용 바통터치 리스트 렌더링
@@ -5669,69 +5727,3 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 300); 
 });
 
-// 🌙 꿈나라 루틴 원터치 실행 함수 (스마트 분유량 측정 + 기저귀 교체)
-window.executeDreamRoutine = async function() {
-    // 1. 기존 트래커 기록에서 '최근에 먹은 분유량' 찾아오기
-    let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-    let feedRecords = records.filter(r => r.type === 'feed' && r.subType !== '모유' && r.amount > 0);
-    let recentAmt = feedRecords.length > 0 ? feedRecords[0].amount : 160; // 기본값 160
-
-    const isConfirm = confirm(`목욕 후 새 기저귀, 막수(${recentAmt}ml), 밤잠 타이머를 한 번에 켤까요?\n오늘 하루도 정말 고생 많으셨습니다! 🤍`);
-    if (!isConfirm) return;
-
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const timestamp = now.getTime();
-
-    // 2. 새 기저귀 기록 (목욕 후 뽀송뽀송)
-    records.unshift({ 
-        id: 'trk_' + (timestamp + 2), 
-        time: timeStr, 
-        timestamp: timestamp + 2, 
-        type: 'diaper', 
-        subType: '소변', 
-        status: ''
-    });
-
-    // 3. 막수 기록 (최근 먹은 양 자동 적용!)
-    records.unshift({ 
-        id: 'trk_' + (timestamp + 1), 
-        time: timeStr, 
-        timestamp: timestamp + 1, 
-        type: 'feed', 
-        subType: '분유', 
-        amount: recentAmt,
-        status: ''
-    });
-
-    // 4. 밤잠 시작
-    records.unshift({ 
-        id: 'trk_' + timestamp, 
-        time: timeStr, 
-        timestamp: timestamp, 
-        type: 'sleep', 
-        subType: '밤잠', 
-        amount: 0 
-    });
-
-    // 배열 정렬 및 100개 제한 보정
-    records.sort((a, b) => b.timestamp - a.timestamp);
-    while(records.length > 100) records.pop();
-
-    // 🚀 5. 파이어베이스 및 로컬 동기화
-    if (typeof window.saveTrackerToFirebase === 'function') {
-        await window.saveTrackerToFirebase(records);
-    } else {
-        localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
-        if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
-    }
-
-    // 6. 밤잠 '타이머' 켜짐 상태로 만들기
-    localStorage.setItem('tosil_sleep_start', timestamp);
-    localStorage.setItem('tosil_sleep_type', '밤잠');
-
-    // 7. 영수증 버튼 표시 여부 체크
-    if (typeof window.checkReceiptVisibility === 'function') window.checkReceiptVisibility();
-
-    window.showToast(`🌙 뽀송한 기저귀, 막수(${recentAmt}ml), 밤잠 시작 완료!\n육퇴를 축하합니다 🎉`);
-};
