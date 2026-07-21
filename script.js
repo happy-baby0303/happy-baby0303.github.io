@@ -5549,7 +5549,7 @@ window.activateHeroMode = function() {
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
 };
 
-// 4. 아빠 모드: 상단 브리핑 (아내 HP + 퇴근길 지령 + 1순위 미션)
+// 👨‍👩‍👦 아빠 모드: 상단 브리핑 (니치 카피라이팅 + 미션 완료 상태 유지)
 window.updateDadBriefing = function() {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -5588,25 +5588,30 @@ window.updateDadBriefing = function() {
     const nameEl = document.getElementById('dad-brief-name');
     if(nameEl) nameEl.innerText = babyName;
 
+    // ==========================================
+    // 💡 1. 초압축 카피라이팅: 아내 HP 편
+    // ==========================================
     let hpBg = "#10B981"; 
-    let hpMsg = "아내 HP 양호 🌿 퇴근 후 육아 교대 필수!";
-
+    let hpMsg = "평화 유지 🕊️ '고생했지?' 칭찬 선빵 필수"; // 🔥 이 부분을 수정했습니다!
     const totalLabor = todayFeedCount + todayDiaperCount; 
 
     if (totalLabor >= 12 || todayDiaperCount >= 7) {
         hpBg = "#EF4444"; 
-        hpMsg = "방전 직전 🚨 빈손 귀가 금지! 디저트 필수";
+        hpMsg = "HP 1% ☠️ 달달한 디저트 조공 필수!"; 
     } else if (totalLabor >= 8 || todayFeedCount >= 5) {
         hpBg = "#F59E0B"; 
-        hpMsg = "HP 주의 😮‍💨 아내에게 커피 수혈 요망";
+        hpMsg = "체력 방전 🪫 귀가 즉시 바통 터치!"; 
     }
 
+    // ==========================================
+    // 💡 2. 초압축 카피라이팅: 1순위 미션 편
+    // ==========================================
     let missionBg = "#3182F6"; 
     let missionMsg = "";
     
+    // 👇 날아갔던 '수면 체크 로직' 복구 완료! 👇
     let sleepStartTime = localStorage.getItem('tosil_sleep_start');
     
-    // 🚨 [자동 치료 엔진] 아빠 모드에서도 좀비 타이머 강제 처형!
     if (sleepStartTime && lastSleep && lastSleep.amount > 0) {
         const sleepEndTime = lastSleep.timestamp + (lastSleep.amount * 60000);
         if (sleepEndTime > parseInt(sleepStartTime)) {
@@ -5615,12 +5620,12 @@ window.updateDadBriefing = function() {
             sleepStartTime = null;
         }
     }
-
     const isSleeping = sleepStartTime || (lastSleep && lastSleep.amount === 0);
+    // 👆 여기까지 👆
 
     if (isSleeping) {
         missionBg = "#A855F7"; 
-        missionMsg = "🤫 아기 수면중! 도어락 무음+발소리 주의";
+        missionMsg = "🚨 수면중! 까치발 입장 필수"; 
     } else {
         const nowTime = now.getTime();
         let feedDiffMins = lastFeed ? Math.floor((nowTime - lastFeed.timestamp) / 60000) : 0;
@@ -5629,15 +5634,36 @@ window.updateDadBriefing = function() {
 
         if (lastFeed && feedDiffMins >= feedInterval - 30) {
             missionBg = "#3182F6"; 
-            missionMsg = "🍼 수유 임박! 문 열자마자 젖병 세팅";
+            missionMsg = "🍼 맘마 타임! 겉옷 벗기 전 젖병 세팅"; 
         } else if (lastDiaper && diaperDiffMins >= 180) {
             missionBg = "#F04452"; 
-            missionMsg = "💩 기저귀 3시간 경과! 엉덩이 확인 요망";
+            missionMsg = "💩 엉덩이 경보! 들어가자마자 기저귀부터"; 
         } else {
             missionBg = "#00B37A"; 
-            missionMsg = "🧸 손 씻고 아내에게 자유시간 1시간 선물하기";
+            
+            // 🔥 평화 미션도 초압축!
+            const fallbackMissions = [
+                "✨ 평화롭네요! 밀린 젖병 설거지 부탁해요", 
+                "💖 아기 기분 최고! 아내에게 1시간 휴식을", 
+                "🗑️ 육아 휴전! 조용히 집안 쓰레기통 비우기" 
+            ];
+            const dayIndex = new Date().getDate() % fallbackMissions.length;
+            missionMsg = fallbackMissions[dayIndex];
         }
     }
+
+    // ==========================================
+    // 💡 3. 미션 완료 상태 체크 (새로고침 방어 로직)
+    // ==========================================
+    let isCleared = false;
+    try {
+        const clearedData = JSON.parse(localStorage.getItem('tosil_cleared_mission'));
+        // 저장된 미션 텍스트와 현재 미션 텍스트가 똑같고, 완료한 지 2시간(7200000ms)이 안 지났다면?
+        // -> 이미 완료한 미션으로 렌더링!
+        if (clearedData && clearedData.text === missionMsg && (Date.now() - clearedData.timestamp < 7200000)) {
+            isCleared = true;
+        }
+    } catch(e) {}
 
     const msgEl = document.getElementById('dad-brief-msg'); 
     
@@ -5651,15 +5677,27 @@ window.updateDadBriefing = function() {
         parentDiv.style.alignItems = "stretch"; 
         parentDiv.style.gap = "10px"; 
 
+        // 완료 여부에 따라 버튼의 형태를 다르게 그려줍니다.
+        const actionButtonHtml = isCleared 
+            ? `<button disabled style="background: #10B981; border: none; color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: not-allowed; flex-shrink: 0;">완수! 👏</button>`
+            : `<button onclick="window.completeTopMission(this, '${missionMsg.replace(/'/g, "\\'")}')" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: all 0.2s;">완료하기</button>`;
+
         parentDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <span style="background: ${hpBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">아내상태</span>
+                <!-- 🚨 아내상태 뱃지: 크기 64px 고정 및 가운데 정렬 -->
+                <span style="background: ${hpBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 0; width: 64px; text-align: center; display: inline-block; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); box-sizing: border-box;">아내상태</span>
                 <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${hpMsg}</span>
             </div>
+            
             <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.08);"></div>
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <span style="background: ${missionBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">1순위미션</span>
-                <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${missionMsg}</span>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; padding-right: 8px;">
+                    <!-- 🚨 1순위미션 뱃지: 크기 64px 고정 및 가운데 정렬 -->
+                    <span style="background: ${missionBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 0; width: 64px; text-align: center; display: inline-block; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); box-sizing: border-box;">1순위미션</span>
+                    <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${missionMsg}</span>
+                </div>
+                ${actionButtonHtml}
             </div>
         `;
     }
@@ -5727,3 +5765,80 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 300); 
 });
 
+
+// 🎉 [아이디어 3] 미션 완료 시 화면에 이모지 폭죽을 터뜨리는 특수효과
+window.shootConfetti = function() {
+    const emojis = ['🎉', '💖', '✨', '👏', '🚀'];
+    for(let i=0; i<20; i++) {
+        let el = document.createElement('div');
+        el.innerText = emojis[Math.floor(Math.random()*emojis.length)];
+        el.style.position = 'fixed';
+        // 아빠 브리핑 카드 근처(상단 중앙)에서 터지도록 위치 설정
+        el.style.left = '50%'; 
+        el.style.top = '30%'; 
+        el.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        el.style.pointerEvents = 'none';
+        el.style.zIndex = '9999';
+        el.style.transition = 'all 1s cubic-bezier(0.25, 1, 0.5, 1)'; // 부드럽게 퍼지는 물리효과
+        el.style.transform = `translate(-50%, -50%) scale(0) rotate(0deg)`;
+        el.style.opacity = '1';
+        document.body.appendChild(el);
+
+        setTimeout(() => {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.random() * 150 + 50; // 퍼지는 거리
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            const rot = Math.random() * 360 - 180;
+            el.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(1.2) rotate(${rot}deg)`;
+            el.style.opacity = '0';
+        }, 10);
+
+        setTimeout(() => el.remove(), 1000);
+    }
+};
+
+// 🎯 [완료 상태 기억 엔진] 1순위 미션 완료 버튼 눌렀을 때 실행되는 함수
+window.completeTopMission = function(btnElement, missionText) {
+    // 1. 폭죽 발사!
+    window.shootConfetti();
+    
+    // 2. 버튼 상태 변경
+    btnElement.style.background = "#10B981"; // 초록색으로 변경
+    btnElement.style.border = "none";
+    btnElement.style.color = "#FFFFFF";
+    btnElement.innerText = "완수! 👏";
+    btnElement.style.transform = "scale(1.1)";
+    btnElement.disabled = true; // 중복 클릭 방지
+    btnElement.style.cursor = "not-allowed";
+    
+    setTimeout(() => {
+        btnElement.style.transform = "scale(1)";
+    }, 200);
+
+    if (navigator.vibrate) navigator.vibrate(50);
+    window.showToast("💖 멋져요! 아내의 스트레스가 감소했습니다.");
+
+    // ✨ 핵심 패치: 방금 완료한 미션의 내용과 시간을 브라우저에 콱 박아둡니다.
+    localStorage.setItem('tosil_cleared_mission', JSON.stringify({
+        text: missionText,
+        timestamp: Date.now()
+    }));
+};
+
+// 💡 [아이디어 1] 아내가 기록했을 때 아빠 화면 숫자가 '번쩍' 하며 업데이트되는 효과
+window.highlightUpdatedStat = function(elementId, newValue) {
+    const el = document.getElementById(elementId);
+    if (!el || el.innerText === newValue) return; // 값이 같으면 무시
+    
+    el.innerText = newValue;
+    // 형광펜 칠하듯 파란색으로 번쩍였다가 원래 색으로 돌아옴
+    el.style.transition = "color 0.3s, transform 0.3s";
+    el.style.color = "#3182F6"; 
+    el.style.transform = "scale(1.2)";
+    
+    setTimeout(() => {
+        el.style.color = "#FFFFFF"; // 다크모드 기본 글씨색으로 복구
+        el.style.transform = "scale(1)";
+    }, 400);
+};
