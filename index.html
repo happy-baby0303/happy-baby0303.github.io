@@ -260,16 +260,17 @@ body.dark-mode .care-btn.active {
     <!-- (이하 기존 트래커 및 하단 콘텐츠 유지) -->
          
       <!-- ▼▼▼ 주간 육아 리포트 버튼 ▼▼▼ -->
-        <button id="weekly-report-btn" onclick="window.openWeeklyReport()" style="display: none; width: 100%; background: linear-gradient(135deg, #FFF0F1, #FFE5E5); color: #F04452; border: 1px solid #FFD1D1; padding: 16px; border-radius: 20px; font-size: 15px; font-weight: 800; cursor: pointer; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(240,68,82,0.1); margin-bottom: 24px; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 24px;">💌</span>
-                <div style="text-align: left;">
-                    <div style="font-size: 12px; font-weight: 800; color: #F04452; opacity: 0.8; margin-bottom: 2px;">수고했어요, 짝꿍!</div>
-                    <div style="font-size: 15px; font-weight: 900; color: #D32F2F;">이번 주 육아 리포트 도착 〉</div>
-                </div>
-            </div>
-            <span style="font-size: 20px;">🎉</span>
-        </button>
+<button id="weekly-report-btn" onclick="window.openWeeklyReport()" style="display: none; width: 100%; background: linear-gradient(135deg, #FFF0F1, #FFE5E5); color: #F04452; border: 1px solid #FFD1D1; padding: 16px; border-radius: 20px; font-size: 15px; font-weight: 800; cursor: pointer; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(240,68,82,0.1); margin-bottom: 24px; transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span id="weekly-btn-icon" style="font-size: 24px;">💌</span>
+        <div style="text-align: left;">
+            <!-- JS가 접근할 수 있게 id 추가 -->
+            <div id="weekly-btn-title" style="font-size: 12px; font-weight: 800; color: #F04452; opacity: 0.8; margin-bottom: 2px;">수고했어요, 짝꿍!</div>
+            <div id="weekly-btn-desc" style="font-size: 15px; font-weight: 900; color: #D32F2F;">이번 주 육아 리포트 도착 〉</div>
+        </div>
+    </div>
+    <span style="font-size: 20px;">🎉</span>
+</button>
 
         <div id="health-smart-banner" style="display:none; margin: 20px 20px 0 20px;"></div>
         <input type="file" id="baby-photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
@@ -292,7 +293,7 @@ body.dark-mode .care-btn.active {
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
         <button onclick="window.openTrackerSheet('feed')" class="box-main" style="border-radius: 18px; padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">
             <span style="font-size: 28px; line-height: 1;">🍼</span>
-            <span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">수유</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: var(--text-m);">맘마</span>
             <span id="btn-sub-feed" style="font-size: 11px; font-weight: 700; color: #3182F6;">-</span>
         </button>
         <button onclick="window.openTrackerSheet('sleep')" class="box-main" style="border-radius: 18px; padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: transform 0.2s;">

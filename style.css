@@ -605,3 +605,37 @@ body.mode-dad .show-on-mom-block { display: none !important; }
     position: relative;
     overflow: hidden;
 }
+
+/* 🍎 맘마(수유/이유식) 토글 전용 스타일 */
+.mamma-toggle-container {
+    display: flex; position: relative;
+    background: #F2F4F6; border-radius: 12px;
+    padding: 4px; margin-bottom: 24px;
+}
+.mamma-toggle-container input[type="radio"] { display: none; }
+.mamma-toggle-container label {
+    flex: 1; text-align: center; padding: 12px 0;
+    font-size: 14.5px; font-weight: 800; color: #8B95A1;
+    cursor: pointer; z-index: 2; transition: color 0.2s ease-in-out;
+}
+/* 선택된 탭 텍스트 색상 */
+.mamma-toggle-container input[id="tab-milk"]:checked ~ label[for="tab-milk"],
+.mamma-toggle-container input[id="tab-food"]:checked ~ label[for="tab-food"] {
+    color: #191F28;
+}
+/* 슬라이더(배경) 움직임 */
+.toggle-slider {
+    position: absolute; top: 4px; left: 4px;
+    width: calc(50% - 4px); height: calc(100% - 8px);
+    background: #fff; border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index: 1;
+}
+.mamma-toggle-container input[id="tab-food"]:checked ~ .toggle-slider {
+    transform: translateX(100%);
+}
+
+body.dark-mode .mamma-toggle-container { background: #191F28; border: 1px solid #333D4B; }
+body.dark-mode .toggle-slider { background: #333D4B; }
+body.dark-mode .mamma-toggle-container input[id="tab-milk"]:checked ~ label[for="tab-milk"],
+body.dark-mode .mamma-toggle-container input[id="tab-food"]:checked ~ label[for="tab-food"] { color: #FFF; }
