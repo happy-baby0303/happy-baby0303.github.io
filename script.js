@@ -281,11 +281,6 @@ function filterPlaces() {
             return matchesRegion && (currentSubRegion === 'all' || addr.includes(currentSubRegion)) && `${p.title} ${p.desc} ${p.locText}`.toLowerCase().includes(keyword);
         });
 
-        if(filteredPlaces.length === 0) { 
-            container.innerHTML = `<p style="text-align:center; padding:35px; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 해당 지역에 아직 등록된 검증 핫플이 없습니다.</p>`; 
-            return; 
-        }
-
         let htmlString = ''; 
         filteredPlaces.forEach((p) => {
             let tagsHTML = '';
@@ -293,11 +288,24 @@ function filterPlaces() {
                 tagsHTML = p.tags.map(tag => `<span style="background:#F2F5F8; color:#4E5968; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; border: 1px solid #E5E8EB; margin-right:4px; display:inline-block; margin-bottom:4px;">#${tag.t || tag}</span>`).join('');
             }
             let mapUrl = `https://map.kakao.com/link/search/${encodeURIComponent(p.query || p.title)}`;
+            
+            // 🌟 [핵심 패치] '경기외곽' 버리고 주소(addr)에서 진짜 동네 이름 뽑기!
+            let realLocation = p.locText || '지역';
+            if (p.addr) {
+                const addrParts = p.addr.split(' ');
+                // 보통 주소가 "경기도 남양주시 다산순환로" 형식이므로 두 번째 단어(남양주시)를 가져옴
+                if (addrParts.length > 1) {
+                    // '시', '구', '군' 글자를 지워서 깔끔하게 "남양주"로 만듦
+                    realLocation = addrParts[1].replace('시', '').replace('구', '').replace('군', '');
+                }
+            }
+
             htmlString += `
                 <div class="box-main" style="border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border); text-align: left; background: var(--bg-card);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="background:#EBF4FF; color:#3182F6; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:900;">${p.locText || '지역'}</span>
+                            <!-- 👇 이제 경기외곽 대신 '남양주'가 예쁘게 들어갑니다! -->
+                            <span style="background:#EBF4FF; color:#3182F6; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:900;">${realLocation}</span>
                             <div style="font-size: 17px; font-weight: 900; color: var(--text-m);">${p.title} ${p.emoji || '📍'}</div>
                         </div>
                     </div>
@@ -397,13 +405,13 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
             </div>
 
             <!-- ✅ 하단 액션 버튼 -->
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; margin-bottom: 30px;"> <!-- 마진 바텀 추가 -->
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
             
-            <!-- 🚨 [최종 보스] 안드로이드 시스템 바 및 웹브라우저 하단바 무조건 밀어내는 150px 투명 기둥! -->
-            <div style="display:block; clear:both; width:100%; height:150px; background:transparent;"></div>
+            <!-- 🚨 [최종 보스] 더 강력하고 두꺼운 200px 투명 기둥! (안드로이드 완벽 대응) -->
+            <div style="display:block; clear:both; width:100%; height:200px; padding-bottom:100px; background:transparent;"></div>
             
         </div>
     `;
@@ -1888,11 +1896,10 @@ function renderBatonTasks() {
     if (!container) return;
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     
-    if (records.length === 0) {
+if (records.length === 0) {
         container.innerHTML = `
-            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
-                <div style="font-size:24px; margin-bottom:10px;">🕊️</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중! 🤍</div>
+            <div style="display: flex; align-items: center; justify-content: center; min-height: 110px; text-align: center; padding: 20px; background: var(--bg-sub); border-radius: 16px; border: 1px dashed var(--border);">
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중! 🤍</div>
             </div>`;
         return;
     }
@@ -2517,7 +2524,7 @@ window.selectTrackerBtn = function(btn, category) {
     else if (category === 'sleep_night') window.trackerState.subType = '밤잠';
 };
 
-// 2. 바텀 시트 열기 (이유식 토글 기능 완벽 탑재)
+// 2. 바텀 시트 열기 (이유식 토글 + 분유 퀵버튼 완벽 탑재)
 window.openTrackerSheet = function(type, editId = null) {
     window.editingTrackerId = (typeof editId === 'string') ? editId : null;
     window.trackerState.type = type; window.trackerState.subType = ''; window.trackerState.status = '';
@@ -2549,8 +2556,9 @@ window.openTrackerSheet = function(type, editId = null) {
     if (type === 'feed') {
         title.innerHTML = '🍼 맘마 기록하기';
         
+        // 🌟 [복구 완료] 최근 수유량 분석 로직
         let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-        let feedRecords = records.filter(r => r.type === 'feed' && r.subType !== '모유' && r.amount > 0);
+        let feedRecords = records.filter(r => r.type === 'feed' && r.subType !== '모유' && r.subType !== '이유식' && r.amount > 0);
         let uniqueAmounts = [];
         for (let r of feedRecords) {
             if (!uniqueAmounts.includes(r.amount)) uniqueAmounts.push(r.amount);
@@ -2558,7 +2566,22 @@ window.openTrackerSheet = function(type, editId = null) {
         }
         let recentFeedAmount = uniqueAmounts.length > 0 ? uniqueAmounts[0] : 160;
         
-        // 💡 [이유식 패치] 기존의 분유 입력 영역을 id="milk-input-area"로 감쌉니다.
+        // 🌟 [복구 완료] 분유 퀵버튼 생성 로직
+        let quickButtonsHtml = '';
+        if (uniqueAmounts.length === 0) {
+            quickButtonsHtml = `
+                <button type="button" onclick="window.setFeedAmount(160)" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 160ml</button>
+                <button type="button" onclick="window.setFeedAmount(200)" style="flex-shrink: 0; padding: 10px 14px; background: #F2F5F8; color: #4E5968; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">200ml</button>
+            `;
+        } else if (uniqueAmounts.length === 1) {
+            quickButtonsHtml = `<button type="button" onclick="window.setFeedAmount(${uniqueAmounts[0]})" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 늘 먹던 ${uniqueAmounts[0]}ml</button>`;
+        } else {
+            quickButtonsHtml = `
+                <button type="button" onclick="window.setFeedAmount(${uniqueAmounts[0]})" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 ${uniqueAmounts[0]}ml</button>
+                <button type="button" onclick="window.setFeedAmount(${uniqueAmounts[1]})" style="flex-shrink: 0; padding: 10px 14px; background: #F2F5F8; color: #4E5968; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">${uniqueAmounts[1]}ml</button>
+            `;
+        }
+        
         let milkHtml = `
             <div id="milk-input-area">
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -2571,6 +2594,13 @@ window.openTrackerSheet = function(type, editId = null) {
                     <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 16px;">
                         <input type="number" id="v-feed-amount" placeholder="${recentFeedAmount}" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition: 0.3s;">
                         <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
+                    </div>
+                    <!-- 🌟 [복구 완료] 분유 +10/-10 및 퀵버튼 영역 -->
+                    <div style="display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
+                        ${quickButtonsHtml}
+                        <div style="width: 1px; background: var(--border); margin: 0 4px;"></div>
+                        <button type="button" onclick="window.adjustFeedAmount(10)" style="flex-shrink: 0; padding: 10px 12px; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer;">+10</button>
+                        <button type="button" onclick="window.adjustFeedAmount(-10)" style="flex-shrink: 0; padding: 10px 12px; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer;">-10</button>
                     </div>
                 </div>
                 <div id="feed-breast-area" style="display: none; text-align: center; margin-bottom: 24px;">
@@ -2588,7 +2618,6 @@ window.openTrackerSheet = function(type, editId = null) {
             </div>
         `;
 
-        // 💡 [이유식 패치] 토글 버튼을 눌렀을 때 나타날 이유식 입력 영역 (기본은 숨김)
         let foodHtml = `
             <div id="food-input-area" style="display: none; text-align: center; margin-bottom: 24px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 이유식 양 (ml/g)</div>
@@ -2596,14 +2625,14 @@ window.openTrackerSheet = function(type, editId = null) {
                     <input type="number" id="v-food-amount" placeholder="60" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition: 0.3s;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
                 </div>
+                <!-- 이유식 미세조절 버튼 -->
                 <div style="display: flex; justify-content: center; gap: 8px;">
-                    <button type="button" onclick="window.adjustFoodAmount(10)" style="padding: 10px 16px; background: #E8F5E9; color: #10B981; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer;">+10</button>
-                    <button type="button" onclick="window.adjustFoodAmount(-10)" style="padding: 10px 16px; background: #FFF0F1; color: #F04452; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer;">-10</button>
+                    <button type="button" onclick="window.adjustFoodAmount(10)" style="padding: 10px 16px; background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer;">+10</button>
+                    <button type="button" onclick="window.adjustFoodAmount(-10)" style="padding: 10px 16px; background: rgba(240, 68, 82, 0.1); color: #F04452; border: 1px solid rgba(240, 68, 82, 0.2); border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer;">-10</button>
                 </div>
             </div>
         `;
 
-        // 💡 [이유식 패치] iOS 스타일 토글 스위치 UI 삽입!
         body.innerHTML = timeInputHtml + `
             <div class="mamma-toggle-container">
                 <input type="radio" id="tab-milk" name="mamma-type" value="milk" checked onchange="window.toggleMammaTab('milk')">
@@ -2674,14 +2703,14 @@ window.openTrackerSheet = function(type, editId = null) {
             <div id="diaper-status-area" style="display:none; margin-bottom:10px;">
                 <div style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-bottom: 10px; text-align:left;">어떤 색깔인가요?</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between;">
-                    <button onclick="window.selectTrackerBtn(this, 'status_golden')" style="flex:1; min-width:30%; padding: 12px 0; background: #F2F5F8; color: #8B95A1; border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">황금</button>
-                    <button onclick="window.selectTrackerBtn(this, 'status_green')" style="flex:1; min-width:30%; padding: 12px 0; background: #F2F5F8; color: #8B95A1; border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">녹색</button>
-                    <button onclick="window.selectTrackerBtn(this, 'status_brown')" style="flex:1; min-width:30%; padding: 12px 0; background: #F2F5F8; color: #8B95A1; border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">갈색</button>
-                    <button onclick="window.selectTrackerBtn(this, 'status_white')" style="flex:1; min-width:30%; padding: 12px 0; background: #F2F5F8; color: #8B95A1; border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">흰/회색</button>
-                    <button onclick="window.selectTrackerBtn(this, 'status_red')" style="flex:1; min-width:30%; padding: 12px 0; background: #F2F5F8; color: #8B95A1; border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">붉은색</button>
-                    <button onclick="window.selectTrackerBtn(this, 'status_black')" style="flex:1; min-width:30%; padding: 12px 0; background: #F2F5F8; color: #8B95A1; border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid #E5E8EB; cursor:pointer; transition:0.2s;">검은색</button>
+                    <button onclick="window.selectTrackerBtn(this, 'status_golden')" style="flex:1; min-width:30%; padding: 12px 0; background: var(--bg-card); color: var(--text-s); border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">황금</button>
+                    <button onclick="window.selectTrackerBtn(this, 'status_green')" style="flex:1; min-width:30%; padding: 12px 0; background: var(--bg-card); color: var(--text-s); border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">녹색</button>
+                    <button onclick="window.selectTrackerBtn(this, 'status_brown')" style="flex:1; min-width:30%; padding: 12px 0; background: var(--bg-card); color: var(--text-s); border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">갈색</button>
+                    <button onclick="window.selectTrackerBtn(this, 'status_white')" style="flex:1; min-width:30%; padding: 12px 0; background: var(--bg-card); color: var(--text-s); border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">흰/회색</button>
+                    <button onclick="window.selectTrackerBtn(this, 'status_red')" style="flex:1; min-width:30%; padding: 12px 0; background: var(--bg-card); color: var(--text-s); border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">붉은색</button>
+                    <button onclick="window.selectTrackerBtn(this, 'status_black')" style="flex:1; min-width:30%; padding: 12px 0; background: var(--bg-card); color: var(--text-s); border-radius: 8px; font-weight: 900; font-size: 13.5px; border: 1px solid var(--border); cursor:pointer; transition:0.2s;">검은색</button>
                 </div>
-                <div id="poop-warning-msg" style="font-size:10.5px; color:#8B95A1; margin-top:12px; text-align:left; font-weight:700; transition:0.3s; padding:0;">🚨 단순 참고용: 평소와 다르다면 반드시 전문의의 진료를 받으세요.</div>
+                <div id="poop-warning-msg" style="font-size:10.5px; color:var(--text-s); margin-top:12px; text-align:left; font-weight:700; transition:0.3s; padding:0;">🚨 단순 참고용: 평소와 다르다면 반드시 전문의의 진료를 받으세요.</div>
             </div>
         `;
         if(saveBtn) saveBtn.style.display = 'block';
@@ -3021,10 +3050,13 @@ window.updateTrackerDashboard = function() {
             for(let date in grouped) {
                 historyHtml += `<div style="font-size:12.5px; font-weight:900; color:#8B95A1; margin:16px 0 8px 0; border-bottom:1px solid #F2F5F8; padding-bottom:6px;">📅 ${date}</div>`;
                 grouped[date].forEach(r => {
-                    let icon = '✨';
-                    if (r.type === 'feed') icon = '🍼';
-                    else if (r.type === 'sleep') icon = (r.subType === '밤잠' ? '🌙' : '☀️');
-                    else if (r.type === 'diaper') {
+    let icon = '✨';
+    // 👇 이 부분이 핵심입니다! 이유식이면 숟가락, 아니면 젖병!
+    if (r.type === 'feed') {
+        icon = (r.subType === '이유식') ? '🥄' : '🍼';
+    }
+    else if (r.type === 'sleep') icon = (r.subType === '밤잠' ? '🌙' : '☀️');
+    else if (r.type === 'diaper') {
                         if (r.subType === '소변') icon = '💧';
                         else if (r.subType === '대변') icon = '💩';
                         else icon = '💧💩';
@@ -5797,23 +5829,25 @@ window.updateDadBriefing = function() {
 
         // 완료 여부에 따라 버튼의 형태를 다르게 그려줍니다.
         const actionButtonHtml = isCleared 
-            ? `<button disabled style="background: #10B981; border: none; color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: not-allowed; flex-shrink: 0;">완수! 👏</button>`
-            : `<button onclick="window.completeTopMission(this, '${missionMsg.replace(/'/g, "\\'")}')" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: all 0.2s;">완료하기</button>`;
+            ? `<button disabled style="background: #10B981; border: none; color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: not-allowed; flex-shrink: 0; align-self: flex-start;">완수! 👏</button>`
+            : `<button onclick="window.completeTopMission(this, '${missionMsg.replace(/'/g, "\\'")}')" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1); color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap; transition: all 0.2s; align-self: flex-start;">완료하기</button>`;
 
         parentDiv.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                <!-- 🚨 아내상태 뱃지: 크기 64px 고정 및 가운데 정렬 -->
-                <span style="background: ${hpBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 0; width: 64px; text-align: center; display: inline-block; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); box-sizing: border-box;">아내상태</span>
-                <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${hpMsg}</span>
+            <div style="display: flex; align-items: flex-start; gap: 8px; width: 100%;">
+                <!-- 🚨 아내상태 뱃지 -->
+                <span style="background: ${hpBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 0; width: 64px; text-align: center; display: inline-block; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); box-sizing: border-box; margin-top: 2px;">아내상태</span>
+                <!-- 🌟 [핵심 패치] white-space: nowrap 제거하고 word-break: keep-all 추가! -->
+                <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; line-height: 1.4; word-break: keep-all;">${hpMsg}</span>
             </div>
             
             <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.08);"></div>
             
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; padding-right: 8px;">
-                    <!-- 🚨 1순위미션 뱃지: 크기 64px 고정 및 가운데 정렬 -->
-                    <span style="background: ${missionBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 0; width: 64px; text-align: center; display: inline-block; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); box-sizing: border-box;">1순위미션</span>
-                    <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;">${missionMsg}</span>
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: flex-start; gap: 8px; padding-right: 8px;">
+                    <!-- 🚨 1순위미션 뱃지 -->
+                    <span style="background: ${missionBg}; color: #FFF; font-size: 11px; font-weight: 900; padding: 4px 0; width: 64px; text-align: center; display: inline-block; border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); box-sizing: border-box; margin-top: 2px;">1순위미션</span>
+                    <!-- 🌟 [핵심 패치] 텍스트가 길면 아래로 자연스럽게 줄바꿈되도록 수정 -->
+                    <span style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; line-height: 1.4; word-break: keep-all;">${missionMsg}</span>
                 </div>
                 ${actionButtonHtml}
             </div>
@@ -5829,11 +5863,10 @@ window.renderHomeBatonList = function() {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     let activeRecords = records.filter(r => r.status === 'requested' || r.status === 'accepted');
 
-    if (activeRecords.length === 0) {
+if (activeRecords.length === 0) {
         container.innerHTML = `
-            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
-                <div style="font-size:24px; margin-bottom:10px;">🕊️</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 미션이 없습니다.<br>오늘 하루도 평화롭네요! 🤍</div>
+            <div style="display: flex; align-items: center; justify-content: center; min-height: 110px; text-align: center; padding: 20px; background: var(--bg-sub); border-radius: 16px; border: 1px dashed var(--border);">
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">현재 대기 중인 미션이 없습니다.<br>오늘 하루도 평화롭네요! 🤍</div>
             </div>`;
         return;
     }
@@ -5959,4 +5992,80 @@ window.highlightUpdatedStat = function(elementId, newValue) {
         el.style.color = "#FFFFFF"; // 다크모드 기본 글씨색으로 복구
         el.style.transform = "scale(1)";
     }, 400);
+};
+
+// ==========================================
+// 📥 엑셀(CSV) 내보내기 엔진 (한글 깨짐 방지 완벽 패치)
+// ==========================================
+window.exportToExcel = function() {
+    // 1. 내 폰에 저장된 트래커, 해열제, 성장 기록 다 불러오기
+    const trackers = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+    const fevers = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    const growths = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
+
+    if (trackers.length === 0 && fevers.length === 0 && growths.length === 0) {
+        return window.showToast("⚠️ 아직 내보낼 데이터가 없습니다. 먼저 기록을 남겨주세요!");
+    }
+
+    // 2. 엑셀 파일(CSV) 헤더 만들기
+    // 💡 \uFEFF 는 엑셀에서 한글이 깨지지 않게 해주는 마법의 코드(BOM)입니다.
+    let csvContent = "\uFEFF"; 
+    csvContent += "날짜,시간,분류,상세,수치/상태\n";
+
+    // 3. 트래커 데이터 줄 세우기
+    trackers.forEach(t => {
+        const d = new Date(t.timestamp);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        
+        let category = t.type === 'feed' ? '수유' : (t.type === 'sleep' ? '수면' : '기저귀');
+        let detail = t.subType || '';
+        let value = t.amount ? t.amount : '';
+        if (t.type === 'feed' && t.subType === '이유식') value += ' ml/g';
+        else if (t.type === 'feed') value += ' ml/분';
+        else if (t.type === 'sleep') value += ' 분';
+        else if (t.type === 'diaper' && t.status) value = t.status;
+
+        // 쉼표(,)가 있으면 엑셀 칸이 밀리므로 제거
+        detail = String(detail).replace(/,/g, '');
+        value = String(value).replace(/,/g, '');
+
+        csvContent += `${dateStr},${t.time},${category},${detail},${value}\n`;
+    });
+
+    // 4. 해열제 데이터 줄 세우기
+    fevers.forEach(f => {
+        const d = new Date(f.timestamp);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        let pillName = f.type === 'red' ? '아세트아미노펜(빨강)' : '이부프로펜(파랑)';
+        let detail = f.symptoms && f.symptoms.length > 0 ? f.symptoms.join('/') : '증상없음';
+        
+        csvContent += `${dateStr},${f.time},해열제,${pillName} (${detail}),${f.temp}도\n`;
+    });
+
+    // 5. 성장 기록 줄 세우기
+    growths.forEach(g => {
+        let hText = g.height > 0 ? `키 ${g.height}cm` : '';
+        let wText = g.weight > 0 ? `몸무게 ${g.weight}kg` : '';
+        let val = [hText, wText].filter(Boolean).join(' / ');
+        
+        csvContent += `${g.date},기록없음,성장기록,생후 ${g.month}개월,${val}\n`;
+    });
+
+    // 6. 브라우저에서 파일로 만들어서 다운로드 실행!
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    // 파일 이름에 오늘 날짜 찍어주기
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `육아메이트_데이터백업_${todayStr}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.showToast("📥 엑셀(CSV) 데이터 다운로드가 완료되었습니다!");
 };
