@@ -2566,19 +2566,19 @@ window.openTrackerSheet = function(type, editId = null) {
         }
         let recentFeedAmount = uniqueAmounts.length > 0 ? uniqueAmounts[0] : 160;
         
-        // 🌟 [복구 완료] 분유 퀵버튼 생성 로직
+// 🌟 [수정 완료] 분유 퀵버튼 생성 (다크모드 대응 class="quick-btn" 추가)
         let quickButtonsHtml = '';
         if (uniqueAmounts.length === 0) {
             quickButtonsHtml = `
-                <button type="button" onclick="window.setFeedAmount(160)" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 160ml</button>
-                <button type="button" onclick="window.setFeedAmount(200)" style="flex-shrink: 0; padding: 10px 14px; background: #F2F5F8; color: #4E5968; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">200ml</button>
+                <button type="button" class="quick-btn active" onclick="window.setFeedAmount(160)" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 160ml</button>
+                <button type="button" class="quick-btn" onclick="window.setFeedAmount(200)" style="flex-shrink: 0; padding: 10px 14px; background: #F2F5F8; color: #4E5968; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">200ml</button>
             `;
         } else if (uniqueAmounts.length === 1) {
-            quickButtonsHtml = `<button type="button" onclick="window.setFeedAmount(${uniqueAmounts[0]})" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 늘 먹던 ${uniqueAmounts[0]}ml</button>`;
+            quickButtonsHtml = `<button type="button" class="quick-btn active" onclick="window.setFeedAmount(${uniqueAmounts[0]})" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 늘 먹던 ${uniqueAmounts[0]}ml</button>`;
         } else {
             quickButtonsHtml = `
-                <button type="button" onclick="window.setFeedAmount(${uniqueAmounts[0]})" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 ${uniqueAmounts[0]}ml</button>
-                <button type="button" onclick="window.setFeedAmount(${uniqueAmounts[1]})" style="flex-shrink: 0; padding: 10px 14px; background: #F2F5F8; color: #4E5968; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">${uniqueAmounts[1]}ml</button>
+                <button type="button" class="quick-btn active" onclick="window.setFeedAmount(${uniqueAmounts[0]})" style="flex-shrink: 0; padding: 10px 14px; background: #EBF4FF; color: #3182F6; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 ${uniqueAmounts[0]}ml</button>
+                <button type="button" class="quick-btn" onclick="window.setFeedAmount(${uniqueAmounts[1]})" style="flex-shrink: 0; padding: 10px 14px; background: #F2F5F8; color: #4E5968; border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">${uniqueAmounts[1]}ml</button>
             `;
         }
         
@@ -2592,7 +2592,7 @@ window.openTrackerSheet = function(type, editId = null) {
                 <div id="feed-ml-area" style="text-align: center; margin-bottom: 24px;">
                     <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
                     <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 16px;">
-                        <input type="number" id="v-feed-amount" placeholder="${recentFeedAmount}" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition: 0.3s;">
+                        <input type="number" id="v-feed-amount" placeholder="${recentFeedAmount}" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 140px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition: 0.3s;">
                         <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
                     </div>
                     <!-- 🌟 [복구 완료] 분유 +10/-10 및 퀵버튼 영역 -->
@@ -2611,7 +2611,7 @@ window.openTrackerSheet = function(type, editId = null) {
                     </div>
                     <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">수유 시간 (분)</div>
                     <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px;">
-                        <input type="number" id="v-breast-amount" placeholder="15" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
+                        <input type="number" id="v-breast-amount" placeholder="15" style="font-size: 40px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 140px; padding: 0; margin: 0; border-bottom: 2px solid var(--border); border-radius: 0;">
                         <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">분</span>
                     </div>
                 </div>
@@ -2622,7 +2622,7 @@ window.openTrackerSheet = function(type, editId = null) {
             <div id="food-input-area" style="display: none; text-align: center; margin-bottom: 24px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 이유식 양 (ml/g)</div>
                 <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 16px;">
-                    <input type="number" id="v-food-amount" placeholder="60" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition: 0.3s;">
+                    <input type="number" id="v-food-amount" placeholder="60" style="font-size: 44px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 140px; padding: 0; margin: 0; border-bottom: 3px solid var(--border); border-radius: 0; transition: 0.3s;">
                     <span style="font-size: 18px; font-weight: 800; color: var(--text-s);">ml</span>
                 </div>
                 <!-- 이유식 미세조절 버튼 -->
@@ -3157,36 +3157,44 @@ window.updateTrackerDashboard = function() {
 <div style="font-size:11.5px; font-weight:700; color:#8B95A1; background:var(--bg-sub); padding:6px 10px; border-radius:10px;">현재 깨시 !</div>
             </div>`;
         }
-    } else {
+} else {
         const currentSleepStart = sleepStartTime ? Number(sleepStartTime) : Number(lastSleepRecord.timestamp);
         const sleepMins = Math.max(0, Math.floor((nowTime - currentSleepStart) / 60000));
         const hours = Math.floor(sleepMins / 60);
         const mins = sleepMins % 60;
-        wakeTimeHtml = `<div style="background:linear-gradient(135deg, #F3F0FF, #EDE9FE); padding:14px 18px; border-radius:16px; margin-bottom:14px; border:1px solid #D8C6FE; display:flex; justify-content:space-between; align-items:center;">
+        
+        // 🌟 낮잠/밤잠 여부 파악해서 이모티콘 변경!
+        const currentSleepType = localStorage.getItem('tosil_sleep_type') || (lastSleepRecord ? lastSleepRecord.subType : '낮잠');
+        const sleepIcon = currentSleepType === '밤잠' ? '🌙' : '☀️';
+
+        wakeTimeHtml = `<div class="sleep-banner-box" style="background:linear-gradient(135deg, #F3F0FF, #EDE9FE); padding:14px 18px; border-radius:16px; margin-bottom:14px; border:1px solid #D8C6FE; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:20px;">🌙</span>
+                <span style="font-size:20px;">${sleepIcon}</span>
                 <div>
-                    <div style="font-size:11px; font-weight:800; color:#7C3AED; margin-bottom:2px;">꿀잠 타임</div>
-                    <div style="font-size:15px; font-weight:900; color:#6C31F6;">잠든 지 ${hours}시간 ${mins}분째 푹 자는 중</div>
+                    <div class="sleep-banner-text1" style="font-size:11px; font-weight:800; color:#7C3AED; margin-bottom:2px;">꿀잠 타임</div>
+                    <div class="sleep-banner-text2" style="font-size:15px; font-weight:900; color:#6C31F6;">잠든 지 ${hours}시간 ${mins}분째 푹 자는 중</div>
                 </div>
             </div>
-            <div style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿! 🤫</div>
+            <div class="sleep-banner-badge" style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿! 🤫</div>
         </div>`;
     }
 
+
     const todayRecords = records.filter(r => new Date(r.timestamp).getDate() === now.getDate());
     
-    // 📊 타임라인 패턴
+// 📊 타임라인 패턴
     let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
         <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-s); font-weight:800; margin-bottom:10px; padding:0 2px;">
             <span>📊 오늘의 하루 타임라인 패턴</span>
             <div style="display:flex; gap:10px;">
-                <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#D8C6FE; border-radius:2px;"></div>수면</span>
-                <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#3182F6; border-radius:2px;"></div>수유</span>
-                <span style="display:flex; align-items:center; gap:3px;"><div style="width:8px; height:8px; background:#F04452; border-radius:2px;"></div>기저귀</span>
+                <span style="display:flex; align-items:center; gap:3px;"><span style="display:inline-block; width:8px; height:8px; background-color:#D8C6FE !important; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>수면</span>
+                <span style="display:flex; align-items:center; gap:3px;"><span style="display:inline-block; width:8px; height:8px; background-color:#3182F6 !important; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>수유</span>
+                <span style="display:flex; align-items:center; gap:3px;"><span style="display:inline-block; width:8px; height:8px; background-color:#F04452 !important; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>기저귀</span>
             </div>
         </div>
-        <div style="width:100%; height:16px; background:var(--bg-sub); border-radius:8px; position:relative; overflow:hidden; margin-bottom:10px;">`;
+        
+        <!-- 바(Bar) 클릭 시 아래쪽 통계/기록 박스로 부드럽게 이동 -->
+        <div onclick="document.getElementById('tracker-stats-container').scrollIntoView({ behavior: 'smooth', block: 'center' });" style="cursor:pointer; width:100%; height:16px; background-color:var(--bg-sub) !important; border-radius:8px; position:relative; overflow:hidden; margin-bottom:10px; -webkit-print-color-adjust:exact; print-color-adjust:exact;">`;
 
     const timeOverlapMap = {}; 
     todayRecords.forEach(r => {
@@ -3199,14 +3207,15 @@ window.updateTrackerDashboard = function() {
         const offsetPx = overlapCount * 4;
         const zIndex = 10 + overlapCount;
 
+        // 🚨 안쪽 데이터 블록들도 span 태그와 !important로 무장 완료!
         if (r.type === 'sleep') {
             const duration = (r.amount === 0) ? Math.floor((nowTime - r.timestamp) / 60000) : r.amount; 
             const widthPercent = Math.min((duration / 1440 * 100), 100 - startPercent); 
-            timelineHtml += `<div style="position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background:rgba(168, 85, 247, 0.4); border-radius:4px; z-index:5;"></div>`;
+            timelineHtml += `<span style="display:inline-block; position:absolute; left:${startPercent}%; width:${widthPercent}%; height:100%; background-color:rgba(168, 85, 247, 0.4) !important; border-radius:4px; z-index:5; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>`;
         } else if (r.type === 'feed') {
-            timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#3182F6; border-radius:2px; z-index:${zIndex};"></div>`;
+            timelineHtml += `<span style="display:inline-block; position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background-color:#3182F6 !important; border-radius:2px; z-index:${zIndex}; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>`;
         } else if (r.type === 'diaper') {
-            timelineHtml += `<div style="position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background:#F04452; border-radius:2px; z-index:${zIndex};"></div>`;
+            timelineHtml += `<span style="display:inline-block; position:absolute; left:calc(${startPercent}% + ${offsetPx}px); width:3px; height:100%; background-color:#F04452 !important; border-radius:2px; z-index:${zIndex}; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>`;
         }
     });
 
@@ -4660,7 +4669,7 @@ const limitMap = {
 }
 
 function deleteOpenRecord(id) {
-    showConfirm("이 품목을 삭제하시겠습니까? (다 썼거나 폐기한 경우)", function() {
+    showConfirm("이 품목을 삭제하시겠습니까?", function() {
         let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
         records = records.filter(r => r.id !== id);
         localStorage.setItem('tosil_open_records', JSON.stringify(records));
