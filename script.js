@@ -3657,8 +3657,18 @@ window.stopSleepTimer = async function() {
 };
 
 // 💾 트래커 기록 저장 함수 (이유식 저장 완벽 지원)
+// 💾 트래커 기록 저장 함수 (이유식 저장 완벽 지원 & 중복 클릭 방어)
 window.saveTrackerRecord = async function() {
     if(!window.trackerState.type) return;
+
+    // 🚨 [핵심 디테일] 버튼 따닥! 중복 클릭 원천 차단
+    const saveBtn = document.getElementById('btn-tracker-save');
+    if (saveBtn) {
+        if (saveBtn.disabled) return; // 이미 눌려서 저장 중이면 강제 종료!
+        saveBtn.disabled = true; // 1차 방어: 버튼 잠금
+        saveBtn.innerText = '저장 중... 💾'; // 2차 방어: 시각적 피드백
+        saveBtn.style.opacity = '0.5';
+    }
 
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     let timeStr = "";
@@ -3690,21 +3700,27 @@ window.saveTrackerRecord = async function() {
         // 1. 이유식 탭이 눌려있을 때!
         if (window.trackerState.subType === '이유식') {
             const foodAmt = document.getElementById('v-food-amount').value;
-            if(!foodAmt) return window.showToast('⚠️ 먹은 이유식 양을 입력해주세요!');
+            if(!foodAmt) {
+                if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
+                return window.showToast('⚠️ 먹은 이유식 양을 입력해주세요!');
+            }
             
-            record.type = 'feed'; // 대시보드 통계를 위해 type은 feed로 통일
+            record.type = 'feed'; 
             record.subType = '이유식';
             record.amount = parseInt(foodAmt);
-            record.status = ''; // 상태값 비움
+            record.status = ''; 
         } 
         // 2. 분유/모유 탭이 눌려있을 때!
         else {
-            if(!window.trackerState.subType) return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요!');
+            if(!window.trackerState.subType) {
+                if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
+                return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요!');
+            }
             
             if (window.trackerState.subType === '모유') {
                 const bAmt = document.getElementById('v-breast-amount').value;
-                if(!bAmt) return window.showToast('⚠️ 수유 시간(분)을 입력해주세요!');
-                if(!window.trackerState.status) return window.showToast('⚠️ 왼쪽/오른쪽을 선택해주세요!');
+                if(!bAmt) { if(saveBtn){ saveBtn.disabled = false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 수유 시간(분)을 입력해주세요!'); }
+                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled = false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 왼쪽/오른쪽을 선택해주세요!'); }
                 
                 record.type = 'feed';
                 record.subType = '모유';
@@ -3712,16 +3728,16 @@ window.saveTrackerRecord = async function() {
                 record.status = window.trackerState.status; 
             } else {
                 const amt = document.getElementById('v-feed-amount').value;
-                if(!amt) return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요!');
+                if(!amt) { if(saveBtn){ saveBtn.disabled = false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요!'); }
                 record.type = 'feed';
-                record.subType = window.trackerState.subType; // 분유 or 유축
+                record.subType = window.trackerState.subType; 
                 record.amount = parseInt(amt);
                 record.status = '';
             }
         }
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) return window.showToast('⚠️ 소변인지 대변인지 선택해주세요!');
+        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled = false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 소변인지 대변인지 선택해주세요!'); }
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
@@ -3765,7 +3781,16 @@ window.saveTrackerRecord = async function() {
 
     window.editingTrackerId = null; 
     window.closeTrackerSheet();
-    window.showToast(record.subType === '이유식' ? "(🥄 냠냠! 이유식 기록 완료!" : "💾 기록이 저장되었습니다!");
+    window.showToast(record.subType === '이유식' ? "🥄 냠냠! 이유식 기록 완료!" : "💾 기록이 저장되었습니다!");
+
+    // 👇 창이 닫힌 후, 다음 기록을 위해 버튼 상태 원상복구
+    if (saveBtn) {
+        setTimeout(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerText = '저장하기';
+            saveBtn.style.opacity = '1';
+        }, 500);
+    }
 };
 
 // ==========================================
@@ -6074,3 +6099,29 @@ window.exportToExcel = function() {
 
     window.showToast("📥 엑셀(CSV) 데이터 다운로드가 완료되었습니다!");
 };
+
+// ==========================================
+// 💎 [니치 UX] 아이폰 다이얼 패드 강제 호출 엔진
+// ==========================================
+const keypadObserver = new MutationObserver(() => {
+    // 앱 화면에 떠 있는 모든 숫자 입력칸을 찾아서
+    document.querySelectorAll('input[type="number"], input[inputmode="numeric"]').forEach(input => {
+        
+        // 소수점이 필요한 체온/체중 입력칸은 decimal 유지
+        if (['v-weight', 'v-temp', 'calc-weight', 'v-height', 'v-weight-growth'].includes(input.id)) {
+            if(input.getAttribute('inputmode') !== 'decimal') {
+                input.setAttribute('inputmode', 'decimal');
+                input.removeAttribute('pattern');
+            }
+        } else {
+            // 나머지(수유량, 수면시간 등)는 무조건 크고 쾌적한 다이얼 패드(pattern="[0-9]*") 강제 호출!
+            if(input.getAttribute('pattern') !== '[0-9]*') {
+                input.setAttribute('inputmode', 'numeric');
+                input.setAttribute('pattern', '[0-9]*');
+            }
+        }
+    });
+});
+
+// 앱 전체의 화면 변화(바텀시트가 열리는 등)를 감지해서 자동으로 속성 주입
+keypadObserver.observe(document.body, { childList: true, subtree: true });
