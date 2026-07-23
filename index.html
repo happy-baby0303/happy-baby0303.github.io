@@ -88,6 +88,11 @@ body.dark-mode .care-btn.active {
     color: #3182F6 !important; /* 쨍한 파란색 글씨 */
     border: 1px solid #3182F6 !important;
 }
+
+/* 팝업(모달) 창을 감싸는 div에 아래 스타일 속성을 추가해 주세요 */
+max-height: 85vh;          /* 화면 높이의 85%까지만 팝업이 커지도록 제한 */
+overflow-y: auto;          /* 내용이 길어지면 내부 스크롤 생성 */
+padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 여백 추가 */
 </style>
 </head>
 
@@ -1446,10 +1451,13 @@ body.dark-mode .care-btn.active {
             조금만 기다려주세요, 금방 오픈할게요!
         </div>
         
-        <!-- 💡 수요 파악 버튼 -->
+<!-- 알림받기 버튼 임시 숨김 처리 시작 
         <button onclick="window.open('https://forms.gle/여기에_구글폼_링크_넣기', '_blank')" style="background: var(--primary); color: #FFF; border: none; padding: 18px 24px; border-radius: 16px; font-size: 16px; font-weight: 900; width: 100%; box-shadow: 0 8px 20px rgba(49, 130, 246, 0.3); cursor: pointer; transition: all 0.2s;">
             🔔 가장 먼저 오픈 알림 받기
         </button>
+        임시 숨김 처리 끝 -->
+
+    </div>
     </div>
     <!-- 👆 🌟 맘수다 탭 끝 🌟 👆 -->
 

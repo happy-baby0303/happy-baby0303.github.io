@@ -156,5 +156,23 @@
 
     <script src="data.js"></script>
     <script src="app.js"></script>
+
+
+<!-- 🚀 우측 하단 위로 가기 버튼 (높이 30px로 정상화 완료!) -->
+    <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">
+        ↑
+    </button>
+
+    <script>
+        // 스크롤 감지해서 300px 이상 내려가면 버튼 보이기
+        window.addEventListener('scroll', () => {
+            const topBtn = document.getElementById('scrollToTopBtn');
+            if (window.scrollY > 300) {
+                topBtn.style.display = 'flex';
+            } else {
+                topBtn.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

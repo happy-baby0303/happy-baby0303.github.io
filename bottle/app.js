@@ -259,8 +259,19 @@ function runBottleEngine() {
 
     if (isFilterActive) processedData.sort((a, b) => b.matchRate - a.matchRate);
 
-    if (processedData.length === 0) {
-        resultArea.innerHTML = `<div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB;"><div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🍼</div><div class="empty-text"><b>조건에 완벽하게 맞는 젖병이 없습니다.</b><br><span style="font-size:13px; color:#8B95A1;">초기화 버튼을 누르거나 필터를 완화해 보세요!</span></div></div>`;
+    // 🚨 방금 꼬였던 바로 그 부분 (안전하게 수정 완료)
+    if (processedData.length === 0 || (isFilterActive && processedData[0].matchRate < 70)) {
+        resultArea.innerHTML = `
+            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+                <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🍼</div>
+                <div class="empty-text" style="margin-bottom: 20px;">
+                    <b style="font-size: 15px; color: #191F28;">조건에 완벽하게 맞는 젖병이 없습니다.</b><br>
+                    <span style="font-size:13px; color:#8B95A1; line-height: 1.5; display: inline-block; margin-top: 4px;">조건을 너무 깐깐하게 고르셨나봐요!<br>필터를 초기화하고 다시 찾아볼까요?</span>
+                </div>
+                <button onclick="resetBottleFilters()" style="padding: 14px 24px; background: #191F28; color: #FFF; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s;">
+                    🔄 필터 초기화하기
+                </button>
+            </div>`;
         return;
     }
 
@@ -326,10 +337,29 @@ function shareToHusband(id, brand, name) {
     });
 }
 
+// ==========================================
+// 💎 [니치 UX] 필터 조작 시 햅틱 & 시선 유도 스크롤
+// ==========================================
 document.querySelectorAll('.matrix-panel select').forEach(select => {
-    select.addEventListener('change', runBottleEngine);
+    select.addEventListener('change', () => {
+        runBottleEngine();
+        
+        // 1. 손맛 (미세 진동)
+        if (navigator.vibrate) navigator.vibrate(10);
+        
+        // 2. 결과창이 화면 아래에 숨어있다면 스무스하게 끌어올려줌
+        const resultArea = document.getElementById('bottle-result-area');
+        if(resultArea) {
+            const rect = resultArea.getBoundingClientRect();
+            // 결과창 꼭대기가 화면의 60%보다 밑에 있으면 살짝 위로 당겨줌
+            if(rect.top > window.innerHeight * 0.6) {
+                window.scrollBy({ top: rect.top - 120, behavior: 'smooth' });
+            }
+        }
+    });
 });
 
+// 🚨 [필수 복구] 앱 처음 켤 때 시동 거는 코드 (이게 날아가서 화면이 안 떴던 겁니다!)
 window.onload = () => { 
     applyGlobalBabyProfile(); 
     runBottleEngine(); 

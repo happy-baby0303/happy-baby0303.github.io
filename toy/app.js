@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const ms = e.target.getAttribute('data-milestone');
             renderToys(ms === 'all' ? toyData : toyData.filter(t => t.milestone === ms || t.milestone === 'all'));
+
+            document.getElementById('view-toy-gear').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 
@@ -36,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const theme = e.currentTarget.getAttribute('data-theme');
             renderToys(toyData.filter(t => t.theme === theme));
+
+           document.getElementById('view-toy-gear').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 });
@@ -114,8 +118,10 @@ function filterPlays(category, btnEl) {
     btnEl.style.background = '#191F28'; btnEl.style.color = '#FFFFFF'; btnEl.style.border = 'none';
     currentPlayCategory = category;
     renderPlays();
+    
+    // ✨ 추가: 필터 클릭 시 결과 리스트 상단으로 부드럽게 스크롤
+    document.getElementById('view-toy-play').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
 function renderPlays() {
     const container = document.getElementById('play-result-area');
     
@@ -126,8 +132,16 @@ function renderPlays() {
         return catMatch && ageMatch;
     });
 
-    if (filtered.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:40px; color:#8B95A1; background:#F9FAFB; border-radius:16px;">현재 개월수에 맞는 해당 놀이가 없습니다.</div>`;
+if (filtered.length === 0) {
+        // 기존 밋밋한 코드를 아래 코드로 덮어쓰기
+        container.innerHTML = `
+            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB; margin-top: 16px;">
+                <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🥲</div>
+                <div class="empty-text">
+                    <b style="font-size:16px; color:#191F28; font-weight:800; display:block; margin-bottom:6px;">앗! 조건에 맞는 놀이가 없어요</b>
+                    <span style="font-size:13px; color:#8B95A1;">다른 놀이 테마를 선택해 보세요.</span>
+                </div>
+            </div>`;
         return;
     }
 

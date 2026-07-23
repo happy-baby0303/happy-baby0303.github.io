@@ -3159,17 +3159,14 @@ window.updateTrackerDashboard = function() {
         const hours = Math.floor(sleepMins / 60);
         const mins = sleepMins % 60;
         
-        // 🌟 낮잠/밤잠 여부 파악해서 이모티콘 변경!
+// 🌟 낮잠/밤잠 여부 파악해서 이모티콘 변경!
         const currentSleepType = localStorage.getItem('tosil_sleep_type') || (lastSleepRecord ? lastSleepRecord.subType : '낮잠');
         const sleepIcon = currentSleepType === '밤잠' ? '🌙' : '☀️';
 
         wakeTimeHtml = `<div class="sleep-banner-box" style="background:linear-gradient(135deg, #F3F0FF, #EDE9FE); padding:14px 18px; border-radius:16px; margin-bottom:14px; border:1px solid #D8C6FE; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:10px;">
                 <span style="font-size:20px;">${sleepIcon}</span>
-                <div>
-                    <div class="sleep-banner-text1" style="font-size:11px; font-weight:800; color:#7C3AED; margin-bottom:2px;">꿀잠 타임</div>
-                    <div class="sleep-banner-text2" style="font-size:15px; font-weight:900; color:#6C31F6;">잠든 지 ${hours}시간 ${mins}분째 푹 자는 중</div>
-                </div>
+                <div class="sleep-banner-text2" style="font-size:15px; font-weight:900; color:#6C31F6;">${hours}시간 ${mins}분째 꿀잠 중</div>
             </div>
             <div class="sleep-banner-badge" style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿! 🤫</div>
         </div>`;
@@ -3181,7 +3178,7 @@ window.updateTrackerDashboard = function() {
 // 📊 타임라인 패턴
     let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
         <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-s); font-weight:800; margin-bottom:10px; padding:0 2px;">
-            <span>📊 오늘의 하루 타임라인 패턴</span>
+            <span>📊 아기 하루 패턴</span>
             <div style="display:flex; gap:10px;">
                 <span style="display:flex; align-items:center; gap:3px;"><span style="display:inline-block; width:8px; height:8px; background-color:#D8C6FE !important; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>수면</span>
                 <span style="display:flex; align-items:center; gap:3px;"><span style="display:inline-block; width:8px; height:8px; background-color:#3182F6 !important; border-radius:2px; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></span>수유</span>

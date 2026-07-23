@@ -337,9 +337,13 @@ function runFoodEngine() {
             `;
         }
 
-        resultArea.innerHTML = htmlOutput;
+        resultArea.innerHTML = htmlOutput; // 👈 2개 중 여기가 맞습니다! (runFoodEngine 안쪽)
+
+        // 👇 여기에 스크롤 코드를 딱! 추가해 주세요.
+        // 결과가 갱신되면 유저 시선이 다시 매트릭스 필터 쪽으로 부드럽게 올라갑니다.
+        document.querySelector('.matrix-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-}
+} // <-- runFoodEngine() 함수가 끝나는 닫는 괄호
 
 function toggleFoodOthers() {
     const otherArea = document.getElementById('food-other-area');
@@ -351,6 +355,9 @@ function toggleFoodOthers() {
         otherArea.style.display = 'none';
         const otherCount = otherArea.querySelectorAll('.stroller-card').length;
         btn.innerText = `나머지 ${otherCount}개 레시피 더보기 ▾`;
+        
+        // 👇 추가: 리스트 접을 때 화면 튕김 방지
+        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
@@ -428,8 +435,11 @@ function switchFoodTab(tabName) {
         btnCuration.style.boxShadow = 'none';
 
         viewCalendar.style.display = 'block';
-        viewCuration.style.display = 'none';
+        viewCuration.style.display = 'none'; // 👈 이 줄이 지워져서 화면이 겹쳤던 겁니다!
     }
+
+    // 탭을 전환할 때마다 화면 맨 위로 부드럽게 끌어올려줌
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
 }
 
 // ==========================================

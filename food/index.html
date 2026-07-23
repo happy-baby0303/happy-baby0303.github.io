@@ -109,7 +109,7 @@
 
             <div class="search-box">
                 <label style="display:block; font-size:14px; font-weight:800; color:#191F28; margin-bottom:12px;">🚦 이 식재료 먹여도 될까? (신호등 판독기)</label>
-                <input type="text" id="ingredient-search" placeholder="예: 고기, 꿀, 소금, 새우 입력" onkeyup="checkIngredient()">
+                <input type="text" id="ingredient-search" placeholder="예: 고기, 꿀, 소금, 새우 입력" onkeyup="checkIngredient(event)">
                 <div id="traffic-light-result" style="margin-top: 16px; display:none;"></div>
             </div>
 
@@ -361,5 +361,23 @@
     <script src="../html2canvas.min.js"></script>
     <script src="data.js"></script>
     <script src="app.js?v=999"></script>
-</body>
+
+
+<!-- 🚀 우측 하단 위로 가기 버튼 -->
+    <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">
+        ↑
+    </button>
+
+    <script>
+        // 스크롤 감지해서 300px 이상 내려가면 버튼 보이기
+        window.addEventListener('scroll', () => {
+            const topBtn = document.getElementById('scrollToTopBtn');
+            if (window.scrollY > 300) {
+                topBtn.style.display = 'flex';
+            } else {
+                topBtn.style.display = 'none';
+            }
+        });
+    </script>
+</body> <!-- 기존 바디 닫는 태그 -->
 </html>

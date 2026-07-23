@@ -149,6 +149,7 @@ function renderVS() {
         </table>
     `;
     res.style.display = 'block';
+    res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function getVolume(dims) { return (dims[0] * dims[1] * dims[2]) / 1000; }
@@ -487,8 +488,16 @@ function renderList(isUserAction = false) {
     setTimeout(() => { document.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);
 }
 
+// 🛠️ 수정된 필터 버튼 클릭 이벤트 (스크롤 모션 추가)
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('stroller-filt-btn')) { const btn = e.target; btn.classList.toggle('active'); renderList(); }
+    if (e.target.classList.contains('stroller-filt-btn')) { 
+        const btn = e.target; 
+        btn.classList.toggle('active'); 
+        renderList(); 
+        
+        // ✨ 필터를 누르면 시선을 다시 필터 영역으로 부드럽게 올려줌
+        document.querySelector('.filter-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 });
 
 function scrollToResults() {

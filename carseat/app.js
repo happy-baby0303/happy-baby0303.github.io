@@ -292,7 +292,7 @@ function runCarseatEngine() {
 
     if (isFilterActive) processedData.sort((a, b) => b.matchRate - a.matchRate);
 
-    if (processedData.length === 0) {
+    if (processedData.length === 0 || (isFilterActive && processedData[0].matchRate < 50)) {
         resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">🚘</div><div class="empty-text"><b>조건에 완벽하게 맞는 카시트가 없습니다.</b><span>차량 고정 방식 등을 한 번 더 확인해 주세요!</span></div></div>`;
         return;
     }
@@ -314,8 +314,13 @@ function runCarseatEngine() {
             </div>
         `;
     }
-    resultArea.innerHTML = htmlOutput;
-}
+   resultArea.innerHTML = htmlOutput; // 👈 여기입니다!
+
+    // 👇 여기에 스크롤 코드를 추가해 주세요!
+    if (isFilterActive) {
+        document.querySelector('.matrix-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+} // <-- runCarseatEngine() 함수가 끝나는 닫는 괄호
 
 function toggleCarseatOthers() {
     const otherArea = document.getElementById('carseat-other-area');
@@ -326,6 +331,8 @@ function toggleCarseatOthers() {
     } else {
         otherArea.style.display = 'none';
         btn.innerText = `나머지 결과 보기 ▾`;
+        // 👇 이 한 줄을 추가해 주세요! (리스트가 접힐 때 시선을 버튼 위치로 부드럽게 올려줌)
+        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
@@ -357,7 +364,7 @@ function shareToHusband(id) {
         content: {
             title: `여보! 우리 아기 카시트는 [${item.brand} ${item.name}] 제품으로 사자 💺❤️`,
             description: `${item.bodySpec}\n우리아이 생명이 달린 거니까 호환성 리포트 확인하고 이 링크로 결제해줘 🥰`, 
-            imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
+            imageUrl: 'https://happy-baby0303.github.io/baby-master/carseat/og-image.png',
             link: { mobileWebUrl: myLink, webUrl: myLink },
         },
         buttons: [
