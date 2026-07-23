@@ -1491,7 +1491,8 @@ body.dark-mode .care-btn.active {
 
 <!-- 🎟️ 프리미엄(축제) 모달 -->
 <div id="premium-modal" class="modal-overlay" onclick="closeFestivalModal(event)">
-    <div class="modal-content box-main" onclick="event.stopPropagation()">
+    <!-- 👇 여기에 max-height와 overflow-y:auto 를 추가해서 스크롤을 만듭니다! 👇 -->
+    <div class="modal-content box-main" style="max-height: 85vh; overflow-y: auto; position: relative;" onclick="event.stopPropagation()">
         <div class="modal-close-handle" style="background:var(--border);" onclick="closeFestivalModalForce()"></div>
         <div id="modal-dynamic-body"></div>
     </div>

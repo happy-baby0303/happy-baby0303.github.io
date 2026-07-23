@@ -404,15 +404,11 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 </a>
             </div>
 
-            <!-- ✅ 하단 액션 버튼 -->
-            <div style="display:flex; gap:10px; margin-bottom: 30px;"> <!-- 마진 바텀 추가 -->
+   <!-- ✅ 하단 액션 버튼 -->
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
-            
-            <!-- 🚨 [최종 보스] 더 강력하고 두꺼운 200px 투명 기둥! (안드로이드 완벽 대응) -->
-            <div style="display:block; clear:both; width:100%; height:200px; padding-bottom:100px; background:transparent;"></div>
-            
         </div>
     `;
     const modalWrap = document.getElementById('premium-modal');
