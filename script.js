@@ -25,15 +25,30 @@ const babyTips = [
 ];
 
 // ==========================================
-// 2. 화면 내비게이션 엔진
+// 2. 화면 내비게이션 엔진 (쫀득한 애니메이션 패치)
 // ==========================================
 function switchTab(id, el) {
+    if(navigator.vibrate) navigator.vibrate(10); // 📱 탭 넘길 때 기분 좋은 미세 진동
+
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    
     const targetTab = document.getElementById('tab-' + id);
     if(targetTab) targetTab.classList.add('active');
-    if (el) el.classList.add('active'); 
-    else { const navEl = document.getElementById('nav-' + id); if (navEl) navEl.classList.add('active'); }
+    
+    let targetNav = el;
+    if (!targetNav) targetNav = document.getElementById('nav-' + id);
+    
+    if (targetNav) {
+        targetNav.classList.add('active');
+        // ✨ 아이콘 바운스 애니메이션
+        const icon = targetNav.querySelector('.icon');
+        if (icon) {
+            icon.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            icon.style.transform = 'scale(1.3) translateY(-4px)';
+            setTimeout(() => { icon.style.transform = 'scale(1) translateY(0)'; }, 200);
+        }
+    }
     window.scrollTo(0,0);
 }
 
