@@ -81,6 +81,18 @@ function switchOutingSubTab(type) {
     filterPlaces();
 }
 
+// ✨ 👇 방금 지운 자리에 이것을 통째로 붙여넣으세요! 👇 ✨
+
+// ==========================================
+// ✨ 툴박스 화면 부드러운 전환 (Fade-Up) 패치
+// ==========================================
+if (!document.getElementById('tool-animation-style')) {
+    const style = document.createElement('style');
+    style.id = 'tool-animation-style';
+    style.innerHTML = `@keyframes toolFadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }`;
+    document.head.appendChild(style);
+}
+
 function switchTool(panelId, el) {
     document.querySelectorAll('.tool-chip').forEach(c => c.classList.remove('active'));
     if(el) el.classList.add('active');
@@ -88,11 +100,20 @@ function switchTool(panelId, el) {
     
     const toolboxTab = document.getElementById('tab-toolbox');
     if(toolboxTab) {
-        toolboxTab.querySelectorAll('.panel-block').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+        toolboxTab.querySelectorAll('.panel-block').forEach(p => { 
+            p.classList.remove('active'); 
+            p.style.display = 'none'; 
+            p.style.animation = ''; // 기존 애니메이션 리셋
+        });
     }
     
     const targetPanel = document.getElementById('panel-' + panelId);
-    if(targetPanel) { targetPanel.classList.add('active'); targetPanel.style.display = 'block'; }
+    if(targetPanel) { 
+        targetPanel.classList.add('active'); 
+        targetPanel.style.display = 'block'; 
+        // 👇 대기업 앱 특유의 쫀득한 팝업 효과
+        targetPanel.style.animation = 'toolFadeUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
+    }
 
     if (panelId === 'fever') {
         const wInput = document.getElementById('v-weight');
@@ -2960,7 +2981,28 @@ window.openTrackerSheet = function(type, editId = null) {
     } else {
         if(saveBtn) saveBtn.innerText = '저장하기';
     }
-};
+
+    // ==========================================
+    // 🚨 [여기에 추가!] 바텀 시트가 열릴 때 무조건 휠 엔진 가동!
+    // ==========================================
+    setTimeout(() => {
+        let targetTime = currentTimeStr; // 기본값은 현재 시간
+        
+        // 수정 모드일 경우 기존에 저장된 시간 불러오기
+        if (window.editingTrackerId) {
+            let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+            let recordToEdit = records.find(r => r.id === window.editingTrackerId);
+            if (recordToEdit) targetTime = recordToEdit.time;
+        }
+        
+        // 화면에 창이 그려지고 난 뒤(0.08초 뒤) 엔진 스위치 ON!
+        if (typeof window.initDrumPicker === 'function') {
+            window.initDrumPicker(targetTime);
+        }
+    }, 80);
+    // ==========================================
+
+}; // <--- openTrackerSheet 함수가 끝나는 진짜 마지막 중괄호
 
 // 💡 [이유식 패치] 토글 버튼 누를 때 화면 바뀌게 해주는 엔진
 window.toggleMammaTab = function(type) {
@@ -4830,8 +4872,15 @@ window.calcPong = calcPong;
 window.switchPongTab = switchPongTab;
 
 // ==========================================
-// 🗓️ [툴박스] 언제깠지 (개봉일 추적기) 모듈
+// 🗓️ [툴박스] 언제깠지 (개봉일 추적기) 모듈 + 스마트 필터
 // ==========================================
+window.currentOpenFilter = 'all'; // 현재 선택된 필터 탭 기억하기
+
+window.setOpenFilter = function(filter) {
+    window.currentOpenFilter = filter;
+    renderOpenRecords();
+};
+
 function addOpenRecord() {
     const typeSelect = document.getElementById('open-item-type');
     const dateInput = document.getElementById('open-item-date');
@@ -4844,7 +4893,7 @@ function addOpenRecord() {
     if (!dateVal) return showToast("⚠️ 뜯은 날짜를 선택해주세요!");
 
     // 권장 유통기한(일수) 맵핑
-const limitMap = {
+    const limitMap = {
         'formula': 21,    // 분유: 3주
         'fever': 30,      // 시럽약: 1달
         'tub_oint': 30,   // 소분 연고: 1달
@@ -4868,6 +4917,8 @@ const limitMap = {
     records.push(newRecord);
     localStorage.setItem('tosil_open_records', JSON.stringify(records));
     
+    // 새 물건 등록 시 자동으로 전체 탭으로 이동해서 보여주기
+    window.currentOpenFilter = 'all'; 
     renderOpenRecords();
     showToast("✍️ 라벨 스티커가 등록되었습니다!");
 }
@@ -4902,18 +4953,52 @@ function renderOpenRecords() {
         return;
     }
 
+    // 🌟 카테고리 맵핑 (내부에 있는 데이터들의 큰 그룹 묶기)
+    const catGroupMap = {
+        'formula': 'food', 'puree': 'food',
+        'fever': 'med', 'eye_drop': 'med',
+        'tub_oint': 'skin', 'tube_oint': 'skin', 'cream': 'skin',
+        'wipe': 'hygiene'
+    };
+    const catGroupNames = {
+        'food': '🍼 수유/식품', 'med': '💊 약/영양제', 'skin': '🧴 연고/스킨케어', 'hygiene': '🧻 위생용품'
+    };
+
+    // 현재 등록된 물건들을 바탕으로 필요한 탭(버튼)만 추출
+    let existingGroups = new Set();
+    records.forEach(r => existingGroups.add(catGroupMap[r.type] || 'etc'));
+
+    // 🌟 상단 가로 스크롤 필터 탭 UI 그리기
+    let html = `<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:12px; scrollbar-width:none; border-bottom:1px solid var(--border);">`;
+    
+    // [전체] 버튼
+    const isAllActive = window.currentOpenFilter === 'all';
+    html += `<button onclick="window.setOpenFilter('all')" style="flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:900; cursor:pointer; border:1px solid ${isAllActive ? '#3182F6' : 'var(--border)'}; background:${isAllActive ? '#E8F3FF' : 'var(--bg-card)'}; color:${isAllActive ? '#3182F6' : 'var(--text-s)'}; transition:all 0.2s;">전체 보기</button>`;
+    
+    // 존재하는 그룹 버튼들 나열
+    Array.from(existingGroups).sort().forEach(group => {
+        const isActive = window.currentOpenFilter === group;
+        html += `<button onclick="window.setOpenFilter('${group}')" style="flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; border:1px solid ${isActive ? '#3182F6' : 'var(--border)'}; background:${isActive ? '#E8F3FF' : 'var(--bg-card)'}; color:${isActive ? '#3182F6' : 'var(--text-s)'}; transition:all 0.2s;">${catGroupNames[group]}</button>`;
+    });
+    html += `</div>`;
+
+    // 🌟 선택된 탭에 맞춰 데이터 필터링
+    let filteredRecords = window.currentOpenFilter === 'all' ? records : records.filter(r => catGroupMap[r.type] === window.currentOpenFilter);
+
+    if (filteredRecords.length === 0) {
+        html += `<div style="text-align:center; padding:20px; color:var(--text-s); font-size:13px; font-weight:700;">해당 카테고리의 품목이 없습니다.</div>`;
+    }
+
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    let html = '';
-    
-    records.sort((a, b) => {
+    filteredRecords.sort((a, b) => {
         const endA = new Date(a.openDate).getTime() + (a.limitDays * 24 * 60 * 60 * 1000);
         const endB = new Date(b.openDate).getTime() + (b.limitDays * 24 * 60 * 60 * 1000);
         return endA - endB;
     });
 
-    records.forEach(r => {
+    filteredRecords.forEach(r => {
         const openD = new Date(r.openDate);
         openD.setHours(0,0,0,0);
         
@@ -4945,7 +5030,7 @@ function renderOpenRecords() {
                     </div>
                 </div>
             </div>
-            <button onclick="deleteOpenRecord('${r.id}')" style="background:#F2F5F8; border:none; border-radius:10px; width:40px; height:40px; color:#8B95A1; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center;">❌</button>
+            <button onclick="deleteOpenRecord('${r.id}')" style="background:#F2F5F8; border:none; border-radius:10px; width:40px; height:40px; color:#8B95A1; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center; transition:0.2s;">❌</button>
         </div>`;
     });
 
