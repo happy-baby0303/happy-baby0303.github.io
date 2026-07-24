@@ -2672,30 +2672,32 @@ window.openTrackerSheet = function(type, editId = null) {
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
     let timeLabel = type === 'sleep' ? "언제 잠들었나요?" : "기록 시간 (터치하여 시간 수정)";
-   // 🌟 촌스러운 OS 기본 시계를 버리고, 숫자 키패드 직력 입력 UI로 교체!
+  // 🌟 (변경됨) 키보드 타이핑이 아닌 부드러운 스와이프 휠 UI로 교체!
     const timeInputHtml = `
         <div style="text-align: center; margin-bottom: 24px;">
             <div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin-bottom:12px;">${timeLabel}</div>
             
-            <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
-                <!-- 🕒 시(Hour) 입력칸 -->
-                <input type="text" id="v-tracker-hh" inputmode="numeric" pattern="[0-9]*" maxlength="2"
-                       value="${String(now.getHours()).padStart(2,'0')}" 
-                       oninput="window.handleHHInput(this, 'v-tracker-mm')" 
-                       onfocus="this.select()"
-                       style="width: 70px; text-align:center; border:none; background:var(--bg-sub); padding:12px 0; border-radius:16px; font-size:28px; font-weight:900; color:var(--text-m); outline:none; transition:0.2s; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+            <style>
+                /* 스크롤바 숨기기 마법 */
+                .drum-picker::-webkit-scrollbar { display: none; }
+                .drum-picker { -ms-overflow-style: none; scrollbar-width: none; }
+            </style>
+
+            <div style="display:flex; justify-content:center; align-items:center; height: 150px; position:relative; overflow:hidden; background:var(--bg-sub); border-radius:20px; box-shadow:inset 0 2px 6px rgba(0,0,0,0.02);">
                 
-                <span style="font-size:24px; font-weight:900; color:var(--text-s); padding-bottom:4px;">:</span>
+                <!-- 가운데를 잡아주는 투명한 강조 박스 -->
+                <div style="position:absolute; top:50%; left:20px; right:20px; height:44px; transform:translateY(-50%); background:rgba(49, 130, 246, 0.08); border-radius:12px; pointer-events:none; border: 1px solid rgba(49, 130, 246, 0.15);"></div>
+
+                <!-- 🕒 시(Hour) 스크롤 영역 -->
+                <div id="picker-hour" class="drum-picker" style="height:100%; overflow-y:auto; scroll-snap-type:y mandatory; width:80px; text-align:center; display:flex; flex-direction:column; scroll-behavior: smooth;"></div>
                 
-                <!-- 🕒 분(Minute) 입력칸 -->
-                <input type="text" id="v-tracker-mm" inputmode="numeric" pattern="[0-9]*" maxlength="2"
-                       value="${String(now.getMinutes()).padStart(2,'0')}" 
-                       oninput="window.handleMMInput(this)" 
-                       onfocus="this.select()"
-                       style="width: 70px; text-align:center; border:none; background:var(--bg-sub); padding:12px 0; border-radius:16px; font-size:28px; font-weight:900; color:var(--text-m); outline:none; transition:0.2s; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="font-size:22px; font-weight:900; color:var(--text-s); margin:0 10px; z-index:1; padding-bottom:4px;">:</div>
+                
+                <!-- 🕒 분(Minute) 스크롤 영역 -->
+                <div id="picker-minute" class="drum-picker" style="height:100%; overflow-y:auto; scroll-snap-type:y mandatory; width:80px; text-align:center; display:flex; flex-direction:column; scroll-behavior: smooth;"></div>
             </div>
             
-            <!-- 🚨 기존 저장 시스템을 속이기 위한 투명 닌자(Hidden) 인풋 -->
+            <!-- 🚨 기존 시스템이 감지하는 투명 닌자 인풋 -->
             <input type="hidden" id="v-tracker-time" value="${currentTimeStr}" onchange="${type === 'sleep' ? 'window.calcSleepFromTimes()' : ''}">
         </div>
     `;
@@ -2834,6 +2836,19 @@ window.openTrackerSheet = function(type, editId = null) {
         setTimeout(() => {
             const btns = document.querySelectorAll('#tracker-sheet-body .btn-main');
             btns.forEach(btn => { if(btn.innerText.includes('낮잠') && !window.editingTrackerId) window.selectTrackerBtn(btn, 'sleep_day'); });
+            
+            // =====================================
+            // 🚨 [추가] 시트가 열리면 스와이프 휠 세팅!
+            // =====================================
+            let targetTime = currentTimeStr;
+            if (window.editingTrackerId) {
+                let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
+                let recordToEdit = records.find(r => r.id === window.editingTrackerId);
+                if (recordToEdit) targetTime = recordToEdit.time;
+            }
+            window.initDrumPicker(targetTime); // 엔진 가동!
+            // =====================================
+
         }, 50);
     }
     // 🚨 대변 색깔 로직이 완벽하게 들어간 기저귀 바텀시트
@@ -3182,9 +3197,17 @@ window.updateTrackerDashboard = function() {
     };
 
     // --- 히스토리 뷰 (펼쳐보기) 렌더링 시작 ---
-    if (window.isHistoryView) {
+     if (window.isHistoryView) {
         if(records.length === 0) {
-            container.innerHTML = `<div style="padding:20px 0; text-align:center; font-size:13px; color:var(--text-s);">기록된 데이터가 없습니다.</div><button class="btn-main" onclick="window.toggleTrackerHistory()" style="width:100%; margin-top:10px; padding:12px; font-size:13.5px; border-radius:12px;">닫기</button>`;
+            // 🌟 텅 빈 화면(Empty State) 감성 패치!
+            container.innerHTML = `
+                <div style="padding:40px 20px; text-align:center; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
+                    <div style="font-size:32px; margin-bottom:12px;">🐣</div>
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">아직 기록된 일과가 없어요!</div>
+                    <div style="font-size:12.5px; color:var(--text-s); line-height:1.5; word-break:keep-all;">오늘도 육아 출근 완료!<br>우리 아기의 첫 맘마 기록을 남겨볼까요?</div>
+                </div>
+                <button class="btn-main" onclick="window.toggleTrackerHistory()" style="width:100%; margin-top:12px; padding:14px; font-size:14px; background:#F2F5F8 !important; color:#4E5968 !important; border:1px solid #E5E8EB !important; border-radius:14px; box-shadow:none !important;">닫기 〉</button>
+            `;
         } else {
             let grouped = {};
             records.forEach(r => {
@@ -3238,18 +3261,30 @@ window.updateTrackerDashboard = function() {
                         }
                     }
                     
+                    // ==========================================
+                    // 💸 (패치) 트래커 히스토리: 은행 입출금 통장 스타일!
+                    // ==========================================
                     historyHtml += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #E5E8EB; border-radius:12px; margin-bottom:8px; background:#FFF; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="display:flex; gap:10px; align-items:center;">
-                                <span style="font-size:18px;">${icon}</span>
-                                <div>
-                                    <div style="font-weight:900; color:var(--text-m); font-size:13.5px; margin-bottom:2px;">${txt}</div>
-                                    <div style="color:#8B95A1; font-weight:700; font-size:11.5px;">${displayTime}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 4px; border-bottom:1px solid rgba(0,0,0,0.05); margin-bottom:4px;">
+                            
+                            <!-- 🕒 왼쪽: 시간 -->
+                            <div style="width: 50px; font-size:13px; font-weight:800; color:#8B95A1; text-align:left; flex-shrink:0;">
+                                ${displayTime.split(' ~ ')[0]} <!-- 시작 시간만 깔끔하게 노출 -->
+                            </div>
+                            
+                            <!-- 🍼 중앙: 아이콘 + 상세 내용 -->
+                            <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:0;">
+                                <div style="font-size:18px; flex-shrink:0; background:var(--bg-sub); width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:10px;">${icon}</div>
+                                <div style="min-width:0;">
+                                    <div style="font-weight:900; color:var(--text-m); font-size:14px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${txt}</div>
+                                    ${displayTime.includes('~') ? `<div style="color:#B0B8C1; font-weight:700; font-size:11.5px;">${displayTime}</div>` : ''}
                                 </div>
                             </div>
-                            <div style="display:flex; gap:8px;">
-                                <button onclick="window.editTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#8B95A1; cursor:pointer; padding:0;">✏️</button>
-                                <button onclick="window.deleteTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#D1D6DB; cursor:pointer; padding:0;">❌</button>
+                            
+                            <!-- ✏️❌ 오른쪽: 액션 버튼 (반투명 처리로 시선 분산 방지) -->
+                            <div style="display:flex; gap:12px; flex-shrink:0;">
+                                <button onclick="window.editTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#8B95A1; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;">✏️</button>
+                                <button onclick="window.deleteTrackerRecord('${r.id}')" style="background:none; border:none; font-size:15px; color:#D32F2F; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;">❌</button>
                             </div>
                         </div>
                     `;
@@ -6293,51 +6328,80 @@ window.copySymptomMemo = function() {
 };
 
 // ==========================================
-// ⏰ 하이엔드 듀얼 숫자 입력기 (토스 스타일)
+// ⏰ [하이엔드 패치] 스와이프 휠(드럼 피커) 엔진
 // ==========================================
+window.initDrumPicker = function(timeStr) {
+    const hourContainer = document.getElementById('picker-hour');
+    const minContainer = document.getElementById('picker-minute');
+    if(!hourContainer || !minContainer) return;
 
-// 1. 시(HH) 입력 시 2자리가 되면 자동으로 분(MM)으로 넘기기
-window.handleHHInput = function(el, nextId) {
-    let val = el.value.replace(/[^0-9]/g, ''); // 숫자만 허용
-    if (val !== '') {
-        if (parseInt(val) > 23) val = '23'; // 24시 넘기면 23으로 강제 고정
-        el.value = val;
-        
-        // 2자리가 채워지면 쫀득하게 다음 칸으로 포커스 이동
-        if (val.length === 2) {
-            const nextEl = document.getElementById(nextId);
-            if(nextEl) {
-                nextEl.focus();
-                nextEl.select(); // 넘어갔을 때 바로 수정 가능하게 드래그 처리
-            }
+    const itemHeight = 44; // 강조 박스 높이와 동일하게 맞춤
+    const paddingHeight = 53; // 위아래 여백을 줘서 첫 숫자와 끝 숫자가 가운데 올 수 있게 함
+
+    // 숫자 리스트 찍어내기
+    const generateItems = (max) => {
+        let html = `<div style="height:${paddingHeight}px; flex-shrink:0;"></div>`;
+        for(let i=0; i<=max; i++) {
+            let val = String(i).padStart(2, '0');
+            html += `<div class="picker-item" style="height:${itemHeight}px; line-height:${itemHeight}px; font-size:20px; font-weight:700; color:#B0B8C1; scroll-snap-align:center; flex-shrink:0; transition:all 0.2s;">${val}</div>`;
         }
-    }
-    window.syncHiddenTime();
-};
+        html += `<div style="height:${paddingHeight}px; flex-shrink:0;"></div>`;
+        return html;
+    };
 
-// 2. 분(MM) 입력 시 최댓값(59) 방어 및 키보드 닫기
-window.handleMMInput = function(el) {
-    let val = el.value.replace(/[^0-9]/g, '');
-    if (val !== '') {
-        if (parseInt(val) > 59) val = '59'; // 60분 넘기면 59로 강제 고정
-        if (val.length > 2) val = val.substring(0, 2);
-        el.value = val;
+    hourContainer.innerHTML = generateItems(23);
+    minContainer.innerHTML = generateItems(59);
+
+    // 스크롤이 멈췄을 때 실행되는 함수
+    const updateHiddenInput = () => {
+        let hIdx = Math.round(hourContainer.scrollTop / itemHeight);
+        let mIdx = Math.round(minContainer.scrollTop / itemHeight);
         
-        // 2자리 완성되면 키보드 스르륵 내리기
-        if (val.length === 2) el.blur(); 
-    }
-    window.syncHiddenTime();
-};
+        if(hIdx < 0) hIdx = 0; if(hIdx > 23) hIdx = 23;
+        if(mIdx < 0) mIdx = 0; if(mIdx > 59) mIdx = 59;
 
-// 3. 🚨 기존 저장 시스템과 완벽 호환되도록 숨겨진 원본에 시간 쏴주기
-window.syncHiddenTime = function() {
-    const hh = (document.getElementById('v-tracker-hh').value || '0').padStart(2, '0');
-    const mm = (document.getElementById('v-tracker-mm').value || '0').padStart(2, '0');
-    const hiddenEl = document.getElementById('v-tracker-time');
-    
-    if (hiddenEl) {
-        hiddenEl.value = `${hh}:${mm}`; // 기존 시스템이 읽어가는 곳에 몰래 업데이트
-        // 수면 계산 등 기존 연동 함수가 있다면 톡 건드려주기
-        if (hiddenEl.onchange) hiddenEl.onchange(); 
-    }
+        // 선택된 숫자만 크고 파란색으로 뽝! 강조
+        hourContainer.querySelectorAll('.picker-item').forEach((el, i) => { 
+            el.style.color = i === hIdx ? '#3182F6' : '#B0B8C1'; 
+            el.style.fontWeight = i === hIdx ? '900' : '700'; 
+            el.style.fontSize = i === hIdx ? '26px' : '20px'; 
+        });
+        minContainer.querySelectorAll('.picker-item').forEach((el, i) => { 
+            el.style.color = i === mIdx ? '#3182F6' : '#B0B8C1'; 
+            el.style.fontWeight = i === mIdx ? '900' : '700'; 
+            el.style.fontSize = i === mIdx ? '26px' : '20px'; 
+        });
+
+        let hh = String(hIdx).padStart(2, '0');
+        let mm = String(mIdx).padStart(2, '0');
+
+        // 기존 시스템이 읽어가는 숨겨진 input 업데이트
+        const hiddenEl = document.getElementById('v-tracker-time');
+        if (hiddenEl && hiddenEl.value !== `${hh}:${mm}`) {
+            hiddenEl.value = `${hh}:${mm}`;
+            if (hiddenEl.onchange) hiddenEl.onchange(); // 수면 시간 자동 계산 등 트리거
+        }
+    };
+
+    // 스크롤 감지 (터치 떼고 바퀴가 멈추면 작동)
+    let scrollTimeout;
+    const onScroll = () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateHiddenInput, 80); // 바퀴 멈추고 0.08초 뒤 인식
+    };
+
+    hourContainer.addEventListener('scroll', onScroll);
+    minContainer.addEventListener('scroll', onScroll);
+
+    // 창이 처음 열렸을 때 현재 시간으로 스크롤 딱! 맞춰놓기
+    const [initH, initM] = timeStr.split(':').map(Number);
+    setTimeout(() => {
+        hourContainer.style.scrollBehavior = 'auto'; // 처음엔 애니메이션 없이 팍 이동
+        minContainer.style.scrollBehavior = 'auto';
+        hourContainer.scrollTop = initH * itemHeight;
+        minContainer.scrollTop = initM * itemHeight;
+        updateHiddenInput();
+        // 이동 후에는 부드럽게 굴러가도록 원상복구
+        setTimeout(() => { hourContainer.style.scrollBehavior = 'smooth'; minContainer.style.scrollBehavior = 'smooth'; }, 50);
+    }, 10);
 };
