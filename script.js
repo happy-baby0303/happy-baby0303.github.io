@@ -347,7 +347,7 @@ function filterPlaces() {
 }
 
 // ==========================================
-// 🎪 행사 모달창 프리미엄 UI 패치 (모바일 하단 짤림 영구 박멸!)
+// 🎪 행사 모달창 프리미엄 UI 패치 (하단 쓸데없는 공백 제거 완료!)
 // ==========================================
 function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const body = document.getElementById('modal-dynamic-body');
@@ -368,7 +368,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
         : `<div style="width:100%; height:140px; border-radius:18px; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); margin-bottom:20px; display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:0 4px 16px rgba(0,0,0,0.06);">🎪</div>`;
 
     body.innerHTML = `
-        <div style="padding: 10px 4px 40px 4px;"> <!-- 🚨 1차 방어: 아래쪽 여백 40px 추가 -->
+        <div style="padding: 10px 4px 20px 4px;"> <!-- 🚨 1차 방어 패딩: 40px -> 20px로 다이어트 -->
             <!-- 🏷️ 제목 영역 -->
             <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:16px;">
                 <span style="font-size:26px; background:#F2F5F8; padding:8px; border-radius:14px; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);">🌲</span>
@@ -424,14 +424,14 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 </a>
             </div>
 
-<!-- ✅ 하단 액션 버튼 -->
-            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+            <!-- ✅ 하단 액션 버튼 (margin-bottom 제거) -->
+            <div style="display:flex; gap:10px; margin-bottom: 0;">
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
             
-            <!-- 🚨 2차 방어: 이 투명 여백을 60px -> 120px로 확 늘려서 버튼을 강제로 위로 밀어 올립니다! -->
-            <div style="width: 100%; height: 120px; display: block; clear: both; flex-shrink: 0;"></div>
+            <!-- 🚨 2차 방어 패딩: 120px 투명 블록을 20px 숨통만 트이게 대폭 축소! -->
+            <div style="width: 100%; height: 20px; display: block; clear: both; flex-shrink: 0;"></div>
         </div>
     `;
     const modalWrap = document.getElementById('premium-modal');
