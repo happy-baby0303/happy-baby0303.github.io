@@ -2672,10 +2672,31 @@ window.openTrackerSheet = function(type, editId = null) {
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
     let timeLabel = type === 'sleep' ? "언제 잠들었나요?" : "기록 시간 (터치하여 시간 수정)";
+   // 🌟 촌스러운 OS 기본 시계를 버리고, 숫자 키패드 직력 입력 UI로 교체!
     const timeInputHtml = `
-        <div style="text-align: center; margin-bottom: 20px;">
-            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">${timeLabel}</div>
-            <input type="time" id="v-tracker-time" value="${currentTimeStr}" onchange="${type === 'sleep' ? 'window.calcSleepFromTimes()' : ''}" style="text-align:center; border:1px solid var(--border); background:var(--bg-sub); padding:8px 16px; border-radius:12px; font-size:18px; font-weight:900; color:var(--text-m); outline:none;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin-bottom:12px;">${timeLabel}</div>
+            
+            <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+                <!-- 🕒 시(Hour) 입력칸 -->
+                <input type="text" id="v-tracker-hh" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+                       value="${String(now.getHours()).padStart(2,'0')}" 
+                       oninput="window.handleHHInput(this, 'v-tracker-mm')" 
+                       onfocus="this.select()"
+                       style="width: 70px; text-align:center; border:none; background:var(--bg-sub); padding:12px 0; border-radius:16px; font-size:28px; font-weight:900; color:var(--text-m); outline:none; transition:0.2s; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+                
+                <span style="font-size:24px; font-weight:900; color:var(--text-s); padding-bottom:4px;">:</span>
+                
+                <!-- 🕒 분(Minute) 입력칸 -->
+                <input type="text" id="v-tracker-mm" inputmode="numeric" pattern="[0-9]*" maxlength="2"
+                       value="${String(now.getMinutes()).padStart(2,'0')}" 
+                       oninput="window.handleMMInput(this)" 
+                       onfocus="this.select()"
+                       style="width: 70px; text-align:center; border:none; background:var(--bg-sub); padding:12px 0; border-radius:16px; font-size:28px; font-weight:900; color:var(--text-m); outline:none; transition:0.2s; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
+            </div>
+            
+            <!-- 🚨 기존 저장 시스템을 속이기 위한 투명 닌자(Hidden) 인풋 -->
+            <input type="hidden" id="v-tracker-time" value="${currentTimeStr}" onchange="${type === 'sleep' ? 'window.calcSleepFromTimes()' : ''}">
         </div>
     `;
 
@@ -6269,4 +6290,54 @@ window.copySymptomMemo = function() {
     navigator.clipboard.writeText(text).then(() => {
         window.showToast("📋 진료 접수용 메모가 복사되었어요!<br>예약 앱이나 문자에 바로 붙여넣기 하세요.");
     });
+};
+
+// ==========================================
+// ⏰ 하이엔드 듀얼 숫자 입력기 (토스 스타일)
+// ==========================================
+
+// 1. 시(HH) 입력 시 2자리가 되면 자동으로 분(MM)으로 넘기기
+window.handleHHInput = function(el, nextId) {
+    let val = el.value.replace(/[^0-9]/g, ''); // 숫자만 허용
+    if (val !== '') {
+        if (parseInt(val) > 23) val = '23'; // 24시 넘기면 23으로 강제 고정
+        el.value = val;
+        
+        // 2자리가 채워지면 쫀득하게 다음 칸으로 포커스 이동
+        if (val.length === 2) {
+            const nextEl = document.getElementById(nextId);
+            if(nextEl) {
+                nextEl.focus();
+                nextEl.select(); // 넘어갔을 때 바로 수정 가능하게 드래그 처리
+            }
+        }
+    }
+    window.syncHiddenTime();
+};
+
+// 2. 분(MM) 입력 시 최댓값(59) 방어 및 키보드 닫기
+window.handleMMInput = function(el) {
+    let val = el.value.replace(/[^0-9]/g, '');
+    if (val !== '') {
+        if (parseInt(val) > 59) val = '59'; // 60분 넘기면 59로 강제 고정
+        if (val.length > 2) val = val.substring(0, 2);
+        el.value = val;
+        
+        // 2자리 완성되면 키보드 스르륵 내리기
+        if (val.length === 2) el.blur(); 
+    }
+    window.syncHiddenTime();
+};
+
+// 3. 🚨 기존 저장 시스템과 완벽 호환되도록 숨겨진 원본에 시간 쏴주기
+window.syncHiddenTime = function() {
+    const hh = (document.getElementById('v-tracker-hh').value || '0').padStart(2, '0');
+    const mm = (document.getElementById('v-tracker-mm').value || '0').padStart(2, '0');
+    const hiddenEl = document.getElementById('v-tracker-time');
+    
+    if (hiddenEl) {
+        hiddenEl.value = `${hh}:${mm}`; // 기존 시스템이 읽어가는 곳에 몰래 업데이트
+        // 수면 계산 등 기존 연동 함수가 있다면 톡 건드려주기
+        if (hiddenEl.onchange) hiddenEl.onchange(); 
+    }
 };
