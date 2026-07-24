@@ -169,7 +169,6 @@ function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row'), subRegions = new Set();
     if(!subRow) return;
 
-    // 🚨 [핵심] 탭이 행사냐 핫플이냐에 따라 필터링 소스를 다르게 가져옵니다.
     let source = [];
     if (currentSubTab === 'event') {
         source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)];
@@ -178,18 +177,25 @@ function generateSubFilters(mainRegion) {
     }
 
     source.forEach(item => {
-        const addr = item.locText || item.addr1 || item.addr || ''; let isMatched = false;
-        if (mainRegion === 'seoul' && addr.includes('서울')) isMatched = true;
-        if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천') || addr.includes('용인') || addr.includes('동탄') || addr.includes('수원'))) isMatched = true;
-        if (mainRegion === 'chungcheong' && (addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종'))) isMatched = true;
-        if (mainRegion === 'gangwon' && addr.includes('강원')) isMatched = true;
-        if (mainRegion === 'jeolla' && (addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주'))) isMatched = true;
-        if (mainRegion === 'gyeongsang' && (addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산'))) isMatched = true;
-        if (mainRegion === 'jeju' && addr.includes('제주')) isMatched = true;
+        const addr = item.locText || item.addr1 || item.addr || '';
+        let isMatched = false;
+
+        // 🌟 1. 데이터에 region 속성이 있으면 무조건 통과! (의왕, 하남 누락 방지)
+        if (item.region === mainRegion) {
+            isMatched = true;
+        } else {
+            if (mainRegion === 'seoul' && addr.includes('서울')) isMatched = true;
+            if (mainRegion === 'gyeonggi' && (addr.includes('경기') || addr.includes('인천') || addr.includes('용인') || addr.includes('동탄') || addr.includes('수원'))) isMatched = true;
+            if (mainRegion === 'chungcheong' && (addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종'))) isMatched = true;
+            if (mainRegion === 'gangwon' && addr.includes('강원')) isMatched = true;
+            if (mainRegion === 'jeolla' && (addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주'))) isMatched = true;
+            if (mainRegion === 'gyeongsang' && (addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산'))) isMatched = true;
+            if (mainRegion === 'jeju' && addr.includes('제주')) isMatched = true;
+        }
         
         if (isMatched) { 
-            // locText(예: 동탄, 수원)가 있으면 우선 적용, 없으면 주소에서 파싱
-            if (item.locText && item.locText.length > 1 && !item.locText.includes('경기') && !item.locText.includes('서울')) {
+            // 🌟 2. locText가 있으면 무조건 우선 추가
+            if (item.locText && item.locText.length >= 1 && item.locText !== '경기외곽' && item.locText !== '서울') {
                 subRegions.add(item.locText);
             } else {
                 const parts = addr.split(' '); 
@@ -207,7 +213,6 @@ function generateSubFilters(mainRegion) {
 
     let html = `<button class="filter-btn ${currentSubRegion === 'all' ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('all', this)">시·군·구 전체</button>`;
     
-    // 가나다 순으로 정렬해서 출력
     Array.from(subRegions).sort().forEach(sub => { 
         html += `<button class="filter-btn ${currentSubRegion === sub ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('${sub}', this)">${sub}</button>`; 
     });
@@ -342,7 +347,7 @@ function filterPlaces() {
 }
 
 // ==========================================
-// 🎪 행사 모달창 프리미엄 UI 패치 (열기 + 닫기 완벽 세트)
+// 🎪 행사 모달창 프리미엄 UI 패치 (모바일 하단 짤림 영구 박멸!)
 // ==========================================
 function openFestivalModal(title, dateText, addr, tel, review, query, image) {
     const body = document.getElementById('modal-dynamic-body');
@@ -363,7 +368,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
         : `<div style="width:100%; height:140px; border-radius:18px; background:linear-gradient(135deg, #EBF4FF, #EAEFF7); margin-bottom:20px; display:flex; align-items:center; justify-content:center; font-size:40px; box-shadow:0 4px 16px rgba(0,0,0,0.06);">🎪</div>`;
 
     body.innerHTML = `
-        <div style="padding: 10px 4px;">
+        <div style="padding: 10px 4px 40px 4px;"> <!-- 🚨 1차 방어: 아래쪽 여백 40px 추가 -->
             <!-- 🏷️ 제목 영역 -->
             <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:16px;">
                 <span style="font-size:26px; background:#F2F5F8; padding:8px; border-radius:14px; box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);">🌲</span>
@@ -419,11 +424,14 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 </a>
             </div>
 
-   <!-- ✅ 하단 액션 버튼 -->
+            <!-- ✅ 하단 액션 버튼 -->
             <div style="display:flex; gap:10px; margin-bottom: 20px;">
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
+            
+            <!-- 🚨 2차 방어: 소아과 브리핑에서 효과를 본 '투명 벽돌(60px)'을 확실하게 버튼 바로 밑에 박아둡니다! -->
+            <div style="width: 100%; height: 60px; display: block; clear: both; flex-shrink: 0;"></div>
         </div>
     `;
     const modalWrap = document.getElementById('premium-modal');
@@ -901,24 +909,45 @@ function checkPillLock(type) {
 }
 
 function selectPill(type) {
-    const redBtn = document.getElementById('btn-pill-red'), blueBtn = document.getElementById('btn-pill-blue');
-    if(redBtn) redBtn.classList.remove('active');
-    if(blueBtn) blueBtn.classList.remove('active');
+    const redBtn = document.getElementById('btn-pill-red');
+    const blueBtn = document.getElementById('btn-pill-blue');
+    
+    // 🔄 먼저 기존 색상 싹 지우기 (버튼 초기화)
+    if(redBtn) {
+        redBtn.classList.remove('active');
+        redBtn.style.setProperty('background', '', 'important');
+        redBtn.style.setProperty('color', '', 'important');
+        redBtn.style.setProperty('border', '', 'important');
+    }
+    if(blueBtn) {
+        blueBtn.classList.remove('active');
+        blueBtn.style.setProperty('background', '', 'important');
+        blueBtn.style.setProperty('color', '', 'important');
+        blueBtn.style.setProperty('border', '', 'important');
+    }
     
     if (!type) { selectedPillType = ''; return; }
     
     const lockStatus = checkPillLock(type);
-    
-    // 💡 변경 전: alert('🚨 [투약 불가] ' + lockStatus.reason);
-    // 💡 변경 후: 아래처럼 showToast를 사용하면 앱이 멈추지 않고 더 예쁘게 알림이 뜹니다!
     if (lockStatus.locked) { 
         showToast('🚨 ' + lockStatus.reason.replace(/\n/g, '<br>')); 
         return; 
     }
     
     selectedPillType = type;
-    if (type === 'red' && redBtn) redBtn.classList.add('active');
-    else if (type === 'blue' && blueBtn) blueBtn.classList.add('active');
+    
+    // 🎨 CSS 에러 상관없이 JS로 무조건 활성화 색깔 입히기!
+    if (type === 'red' && redBtn) {
+        redBtn.classList.add('active');
+        redBtn.style.setProperty('background', 'rgba(239, 68, 68, 0.15)', 'important');
+        redBtn.style.setProperty('color', '#EF4444', 'important');
+        redBtn.style.setProperty('border', '1px solid #EF4444', 'important');
+    } else if (type === 'blue' && blueBtn) {
+        blueBtn.classList.add('active');
+        blueBtn.style.setProperty('background', 'rgba(49, 130, 246, 0.15)', 'important');
+        blueBtn.style.setProperty('color', '#3182F6', 'important');
+        blueBtn.style.setProperty('border', '1px solid #3182F6', 'important');
+    }
 }
 
 function toggleCheck(e) { if(e.target.tagName !== 'INPUT') { const cb = document.getElementById('agree-check'); if(cb) cb.checked = !cb.checked; } }
@@ -928,16 +957,26 @@ function calcFever() {
     if(agreeCb && !agreeCb.checked) return alert("⚠️ 위험 고지 및 면책조항 동의 확인이 필요합니다.");
     const w = Number(document.getElementById('v-weight').value);
     if(!w) return alert("체중 값을 계측하여 정확히 입력하십시오.");
+    
+    // ✨ 핵심 패치: 여기서 계측한 체중을 최신 체중으로 강제 저장! (소아과 리포트 연동)
+    localStorage.setItem('tosil_latest_weight', w);
+    
     document.getElementById('dose-red').innerText = `${(w*0.3).toFixed(1)} ~ ${(w*0.38).toFixed(1)}`;
     document.getElementById('dose-blue').innerText = `${(w*0.4).toFixed(1)} ~ ${(w*0.5).toFixed(1)}`;
     const fRes = document.getElementById('fever-result'); if(fRes) fRes.style.display = 'block';
 }
 
 async function addFeverRecord() {
+    // 🚨 1. 하단 투약 기록 시에도 무조건 동의 박스 체크 확인!
+    const agreeCb = document.getElementById('agree-check');
+    if(agreeCb && !agreeCb.checked) {
+        return showToast("⚠️ 투약 기록을 저장하려면 상단의 위험 고지 및 면책조항에 동의해주세요!");
+    }
+
     const temp = parseFloat(document.getElementById('v-temp').value);
-    if(!temp || !selectedPillType) return alert('체온 and 약 종류를 명확히 지정해주세요!');
+    if(!temp || !selectedPillType) return showToast('⚠️ 체온과 약 종류를 명확히 지정해주세요!');
     const lockStatus = checkPillLock(selectedPillType);
-    if (lockStatus.locked) return alert('🚨 [저장 실패] ' + lockStatus.reason);
+    if (lockStatus.locked) return showToast('🚨 [저장 실패] ' + lockStatus.reason.replace(/\n/g, ' '));
     
     const symptoms = [
         document.getElementById('sym-cough').checked ? '🤧기침' : '', 
@@ -960,17 +999,38 @@ async function addFeverRecord() {
     
     localStorage.setItem('tosil_fever_records', JSON.stringify(records));
     document.getElementById('v-temp').value = '';
-    ['sym-cough','sym-vomit','sym-diarrhea','sym-nofood'].forEach(id => { const cb = document.getElementById(id); if(cb) cb.checked = false; });
-    selectPill(''); renderFeverTimeline(); setTimeout(updateHomeDashboard, 100); 
+    
+    // 증상 체크박스 완벽 초기화
+    ['sym-cough','sym-vomit','sym-diarrhea','sym-nofood'].forEach(id => { 
+        const cb = document.getElementById(id); 
+        if(cb) {
+            cb.checked = false;
+            if(cb.nextElementSibling) {
+                cb.nextElementSibling.style.background = '';
+                cb.nextElementSibling.style.border = '';
+                cb.nextElementSibling.style.color = '';
+            }
+        } 
+    });
+    
+    selectPill(''); 
+    renderFeverTimeline(); 
+    setTimeout(updateHomeDashboard, 100); 
+    
+    showToast("💊 투약 기록이 안전하게 저장되었습니다!");
 }
 
 function renderFeverTimeline() {
     const container = document.getElementById('fever-timeline'); if(!container) return; 
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    
     if(records.length === 0) {
         container.innerHTML = `<div style="text-align:center; padding:40px 20px; background:var(--bg-sub, #F8F9FA); border-radius:16px; border:1px dashed #E5E8EB;">우리 아기가 아프지 않아서 기록이 텅 비어있네요. 💚</div>`;
         ['fever-timer-box','fever-chart-container','fever-alert'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display='none'; });
         if(feverTimerInterval) clearInterval(feverTimerInterval);
+        
+        // ✨ 여기서 빈 배열을 넘겨줘서 화면의 타이머 잠금 텍스트를 즉시 없앱니다!
+        updateFeverTimer([]); 
         return;
     }
     
@@ -988,14 +1048,24 @@ function renderFeverTimeline() {
     
     drawFeverChart(records);
     if(feverTimerInterval) clearInterval(feverTimerInterval); 
-    updateFeverTimer(records); feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
+    updateFeverTimer(records); 
+    feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
 }
 
 function updateFeverTimer(records) {
-    if (!records || records.length === 0) return;
-    const redLock = checkPillLock('red'), blueLock = checkPillLock('blue');
     const redBtn = document.getElementById('btn-pill-red'), blueBtn = document.getElementById('btn-pill-blue');
     const timerRedEl = document.getElementById('timer-red'), timerBlueEl = document.getElementById('timer-blue');
+    
+    // 🚨 핵심 패치: 기록이 비어있으면 즉시 타이머 문구와 잠금(투명도)을 원상복구!
+    if (!records || records.length === 0) {
+        if (timerRedEl) { timerRedEl.innerText = "✅ 즉시 복용 가능"; timerRedEl.style.color = "#2ECC71"; }
+        if (timerBlueEl) { timerBlueEl.innerText = "✅ 즉시 복용 가능"; timerBlueEl.style.color = "#2ECC71"; }
+        if (redBtn) { redBtn.style.cursor = 'pointer'; redBtn.style.opacity = '1'; }
+        if (blueBtn) { blueBtn.style.cursor = 'pointer'; blueBtn.style.opacity = '1'; }
+        return;
+    }
+
+    const redLock = checkPillLock('red'), blueLock = checkPillLock('blue');
     if (timerRedEl) { timerRedEl.innerText = redLock.locked ? redLock.reason.split('\n')[1] : "✅ 즉시 복용 가능"; timerRedEl.style.color = redLock.locked ? "var(--danger)" : "#2ECC71"; }
     if (timerBlueEl) { timerBlueEl.innerText = blueLock.locked ? blueLock.reason.split('\n')[1] : "✅ 즉시 복용 가능"; timerBlueEl.style.color = blueLock.locked ? "var(--danger)" : "#2ECC71"; }
     if (redBtn) { redBtn.style.cursor = 'pointer'; redBtn.style.opacity = redLock.locked ? '0.3' : '1'; }
@@ -1013,11 +1083,28 @@ async function clearFeverRecord() {
             try { await setDoc(doc(db, "fever_" + syncCode, "status"), { records: [] }); } catch (e) {}
         }
         
-        selectPill(''); 
-        renderFeverTimeline(); 
+        // ✨ 핵심: 체온 숫자, 체크박스 버튼, 약 종류 전부 완벽하게 빈칸으로 강제 초기화!
+        document.getElementById('v-temp').value = '';
+        ['sym-cough','sym-vomit','sym-diarrhea','sym-nofood'].forEach(id => { 
+            const cb = document.getElementById(id); 
+            if(cb) {
+                cb.checked = false; 
+                // 동반 증상 버튼 파란색 칠해진 것도 원래 회색으로 원상복구
+                if(cb.nextElementSibling) {
+                    cb.nextElementSibling.style.background = '';
+                    cb.nextElementSibling.style.border = '';
+                    cb.nextElementSibling.style.color = '';
+                }
+            }
+        });
+
+        selectPill(''); // 약 버튼 선택 풀기
+        renderFeverTimeline(); // 타임라인 다시 그리기
+        updateFeverTimer([]); // 쐐기 박기 (타이머 글자 완벽 해제)
+        
         setTimeout(updateHomeDashboard, 100); 
         
-        showToast("💊 해열제 투약 기록이 초기화되었습니다!");
+        showToast("💊 해열제 투약 기록이 초기화되었습니다! 즉시 새 기록이 가능합니다.");
         
     }, "🧹", "초기화", "#F04452");
 }
@@ -2306,6 +2393,7 @@ function updateSmartBanner() {
 window.updateSmartBanner = updateSmartBanner; // 명시적 등록
 
 // ==========================================
+// // ==========================================
 // 👨‍⚕️ 소아과 진료 브리핑 리포트 엔진
 // ==========================================
 function openPediatricianReport() {
@@ -2315,7 +2403,8 @@ function openPediatricianReport() {
     }
     
     let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
-    let recordHtml = '<div style="max-height: 350px; overflow-y: auto; background:#F8F9FA; padding:16px; border-radius:12px; border:1px solid #E5E8EB; display:flex; flex-direction:column; gap:12px;">';
+    // ✨ 클래스(box-sub) 적용
+    let recordHtml = '<div class="box-sub" style="max-height: 350px; overflow-y: auto; padding:16px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">';
     
     records.forEach(r => {
         let pillText = '<span style="color:#8B95A1; font-weight:700;">약 미복용</span>';
@@ -2325,13 +2414,13 @@ function openPediatricianReport() {
             pillText = '<span style="color:#3182F6; font-weight:900;">🔵 이부/덱시부프로펜 (파랑)</span>';
         }
         
-        let symText = (r.symptoms && r.symptoms.length > 0) ? `<div style="margin-top:6px; font-size:11.5px; color:#6B7684; background:#F2F5F8; padding:4px 8px; border-radius:6px; display:inline-block;">🚨 증상: ${r.symptoms.join(', ')}</div>` : '';
-        let tempStyle = r.temp >= 38.0 ? 'color:#E32636; font-weight:900; font-size:16px;' : 'color:#191F28; font-weight:800; font-size:15px;';
+        let symText = (r.symptoms && r.symptoms.length > 0) ? `<div style="margin-top:6px; font-size:11.5px; color:#6B7684; background:rgba(0,0,0,0.05); padding:4px 8px; border-radius:6px; display:inline-block;">🚨 증상: ${r.symptoms.join(', ')}</div>` : '';
+        let tempStyle = r.temp >= 38.0 ? 'color:#E32636; font-weight:900; font-size:16px;' : 'color:var(--text-m); font-weight:800; font-size:15px;';
         
         recordHtml += `
-            <div style="border-bottom:1px dashed #D1D6DB; padding-bottom:12px;">
+            <div style="border-bottom:1px dashed var(--border); padding-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="color:#4E5968; font-weight:800; font-size:13px;">⏱️ ${r.time}</span>
+                    <span style="color:var(--text-s); font-weight:800; font-size:13px;">⏱️ ${r.time}</span>
                     <span style="${tempStyle}">${r.temp}℃</span>
                 </div>
                 <div style="font-size:13px;">${pillText}</div>
@@ -2347,19 +2436,19 @@ function openPediatricianReport() {
     body.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
             <div style="font-size: 36px; margin-bottom: 8px;">👨‍⚕️</div>
-            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #191F28;">소아과 진료 브리핑</h3>
-            <p style="margin: 0; font-size: 13px; font-weight: 600; color: #8B95A1; line-height: 1.5;">
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: var(--text-m);">소아과 진료 브리핑</h3>
+            <p style="margin: 0; font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5;">
                 의사 선생님께 스마트폰을 이대로 보여주세요.<br>최근 체중과 투약 기록이 요약되어 있습니다.
             </p>
         </div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #F2F4F6; padding: 18px 20px; border-radius: 16px; margin-bottom: 16px;">
-            <span style="color: #4E5968; font-weight: 800; font-size: 14px;"> 최근 계측 체중</span>
-            <span style="color: #191F28; font-weight: 900; font-size: 20px;">${weight}${weight !== '미입력' ? ' <span style="font-size:14px; color:#8B95A1;">kg</span>' : ''}</span>
+        <div class="box-sub" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-radius: 16px; margin-bottom: 16px; border: 1px solid var(--border);">
+            <span style="color: var(--text-s); font-weight: 800; font-size: 14px;"> 최근 계측 체중</span>
+            <span style="color: var(--text-m); font-weight: 900; font-size: 20px;">${weight}${weight !== '미입력' ? ' <span style="font-size:14px; color:var(--text-s);">kg</span>' : ''}</span>
         </div>
 
-        <div style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-            <div style="font-size: 13px; font-weight: 800; color: #8B95A1; margin-bottom: 12px; border-bottom: 1px dashed #E5E8EB; padding-bottom: 12px;">
+        <div class="box-main" style="border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 12px;">
                 📊 최근 타임라인 요약
             </div>
             <div style="max-height: 250px; overflow-y: auto;">
@@ -2367,14 +2456,17 @@ function openPediatricianReport() {
             </div>
         </div>
 
-        <button style="width: 100%; padding: 18px; border-radius: 16px; background: #191F28; color: #FFFFFF; font-weight: 800; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s;" onclick="closeFestivalModalForce()">
+        <button style="width: 100%; padding: 18px; border-radius: 16px; background: var(--text-m); color: var(--bg-card); font-weight: 800; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s;" onclick="closeFestivalModalForce()">
             확인 완료
         </button>
+        <!-- 📱 모바일 하단 잘림 방지용 투명 여백 -->
+        <div style="height: 40px; width: 100%;"></div>
     `;
 
     const modalWrap = document.getElementById('premium-modal');
     if(modalWrap) modalWrap.style.display = 'flex';
 }
+
 window.openPediatricianReport = openPediatricianReport;
 
 

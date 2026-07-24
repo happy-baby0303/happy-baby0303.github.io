@@ -93,6 +93,30 @@ body.dark-mode .care-btn.active {
 max-height: 85vh;          /* 화면 높이의 85%까지만 팝업이 커지도록 제한 */
 overflow-y: auto;          /* 내용이 길어지면 내부 스크롤 생성 */
 padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 여백 추가 */
+
+/* ========================================== */
+        /* 🌙 다크모드: 해열제 선택 버튼 활성화 색상 살리기 */
+        /* ========================================== */
+        body.dark-mode #btn-pill-red.active {
+            background-color: rgba(239, 68, 68, 0.15) !important;
+            color: #EF4444 !important;
+            border: 1px solid #EF4444 !important;
+        }
+        body.dark-mode #btn-pill-blue.active {
+            background-color: rgba(49, 130, 246, 0.15) !important;
+            color: #3182F6 !important;
+            border: 1px solid #3182F6 !important;
+        }
+   
+    /* ========================================== */
+        /* 🌙 다크모드: 해열제 타이머 및 산출 결과 박스 색상 동기화 */
+        /* ========================================== */
+        body.dark-mode #fever-timer-box,
+        body.dark-mode #fever-result {
+            background-color: var(--bg-card) !important;
+            border: 1px solid var(--border) !important;
+        }
+
 </style>
 </head>
 
