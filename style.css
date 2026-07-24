@@ -525,8 +525,10 @@ body.dark-mode #smart-banner-container > div span[style*="background: #F59E0B"] 
    ========================================== */
 #premium-modal > div,
 .modal-content {
-    border-radius: 24px !important; /* 빵빵하게 둥근 모서리 */
-    overflow: hidden !important;    /* 둥근 모서리 밖으로 삐져나가는 것들 숨김 */
+    border-radius: 24px !important; 
+    /* 🚨 스크롤 방해꾼 검거! 아래처럼 x축만 자르고 y축은 스크롤(auto)을 허용합니다! */
+    overflow-x: hidden !important;
+    overflow-y: auto !important; 
 }
 
 /* 🧰 툴박스 상단 버튼 디자인 (대기업 타일형) */

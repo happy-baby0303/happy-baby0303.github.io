@@ -2465,7 +2465,7 @@ window.openPediatricianReport = function() {
             </button>
         </div>
         <!-- 📱 모바일 하단 잘림 방지용 투명 여백 -->
-        <div style="height: 60px; width: 100%;"></div>
+        <div style="height: 20px; width: 100%;"></div>
     `;
 
     const modalWrap = document.getElementById('premium-modal');
