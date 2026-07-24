@@ -489,10 +489,11 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
                     </div>
                 </div>
 
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <details class="flat-accordion box-main" style="border-radius:20px; overflow:hidden;">
-    <summary style="padding:16px 20px; font-size:14.5px; font-weight:800; color:var(--text-m); cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:12px;">
-        <span style="flex:1; word-break:keep-all; line-height:1.4; text-align:left;">📊 소비 패턴 진단 (카테고리별)</span>
+                <!-- ✨ 다크모드 CSS가 덮어씌우지 못하도록 강제 투명(transparent) 및 선 없음(none) 속성 방패를 달아줍니다! -->
+<div style="display:flex; flex-direction:column; gap:10px; border:none !important; background:transparent !important;">
+    <details class="flat-accordion box-main" style="border-radius:20px; overflow:hidden;">
+        <summary style="padding:16px 20px; font-size:14.5px; font-weight:800; color:var(--text-m); cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <span style="flex:1; word-break:keep-all; line-height:1.4; text-align:left;">📊 소비 패턴 진단 (카테고리별)</span>
         <span class="box-tint-blue" style="font-size:12px; color:var(--primary); padding:4px 10px; border-radius:8px; white-space:nowrap; flex-shrink:0;">열어보기 ▾</span>
     </summary>
     <div class="lib-content" style="padding:0 20px 20px 20px;">
@@ -656,10 +657,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
         <div id="fever-chart-container" style="display:none; height:180px; margin-bottom:20px;"><canvas id="feverChart"></canvas></div>
         <div id="fever-timeline" style="margin-bottom:20px; overflow:hidden;"></div>
         
-        <button onclick="downloadFeverReport()" style="width: 100%; padding: 14px; border-radius: 14px; border: 1px solid #DDD; background: white; color: #666; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 10px;">
-            📸 소아과 제출용 리포트 캡처 (저장)
-        </button>
-        <button class="btn-main" style="background:var(--success) !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(0,179,122,0.2) !important; padding:16px; font-size:15px; font-weight:800; border-radius:14px; width:100%; display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom: 10px;" onclick="openPediatricianReport()">
+         <button class="btn-main" style="background:var(--success) !important; color:#FFF !important; border:none !important; box-shadow:0 6px 16px rgba(0,179,122,0.2) !important; padding:16px; font-size:15px; font-weight:800; border-radius:14px; width:100%; display:flex; justify-content:center; align-items:center; gap:8px; margin-bottom: 10px;" onclick="openPediatricianReport()">
             👨‍⚕️ 소아과 진료용 요약 리포트 열기
         </button>
         <button class="btn-main" style="background: #F9FAFB !important; color: #8B95A1 !important; border: none !important; font-size:13px; font-weight: 700; border-radius: 14px; width: 100%; padding: 14px; box-shadow:none !important;" onclick="clearFeverRecord()">
@@ -976,8 +974,9 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
                         <button onclick="addCustomBaton()" style="flex-shrink: 0; box-sizing: border-box; padding:12px 18px; background:var(--primary); color:#FFF; border:none; border-radius:12px; font-weight:800; font-size: 13px; cursor:pointer; white-space: nowrap;">부탁하기</button>
                     </div>
                 </div>
-                <div style="font-size: 14px; font-weight: 800; margin-bottom: 12px; padding: 0 4px; color: var(--text-s);">📋 실시간 바통터치 미션 보드</div>
-                <div id="baton-list-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+                <!-- ✨ 다크모드 강제 테두리/배경색 방어용 투명 쉴드 추가! -->
+<div style="font-size: 14px; font-weight: 800; margin-bottom: 12px; padding: 0 4px; color: var(--text-s); border: none !important; background: transparent !important;">📋 실시간 바통터치 미션 보드</div>
+<div id="baton-list-container" style="display:flex; flex-direction:column; gap:10px; border: none !important; background: transparent !important;"></div>
             </div> <!-- panel-baton 닫기 -->
 
             <!-- ========================================== -->

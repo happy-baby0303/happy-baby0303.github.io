@@ -424,14 +424,14 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image) {
                 </a>
             </div>
 
-            <!-- ✅ 하단 액션 버튼 -->
+<!-- ✅ 하단 액션 버튼 -->
             <div style="display:flex; gap:10px; margin-bottom: 20px;">
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex:2; padding:16px; background:#3182F6; color:#FFF; border-radius:14px; font-weight:900; font-size:15px; border:none; box-shadow:0 4px 12px rgba(49,130,246,0.3); cursor:pointer;">확인 완료</button>
             </div>
             
-            <!-- 🚨 2차 방어: 소아과 브리핑에서 효과를 본 '투명 벽돌(60px)'을 확실하게 버튼 바로 밑에 박아둡니다! -->
-            <div style="width: 100%; height: 60px; display: block; clear: both; flex-shrink: 0;"></div>
+            <!-- 🚨 2차 방어: 이 투명 여백을 60px -> 120px로 확 늘려서 버튼을 강제로 위로 밀어 올립니다! -->
+            <div style="width: 100%; height: 120px; display: block; clear: both; flex-shrink: 0;"></div>
         </div>
     `;
     const modalWrap = document.getElementById('premium-modal');
@@ -2393,17 +2393,15 @@ function updateSmartBanner() {
 window.updateSmartBanner = updateSmartBanner; // 명시적 등록
 
 // ==========================================
-// // ==========================================
-// 👨‍⚕️ 소아과 진료 브리핑 리포트 엔진
+// 👨‍⚕️ 소아과 진료 브리핑 리포트 엔진 (복사 기능 탑재 완료!)
 // ==========================================
-function openPediatricianReport() {
+window.openPediatricianReport = function() {
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     if(records.length === 0) {
         return alert("아직 기록된 체온/투약 데이터가 없습니다. 건강한 상태네요! 🌿");
     }
     
     let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
-    // ✨ 클래스(box-sub) 적용
     let recordHtml = '<div class="box-sub" style="max-height: 350px; overflow-y: auto; padding:16px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">';
     
     records.forEach(r => {
@@ -2433,6 +2431,7 @@ function openPediatricianReport() {
     const body = document.getElementById('modal-dynamic-body');
     if(!body) return;
 
+    // 모달 내부 HTML (복사 버튼 추가 및 하단 여백 보정 완료)
     body.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
             <div style="font-size: 36px; margin-bottom: 8px;">👨‍⚕️</div>
@@ -2456,16 +2455,40 @@ function openPediatricianReport() {
             </div>
         </div>
 
-        <button style="width: 100%; padding: 18px; border-radius: 16px; background: var(--text-m); color: var(--bg-card); font-weight: 800; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s;" onclick="closeFestivalModalForce()">
-            확인 완료
-        </button>
+        <!-- 수정된 하단 액션 버튼 영역 -->
+        <div style="display: flex; gap: 10px;">
+            <button style="flex: 1.5; padding: 16px; border-radius: 16px; background: #E8F3FF; color: #3182F6; font-weight: 900; font-size: 15px; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap;" onclick="window.copySymptomMemo()">
+                📋 병원 예약용 증상 복사
+            </button>
+            <button style="flex: 1; padding: 16px; border-radius: 16px; background: #F2F5F8; color: #4E5968; font-weight: 800; font-size: 15px; border: none; cursor: pointer; transition: 0.2s;" onclick="closeFestivalModalForce()">
+                닫기
+            </button>
+        </div>
         <!-- 📱 모바일 하단 잘림 방지용 투명 여백 -->
-        <div style="height: 40px; width: 100%;"></div>
+        <div style="height: 60px; width: 100%;"></div>
     `;
 
     const modalWrap = document.getElementById('premium-modal');
     if(modalWrap) modalWrap.style.display = 'flex';
-}
+};
+
+// 🏥 병원 예약용 증상 복사 함수 (이것도 같이 넣어주세요!)
+window.copySymptomMemo = function() {
+    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
+    
+    if(records.length === 0) return window.showToast('⚠️ 복사할 진료 기록이 없습니다.');
+    
+    let latest = records[0];
+    let pillName = latest.type === 'red' ? '아세트아미노펜(빨강)' : '이부프로펜(파랑)';
+    let symp = (latest.symptoms && latest.symptoms.length > 0) ? latest.symptoms.join(', ') : '특이증상 없음';
+    
+    let text = `[증상요약]\n- 최근 체온: ${latest.temp}도\n- 복용 약: ${pillName}\n- 몸무게: ${weight}kg\n- 동반 증상: ${symp}`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        window.showToast("📋 진료 접수용 메모가 복사되었어요!<br>예약 앱이나 문자에 바로 붙여넣기 하세요.");
+    });
+};
 
 window.openPediatricianReport = openPediatricianReport;
 
@@ -6229,3 +6252,21 @@ const keypadObserver = new MutationObserver(() => {
 
 // 앱 전체의 화면 변화(바텀시트가 열리는 등)를 감지해서 자동으로 속성 주입
 keypadObserver.observe(document.body, { childList: true, subtree: true });
+
+// 🏥 병원 예약(진료 접수)용 증상 요약 복사 함수
+window.copySymptomMemo = function() {
+    let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
+    let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
+    
+    if(records.length === 0) return window.showToast('⚠️ 복사할 진료 기록이 없습니다.');
+    
+    let latest = records[0];
+    let pillName = latest.type === 'red' ? '아세트아미노펜(빨강)' : '이부프로펜(파랑)';
+    let symp = (latest.symptoms && latest.symptoms.length > 0) ? latest.symptoms.join(', ') : '특이증상 없음';
+    
+    let text = `[증상요약]\n- 최근 체온: ${latest.temp}도\n- 복용 약: ${pillName}\n- 몸무게: ${weight}kg\n- 동반 증상: ${symp}`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        window.showToast("📋 진료 접수용 메모가 복사되었어요!<br>예약 앱이나 문자에 바로 붙여넣기 하세요.");
+    });
+};
