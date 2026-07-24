@@ -4886,8 +4886,21 @@ function addOpenRecord() {
     const dateInput = document.getElementById('open-item-date');
     
     const typeVal = typeSelect.value;
-    const typeText = typeSelect.options[typeSelect.selectedIndex].text.split(' ')[1]; 
-    const emoji = typeSelect.options[typeSelect.selectedIndex].text.split(' ')[0];
+    const optionText = typeSelect.options[typeSelect.selectedIndex].text;
+    
+    // 이모지와 글자 분리
+    const parts = optionText.split(' ');
+    const emoji = parts[0]; 
+    let typeText = parts.slice(1).join(' '); 
+    
+    // ✨ [핵심 패치] 길고 안 예쁜 이름을 스마트하게 압축!
+    // 1. 슬래시(/)가 있으면 그 앞까지만! (예: "아기 로션/크림/오일" ➡️ "아기 로션")
+    typeText = typeText.split('/')[0];
+    // 2. 괄호가 있으면 그 앞까지만! (예: "해열제 (챔프 등)" ➡️ "해열제")
+    typeText = typeText.split('(')[0];
+    // 3. 혹시 모를 앞뒤 공백 깔끔하게 청소
+    typeText = typeText.trim();
+    
     const dateVal = dateInput.value;
     
     if (!dateVal) return showToast("⚠️ 뜯은 날짜를 선택해주세요!");
@@ -4907,7 +4920,7 @@ function addOpenRecord() {
     const newRecord = {
         id: 'open_' + new Date().getTime(),
         type: typeVal,
-        name: typeText,
+        name: typeText, // 👈 스마트하게 줄여진 이름이 저장됨!
         emoji: emoji,
         openDate: dateVal,
         limitDays: limitMap[typeVal]
@@ -4917,7 +4930,6 @@ function addOpenRecord() {
     records.push(newRecord);
     localStorage.setItem('tosil_open_records', JSON.stringify(records));
     
-    // 새 물건 등록 시 자동으로 전체 탭으로 이동해서 보여주기
     window.currentOpenFilter = 'all'; 
     renderOpenRecords();
     showToast("✍️ 라벨 스티커가 등록되었습니다!");
