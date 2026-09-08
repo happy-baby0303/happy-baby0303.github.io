@@ -45,6 +45,84 @@
         if (bar) try { bar.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
     };
 
+    /* ---------- PLUS 를 한 덩어리로 ----------
+       \u26a0\ufe0f bottlegear.js \u00b7 bottlerefuse.js \u00b7 bottlemilk.js 는
+          한 그릇에 여러 패널을 담는다. (모유 재고 \uD83D\uDD12 + 보관 기준표 무료)
+          그릇째 두면 유료와 무료가 섞여 보인다.
+          그래서 패널을 하나씩 꺼내 pane 의 직계로 만든 뒤 정렬한다.
+
+       \u26a0\ufe0f 구독 여부에 따라 위아래를 바꾼다.
+          미구독자에게 자물쇠부터 보여주면 "다 유료네" 하고 나간다. */
+
+    var PLUS_TITLE = /갈 때가 된 것|다음에 준비할 것|젖병을 안 물어요|우리 집 모유 재고|쪽쪽이, 자꾸 뱉나요/;
+    var BOXES = ["bottle-guide", "bottle-gear", "bottle-refuse", "bottle-milk", "paci-guide"];
+
+    function isPlusUser() {
+        try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
+        if (!localStorage.getItem("firebase_uid")) return false;
+        return localStorage.getItem("tosil_is_founder") === "true"
+            || localStorage.getItem("tosil_plan_cache") === "premium"
+            || localStorage.getItem("tosil_is_master") === "true";
+    }
+
+    /* \u26a0\ufe0f 모듈이 다시 그리면 숨은 그릇 안에 새 패널이 생긴다.
+          꺼내둔 옛 패널은 그대로 남아서 화면에 두 벌이 뜬다.
+          그래서 다시 꺼낼 때는 '내가 꺼냈던 것' 을 먼저 치운다.
+          data-from 으로 표시해두면 누가 꺼낸 건지 알 수 있다. */
+    function flatten() {
+        var pane = document.getElementById(PANE.tools);
+        if (!pane) return;
+        BOXES.forEach(function (id) {
+            var box = document.getElementById(id);
+            if (!box || box.parentNode !== pane) return;
+            var fresh = Array.prototype.slice.call(box.children);
+            if (!fresh.length) return;
+
+            // 지난번에 이 그릇에서 꺼낸 것들을 치운다
+            Array.prototype.slice.call(pane.querySelectorAll('[data-from="' + id + '"]'))
+                .forEach(function (old) { if (old.parentNode === pane) pane.removeChild(old); });
+
+            fresh.forEach(function (p) {
+                p.setAttribute("data-from", id);
+                pane.insertBefore(p, box);
+            });
+            box.style.display = "none";   // 그릇은 남긴다. 모듈이 다시 그릴 자리다
+        });
+    }
+
+    /* 모듈이 다시 그린 직후에 바로 정리한다. 4초를 기다리면 그동안 화면이 깨진다. */
+    function hookRefresh() {
+        ["refreshBottleGear", "refreshBottleRefuse", "refreshMilk", "refreshPaci"].forEach(function (n) {
+            var f = window[n];
+            if (typeof f !== "function" || f.__tabs) return;
+            var w = function () {
+                var r = f.apply(this, arguments);
+                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 40);
+                return r;
+            };
+            w.__tabs = true;
+            window[n] = w;
+        });
+    }
+
+    function orderPlus() {
+        var pane = document.getElementById(PANE.tools);
+        if (!pane) return;
+        var kids = Array.prototype.slice.call(pane.children).filter(function (el) {
+            return el.style.display !== "none";
+        });
+        var plus = [], free = [];
+        kids.forEach(function (el) {
+            var h = el.querySelector ? el.querySelector(".matrix-header") : null;
+            var t = h ? (h.textContent || "") : (el.textContent || "").slice(0, 120);
+            (PLUS_TITLE.test(t) ? plus : free).push(el);
+        });
+        if (!plus.length || !free.length) return;
+        var want = isPlusUser() ? plus.concat(free) : free.concat(plus);
+        if (want.every(function (el, i) { return kids[i] === el; })) return;
+        want.forEach(function (el) { pane.appendChild(el); });
+    }
+
     function paint() {
         var c = cur();
         TABS.forEach(function (t) {
@@ -147,16 +225,22 @@
         if (footer) host.appendChild(footer);
 
         paint();
+        setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 300);
         return true;
     }
 
     function boot() {
         var tries = 0;
         var go = function () {
-            if (build()) return;
+            if (build()) {
+                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 900);
+                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 2400);
+                return;
+            }
             if (++tries < 12) setTimeout(go, 350);
         };
         setTimeout(go, 1400);
+        setInterval(function () { hookRefresh(); flatten(); orderPlus(); }, 4000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
@@ -187,6 +271,7 @@
                 }
             }
             console.log("탭 밖에 남은 것:", loose.join(" · ") || "없음");
+            console.log("PLUS 구독:", isPlusUser(), "→", isPlusUser() ? "PLUS 를 위로" : "무료를 위로");
         }
     };
 })();

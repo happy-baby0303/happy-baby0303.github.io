@@ -461,6 +461,12 @@
         if (f === "h" || f === "m") {
             var n = parseInt(v, 10);
             o.drive[f] = (n >= 0 && n < 24) ? n : "";
+        } else if (f === "gap") {
+            /* \u26a0\ufe0f 숫자로 저장해야 한다.
+                  문자열로 두면 gapMinutes() 의 indexOf 가 못 찾아
+                  눌러도 아무 일이 없는 것처럼 보인다. */
+            var g = parseInt(v, 10);
+            if (GAP_CHOICES.indexOf(g) > -1) o.drive.gap = g;
         } else o.drive[f] = String(v || "").trim();
         save(o); paint();
     };
@@ -625,7 +631,7 @@
                     'border-radius:11px; cursor:pointer; font-size:12.5px; font-weight:800; ' +
                     (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
                         : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
-                    (g >= 60 ? (g % 60 ? (g / 60).toFixed(1) : g / 60) + '시간' : g + '분') + '</div>';
+                    (g % 60 === 0 ? (g / 60) + '시간' : (g / 60).toFixed(1) + '시간') + '</div>';
             }).join("") + '</div>';
 
         out += '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">' +

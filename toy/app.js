@@ -204,8 +204,8 @@ function renderPlays() {
         if (p.relatedToyId) {
             linkToToyHtml = `
                 <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#F8F9FA; border:1px solid #E5E8EB; padding:14px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
-                    <div style="font-size:13px; font-weight:800; color:#4E5968;">🛒 이 놀이에 쓰는 장난감이 없다면?</div>
-                    <div style="font-size:13px; font-weight:900; color:#3182F6;">최저가 보기 〉</div>
+                    <div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:#4E5968; word-break:keep-all;">🛒 이 놀이에 쓰는 장난감</div>
+                    <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#3182F6; white-space:nowrap; margin-left:10px;">보러 가기 〉</div>
                 </div>
             `;
         }
@@ -237,12 +237,22 @@ function renderPlays() {
             ${linkToToyHtml}
 
             <div style="display: flex; gap: 8px;">
-                <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1.2; padding: 14px; border-radius: 12px; background: #191F28; color: #FFF; font-weight: 800; font-size: 14px; border: none; cursor: pointer; transition: 0.2s;">
-                    ⏱️ ${p.playTime}분 버티기 시작
+                <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #191F28; color: #FFF; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap;">
+                    ⏱️ ${p.playTime}분 타이머
                 </button>
-                <button onclick="sharePlayMission('${p.id}')" style="flex: 1; padding: 14px; border-radius: 12px; background: #FEE500; color: #191919; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                    💬 아빠 미션전송
+                <button onclick="sharePlayMission('${p.id}')" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #FEE500; color: #191919; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; white-space: nowrap;">
+                    💬 아빠에게
                 </button>
+            </div>
+
+            <!-- ⚠️ 기록은 무료여야 한다. 이게 없으면 무료 사용자는
+                 '이번 달 놀이 기록' 과 도감을 영영 못 채운다.
+                 그러면 사라지는 놀이도, 취향 학습도 통째로 멈춘다. -->
+            <div id="playdone-${p.id}" onclick="window.togglePlayDone && window.togglePlayDone('${p.id}')"
+                 style="margin-top: 10px; text-align: center; padding: 13px; border-radius: 12px;
+                        font-size: 13.5px; font-weight: 800; cursor: pointer;
+                        background: #FFFFFF; color: #4E5968; border: 1px solid #D1D5DB;">
+                오늘 놀았어요
             </div>
         </div>`;
     });

@@ -294,15 +294,30 @@
     /* ---------- 처방전 카드에 '했어요' ---------- */
 
     function paintMarks() {
-        /* ⚠️ 카드에는 손대지 않는다. playweek.js 가 '놀았어요' 를 직접 그린다.
-              여기서 또 붙이면 버튼이 두 개가 되고 줄이 흐트러진다. */
+        /* ⚠️ 처방전 카드에는 손대지 않는다. playweek.js 가 직접 그린다.
+              여기서 또 붙이면 버튼이 두 개가 되고 줄이 흐트러진다.
+
+              대신 놀이 목록(app.js)의 '오늘 놀았어요' 는 여기서 칠해준다.
+              app.js 는 다시 그릴 때 눌린 상태를 모르기 때문이다. */
+        var els = document.querySelectorAll('[id^="playdone-"]');
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            var id = el.id.slice("playdone-".length);
+            var on = window.didPlayToday(id);
+            el.textContent = on ? "\u2713 오늘 놀았어요" : "오늘 놀았어요";
+            el.style.background = on ? "#EAF7F1" : "#FFFFFF";
+            el.style.color = on ? "#1F6F52" : "#4E5968";
+            el.style.border = "1px solid " + (on ? "#A7DFC8" : "#D1D5DB");
+        }
     }
 
     function boot() {
         setTimeout(function () { paintCard(); paintMarks(); }, 700);
         setTimeout(function () { paintCard(); paintMarks(); }, 1800);
+        setTimeout(function () { paintMarks(); }, 3200);
 
-        ["makePlayWeek", "swapPlayDay", "switchToyMainTab"].forEach(function (n) {
+        ["makePlayWeek", "swapPlayDay", "switchToyMainTab",
+         "filterPlays", "updateToyView", "renderFavorites"].forEach(function (n) {
             var f = window[n];
             if (typeof f !== "function" || f.__log) return;
             var w = function () {

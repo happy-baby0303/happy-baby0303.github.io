@@ -1925,7 +1925,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
     html += `
         <details style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
             <summary style="padding: 16px 20px; font-size: 14px; font-weight: 800; color: #191F28; cursor: pointer; display: flex; justify-content: space-between; align-items: center; outline:none;">
-                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📋</span> 일주일 식단표 한눈에 보기</div>
+               <div data-plus-head style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📋</span> 일주일 식단표 한눈에 보기</div>
                 <span class="arrow" style="font-size: 12px; color: #8B95A1; transition:0.3s;">▼</span>
             </summary>
             <div style="padding: 0 20px 20px; border-top: 1px dashed #E5E8EB; margin-top: 4px; padding-top: 12px;">

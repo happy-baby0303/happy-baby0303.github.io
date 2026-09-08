@@ -141,6 +141,8 @@
     var FOLD_KEYS = ["ADAC", "어떤 상황", "중고로", "쿨시트", "차에서 뭘",
                      "사고가 났다면", "토했을 때", "하네스를 스스로", "장거리"];
 
+    var BOXES = ["carseat-own", "carseat-cry"];
+
     function isPlusUser() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
         if (!localStorage.getItem("firebase_uid")) return false;
@@ -155,20 +157,43 @@
           (우리 카시트 + 쿨시트 + 차에서 + 사고 + 세탁 이 한 덩어리)
           그릇째 옮기면 무료 패널이 PLUS 를 따라다닌다.
           그래서 먼저 패널을 하나씩 꺼내 pane 의 직계로 만든 뒤에 정렬한다. */
+    /* \u26a0\ufe0f 모듈이 다시 그리면 숨은 그릇 안에 새 패널이 생긴다.
+          꺼내둔 옛 패널은 그대로 남아서 화면에 두 벌이 뜬다.
+          그래서 다시 꺼낼 때는 '내가 꺼냈던 것' 을 먼저 치운다.
+          data-from 으로 표시해두면 누가 꺼낸 건지 알 수 있다. */
     function flatten() {
         var pane = document.getElementById(PANE.use);
         if (!pane) return;
-        var kids = Array.prototype.slice.call(pane.children);
-        kids.forEach(function (box) {
-            if (box.id !== "carseat-own" && box.id !== "carseat-cry") return;
-            if (box.getAttribute("data-flat")) return;
-            var panels = Array.prototype.slice.call(box.children);
-            if (panels.length < 2) return;
-            box.setAttribute("data-flat", "1");
-            /* 그릇은 남겨둔다 \u2014 모듈이 다시 그릴 자리가 필요하다.
-               다만 비어 있으면 자리를 안 먹게 접어둔다. */
-            panels.forEach(function (p) { pane.insertBefore(p, box); });
-            box.style.display = "none";
+        BOXES.forEach(function (id) {
+            var box = document.getElementById(id);
+            if (!box || box.parentNode !== pane) return;
+            var fresh = Array.prototype.slice.call(box.children);
+            if (!fresh.length) return;
+
+            // 지난번에 이 그릇에서 꺼낸 것들을 치운다
+            Array.prototype.slice.call(pane.querySelectorAll('[data-from="' + id + '"]'))
+                .forEach(function (old) { if (old.parentNode === pane) pane.removeChild(old); });
+
+            fresh.forEach(function (p) {
+                p.setAttribute("data-from", id);
+                pane.insertBefore(p, box);
+            });
+            box.style.display = "none";   // 그릇은 남긴다. 모듈이 다시 그릴 자리다
+        });
+    }
+
+    /* 모듈이 다시 그린 직후에 바로 정리한다. 4초를 기다리면 그동안 화면이 깨진다. */
+    function hookRefresh() {
+        ["refreshCarseatOwn", "refreshCarseatCry"].forEach(function (n) {
+            var f = window[n];
+            if (typeof f !== "function" || f.__tabs) return;
+            var w = function () {
+                var r = f.apply(this, arguments);
+                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 40);
+                return r;
+            };
+            w.__tabs = true;
+            window[n] = w;
         });
     }
 
@@ -340,15 +365,15 @@
             fixFold();
             calmEmoji();
             if (build()) {
-                setTimeout(function () { calmEmoji(); flatten(); orderPlus(); foldExtras(); }, 400);
-                setTimeout(function () { flatten(); orderPlus(); foldExtras(); }, 1400);
-                setTimeout(function () { flatten(); orderPlus(); foldExtras(); }, 3000);
+                setTimeout(function () { hookRefresh(); calmEmoji(); flatten(); orderPlus(); foldExtras(); }, 400);
+                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); foldExtras(); }, 1400);
+                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); foldExtras(); }, 3000);
                 return;
             }
             if (++tries < 12) setTimeout(go, 350);
         };
         setTimeout(go, 1400);
-        setInterval(function () { calmEmoji(); flatten(); orderPlus(); }, 4000);   // 다시 그려져도 유지
+        setInterval(function () { calmEmoji(); hookRefresh(); flatten(); orderPlus(); }, 4000);   // 다시 그려져도 유지
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
