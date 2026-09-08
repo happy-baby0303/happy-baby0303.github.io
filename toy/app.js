@@ -70,9 +70,12 @@ function applyGlobalBabyProfile() {
             b.innerText = `생후 ${months}개월 맞춤`;
         });
 
-        if (months <= 3) autoMilestone = 'tummy';
-        else if (months <= 6) autoMilestone = 'flip';
-        else if (months <= 9) autoMilestone = 'crawl';
+               /* ⚠️ 놀이 탭(playweek·playlog)과 같은 기준이어야 한다.
+              여기만 newborn 을 안 고르면 신생아템 17개가 안 보인다. */
+        if (months < 2) autoMilestone = 'newborn';
+        else if (months < 4) autoMilestone = 'tummy';
+        else if (months < 7) autoMilestone = 'flip';
+        else if (months < 10) autoMilestone = 'crawl';
         else autoMilestone = 'stand';
         
         globalMilestone = autoMilestone;
@@ -499,7 +502,7 @@ function generateToyHTML(toy, favs) {
             </div>
 
             <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 AI 팩트체크</div>
+                <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 알아두실 것</div>
                 <div style="font-size: 13.5px; color: #4E5968; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
             </div>
 

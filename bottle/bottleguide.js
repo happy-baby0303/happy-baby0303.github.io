@@ -298,7 +298,15 @@
         try {
             var list = JSON.parse(localStorage.getItem("tosil_open_records")) || [];
             list = list.filter(function (r) { return !r || String(r.name).indexOf("젖꼭지") === -1; });
-            list.push({ id: "nip_" + Date.now(), name: "젖꼭지", openDate: key, limitDays: 60 });
+                       /* ⚠️ '언제깠지' 는 이름 앞에 아이콘을, 위쪽 칩에 분류를 쓴다.
+                  그 둘을 안 넣으면 화면에 undefined 가 찍힌다.
+                  필드 이름을 확인하기 전이라 후보를 다 넣어둔다. */
+            list.push({
+                id: "nip_" + Date.now(), name: "젖꼭지",
+                emoji: "🍼", icon: "🍼",
+                category: "수유", cat: "수유", type: "수유",
+                openDate: key, limitDays: 60
+            });
             localStorage.setItem("tosil_open_records", JSON.stringify(list));
         } catch (e) {}
 
@@ -388,15 +396,20 @@
             head.style.cursor = "pointer";
             head.innerHTML = '🔍 직접 조건 고르기 <span id="fold-mark" style="margin-left:auto; ' +
                              'font-size:13px; font-weight:800; color:' + GRAY + ';">펼치기 ▾</span>';
-            var grid = panel.querySelector(".matrix-grid");
+                      var grid = panel.querySelector(".matrix-grid");
             if (grid) {
-                grid.style.display = "none";
-                head.onclick = function () {
-                    var on = (grid.style.display === "none");
-                    grid.style.display = on ? "grid" : "none";
+                /* ⚠️ 격자만 숨기면 패널 여백 28px + 제목 여백 24px 이 그대로 남아
+                      빈 상자가 커진다. 접을 때는 여백도 같이 줄인다. */
+                var fold = function (on) {
+                    grid.style.display = on ? "none" : "grid";
+                    panel.style.padding = on ? "18px 24px" : "28px 24px";
+                    panel.style.marginBottom = on ? "20px" : "32px";
+                    head.style.marginBottom = on ? "0" : "24px";
                     var mk = document.getElementById("fold-mark");
-                    if (mk) mk.textContent = on ? "접기 ▴" : "펼치기 ▾";
+                    if (mk) mk.textContent = on ? "펼치기 ▾" : "접기 ▴";
                 };
+                fold(true);
+                head.onclick = function () { fold(grid.style.display !== "none"); };
             }
         }
 

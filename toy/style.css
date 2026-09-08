@@ -18,7 +18,9 @@ body {
     overflow-wrap: break-word; 
 }
 a { text-decoration: none; color: inherit; }
-.container { max-width: 600px; margin: 0 auto; padding: 0 20px 120px; } 
+
+/* 📱 중앙 정렬 컨테이너 (다른 탭과 동일하게 600px로 통일) */
+.container { max-width: 600px; margin: 0 auto; padding: 0 20px 120px; min-height: 100vh; } 
 
 /* 👑 헤더와 홈버튼 설정 */
 .app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; padding: 0; width: 100%; }
@@ -41,10 +43,17 @@ a { text-decoration: none; color: inherit; }
     -webkit-text-fill-color: transparent;
 }
 .hero-title p { margin: 8px 0 0; color: #8B95A1; font-weight: 600; font-size: 14px; }
+.dynamic-age-badge { background: #E8F3FF; color: #3182F6; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap; }
 
-/* ✨ 매트릭스 패널 (하얀색 고급 카드 공통) */
-.matrix-panel, .milestone-panel { background: #FFFFFF; padding: 28px 24px; border-radius: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); margin-bottom: 32px; border: 1px solid #F2F5F8; }
-.matrix-header, .panel-header-dark { font-size: 16px; font-weight: 900; color: #191F28; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+/* ✨ 이유식 전용: 식재료 신호등 검색창 */
+.search-box { background: #FFFFFF; padding: 24px; border-radius: 24px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8; }
+.search-box label { display:block; font-size:14px; font-weight:800; color:#191F28; margin-bottom:12px; }
+.search-box input { width: 100%; padding: 16px; border: 1px solid #E5E8EB; border-radius: 14px; font-size: 15px; font-weight: 600; transition: 0.2s; background: #F9FAFB; box-sizing: border-box; outline: none; }
+.search-box input:focus { border-color: #10B981; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+
+/* ✨ 매트릭스 패널 (하얀색 고급 필터 카드 공통) */
+.matrix-panel { background: #FFFFFF; padding: 28px 24px; border-radius: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); margin-bottom: 24px; border: 1px solid #F2F5F8; }
+.matrix-header { font-size: 16px; font-weight: 900; color: #191F28; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
 .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; }
 .matrix-item { display: flex; flex-direction: column; }
 .matrix-item.full-width { grid-column: 1 / -1; }
@@ -52,85 +61,45 @@ a { text-decoration: none; color: inherit; }
 
 /* ✨ 선택 박스 (공통) */
 .custom-select-wrapper { position: relative; width: 100%; }
-.custom-select-wrapper select { width: 100%; padding: 16px; border-radius: 14px; background-color: #F9FAFB; border: 1px solid #E5E8EB; color: #191F28; font-family: 'Pretendard'; font-size: 14px; font-weight: 700; appearance: none; outline: none; transition: 0.2s ease; cursor: pointer; }
+.custom-select-wrapper select { width: 100%; padding: 16px; border-radius: 14px; background-color: #F9FAFB; border: 1px solid #E5E8EB; color: #191F28; font-family: 'Pretendard'; font-size: 14px; font-weight: 700; appearance: none; outline: none; transition: 0.2s ease; cursor: pointer; box-sizing: border-box; }
 .custom-select-wrapper select:focus { border-color: #3182F6; background-color: #FFFFFF; box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.1); }
 .custom-select-wrapper::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238B95A1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; }
 
-/* ✨ 공통 버튼 */
-.btn-reset { flex: 1; background: #F2F5F8; color: #4E5968; border: none; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; }
-.btn-search { flex: 2; background: #3182F6; color: #FFF; border: none; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.25); transition: transform 0.2s; }
-.btn-reset:active, .btn-search:active { transform: scale(0.96); }
-
-/* 🧸 장난감 전용: 마일스톤(발달단계) 버튼 (가로 스와이프 복구!) */
-.chip-group { 
-    display: flex; 
-    flex-wrap: nowrap !important; /* 줄바꿈 강제 금지 */
-    overflow-x: auto; /* 가로 스크롤 활성화 */
-    gap: 8px; 
-    justify-content: flex-start; 
-    margin-top: 8px; 
-    padding-bottom: 4px; /* 스크롤할 때 잘리지 않게 여유 공간 */
-    -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
-    scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
-}
-.chip-group::-webkit-scrollbar { display: none; } /* 크롬, 사파리 스크롤바 완벽 숨김 */
-
-.ms-chip { 
-    flex: 0 0 auto !important; /* 버튼 글자 길이에 맞춰서 찌그러지지 않게 보호 */
-    white-space: nowrap !important; 
-    margin: 0 !important; 
-    background: #F9FAFB; 
-    border: 1px solid #E5E8EB; 
-    padding: 14px 18px; 
-    border-radius: 14px; 
-    font-size: 14px; 
-    font-weight: 700; 
-    color: #4E5968; 
-    cursor: pointer; 
-    transition: 0.2s; 
-}
-.ms-chip.active { background: #191F28; color: #FFFFFF; border-color: #191F28; }
-/* 🧸 장난감 전용: 긴급(SOS) 테마 패널 - 프리미엄 다크 테마 */
-.sos-theme-panel { background: #191F28; padding: 28px 24px; border-radius: 24px; margin-bottom: 32px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-.panel-header { color: #FFFFFF; font-size: 16px; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;}
-.theme-scroll-wrapper { display: flex; gap: 12px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; padding-bottom: 8px; }
-.theme-scroll-wrapper::-webkit-scrollbar { display: none; }
-.theme-card { flex: 0 0 150px; background: #333D4B; border: 1px solid #4E5968; border-radius: 16px; padding: 18px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 12px; }
-.theme-card:active { transform: scale(0.96); }
-.theme-card.active { background: #3182F6; border-color: #3182F6; box-shadow: 0 4px 12px rgba(49,130,246,0.3); }
-.theme-card .theme-emoji { font-size: 28px; }
-.theme-card .theme-text { color: #B0B8C1; font-size: 13px; line-height: 1.4; }
-.theme-card .theme-text b { font-size: 14px; font-weight: 800; color: #FFFFFF; display: block; margin-bottom: 4px; }
-.btn-secondary { padding: 16px; background: #333D4B; color: #FFFFFF; border: none; border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 6px;}
-
-/* 결과 카드 (공통) */
-.result-area { display: flex; flex-direction: column; gap: 24px; }
+/* 🌟 결과 카드 (공통 24px 둥근 테두리 적용) */
 .stroller-card, .report-card { background: #FFFFFF; padding: 28px 24px; border-radius: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); position: relative; border: 1px solid #F2F5F8; margin-bottom: 24px; }
-.premium-empty-state { display: flex; flex-direction: column; gap: 16px; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 16px; padding: 32px 24px; align-items: center; justify-content: center; margin-bottom: 16px; text-align: center; }
-.empty-icon { font-size: 32px; background: #FFF; padding: 12px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.premium-empty-state { display: flex; flex-direction: column; gap: 16px; background: #F9FAFB; border: 1px dashed #D1D5DB; border-radius: 16px; padding: 40px 24px; align-items: center; justify-content: center; margin-bottom: 16px; text-align: center; }
+.empty-icon { font-size: 40px; margin-bottom: 8px; }
 .empty-text { display: flex; flex-direction: column; gap: 6px; }
 .empty-text b { font-size: 16px; color: #191F28; font-weight: 800; }
 .empty-text span { font-size: 13.5px; color: #8B95A1; font-weight: 600; line-height: 1.5; word-break: keep-all; }
 
-/* 🌟 단점 박스 공통 */
-.insight-box { margin-bottom: 16px; background: #F9FAFB !important; padding: 18px; border-radius: 14px; border: 1px solid #E5E8EB !important; }
-.insight-box .title { font-size: 13px; font-weight: 900; color: #191F28; margin-bottom: 8px; }
-.insight-box .text { font-size: 13.5px; color: #4E5968; line-height: 1.6; font-weight: 600; word-break: keep-all; }
+/* ==========================================
+   🥦 이유식 전용: 캘린더 & 스마트 요리 모드 애니메이션
+   ========================================== */
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* 🧸 장난감 이미지 홀더 */
-.toy-img-placeholder { width: 70px; height: 70px; background: #F9FAFB; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 36px; border: 1px solid #E5E8EB; flex-shrink: 0;}
+/* 캘린더 날짜 박스 */
+.cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; border-radius: 12px; font-size: 14px; font-weight: 800; color: #191F28; cursor: pointer; transition: 0.2s; position: relative; }
+.cal-day.today { background: #F0F7FF; color: #3182F6; }
+.cal-day.selected { background: #191F28; color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: scale(1.05); z-index: 2; }
+.cal-day.empty { cursor: default; }
+.cal-dot-container { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; justify-content: center; padding: 0 4px; }
+.cal-dot { width: 6px; height: 6px; border-radius: 50%; }
+.cal-dot.pass { background: #10B981; }
+.cal-dot.fail { background: #EF4444; }
 
-/* ✨ 수익화 제휴 버튼 (공통 까만색) */
-.buy-btn { display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; padding: 18px; border-radius: 14px; text-decoration: none; font-size: 15px; margin-top: 24px; transition: 0.2s; width: 100%; box-sizing: border-box; }
-.buy-btn:active { transform: scale(0.97); }
-.buy-btn.coupang { background: #191F28; color: #FFFFFF; box-shadow: 0 4px 14px rgba(0,0,0,0.1); } 
-.buy-btn.official { background: #FFFFFF; color: #191F28; border: 1.5px solid #191F28; }
-.buy-btn.naver { background: #F2F5F8; color: #4E5968; border: 1px solid #E5E8EB; } 
-.coupang-safety-guard { font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all; }
-.coupang-safety-guard b { color: #3182F6; font-weight: 800; }
+/* 요리 모드 단계 박스 */
+.cook-step { padding: 16px; background: #F8F9FA; border-radius: 14px; font-size: 15px; font-weight: 700; color: #191F28; line-height: 1.5; border: 1px solid #E5E8EB; cursor: pointer; transition: 0.2s; display: flex; gap: 12px; align-items: flex-start; }
+.cook-step.checked { background: #FFFFFF; color: #B0B8C1; text-decoration: line-through; border-color: #F2F4F6; }
+.cook-step.checked .step-box { background: #10B981; border-color: #10B981; color: #FFF; }
 
-/* 파란색 배너 통일 */
-.sync-banner, #auto-sync-banner { background: #F0F7FF; color: #1B64DA; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 800; display: none; align-items: center; justify-content: center; border: 1px solid #C9E2FF; margin-bottom: 32px; word-break: keep-all; line-height: 1.5; text-align: center; }
+/* 타이머 알람 번쩍임 애니메이션 */
+@keyframes alarmFlash {
+    0% { background-color: #FFFFFF; }
+    50% { background-color: #FFE5E5; }
+    100% { background-color: #FFFFFF; }
+}
+.alarm-active { animation: alarmFlash 1s infinite !important; }
 
 /* 🛡️ 법적 고지 푸터 */
 .legal-footer { margin-top: 40px; padding: 24px 20px; background: #F9FAFB; border-top: 1px solid #E5E8EB; border-radius: 16px; text-align: left; }
@@ -146,90 +115,6 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 380px) {
     .matrix-grid { grid-template-columns: 1fr !important; }
 }
-
-/* ✨ 매트릭스(필터) 제목과 발달상태(마일스톤) 제목의 간격을 분리했습니다! */
-.matrix-header { font-size: 16px; font-weight: 900; color: #191F28; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
-
-/* 1. 발달 상태 제목: 밑 여백을 24px -> 10px로 대폭 줄여서 버튼을 위로 당깁니다 */
-.panel-header-dark {
-    font-size: 15px;
-    font-weight: 900;
-    color: #191F28;
-    background: transparent;
-    border: none;
-    padding: 0 4px 12px 4px;
-    margin-top: 24px;
-}
-
-/* 2. 칩 그룹(버튼): 위 여백(margin-top)을 0으로 없애서 제목에 착 붙게 만듭니다 */
-.chip-group { 
-    display: flex; 
-    flex-wrap: nowrap !important; 
-    overflow-x: auto; 
-    gap: 8px; 
-    justify-content: flex-start; 
-    margin-top: 0; /* 위쪽 여백 완전 제거! */
-    padding-bottom: 4px; 
-    -ms-overflow-style: none; 
-    scrollbar-width: none; 
-}
-.chip-group::-webkit-scrollbar { display: none; }
-
-/* 🧸 장난감: SOS 패널을 화이트 톤으로 가볍고 깔끔하게 변경 */
-.sos-theme-panel { background: #FFFFFF; padding: 24px; border-radius: 24px; margin-bottom: 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid #F2F5F8; }
-.panel-header { color: #191F28; font-size: 16px; font-weight: 900; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;}
-
-.theme-card { flex: 0 0 150px; background: #F9FAFB; border: 1px solid #E5E8EB; border-radius: 16px; padding: 16px; text-align: left; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 12px; }
-.theme-card.active { background: #E8F3FF; border-color: #3182F6; box-shadow: none; }
-.theme-card .theme-text { color: #4E5968; font-size: 13px; line-height: 1.4; }
-.theme-card .theme-text b { color: #191F28; }
-
-/* ========================================== */
-        /* 🧸 장난감 탭 다크모드: 브라우저 농간 완벽 방어판 */
-        /* ========================================== */
-
-        /* 1. 상단 탭 & 카드 본체 다크모드 (이건 잘 먹히고 있음) */
-        body.dark-mode .segment-control { background-color: #191F28 !important; border: 1px solid #333D4B !important; }
-        body.dark-mode #tab-btn-play, body.dark-mode #tab-btn-gear { background-color: transparent !important; color: #8B95A1 !important; }
-        body.dark-mode #tab-btn-play[style*="background"], body.dark-mode #tab-btn-gear[style*="background"] { background-color: #333D4B !important; color: #F9FAFB !important; box-shadow: none !important; }
-        body.dark-mode .toy-card, body.dark-mode .sos-theme-panel, body.dark-mode .theme-card { background-color: #191F28 !important; border: 1px solid #333D4B !important; box-shadow: none !important; }
-        body.dark-mode .ms-chip:not(.active), body.dark-mode .play-filter-btn:not(.active) { background-color: #202632 !important; color: #B0B8C1 !important; border: 1px solid #333D4B !important; }
-
-        /* 2. 스크롤 띠 (Sticky) 하얀 배경 제거 -> 'position: sticky' 속성으로 때려잡기 */
-        body.dark-mode div[style*="position: sticky"], 
-        body.dark-mode div[style*="position:sticky"] {
-            background-color: #000000 !important;
-        }
-
-        /* 3. 아빠의 역할 (노란 박스) -> HEX와 RGB 두 가지 모두 저격 */
-        body.dark-mode [style*="FFF9E6"], body.dark-mode [style*="255, 249, 230"] {
-            background-color: #3B2E15 !important; border-color: #4D3C1C !important; color: #FBBF24 !important;
-        }
-        body.dark-mode [style*="FFF9E6"] *, body.dark-mode [style*="255, 249, 230"] * { color: #FBBF24 !important; }
-
-        /* 4. 시간 확보 리포트 (초록 뱃지) -> HEX와 RGB 두 가지 모두 저격 */
-        body.dark-mode [style*="E6F7F2"], body.dark-mode [style*="230, 247, 242"] {
-            background-color: #064E3B !important; border: none !important; color: #34D399 !important;
-        }
-        body.dark-mode [style*="00B37A"], body.dark-mode [style*="0, 179, 122"] { color: #34D399 !important; }
-
-        /* 5. 찜하기 버튼 & 장난감 이미지 박스 (클래스 이름으로 정확히 때려잡기) */
-        body.dark-mode .toy-img-placeholder,
-        body.dark-mode #toy-result-area button[style*="F2F4F6"],
-        body.dark-mode #toy-result-area button[style*="242, 244, 246"] {
-            background-color: #202632 !important; border: 1px solid #333D4B !important; color: #F9FAFB !important;
-        }
-
-        /* 6. 카카오톡 노란색 버튼 채도 낮추기 */
-        body.dark-mode [style*="FEE500"], body.dark-mode [style*="254, 229, 0"] {
-            background-color: #3B3200 !important; color: #FEE500 !important; border: 1px solid #5C4F00 !important;
-        }
-
-        /* 7. 기타 숨어버린 하얀색 카드 본체 및 글씨들 구출 */
-        body.dark-mode #play-result-area > div, body.dark-mode #toy-result-area > div {
-            background-color: #191F28 !important; border: 1px solid #333D4B !important; box-shadow: none !important; color: #F9FAFB !important;
-        }
-        body.dark-mode .toy-card-title, body.dark-mode .theme-text { color: #F9FAFB !important; }
 
 /* ========================================== */
 /* 🌙 다크모드 (인라인 스타일까지 강제 반전) */
@@ -386,6 +271,8 @@ body.dark-mode .cook-step { background: #202632 !important; color: #E5E8EB !impo
 body.dark-mode .cook-step.checked { background: #191F28 !important; color: #6B7684 !important; }
 
 /* 5. 장난감 '시간 확보 추천 라인업' 헤더 박스 */
+body.dark-mode .panel-header-dark,
+body.dark-mode .sos-theme-panel { background: #202632 !important; border: none !important; color: #F9FAFB !important; }
 body.dark-mode .theme-card { background: #191F28 !important; border-color: #333D4B !important; color: #E5E8EB !important; }
 body.dark-mode .theme-text b { color: #FFFFFF !important; }
 body.dark-mode .ms-chip { background: #202632 !important; color: #B0B8C1 !important; border-color: #333D4B !important; }
@@ -393,226 +280,127 @@ body.dark-mode .ms-chip.active,
 body.dark-mode .play-filter-btn.active { background: #3182F6 !important; color: #FFFFFF !important; border: none !important; }
 body.dark-mode .play-filter-btn { background: #202632 !important; color: #B0B8C1 !important; border-color: #333D4B !important; }
 
-/* 소제목: 박스 없애고 텍스트만 */
-.panel-header-dark {
-    font-size: 15px !important;
-    font-weight: 900 !important;
-    color: #191F28 !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0 4px 12px 4px !important;
-    margin-top: 24px !important;
-    display: block !important;
-}
-body.dark-mode .panel-header-dark { color: #F9FAFB !important; background: transparent !important; }
-
-.ms-chip, .play-filter-btn {
-    padding: 10px 16px !important;
-    border-radius: 20px !important;
-    font-size: 13.5px !important;
-    font-weight: 700 !important;
-}
-#milestone-filters, #theme-filters { gap: 8px !important; padding-bottom: 12px !important; }
-.sos-theme-panel { background: transparent !important; padding: 0 !important; border: none !important; }
-.theme-card {
-    border-radius: 16px !important;
-    padding: 16px 12px !important;
-    min-width: 130px !important;
-}
-body.dark-mode .theme-card { background: #191F28 !important; border: 1px solid #333D4B !important; }
-
-/* SOS 패널 제목 */
-.sos-theme-panel .panel-header {
-    color: #191F28 !important;
-    background: transparent !important;
-    font-size: 15px !important;
-    font-weight: 900 !important;
-    padding: 0 4px 12px 4px !important;
-    margin: 0 !important;
-}
-body.dark-mode .sos-theme-panel .panel-header { color: #F9FAFB !important; }
-
-/* ========================================== */
-/* 탭 활성화 표시 */
-/* ========================================== */
-.segment-control button {
-    transition: all 0.2s !important;
-    position: relative !important;
-}
-.segment-control button.tab-on {
-    background: #3182F6 !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 4px 12px rgba(49,130,246,0.3) !important;
-    font-weight: 900 !important;
-}
-.segment-control button.tab-off {
-    background: transparent !important;
-    color: #8B95A1 !important;
-    box-shadow: none !important;
-    font-weight: 800 !important;
-}
-body.dark-mode .segment-control { background: #202632 !important; }
-body.dark-mode .segment-control button.tab-off { color: #8B95A1 !important; }
-
-/* 누를 때 눌리는 느낌 */
-.segment-control button:active,
-.ms-chip:active,
-.play-filter-btn:active,
-.theme-card:active { transform: scale(0.96) !important; }
-
-/* 칩 선택 표시 */
-.ms-chip.active, .play-filter-btn.active {
-    background: #3182F6 !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    font-weight: 900 !important;
-}
-body.dark-mode .ms-chip.active,
-body.dark-mode .play-filter-btn.active {
-    background: #3182F6 !important;
-    color: #FFFFFF !important;
-}
-
-/* 테마 카드 선택 표시 */
-.theme-card.active {
-    border: 2px solid #3182F6 !important;
-    background: #EBF4FF !important;
-}
-body.dark-mode .theme-card.active {
-    border: 2px solid #60A5FA !important;
-    background: #16243B !important;
-}
-
-/* 결과 제목은 박스 없이 텍스트만 */
-#toy-result-area > div:first-child,
-body.dark-mode #toy-result-area > div:first-child {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 4px 12px 4px !important;
-    margin-bottom: 4px !important;
-}
-body.dark-mode #toy-result-area > div:first-child { color: #F9FAFB !important; }
-
-/* SOS 패널 - 박스 제거하고 카드만 */
-.sos-theme-panel {
-    background: transparent !important;
-    padding: 0 !important;
-    border: none !important;
-    margin-bottom: 28px !important;
-    box-shadow: none !important;
-}
-.theme-scroll-wrapper {
-    display: flex !important;
-    gap: 10px !important;
-    overflow-x: auto !important;
-    padding: 4px 4px 14px 4px !important;
-    scrollbar-width: none !important;
-}
-.theme-scroll-wrapper::-webkit-scrollbar { display: none; }
-
-.theme-card {
-    flex-shrink: 0 !important;
-    min-width: 145px !important;
-    padding: 18px 16px !important;
-    border-radius: 18px !important;
-    background: #FFFFFF !important;
-    border: 1px solid #E5E8EB !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
-    text-align: left !important;
-    cursor: pointer !important;
-    transition: 0.2s !important;
-}
-.theme-emoji { font-size: 26px !important; margin-bottom: 12px !important; display: block !important; }
-.theme-text { font-size: 12px !important; color: #8B95A1 !important; line-height: 1.45 !important; font-weight: 700 !important; }
-.theme-text b { display: block !important; margin-top: 5px !important; font-size: 13.5px !important; color: #191F28 !important; font-weight: 900 !important; }
-
-.theme-card.active { border: 2px solid #3182F6 !important; background: #F0F7FF !important; }
-
-body.dark-mode .theme-card { background: #191F28 !important; border-color: #333D4B !important; }
-body.dark-mode .theme-text { color: #8B95A1 !important; }
-body.dark-mode .theme-text b { color: #FFFFFF !important; }
-body.dark-mode .theme-card.active { background: #16243B !important; border-color: #60A5FA !important; }
-
-/* ========================================== */
-/* 🎨 SOS 카드 마감 */
-/* ========================================== */
-
-/* 1. 바깥 박스 완전 제거 */
-.sos-theme-panel,
-body.dark-mode .sos-theme-panel {
-    background: none !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-
-/* 2. 화면 끝까지 스크롤되게 (좌우 여백 밖으로 빼기) */
-.theme-scroll-wrapper {
-    margin: 0 -20px !important;
-    padding: 4px 20px 16px 20px !important;
-}
-
-/* 3. 카드 높이 통일 + 세로 정렬 */
-.theme-card {
-    height: 118px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    box-sizing: border-box !important;
-    /* 선택 시 크기 안 변하게 미리 2px 확보 */
-    border: 2px solid #E5E8EB !important;
-}
-.theme-card.active { border: 2px solid #3182F6 !important; }
-body.dark-mode .theme-card { border: 2px solid #333D4B !important; }
-body.dark-mode .theme-card.active { border: 2px solid #60A5FA !important; }
-
-/* 4. 이모지 크기 살짝 줄이고 여백 정리 */
-.theme-emoji { font-size: 24px !important; margin-bottom: 0 !important; line-height: 1 !important; }
-
-/* 5. 텍스트 두 줄 고정 */
-.theme-text { font-size: 11.5px !important; line-height: 1.4 !important; }
-.theme-text b { font-size: 13px !important; margin-top: 4px !important; }
-
-/* 6. 누를 때 반응 */
-.theme-card:active { transform: scale(0.96) !important; }
-
-.sos-theme-panel { position: relative !important; }
-.sos-theme-panel::after {
-    content: '';
-    position: absolute;
-    right: -20px; top: 0; bottom: 16px;
-    width: 40px;
-    background: linear-gradient(to right, rgba(242,244,246,0), rgba(242,244,246,1));
-    pointer-events: none;
-}
-body.dark-mode .sos-theme-panel::after {
-    background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,1));
+body.dark-mode [style*="background: #FFF5F5"],
+body.dark-mode [style*="background:#FFF5F5"],
+body.dark-mode [style*="background: #FFFFFF"],
+body.dark-mode [style*="background:#FFF"],
+body.dark-mode [style*="background: #FEF2F2"] {
+    background-color: #191F28 !important;
+    border-color: #333D4B !important;
 }
 
 /* ========================================== */
-/* 🌙 건전지 안내 박스 */
+/* 🌙 이유식 - 남은 밝은 카드 전부 잡기 */
 /* ========================================== */
-body.dark-mode [style*="background:#FFFBEB"],
-body.dark-mode [style*="background: #FFFBEB"] {
-    background-color: #2D2513 !important;
-    border-color: #5C4300 !important;
+
+/* 1. 흰색/분홍빛 계열 배경 전부 (#FF로 시작하는 모든 색) */
+body.dark-mode #food-calendar-view [style*="background: #FF"],
+body.dark-mode #food-calendar-view [style*="background:#FF"],
+body.dark-mode .container [style*="background: #FF"],
+body.dark-mode .container [style*="background:#FF"],
+body.dark-mode .container [style*="background: white"],
+body.dark-mode .container [style*="background:white"] {
+    background-color: #191F28 !important;
+    border-color: #333D4B !important;
 }
-body.dark-mode [style*="background:#FFFBEB"] b,
-body.dark-mode [style*="background: #FFFBEB"] b,
-body.dark-mode [style*="background:#FFFBEB"] strong,
-body.dark-mode [style*="background: #FFFBEB"] strong {
-    color: #FDE68A !important;
+
+/* 2. 그 안 글씨 밝게 */
+body.dark-mode .container [style*="background: #FF"] *,
+body.dark-mode .container [style*="background:#FF"] * {
+    color: #E5E8EB !important;
 }
-body.dark-mode [style*="background:#FFFBEB"],
-body.dark-mode [style*="background: #FFFBEB"],
-body.dark-mode [style*="background:#FFFBEB"] div,
-body.dark-mode [style*="background: #FFFBEB"] div {
-    color: #FCD34D !important;
+
+/* 3. 강조색은 살리기 */
+body.dark-mode .container [style*="color: #F04452"],
+body.dark-mode .container [style*="color:#F04452"],
+body.dark-mode .container [style*="color: #EF4444"],
+body.dark-mode .container [style*="color: #E32636"] { color: #FCA5A5 !important; }
+body.dark-mode .container [style*="color: #10B981"],
+body.dark-mode .container [style*="color:#10B981"],
+body.dark-mode .container [style*="color: #059669"],
+body.dark-mode .container [style*="color: #00B37A"] { color: #6EE7B7 !important; }
+body.dark-mode .container [style*="color: #3182F6"],
+body.dark-mode .container [style*="color:#3182F6"] { color: #60A5FA !important; }
+
+/* 4. 안쪽 회색 박스 (기록된 내역이 없습니다) */
+body.dark-mode .container [style*="background: #F"] {
+    background-color: #202632 !important;
+    border-color: #333D4B !important;
 }
-body.dark-mode [style*="background:#FFFBEB"] a,
-body.dark-mode [style*="background: #FFFBEB"] a {
-    color: #FBBF24 !important;
+body.dark-mode .container [style*="background: #F"] * { color: #B0B8C1 !important; }
+
+/* ⚠️ 반드시 파일 맨 마지막에! */
+body.dark-mode [style*="FEE500"],
+body.dark-mode [style*="fee500"],
+body.dark-mode button[style*="FEE500"],
+body.dark-mode a[style*="FEE500"] {
+    background-color: #FEE500 !important;
+    color: #191919 !important;
+}
+body.dark-mode [style*="FEE500"] *,
+body.dark-mode [style*="fee500"] *,
+body.dark-mode button[style*="FEE500"] *,
+body.dark-mode a[style*="FEE500"] * {
+    color: #191919 !important;
+}
+
+/* ⚠️ 반드시 파일 맨 마지막 (카카오 노란 버튼 보호) */
+body.dark-mode .container button[style*="FEE500"],
+body.dark-mode .container a[style*="FEE500"],
+body.dark-mode #food-result-area button[style*="FEE500"] {
+    background-color: #FEE500 !important;
+    color: #191919 !important;
+}
+body.dark-mode .container button[style*="FEE500"] *,
+body.dark-mode #food-result-area button[style*="FEE500"] * {
+    color: #191919 !important;
+}
+/* ============================================================
+   가로 넘침 막기 · 좁은 화면 대응
+   ------------------------------------------------------------
+   7일 식단 카드가 170px × 7 = 1,262px 라, 스크롤 상자가
+   화면을 밀어내면서 헤더의 '← 홈' 과 제목 앞글자까지 잘렸다.
+   아이폰 16 프로(440px)에서도 잘렸으니 그보다 작은 폰은 더하다.
+   ============================================================ */
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;          /* 페이지가 통째로 옆으로 밀리는 걸 막는다 */
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    overflow-x: clip;            /* 안쪽 스크롤 상자가 밖으로 못 나가게 */
+}
+
+/* 가로 스크롤 상자는 부모 폭을 넘지 않는다.
+   min-width:auto 가 기본이라 flex 안에서 안 줄어드는 걸 풀어준다. */
+.hide-scroll {
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* 7일 식단 카드 — 좁은 화면에서는 카드도 같이 줄어든다 */
+@media (max-width: 460px) {
+    .hide-scroll > div[style*="min-width: 170px"],
+    .hide-scroll > div[style*="min-width:170px"] {
+        min-width: 44vw !important;
+        max-width: 44vw !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .hide-scroll > div[style*="min-width: 170px"],
+    .hide-scroll > div[style*="min-width:170px"] {
+        min-width: 60vw !important;
+        max-width: 60vw !important;
+    }
+}
+
+/* 제목이 길어도 안 잘리게 */
+.hero-title, .section-title, .matrix-header {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }

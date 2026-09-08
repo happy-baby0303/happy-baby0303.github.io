@@ -298,14 +298,23 @@ function runFoodEngine() {
         if (customAllergies.length > 0) {
             // 엄마들이 자주 입력하는 한글 알레르기 키워드를 영어 DB(allergens)와 매핑
             const allergyDictionary = {
-                '계란': 'egg', '달걀': 'egg', '흰자': 'egg', '노른자': 'egg',
-                '우유': 'dairy', '치즈': 'dairy', '유제품': 'dairy', '요거트': 'dairy',
-                '밀가루': 'flour', '밀': 'flour', '면': 'flour', '빵': 'flour',
-                '콩': 'soy', '대두': 'soy', '두부': 'soy', '된장': 'soy',
-                '새우': 'shellfish', '게': 'shellfish', '갑각류': 'shellfish',
-                '생선': 'seafood', '조개': 'seafood', '해산물': 'seafood',
-                '땅콩': 'peanut', '호두': 'peanut', '견과': 'peanut', '견과류': 'peanut'
-            };
+        '계란': 'egg', '달걀': 'egg', '흰자': 'egg', '노른자': 'egg', '메추리알': 'egg',
+        '우유': 'dairy', '치즈': 'dairy', '유제품': 'dairy', '요거트': 'dairy',
+        '요구르트': 'dairy', '버터': 'dairy', '생크림': 'dairy', '분유': 'dairy',
+        '밀가루': 'flour', '밀': 'flour', '면': 'flour', '빵': 'flour', '국수': 'flour',
+        '파스타': 'flour', '소면': 'flour', '오트밀': 'flour', '귀리': 'flour',
+        '콩': 'soy', '대두': 'soy', '두부': 'soy', '된장': 'soy', '간장': 'soy',
+        '두유': 'soy', '순두부': 'soy', '콩나물': 'soy', '렌틸': 'soy', '완두': 'soy',
+        '새우': 'shellfish', '게': 'shellfish', '갑각류': 'shellfish', '꽃게': 'shellfish',
+        '조개': 'shellfish', '바지락': 'shellfish', '전복': 'shellfish', '굴': 'shellfish',
+        '오징어': 'shellfish', '문어': 'shellfish', '낙지': 'shellfish',
+        '생선': 'seafood', '해산물': 'seafood', '대구': 'seafood', '대구살': 'seafood',
+        '가자미': 'seafood', '연어': 'seafood', '광어': 'seafood', '고등어': 'seafood',
+        '참치': 'seafood', '멸치': 'seafood', '멸치육수': 'seafood', '황태': 'seafood',
+        '북어': 'seafood', '미역': 'seafood', '다시마': 'seafood', '흰살생선': 'seafood',
+        '땅콩': 'peanut', '견과': 'peanut', '견과류': 'peanut', '호두': 'peanut',
+        '잣': 'peanut', '아몬드': 'peanut', '캐슈': 'peanut', '피스타치오': 'peanut'
+    };
 
             const hasCustomAllergy = customAllergies.some(customItem => {
                 const mappedEng = allergyDictionary[customItem]; // "유제품" -> "dairy" 변환
@@ -338,7 +347,7 @@ function runFoodEngine() {
         let top3Results = filtered.slice(0, 3); 
         let otherResults = filtered.slice(3); 
 
-        let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #191F28; margin-bottom: 16px;">✨ 오늘의 AI 추천 식단 TOP ${top3Results.length}</div>`;
+        let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #191F28; margin-bottom: 16px;">✨ 오늘의 추천 식단 TOP ${top3Results.length}</div>`;
         htmlOutput += top3Results.map(item => generateCardHTML(item)).join('');
 
         if (otherResults.length > 0) {
@@ -443,12 +452,13 @@ window.onload = () => {
     runFoodEngine(); 
 };
 
-// 🚀 [NEW 4] 이유식 탭 전환 로직 (식단 추천 vs 캘린더)
+// 🚀 [NEW 4] 이유식 탭 전환 로직 (식단 추천 vs 캘린더 완벽 분리)
 function switchFoodTab(tabName) {
     const btnCuration = document.getElementById('tab-btn-curation');
     const btnCalendar = document.getElementById('tab-btn-calendar');
     const viewCuration = document.getElementById('view-curation');
     const viewCalendar = document.getElementById('view-calendar');
+    const foodGuide = document.getElementById('food-guide'); // ✨ 달력 탭에서 방해되는 녀석 숨기기용!
 
     if (tabName === 'curation') {
         btnCuration.style.background = '#FFFFFF';
@@ -460,6 +470,7 @@ function switchFoodTab(tabName) {
 
         viewCuration.style.display = 'block';
         viewCalendar.style.display = 'none';
+        if (foodGuide) foodGuide.style.display = 'block'; // 레시피 탭에서는 가이드 보이기
     } else {
         btnCalendar.style.background = '#FFFFFF';
         btnCalendar.style.color = '#191F28';
@@ -469,7 +480,8 @@ function switchFoodTab(tabName) {
         btnCuration.style.boxShadow = 'none';
 
         viewCalendar.style.display = 'block';
-        viewCuration.style.display = 'none'; // 👈 이 줄이 지워져서 화면이 겹쳤던 겁니다!
+        viewCuration.style.display = 'none'; 
+        if (foodGuide) foodGuide.style.display = 'none'; // ✨ 달력 탭에서는 가이드 완벽히 숨기기!
     }
 
     // 탭을 전환할 때마다 화면 맨 위로 부드럽게 끌어올려줌
@@ -568,37 +580,75 @@ function getFoodEmoji(name) {
 }
 
 function renderSelectedDateRecords() {
-    const [y, m, d] = selectedDateStr.split('-');
-    const titleEl = document.getElementById('cal-selected-date-text');
-    if(titleEl) titleEl.innerText = `${parseInt(m)}월 ${parseInt(d)}일 식재료 기록`;
-    
+    const listArea = document.getElementById('cal-record-list');
     const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     const dailyRecords = records[selectedDateStr] || [];
-    const listArea = document.getElementById('cal-record-list');
-    if(!listArea) return;
     
+    const dateObj = new Date(selectedDateStr);
+    const titleEl = document.getElementById('cal-selected-date-text');
+    if(titleEl) titleEl.innerText = `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일 기록`;
+
     if (dailyRecords.length === 0) {
-        listArea.innerHTML = `<div style="text-align: center; color: #8B95A1; font-size: 13.5px; padding: 30px 0; background: #FFF; border-radius: 14px; border: 1px dashed #D1D5DB;">아직 기록된 식재료가 없어요.<br>위의 [+ 재료 테스트]를 눌러 추가해보세요!</div>`;
+        listArea.innerHTML = `<div style="text-align: center; padding: 30px 0; color: #8B95A1; font-size: 14px; font-weight: 600; background:#FFF; border-radius:14px; border:1px dashed #D1D5DB;">기록된 내역이 없습니다.</div>`;
         return;
     }
-    
-    listArea.innerHTML = dailyRecords.map((r, index) => {
-        const emoji = getFoodEmoji(r.ingredient);
-        return `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #FFF; padding: 16px; border-radius: 16px; border: 1px solid #E5E8EB; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 24px; background: #F8F9FA; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; border-radius: 12px; border: 1px solid #F2F4F6;">${emoji}</div>
-                <div>
-                    <div style="font-size: 15.5px; font-weight: 900; color: #191F28; margin-bottom: 2px;">${r.ingredient}</div>
-                    <div style="font-size: 12px; font-weight: 700; color: #8B95A1;">${r.status === 'pass' ? '알레르기 없음' : '발진/거부 반응'}</div>
+
+    listArea.innerHTML = dailyRecords.map((r, i) => {
+        let contentHtml = '';
+
+        if (r.type === 'meal' || (r.menu && !r.ingredient)) {
+            let amountHtml = ''; let reactionHtml = ''; let actionBtnHtml = '';
+
+            // 💡 [핵심 디테일] 계획됨 상태면 '기록 완료' 파란 버튼 띄우기 (문자열 포함 여부로 확실히 체크!)
+            if (r.amount && r.amount.includes('계획됨')) {
+                amountHtml = `<span style="background:#FFF7ED; border:1px solid #FDBA74; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; color:#9A3412; cursor:pointer;" onclick="openMealSheetForUpdate('${selectedDateStr}', ${i}, '${r.menu}')">⏳ 아직 안 먹었어요 · 눌러서 기록</span>`;
+                actionBtnHtml = `<button onclick="openMealSheetForUpdate('${selectedDateStr}', ${i}, '${r.menu}')" style="background:#3182F6; color:#FFF; border:none; border-radius:8px; font-size:12px; font-weight:800; padding:8px 12px; cursor:pointer; box-shadow:0 2px 4px rgba(49,130,246,0.2); transition:0.2s;">기록 완료 ✏️</button>`;
+            } else {
+                // 이미 먹은 기록일 경우 (기존)
+                amountHtml = `<span style="background:#F0F7FF; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#3182F6;">${r.amount}</span>`;
+                reactionHtml = `<span style="background:#F2F4F6; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#4E5968;">${r.reaction}</span>`;
+                actionBtnHtml = `<button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:8px; font-size:12px; font-weight:700; color:#8B95A1; cursor:pointer; padding:6px 10px;">삭제</button>`;
+            }
+
+            contentHtml = `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <span style="font-size:12px; color:#8B95A1; font-weight:700;">${(typeof r.time === 'string' && !/^\d{6,}$/.test(r.time)) ? r.time : ''}</span>
+                    <span style="font-weight: 900; font-size: 16px; color: #191F28; letter-spacing:-0.5px;">${getFoodEmoji(r.menu)} ${r.menu}</span>
                 </div>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                <span style="font-size: 11.5px; font-weight: 900; color: ${r.status === 'pass' ? '#059669' : '#D32F2F'}; background: ${r.status === 'pass' ? '#ECFDF5' : '#FFF0F1'}; padding: 6px 10px; border-radius: 8px;">${r.status === 'pass' ? '🟢 안심 통과' : '🚨 주의 요망'}</span>
-                <button onclick="deleteFoodRecord('${selectedDateStr}', ${index})" style="background: none; border: none; color: #D1D5DB; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: underline;">삭제</button>
-            </div>
-        </div>
-    `}).join('');
+                <div style="display:flex; gap:6px; align-items:center;">
+                    ${amountHtml} ${reactionHtml}
+                </div>
+            `;
+            
+            return `
+                <div style="background: #FFF; border: 1px solid #E5E8EB; padding: 18px 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                    <div style="display:flex; flex-direction:column;">
+                        ${contentHtml}
+                    </div>
+                    <div>${actionBtnHtml}</div>
+                </div>
+            `;
+        } else {
+            // 재료 테스트용 UI (기존)
+            const isPass = r.status === 'pass';
+            const icon = isPass ? '🟢' : '🚨';
+            contentHtml = `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                    <span style="font-size:12px; color:#8B95A1; font-weight:700;">${(typeof r.time === 'string' && !/^\d{6,}$/.test(r.time)) ? r.time : ''}</span>
+                    <span style="font-weight: 900; font-size: 15px; color: ${isPass ? '#059669' : '#D32F2F'};">${getFoodEmoji(r.ingredient)} ${r.ingredient} 먹여봤어요</span>
+                </div>
+                <span style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'};">
+                    ${icon} ${isPass ? '무사 통과' : '알레르기 반응'}
+                </span>
+            `;
+            return `
+                <div style="background: #FFF; border: 1px solid #E5E8EB; padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div style="display:flex; flex-direction:column;">${contentHtml}</div>
+                    <button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background: #F9FAFB; border: 1px solid #E5E8EB; border-radius: 8px; font-size: 12px; font-weight:700; color: #8B95A1; cursor: pointer; padding:6px 10px;">삭제</button>
+                </div>
+            `;
+        }
+    }).join('');
 }
 
 function openFoodSheet() {
@@ -929,12 +979,27 @@ function setAllergyStatus(status) {
     }
 }
 
+let editingDate = null;
+let editingIndex = -1;
+
 function openMealSheet() {
+    editingDate = null;
+    editingIndex = -1;
     document.getElementById('meal-bottom-sheet').style.display = 'flex';
     document.getElementById('meal-menu-input').value = '';
     document.getElementById('meal-amount-input').value = '';
     document.getElementById('meal-reaction-input').selectedIndex = 0;
 }
+
+// 💡 [니치 디테일] 계획된 식단을 실제 먹은 기록으로 업데이트 창 열기!
+window.openMealSheetForUpdate = function(dateStr, index, menuName) {
+    editingDate = dateStr;
+    editingIndex = index;
+    document.getElementById('meal-bottom-sheet').style.display = 'flex';
+    document.getElementById('meal-menu-input').value = menuName;
+    document.getElementById('meal-amount-input').value = '';
+    document.getElementById('meal-reaction-input').selectedIndex = 0;
+};
 
 function openTestSheet() {
     document.getElementById('test-bottom-sheet').style.display = 'flex';
@@ -954,14 +1019,33 @@ function saveMealRecord() {
     const amount = document.getElementById('meal-amount-input').value.trim();
     const reaction = document.getElementById('meal-reaction-input').value;
     
-    // ✨ 깐깐한 amount 검사 삭제! 메뉴 이름만 적으면 무조건 통과!
     if (!menu) return alert('메뉴 이름은 꼭 입력해주세요! (예: 소고기 미음)');
 
-    // 입력 안 했으면 '양 모름', 입력했으면 '50ml' 식으로 알아서 포맷팅
     const finalAmount = amount ? `${amount}ml` : '양 모름';
+    const timeStr = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'});
+    let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
 
-    saveToCalendarDB({ type: 'meal', menu, amount: finalAmount, reaction });
+    if (editingIndex !== -1 && editingDate) {
+        // 💡 [니치 디테일] '계획됨' 상태를 현재 입력한 섭취량/반응으로 완벽히 덮어쓰기!
+        records[editingDate][editingIndex].menu = menu;
+        records[editingDate][editingIndex].amount = finalAmount;
+        records[editingDate][editingIndex].reaction = reaction;
+        records[editingDate][editingIndex].time = timeStr;
+        
+        // 덮어쓰기 끝났으니 초기화
+        editingIndex = -1;
+        editingDate = null;
+    } else {
+        // 신규 기록 저장
+        if (!records[selectedDateStr]) records[selectedDateStr] = [];
+        records[selectedDateStr].push({ type: 'meal', menu, amount: finalAmount, reaction, time: timeStr });
+    }
+
+    localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
     closeSheets();
+    renderCalendar();
+    renderSelectedDateRecords();
+    renderTotalSummary();
 }
 
 function saveTestRecord() {
@@ -972,7 +1056,7 @@ function saveTestRecord() {
     closeSheets();
 }
 
-// 공통 DB 저장 로직
+// 공통 DB 저장 로직 (테스트 기록용 유지)
 function saveToCalendarDB(dataObj) {
     const timeStr = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'});
     dataObj.time = timeStr;
@@ -990,58 +1074,67 @@ function saveToCalendarDB(dataObj) {
 
 // ✨ 디테일 카드 렌더링 (타입에 따라 디자인 다르게)
 function renderSelectedDateRecords() {
+    /* ⚠️ 이 이름의 함수가 파일에 둘 있었다. 자바스크립트는 나중 것이 이긴다.
+          그래서 '계획됨' 을 눌러도 아무 반응이 없었다.
+          이제 하나로 합친다. 위쪽 옛 정의는 이 함수가 덮어쓴다. */
     const listArea = document.getElementById('cal-record-list');
+    if (!listArea) return;
     const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     const dailyRecords = records[selectedDateStr] || [];
-    
     const dateObj = new Date(selectedDateStr);
     const titleEl = document.getElementById('cal-selected-date-text');
-    if(titleEl) titleEl.innerText = `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일 기록`;
+    if (titleEl) titleEl.innerText = `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일 기록`;
 
     if (dailyRecords.length === 0) {
-        listArea.innerHTML = `<div style="text-align: center; padding: 30px 0; color: #8B95A1; font-size: 14px; font-weight: 600; background:#FFF; border-radius:14px; border:1px dashed #D1D5DB;">기록된 내역이 없습니다.</div>`;
+        listArea.innerHTML = `<div style="text-align:center; padding:30px 0; color:#8B95A1; font-size:14px; font-weight:600; background:#FFF; border-radius:14px; border:1px dashed #D1D5DB;">기록된 내역이 없습니다.</div>`;
         return;
     }
 
-    listArea.innerHTML = dailyRecords.map((r, i) => {
-        let contentHtml = '';
+    const showTime = (t) => (typeof t === 'string' && !/^\d{6,}$/.test(t)) ? t : '';
 
-       // 1. 식단 기록용 UI (ml 글자를 빼고 r.amount 그대로 출력하게 수정)
+    listArea.innerHTML = dailyRecords.map((r, i) => {
+        // ── 식단 기록 ──
         if (r.type === 'meal' || (r.menu && !r.ingredient)) {
-            contentHtml = `
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                    <span style="font-size:12px; color:#8B95A1; font-weight:700;">${r.time || ''}</span>
-                    <span style="font-weight: 900; font-size: 15px; color: #191F28;">🍲 ${r.menu}</span>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <span style="background:#F0F7FF; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#3182F6;">${r.amount}</span>
-                    <span style="background:#F2F4F6; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#4E5968;">${r.reaction}</span>
-                </div>
-            `;
-        } 
-        // 2. 재료 테스트용 UI
-        else {
-            const isPass = r.status === 'pass';
-            const icon = isPass ? '🟢' : '🚨';
-            contentHtml = `
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                    <span style="font-size:12px; color:#8B95A1; font-weight:700;">${r.time || ''}</span>
-                    <span style="font-weight: 900; font-size: 15px; color: ${isPass ? '#059669' : '#D32F2F'};">🧪 ${r.ingredient} 테스트</span>
-                </div>
-                <span style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'};">
-                    ${icon} ${isPass ? '무사 통과' : '알레르기 반응'}
-                </span>
-            `;
+            const planned = !!(r.amount && String(r.amount).indexOf('계획됨') > -1);
+            const open = `openMealSheetForUpdate('${selectedDateStr}', ${i}, '${String(r.menu).replace(/'/g, "")}')`;
+
+            const chips = planned
+                ? `<span onclick="${open}" style="background:#FFF7ED; border:1px solid #FDBA74; padding:5px 10px; border-radius:7px; font-size:11.5px; font-weight:800; color:#9A3412; cursor:pointer;">⏳ 아직 안 먹었어요 · 눌러서 기록</span>`
+                : `<span style="background:#F0F7FF; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#3182F6;">${r.amount || ''}</span>
+                   <span style="background:#F2F4F6; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#4E5968;">${r.reaction || ''}</span>`;
+
+            const btn = planned
+                ? `<button onclick="${open}" style="background:#3182F6; color:#FFF; border:none; border-radius:9px; font-size:12px; font-weight:800; padding:9px 12px; cursor:pointer; white-space:nowrap;">기록하기 ✏️</button>`
+                : `<button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:8px; font-size:12px; font-weight:700; color:#8B95A1; cursor:pointer; padding:6px 10px;">삭제</button>`;
+
+            return `
+                <div style="background:#FFF; border:1px solid ${planned ? '#FDBA74' : '#E5E8EB'}; padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                            <span style="font-size:12px; color:#8B95A1; font-weight:700;">${showTime(r.time)}</span>
+                            <span style="font-weight:900; font-size:15.5px; color:#191F28; letter-spacing:-0.4px;">${getFoodEmoji(r.menu)} ${r.menu}</span>
+                        </div>
+                        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">${chips}</div>
+                    </div>
+                    <div style="flex-shrink:0;">${btn}</div>
+                </div>`;
         }
 
+        // ── 재료 먹여본 기록 ──
+        const isPass = r.status === 'pass';
         return `
-            <div style="background: #FFF; border: 1px solid #E5E8EB; padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <div style="display:flex; flex-direction:column;">
-                    ${contentHtml}
+            <div style="background:#FFF; border:1px solid #E5E8EB; padding:16px; border-radius:14px; display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;">
+                <div style="flex:1; min-width:0;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                        <span style="font-size:12px; color:#8B95A1; font-weight:700;">${showTime(r.time)}</span>
+                        <span style="font-weight:900; font-size:15px; color:${isPass ? '#059669' : '#D32F2F'};">${getFoodEmoji(r.ingredient)} ${r.ingredient} 먹여봤어요</span>
+                    </div>
+                    <span style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'};">
+                        ${isPass ? '🟢 무사 통과' : '🚨 알레르기 반응'}
+                    </span>
                 </div>
-                <button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background: #F9FAFB; border: 1px solid #E5E8EB; border-radius: 8px; font-size: 12px; font-weight:700; color: #8B95A1; cursor: pointer; padding:6px 10px;">삭제</button>
-            </div>
-        `;
+                <button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:8px; font-size:12px; font-weight:700; color:#8B95A1; cursor:pointer; padding:6px 10px;">삭제</button>
+            </div>`;
     }).join('');
 }
 
@@ -1429,3 +1522,454 @@ function calcReverseFood() {
 
     noteEl.innerHTML = `💡 젖병 눈금에 맞춘 <b>현실 레시피</b>예요!<br>이렇게 끓이면 약 <b>${finalYieldG.toLocaleString()}g</b> 정도 완성돼요.${brothTip}`;
 }
+
+// ==========================================
+// 🥦 [배냇함 PLUS] 우리아기 맞춤 식단 엔진 & UI (V8.0 극강의 락인 에디션)
+// ==========================================
+
+window.currentWeeklyPlan = [];
+window.availableRecipePool = [];
+
+window.generatePremiumMealPlan = function() {
+    const inventory = JSON.parse(localStorage.getItem('tosil_open_records')) || []; 
+    const calendarData = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {}; 
+    const currentAge = document.getElementById('food-age').value || 'early'; 
+    
+    let allergyData = [];
+    Object.values(calendarData).forEach(dailyList => { allergyData.push(...dailyList); });
+
+    const bannedFoods = allergyData.filter(r => (r.type === 'test' || (r.ingredient && !r.menu)) && r.status === 'fail').map(r => r.ingredient); 
+    const safeFoods = allergyData.filter(r => (r.type === 'test' || (r.ingredient && !r.menu)) && r.status === 'pass').map(r => r.ingredient);
+
+    // 💡 [니치 디테일 1] 알레르기 유발 9대 위험 재료 중, 아직 '무사통과(pass)' 기록이 없는 미지의 재료들 추출!
+    const dangerIngredients = ['계란', '밀가루', '치즈', '우유', '땅콩', '새우', '생선', '두부', '대두'];
+    const untestedDangers = dangerIngredients.filter(f => !bannedFoods.includes(f) && !safeFoods.includes(f));
+    const newTestFood = untestedDangers.length > 0 ? untestedDangers[0] : null;
+
+    const urgentFoods = inventory.filter(item => {
+        if (!item.openDate || !item.limitDays) return false;
+        const [y, m, d] = item.openDate.split('-');
+        const passedDays = Math.floor((new Date().getTime() - new Date(y, m - 1, d).getTime()) / (1000 * 60 * 60 * 24));
+        const daysLeft = item.limitDays - passedDays;
+        return daysLeft <= 2 && daysLeft >= 0 && !bannedFoods.includes(item.name || "");
+    }).map(item => item.name);
+
+    // 💡 [니치 디테일 2] "진짜 완벽하게 안전한" 레시피만 걸러내기 (bannedFoods + untestedDangers 모두 차단!!)
+    let safeValidRecipes = babyFoodData.filter(r => {
+        if (r.age !== currentAge) return false; // 월령 필터
+        if (bannedFoods.some(b => r.name.includes(b) || r.ingredients.includes(b))) return false; // 알레르기 발생 재료 차단
+        if (untestedDangers.some(u => r.name.includes(u) || r.ingredients.includes(u))) return false; // 아직 안 먹어본 위험재료 철벽 차단!!
+        return true;
+    });
+
+    // 만약 너무 빡빡해서 레시피가 안 나오면 알레르기 발생 재료만 뺀 걸로 폴백
+    if (safeValidRecipes.length === 0) safeValidRecipes = babyFoodData.filter(r => r.age === currentAge && !bannedFoods.some(b => r.name.includes(b)));
+    
+    window.availableRecipePool = [...safeValidRecipes];
+
+    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+    let recipePool = shuffle(safeValidRecipes);
+
+    let weeklyPlan = [];
+    const days = ['월', '화', '수', '목', '금', '토', '일'];
+    let lastRecipe = null;
+
+    /* ==========================================================
+       🍚 새 재료는 한 번에 하나, 사흘씩
+       ----------------------------------------------------------
+       '대구살 무 당근 죽' 은 처음 주는 재료가 한 번에 셋이다.
+       반응이 와도 뭐 때문인지 못 찾는다.
+
+       ⚠️ 필터(food-age)가 아니라 아기 개월수로 판단한다.
+          필터를 '전체'로 두면 안 걸리기 때문이다.
+       ========================================================== */
+    const babyMonths = (function () {
+        const s = localStorage.getItem('tosil_startDate');
+        if (!s) return null;
+        const p = String(s).split('-').map(Number);
+        if (p.length !== 3) return null;
+        const b = new Date(p[0], p[1] - 1, p[2]), t = new Date();
+        let m = (t.getFullYear() - b.getFullYear()) * 12 + (t.getMonth() - b.getMonth());
+        if (t.getDate() < b.getDate()) m--;
+        return m < 0 ? 0 : m;
+    })();
+
+    const needBlocks = (currentAge === 'early' || currentAge === 'mid')
+                    || (babyMonths !== null && babyMonths < 9
+                        && currentAge !== 'late' && currentAge !== 'done');
+
+    const SKIP_ING = ['물', '육수', '채수', '생수', '쌀뜨물', '쌀가루', '진밥', '밥', '참기름', '들기름'];
+
+    const ingNames = (r) => String(r.ingredients || '').split(',').map(s =>
+        s.replace(/\([^)]*\)/g, '')
+         .replace(/[\d.]+\s*(g|ml|개|장|알|T|t|큰술|작은술|컵)?\s*$/, '')
+         .replace(/^(초기용|중기용|후기용|초기|중기|후기|완료기|불린|익힌|다진|무첨가|시판|푹 익은)\s*/, '')
+         .replace(/\s*(약간|조금|적당량|소량)\s*$/, '')
+         .trim()
+    ).filter(n => n && !SKIP_ING.some(s => n.indexOf(s) > -1));
+
+    const newOnes = (r) => ingNames(r).filter(n =>
+        !safeFoods.some(s => n.indexOf(s) > -1 || s.indexOf(n) > -1));
+
+    if (needBlocks) {
+        let pool = recipePool;
+        if (!pool.length) {
+            const stage = (currentAge === 'early' || currentAge === 'mid') ? currentAge
+                        : (babyMonths !== null && babyMonths < 7 ? 'early' : 'mid');
+            pool = babyFoodData.filter(r => r.age === stage
+                && !bannedFoods.some(b => r.name.includes(b) || r.ingredients.includes(b)));
+        }
+        const ranked = shuffle(pool).map(r => ({ r: r, k: newOnes(r) }))
+                          .sort((x, y) => x.k.length - y.k.length);
+
+        const blocks = [], usedNames = [];
+        ranked.forEach(x => {
+            if (blocks.length >= 3 || usedNames.indexOf(x.r.name) > -1) return;
+            usedNames.push(x.r.name);
+            blocks.push(x);
+        });
+
+        if (blocks.length) {
+            days.forEach((day, index) => {
+                const b = blocks[Math.floor(index / 3)] || blocks[blocks.length - 1];
+                const nth = (index % 3) + 1;
+                weeklyPlan.push({
+                    day: day,
+                    type: b.k.length === 0 ? '이미 먹어본 재료' : '새 알레르기 테스트',
+                    testStage: (nth === 1 ? '첫날' : nth === 2 ? '2일째 · 지켜보기' : '3일째 · 마지막'),
+                    newFoods: b.k,
+                    recipe: b.r
+                });
+            });
+            window.currentWeeklyPlan = weeklyPlan;
+            return weeklyPlan;
+        }
+    }
+
+    days.forEach((day, index) => {
+        let dailyMenu = { day: day, type: '안전 밸런스 식단', recipe: null };
+
+        if (index < 2 && urgentFoods.length > 0) {
+            let uFood = urgentFoods[index % urgentFoods.length];
+            let found = recipePool.find(r => r.name.includes(uFood) || r.ingredients.includes(uFood));
+            if (found) { dailyMenu.recipe = found; dailyMenu.type = '냉장고 재고 소진'; }
+        } 
+        
+        // 💡 새 테스트 날짜(수요일)에는 "전체 DB"에서 테스트 재료가 들어간 레시피를 찾음
+                // 새 재료는 사흘을 지켜봐야 한다. 수·목·금 같은 것으로 이어 붙인다.
+        // 이틀 뒤에 반응이 오는 경우가 있어서, 중간에 다른 새 재료가 끼면 원인을 못 찾는다.
+        if (!dailyMenu.recipe && index >= 2 && index <= 4 && newTestFood) { 
+            let testPool = babyFoodData.filter(r => r.age === currentAge && !bannedFoods.some(b => r.name.includes(b) || r.ingredients.includes(b)));
+            let found = testPool.find(r => r.name.includes(newTestFood) || r.ingredients.includes(newTestFood));
+                        if (found) { 
+                dailyMenu.recipe = found; 
+                // ⚠️ type 은 건드리지 않는다. 카드 색을 정하는 조건이 이 글자를 그대로 본다.
+                dailyMenu.type = '새 알레르기 테스트';
+                dailyMenu.testStage = (index === 2) ? '첫날 · ' + newTestFood
+                                    : (index === 3) ? '2일째 · 지켜보기'
+                                                    : '3일째 · 마지막';
+            }
+        } 
+        
+        if (!dailyMenu.recipe) {
+            let found = recipePool.find(r => r !== lastRecipe) || recipePool[0];
+            dailyMenu.recipe = found;
+        }
+
+        recipePool = recipePool.filter(r => r !== dailyMenu.recipe);
+        if (recipePool.length === 0) recipePool = shuffle(safeValidRecipes); 
+
+        lastRecipe = dailyMenu.recipe;
+        weeklyPlan.push(dailyMenu);
+    });
+
+    window.currentWeeklyPlan = weeklyPlan;
+    return weeklyPlan;
+};
+
+// 💡 단일 메뉴 교체 (애니메이션 제거, 극강의 미니멀리즘 유지)
+window.swapDailyRecipe = function(dayIndex) {
+    const currentRecipeNames = window.currentWeeklyPlan.map(p => p.recipe.name);
+    let freshRecipes = window.availableRecipePool.filter(r => !currentRecipeNames.includes(r.name));
+    
+    if (freshRecipes.length === 0) {
+        freshRecipes = window.availableRecipePool.filter(r => r.name !== window.currentWeeklyPlan[dayIndex].recipe.name);
+    }
+    
+    if (freshRecipes.length > 0) {
+        const newRecipe = freshRecipes[Math.floor(Math.random() * freshRecipes.length)];
+        window.currentWeeklyPlan[dayIndex].recipe = newRecipe;
+        window.currentWeeklyPlan[dayIndex].type = '변경됨';
+        
+        // 화면만 깔끔하게 즉시 다시 그림 (애니메이션 X)
+        window.drawAutoPilotUI();
+    }
+};
+
+window.renderAutoPilotUI = function() {
+    const container = document.getElementById('autopilot-result-container');
+    const triggerBox = document.getElementById('autopilot-trigger-box');
+    
+    if(triggerBox) triggerBox.style.display = 'none';
+    if(container) container.style.display = 'block';
+
+    container.innerHTML = `
+        <div style="text-align:center; padding: 60px 20px; background:#F9FAFB; border-radius:16px; border:1px solid #E5E8EB;">
+            <div style="color:#191F28; font-weight:900; font-size:16px; margin-bottom:8px;">우리아기 식단 설계 중...</div>
+            <div style="color:#8B95A1; font-weight:600; font-size:13.5px;">아기의 취향과 알레르기 데이터를 분석하고 있습니다.</div>
+        </div>
+    `;
+    
+    if(!document.getElementById('hide-scroll-style')) {
+        const style = document.createElement('style');
+        style.id = 'hide-scroll-style';
+        style.innerHTML = `.hide-scroll::-webkit-scrollbar { display: none; } .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }`;
+        document.head.appendChild(style);
+    }
+
+    setTimeout(() => {
+        window.generatePremiumMealPlan();
+        window.drawAutoPilotUI();
+    }, 800); 
+};
+
+// 💡 [배냇함 PLUS] 달력 1초 자동 연동 기능 (Killer Feature)
+window.applyPlanToCalendar = function() {
+    const plan = window.currentWeeklyPlan;
+    if (!plan || plan.length === 0) return alert("먼저 식단표를 생성해주세요!");
+
+    let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    let today = new Date();
+
+    plan.forEach((day, index) => {
+        // 오늘부터 7일간의 날짜를 계산
+        let targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + index);
+        let dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+
+        if (!records[dateStr]) records[dateStr] = [];
+        
+        // 캘린더에 식단 꽂아넣기
+        records[dateStr].push({ 
+            type: 'meal', 
+            menu: day.recipe.name, 
+            amount: '계획됨', 
+            reaction: '대기중',
+            time: '오전'
+        });
+    });
+
+    localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
+    renderCalendar(); // 달력 새로고침
+    
+    alert("🎉 성공! 오늘부터 7일간의 달력에 식단이 자동으로 등록되었습니다.");
+    // 달력 위치로 스크롤 부드럽게 이동
+    document.getElementById('cal-month-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+// 💡 화면 렌더링 독립 함수 (UI 밸런스 복구 및 공간 최적화)
+// 💡 화면 렌더링 독립 함수 (철분 파란색 변경, 중복 뱃지 삭제, 터치 장바구니 탑재!)
+window.drawAutoPilotUI = function(highlightIndex = -1) {
+    const container = document.getElementById('autopilot-result-container');
+    const plan = window.currentWeeklyPlan;
+
+    let allRequiredIngredients = [];
+    plan.forEach(day => {
+        if(day.recipe && day.recipe.ingredients) {
+            allRequiredIngredients.push(...day.recipe.ingredients.split(',').map(i => i.trim().replace(/[0-9gml]+(ml|g)?/g, '').trim()));
+        }
+    });
+    
+    let uniqueRequired = [...new Set(allRequiredIngredients)].filter(ing => !ing.includes('물') && !ing.includes('쌀') && !ing.includes('진밥'));
+    const inventory = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
+    const fridgeItemNames = inventory.map(item => item.name);
+    let missingIngredients = uniqueRequired.filter(ing => !fridgeItemNames.some(fItem => ing.includes(fItem)));
+
+    let prepCounts = {};
+    allRequiredIngredients.forEach(item => {
+        if(!item.includes('물') && !item.includes('쌀') && !item.includes('진밥') && !item.includes('현미유') && !item.includes('간장') && !item.includes('버터')) {
+            prepCounts[item] = (prepCounts[item] || 0) + 1;
+        }
+    });
+
+    let html = `
+        <style>
+            @keyframes cardPulse { 0% { transform: scale(1); background-color: #FFFFFF; } 50% { transform: scale(0.97); background-color: #F4F8FF; } 100% { transform: scale(1); background-color: #FFFFFF; } }
+            .swapped-card { animation: cardPulse 0.4s ease-out forwards; }
+            details > summary::-webkit-details-marker { display: none; }
+            details[open] summary .arrow { transform: rotate(180deg); }
+            /* 💡 장바구니 체크리스트용 CSS */
+            .shop-tag { display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:6px 12px; border-radius:20px; color:#FFF; font-weight:700; font-size:13px; margin-bottom:6px; margin-right:6px; cursor:pointer; transition:0.2s; }
+            .shop-tag.checked { background:rgba(255,255,255,0.05); color:#8B95A1; text-decoration:line-through; border-color:transparent; }
+        </style>
+
+                      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; padding: 0 4px;">
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 13px; font-weight: 800; color: #3182F6; margin-bottom: 4px;">이번 주 맞춤형 식단</div>
+                <div data-plus-head style="font-size: 18px; font-weight: 900; color: #191F28; letter-spacing: -0.5px;">우리아기 완벽한 7일 식단표</div>
+            </div>
+        </div>
+        
+        <div class="hide-scroll" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; padding-top: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
+    `;
+
+    plan.forEach((day, index) => {
+        let bg = '#FFFFFF'; let border = '#E5E8EB'; let badgeBg = '#F0F7FF'; let badgeColor = '#3182F6';
+        if (day.type.includes('냉장고')) { bg = '#FFF5F5'; border = '#FECACA'; badgeBg = '#FFF0F1'; badgeColor = '#D32F2F'; }
+        if (day.type.includes('테스트')) { bg = '#FFFAF0'; border = '#FDE68A'; badgeBg = '#FFF9E6'; badgeColor = '#B45309'; }
+        if (day.type.includes('변경됨')) { bg = '#FFFFFF'; border = '#C9E2FF'; badgeBg = '#E8F3FF'; badgeColor = '#1B64DA'; }
+
+        let cookTime = 0;
+        if(day.recipe.recipe) {
+            day.recipe.recipe.forEach(step => {
+                const match = step.match(/(\d+)분/);
+                if(match) cookTime += parseInt(match[1]);
+            });
+        }
+        let timeTag = cookTime > 0 ? `<span style="font-size:11.5px; font-weight:800; color:#8B95A1;">⏳ 약 ${cookTime + 5}분</span>` : '';
+
+        // 💡 [디테일 1] 철분 듬뿍을 빨간색 ➔ 파란색(#3182F6)으로 변경하여 경고와 차별화!
+        let goalBadge = '';
+        if (day.recipe.goal === 'iron') goalBadge = '<span style="color:#3182F6; font-weight:900; font-size:11.5px;">#철분듬뿍</span>';
+        else if (day.recipe.goal === 'poop') goalBadge = '<span style="color:#B45309; font-weight:900; font-size:11.5px;">#장튼튼</span>';
+        else if (day.recipe.goal === 'weight') goalBadge = '<span style="color:#059669; font-weight:900; font-size:11.5px;">#체중쑥쑥</span>';
+        else goalBadge = '<span style="color:#4E5968; font-weight:900; font-size:11.5px;">#영양만점</span>';
+
+        let allergenBadge = '';
+        const dangerIngredients = ['계란', '밀가루', '치즈', '우유', '땅콩', '새우', '생선', '두부', '대두'];
+        let foundAllergens = dangerIngredients.filter(a => day.recipe.ingredients.includes(a));
+        
+        // 💡 [디테일 2] 테스트 날짜일 때는 요일 옆 뱃지를 아예 안 띄웁니다! (중복 제거)
+        if(foundAllergens.length > 0 && !day.type.includes('테스트')) {
+            allergenBadge = `
+                <span onclick="event.stopPropagation(); showAllergyInfo('${foundAllergens[0]}')" 
+                      style="display:inline-block; color:#D32F2F; background:#FFF0F1; border:1px solid #FECACA; padding:3px 8px; border-radius:8px; font-size:10px; font-weight:900; cursor:pointer; vertical-align: middle;">
+                    ⚠️${foundAllergens[0]}주의
+                </span>`;
+        }
+
+        let cardClass = index === highlightIndex ? 'swapped-card' : '';
+
+        html += `
+            <div class="${cardClass}" onclick="openCookingMode('${day.recipe.name}')" style="cursor: pointer; min-width: 170px; max-width: 170px; height: 210px; background: ${bg}; border: 1px solid ${border}; border-radius: 20px; padding: 20px; scroll-snap-align: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+                    <div style="font-size: 13px; font-weight: 900; color: #8B95A1;">Day ${index + 1}</div>
+                    <button onclick="event.stopPropagation(); swapDailyRecipe(${index})" style="font-size: 11.5px; font-weight: 800; color: #4E5968; background: #FFFFFF; border:1px solid #D1D5DB; padding: 4px 10px; border-radius: 8px; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                        교체
+                    </button>
+                </div>
+                
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom: 8px;">
+                    <div style="font-weight: 900; font-size: 18px; color: #191F28; letter-spacing: -0.5px;">${day.day}요일</div>
+                    ${allergenBadge}
+                </div>
+                
+                <div style="display: inline-block; align-self: flex-start; color: ${badgeColor}; font-size: 11px; font-weight: 800; margin-bottom: 12px;">
+                    ${day.type === '안전 밸런스 식단' ? '• 안전 식단' : `• ${day.type}`}
+                </div>
+                
+                <div style="flex: 1; display: flex; align-items: flex-start;">
+                    <div style="font-size: 14.5px; font-weight: 900; color: #191F28; line-height: 1.4; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        ${day.recipe.name}
+                    </div>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 12px; border-top: 1px dashed ${border === '#E5E8EB' ? '#E5E8EB' : border}; display:flex; justify-content:space-between; align-items:center;">
+                    ${timeTag}
+                    ${goalBadge}
+                </div>
+            </div>
+        `;
+    });
+    html += `</div>`;
+
+    html += `
+        <button onclick="applyPlanToCalendar()" style="width: 100%; background: #191F28; color: #FFF; border: none; padding: 16px; border-radius: 14px; font-size: 15.5px; font-weight: 900; margin-bottom: 24px; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition: 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span style="font-size:18px;">✅</span> 이 식단표를 내 달력에 자동 등록하기
+        </button>
+    `;
+
+    // 💡 [니치 복구 완료!] 각 영양소별 등장 횟수를 AI가 실시간으로 카운트!!
+    let ironCnt = plan.filter(p => p.recipe.goal === 'iron').length;
+    let poopCnt = plan.filter(p => p.recipe.goal === 'poop').length;
+    let weightCnt = plan.filter(p => p.recipe.goal === 'weight').length;
+    
+    // 기본값 세팅
+    let reportTitle = "골고루 균형 잡힌 영양 식단";
+    let reportColor = "#059669"; let reportBg = "#ECFDF5";
+    
+    // 가장 많이 포함된 식단에 맞춰 타이틀과 테마 색상 자동 변경! (철분은 파란색으로 통일)
+    if (ironCnt >= 3) { reportTitle = "소고기 듬뿍! 철분 집중 보충 식단"; reportColor = "#3182F6"; reportBg = "#F0F7FF"; } 
+    else if (weightCnt >= 3) { reportTitle = "포만감 든든! 체중 증량 식단"; reportColor = "#059669"; reportBg = "#ECFDF5"; }
+    else if (poopCnt >= 3) { reportTitle = "속이 편안한 황금똥 식단"; reportColor = "#B45309"; reportBg = "#FFF9E6"; }
+
+    // 아코디언(details)으로 깔끔하게 접어두면서, 누르면 상세 횟수가 나오도록!
+    html += `
+        <details style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <summary style="padding: 16px 20px; font-size: 14px; font-weight: 800; color: #191F28; cursor: pointer; display: flex; justify-content: space-between; align-items: center; outline:none;">
+                               <div data-plus-head style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📊</span> 주간 영양 분석 리포트</div>
+                <span class="arrow" style="font-size: 12px; color: #8B95A1; transition:0.3s;">▼</span>
+            </summary>
+            <div style="padding: 0 20px 20px; border-top: 1px dashed #E5E8EB; margin-top: 4px; padding-top: 16px;">
+                <div style="font-size: 14.5px; font-weight: 800; color: ${reportColor}; line-height: 1.4; margin-bottom: 8px;">
+                    이번 주는 [${reportTitle}]으로 설계되었어요!
+                </div>
+                <div style="font-size: 13px; font-weight: 600; color: #4E5968;">
+                    철분 특화 ${ironCnt}회 · 소화/배변 ${poopCnt}회 · 체중/골격 ${weightCnt}회
+                </div>
+            </div>
+        </details>
+    `;
+
+    html += `
+        <details style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            <summary style="padding: 16px 20px; font-size: 14px; font-weight: 800; color: #191F28; cursor: pointer; display: flex; justify-content: space-between; align-items: center; outline:none;">
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📋</span> 일주일 식단표 한눈에 보기</div>
+                <span class="arrow" style="font-size: 12px; color: #8B95A1; transition:0.3s;">▼</span>
+            </summary>
+            <div style="padding: 0 20px 20px; border-top: 1px dashed #E5E8EB; margin-top: 4px; padding-top: 12px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left;">
+                    <tbody>
+                        ${plan.map((p, idx) => `
+                            <tr style="border-bottom: 1px solid #F2F4F6;">
+                                <td style="padding: 12px 4px; font-weight: 900; color: #191F28; width: 40px;">${p.day}</td>
+                                <td style="padding: 12px 4px; font-weight: 700; color: #4E5968;">
+                                    <span onclick="openCookingMode('${p.recipe.name}')" style="cursor:pointer;">${p.recipe.name}</span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    `;
+
+    // 💡 [니치 디테일 3] 마트 갈 때 쓰는 '터치형 체크리스트' 장바구니!!
+    const missingCount = missingIngredients.length;
+    const missingTagsHtml = missingCount > 0 
+        ? missingIngredients.map(ing => `<span class="shop-tag" onclick="this.classList.toggle('checked')">${ing}</span>`).join('')
+        : '<div style="color:#4ADE80; font-size:14px; font-weight:800; text-align:center; padding:10px 0;">필요한 재료가 냉장고에 모두 있습니다! 🎉</div>';
+
+    html += `
+        <div style="background: #191F28; border-radius: 16px; padding: 24px; text-align: left; box-shadow: 0 4px 16px rgba(0,0,0,0.05); position: relative; overflow: hidden; margin-bottom: 32px;">
+            <div style="font-size: 12px; font-weight: 900; color: #3182F6; margin-bottom: 8px;">스마트 장보기 비서</div>
+            <div style="font-size: 15.5px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px; line-height:1.4;">
+                이번 주 식단을 완성하려면<br><span style="color:#4ADE80;">총 ${missingCount}개의 식재료</span>가 부족합니다.
+            </div>
+            <div style="font-size: 12px; color: #8B95A1; font-weight: 600; margin-bottom: 20px;">
+                💡 장 보실 때 재료를 터치해서 하나씩 지워보세요!
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                ${missingTagsHtml}
+            </div>
+            
+            <a href="https://link.coupang.com/a/e2f58ZVlhQ" target="_blank" style="display: flex; justify-content:center; align-items:center; gap:8px; width: 100%; background: #3182F6; color: #FFFFFF; padding: 16px 0; border-radius: 12px; font-weight: 900; font-size: 15px; text-decoration: none; transition: 0.2s;">
+                부족한 재료 로켓프레시로 한 번에 담기 〉
+            </a>
+        </div>
+    `;
+
+    container.innerHTML = html;
+};

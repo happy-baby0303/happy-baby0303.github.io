@@ -144,8 +144,6 @@
         <div class="legal-footer">
             <p><strong>※ 면책 조항</strong><br>
             본 서비스의 차량 호환성 및 안전 스펙 정보는 제조사 기준에 따르며, 차종의 연식이나 실내 옵션에 따라 미세한 차이가 있을 수 있습니다. 구매 전 반드시 확인하시기 바랍니다.</p>
-            <p><strong>※ 쿠팡 파트너스 안내</strong><br>
-            이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 구매 시 이에 따른 일정액의 수수료를 제공받습니다. 배냇함는 객관적 데이터를 바탕으로 정보를 제공하며, 수수료는 추천 순서에 영향을 주지 않습니다.</p>
         </div>
 
         <!-- 💡 [팝업] 차알못을 위한 카시트 장착 방식 10초 가이드 -->
@@ -159,8 +157,14 @@
                 
                 <div style="font-size: 13.5px; color: #4E5968; line-height: 1.6; margin-bottom: 20px; letter-spacing: -0.3px;">
                     
+                                        <div style="background: #F9FAFB; padding: 14px 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #E5E8EB;">
+                        <b style="color: #4E5968; font-size: 13.5px; display: block; margin-bottom: 6px;">먼저 — 우리 차에 ISOFIX가 있나요?</b>
+                        <span style="font-size: 13px;">뒷좌석 등받이와 방석 사이 틈을 손으로 더듬어 보세요. <b>쇠고리 두 개</b>가 잡히면 있는 겁니다. 2010년 이후 차는 대부분 있어요.<br><br>
+                        <b>ISOFIX는 '꽂는 규격'일 뿐이라 그것만으로는 부족합니다.</b> 꽂은 뒤 카시트가 뒤로 넘어가지 않게 <b>아래 ①② 중 하나를 반드시 같이</b> 씁니다. 어느 쪽인지는 <b>내 차 설명서</b>가 정합니다.</span>
+                    </div>
+
                     <div style="background: #F0F7FF; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #D6E8F9;">
-                        <b style="color: #1B64DA; font-size: 14.5px; display: block; margin-bottom: 8px;">1️⃣ 바닥으로 기둥 내리기 (레그형)</b>
+                        <b style="color: #1B64DA; font-size: 14.5px; display: block; margin-bottom: 8px;">① 바닥으로 기둥 내리기 (서포트 레그)</b>
                         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
                             <span>🚗</span> 
                             <span><b>누가 쓰나요?</b> 길에 다니는 <b>대부분의 승용차 및 SUV</b></span>
@@ -172,7 +176,7 @@
                     </div>
                     
                     <div style="background: #FFF9E6; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #FDE68A;">
-                        <b style="color: #B78103; font-size: 14.5px; display: block; margin-bottom: 8px;">2️⃣ 등받이 뒤로 끈 묶기 (탑테더)</b>
+                                               <b style="color: #B78103; font-size: 14.5px; display: block; margin-bottom: 8px;">② 등받이 뒤로 끈 묶기 (탑테더)</b>
                         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
                             <span>🚐</span> 
                             <span><b>누가 쓰나요?</b> <b>카니발, 팰리세이드</b> 등 대형 패밀리카</span>
@@ -184,7 +188,7 @@
                     </div>
                     
                     <div style="background: #F2F4F6; padding: 16px; border-radius: 12px; border: 1px solid #E5E8EB;">
-                        <b style="color: #4E5968; font-size: 14.5px; display: block; margin-bottom: 8px;">3️⃣ 안전벨트 칭칭 감기</b>
+                        <b style="color: #4E5968; font-size: 14.5px; display: block; margin-bottom: 8px;">ISOFIX가 없다면 — 안전벨트로 고정</b>
                         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
                             <span>🚙</span> 
                             <span><b>누가 쓰나요?</b> <b>2010년 이전</b>에 출고된 구형 차량</span>
@@ -203,10 +207,16 @@
 
     </main>
 
+    <script src="../shared/babyswitch.js"></script>
     <script src="data.js"></script>
     <script src="app.js"></script>
-    <script src="disclosure.js"></script>
+    <script src="../shared/disclosure.js"></script>
     <script src="carseatguide.js"></script>
+    <script src="carseatown.js"></script>
+    <script src="carseatcry.js"></script>
+    <script src="carseattabs.js"></script>
+    <script src="../shared/plusmark.js"></script>
+   
 <!-- 🚀 우측 하단 위로 가기 버튼 -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">
         ↑

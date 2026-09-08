@@ -70,10 +70,29 @@
         return "done";
     }
 
-    function mealSize() {
+    /* 한 끼 양은 아기마다 크게 다르다.
+       "초기인데 20g씩 먹는다" 같은 집이 흔한데 단계로만 정하면 안 맞는다.
+       기본값은 단계에서 가져오되, 눌러서 고칠 수 있게 한다. */
+    var MEAL_KEY = "tosil_meal_size";
+
+    function defaultMeal() {
         var s = stageNow();
         return s === "mid" ? 100 : s === "late" ? 150 : s === "done" ? 200 : 60;
     }
+    function mealSize() {
+        var v = parseInt(localStorage.getItem(MEAL_KEY), 10);
+        return (isFinite(v) && v >= 10 && v <= 400) ? v : defaultMeal();
+    }
+    window.setMealSize = function () {
+        var v = prompt("한 번에 몇 g 정도 먹나요?\n(모르시면 비워두세요 — 단계 기준으로 잡아드립니다)",
+                       String(mealSize()));
+        if (v === null) return;
+        v = parseInt(String(v).replace(/[^0-9]/g, ""), 10);
+        if (!isFinite(v)) { try { localStorage.removeItem(MEAL_KEY); } catch (e) {} }
+        else if (v < 10 || v > 400) return alert("10~400 사이로 넣어주세요.");
+        else { try { localStorage.setItem(MEAL_KEY, String(v)); } catch (e) {} }
+        paint();
+    };
 
     /* ==========================================================
        1. 외울 것은 하나뿐
@@ -106,13 +125,13 @@
     var FLOUR_D   = 0.6;           // 쌀가루 밀도 (물 대비)
 
     var TOOLS = [
-        { id: "bottle", icon: "🍼", name: "젖병",     unit: "ml",
+        { id: "bottle", icon: "", name: "젖병",     unit: "ml",
           tip: "눈금이 있고 이미 소독돼 있어서 제일 편해요" },
-        { id: "cup",    icon: "🥛", name: "계량컵",   unit: "ml",
+        { id: "cup",    icon: "", name: "계량컵",   unit: "ml",
           tip: "눈금대로 부으시면 됩니다" },
-        { id: "spoon",  icon: "🥄", name: "같은 숟가락", unit: "술",
+        { id: "spoon",  icon: "", name: "같은 숟가락", unit: "술",
           tip: "가루 뜬 그 숟가락으로 물도 재세요" },
-        { id: "scale",  icon: "⚖️", name: "저울",     unit: "g",
+        { id: "scale",  icon: "", name: "저울",     unit: "g",
           tip: "물 1ml = 1g 이라 눈금 그대로예요" }
     ];
 
@@ -128,7 +147,9 @@
     };
 
     function batch(n) {
-        var ml = n * SPOON_ML * VOL_RATIO;              // 물의 양
+        // ⚠️ 13 × 12 = 156ml 는 젖병 눈금(20ml 칸)으로 맞출 수가 없다.
+        //    10 단위로 반올림한다. ±3% 는 농도로 흡수된다.
+        var ml = Math.round(n * SPOON_ML * VOL_RATIO / 10) * 10;
         var g = Math.round(n * SPOON_ML * FLOUR_D);     // 쌀가루 무게
         var y = Math.round((g + ml) * 0.8);             // 끓이면서 줄어드는 몫
         return { g: g, ml: ml, y: y, meals: Math.max(1, Math.round(y / mealSize())) };
@@ -337,57 +358,144 @@
 
     var HOST = "food-guide";
 
+    /* ==========================================================
+       자리를 둘로 나눈다
+       ----------------------------------------------------------
+       지금까지는 네 칸(공식·미음기본·사흘규칙·이상신호)이
+       한 덩어리 안에 있었다. 그러니 화면을 탭으로 나눌 때
+       '알레르기 이상 신호' 라는 글자 때문에 통째로 알레르기 탭에 갔다.
+
+       🍚 레시피 탭  →  미음 만들기 (공식 + 순서 + 저울)  = fg-cook
+       🚦 알레르기 탭 →  사흘 규칙 + 이상 신호            = fg-aller
+       ========================================================== */
+
     function paint() {
-        var host = document.getElementById(HOST);
-        if (!host) return;
-        host.innerHTML =
-            statusLine() +
-            formulaCard() +
-            fold("basics", "📖", "미음 만들기 기본", "여섯 단계면 초기 레시피가 다 같아져요", basicsBody()) +
-            fold("sign",   "🚨", "알레르기 이상 신호", "언제 병원에 가야 하는지", signBody());
+        var a = document.getElementById("fg-cook");
+        if (a) a.innerHTML = mixCard();
+
+        var b = document.getElementById("fg-aller");
+        if (b) b.innerHTML = statusLine() +
+            fold("rule",  "🚦", "새 재료는 사흘씩", "하나씩, 아침에, 사흘 이상", ruleBody()) +
+            fold("sign",  "🚨", "알레르기 이상 신호", "언제 병원에 가야 하는지", signBody());
     }
 
-    function calcBlock() {
-        var el = document.getElementById("food-calc-body");
-        if (!el) return null;
-        var p = el;
-        for (var i = 0; i < 5 && p && p.parentNode; i++) {
-            if (p.parentNode.classList && p.parentNode.classList.contains("container")) return p;
-            p = p.parentNode;
-        }
-        return null;
+    /* ---------- 🥄 미음 만들기 — 셋을 하나로 ---------- */
+
+    function mixCard() {
+        var c = batch(spoons), t = toolNow();
+        var name = esc(babyName());
+
+        var toolBtns = TOOLS.map(function (x) {
+            var on = (x.id === t.id);
+            return '<div onclick="window.setFoodTool(\'' + x.id + '\')" ' +
+                'style="flex:1; text-align:center; padding:9px 3px; border-radius:10px; cursor:pointer; ' +
+                'font-size:12px; font-weight:800; ' +
+                (on ? 'background:' + DARK + '; color:#FFFFFF;' : 'background:#F2F4F6; color:#4E5968;') +
+                '">' + x.icon + ' ' + x.name + '</div>';
+        }).join("");
+
+        var amtBtns = [1, 2, 3, 4, 5].map(function (n) {
+            var on = (n === spoons), b = batch(n);
+            return '<div onclick="window.setMixSpoons(' + n + ')" ' +
+                'style="flex:1; text-align:center; padding:11px 2px; border-radius:11px; cursor:pointer; ' +
+                (on ? 'background:' + BLUE + '; color:#FFFFFF;' : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                '<div style="font-size:13.5px; font-weight:900;">' + n + '술</div>' +
+                '<div style="font-size:10px; font-weight:700; opacity:0.75; margin-top:2px;">' +
+                    b.meals + '끼</div>' +
+            '</div>';
+        }).join("");
+
+        return '<div class="matrix-panel" style="margin-bottom:16px;">' +
+
+            '<div class="matrix-header">🥄 미음 만들기</div>' +
+
+            '<div style="text-align:center; padding:2px 0 16px;">' +
+                '<div style="font-size:21px; font-weight:900; color:' + BLUE + '; letter-spacing:-0.8px;">' +
+                    '쌀가루 ' + spoons + '술 : 물 ' + waterText(spoons) + '</div>' +
+                '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; margin-top:6px;">' +
+                    '완성 약 ' + c.y + 'g · ' + name + ' ' + c.meals + '끼' +
+                    '<span onclick="window.setMealSize()" style="margin-left:6px; color:' + BLUE + '; ' +
+                        'font-weight:800; cursor:pointer;">한 끼 ' + mealSize() + 'g ✎</span></div>' +
+            '</div>' +
+
+            '<div style="font-size:11.5px; font-weight:800; color:#4E5968; margin-bottom:6px;">얼마나 만들까요</div>' +
+            '<div style="display:flex; gap:5px; margin-bottom:14px;">' + amtBtns + '</div>' +
+
+            '<div style="font-size:11.5px; font-weight:800; color:#4E5968; margin-bottom:6px;">물은 뭘로 재세요</div>' +
+            '<div style="display:flex; gap:5px; margin-bottom:8px;">' + toolBtns + '</div>' +
+            '<div style="font-size:11px; font-weight:700; color:' + GRAY + '; margin-bottom:14px;">' +
+                t.icon + ' ' + esc(t.tip) + '</div>' +
+
+            '<div style="background:#FFF9E6; border:1px solid #FDE68A; border-radius:13px; ' +
+                'padding:14px 15px; font-size:12.5px; font-weight:700; color:var(--fg-gold); ' +
+                'line-height:1.7; word-break:keep-all; margin-top:4px;">' +
+                '⚖️ <b>정확히 안 맞아도 됩니다.</b> 다 끓이고 숟가락으로 떠서 ' +
+                '<b>주르륵 흐르면</b> 초기 미음이 맞아요. 되직하면 물을 조금 더, 묽으면 1~2분 더 끓이면 됩니다.<br>' +
+                '숟가락이 크든 작든 상관없어요. <b>같은 숟가락으로 가루 1 : 물 12</b> 만 지키면 됩니다.</div>' +
+
+        '</div>';
     }
 
-    function foldOldCalc() {
-        var body = document.getElementById("food-calc-body");
-        if (!body || body.getAttribute("data-fg")) return;
-        body.setAttribute("data-fg", "1");
+    var spoons = 2;
+    window.setMixSpoons = function (n) { spoons = n; paint(); };
 
-        // 기존 계산기는 원래도 접혀서 시작한다. 접힌 상태만 확인하고 끝.
-        //
-        // ⚠️ v2 에서 헤더 글씨를 바꾸려다 사고가 났다.
-        //    querySelector("div div div") 가 제목이 아니라 40px 짜리 💧 아이콘 칸을
-        //    잡아서, 거기에 긴 글이 들어가며 글자가 뒤집힌 것처럼 보였다.
-        //    남의 화면 구조를 짐작해서 글씨를 갈아끼우면 이렇게 된다.
-        //    헤더는 이미 "몇 g 넣으면 몇 g 나오는지, 저울 하나로 끝" 이라
-        //    설명이 충분하다. 손대지 않는다.
-        body.style.display = "none";
+    /* ---------- 사흘 규칙 본문 (기존 카드에서 떼어냄) ---------- */
+
+    function ruleBody() {
+        return '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            'line-height:1.75; word-break:keep-all;">' +
+            '새 재료는 <b>하나씩, 아침에, 사흘 이상</b> 지켜보고 다음으로 넘어가세요. ' +
+            '아침에 주는 건 <b>낮 동안 병원에 갈 수 있어서</b>입니다.<br><br>' +
+            '이상이 있었던 재료는 스스로 다시 시도하지 마시고, <b>다음 진료 때 꼭 말씀하세요.</b></div>';
     }
 
     function mount() {
-        if (document.getElementById(HOST)) return;
-        var a = calcBlock();
-        if (!a || !a.parentNode) return;
+        var c = document.querySelector("main.container") || document.querySelector(".container");
+        if (!c) return;
 
-        var box = document.createElement("div");
-        box.id = HOST;
-        a.parentNode.insertBefore(box, a);
+        /* 탭으로 나뉜 뒤로는 '컨테이너 직계' 가 아니라 '탭 칸의 직계' 를 찾아야 한다.
+           안 그러면 카드가 탭 밖에 붙어서 어느 탭에서나 보인다. */
+        function stop(node) {
+            if (!node) return false;
+            if (node === c) return true;
+            var id = node.id || "";
+            return id === "tab-recipe" || id === "tab-plan" || id === "tab-allergy";
+        }
+        function topOf(el) {
+            var p = el, g = 0;
+            while (p && p.parentNode && !stop(p.parentNode) && g++ < 20) p = p.parentNode;
+            return (p && stop(p.parentNode)) ? p : null;
+        }
 
-        foldOldCalc();
+        // 🍚 레시피 탭 자리 — 기존 계량 계산기 카드 바로 앞
+        if (!document.getElementById("fg-cook")) {
+            var anchor = topOf(document.getElementById("food-calc-body"));
+            if (anchor) {
+                var a = document.createElement("div");
+                a.id = "fg-cook";
+                anchor.parentNode.insertBefore(a, anchor);
+            }
+        }
+
+        // 🚦 알레르기 탭 자리 — 식재료 신호등 카드 바로 앞
+        if (!document.getElementById("fg-aller")) {
+            var t = topOf(document.getElementById("traffic-light-result"));
+            if (t) {
+                var b = document.createElement("div");
+                b.id = "fg-aller";
+                t.parentNode.insertBefore(b, t);
+            }
+        }
+
+        // 기존 '이유식 계량 계산기' 카드는 접어둔다 — 위 카드가 그 일을 한다
+        var body = document.getElementById("food-calc-body");
+        if (body && !body.getAttribute("data-fg")) {
+            body.setAttribute("data-fg", "1");
+            body.style.display = "none";
+        }
+
         paint();
     }
-
-    /* ---------- 시작 ---------- */
 
     function boot() {
         setTimeout(mount, 200);
