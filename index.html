@@ -795,6 +795,14 @@ body.dark-mode button.chk-premium-btn:not([style*="background: transparent"]) {
     filter: brightness(0.8) contrast(1.2);
 }
 
+/* 숫자 입력칸 화살표 없애기 — 단위 글자와 겹칩니다 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
 /* ========================================================================= */
 /* CSS 패치 끝 */
 /* ========================================================================= */
@@ -1039,7 +1047,7 @@ body.dark-mode button.chk-premium-btn:not([style*="background: transparent"]) {
         <div class="home-hero" style="padding: 0; margin-bottom: 24px;">
              <input type="file" id="baby-photo-input" accept="image/*" style="display:none" onchange="window.uploadPhoto(this)">
             <div class="home-hero-card" id="baby-dashboard"  onclick="var i=document.getElementById('baby-photo-input'); if(i) i.click();" style="position: relative; border-radius: 28px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: 220px; display: flex; flex-direction: column; cursor:pointer;">
-                <img src="img.jpg" class="home-hero-img" alt="아기 사진" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+                <img src="img.jpg" class="home-hero-img" alt="아기 사진" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%;" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
 
                 <!-- 윗부분 살짝 어둡게 (글씨 가독성용) -->
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%); pointer-events: none;"></div>
@@ -1757,15 +1765,20 @@ body.dark-mode button.chk-premium-btn:not([style*="background: transparent"]) {
     <!-- 🛍️ 메인 카드: 핫딜 계산기 전체를 감싸는 둥근 흰색 쟁반 -->
     <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
         
-        <!-- 타이틀 (촌스러운 주황색 선 삭제하고 깔끔한 텍스트로) -->
-        <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 20px 0; color: #191F28; letter-spacing: -0.5px;">🛍️ 나만의 핫딜 판독기 (최저가 기록)</h2>
-        
-        <!-- 안내 문구 박스 (점선 지우고 부드러운 파스텔 주황 배경으로 변경) -->
-        <div style="background: #FFF4ED; padding: 16px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #FFE4D6;">
-            <p style="font-size: 13.5px; font-weight: 700; color: #E65100; line-height: 1.5; word-break: keep-all; margin: 0;">
-                "남들이 얼마에 샀는지는 중요하지 않아요! <strong>내가 전에 샀던 가격(나의 최저가)</strong>을 AI가 기억했다가, 이번 쇼핑이 성공적인 방어였는지 알려드릴게요!"
-            </p>
-        </div>
+    <!-- 타이틀 -->
+<h2 style="font-size: 20px; font-weight: 900; margin: 0 0 8px 0; color: #191F28; letter-spacing: -0.5px;">🛍️ 나만의 핫딜 판독기 (최저가 기록)</h2>
+
+<!-- 쿠팡 파트너스 안내 문구 (안전한 가독성 + 깔끔한 토스 스타일) -->
+<div style="font-size: 12.5px; font-weight: 600; color: #4E5968; margin: 0 0 18px 0; line-height: 1.4; word-break: keep-all;">
+    📢 본 서비스는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+</div>
+
+<!-- 안내 문구 박스 (중복 문구 삭제 완료) -->
+<div style="background: #FFF4ED; padding: 16px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #FFE4D6;">
+    <p style="font-size: 13.5px; font-weight: 700; color: #E65100; line-height: 1.5; word-break: keep-all; margin: 0;">
+        "남들이 얼마에 샀는지는 중요하지 않아요! <strong>내가 전에 샀던 가격(나의 최저가)을 AI가 기억했다가, 이번 쇼핑이 성공적인 방어였는지 알려드릴게요!"</strong>
+    </p>
+</div>
         
         <!-- 1. 품목 선택 (모던한 회색 박스 입력칸) -->
         <div style="margin-bottom: 24px;">
@@ -3191,7 +3204,14 @@ body.dark-mode button.chk-premium-btn:not([style*="background: transparent"]) {
                     name: data.babyName || '우리아기', 
                     birth: data.babyBirth || '' 
                 }));
-                if (data.babyPhoto) localStorage.setItem("tosil_baby_photo", data.babyPhoto);
+                               /* ⚠️ 가족방 babyPhoto 는 사진 칸이 하나뿐이라 아기를 구분 못 한다.
+                      지금 보고 있는 아기에게 그대로 쓰면 남의 얼굴이 덮인다.
+                      첫째를 보고 있을 때만 받고, 이미 사진이 있으면 건드리지 않는다.
+                      아기별 사진은 각자 tosil_baby_photo<꼬리표> 에 이미 들어 있다. */
+                if (data.babyPhoto && !window.currentBabySuffix &&
+                    !localStorage.getItem("tosil_baby_photo")) {
+                    localStorage.setItem("tosil_baby_photo", data.babyPhoto);
+                }
                 
                 // 🔄 가족방의 기존 기록 전부 내려받기
                 const buckets = [

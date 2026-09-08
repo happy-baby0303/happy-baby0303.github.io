@@ -29,6 +29,30 @@
 
     function todayKey() { return dayKey(Date.now()); }
 
+    /* ---------- 잠의 하루는 자정에 안 끝난다 ----------
+       19:30 에 자서 07:00 에 깬 잠을 자정에서 자르면
+       '4시간 30분 + 7시간' 두 조각이 된다.
+       11시간을 잔 아기가 화면에는 4시간 반 잔 걸로 보인다.
+
+       그래서 잠만 새벽 4시를 하루의 시작으로 본다.
+         · 기상 시각은 아기마다, 개월마다 달라서 기준이 될 수 없다
+         · 새벽 2~3시 밤중 수유까지 전날 밤으로 묶인다
+         · 4시는 밤잠 한가운데가 아니라 끝자락이라 잠을 안 자른다
+
+       ⚠️ dayKey 는 그대로 둔다. 수유·기저귀·통계가 다 그걸 쓴다.
+          여기서 바꾸는 건 '잠' 뿐이다. -------- */
+
+    var SLEEP_DAY_START_H = 4;          // 잠의 하루 시작 (0~23). 5시로 바꾸려면 여기만.
+    var SD_OFFSET = SLEEP_DAY_START_H * 60 * 60000;
+
+    // 그 시각이 속한 '잠의 하루' 가 시작된 순간
+    function sleepDayStart(ts) {
+        var d = new Date(ts - SD_OFFSET);
+        d.setHours(SLEEP_DAY_START_H, 0, 0, 0);
+        return d.getTime();
+    }
+    function sleepDayKey(ts) { return dayKey(sleepDayStart(ts) + 60000); }
+
     function fmtWhen(ts) {
         var d = new Date(ts);
         var h = d.getHours();
@@ -88,7 +112,7 @@
     // 최근 3일은 매번 다시 만들고(수정·삭제 자가 치유), 그보다 오래된 날은 한 번 쌓고 유지한다.
     function collectSleepSegs(ledger, records) {
         var changed = false;
-        var base = new Date(); base.setHours(0, 0, 0, 0);
+        var base = new Date(sleepDayStart(Date.now()));
         var recentStart = base.getTime() - 2 * DAY;
         var rebuilt = {};
 
@@ -96,25 +120,29 @@
             if (!r || r.type !== "sleep") return;
             var sr = sleepRange(r);
             if (!(sr.end > sr.start)) return;
-            var cur = new Date(sr.start); cur.setHours(0, 0, 0, 0);
-            var guard = 0;
-            while (cur.getTime() < sr.end && guard++ < 4) {
-                var dStart = cur.getTime();
-                var a = Math.max(sr.start, dStart);
-                var b = Math.min(sr.end, dStart + DAY);
-                if (b > a) {
-                    var key = dayKey(dStart);
-                    var seg = [Math.round((a - dStart) / 60000), Math.round((b - dStart) / 60000)];
-                    if (dStart >= recentStart) {
-                        if (!rebuilt[key]) rebuilt[key] = [];
-                        rebuilt[key].push(seg);
-                    } else if (ledger.days[key]) {
-                        if (!ledger.days[key].segs) ledger.days[key].segs = [];
-                        var dup = ledger.days[key].segs.some(function (g) { return g[0] === seg[0] && g[1] === seg[1]; });
-                        if (!dup) { ledger.days[key].segs.push(seg); changed = true; }
-                    }
-                }
-                cur = new Date(dStart + DAY);
+            /* \u26a0\ufe0f 자르지 않는다. 잠 하나는 잠 하나다.
+                  경계를 자정에서 새벽 4시로 옮겨도, 그 선을 넘는 잠은 또 잘린다.
+                  (02:20~07:00 을 4시에서 자르면 1시간 40분 + 3시간이 된다)
+                  그래서 '시작한 날' 에 통째로 넣는다.
+                  19:30 에 자서 07:00 에 깬 잠은 그날 밤 11시간 30분 한 덩어리다.
+
+                  그러면 조각의 끝(분)이 1440 을 넘을 수 있다.
+                  띠를 그릴 때 100% 에서 잘라주면 되고, 숫자는 그대로 정확하다. */
+            var dStart = sleepDayStart(sr.start);
+            var key = sleepDayKey(dStart + 60000);
+            var seg = [Math.round((sr.start - dStart) / 60000),
+                       Math.round((sr.end - dStart) / 60000)];
+
+            // 20시간을 넘는 건 '끝났다' 를 안 누른 기록이다. 그건 세지 않는다.
+            if (seg[1] - seg[0] > 20 * 60) return;
+
+            if (dStart >= recentStart) {
+                if (!rebuilt[key]) rebuilt[key] = [];
+                rebuilt[key].push(seg);
+            } else if (ledger.days[key]) {
+                if (!ledger.days[key].segs) ledger.days[key].segs = [];
+                var dup = ledger.days[key].segs.some(function (g) { return g[0] === seg[0] && g[1] === seg[1]; });
+                if (!dup) { ledger.days[key].segs.push(seg); changed = true; }
             }
         });
 
@@ -970,31 +998,41 @@ wrap.innerHTML =
     function recentDays(n) {
         var ledger = loadLedger();
         var out = [];
-        var base = new Date(); base.setHours(0, 0, 0, 0);
+        var base = new Date(sleepDayStart(Date.now()));
         for (var i = n - 1; i >= 0; i--) {
             var ts = base.getTime() - i * DAY;
-            var d = ledger.days[dayKey(ts)];
+            var d = ledger.days[sleepDayKey(ts + 60000)];
             out.push({ ts: ts, segs: d ? (d.segs || []) : null });
         }
         return out;
     }
 
     function sleepStats(days) {
-        var totals = [], bedtimes = [], longest = 0, have = 0;
-        days.forEach(function (x, i) {
-            if (!x.segs) return;
+        var totals = [], bedtimes = [], longest = 0, have = 0, wakes = [];
+        days.forEach(function (x) {
+            /* \u26a0\ufe0f segs 가 빈 배열인 날은 '기록 있는 날' 이 아니다.
+                  그걸 세면 평균이 0 으로 깎여 '하루 평균 수면 0분' 이 뜬다. */
+            if (!x.segs || !x.segs.length) return;
             have++;
             var sum = 0, bt = null;
+
+            /* \u26a0\ufe0f 예전엔 자정을 넘은 조각을 다음날과 이어붙였다.
+                  이제 하루가 새벽 4시에 시작하므로 밤잠이 애초에 안 잘린다.
+                  한 조각이 곧 한 번의 잠이다. */
             x.segs.forEach(function (g) {
-                sum += (g[1] - g[0]);
-                if (g[0] >= 17 * 60) bt = (bt === null) ? g[0] : Math.max(bt, g[0]);
                 var len = g[1] - g[0];
-                // 자정을 넘은 밤잠은 다음날 조각과 이어붙인다
-                if (g[1] >= 1440 && days[i + 1] && days[i + 1].segs) {
-                    days[i + 1].segs.forEach(function (h) { if (h[0] === 0) len += (h[1] - h[0]); });
-                }
+                sum += len;
                 if (len > longest) longest = len;
+                // 잠든 시각 (하루 시작이 4시라 저녁은 13시간째 = 780분 이후)
+                if (g[0] >= 13 * 60) bt = (bt === null) ? g[0] : Math.max(bt, g[0]);
             });
+
+            /* 밤에 몇 번 깼나 — 밤 구간(저녁 이후)의 조각 수 - 1.
+               8시간을 자도 네 번 깨면 부모는 못 잔 것이다.
+               총 시간보다 이 숫자가 삶을 결정한다. */
+            var night = x.segs.filter(function (g) { return g[0] >= 13 * 60; });
+            if (night.length) wakes.push(Math.max(0, night.length - 1));
+
             totals.push(sum);
             if (bt !== null) bedtimes.push(bt);
         });
@@ -1003,7 +1041,8 @@ wrap.innerHTML =
             var t = 0; a.forEach(function (v) { t += v; });
             return Math.round(t / a.length);
         };
-        return { have: have, avgTotal: avg(totals), avgBed: avg(bedtimes), longest: longest, bedCount: bedtimes.length };
+        return { have: have, avgTotal: avg(totals), avgBed: avg(bedtimes),
+                 longest: longest, bedCount: bedtimes.length, avgWakes: avg(wakes) };
     }
 
     function overlay(days, slots) {
@@ -1017,7 +1056,7 @@ wrap.innerHTML =
             var mark = [];
             for (i = 0; i < slots; i++) mark.push(false);
             x.segs.forEach(function (g) {
-                var a = Math.floor(g[0] / per), b = Math.ceil(g[1] / per);
+                var a = Math.floor(Math.min(g[0], 1440) / per), b = Math.ceil(Math.min(g[1], 1440) / per);
                 for (var j = a; j < b && j < slots; j++) mark[j] = true;
             });
             for (i = 0; i < slots; i++) if (mark[i]) counts[i]++;
@@ -1025,8 +1064,11 @@ wrap.innerHTML =
         return { counts: counts, days: n };
     }
 
+    /* \u26a0\ufe0f mins 는 '하루 시작(새벽 4시)부터 몇 분' 이다.
+          그대로 읽으면 21시에 잠든 걸 17시로 말하게 된다. */
     function hhmm(mins) {
-        var h = Math.floor(mins / 60) % 24, m = Math.round(mins % 60);
+        var abs = (mins + SLEEP_DAY_START_H * 60) % 1440;
+        var h = Math.floor(abs / 60), m = Math.round(abs % 60);
         return h + "시 " + (m ? m + "분" : "정각");
     }
     function dur(mins) {
@@ -1038,14 +1080,19 @@ wrap.innerHTML =
         var bars = "";
         if (segs) {
             segs.forEach(function (g) {
-                var left = g[0] / 1440 * 100;
-                var w = Math.max((g[1] - g[0]) / 1440 * 100, 0.7);
+                /* 조각이 1440 을 넘을 수 있다 (밤잠이 다음날 아침까지).
+                   숫자는 그대로 두고 그림만 오른쪽 끝에서 자른다. */
+                var left = Math.min(g[0], 1440) / 1440 * 100;
+                var w = Math.max((Math.min(g[1], 1440) - Math.min(g[0], 1440)) / 1440 * 100, 0.7);
+                if (left + w > 100) w = 100 - left;
                 bars += '<span style="position:absolute; left:' + left + '%; width:' + w + '%; height:100%; background-color:#7F77DD !important; border-radius:3px;"></span>';
             });
         }
+        /* 띠는 새벽 4시에서 시작해 다음날 새벽 4시에 끝난다.
+           밤(저녁 7시~새벽 4시)에 옅은 음영을 깔아 어디가 밤인지 보이게 한다.
+           19시 = 하루 시작에서 15시간째 = 62.5% 지점부터 끝까지. */
         return '<div style="position:relative; height:' + h + 'px; background:var(--bg-sub); border-radius:5px; overflow:hidden;">' +
-               '<span style="position:absolute; left:0; width:25%; height:100%; background-color:rgba(127,119,221,0.12) !important;"></span>' +
-               '<span style="position:absolute; left:75%; width:25%; height:100%; background-color:rgba(127,119,221,0.12) !important;"></span>' +
+               '<span style="position:absolute; left:62.5%; width:37.5%; height:100%; background-color:rgba(127,119,221,0.12) !important;"></span>' +
                bars + '</div>';
     }
 
@@ -1080,8 +1127,9 @@ wrap.innerHTML =
         } else {
             var cells = [];
             if (st.avgBed !== null) cells.push(["잠드는 시간", hhmm(st.avgBed) + " 쯤"]);
-            if (st.avgTotal !== null) cells.push(["하루 평균 수면", dur(st.avgTotal)]);
-            if (st.longest) cells.push(["가장 길게 잔 잠", dur(st.longest)]);
+            if (st.avgTotal) cells.push(["하루 평균 수면", dur(st.avgTotal)]);
+            if (st.longest) cells.push(["안 깨고 잔 최장", dur(st.longest)]);
+            if (st.avgWakes !== null && st.avgTotal) cells.push(["밤에 깨는 횟수", st.avgWakes + "번"]);
             summary = '<div style="display:flex; gap:8px; margin-top:22px;">';
             cells.forEach(function (c) {
                 summary += '<div style="flex:1; background:var(--bg-sub); border-radius:14px; padding:14px 10px; text-align:center;">' +
@@ -1108,6 +1156,7 @@ wrap.innerHTML =
                     '<div>' +
                         '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' + esc(name) + '의 잠 무늬</div>' +
                         '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">이레 동안 쌓인 잠의 결</div>' +
+                        '<div style="font-size:11px; font-weight:600; color:var(--text-sub); margin-top:4px; opacity:0.8;">하루를 새벽 ' + SLEEP_DAY_START_H + '시부터 셉니다 · 밤잠이 안 잘리게요</div>' +
                     '</div>' +
                     '<div onclick="window.closeSleepMap()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; padding:2px 8px; line-height:1;">×</div>' +
                 '</div>' +
@@ -1117,14 +1166,14 @@ wrap.innerHTML =
                 '<div style="font-size:12.5px; font-weight:700; color:var(--text-s); margin-bottom:16px;">날마다</div>' +
                 rows +
                 '<div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; color:var(--text-sub); margin:8px 0 0 62px;">' +
-                    '<span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div>' +
+                    '<span>새벽4시</span><span>10시</span><span>16시</span><span>22시</span><span>새벽4시</span></div>' +
 
                 '<div style="margin-top:26px; padding-top:22px; border-top:1px dashed var(--border);">' +
                     '<div style="font-size:12.5px; font-weight:700; color:var(--text-s); margin-bottom:6px;">겹쳐보면</div>' +
                     '<div style="font-size:11.5px; font-weight:500; color:var(--text-sub); margin-bottom:14px;">진해지는 곳이 이 아이의 잠자리예요</div>' +
                     '<div style="display:flex; height:34px; border-radius:10px; overflow:hidden; background:var(--bg-sub);">' + band + '</div>' +
                     '<div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; color:var(--text-sub); margin-top:7px;">' +
-                        '<span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div>' +
+                        '<span>새벽4시</span><span>10시</span><span>16시</span><span>22시</span><span>새벽4시</span></div>' +
                 '</div>' +
                 summary +
             '</div>' +
@@ -1236,6 +1285,27 @@ wrap.innerHTML =
 
     /* ---------- 점검용 ----------
        콘솔에서 window.emotionDebug() 를 치면 장부 상태가 보입니다. */
+    /* 잠 무늬 점검 — 하루 경계가 제대로 옮겨졌는지 눈으로 본다 */
+    window.sleepDebug = function () {
+        var days = recentDays(7), st = sleepStats(days);
+        console.log("잠의 하루 시작: 새벽 " + SLEEP_DAY_START_H + "시");
+        days.forEach(function (x) {
+            var d = new Date(x.ts);
+            if (!x.segs || !x.segs.length) { console.log("  " + (d.getMonth()+1) + "/" + d.getDate() + "  기록 없음"); return; }
+            var sum = 0, max = 0;
+            x.segs.forEach(function (g) { sum += g[1]-g[0]; if (g[1]-g[0] > max) max = g[1]-g[0]; });
+            console.log("  " + (d.getMonth()+1) + "/" + d.getDate() +
+                        "  총 " + dur(sum) + " · 통잠 최장 " + dur(max) + " · 조각 " + x.segs.length + "개");
+            x.segs.forEach(function (g) {
+                console.log("       " + hhmm(g[0]) + " ~ " + hhmm(g[1]) + "   " + dur(g[1]-g[0]) +
+                            (g[1] > 1440 ? "  (다음날 아침까지)" : ""));
+            });
+        });
+        console.log("7일 요약: 평균 " + (st.avgTotal ? dur(st.avgTotal) : "-") +
+                    " · 통잠 최장 " + (st.longest ? dur(st.longest) : "-") +
+                    " · 밤에 깨는 횟수 " + (st.avgWakes === null ? "-" : st.avgWakes + "번"));
+    };
+
     window.emotionDebug = function () {
         var l = loadLedger();
         console.log('기록된 날짜 수:', Object.keys(l.days).length);

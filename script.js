@@ -1438,11 +1438,6 @@ function calcHotDeal() {
         <button class="btn-main" style="margin-top:0; background:#191F28 !important; color:#FFF !important; border:none !important; box-shadow:none !important; padding:16px; font-size:14.5px; font-weight:800; border-radius:14px; width:100%; cursor:pointer;" onclick="sendHotdealToLedger(${price}, '${cat}')">
             ${price.toLocaleString()}원 가계부로 연동하기
         </button>
-        
-        <!-- ✨ [법적 필수] 쿠팡 파트너스 활동 문구 추가 (은은하고 작게 처리) -->
-        <div style="font-size: 11px; font-weight: 600; color: var(--text-s); text-align: center; margin-top: 10px; line-height: 1.4; word-break: keep-all;">
-            "본 서비스는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
-        </div>
     `;
     
     const badgeEl = document.getElementById('hd-past-badge');
@@ -2902,7 +2897,12 @@ window.uploadPhoto = function(input) {
                         if(typeof window.showToast === 'function') window.showToast("⏳ 프로필 사진을 안전하게 서버에 저장 중입니다...");
                         
                         // 🚨 2. 파일명 고정 (새로 올릴 때마다 기존 사진을 덮어써서 용량 폭탄 방지!)
-                        const fileName = `profiles/${uid}/baby.jpg`;
+                                               /* 🚨 2. 아기마다 파일을 따로 둔다.
+                           ⚠️ 예전엔 baby.jpg 하나로 덮어썼다. 용량은 아꼈지만
+                              다둥이가 생기면서 나중에 올린 아기가 앞선 아기 사진을
+                              지워버렸다. 한 아기당 한 장이라 용량은 그대로다. */
+                        const babyTag = (window.currentBabySuffix || '').replace(/[^a-zA-Z0-9_]/g, '') || 'first';
+                        const fileName = `profiles/${uid}/baby${babyTag === 'first' ? '' : '_' + babyTag}.jpg`;
                         const imgRef = window.storageRef(window.storage, fileName);
                         
                         await window.uploadString(imgRef, dataUrl, 'data_url');
