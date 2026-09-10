@@ -178,11 +178,17 @@
         return p.key ? localStorage.getItem(p.key) : (parts()[p.id] || "");
     }
 
-    window.logBottlePart = function (id) {
+    /* \u26a0\ufe0f '오늘 갈았어요' 만 있으면 오늘 간 사람만 쓸 수 있다.
+          3주 전에 갈았으면 적을 방법이 없어서 '아직 안 적으셨어요' 가 영영 안 없어진다.
+          날짜를 직접 고를 수 있어야 한다. */
+    window.logBottlePart = function (id, when) {
         var p = null;
         for (var i = 0; i < PARTS.length; i++) if (PARTS[i].id === id) p = PARTS[i];
         if (!p) return;
-        var k = today();
+        var v = String(when || "").trim();
+        if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;      // 이상한 값은 무시
+        if (v && daysSince(v) < 0) return;                      // 미래는 안 받는다
+        var k = v || today();
 
         if (p.key) { try { localStorage.setItem(p.key, k); } catch (e) {} }
         else {
@@ -454,7 +460,8 @@
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 (over ? '<b>' + over + '개</b>는 한 번 볼 때가 됐어요. '
                       : '갈아 끼운 날만 눌러두시면 다음에 볼 때를 세어드려요. ') +
-                '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>입니다.</div>' +
+                '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>입니다.<br>' +
+                '<span style="font-size:11.5px;">예전에 갈았으면 옆 <b>달력</b>에서 그 날짜를 고르세요.</span></div>' +
 
             show.map(function (r) {
                 var c = r.over ? RED : (r.n === null ? GRAY : "#4E5968");
@@ -470,10 +477,18 @@
                                               : r.n + "일 지났어요" + (r.over ? " \u2014 볼 때가 됐어요" : "")) +
                             '</div>' +
                         '</div>' +
-                        '<div onclick="window.logBottlePart(\'' + r.p.id + '\')" ' +
-                            'style="flex-shrink:0; padding:10px 13px; border-radius:11px; cursor:pointer; ' +
-                            'font-size:12px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
-                            'border:1px solid #D1D5DB;">오늘 갈았어요</div>' +
+                        '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center;">' +
+                            '<div onclick="window.logBottlePart(\'' + r.p.id + '\')" ' +
+                                'style="padding:10px 13px; border-radius:11px; cursor:pointer; ' +
+                                'font-size:12px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
+                                'border:1px solid #D1D5DB; white-space:nowrap;">오늘 갈았어요</div>' +
+                            '<input type="date" value="' + esc(r.d || "") + '" max="' + today() + '" ' +
+                                'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
+                                'title="예전에 갈았으면 그 날짜를 고르세요" ' +
+                                'style="width:34px; padding:10px 4px; border-radius:11px; ' +
+                                'border:1px solid #D1D5DB; background: #FFFFFF; color:#8B95A1; ' +
+                                'font-size:11px; cursor:pointer;">' +
+                        '</div>' +
                     '</div>' +
                     '<div style="margin-top:5px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                         'line-height:1.6; word-break:keep-all;">' + esc(r.p.why) + '</div>' +
@@ -564,8 +579,14 @@
     }
 
     function boot() {
-        setTimeout(mount, 350);
-        setTimeout(mount, 1150);
+        /* \u26a0\ufe0f 늦게 붙으면 그 칸이 한동안 비어 보인다.
+              바로 시도하고, 앵커가 아직 없으면 촘촘히 다시 본다. */
+        mount();
+        var t = 0;
+        var again = setInterval(function () {
+            mount();
+            if (document.getElementById(HOST) || ++t > 24) clearInterval(again);
+        }, 120);
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();

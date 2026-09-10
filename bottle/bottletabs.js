@@ -97,11 +97,21 @@
             if (typeof f !== "function" || f.__tabs) return;
             var w = function () {
                 var r = f.apply(this, arguments);
-                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 40);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 40);
                 return r;
             };
             w.__tabs = true;
             window[n] = w;
+        });
+    }
+
+    /* 모듈은 자기 앵커 옆에 붙는다. 그 자리가 '고르기' 칸이면 데려와야 한다. */
+    function adopt() {
+        var use = document.getElementById(PANE.tools);
+        if (!use) return;
+        BOXES.forEach(function (id) {
+            var box = document.getElementById(id);
+            if (box && box.parentNode !== use) use.appendChild(box);
         });
     }
 
@@ -186,7 +196,36 @@
         return { pick: clean(pick), tools: clean(tools) };
     }
 
+    /* 탭이 붙기 전 1.4초 동안 원래 배치가 보였다가 확 바뀐다.
+       그 사이를 부드럽게 만든다. 완전히 가리면 느려 보이니 살짝만. */
+    /* \u26a0\ufe0f 흐림을 JS 로 켜면 이미 늦다. 그때는 원래 배치가 벌써 보인 뒤다.
+          그래서 CSS 가 처음부터 감춰두고, 여기서는 걷어내기만 한다.
+          index.html <style> 에 아래가 있어야 한다.
+
+            main.container { animation: tabReady .2s ease-out 1.2s forwards; opacity: 0; }
+            main.container.tabs-on { animation: none; opacity: 1; transition: opacity .2s; }
+            @keyframes tabReady { to { opacity: 1; } }
+
+          CSS 를 안 넣었어도 화면이 안 깨진다. 클래스만 붙고 끝난다. */
+    function showNow() {
+        var h = document.querySelector("main.container") || document.querySelector(".container");
+        if (h) h.classList.add("tabs-on");
+    }
+
     function build() {
+        /* \u26a0\ufe0f 탭 칸은 index.html 에 박아뒀다.
+              JS 가 만들어서 옮기면 그 사이 원래 배치가 보였다가 확 바뀐다.
+              있으면 그대로 쓰고, 없을 때만 만든다. */
+        if (document.getElementById(PANE.pick) && document.getElementById(PANE.tools)) {
+            showNow();
+            paint();
+            /* 칸이 이미 있으면 build 가 곧장 통과해서 아래 정리가 늦게 돈다.
+               탭은 떴는데 안이 비어 보이지 않게 여기서 바로 한 번 한다. */
+            hookRefresh(); adopt(); flatten(); orderPlus();
+            setTimeout(function () { adopt(); flatten(); orderPlus(); }, 250);
+            setTimeout(function () { adopt(); flatten(); orderPlus(); }, 700);
+            return true;
+        }
         if (document.getElementById(BAR)) return true;
 
         var host = document.querySelector("main.container") || document.querySelector(".container");
@@ -225,7 +264,7 @@
         if (footer) host.appendChild(footer);
 
         paint();
-        setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 300);
+        setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 300);
         return true;
     }
 
@@ -233,14 +272,17 @@
         var tries = 0;
         var go = function () {
             if (build()) {
-                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 900);
-                setTimeout(function () { hookRefresh(); flatten(); orderPlus(); }, 2400);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 900);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 2400);
                 return;
             }
-            if (++tries < 12) setTimeout(go, 350);
+            if (++tries < 20) setTimeout(go, 150);
         };
-        setTimeout(go, 1400);
-        setInterval(function () { hookRefresh(); flatten(); orderPlus(); }, 4000);
+        setTimeout(go, 120);
+        /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
+        setTimeout(showNow, 2000);
+        setTimeout(function () { showNow(); }, 2500);
+        setInterval(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 4000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

@@ -70,7 +70,16 @@
         <div id="auto-sync-banner" style="display: none; align-items: center; background: #E8F3FF; border: 1px solid #3182F6; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #1B64DA; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.1);">
             </div>
 
-        <div class="matrix-panel">
+        
+        <!-- 🗂️ 탭 막대 — JS 가 만들지 않고 여기 박아둔다.
+             그래야 처음부터 제자리에 있어서 화면이 안 튄다. -->
+        <div id="stroller-tabbar" style="display:flex; gap:4px; background:#F2F4F6; border:1px solid #E5E8EB; border-radius:14px; padding:4px; margin:0 0 20px;">
+            <div id="stab-pick" onclick="window.switchStrollerTab && window.switchStrollerTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#191F28; box-shadow:0 2px 8px rgba(0,0,0,0.06);">🍼 유모차 고르기</div>
+            <div id="stab-use" onclick="window.switchStrollerTab && window.switchStrollerTab('use')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:transparent; color:#8B95A1;">🧰 쓰면서 챙길 것</div>
+        </div>
+
+        <div id="view-stroller-pick">
+<div class="matrix-panel">
             <div class="matrix-header"><span class="icon">	🔍</span>  우리 집 상황</div>
             <div class="matrix-grid">
                 <div class="matrix-item">
@@ -176,17 +185,26 @@
 
         <button id="show-more-btn" class="show-more-btn" style="display:none;" onclick="toggleOthers()">나머지 결과 보기 ▾</button>
         <div id="result-other-area" class="result-area" style="display:none; margin-top:20px;"></div>
+        </div>
 
-        <div class="legal-footer">
-            <p>※ 본 서비스 내 일부 상품 링크는 쿠팡 파트너스 활동의 일환으로, 구매 시 이에 따른 일정액의 수수료를 제공받습니다.</p>
-            <p><strong>배냇함는 제원과 데이터를 바탕으로 정보를 제공하며, 제휴 수수료는 추천 순서에 영향을 주지 않습니다.</strong></p>
+        <!-- 🧰 PLUS 모듈이 여기 안으로 들어온다 -->
+        <div id="view-stroller-use" style="display:none;"></div>
+
+
+                <div class="legal-footer">
+            <p><strong>※ 면책 조항</strong><br>
+            본 서비스의 유모차 제원(무게·접은 치수·기내 반입 등)과 차량 트렁크 정보는 제조사 및 조사 시점 기준으로 제공되며, 연식·옵션·리뉴얼에 따라 실제와 다를 수 있습니다. 특히 <strong>기내 반입 규정은 항공사마다 다르므로</strong> 탑승 전 반드시 해당 항공사에 확인하시기 바랍니다. 구매 전 제조사 사양을 다시 확인해 주세요.</p>
         </div>
 
     </main>
+    <script src="../shared/babyswitch.js"></script>
     <script src="data.js"></script>
     <script src="app.js"></script>
-    <script src="disclosure.js"></script>
+    <script src="../shared/disclosure.js"></script>
     <script src="strollerguide.js"></script>
+    <script src="strollerown.js"></script>
+    <script src="strollertabs.js"></script>
+    <script src="../shared/plusmark.js"></script>
 
 <!-- 🚀 우측 하단 위로 가기 버튼 (공유 버튼과 안 겹치게 bottom: 100px 로 수정 완료!) -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 100px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">

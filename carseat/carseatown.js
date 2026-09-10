@@ -129,9 +129,14 @@
         } else o[f] = v;
         save(o); paint();
     };
-    window.markHarness = function () {
+    /* \u26a0\ufe0f '오늘 맞췄어요' 만 있으면 오늘 맞춘 사람만 쓸 수 있다.
+          지난달에 맞췄으면 적을 방법이 없어서 '아직 안 적음' 이 영영 안 없어진다. */
+    window.markHarness = function (when) {
         var o = own();
-        o.harnessAt = today();
+        var v = String(when || "").trim();
+        if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+        if (v && daysSince(v) < 0) return;                 // 미래는 안 받는다
+        o.harnessAt = v || today();
         o.harnessH = o.height || "";      // 그때 키를 같이 적어둔다
         save(o); paint();
     };
@@ -589,9 +594,17 @@
         }
 
         out += '</div>' + nextSeatHTML(o, autoMax) + carChangeHTML(o) +
-            '<div onclick="window.markHarness()" style="margin-top:14px; text-align:center; ' +
-                'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:13px; ' +
-                'font-size:13.5px; font-weight:900; cursor:pointer;">오늘 어깨끈 맞췄어요</div>' +
+            '<div style="display:flex; gap:8px; align-items:center; margin-top:14px;">' +
+                '<div onclick="window.markHarness()" style="flex:1; text-align:center; ' +
+                    'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:13px; ' +
+                    'font-size:13.5px; font-weight:900; cursor:pointer;">오늘 어깨끈 맞췄어요</div>' +
+                '<input type="date" value="' + esc(o.harnessAt || "") + '" max="' + today() + '" ' +
+                    'onchange="window.markHarness(this.value)" ' +
+                    'title="예전에 맞췄으면 그 날짜를 고르세요" ' +
+                    'style="flex-shrink:0; width:44px; padding:15px 6px; border-radius:13px; ' +
+                    'border:1px solid #D1D5DB; background: #FFFFFF; color:' + GRAY + '; ' +
+                    'font-size:11px; cursor:pointer;">' +
+            '</div>' +
 
             '<div style="margin-top:11px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
@@ -754,7 +767,16 @@
         paint();
     }
 
-    function boot() { setTimeout(mount, 420); setTimeout(mount, 1250); }
+    function boot() {
+        /* \u26a0\ufe0f 늦게 붙으면 그 칸이 한동안 비어 보인다.
+              바로 시도하고, 앵커가 아직 없으면 촘촘히 다시 본다. */
+        mount();
+        var t = 0;
+        var again = setInterval(function () {
+            mount();
+            if (document.getElementById(HOST) || ++t > 24) clearInterval(again);
+        }, 120);
+    }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 

@@ -367,8 +367,14 @@
     }
 
     function boot() {
-        setTimeout(mount, 300);
-        setTimeout(mount, 1100);
+        /* \u26a0\ufe0f 늦게 붙으면 그 칸이 한동안 비어 보인다.
+              바로 시도하고, 앵커가 아직 없으면 촘촘히 다시 본다. */
+        mount();
+        var t = 0;
+        var again = setInterval(function () {
+            mount();
+            if (document.getElementById(HOST) || ++t > 24) clearInterval(again);
+        }, 120);
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();

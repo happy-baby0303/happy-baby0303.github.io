@@ -180,8 +180,12 @@
     function idleHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83C\uDF7C 젖병을 안 물어요</div>' +
+            /* \u26a0\ufe0f 병원 신호는 시작 화면에도 있어야 한다.
+                  여기 없으면 구독자는 '시작하기' 를 누르기 전까지 이걸 못 본다.
+                  돈 낸 사람이 안전 안내를 늦게 보는 건 말이 안 된다. */
+            warnHTML() +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
-                'margin:-16px 0 16px; line-height:1.75; word-break:keep-all;">' +
+                'margin:0 0 16px; line-height:1.75; word-break:keep-all;">' +
                 '복직이 다가오는데 ' + esc(nm("가")) + ' 젖병을 거부하시나요. ' +
                 '방법이 <b>아홉 가지</b> 있고 순서가 있습니다. ' +
                 '한꺼번에 다 하시면 뭐가 통했는지 모르니까, <b>하루에 하나씩</b> 드릴게요.</div>' +
@@ -369,7 +373,16 @@
         paint();
     }
 
-    function boot() { setTimeout(mount, 380); setTimeout(mount, 1180); }
+    function boot() {
+        /* \u26a0\ufe0f 늦게 붙으면 그 칸이 한동안 비어 보인다.
+              바로 시도하고, 앵커가 아직 없으면 촘촘히 다시 본다. */
+        mount();
+        var t = 0;
+        var again = setInterval(function () {
+            mount();
+            if (document.getElementById(HOST) || ++t > 24) clearInterval(again);
+        }, 120);
+    }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 

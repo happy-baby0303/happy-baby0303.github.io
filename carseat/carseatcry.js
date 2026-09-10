@@ -14,7 +14,7 @@
      2. 하네스 탈출   두 살 넘으면 갑자기 시작된다. 진짜 위험하다
      3. 하네스 탈출   두 살 넘으면 갑자기 시작된다 (무료 — 안전 정보다)
      4. 장거리 안전   귀성길에 지킬 것 (무료 — 안전 정보다)
-     5. 이번 주행 계획 몇 시에 쉴지 계산해준다 (PLUS — 계산이다)
+     5. 이번 주 여행 계획 몇 시에 쉴지 계산해준다 (PLUS — 계산이다)
 
    ⚠️ 3·4 를 잠그면 안 된다.
       "차에 아이만 두고 내리지 마세요" 를 유료로 파는 앱이 되면 안 된다.
@@ -389,7 +389,7 @@
     }
 
     /* ==========================================================
-       5. 이번 주행 계획 — 여기만 PLUS
+       5. 이번 주 여행 계획 — 여기만 PLUS
        ----------------------------------------------------------
        안전 수칙은 위 카드에 무료로 다 있다.
        여기서 파는 건 '내 여정에 맞춘 쉬는 시각' 이라는 계산이다.
@@ -467,7 +467,13 @@
                   눌러도 아무 일이 없는 것처럼 보인다. */
             var g = parseInt(v, 10);
             if (GAP_CHOICES.indexOf(g) > -1) o.drive.gap = g;
-        } else o.drive[f] = String(v || "").trim();
+        } else {
+            /* \u26a0\ufe0f 글자칸은 시간표를 안 바꾼다. 저장만 하고 다시 그리지 않는다.
+                  칠 때마다 화면 전체를 다시 그리면 눈에 띄게 느려진다. */
+            o.drive[f] = String(v || "").trim();
+            save(o);
+            return;
+        }
         save(o); paint();
     };
 
@@ -547,7 +553,7 @@
         var p = drivePlan();
         if (!p) return;
         var d = (st().drive) || {};
-        var lines = ["\uD83D\uDE97 " + nm("의") + " 주행 계획" +
+        var lines = ["\uD83D\uDE97 " + nm("의") + " 여행 계획" +
                      (d.to ? " \u00b7 " + d.to : ""), ""];
         lines.push("출발  " + clock(p.sh, p.sm, 0) + "   타기 전 수유 · 기저귀 · 겉옷 벗기기");
         p.stops.forEach(function (x) {
@@ -589,7 +595,7 @@
         var m = monthsOld();
 
         var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDDD3\uFE0F 이번 주행 계획</div>';
+            '<div class="matrix-header">\uD83D\uDDD3\uFE0F 이번 주 여행 계획</div>';
 
         if (!plus) {
             return out +
@@ -774,7 +780,16 @@
         paint();
     }
 
-    function boot() { setTimeout(mount, 460); setTimeout(mount, 1300); }
+    function boot() {
+        /* \u26a0\ufe0f 늦게 붙으면 그 칸이 한동안 비어 보인다.
+              바로 시도하고, 앵커가 아직 없으면 촘촘히 다시 본다. */
+        mount();
+        var t = 0;
+        var again = setInterval(function () {
+            mount();
+            if (document.getElementById(HOST) || ++t > 24) clearInterval(again);
+        }, 120);
+    }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 
