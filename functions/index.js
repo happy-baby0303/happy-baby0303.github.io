@@ -58,7 +58,7 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
   const senderUid = request.auth && request.auth.uid;
   if (!senderUid) return { success: false, error: "로그인이 필요합니다." };
 
-  const { syncCode, title, body } = request.data || {};
+  const { syncCode, title, body, excludeToken } = request.data || {};
   if (!syncCode) return { success: false, error: "가족 코드가 없습니다." };
 
   try {
@@ -70,6 +70,17 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
       // members 는 { uid: "master" } 형태의 객체다. 옛 배열도 받아준다.
     const raw = familyDoc.data().members || {};
     const all = Array.isArray(raw) ? raw : Object.keys(raw);
+
+    /* ⚠️ 이 방 사람인지 아무도 확인하지 않고 있었다.
+          가족 코드는 "TS-" + 영숫자 8자다. 남의 코드를 알거나 찍으면
+          로그인만 한 상태로 그 집에 아무 제목·본문이나 띄울 수 있었다.
+          아기 이름을 넣은 가짜 알림은 부모에게 그대로 먹힌다.
+          보내는 사람이 이 방 사람인지부터 본다. */
+    if (!all.includes(senderUid)) {
+      logger.warn("가족방 밖에서 온 푸시 요청", { syncCode, senderUid });
+      return { success: false, error: "이 가족방의 구성원이 아닙니다." };
+    }
+
     const targetUids = all.filter((uid) => uid !== senderUid);
     if (targetUids.length === 0) {
       logger.warn("가족방에 상대가 없음", { syncCode, senderUid, members: all });
@@ -97,8 +108,21 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
       });
     }
 
-    const tokens = [...tokenMap.keys()];
-    logger.info("푸시 대상", { syncCode, targetUids, tokenCount: tokens.length });
+    /* ⚠️ uid 로만 걸러내면 내 알림이 내 폰으로 돌아오는 걸 못 막는다.
+          토큰이 어느 user 문서에 적혔는지는 로그인 시점에 따라 어긋날 수 있고
+          (firebase_uid 를 localStorage 캐시에서 읽어 저장한 적이 있다),
+          한 사람이 계정을 두 번 만들면 uid 가 둘이 된다.
+
+          보낸 기기의 토큰 자체를 뺀다. 이건 어긋날 수가 없다.
+          내가 누른 일로 내 폰이 울리는 일은 이제 없다. */
+    const drop = new Set(
+      (Array.isArray(excludeToken) ? excludeToken : [excludeToken]).filter(Boolean)
+    );
+    const tokens = [...tokenMap.keys()].filter((t) => !drop.has(t));
+
+    logger.info("푸시 대상", {
+      syncCode, targetUids, tokenCount: tokens.length, dropped: drop.size,
+    });
     if (tokens.length === 0) {
       logger.warn("푸시 토큰 없음", { syncCode, targetUids });
       return {
