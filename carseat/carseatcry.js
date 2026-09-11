@@ -749,7 +749,7 @@
             'line-height:1.7; word-break:keep-all;">' +
             '막히면 계획은 밀립니다. <b>시각보다 \'얼마마다\' 를 지키세요.</b> ' +
             '그리고 아기가 힘들어하면 <b>계획보다 먼저</b> 세우시고요. ' +
-            '이 시간표는 <b>세어드리는 것</b>일 뿐이에요.</div>' +
+            '이 시간표는 <b>기준을 잡아드리는 것</b>이에요. 아이 상태가 먼저입니다.</div>' +
 
             '<div onclick="window.shareDrivePlan()" style="margin-top:13px; text-align:center; ' +
                 'padding:15px; background:#FEE500; color:#191919; border-radius:13px; ' +

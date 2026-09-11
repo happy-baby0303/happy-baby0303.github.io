@@ -364,9 +364,15 @@ function runFoodEngine() {
 
         resultArea.innerHTML = htmlOutput; // 👈 2개 중 여기가 맞습니다! (runFoodEngine 안쪽)
 
-        // 👇 여기에 스크롤 코드를 딱! 추가해 주세요.
-        // 결과가 갱신되면 유저 시선이 다시 매트릭스 필터 쪽으로 부드럽게 올라갑니다.
-        document.querySelector('.matrix-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        /* ⚠️ 무조건 스크롤하면 안 된다.
+              탭을 누를 때도 runFoodEngine 이 다시 돌아서,
+              가만히 있고 싶은데 화면이 저절로 내려간다.
+              사용자가 '필터를 직접 바꿨을 때' 만 올려준다. */
+        if (window.__foodUserFiltered) {
+            window.__foodUserFiltered = false;
+            var mp = document.querySelector('.matrix-panel');
+            if (mp) mp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 } // <-- runFoodEngine() 함수가 끝나는 닫는 괄호
 

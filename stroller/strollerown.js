@@ -158,7 +158,7 @@
             '</div>' +
             '<div style="margin-top:6px; font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '무게를 알아야 <b>손목에 얼마나 실리는지</b> 세어드릴 수 있어요. ' +
+                '무게를 알아야 <b>손목에 얼마나 실리는지</b> 알려드릴 수 있어요. ' +
                 '두 대 쓰시면 <b>둘 다</b> 알려주세요 \u2014 상황마다 뭘 갖고 나갈지 골라드립니다.</div>' +
 
             '<div style="display:flex; gap:6px; margin-top:16px;">' +
@@ -692,7 +692,7 @@
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.8; word-break:keep-all;">' +
                     '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상합니다. ' +
-                    '쓰고 계신 걸 알려주시면 <b>하루에 몇 kg 을 드시는지</b> 세어드릴게요.</div>' +
+                    '쓰고 계신 걸 알려주시면 <b>하루에 몇 kg 을 드시는지</b> 알려드릴게요.</div>' +
                 '<div onclick="window.openStrollerSheet()" style="text-align:center; padding:16px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
                     'font-size:14.5px; font-weight:900; cursor:pointer;">유모차 알려주기</div>' +
@@ -718,8 +718,8 @@
 
             '<div style="margin-top:12px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '여기 숫자는 <b>세어드리는 것</b>일 뿐이에요. ' +
-                '최종 기준은 늘 <b>내 유모차 설명서</b>입니다.</div>' +
+                '여기 날짜는 배냇함이 대신 챙겨둔 거예요. ' +
+                '마지막은 늘 <b>내 유모차 설명서</b>를 따라주세요.</div>' +
         '</div>';
     }
 
@@ -729,12 +729,12 @@
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
-                    '하루에 몇 kg 을 드시는지 세어드려요</div>' +
+                    '하루에 몇 kg 을 드시는지 알려드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
                     '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상합니다. ' +
                     '쓰시는 유모차만 알려주시면 하루 부담을 숫자로 보여드리고, ' +
-                    '<b>가벼운 걸로 바꾸면 얼마나 줄어드는지</b>까지 세어드려요.<br>' +
+                    '<b>가벼운 걸로 바꾸면 얼마나 줄어드는지</b>도 계산해드려요.<br>' +
                     '브레이크\u00b7바퀴\u00b7시트는 <b>볼 때가 되면</b> 먼저 말씀드립니다.</div>' +
             '</div>' +
         '</div>';

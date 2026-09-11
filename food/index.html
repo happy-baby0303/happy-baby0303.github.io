@@ -186,7 +186,7 @@
                     <div class="matrix-item">
                         <label>👶 아기 월령</label>
                         <div class="custom-select-wrapper">
-                            <select id="food-age" onchange="runFoodEngine()">
+                            <select id="food-age" onchange="window.__foodUserFiltered=true; runFoodEngine()">
                                 <option value="early">초기 (생후 4~6개월)</option>
                                 <option value="mid">중기 (생후 7~9개월)</option>
                                 <option value="late">후기 (생후 10~11개월)</option>
@@ -197,7 +197,7 @@
                     <div class="matrix-item">
                         <label>🎯 현재 가장 큰 고민</label>
                         <div class="custom-select-wrapper">
-                            <select id="food-goal" onchange="runFoodEngine()">
+                            <select id="food-goal" onchange="window.__foodUserFiltered=true; runFoodEngine()">
                                 <option value="all">특별한 고민 없음</option>
                                 <option value="iron"> 철분 보충 필수</option>
                                 <option value="poop"> 변비 해결</option>
@@ -207,11 +207,11 @@
                     </div>
                     <div class="matrix-item full-width">
                         <label>🥕 냉장고 파먹기 (반드시 포함할 재료)</label>
-                        <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #E5E8EB; background: #F9FAFB; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
+                        <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기 (입력 후 엔터)" onkeyup="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #E5E8EB; background: #F9FAFB; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
                     </div>
                     <div class="matrix-item full-width">
                         <label>⚠️ 알레르기 차단 (제외할 재료)</label>
-                        <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아 (입력 후 엔터)" onkeyup="runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #E5E8EB; background: #F9FAFB; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
+                        <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아 (입력 후 엔터)" onkeyup="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #E5E8EB; background: #F9FAFB; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
                     </div>
                 </div>
             </div>

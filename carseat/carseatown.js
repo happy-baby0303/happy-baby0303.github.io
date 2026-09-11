@@ -304,7 +304,7 @@
                 (leftCm > 0 ? '키 상한까지 <b>' + leftCm + 'cm</b> 남았어요. ' : '') +
                 '그다음은 <b>주니어 카시트</b>이고, 한 번 사면 대개 <b>만 12세까지</b> 씁니다.' +
                 (v ? '' : '<br><span style="color:' + GRAY + ';">키를 한 번 더 재서 적어주시면 ' +
-                          '<b>몇 개월 뒤인지</b>까지 세어드릴게요.</span>') +
+                          '<b>몇 개월 뒤인지</b>까지 알려드릴게요.</span>') +
             '</div>' +
             '<div style="margin-top:11px;">' +
                 picks.map(function (x) {
@@ -432,7 +432,7 @@
                 '<div class="matrix-header">\uD83D\uDE98 우리 카시트</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.75; word-break:keep-all;">' +
-                    '쓰고 계신 카시트를 알려주시면 <b>언제까지 쓸 수 있는지</b> 세어드립니다. ' +
+                    '쓰고 계신 카시트를 알려주시면 <b>언제까지 쓸 수 있는지</b> 알려드려요. ' +
                     '카시트는 나이가 아니라 <b>키</b>가 기준이라, 개월수만으로는 알 수 없어요.</div>' +
                 '<div onclick="window.openSeatSheet()" style="text-align:center; padding:16px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
@@ -509,7 +509,7 @@
         } else if (h && !autoMax) {
             out += '<div style="font-size:12px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
                 'word-break:keep-all;">이 제품은 키 기준이 안 적혀 있어요. ' +
-                '<b>설명서에서 상한 키를 보고</b> 아래에 적어주시면 남은 기간을 세어드립니다.</div>';
+                '<b>설명서에서 상한 키를 보고</b> 아래에 적어주시면 남은 기간을 계산해드려요.</div>';
         }
 
         /* ── 설명서에서 옮겨 적는 칸 ── */
@@ -608,8 +608,8 @@
 
             '<div style="margin-top:11px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '여기 숫자는 <b>세어드리는 것</b>일 뿐이에요. ' +
-                '최종 기준은 늘 <b>내 카시트 설명서</b>와 <b>내 차 설명서</b>입니다.</div>' +
+                '여기 날짜는 배냇함이 대신 챙겨둔 거예요. ' +
+                '마지막은 늘 <b>내 카시트 설명서</b>와 <b>내 차 설명서</b>를 따라주세요.</div>' +
         '</div>';
 
         return out;
@@ -621,12 +621,12 @@
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
-                    '언제까지 쓸 수 있는지 세어드려요</div>' +
+                    '언제까지 쓸 수 있는지 알려드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
                     '카시트는 나이가 아니라 <b>키</b>가 기준입니다. ' +
                     esc(nm("의")) + ' 키를 넣으면 남은 기간을, ' +
-                    '설명서에서 숫자 두 개만 옮겨 적으면 <b>뒤보기 여유와 만료일</b>까지 세어드려요.<br>' +
+                    '설명서에서 숫자 두 개만 옮겨 적으면 <b>뒤보기 여유와 만료일</b>도 챙겨드려요.<br>' +
                     '어깨끈은 얼마나 자랐는지, <b>다음 카시트는 몇 개월 뒤</b>인지, ' +
                     '겨울엔 패딩\u00b7여름엔 쿨시트까지 <b>때가 되면 먼저</b> 말씀드립니다.</div>' +
             '</div>' +

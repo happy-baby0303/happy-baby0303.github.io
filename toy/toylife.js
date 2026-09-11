@@ -304,7 +304,7 @@
                                   : 'PLUS면 이걸로 다음 주를 짜드려요') + '</div>' +
                   '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                       'line-height:1.7; word-break:keep-all;">' +
-                      '잠자는 것들을 앞으로 당겨서 일곱 날을 통째로 짭니다.</div></div>') +
+                      '자고 있던 장난감으로 <b>다음 주 놀이를 새로 짜드릴게요.</b></div></div>') +
         '</div>';
     }
 

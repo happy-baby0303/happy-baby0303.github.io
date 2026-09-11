@@ -459,7 +459,7 @@
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 (over ? '<b>' + over + '개</b>는 한 번 볼 때가 됐어요. '
-                      : '갈아 끼운 날만 눌러두시면 다음에 볼 때를 세어드려요. ') +
+                      : '갈아 끼운 날만 눌러두시면 다음에 볼 때가 됐을 때 알려드려요. ') +
                 '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>입니다.<br>' +
                 '<span style="font-size:11.5px;">예전에 갈았으면 옆 <b>달력</b>에서 그 날짜를 고르세요.</span></div>' +
 
@@ -504,7 +504,7 @@
                 : '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
                   'border-radius:14px; padding:16px;">' +
                   '<div style="font-size:13.5px; font-weight:900; color:#8A6D00;">' +
-                      '나머지 ' + (PARTS.length - show.length) + '개는 PLUS에서 세어드려요</div>' +
+                      '나머지 ' + (PARTS.length - show.length) + '개도 PLUS에서 챙겨드려요</div>' +
                   '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#8A6D00; ' +
                       'line-height:1.75; word-break:keep-all;">' +
                       '젖병솔 \u00b7 빨대 \u00b7 패킹까지요. ' +

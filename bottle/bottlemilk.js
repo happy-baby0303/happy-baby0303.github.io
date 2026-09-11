@@ -242,7 +242,7 @@
         if (!a.length) {
             out += '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
-                '유축하실 때마다 눌러두시면 <b>며칠 남았는지 세어드립니다.</b> ' +
+                '유축하실 때마다 눌러두시면 <b>며칠 남았는지 알려드려요.</b> ' +
                 '오래된 것부터 위로 올려드릴게요 \u2014 냉동실 뒤에 밀려서 상하는 팩이 없게요.</div>';
         } else {
             out += '<div style="display:flex; gap:8px; margin:-16px 0 14px;">' +
@@ -295,7 +295,7 @@
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
-                    '몇 팩이 며칠 남았는지 세어드려요</div>' +
+                    '몇 팩이 며칠 남았는지 알려드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
                     '유축할 때마다 한 번씩 눌러두시면 <b>오래된 것부터 위로</b> 올려드립니다. ' +

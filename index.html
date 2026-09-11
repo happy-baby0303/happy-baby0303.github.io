@@ -49,7 +49,9 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+     <!-- ⚠️ black-translucent 는 상태바를 투명하게 만들어 화면을 그 밑으로 민다.
+         배경이 흰색이라 시계·배터리가 묻혀서 안 보인다. default 로 둔다. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="배냇함">
     <link rel="apple-touch-icon" href="./apple-touch-icon.png">
     <link rel="icon" href="./icon-192x192.png">
@@ -203,6 +205,14 @@ body.mode-senior #export-card /* 👈 🚨 요놈이 바로 '배냇함 내려받
 
 /*여백 늘리기 — 답답함 해소 */
 #tab-home > div { margin-bottom: 24px !important; }
+
+/* ⚠️ 빈 칸도 div 라서 24px 을 먹는다. 넷이면 96px 이 그냥 날아간다.
+      내용이 없는 칸은 자리를 안 차지하게 한다. */
+#tab-home > div:empty { margin-bottom: 0 !important; display: none !important; }
+
+/* 사진 칸 — 220px 은 세로 사진에 너무 납작하다.
+   화면 너비에 맞춰 키우되, 가로가 넓은 기기에서 너무 커지지 않게 묶는다. */
+#baby-dashboard { height: clamp(250px, 66vw, 360px) !important; }
 
 .box-main,
 #now-status-card,
@@ -3309,6 +3319,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <script src="./premium.js"></script>
 <script src="./anniversaries.js"></script>
 <script src="./home.js"></script>
+ <script src="./homefix.js"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js"></script>
 <script src="./bedtime.js"></script>
