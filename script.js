@@ -3282,13 +3282,58 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // 💌 [부부 육아 바통터치 엔진] (버그 완벽 수정본)
 // ==========================================
+/* 🔔 알림을 눌러 들어왔을 때 그 화면으로 데려간다.
+      sw.js 가 '/?go=toolbox' 로 열어준다. */
+(function () {
+    try {
+        var go = new URLSearchParams(location.search).get('go');
+        if (!go) return;
+        var map = { toolbox: 'nav-toolbox', home: 'nav-home', info: 'nav-info' };
+        var navId = map[go];
+        if (!navId) return;
+        var run = function () {
+            var el = document.getElementById(navId);
+            if (el && typeof window.switchTab === 'function') {
+                window.switchTab(go, el);
+                history.replaceState(null, '', location.pathname);   // 주소는 깔끔하게
+                return true;
+            }
+            return false;
+        };
+        var n = 0;
+        var t = setInterval(function () { if (run() || ++n > 20) clearInterval(t); }, 250);
+    } catch (e) {}
+})();
+
 async function saveBatonToFirebase(records) {
-    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
-        const syncCode = window.getSyncCode(); if (!syncCode) return;
-        try { await setDoc(doc(db, "baton_" + syncCode, "status"), { records }); } catch (e) {}
+    /* ⚠️ 예전엔 setDoc / db 를 전역으로 찾았는데, 이 앱은 window.setDoc 에 담아둔다.
+          그래서 조건이 늘 false 가 되어 서버 저장을 통째로 건너뛰었다.
+          내 폰 localStorage 만 바뀌고 짝꿍 폰은 그대로였다.
+          아빠가 '해결완료' 를 눌러도 엄마 화면에서 안 사라진 이유다. */
+    const _db     = window.db     || (typeof db     !== 'undefined' ? db     : null);
+    const _setDoc = window.setDoc || (typeof setDoc !== 'undefined' ? setDoc : null);
+    const _doc    = window.doc    || (typeof doc    !== 'undefined' ? doc    : null);
+
+    /* ⚠️ 서버 저장이 안 되더라도 내 화면은 반드시 갱신한다.
+          예전엔 syncCode 가 없으면 여기서 return 해버려서
+          localStorage 저장도, 화면 다시 그리기도 안 됐다. */
+    const syncCode = window.getSyncCode ? window.getSyncCode() : null;
+
+    if (_db && _setDoc && _doc && syncCode) {
+        try {
+            await _setDoc(_doc(_db, "baton_" + syncCode, "status"), { records });
+        } catch (e) {
+            console.warn('[바통터치] 서버 저장 실패', e);
+        }
+    } else {
+        console.warn('[바통터치] 서버 저장 건너뜀', {
+            db: !!_db, setDoc: !!_setDoc, doc: !!_doc, syncCode: syncCode || '없음'
+        });
     }
+
     localStorage.setItem('tosil_baton_records', JSON.stringify(records));
-    renderBatonTasks();
+    if (typeof renderBatonTasks === 'function') renderBatonTasks();
+    if (typeof window.refreshHomeFix === 'function') window.refreshHomeFix();
 }
 
 async function addQuickBaton(text) {
@@ -8964,10 +9009,10 @@ window.renderHomeBatonList = function() {
 
     if (activeRecords.length === 0) {
         container.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 20px; background: var(--bg-sub); border-radius: 20px; border: none; text-align: center;">
-                <div style="font-size: 32px; margin-bottom: 12px; filter: grayscale(20%);">🤍</div>
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-m); margin-bottom: 4px;">아내가 남겨둔 미션이 없어요.</div>
-                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s);">지금은 평화로운 자유시간입니다!</div>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 34px 20px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); text-align: center;">
+                <div style="font-size: 30px; margin-bottom: 10px;">\u2615</div>
+                <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-bottom: 5px;">지금은 쉬셔도 돼요</div>
+                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s); line-height: 1.7;">부탁이 오면 여기에 뜹니다</div>
             </div>`;
         return;
     }

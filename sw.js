@@ -31,7 +31,11 @@ self.addEventListener('notificationclick', function(event) {
                 }
                 return client.focus();
             }
-            return clients.openWindow('/');
+            /* 알림 종류에 따라 갈 곳을 나눈다.
+               바통터치는 툴박스에 있으니 거기로 보낸다. */
+            var t = (event.notification && event.notification.title) || '';
+            var go = (t.indexOf('바통') > -1) ? '/?go=toolbox' : '/';
+            return clients.openWindow(go);
         })
     );
 });
