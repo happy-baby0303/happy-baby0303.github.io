@@ -100,7 +100,8 @@
             lastTemp:   lastTemp,
             lastTempAt: lastTempAt,
             opens:      opens.length,
-            stage:      localStorage.getItem("tosil_feedingStage") || "모유/분유"
+            stage:      localStorage.getItem("tosil_feedingStage") || "모유/분유",
+            vacSoon:    (function () { var v = nextVaccine(); return v ? v.left : null; })()
         };
     }
 
@@ -154,6 +155,35 @@
         { find: "두드러기", ranges: [[5, 10]], whys: ["새 재료를 늘릴 때라"], base: 50,
           boost: function (c) {
               return c.stage.indexOf("이유식") > -1 ? { s: 35, why: c.stage + " 중이라" } : null;
+          } },
+
+        /* ---- libraryplus.js 가 붙이는 여덟 편 ---- */
+
+        { find: "눕히는 자세", ranges: [[0, 12]], whys: ["돌 전에 제일 중요해서"], base: 70 },
+        { find: "코막힘",     ranges: [[0, 24]], whys: ["코가 자주 막히는 때라"], base: 47 },
+        { find: "배앓이",     ranges: [[0, 4]],  whys: ["배앓이가 심한 때라"],   base: 64 },
+        { find: "이앓이",     ranges: [[4, 14]], whys: ["첫니가 나올 때라"],     base: 56 },
+
+        { find: "안 쌌어요", ranges: [[4, 24]], whys: ["변이 단단해지는 때라"], base: 46,
+          boost: function (c) {
+              return c.stage.indexOf("이유식") > -1 ? { s: 18, why: c.stage + " 중이라" } : null;
+          } },
+
+        { find: "접종 하고", ranges: [[0, 24]], whys: [""], base: 6,
+          boost: function (c) {
+              return (c.vacSoon !== null && c.vacSoon <= 7 && c.vacSoon >= -3)
+                  ? { s: 70, why: (c.vacSoon > 0 ? "접종이 " + c.vacSoon + "일 남아서" : "접종한 지 얼마 안 돼서") }
+                  : null;
+          } },
+
+        { find: "체온, 어디서", ranges: [[0, 99]], whys: [""], base: 5,
+          boost: function (c) {
+              return c.hot ? { s: 44, why: "최근에 열이 있어서" } : null;
+          } },
+
+        { find: "약 먹이기", ranges: [[0, 99]], whys: [""], base: 4,
+          boost: function (c) {
+              return c.hot ? { s: 30, why: "약을 먹일 일이 있어서" } : null;
           } }
     ];
 
@@ -164,6 +194,12 @@
             if (m >= ranges[i][0] && m <= ranges[i][1]) return i;
         }
         return -1;
+    }
+
+    // library2.js 가 글을 더 넣으면 그 글들의 규칙도 같이 받는다
+    function allRules() {
+        var extra = window.INFO_RULES_EXTRA;
+        return (extra && extra.length) ? RULES.concat(extra) : RULES;
     }
 
     function inRange(m, ranges) {
@@ -199,8 +235,9 @@
         var c = context(), scored = [];
 
         articles().forEach(function (a, idx) {
-            for (var i = 0; i < RULES.length; i++) {
-                var r = RULES[i];
+            var rules = allRules();
+            for (var i = 0; i < rules.length; i++) {
+                var r = rules[i];
                 if (a.title.indexOf(r.find) === -1) continue;
 
                 var s = 0, why = "";
@@ -220,7 +257,8 @@
                 // "생후 20개월이라 열날 때" 는 이유가 아니다.
                 if (s < 10) why = "";
 
-                if (s > 0) scored.push({ el: a.el, title: a.title, score: s, why: why, idx: idx });
+                var alt = (hit > -1 && r.whys && r.whys[hit]) ? r.whys[hit] : "";
+                if (s > 0) scored.push({ el: a.el, title: a.title, score: s, why: why, alt: alt, idx: idx });
                 break;
             }
         });
@@ -228,7 +266,20 @@
         scored.sort(function (x, y) {
             return (y.score !== x.score) ? y.score - x.score : x.idx - y.idx;
         });
-        return { list: scored.slice(0, n || 3), ctx: c };
+
+        var top = scored.slice(0, n || 3);
+
+        // 같은 딱지가 두 번 나오면 두 번째는 다른 말로 바꾼다.
+        // 셋 다 "초기 이유식 중이라" 면 그건 딱지가 아니라 배경이다.
+        var seen = {};
+        top.forEach(function (a) {
+            if (!a.why) return;
+            if (!seen[a.why]) { seen[a.why] = 1; return; }
+            a.why = (a.alt && !seen[a.alt]) ? a.alt : "";
+            if (a.why) seen[a.why] = 1;
+        });
+
+        return { list: top, ctx: c };
     }
 
     /* ==========================================================
@@ -245,7 +296,30 @@
         if (block) block.style.display = on ? "" : "none";
 
         var btn = document.getElementById("info-all-btn");
-        if (btn) btn.textContent = on ? "글 접기 〈" : ("글 전체 보기 " + articles().length + "개 〉");
+        if (btn) btn.textContent = on ? "글 접기 " : ("글 전체 보기 " + articles().length + "개 〉");
+
+        /* ⚠️ 접는 버튼이 목록 '위' 에만 있으면, 펼친 뒤 아래로 내려간 사람은
+              그 버튼을 못 찾는다. 화면 밖으로 올라가 있기 때문이다.
+              목록 '아래' 에도 같은 버튼을 둔다. */
+        var foot = document.getElementById("info-all-btn-foot");
+        if (on && block) {
+            if (!foot) {
+                foot = document.createElement("div");
+                foot.id = "info-all-btn-foot";
+                foot.onclick = function () { window.toggleInfoLibrary(); };
+                foot.style.cssText =
+                    "text-align:center; margin:4px 0 18px; padding:15px; " +
+                    "background:var(--bg-card); border:1px solid var(--border); " +
+                    "border-radius:14px; font-size:13px; font-weight:800; " +
+                    "color:var(--text-sub); cursor:pointer;";
+                foot.textContent = " 글 접기";
+                if (block.parentNode) block.parentNode.insertBefore(foot, block.nextSibling);
+            }
+            foot.style.display = "";
+        } else if (foot) {
+            foot.style.display = "none";
+        }
+
         return block;
     }
 
@@ -262,7 +336,15 @@
         }
         el.open = true;
         setTimeout(function () {
-            try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
+            /* ⚠️ center 로 보내면 화면 한가운데에 놓여서
+                  '내가 누른 게 이거구나' 가 잘 안 보인다.
+                  위쪽에 붙이고 잠깐 테두리를 줘서 눈이 바로 가게 한다. */
+            try { el.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
+            try {
+                el.style.transition = "box-shadow .3s";
+                el.style.boxShadow = "0 0 0 2px " + GOLD;
+                setTimeout(function () { el.style.boxShadow = "none"; }, 1400);
+            } catch (e) {}
         }, 120);
     }
 
@@ -441,6 +523,10 @@
     function vaccineHTML() {
         var v = nextVaccine();
         if (!v) return "";
+
+        // 다섯 달 뒤 접종을 오늘 말해줄 이유가 없다.
+        // 늘 떠 있는 카드는 아무도 안 본다. 한 달 안쪽일 때만 나온다.
+        if (v.left > 30) return "";
 
         var head, color;
         if (v.left > 14)      { head = "D-" + v.left;  color = "var(--text-sub)"; }
