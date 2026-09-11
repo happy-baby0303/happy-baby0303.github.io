@@ -44,21 +44,70 @@
         return isNaN(d.getTime()) ? null : d;
     }
 
+    /* ⚠️ 날짜가 한 가지 모양으로만 들어오지 않는다.
+          도감(script.js toggleMilestone)은 "2026. 09. 11" 로 저장하고,
+          아주 옛 기록은 "예전 기록 \uD83E\uDD0D" 같은 글자였다.
+          그걸 "-" 로 쪼개니 Number() 가 전부 NaN 이 되고
+          new Date(NaN, NaN, NaN) → NaN년 NaN월 NaN일 이 찍혔다.
+
+          게다가 "2026. 09. 11" 은 "2026-09-08" 보다 뒤로 정렬된다(. > -).
+          그래서 책의 마지막 날짜가 도감 키로 잡히고,
+          dday() 가 빈 값을 내서 맺음말이 "여기까지가 0일입니다" 가 됐다.
+
+          들어오는 모양을 여기서 전부 한 줄로 편다. */
+
+    function normKey(v) {
+        if (v == null) return null;
+        if (v instanceof Date) {
+            if (isNaN(v.getTime())) return null;
+            return v.getFullYear() + "-" +
+                   String(v.getMonth() + 1).padStart(2, "0") + "-" +
+                   String(v.getDate()).padStart(2, "0");
+        }
+        if (typeof v === "number") {
+            var dn = new Date(v);
+            return isNaN(dn.getTime()) ? null : normKey(dn);
+        }
+        var t = String(v).trim();
+        if (!t) return null;
+
+        // 숫자만 있으면 밀리초 시각으로 본다
+        if (/^\d{10,}$/.test(t)) return normKey(Number(t));
+
+        // 2026-09-11 / 2026. 09. 11 / 2026.9.11 / 2026/9/11 / 2026년 9월 11일
+        var m = t.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+        if (!m) return null;
+
+        var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);
+        if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;
+
+        return y + "-" + String(mo).padStart(2, "0") + "-" + String(da).padStart(2, "0");
+    }
+
     function fromKey(k) {
-        var p = String(k).split("-");
-        return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+        var key = normKey(k);
+        if (!key) return null;
+        var p = key.split("-");
+        var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+        return isNaN(d.getTime()) ? null : d;
     }
 
     function pretty(k) {
         var d = fromKey(k);
+        if (!d) return "";                 // 모르면 아무 말도 안 한다. NaN 은 절대 안 찍는다.
         return d.getFullYear() + "년 " + (d.getMonth() + 1) + "월 " + d.getDate() + "일";
     }
 
+    function ddayNum(k) {
+        var b = birth(), d = fromKey(k);
+        if (!b || !d) return null;
+        var n = Math.floor((d.getTime() - b.getTime()) / 86400000);
+        return n >= 0 ? n : null;
+    }
+
     function dday(k) {
-        var b = birth();
-        if (!b) return "";
-        var n = Math.floor((fromKey(k).getTime() - b.getTime()) / 86400000);
-        return n >= 0 ? "D+" + n : "";
+        var n = ddayNum(k);
+        return n === null ? "" : ("D+" + n);
     }
 
     function milestoneList() {
@@ -109,50 +158,66 @@
 
     function collect() {
         var days = {};
+
+        /* ⚠️ 들어오는 키를 여기서 전부 편다.
+              날짜로 못 읽는 키는 아예 안 받는다. 받으면 NaN 쪽이 생긴다. */
         var touch = function (k) {
-            if (!days[k]) days[k] = { key: k, ms: [], photos: [], letter: null, anni: [], diary: [] };
-            return days[k];
+            var key = normKey(k);
+            if (!key) return null;
+            if (!days[key]) days[key] = { key: key, ms: [], photos: [], letter: null, anni: [], diary: [] };
+            return days[key];
         };
 
         // 사진
         if (typeof window.photoDays === "function") {
             window.photoDays().forEach(function (k) {
-                touch(k).photos = window.getDayPhotos(k) || [];
+                var t = touch(k);
+                if (t) t.photos = window.getDayPhotos(k) || [];
             });
         }
 
         // 처음 해낸 일
+        var msDates = {};
+        try { msDates = JSON.parse(localStorage.getItem("tosil_milestone_dates")) || {}; } catch (e) {}
+
         var raw = [];
         try { raw = JSON.parse(localStorage.getItem("tosil_milestones")) || []; } catch (e) {}
         raw.forEach(function (a) {
             var id = typeof a === "string" ? a : (a && a.id);
-            var date = (a && a.date) ? a.date : null;
-            if (!id || !date) return;
+            if (!id) return;
+
+            /* 날짜를 세 번 찾아본다.
+                 ① 도감이 적어둔 날짜
+                 ② 예전 버전이 남긴 밀리초 시각
+               둘 다 못 읽으면 책에 넣지 않는다.
+               날짜 없는 기록을 억지로 끼우면 엉뚱한 날에 박힌다. */
+            var date = normKey(a && a.date) || normKey(msDates[id]);
+            if (!date) return;
+
             var it = msItem(id);
-            if (it) touch(date).ms.push({ id: id, title: it.title, desc: it.desc });
+            var t = touch(date);
+            if (it && t) t.ms.push({ id: id, title: it.title, desc: it.desc });
         });
+
+        /* ⚠️ 부부 문답은 이 책에 넣지 않는다.
+              이건 아이의 배냇함이고, 문답은 부부 둘의 책이다.
+              성격이 다르고, 따로 묶어서 팔 물건이다.
+              (diaryPage 는 그 책을 만들 때 그대로 쓴다) */
 
         // 편지 — 전부 넣으면 책이 아니라 일지가 된다.
         // 사진이나 첫 순간이 있는 날은 그날 편지를, 그 외에는 달마다 한 통만.
-        // 부부가 둘 다 답한 문답
-        if (typeof window.diaryEntries === "function") {
-            window.diaryEntries().forEach(function (e) {
-                var t = touch(e.key);
-                if (!t.diary) t.diary = [];
-                t.diary.push(e);
-            });
-        }
-
         var letters = {};
         try { letters = JSON.parse(localStorage.getItem("tosil_letters")) || {}; } catch (e) {}
         var monthTaken = {};
         Object.keys(letters).sort().forEach(function (k) {
-            var d = days[k];
+            var key = normKey(k);
+            if (!key) return;
+            var d = days[key];
             var rich = d && (d.photos.length || d.ms.length);
-            var ym = k.slice(0, 7);
+            var ym = key.slice(0, 7);
             if (rich || !monthTaken[ym]) {
-                touch(k).letter = letters[k];
-                if (!rich) monthTaken[ym] = 1;
+                var t = touch(key);
+                if (t) { t.letter = letters[k]; if (!rich) monthTaken[ym] = 1; }
             }
         });
 
@@ -160,7 +225,8 @@
         if (typeof window.anniversaryDays === "function") {
             window.anniversaryDays().forEach(function (k) {
                 var list = (window.anniversariesOn(k) || []).filter(function (a) { return a.tier === 1; });
-                if (list.length) touch(k).anni = list;
+                var t = list.length ? touch(k) : null;
+                if (t) t.anni = list;
             });
         }
 
@@ -233,8 +299,10 @@
             '<div style="height:100%; display:flex; flex-direction:column;">' +
                 (o.kicker ? '<div style="font-size:16px; font-weight:800; color:' + GOLD + '; letter-spacing:5px; margin-bottom:26px;">' + esc(o.kicker) + '</div>' : '') +
 
-                (o.img ? '<div style="width:100%; height:790px; border-radius:8px; overflow:hidden; background:#F1ECE8;">' +
-                            '<img src="' + o.img + '" style="width:100%; height:100%; object-fit:cover; display:block;">' +
+                (o.img ? '<div style="width:100%; height:790px; overflow:hidden; background:' + PAPER + '; ' +
+                            'display:flex; align-items:center; justify-content:center;">' +
+                            '<img src="' + o.img + '" style="max-width:100%; max-height:100%; object-fit:contain; ' +
+                                'display:block; box-shadow:0 3px 16px rgba(96,78,60,0.13);">' +
                          '</div>' : '') +
 
                 '<div style="margin-top:' + (o.img ? 52 : 0) + 'px;">' +
@@ -291,6 +359,17 @@
         else if (chars > 80) imgH = 720;
         if (!o.img) imgH = 0;
 
+        /* ⚠️ 글이 한 줄도 없는 날이 있다. 사진만 있는 날이다.
+              그런 쪽은 사진 밑이 통째로 빈 종이였다.
+              돈 받고 파는 책에서 반 장이 비면 그건 낭비로 보인다.
+              글이 없으면 사진에게 남은 자리를 전부 준다. */
+        var hasText = !!(o.title || o.desc || o.caption || text || (l && l.ms));
+        var photoBox = o.img
+            ? (hasText
+                ? 'height:' + imgH + 'px;'
+                : 'flex:1; min-height:0; margin-bottom:10px;')
+            : '';
+
         var stat = statLine(l);
 
         return shell(
@@ -301,12 +380,18 @@
                 '<div style="font-size:21px; font-weight:600; color:' + INK_L + '; ' +
                     'margin-bottom:34px;">' + esc(pretty(o.key)) + '  \u00b7  ' + esc(dday(o.key)) + '</div>' +
 
+                /* ⚠️ 사진 칸 바탕이 #F7F4F1 이었다. 종이색(#FDFBF7)과 달라서
+                      세로 사진 양옆에 회색 띠가 그어진 것처럼 보였다.
+                      바탕을 종이와 같게 해서 띠를 없애고,
+                      대신 사진 자체에 아주 옅은 그림자를 준다.
+                      상자 안에 갇힌 그림이 아니라 종이에 놓인 인화지로 보이게. */
                 (o.img
-                    ? '<div style="width:100%; height:' + imgH + 'px; border-radius:8px; ' +
-                          'overflow:hidden; background:#F7F4F1; display:flex; ' +
+                    ? '<div style="width:100%; ' + photoBox + ' background:' + PAPER + '; ' +
+                          'overflow:hidden; display:flex; ' +
                           'align-items:center; justify-content:center;">' +
                           '<img src="' + o.img + '" style="max-width:100%; max-height:100%; ' +
-                              'width:auto; height:auto; object-fit:contain; display:block;">' +
+                              'width:auto; height:auto; object-fit:contain; display:block; ' +
+                              'box-shadow:0 3px 16px rgba(96,78,60,0.13);">' +
                       '</div>'
                     : '') +
 
@@ -428,10 +513,17 @@
                        'letter-spacing:0.5px; line-height:1.9;">' + esc(bits.join("   \u00b7   ")) + '</div>';
             }
         }
+        /* ⚠️ n 을 못 구하는 날이 있다(생일 미입력 등).
+              그때 예전 코드는 "0" 을 넣어 "여기까지가 0일입니다" 로 끝났다.
+              책의 마지막 장이다. 숫자가 없으면 숫자를 빼고 말한다. */
+        var head = (n === "" || n === null || n === undefined || String(n) === "0")
+            ? '여기까지<br>담았습니다'
+            : '여기까지가<br>' + esc(String(n)) + '일입니다';
+
         return shell(
             '<div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
                 '<div style="font-family:\'Gowun Batang\',serif; font-size:50px; font-weight:700; letter-spacing:-2px; line-height:1.45;">' +
-                    '여기까지가<br>' + n + '일입니다</div>' +
+                    head + '</div>' +
                 '<div style="width:1px; height:110px; background:' + LINE + '; margin:52px auto;"></div>' +
                 '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; line-height:1.9;">' +
                     '다음 장은 아직 비어 있어요.<br>내일 또 한 줄이 쌓입니다.</div>' +
@@ -564,7 +656,7 @@
                 letter = null;
             });
 
-            (d.diary || []).forEach(function (e) { pages.push({ type: "diary", e: e }); });
+            /* 부부 문답은 collect() 에서 아예 안 담는다. 여기도 만들지 않는다. */
 
             /* 사진도 도감도 없는 날은 편지만 한 장으로 */
             if (letter) pages.push({
@@ -594,7 +686,15 @@
             if (p.letter) sum.letters++;
             if (p.kicker === "처음 해낸 일") sum.ms++;
         });
-        pages.push({ type: "end", n: dday(last).replace("D+", "") || "0", sum: sum });
+        /* ⚠️ 마지막 날짜로 일수를 센다.
+              예전엔 도감 키("2026. 09. 11")가 정렬상 맨 뒤로 가서
+              그게 last 가 되고, 날짜로 못 읽혀 "0일" 이 찍혔다.
+              이제 키가 전부 펴져 있지만, 그래도 한 번 더 막아둔다. */
+        var endN = ddayNum(last);
+        if (endN === null) {
+            for (var q = data.length - 1; q >= 0 && endN === null; q--) endN = ddayNum(data[q].key);
+        }
+        pages.push({ type: "end", n: endN === null ? "" : endN, sum: sum });
 
         if (pages.length > MAX_PAGES) {
             pages = pages.slice(0, MAX_PAGES - 1).concat(pages[pages.length - 1]);

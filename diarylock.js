@@ -41,7 +41,16 @@
         var t = new Date();
         return t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate();
     }
+    /* ⚠️ 여기만 tosil_userRole 을 봤다. 앱의 나머지는 전부 user_role 이다.
+          키가 달라서 이 파일은 늘 "husband" 로 판단했고,
+          엄마가 써도 "엄마가 아직 안 썼어요" 라고 자기한테 말했다. */
     function myRole() {
+        if (typeof window.myRoleWord === "function") {
+            return window.myRoleWord() === "아빠" ? "husband" : "wife";
+        }
+        var r = localStorage.getItem("user_role");
+        if (r === "dad") return "husband";
+        if (r === "mom") return "wife";
         return localStorage.getItem("tosil_userRole") || "husband";
     }
     function otherWord() {
@@ -158,6 +167,7 @@
             var fn = window.httpsCallable(window.functions, "sendFamilyPush");
             fn({
                 syncCode: code,
+                excludeToken: localStorage.getItem('fcm_token') || null,
                 title: "\uD83D\uDC8C 오늘의 문답이 기다려요",
                 body: day ? (day + "일차 질문에 한 사람만 답했어요") : "한 사람만 답했어요"
             }).catch(function (e) { console.warn("재촉 실패", e); });
@@ -196,12 +206,15 @@
         if (!code || !window.functions || !window.httpsCallable) return;
 
         var day = (typeof window.getCurrentDay === "function") ? window.getCurrentDay() : "";
-        var me = (myRole() === "husband") ? "아빠" : "엄마";
+        var me = (typeof window.myRoleWord === "function")
+            ? window.myRoleWord()
+            : ((myRole() === "husband") ? "아빠" : "엄마");
 
         try {
             var fn = window.httpsCallable(window.functions, "sendFamilyPush");
             fn({
                 syncCode: code,
+                excludeToken: localStorage.getItem('fcm_token') || null,
                 title: "\uD83D\uDCD6 " + me + "가 오늘의 답을 남겼어요",
                 body: day ? (day + "일차 \u00b7 내 답을 쓰면 열립니다") : "내 답을 쓰면 열립니다"
             }).catch(function () {});

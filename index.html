@@ -48,8 +48,10 @@
          흰색으로 두면 흰 글씨 시계·배터리가 묻혀서 안 보인다.
          (apple-mobile-web-app-status-bar-style 은 아이폰 전용이라 안드로이드엔 안 먹는다)
          앱 배경과 같은 색으로 맞춘다. -->
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F2">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111111">
+    <!-- ⚠️ 다크모드는 앱에서 뺐다. 그런데 여기 #111111 이 남아 있으면
+         폰이 다크모드인 사람은 앱은 크림색인데 상태바만 새까맣게 뜬다.
+         앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
+    <meta name="theme-color" content="#FAF7F2">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -92,6 +94,27 @@
 
 <style>
     body { margin: 0 !important; padding: 0 !important; }
+
+/* ========================================== */
+/* ⚠️ 요즘 안드로이드는 화면을 상태바 밑까지 민다(edge-to-edge).
+      그러면 헤더가 시계·배터리 밑으로 파고들어 그 자리가 안 칠해진다.
+      상태바 높이만큼 앱 색으로 메우고, 헤더를 그만큼 내린다.
+      상태바가 없는 기기에서는 env() 가 0px 이라 아무 일도 안 일어난다. */
+/* ========================================== */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: #FAF7F2;
+    z-index: 9999;
+    pointer-events: none;
+}
+.global-header {
+    padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    background: #FAF7F2 !important;
+    backdrop-filter: none !important;
+}
 /* ========================================== */
 /* 👵 조부모 / 시터 모드 전용 프라이버시 철통 방어 패치 */
 /* ========================================== */
@@ -2952,7 +2975,20 @@ input[type="number"] { -moz-appearance: textfield; }
                 console.log('[푸시] ✅ 토큰 발급:', token.slice(0, 20) + '...');
                 localStorage.setItem('fcm_token', token);
 
-                const myUid = window.auth?.currentUser?.uid || localStorage.getItem('firebase_uid');
+                /* ⚠️ 예전엔 로그인이 아직 안 잡히면 localStorage 에 캐시된
+                      옛 uid 로 토큰을 저장했다. 계정을 다시 만들거나 기기를 바꾸면
+                      내 폰 토큰이 '예전 나' 앞으로 적힌다.
+                      그러면 서버가 '보낸 사람 빼기' 를 해도 그 문서는 안 걸러져서
+                      내가 누른 알림이 내 폰으로 돌아왔다.
+                      살아있는 로그인이 없으면 저장을 미룬다. 다음에 켤 때 다시 한다. */
+                const liveUid = window.auth?.currentUser?.uid || null;
+                if (!liveUid) {
+                    console.warn('[푸시] 로그인이 아직 안 잡혀 토큰 저장을 미룹니다.');
+                    return false;
+                }
+                localStorage.setItem('firebase_uid', liveUid);   // 캐시도 최신으로 맞춰둔다
+
+                const myUid = liveUid;
                 const myKakaoId = localStorage.getItem('kakao_id') || myUid;
 
                 // ✅ [수정] 로그인 전이면 그냥 넘어가지 말고, 이유를 로그로 남김
@@ -3250,7 +3286,15 @@ input[type="number"] { -moz-appearance: textfield; }
                     ));
                     
                                      // 🚨 내 기기에도 역할을 강제 세팅 (시터 코드로 들어왔으면 강제 시터 모드!)
-                    localStorage.setItem('user_role', assignedRole === 'viewer' ? 'senior' : 'mom');
+                    /* ⚠️ 예전엔 초대코드로 들어온 사람을 무조건 '엄마'로 덮어썼다.
+                          아빠가 초대코드로 들어오면 그 순간 역할이 엄마가 되고,
+                          아빠가 보내는 알림이 전부 "엄마가 해냈어요" 로 뜬다.
+                          시터(viewer)만 강제하고, 나머지는 본인이 고른 역할을 지킨다. */
+                    if (assignedRole === 'viewer') {
+                        localStorage.setItem('user_role', 'senior');
+                    } else if (!localStorage.getItem('user_role')) {
+                        localStorage.setItem('user_role', 'mom');
+                    }
                     // 서버가 정한 역할을 자물쇠로 남긴다. 스스로 못 푼다.
                     if (assignedRole === 'viewer') localStorage.setItem('tosil_role_locked', 'viewer');
                     else localStorage.removeItem('tosil_role_locked');
@@ -3387,6 +3431,9 @@ input[type="number"] { -moz-appearance: textfield; }
 <script src="./libraryplus.js"></script>
 <script src="./infopick.js"></script>
 <script src="./sosplus.js"></script>
+<!-- 🍎 아이폰은 홈 화면에 담아둔 앱에만 알림을 준다.
+     그 안내를 띄운다. 안드로이드·PC 에서는 아무 일도 안 한다. -->
+<script src="./iospush.js?v=1"></script>
 
 <!-- 💩 기저귀 바텀시트 모달 -->
 <div id="diaper-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">

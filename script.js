@@ -189,6 +189,30 @@ window.getSyncCode = function() {
     return localStorage.getItem("family_sync_code") || null;
 };
 
+/* ⚠️ 내가 누구인지를 묻는 곳이 앱 전체에 흩어져 있었다.
+      어떤 곳은 user_role, 어떤 곳은 body 의 mode-dad 클래스를 봤다.
+      둘이 어긋나면 화면은 '오늘의 아빠' 인데 알림은 '엄마가 해냈어요' 가 된다.
+      묻는 창구를 하나로 만든다. 화면이 아빠면 알림도 아빠다. */
+window.myRoleWord = function () {
+    var isDad = (document.body && document.body.classList.contains('mode-dad'))
+             || localStorage.getItem('user_role') === 'dad';
+    return isDad ? '아빠' : '엄마';
+};
+
+window.myUid = function () {
+    return (window.auth && window.auth.currentUser)
+        ? window.auth.currentUser.uid
+        : (localStorage.getItem('firebase_uid') || '');
+};
+
+/* ⚠️ 내가 보낸 알림이 내 폰으로 돌아오면 안 된다.
+      uid 로 거르는 건 서버가 이미 하고 있는데도 돌아왔다.
+      토큰이 어느 계정 문서에 적혔는지가 어긋날 수 있기 때문이다.
+      그래서 '이 기기의 토큰' 을 같이 올려서 서버가 그것만 콕 집어 뺀다. */
+window.myPushToken = function () {
+    return localStorage.getItem('fcm_token') || null;
+};
+
 // ==========================================
 // 🚀 [초고속 패치] 렉 없는 즉각 반응형 화면 내비게이션 엔진
 // ==========================================
@@ -3333,6 +3357,7 @@ async function saveBatonToFirebase(records) {
 
     localStorage.setItem('tosil_baton_records', JSON.stringify(records));
     if (typeof renderBatonTasks === 'function') renderBatonTasks();
+    if (typeof window.renderHomeBatonList === 'function') window.renderHomeBatonList();
     if (typeof window.refreshHomeFix === 'function') window.refreshHomeFix();
 }
 
@@ -3398,10 +3423,14 @@ async function createBatonTask(text, reward) {
     const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
     if (syncCode && window.functions && window.httpsCallable) {
         const sendFamilyPush = window.httpsCallable(window.functions, 'sendFamilyPush');
-                const myName = localStorage.getItem('kakao_nickname') || '짝꿍';
-        const roleWord = localStorage.getItem('user_role') === 'dad' ? '아빠' : '엄마';
+        const roleWord = window.myRoleWord();
         sendFamilyPush({
             syncCode: syncCode,
+            /* ⚠️ 내가 보낸 알림이 내 폰에 되돌아오면 안 된다.
+                  '내가 부탁해놓고 내가 부탁받는' 꼴이 된다.
+                  서버(sendFamilyPush)가 이 uid 는 빼고 보낸다. */
+            excludeUid: window.myUid(),
+            excludeToken: window.myPushToken(),
             /* \u26a0\ufe0f "[OOO]님이 OOO을 요청합니다" 는 업무 알림 말투다.
                   부부 사이에 쓰는 말이 아니다. 이름을 앞세우지 않는다. */
             title: "\uD83D\uDC8C " + roleWord + "가 손을 내밀었어요",
@@ -3562,15 +3591,20 @@ function startBatonRealtimeSync() {
     if(typeof window.onSnapshot !== 'function') return;
 
     batonUnsubscribe = window.addLiveListener(window.onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-            const serverData = docSnap.data().records || [];
-            const localData = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
-            
-            if (serverData.length > 0 || (serverData.length === 0 && localData.length === 0)) {
-                localStorage.setItem('tosil_baton_records', JSON.stringify(serverData));
-                renderBatonTasks(); 
-            }
-        }
+        if (!docSnap.exists()) return;
+        const serverData = docSnap.data().records || [];
+
+        /* ⚠️ 예전엔 '서버는 비었는데 내 폰엔 남아있으면' 갱신을 건너뛰었다.
+              그런데 그게 바로 짝꿍이 미션을 끝냈을 때의 모습이다.
+              끝난 부탁이 내 화면에서 영영 안 사라진 이유. 서버가 정답이다. */
+        localStorage.setItem('tosil_baton_records', JSON.stringify(serverData));
+
+        /* ⚠️ 예전엔 툴박스만 다시 그리고 홈은 안 그렸다.
+              그래서 알림을 눌러 들어와도 홈은 '지금은 쉬셔도 돼요' 였고,
+              새로고침을 해야 부탁이 보였다. 보이는 곳을 전부 다시 그린다. */
+        if (typeof renderBatonTasks === 'function') renderBatonTasks();
+        if (typeof window.renderHomeBatonList === 'function') window.renderHomeBatonList();
+        if (typeof window.refreshHomeFix === 'function') window.refreshHomeFix();
     }, (error) => {
         console.warn("바통터치 실시간 연동 에러 (오프라인 모드)", error);
     }));
@@ -8021,10 +8055,11 @@ async function completeBaton(id) {
     const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
     if (syncCode && window.functions && window.httpsCallable) {
         const sendFamilyPush = window.httpsCallable(window.functions, 'sendFamilyPush');
-        const myName = localStorage.getItem('kakao_nickname') || '짝꿍';
         sendFamilyPush({
             syncCode: syncCode,
-            title: "\u2728 " + (localStorage.getItem('user_role') === 'dad' ? '아빠' : '엄마') + "가 해냈어요",
+            excludeUid: window.myUid(),
+            excludeToken: window.myPushToken(),
+            title: "\u2728 " + window.myRoleWord() + "가 해냈어요",
             /* \u26a0\ufe0f 미션 제목을 이어붙이면 안 된다.
                   제목이 "새벽 수유 요청합니다" 같은 문장이라
                   "새벽 수유 요청합니다 \u00b7 끝났습니다" 가 되어 무슨 말인지 알 수 없다.
@@ -9025,32 +9060,74 @@ window.renderHomeBatonList = function() {
         return;
     }
 
+    /* ⚠️ 여기가 '부탁이 도착한 순간' 의 얼굴이다.
+          빈 카드는 곱게 만들어놓고 정작 부탁이 오면 옛 화면으로 돌아가 있었다.
+          부탁이 온 순간이 이 기능의 전부인데 거기가 제일 안 예뻤다.
+
+          말투도 바꾼다.
+            요청중 / 미션접수 / 거절 / 해결완료   ← 회사에서 쓰는 말
+            기다리고 있어요 / 제가 갈게요 ...      ← 부부 사이의 말
+
+          ⚠️ 색은 rgb() 로 적는다. theme.js 가 #hex 를 찾아 갈아끼우기 때문에
+             hex 로 쓰면 이 카드만 다른 색으로 덧칠된다. */
+
+    var PURPLE = 'rgb(127, 119, 221)';
+    var CREAM  = 'rgb(251, 248, 243)';
+
     let html = '';
     activeRecords.forEach(r => {
-        // 🚨 테마 간섭 회피용 RGB 코드 + 이모지 삭제
-        let statusHtml = r.status === 'requested' 
-            ? `<span style="background:rgb(255, 240, 241) !important; color:rgb(240, 68, 82) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(255, 227, 227) !important;">요청중</span>`
-            : `<span style="background:rgb(235, 244, 255) !important; color:rgb(49, 130, 246) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(177, 214, 255) !important;">처리중</span>`;
-            
-        let actionBtn = r.status === 'requested'
-            ? `<button onclick="acceptBaton('${r.id}'); renderHomeBatonList(); if(typeof renderBatonTasks==='function') renderBatonTasks();" style="padding:14px; background:rgb(127, 119, 221) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(127,119,221,0.3);">미션접수</button>`
-            : `<button onclick="completeBaton('${r.id}'); renderHomeBatonList(); if(typeof renderBatonTasks==='function') renderBatonTasks(); window.updateDadBriefing();" style="padding:14px; background:rgb(0, 179, 122) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(0,179,122,0.3);">해결완료</button>`;
 
-        let cleanReward = r.reward ? r.reward.replace(/[✨🎁]/g, '').trim() : '';
-        let rewardHtml = (cleanReward && cleanReward !== "없음") ? `<div style="margin-top:6px; color:rgb(183, 129, 3) !important; font-size:11.5px; font-weight:800; background:rgb(255, 249, 230) !important; padding:4px 8px; border-radius:6px; display:inline-block; border:1px solid rgb(255, 229, 143) !important;">보상: ${cleanReward}</div>` : '';
+        var waiting = (r.status === 'requested');
 
-        // 🚨 글자 잘림 방지 (word-break:keep-all, line-height 조절)
-        html += `
-        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:15px 16px; margin-bottom:10px;" data-theme-src="">
-            <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:9px; line-height:1.4; word-break:keep-all;">${r.text}</div>
-            ${rewardHtml}
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:16px;">
-                <div style="display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--text-sub); min-width:0;">
-                    ${statusHtml}<span style="margin-left:2px; font-weight:600;">${r.time}</span>
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;"><button onclick="cancelBaton('${r.id}')" style="padding:14px; background:var(--bg-sub) !important; color:rgb(139, 149, 161) !important; border:none; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; flex-shrink:0;">거절</button>${actionBtn}</div>
-            </div>
-        </div>`;
+        // 머리말 — 지금 이 부탁이 어떤 상태인지를 사람 말로
+        var head = waiting
+            ? '\uD83D\uDC8C <b style="color:' + PURPLE + ' !important;">' + r.time + '</b> 에 손을 내밀었어요'
+            : '\uD83E\uDD1D 제가 맡았어요';
+
+        // 약속한 것
+        var cleanReward = r.reward ? r.reward.replace(/[\u2728\uD83C\uDF81]/g, '').trim() : '';
+        var rewardHtml = (cleanReward && cleanReward !== '없음')
+            ? '<div style="margin-top:12px; padding:10px 12px; background:' + CREAM + ' !important; ' +
+                  'border-radius:12px; font-size:12.5px; font-weight:700; ' +
+                  'color:rgb(160, 119, 34) !important; word-break:keep-all;">' +
+                  '\uD83E\uDD1E 끝내면 약속한 것 · ' + cleanReward + '</div>'
+            : '';
+
+        // 버튼 — 눌렀을 때 무슨 일이 일어나는지를 그대로 적는다
+        var mainBtn = waiting
+            ? '<button onclick="acceptBaton(\'' + r.id + '\')" ' +
+                  'style="flex:1; padding:15px; background:' + PURPLE + ' !important; color:#FFF !important; ' +
+                  'border:none; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer; ' +
+                  'box-shadow:0 4px 14px rgba(127,119,221,0.32);">제가 갈게요</button>'
+            : '<button onclick="completeBaton(\'' + r.id + '\'); if(window.updateDadBriefing) window.updateDadBriefing();" ' +
+                  'style="flex:1; padding:15px; background:rgb(160, 119, 34) !important; color:#FFF !important; ' +
+                  'border:none; border-radius:14px; font-size:14px; font-weight:800; cursor:pointer; ' +
+                  'box-shadow:0 4px 14px rgba(160,119,34,0.28);">다 했어요</button>';
+
+        // 거절은 '거절' 이라고 적지 않는다. 못 하는 날도 있는 거다.
+        var subBtn = waiting
+            ? '<button onclick="cancelBaton(\'' + r.id + '\')" ' +
+                  'style="padding:15px 16px; background:transparent; color:rgb(163, 149, 138) !important; ' +
+                  'border:1px solid rgb(237, 230, 222) !important; border-radius:14px; ' +
+                  'font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0; ' +
+                  'word-break:keep-all;">지금은 어려워요</button>'
+            : '';
+
+        html +=
+        '<div style="background:var(--bg-card); border:1px solid rgb(237, 230, 222) !important; ' +
+             'border-radius:20px; padding:18px 18px 16px; margin-bottom:12px; ' +
+             'box-shadow:0 4px 16px rgba(120,100,80,0.06);" data-theme-src="">' +
+
+            '<div style="font-size:12px; font-weight:700; color:rgb(163, 149, 138) !important; ' +
+                 'margin-bottom:10px; letter-spacing:-0.2px;">' + head + '</div>' +
+
+            '<div style="font-size:17px; font-weight:800; color:var(--text-m); ' +
+                 'line-height:1.5; word-break:keep-all; letter-spacing:-0.4px;">' + r.text + '</div>' +
+
+            rewardHtml +
+
+            '<div style="display:flex; gap:8px; margin-top:16px;">' + subBtn + mainBtn + '</div>' +
+        '</div>';
     });
     container.innerHTML = html;
 };
@@ -12353,7 +12430,14 @@ window.toggleMilestone = function(id) {
     
     if (idx === -1) {
         // 🌸 도장 쾅! (새로 달성)
-        const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '. ');
+        /* ⚠️ toISOString() 은 세계표준시라 한국보다 9시간 느리다.
+              새벽 0~9시에 도감을 찍으면 어제 날짜로 적혔다.
+              밤중에 처음 뒤집기를 본 날이 하루 전으로 기록되는 셈이다.
+              내 시계 기준으로 적는다. */
+        const _t = new Date();
+        const todayStr = _t.getFullYear() + '. ' +
+                         String(_t.getMonth() + 1).padStart(2, '0') + '. ' +
+                         String(_t.getDate()).padStart(2, '0');
         achievedData.push({ id: id, date: todayStr }); 
     } else {
         // 🌫️ 도장 취소
@@ -12410,7 +12494,11 @@ window.__old_downloadMilestone_unused = function() {
         return window.showToast("⚠️ 도감 정보를 불러오는 중 오류가 발생했습니다. 체크를 풀고 다시 시도해주세요.");
     }
 
-    const latestDate = achievedDates[latestId] || new Date().toISOString().split('T')[0].replace(/-/g, '. ');
+    /* ⚠️ 여기도 같은 이유로 새벽엔 어제가 나왔다. */
+    const _n = new Date();
+    const latestDate = achievedDates[latestId] ||
+        (_n.getFullYear() + '. ' + String(_n.getMonth() + 1).padStart(2, '0') +
+         '. ' + String(_n.getDate()).padStart(2, '0'));
 
     const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
     const savedDate = localStorage.getItem('tosil_startDate');
