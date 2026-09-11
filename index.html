@@ -2961,8 +2961,17 @@ input[type="number"] { -moz-appearance: textfield; }
                     return false;
                 }
 
+                /* ⚠️ fcm_token 하나만 저장하면 기기 한 대만 알림을 받는다.
+                      컴퓨터로 접속하면 폰 토큰이 덮어써지고, 폰으로 열면 반대가 된다.
+                      마지막에 연 기기 하나만 살아남는 구조였다.
+
+                      그래서 배열(fcm_tokens)에 쌓는다. 폰·태블릿·컴퓨터가 다 받는다.
+                      fcm_token 도 같이 남겨둔다 — 서버가 옛 필드도 읽기 때문이다. */
+                /* arrayUnion 은 '이미 있으면 안 넣고, 없으면 추가' 를 서버가 해준다.
+                   읽고 쓰는 사이에 다른 기기가 끼어들어도 안 꼬인다. */
                 await window.setDoc(window.doc(window.db, "users", String(myKakaoId)), {
-                    fcm_token: token,
+                    fcm_token: token,                       // 옛 필드도 계속 채운다
+                    fcm_tokens: window.arrayUnion(token),   // 기기별로 쌓인다
                     firebase_uid: myUid,
                     token_updated_at: Date.now()
                 }, { merge: true });
@@ -2977,6 +2986,37 @@ input[type="number"] { -moz-appearance: textfield; }
 
         // ✅ [추가] 이미 알림을 켠 사람은 앱 켤 때마다 조용히 토큰 갱신
         //    (푸시 토큰은 시간이 지나면 바뀌기 때문에 꼭 필요합니다)
+        /* 🔔 알림이 오는지 직접 확인하는 버튼.
+           개발자 도구를 못 여는 분도 눌러보면 결과가 글로 뜬다.
+           설정 화면 어딘가에 이 한 줄만 붙이면 된다.
+             <div onclick="window.testPush()">알림 테스트</div> */
+        window.testPush = async () => {
+            const say = (m) => {
+                if (window.showToast) window.showToast(m); else alert(m);
+                console.log('[푸시 테스트]', m);
+            };
+            if (!('Notification' in window)) return say('이 브라우저는 알림을 지원하지 않아요');
+            if (Notification.permission !== 'granted') {
+                const ok = await window.requestPushPermission();
+                if (!ok) return say('알림 권한이 꺼져 있어요. 브라우저 설정에서 켜주세요');
+            }
+            const code = (window.getSyncCode ? window.getSyncCode() : null)
+                      || localStorage.getItem('family_sync_code');
+            if (!code) return say('짝꿍 연결이 안 돼 있어요. 가족 코드를 먼저 맞춰주세요');
+            if (!window.functions || !window.httpsCallable) return say('서버 연결 준비가 안 됐어요. 잠시 뒤 다시 눌러주세요');
+
+            try {
+                const fn = window.httpsCallable(window.functions, 'sendFamilyPush');
+                const r = await fn({ syncCode: code, title: '🔔 알림 테스트',
+                                     body: '이 알림이 보이면 정상이에요' });
+                const d = r && r.data ? r.data : {};
+                if (d.success) say('짝꿍 기기 ' + (d.sent || 0) + '대로 보냈어요. 그쪽에서 확인해주세요');
+                else say(d.error || '보내지 못했어요');
+            } catch (e) {
+                say('에러: ' + (e.code || '') + ' ' + (e.message || ''));
+            }
+        };
+
         window.syncPushToken = async () => {
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
             await window.requestPushPermission();

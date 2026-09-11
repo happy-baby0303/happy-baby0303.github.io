@@ -296,7 +296,7 @@
         if (block) block.style.display = on ? "" : "none";
 
         var btn = document.getElementById("info-all-btn");
-        if (btn) btn.textContent = on ? "글 접기 " : ("글 전체 보기 " + articles().length + "개 〉");
+        if (btn) btn.textContent = on ? "글 접기 〈" : ("글 전체 보기 " + articles().length + "개 〉");
 
         /* ⚠️ 접는 버튼이 목록 '위' 에만 있으면, 펼친 뒤 아래로 내려간 사람은
               그 버튼을 못 찾는다. 화면 밖으로 올라가 있기 때문이다.
@@ -312,7 +312,7 @@
                     "background:var(--bg-card); border:1px solid var(--border); " +
                     "border-radius:14px; font-size:13px; font-weight:800; " +
                     "color:var(--text-sub); cursor:pointer;";
-                foot.textContent = " 글 접기";
+                foot.textContent = "〈 글 접기";
                 if (block.parentNode) block.parentNode.insertBefore(foot, block.nextSibling);
             }
             foot.style.display = "";
