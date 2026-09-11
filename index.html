@@ -44,7 +44,11 @@
     <meta property="og:image" content="https://happy-baby0303.github.io/icon-512.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="naver-site-verification" content="ca4d9c6e9d67449206cd0c54313cc776aff61ce1" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF">
+    <!-- ⚠️ 안드로이드 상태바 색은 여기서 정해진다.
+         흰색으로 두면 흰 글씨 시계·배터리가 묻혀서 안 보인다.
+         (apple-mobile-web-app-status-bar-style 은 아이폰 전용이라 안드로이드엔 안 먹는다)
+         앱 배경과 같은 색으로 맞춘다. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F2">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111111">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -207,12 +211,17 @@ body.mode-senior #export-card /* 👈 🚨 요놈이 바로 '배냇함 내려받
 #tab-home > div { margin-bottom: 24px !important; }
 
 /* ⚠️ 빈 칸도 div 라서 24px 을 먹는다. 넷이면 96px 이 그냥 날아간다.
-      내용이 없는 칸은 자리를 안 차지하게 한다. */
-#tab-home > div:empty { margin-bottom: 0 !important; display: none !important; }
+      내용이 없는 칸은 자리를 안 차지하게 한다.
+      :empty 는 공백 문자만 있어도 안 걸리므로, 높이가 0인 것도 같이 잡는다. */
+#tab-home > div:empty,
+#tab-home > div:blank { margin-bottom: 0 !important; display: none !important; }
+
+/* 마지막 칸은 아래 여백이 필요 없다. 탭바 위에 빈 공간이 남는다. */
+#tab-home > div:last-child { margin-bottom: 0 !important; }
 
 /* 사진 칸 — 220px 은 세로 사진에 너무 납작하다.
    화면 너비에 맞춰 키우되, 가로가 넓은 기기에서 너무 커지지 않게 묶는다. */
-#baby-dashboard { height: clamp(250px, 66vw, 360px) !important; }
+#baby-dashboard { height: clamp(280px, 78vw, 420px) !important; }
 
 .box-main,
 #now-status-card,
