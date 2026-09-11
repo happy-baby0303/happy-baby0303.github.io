@@ -250,6 +250,98 @@
         );
     }
 
+    /* ==========================================================
+       하루를 한 장에 \u2014 사진 + 그날 편지 + 그날 숫자
+       ----------------------------------------------------------
+       \u26a0\ufe0f 예전엔 같은 날인데 사진 쪽과 편지 쪽이 따로 만들어졌다.
+          사진 쪽은 사진만, 편지 쪽은 글만 있어서
+          42쪽 중 절반이 거의 빈 종이였다. 인쇄하면 종이가 그만큼 낭비된다.
+
+       \u26a0\ufe0f 사진을 object-fit:cover 로 높이 790px 에 욱여넣고 있었다.
+          세로 사진은 위아래가 잘리고 가로 사진은 옆으로 늘어났다.
+          contain 으로 바꿔 원본 비율을 지킨다. 남는 자리는 여백으로 둔다.
+
+       \u26a0\ufe0f 글 길이에 따라 사진 높이를 바꾼다.
+          글이 짧은 날은 사진을 크게, 긴 날은 작게. 어느 쪽도 넘치지 않는다.
+       ---------------------------------------------------------- */
+
+    function statLine(l) {
+        var stat = [];
+        if (!l) return stat;
+        if (l.milk) stat.push("수유 " + l.milk + "ml");
+        if (l.breastMins) stat.push("모유 " + l.breastMins + "분");
+        if (l.sleepMins) {
+            var h = Math.floor(l.sleepMins / 60), m = l.sleepMins % 60;
+            stat.push("수면 " + (h ? h + "시간 " : "") + (m ? m + "분" : ""));
+        }
+        if (l.dawn) stat.push("새벽 " + l.dawn + "번");
+        return stat;
+    }
+
+    function dayPage(o, folio) {
+        // o = { key, img, caption, kicker, title, desc, letter }
+        var l = o.letter || null;
+        var text = l ? String(l.text || "") : "";
+        var chars = text.length + String(o.desc || "").length + String(o.caption || "").length;
+
+        /* 글 길이로 사진 칸을 정한다. 종이 높이는 shell 이 잡아준다. */
+        var imgH = 820;
+        if (chars > 320) imgH = 480;
+        else if (chars > 180) imgH = 620;
+        else if (chars > 80) imgH = 720;
+        if (!o.img) imgH = 0;
+
+        var stat = statLine(l);
+
+        return shell(
+            '<div style="height:100%; display:flex; flex-direction:column;">' +
+
+                '<div style="font-size:16px; font-weight:800; color:' + GOLD + '; ' +
+                    'letter-spacing:5px; margin-bottom:12px;">' + esc(o.kicker || "그날") + '</div>' +
+                '<div style="font-size:21px; font-weight:600; color:' + INK_L + '; ' +
+                    'margin-bottom:34px;">' + esc(pretty(o.key)) + '  \u00b7  ' + esc(dday(o.key)) + '</div>' +
+
+                (o.img
+                    ? '<div style="width:100%; height:' + imgH + 'px; border-radius:8px; ' +
+                          'overflow:hidden; background:#F7F4F1; display:flex; ' +
+                          'align-items:center; justify-content:center;">' +
+                          '<img src="' + o.img + '" style="max-width:100%; max-height:100%; ' +
+                              'width:auto; height:auto; object-fit:contain; display:block;">' +
+                      '</div>'
+                    : '') +
+
+                '<div style="margin-top:' + (o.img ? 40 : 0) + 'px;">' +
+                    (o.title ? '<div style="font-family:\'Gowun Batang\',serif; font-size:46px; ' +
+                        'font-weight:700; letter-spacing:-2px; line-height:1.35; ' +
+                        'word-break:keep-all; margin-bottom:18px;">' + esc(o.title) + '</div>' : '') +
+
+                    (o.desc ? '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; ' +
+                        'line-height:1.75; word-break:keep-all; margin-bottom:18px;">' +
+                        esc(o.desc) + '</div>' : '') +
+
+                    (o.caption ? '<div style="font-family:\'Nanum Pen Script\',cursive; ' +
+                        'font-size:36px; color:' + INK_S + '; line-height:1.5; ' +
+                        'word-break:keep-all; margin-bottom:18px;">' + esc(o.caption) + '</div>' : '') +
+
+                    (text ? '<div style="font-family:\'Nanum Pen Script\',cursive; ' +
+                        'font-size:' + (chars > 320 ? 38 : 44) + 'px; color:' + INK + '; ' +
+                        'line-height:1.7; white-space:pre-wrap; word-break:keep-all;">' +
+                        esc(text) + '</div>' : '') +
+
+                    (l && l.ms ? '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:40px; ' +
+                        'color:' + GOLD + '; margin-top:26px; line-height:1.6;">' + esc(l.ms) + '</div>' : '') +
+                '</div>' +
+
+                '<div style="margin-top:auto; padding-top:30px; border-top:1px solid ' + LINE + '; ' +
+                    'display:flex; justify-content:space-between; align-items:center; ' +
+                    'font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:0.5px;">' +
+                    '<span>' + esc(stat.join("   \u00b7   ")) + '</span>' +
+                    '<span>' + esc(dday(o.key)) + '</span>' +
+                '</div>' +
+            '</div>', folio
+        );
+    }
+
     function letterPage(l, key, folio) {
         var stat = [];
         if (l.milk) stat.push("수유 " + l.milk + "ml");
@@ -323,7 +415,19 @@
         );
     }
 
-    function endPage(n) {
+    function endPage(n, sum) {
+        /* 총계 한 줄이 있으면 '책' 이 되고, 없으면 '출력물' 로 끝난다. */
+        var tail = "";
+        if (sum) {
+            var bits = [];
+            if (sum.photos) bits.push("사진 " + sum.photos + "장");
+            if (sum.letters) bits.push("편지 " + sum.letters + "통");
+            if (sum.ms) bits.push("처음 해낸 일 " + sum.ms + "가지");
+            if (bits.length) {
+                tail = '<div style="margin-top:46px; font-size:21px; font-weight:600; color:' + INK_L + '; ' +
+                       'letter-spacing:0.5px; line-height:1.9;">' + esc(bits.join("   \u00b7   ")) + '</div>';
+            }
+        }
         return shell(
             '<div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
                 '<div style="font-family:\'Gowun Batang\',serif; font-size:50px; font-weight:700; letter-spacing:-2px; line-height:1.45;">' +
@@ -331,6 +435,7 @@
                 '<div style="width:1px; height:110px; background:' + LINE + '; margin:52px auto;"></div>' +
                 '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; line-height:1.9;">' +
                     '다음 장은 아직 비어 있어요.<br>내일 또 한 줄이 쌓입니다.</div>' +
+                tail +
                 '<div style="margin-top:auto; font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:3px;">배냇함</div>' +
             '</div>', ""
         );
@@ -430,28 +535,43 @@
         pages.push({ type: "cover", src: covSrc, span: span });
         pages.push({ type: "opening" });
 
+        /* \u26a0\ufe0f 예전엔 사진 쪽, 편지 쪽을 따로 만들어서 절반이 빈 종이였다.
+              하루를 한 장에 담는다. 사진이 여러 장인 날만 장수가 늘어나고,
+              편지는 그 날의 첫 장에 같이 실린다. */
         data.forEach(function (d) {
             d.anni.forEach(function (a) { pages.push({ type: "anni", a: a, key: d.key }); });
+
+            var letter = d.letter || null;   // 그 날 첫 장에만 싣는다
 
             d.ms.forEach(function (m) {
                 var found = (typeof window.getMilestonePhoto === "function") ? window.getMilestonePhoto(m.id) : null;
                 pages.push({
-                    type: "scene", key: d.key, src: found ? found.photo : null,
+                    type: "day", key: d.key, src: found ? found.photo : null,
                     kicker: "처음 해낸 일", title: m.title, desc: m.desc,
-                    note: found ? (found.photo.caption || "") : ""
+                    caption: found ? (found.photo.caption || "") : "",
+                    letter: letter
                 });
+                letter = null;
             });
 
             d.photos.filter(function (p) { return !p.msId; }).forEach(function (p) {
                 pages.push({
-                    type: "scene", key: d.key, src: p,
-                    kicker: "그날의 사진", title: "", desc: "", note: p.caption || ""
+                    type: "day", key: d.key, src: p,
+                    kicker: "그날의 사진", title: "", desc: "",
+                    caption: p.caption || "",
+                    letter: letter
                 });
+                letter = null;
             });
 
             (d.diary || []).forEach(function (e) { pages.push({ type: "diary", e: e }); });
 
-            if (d.letter) pages.push({ type: "letter", l: d.letter, key: d.key });
+            /* 사진도 도감도 없는 날은 편지만 한 장으로 */
+            if (letter) pages.push({
+                type: "day", key: d.key, src: null,
+                kicker: "그날의 편지", title: "", desc: "", caption: "",
+                letter: letter
+            });
         });
 
         // 목소리 목록
@@ -466,7 +586,15 @@
             if (vs.length) pages.push({ type: "voice", list: vs });
         }
 
-        pages.push({ type: "end", n: dday(last).replace("D+", "") || "0" });
+        /* 이 책에 실제로 담긴 것들을 센다 */
+        var sum = { photos: 0, letters: 0, ms: 0 };
+        pages.forEach(function (p) {
+            if (p.type !== "day") return;
+            if (p.src) sum.photos++;
+            if (p.letter) sum.letters++;
+            if (p.kicker === "처음 해낸 일") sum.ms++;
+        });
+        pages.push({ type: "end", n: dday(last).replace("D+", "") || "0", sum: sum });
 
         if (pages.length > MAX_PAGES) {
             pages = pages.slice(0, MAX_PAGES - 1).concat(pages[pages.length - 1]);
@@ -495,13 +623,17 @@
 
             if (p.type === "cover")        html = coverPage(p.img, p.span);
             else if (p.type === "opening") html = openingPage();
-            else if (p.type === "end")     html = endPage(p.n);
+            else if (p.type === "end")     html = endPage(p.n, p.sum);
             else {
                 folioNo++;
                 if (p.type === "anni")        html = anniPage(p.a, p.key, String(folioNo));
                 else if (p.type === "letter") html = letterPage(p.l, p.key, String(folioNo));
                 else if (p.type === "voice")  html = voicePage(p.list, String(folioNo));
                 else if (p.type === "diary")  html = diaryPage(p.e, String(folioNo));
+                else if (p.type === "day") html = dayPage({
+                    img: p.img, kicker: p.kicker, title: p.title,
+                    desc: p.desc, caption: p.caption, key: p.key, letter: p.letter
+                }, String(folioNo));
                 else html = scenePage({
                     img: p.img, kicker: p.kicker, title: p.title,
                     desc: p.desc, note: p.note, key: p.key

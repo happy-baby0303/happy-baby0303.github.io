@@ -3402,8 +3402,10 @@ async function createBatonTask(text, reward) {
         const roleWord = localStorage.getItem('user_role') === 'dad' ? '아빠' : '엄마';
         sendFamilyPush({
             syncCode: syncCode,
-            title: "💌 " + roleWord + "의 바통터치 SOS",
-            body: `[${myName}] ${text}`
+            /* \u26a0\ufe0f "[OOO]님이 OOO을 요청합니다" 는 업무 알림 말투다.
+                  부부 사이에 쓰는 말이 아니다. 이름을 앞세우지 않는다. */
+            title: "\uD83D\uDC8C " + roleWord + "가 손을 내밀었어요",
+            body: text
         }).catch(e => console.error("푸시 발송 에러", e));
     }
 }
@@ -8022,8 +8024,14 @@ async function completeBaton(id) {
         const myName = localStorage.getItem('kakao_nickname') || '짝꿍';
         sendFamilyPush({
             syncCode: syncCode,
-            title: "✅ 바통터치 미션 클리어!",
-            body: `${myName}님이 미션을 완료했습니다. 든든하죠?`
+            title: "\u2728 " + (localStorage.getItem('user_role') === 'dad' ? '아빠' : '엄마') + "가 해냈어요",
+            /* \u26a0\ufe0f 미션 제목을 이어붙이면 안 된다.
+                  제목이 "새벽 수유 요청합니다" 같은 문장이라
+                  "새벽 수유 요청합니다 \u00b7 끝났습니다" 가 되어 무슨 말인지 알 수 없다.
+                  완료 알림은 완료만 말한다. */
+            body: reward && reward !== "없음"
+                ? ("부탁하신 일, 끝났어요. 약속한 " + reward + " 잊지 마세요")
+                : "부탁하신 일, 끝났어요"
         }).catch(e => console.error("푸시 발송 에러", e));
     }
 }
