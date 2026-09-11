@@ -72,6 +72,7 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
     const all = Array.isArray(raw) ? raw : Object.keys(raw);
     const targetUids = all.filter((uid) => uid !== senderUid);
     if (targetUids.length === 0) {
+      logger.warn("가족방에 상대가 없음", { syncCode, senderUid, members: all });
       return { success: false, error: "알림을 보낼 가족이 없습니다." };
     }
 
@@ -82,15 +83,22 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
         .collection("users")
         .where("firebase_uid", "in", chunk)
         .get();
-           snap.forEach((doc) => {
+      snap.forEach((doc) => {
         const d = doc.data();
         if (d.push_baton === false) return;   // 이 사람은 바통터치 알림을 껐다
-        const t = d.fcm_token;
-        if (t) tokenMap.set(t, doc.id);
+
+        /* ⚠️ 예전엔 fcm_token 하나만 읽어서, 기기 한 대만 알림을 받았다.
+              폰·태블릿·컴퓨터를 같이 쓰면 마지막에 연 것만 받는 구조였다.
+              이제 fcm_tokens 배열을 읽는다. 옛 필드도 같이 본다 —
+              앱을 아직 안 켠 사람은 배열이 없기 때문이다. */
+        const list = Array.isArray(d.fcm_tokens) ? d.fcm_tokens.slice() : [];
+        if (d.fcm_token && !list.includes(d.fcm_token)) list.push(d.fcm_token);
+        list.forEach((t) => { if (t) tokenMap.set(t, doc.id); });
       });
     }
 
     const tokens = [...tokenMap.keys()];
+    logger.info("푸시 대상", { syncCode, targetUids, tokenCount: tokens.length });
     if (tokens.length === 0) {
       logger.warn("푸시 토큰 없음", { syncCode, targetUids });
       return {
@@ -128,14 +136,25 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
       }
     });
 
+    /* ⚠️ 죽은 토큰만 정확히 뺀다.
+          예전엔 fcm_token 필드를 통째로 지워서,
+          기기 하나가 죽으면 그 사람 알림이 전부 끊겼다. */
     await Promise.all(
-      deadTokens.map((t) =>
-        db
+      deadTokens.map((t) => {
+        const update = { fcm_tokens: admin.firestore.FieldValue.arrayRemove(t) };
+        return db
           .collection("users")
           .doc(tokenMap.get(t))
-          .update({ fcm_token: admin.firestore.FieldValue.delete() })
-          .catch(() => {})
-      )
+          .get()
+          .then((snap) => {
+            // 옛 단일 필드가 마침 그 죽은 토큰이면 그것도 지운다
+            if (snap.exists && snap.data().fcm_token === t) {
+              update.fcm_token = admin.firestore.FieldValue.delete();
+            }
+            return db.collection("users").doc(tokenMap.get(t)).update(update);
+          })
+          .catch(() => {});
+      })
     );
 
     logger.info("푸시 발송 결과", {
