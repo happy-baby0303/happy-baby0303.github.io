@@ -139,7 +139,7 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
           title,
           body,
           icon: "/icon-192x192.png",
-          badge: "/icon-192x192.png",
+          // badge: "/icon-badge.png",   // ⚠️ 컬러 PNG 는 안드로이드 상태바에서 흰 네모가 된다
         },
       },
       android: { priority: "high" },
@@ -438,7 +438,7 @@ exports.bedtimeReminder = onSchedule(
               title,
               body,
               icon: "/icon-192x192.png",
-              badge: "/icon-192x192.png",
+              // badge: "/icon-badge.png",   // ⚠️ 컬러 PNG 는 안드로이드 상태바에서 흰 네모가 된다
               tag: "yukamate-bedtime",
             },
           },
