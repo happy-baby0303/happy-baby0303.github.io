@@ -3,20 +3,18 @@
 
    왜 이 파일이 필요한가.
 
-   애플은 웹앱(PWA)에 알림을 줄 때 조건을 하나 겁니다.
+   애플은 웹앱(PWA)에 알림을 줄 때 조건을 겁니다.
    "사파리 탭에서 열어놓은 것"에는 절대 알림을 주지 않습니다.
    반드시 공유 → 홈 화면에 추가 → 그 아이콘으로 연 상태여야
    Push API 자체가 브라우저에 존재합니다.
-
-   그래서 아내분 아이폰에서는
-     getToken()  →  애초에 실행조차 안 됨  →  토큰 등록 0건
-                 →  보내는 쪽은 멀쩡한데 받을 주소가 없음
-   이 됩니다. 우리 코드 잘못이 아니라 애플의 설계입니다.
 
    조건이 하나 더 있습니다.
    알림 권한 창은 반드시 "사용자가 버튼을 누른 직후"에만 뜹니다.
    화면 뜨자마자 requestPermission() 을 부르면 iOS는 조용히 무시합니다.
    그래서 이 파일은 안내문이 아니라 '버튼'을 띄웁니다.
+
+   ⚠️ 홈 화면에 추가한 것과, 그 앱 안에서 알림을 켠 것은 다른 일입니다.
+      예전부터 홈 화면에 두고 쓰던 사람도 알림은 따로 켜야 합니다.
 
    index.html 에서 script.js 뒤에 한 줄 넣으세요.
      <script src="iospush.js?v=1"></script>
@@ -43,7 +41,7 @@
 
        앱으로 감싸면 화면은 그대로인데 standalone 판정이 false 로 나온다.
        그대로 두면 앱 안에서 "홈 화면에 추가하세요" 가 뜬다.
-       이미 앱인데 앱을 설치하라는 소리라 그대로 리뷰 반려감이다.
+       이미 앱인데 앱을 설치하라는 소리라 리뷰 반려감이다.
 
        껍데기 만들 때 둘 중 하나만 해두세요.
          ① 웹뷰 UA 뒤에 BaenatApp 을 붙이거나
@@ -62,6 +60,10 @@
 
     /* ----------------------------------------------------------
        2. 홈 화면 아이콘으로 연 상태인가
+
+       ⚠️ '홈 화면에 추가해둔 적이 있다' 와 '지금 그 아이콘으로 열었다' 는 다르다.
+          아이콘을 만들어두고 사파리 탭으로 들어오면 여전히 false 다.
+          알림은 아이콘으로 연 창에만 온다.
        ---------------------------------------------------------- */
 
     var isStandalone =
@@ -82,7 +84,7 @@
     var tooOld = ver !== null && ver < 16.4;
 
     /* ----------------------------------------------------------
-       4. 지금 어떤 상태인가 — 넷 중 하나
+       4. 지금 어떤 상태인가 — 다섯 중 하나
        ---------------------------------------------------------- */
 
     var perm = (typeof Notification !== "undefined")
@@ -90,23 +92,41 @@
         : "unsupported";
 
     var state;
-    if (tooOld)               state = "old";        // iOS 업데이트 필요
-    else if (!isStandalone)   state = "install";    // 홈 화면에 추가해야 함
-    else if (perm === "granted") state = "done";    // 끝. 아무것도 안 띄운다
-    else if (perm === "denied")  state = "blocked"; // 설정에서 되살려야 함
-    else                      state = "ask";        // 버튼만 누르면 됨
-
-    if (state === "done") return;
+    if (tooOld)                  state = "old";      // iOS 업데이트 필요
+    else if (!isStandalone)      state = "install";  // 아이콘으로 들어와야 함
+    else if (perm === "granted") state = "done";     // 끝. 아무것도 안 띄운다
+    else if (perm === "denied")  state = "blocked";  // 설정에서 되살려야 함
+    else                         state = "ask";      // 버튼만 누르면 됨
 
     /* ----------------------------------------------------------
-       5. 너무 자주 띄우지 않는다 — 닫으면 3일
+       5. 부탁할 이유가 있는 사람에게만 묻는다
+
+          짝꿍이 없으면 알림이 올 일이 없다. 그런 사람에게
+          "홈 화면에 추가하세요" 를 띄우면 그냥 귀찮은 팝업이다.
+       ---------------------------------------------------------- */
+
+    function hasPartner() {
+        try {
+            if (typeof window.getSyncCode === "function" && window.getSyncCode()) {
+                return true;
+            }
+            return !!localStorage.getItem("family_sync_code");
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /* ----------------------------------------------------------
+       6. 너무 자주 띄우지 않는다 — 닫으면 3일
           단, '버튼만 누르면 되는' 상태는 매번 띄운다. 한 번이면 끝나니까.
        ---------------------------------------------------------- */
 
     var KEY = "baenat_iospush_hide";
-    if (state !== "ask") {
+
+    function snoozed() {
+        if (state === "ask") return false;
         var until = Number(localStorage.getItem(KEY) || 0);
-        if (until && Date.now() < until) return;
+        return !!(until && Date.now() < until);
     }
 
     function snooze() {
@@ -114,12 +134,12 @@
     }
 
     /* ----------------------------------------------------------
-       6. 문구
+       7. 문구
        ---------------------------------------------------------- */
 
     var COPY = {
         old: {
-            icon: "🍎",
+            icon: "\uD83C\uDF4E",
             title: "아이폰을 업데이트해 주세요",
             body:
                 "iOS 16.4부터 아이폰도 알림을 받을 수 있어요.<br>" +
@@ -128,20 +148,20 @@
             cta: null
         },
         install: {
-            icon: "💌",
-            title: "아이폰은 한 번만 더 해주셔야 해요",
+            icon: "\uD83D\uDC8C",
+            title: "홈 화면 아이콘으로 열어주세요",
             body:
                 "아이폰은 홈 화면에 담아둔 앱에만 알림을 보내줍니다.<br>" +
-                "30초면 끝나고, 다음부턴 바통터치가 바로 울려요.",
+                "사파리로 열면 아무리 아이콘이 있어도 안 울려요.",
             steps: [
-                "아래 <b>공유 버튼</b>을 누르고",
-                "<b>홈 화면에 추가</b>를 고른 뒤",
-                "<b>홈 화면의 배냇함 아이콘</b>으로 다시 들어와 주세요"
+                "이미 홈 화면에 있다면 <b>그 아이콘</b>을 눌러 들어와 주세요",
+                "없다면 아래 <b>공유 버튼</b> → <b>홈 화면에 추가</b>",
+                "그다음 뜨는 <b>알림 켜기</b>를 눌러주세요"
             ],
             cta: null
         },
         ask: {
-            icon: "🔔",
+            icon: "\uD83D\uDD14",
             title: "알림을 켤까요",
             body:
                 "짝꿍이 바통을 넘기면 바로 알려드릴게요.<br>" +
@@ -150,7 +170,7 @@
             cta: "알림 켜기"
         },
         blocked: {
-            icon: "🔕",
+            icon: "\uD83D\uDD15",
             title: "알림이 꺼져 있어요",
             body:
                 "아이폰 <b>설정 → 알림 → 배냇함</b>에서<br>" +
@@ -160,13 +180,14 @@
         }
     };
 
-    var c = COPY[state];
-
     /* ----------------------------------------------------------
-       7. 화면 — 아래에서 올라오는 쪽지
+       8. 화면 — 아래에서 올라오는 쪽지
        ---------------------------------------------------------- */
 
     function build() {
+        var c = COPY[state];
+        if (!c) return;
+
         var wrap = document.createElement("div");
         wrap.id = "iospush-sheet";
         wrap.setAttribute("role", "dialog");
@@ -199,7 +220,6 @@
 
         document.body.appendChild(wrap);
 
-        // 닫기
         function close() {
             snooze();
             wrap.classList.remove("on");
@@ -242,7 +262,7 @@
     }
 
     /* ----------------------------------------------------------
-       8. 모양 — 앱의 크림·연보라를 그대로 쓴다
+       9. 모양 — 앱의 크림·연보라를 그대로 쓴다
           색이 안 맞으면 아래 두 값만 바꾸세요.
        ---------------------------------------------------------- */
 
@@ -293,29 +313,13 @@
     document.head.appendChild(css);
 
     /* ----------------------------------------------------------
-       9. 화면이 다 그려진 뒤에 띄운다 — 로딩 중에 덮으면 놀란다
-
-          그리고 아무에게나 부탁하지 않는다.
-          짝꿍이 연결 안 된 사람은 알림이 올 일 자체가 없다.
-          그런 사람에게 "홈 화면에 추가하세요" 는 그냥 귀찮은 팝업이다.
-
-            짝꿍 있음   바통터치·문답이 오가는 사이 → 알림 없으면 기능이 반쪽
-            짝꿍 없음   부탁할 이유가 없다 → 조용히 있는다
+       10. 화면이 다 그려진 뒤에 띄운다 — 로딩 중에 덮으면 놀란다
        ---------------------------------------------------------- */
-
-    function hasPartner() {
-        try {
-            if (typeof window.getSyncCode === "function" && window.getSyncCode()) {
-                return true;
-            }
-            return !!localStorage.getItem("family_sync_code");
-        } catch (e) {
-            return false;
-        }
-    }
 
     function start() {
         setTimeout(function () {
+            if (state === "done") return;
+            if (snoozed()) return;
             if (!hasPartner()) return;
             build();
         }, 1200);
@@ -323,5 +327,27 @@
 
     if (document.readyState === "complete") start();
     else window.addEventListener("load", start);
+
+    /* ----------------------------------------------------------
+       점검용 — 콘솔에 iosPushDebug() 를 치면 지금 상태를 알려준다
+       ---------------------------------------------------------- */
+
+    window.iosPushDebug = function () {
+        var say = {
+            old:     "iOS 를 16.4 이상으로 올려야 합니다",
+            install: "사파리로 열고 있습니다. 홈 화면 아이콘으로 들어와야 합니다",
+            ask:     "홈 화면은 맞습니다. 알림 켜기 버튼만 누르면 끝납니다",
+            blocked: "알림을 거부해뒀습니다. 설정 → 알림 → 배냇함 에서 켜야 합니다",
+            done:    "알림은 다 켜져 있습니다. 그래도 안 오면 토큰 저장 쪽 문제입니다"
+        };
+        console.log("\uD83C\uDF4E 아이폰 알림 점검");
+        console.log("  iOS 버전          :", ver === null ? "모름" : ver);
+        console.log("  홈 화면으로 열었나  :", isStandalone ? "예" : "아니오 (사파리)");
+        console.log("  알림 권한          :", perm);
+        console.log("  짝꿍 연결          :", hasPartner() ? "됨" : "안 됨");
+        console.log("  저장된 토큰        :", localStorage.getItem("fcm_token") ? "있음" : "없음");
+        console.log("  → 판단             :", say[state]);
+        return state;
+    };
 
 })();

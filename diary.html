@@ -704,6 +704,8 @@
         window.saveSetup = function(roleVal) {
             if (!roleVal) return;
             localStorage.setItem('tosil_userRole', roleVal);
+            /* 본체에도 같이 적는다. 한 번 고르면 앱 전체가 같은 사람으로 본다. */
+            localStorage.setItem('user_role', roleVal === 'husband' ? 'dad' : 'mom');
             document.getElementById('setup-modal').style.display = 'none';
             location.reload(); 
         };
@@ -829,6 +831,20 @@
             setTimeout(() => { modal.style.display = 'none'; }, 300);
         };
 
+        /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
+              앱 본체는 user_role(dad/mom), 이 화면은 tosil_userRole(husband/wife).
+              서로 모르는 값이라 본체에서 아빠를 고르고 여기서 또 물어봤고,
+              다르게 고르면 아빠 답이 엄마 칸에 저장됐다.
+              본체 값이 있으면 그걸 따른다. 본체가 늘 우선이다. */
+        (function syncRole() {
+            var main = localStorage.getItem('user_role');
+            if (main !== 'dad' && main !== 'mom') return;
+            var want = (main === 'dad') ? 'husband' : 'wife';
+            if (localStorage.getItem('tosil_userRole') !== want) {
+                localStorage.setItem('tosil_userRole', want);
+            }
+        })();
+
         window.addEventListener('DOMContentLoaded', () => {
             const savedRole = localStorage.getItem('tosil_userRole'); 
             if (!savedRole) {
@@ -843,5 +859,7 @@
 
     <!-- 🔒 육아문답 상호 잠금 — 내가 써야 짝꿍 답이 열린다 -->
     <script src="diarylock.js"></script>
+    <!--        100장마다 책 한 권이 꽂히는 책장 -->
+    <script src="bookshelf.js?v=1"></script>
 </body>
 </html>
