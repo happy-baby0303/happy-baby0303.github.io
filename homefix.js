@@ -349,7 +349,9 @@
     function plusHTML() {
         if (isPlus()) return "";        // 이미 쓰시는 분께는 안 판다
 
-        return '<div id="home-plus" style="background:#191F28; border-radius:20px; ' +
+        /* \u26a0\ufe0f #191F28 은 차가운 남색이라 이 앱의 따뜻한 배경과 안 어울린다.
+              premium.js 가 쓰는 rgba(35,29,24) 와 같은 갈색 계열로 맞춘다. */
+        return '<div id="home-plus" style="background:#2A231D; border-radius:20px; ' +
             'padding:20px 18px; margin-bottom:20px;">' +
             '<div style="display:flex; align-items:center; gap:7px; margin-bottom:5px;">' +
                 '<span style="padding:3px 8px; border-radius:6px; background:#FFF9E6; ' +
@@ -374,7 +376,11 @@
                 '</div>';
             }).join("") +
 
-            '<div onclick="window.openPremiumModal && window.openPremiumModal()" ' +
+            /* \u26a0\ufe0f 이름을 또 짐작해서 썼다가 또 안 눌렸다.
+                  openUpsell 도 startPremium 도 어느 파일에도 없다.
+                  실제로 있는 건 script.js 의 showPaywall 하나뿐이다.
+                  이제 창구(window.openPlus)를 거친다. 이름을 여기서 짐작하지 않는다. */
+            '<div onclick="window.openPlus && window.openPlus(\'curator\')" ' +
                 'style="margin-top:15px; text-align:center; padding:15px; background:#FFFFFF; ' +
                 'color:#191F28; border-radius:13px; font-size:14px; font-weight:900; cursor:pointer;">' +
                 'PLUS 둘러보기</div>' +

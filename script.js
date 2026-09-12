@@ -213,6 +213,36 @@ window.myPushToken = function () {
     return localStorage.getItem('fcm_token') || null;
 };
 
+/* ⚠️ PLUS 창을 여는 함수 이름이 파일마다 달랐다.
+      homefix 는 openUpsell / startPremium 을 부르고
+      photobook 도 openUpsell 을 부르는데,
+      실제로 만들어진 건 showPaywall 하나뿐이다.
+
+      inline onclick 은 없는 함수를 불러도 에러를 안 낸다.
+      조용히 undefined 가 되고 끝난다.
+      그래서 '눌러도 아무 일 없는' 버튼이 됐다. 콘솔에도 아무것도 안 남는다.
+
+      창구를 하나로 만든다. 있는 것부터 차례로 시도하고,
+      전부 없으면 조용히 넘어가지 않고 사람에게 말한다. */
+window.openPlus = function (key) {
+    var tries = [
+        function () { return window.openUpsell && window.openUpsell(key || 'curator'); },
+        function () { return window.showPaywall && window.showPaywall(); },
+        function () { return window.startPremium && window.startPremium(); },
+        function () { return window.openPremiumModal && window.openPremiumModal(); }
+    ];
+    for (var i = 0; i < tries.length; i++) {
+        try {
+            var r = tries[i]();
+            if (r !== undefined && r !== false) return r;
+        } catch (e) {
+            console.warn('[PLUS] 여는 중 에러', e);
+        }
+    }
+    console.warn('[PLUS] 열 수 있는 함수를 못 찾았습니다.');
+    if (typeof window.showToast === 'function') window.showToast('잠시 뒤 다시 눌러주세요');
+};
+
 // ==========================================
 // 🚀 [초고속 패치] 렉 없는 즉각 반응형 화면 내비게이션 엔진
 // ==========================================

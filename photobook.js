@@ -819,7 +819,7 @@
 
         var pro = (typeof window.isPremium !== "function") || window.isPremium();
         if (!pro) {
-            if (typeof window.openUpsell === "function") return window.openUpsell("book");
+            if (typeof window.openPlus === "function") return window.openPlus("book");
             return toast("프리미엄에서 전체를 뽑을 수 있어요");
         }
         window.makeMemoryBook();
@@ -871,11 +871,25 @@
 
         var pro = (typeof window.isPremium !== "function") || window.isPremium();
 
+        /* ⚠️ 여기가 돈이 새던 자리다.
+              조건이 "구독 안 함 그리고 창을 여는 함수가 있음" 이었다.
+              그런데 그 함수(openUpsell)가 어느 파일에도 없었다.
+              그래서 조건이 통째로 거짓이 되고, 그냥 아래로 떨어져서
+              구독 안 한 사람도 포토북이 그대로 만들어졌다.
+
+              잠그는 일과 창을 여는 일을 갈라놓는다.
+              창을 못 열어도 통과는 절대 안 시킨다. */
         if (wantBook) {
-            if (!pro && typeof window.openUpsell === "function") return window.openUpsell("book");
+            if (!pro) {
+                if (typeof window.openPlus === "function") window.openPlus("book");
+                return;
+            }
             window.makeMemoryBook();          // 내부에서 다시 잡아둔 이름
         } else {
-            if (!pro && typeof window.openUpsell === "function") return window.openUpsell("voice");
+            if (!pro) {
+                if (typeof window.openPlus === "function") window.openPlus("voice");
+                return;
+            }
             if (typeof window.openVoiceSheet === "function") window.openVoiceSheet();
         }
     }, true);
