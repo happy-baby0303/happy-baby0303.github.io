@@ -115,6 +115,39 @@ body::before {
     background: #FAF7F2 !important;
     backdrop-filter: none !important;
 }
+
+/* ========================================== */
+/* ⚠️ 바텀시트에 키 제한이 없었다.
+      내용이 화면보다 길어지면 그대로 잘려서
+      맨 아래 저장 버튼이 화면 밖으로 나갔다.
+      기록을 남기러 연 시트에서 저장을 못 누르는 상태였다.
+
+      화면 높이를 넘지 않게 하고, 넘치면 시트 안에서 스크롤되게 한다.
+      dvh 는 주소창이 접혔다 펴져도 '진짜 보이는 높이' 를 쓴다.
+      안 되는 기기를 위해 vh 를 먼저 적어둔다.
+
+      overscroll-behavior:contain — 시트 안에서 끝까지 내렸을 때
+      뒤에 있는 홈 화면이 따라 움직이지 않게 막는다. */
+/* ========================================== */
+#tracker-sheet-content {
+    max-height: 88vh;
+    max-height: 88dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#tracker-sheet-content::-webkit-scrollbar { width: 0; }
+
+/* 커뮤니티 알림·활동 창도 안쪽에 스크롤이 없어 길어지면 잘린다.
+   맘수다를 열기 전에 미리 막아둔다. */
+#commNotiOverlay > *,
+#commActivityOverlay > * {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
 /* ========================================== */
 /* 👵 조부모 / 시터 모드 전용 프라이버시 철통 방어 패치 */
 /* ========================================== */
@@ -3434,44 +3467,15 @@ input[type="number"] { -moz-appearance: textfield; }
 <!-- 🍎 아이폰은 홈 화면에 담아둔 앱에만 알림을 준다.
      그 안내를 띄운다. 안드로이드·PC 에서는 아무 일도 안 한다. -->
 <script src="./iospush.js?v=1"></script>
+<!-- 💩 기저귀 시트 — index.html 에 화면은 있는데 부르는 함수가 하나도 없었다 -->
+<script src="./diapersheet.js?v=1"></script>
 
-<!-- 💩 기저귀 바텀시트 모달 -->
-<div id="diaper-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
-    <div class="box-main" style="border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <!-- 🌟 제목 부드럽게 변경! -->
-            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-m);">어떤 기저귀를 갈았나요?</h3>
-            <button onclick="closeDiaperSheet()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-s); padding: 0;">✕</button>
-        </div>
-        
-        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-            <button onclick="saveQuickPee()" class="box-tint-blue" style="flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; color:var(--primary);">💧 소변</button>
-            <!-- 🌟 둘 다 openPoopAI 함수를 쓰도록 변경! -->
-            <button onclick="window.openPoopAI('대변')" class="box-tint-red" style="flex: 1; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 15px; cursor: pointer; color:var(--danger);">💩 대변</button>
-            <button onclick="window.openPoopAI('소변+대변')" style="flex: 1; padding: 16px; border-radius: 14px; background: #F3E8FF; border: 1px solid #C4B5FD; color: #7C3AED; font-weight: 800; font-size: 15px; cursor: pointer;">💧+💩 둘 다</button>
-        </div>
-
-        <div id="poop-ai-area" style="display: none; animation: fadeIn 0.3s;">
-            <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: var(--text-s);">어떤 색깔인가요?</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
-                <button class="ai-poop-btn" onclick="analyzePoop('황금색', this, 'good')" style="background:#FBBF24;">황금</button>
-                <button class="ai-poop-btn" onclick="analyzePoop('녹색', this, 'good')" style="background:#4ADE80;">녹색</button>
-                <button class="ai-poop-btn" onclick="analyzePoop('갈색', this, 'good')" style="background:#A16207; color:white;">갈색</button>
-                <button class="ai-poop-btn box-main" onclick="analyzePoop('흰/회색', this, 'bad')">흰/회색</button>
-                <button class="ai-poop-btn" onclick="analyzePoop('붉은색', this, 'bad')" style="background:#EF4444; color:white;">붉은색</button>
-                <button class="ai-poop-btn" onclick="analyzePoop('검은색', this, 'bad')" style="background:#1F2937; color:white;">검은색</button>
-            </div>
-
-            <div id="ai-poop-result" style="display: none; padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;"></div>
-            
-            <div class="box-sub" style="font-size: 11px; line-height: 1.5; margin-bottom: 16px; word-break: keep-all; padding: 10px; border-radius: 8px;">
-                <strong style="color: var(--danger);">🚨 단순 참고용:</strong> AI 판독 결과는 일반적인 기준이며 의학적 진단을 대신할 수 없습니다. 아기 컨디션이 평소와 다르다면 반드시 전문의의 진료를 받으세요.
-            </div>
-
-            <button onclick="saveAiPoopRecord()" style="width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 14px; font-weight: 800; font-size: 16px; cursor: pointer;">기록 저장하기</button>
-        </div>
-    </div>
-</div>
+<!-- ⚠️ 여기 있던 기저귀 바텀시트(#diaper-bottom-sheet)를 들어냈다.
+     같은 일을 하는 시트가 두 개였다.
+       ① 이 시트          — 부르는 함수가 하나도 없어 열리지도 않던 죽은 화면
+       ② #tracker-sheet  — 실제로 쓰이는 것. 시간·색깔·경고문 전부 들어있음
+     ② 이 이미 다 하고 있어서 ① 을 살릴 이유가 없다.
+     openDiaperSheet() 는 diapersheet.js 가 ② 로 보내준다. -->
 
 <div id="routine-settings-modal" class="modal-overlay" style="z-index: 6500; display:none; justify-content:center; align-items:center;" onclick="window.closeRoutineSettings(event)">
     
