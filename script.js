@@ -14101,7 +14101,7 @@ window.showPaywall = function() {
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#38BDF8; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">둘째, 셋째 다둥이 프로필 무제한 추가</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">둘째, 셋째까지 — 아기 프로필 3명</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#38BDF8; font-size:16px;">✓</span>
@@ -14295,10 +14295,19 @@ window.addNewBabyProfile = function() {
     }
     
     // VIP라도 최대 3명까지만
-    if (profiles.length >= 3) return alert("👶 아기 프로필은 최대 3명까지 등록 가능합니다!");
+    if (profiles.length >= 3) return alert("\uD83D\uDC76 아기는 3명까지 담을 수 있어요");
     
     // 즉석에서 예쁜 이름을 물어봄
-    const newName = prompt("추가할 아기의 예쁜 이름을 입력해주세요!");
+    /* ⚠️ prompt() 도 alert() 와 같은 시스템 창이다.
+          안드로이드에서 도메인 주소가 그대로 뜬다.
+          답을 받아야 해서 토스트로는 못 바꾼다.
+          앱에 입력창(showPrompt)이 있으면 그걸 쓰고, 없으면 그대로 간다. */
+    var newName;
+    if (typeof window.showPrompt === "function") {
+        newName = window.showPrompt("추가할 아기의 이름을 알려주세요");
+    } else {
+        newName = prompt("추가할 아기의 이름을 알려주세요");
+    }
     if (!newName || !newName.trim()) return;
     
     const cleanName = newName.trim();

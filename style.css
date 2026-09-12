@@ -36,7 +36,14 @@ body.dark-mode {
     --border: #333842 !important; --bg-main: #121212 !important; --bg-card: #1E2024 !important; --bg-sub: #2A2D32 !important;
 }
 
-body { background: var(--bg-main); color: var(--text-m); line-height: 1.5; padding-top: 60px; padding-bottom: 120px; min-height: 100vh; letter-spacing: -0.4px; -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; padding-bottom: env(safe-area-inset-bottom); }
+body { background: var(--bg-main); color: var(--text-m); line-height: 1.5; padding-top: 60px; min-height: 100vh; letter-spacing: -0.4px; -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
+    /* ⚠️ padding-bottom 이 이 규칙 안에 두 번 있었다.
+          위의 120px 이 이 줄에 덮여서 사라졌고, env() 는 대개 0px 이라
+          하단 탭(고정, 높이 약 78px)이 본문 마지막 줄을 가리고 있었다.
+          430px 이하는 mobile.js 가 .tab-content 로 따로 잡아주지만
+          그보다 넓은 화면(태블릿·PC)에는 아무 보정이 없었다.
+          한 줄로 합친다. 둘을 더해야 맞다. */
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 button, input[type="button"], input[type="submit"] { -webkit-appearance: none; appearance: none; border: none; outline: none; background: transparent; cursor: pointer; transition: transform 0.1s ease-in-out, background-color 0.2s ease; }
 button:active, .btn-main:active { transform: scale(0.96); }
 .wrapper { max-width: 500px; margin: 0 auto; padding: 10px 16px; }

@@ -112,7 +112,12 @@
                 await reg.showNotification("나들이는 즐거우셨나요?", {
                     body: body,
                     icon: "/icon-192x192.png",
-                    badge: "/icon-192x192.png",
+                    /* ⚠️ badge 는 상태바에 뜨는 작은 아이콘이다.
+                          안드로이드는 알파 채널만 읽어서 단색 실루엣으로 그린다.
+                          컬러 PNG 를 넣으면 흰 네모 덩어리로 뜬다.
+                          투명 배경 단색 아이콘(icon-badge.png)을 만들어 넣어야 한다.
+                          아직 없으면 아예 빼는 편이 낫다 — 기본 종 모양이 뜬다. */
+                    // badge: "/icon-badge.png",
                     tag: "outing-return"
                 });
             } else {

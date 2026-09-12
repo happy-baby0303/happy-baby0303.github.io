@@ -75,7 +75,7 @@ self.addEventListener('notificationclick', function (event) {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v3';
+const CACHE = 'baenaet-v7';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -83,13 +83,23 @@ const ASSETS = [
     './index.html',
     './diary.html',
     './manifest.json',
+
+    /* ⚠️ 자료 파일 셋이 빠져 있었다. 합쳐서 1.2MB 다.
+          수유실 1,100곳 · 나들이 장소 · 축제 일정이 전부 여기 들어 있고,
+          없으면 나들이 탭이 통째로 빈 화면이 된다.
+          '데이터 안 터지면 못 쓴다' 던 것의 나머지 절반이 이거다. */
+    './nursing.json',
+    './places.json',
+    './festivals.json',
     './style.css',
+    './tune.css',        /* ⚠️ 빠져 있었다. 없으면 오프라인에서 글자 크기·모서리가 통째로 어긋난다 */
     './icon-512.png',
     './icon-192x192.png',
     './icon-maskable-512.png',
     './apple-touch-icon.png',
     './anniversaries.js',
     './babyphoto.js',
+    './backbutton.js',
     './babytab.js',
     './bedtime.js',
     './bookshelf.js',
@@ -109,6 +119,10 @@ const ASSETS = [
     './graveyard.js',
     './home.js',
     './homefix.js',
+    './icons.js',
+    './idle.js',
+    './sealsoon.js',
+    './vaccine.js',
     './homelayout.js',
     './infopick.js',
     './iospush.js',

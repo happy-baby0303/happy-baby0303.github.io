@@ -262,7 +262,8 @@
         var tags = (p.tags || []).slice(0, 3).map(function (t) {
             var s = (typeof t === "string") ? t : (t && t.t) || "";
             return '<span style="font-size:10.5px; font-weight:800; color:var(--text-sub); ' +
-                   'background:var(--bg-sub); border-radius:7px; padding:4px 8px; white-space:nowrap;">' +
+                   'background:var(--bg-sub); border-radius:7px; padding:4px 8px; ' +
+                   'max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' +
                    esc(s) + '</span>';
         }).join("");
 
@@ -301,7 +302,7 @@
                       'line-height:1.55; word-break:keep-all;">' + esc(p.ageNote) + '</div>'
                     : '') +
 
-                (tags ? '<div style="display:flex; gap:5px; margin-top:9px; overflow:hidden;">' + tags + '</div>' : '') +
+                (tags ? '<div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:9px;">' + tags + '</div>' : '') +
             '</div>' +
         '</div>';
     }

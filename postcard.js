@@ -45,16 +45,30 @@
 
     function prettyDate(str) {
         if (!str) return "";
-        var p = String(str).split("-");
-        if (p.length !== 3) return String(str);
+        var k = normDate(str);
+        if (!k) return String(str);
+        var p = k.split("-");
         return p[0] + ". " + p[1] + ". " + p[2];
+    }
+
+    /* ⚠️ 날짜가 두 가지 모양으로 들어온다.
+          사진은 "2026-09-11", 도감은 "2026. 09. 11" (script.js 가 그렇게 저장한다).
+          점 형식을 그대로 new Date() 에 넣으면 NaN 이라
+          도감 엽서에만 "생후 N일의 기록" 이 통째로 빠져 있었다.
+          제일 많이 공유되는 게 도감 엽서인데 거기가 비어 있었다. */
+    function normDate(v) {
+        if (!v) return null;
+        var m = String(v).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+        if (!m) return null;
+        return m[1] + "-" + String(m[2]).padStart(2, "0") + "-" + String(m[3]).padStart(2, "0");
     }
 
     function ddayText(dateStr) {
         var s = localStorage.getItem("tosil_startDate");
         if (!s) return "";
+        var key = normDate(dateStr);
         var b = new Date(s + "T00:00:00").getTime();
-        var t = dateStr ? new Date(dateStr + "T00:00:00").getTime() : Date.now();
+        var t = key ? new Date(key + "T00:00:00").getTime() : Date.now();
         if (isNaN(b) || isNaN(t)) return "";
         var n = Math.floor((t - b) / 86400000);
         return n >= 0 ? "생후 " + n + "일의 기록" : "";
@@ -243,7 +257,11 @@
         if (!item) return toast("도감 정보를 불러오지 못했어요");
 
         var rank = a.ids.indexOf(id) + 1;
-        var date = a.dates[id] || new Date().toISOString().split("T")[0];
+        /* ⚠️ toISOString() 은 세계표준시라 새벽엔 어제가 된다. 내 시계로 적는다. */
+        var _n = new Date();
+        var date = a.dates[id] || (_n.getFullYear() + "-" +
+                   String(_n.getMonth() + 1).padStart(2, "0") + "-" +
+                   String(_n.getDate()).padStart(2, "0"));
 
         var found = (typeof window.getMilestonePhoto === "function") ? window.getMilestonePhoto(id) : null;
         var photo = found ? await photoOf(found.photo) : null;

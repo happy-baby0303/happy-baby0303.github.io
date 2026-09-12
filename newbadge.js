@@ -194,7 +194,7 @@
     }
 
       function boot() {
-        setInterval(paint, 1200);        // 👈 이 줄 추가
+        setInterval(paint, 5000);      /* ⚠️ 1.2초마다 DOM 전체를 훑고 있었다. 하루 종일 켜두는 앱이라 이게 발열이 된다 */        // 👈 이 줄 추가
 
         setTimeout(paint, 1500);
         setTimeout(paint, 3500);

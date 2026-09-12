@@ -114,7 +114,10 @@
                 var tag = Number(year) + "-" + pad(Number(month));
                 var used = localStorage.getItem(FREE_KEY);
                 if (used && used !== tag) {
-                    if (typeof window.openUpsell === "function") window.openUpsell("month");
+                    /* ⚠️ openUpsell 은 어느 파일에도 정의가 없다.
+                          그래서 늘 아래 toast 로 떨어지고 결제창이 안 열렸다.
+                          script.js 의 창구(openPlus)를 쓴다. */
+                    if (typeof window.openPlus === "function") window.openPlus("month");
                     else toast("이달의 카드는 플러스에서 매달 받을 수 있어요");
                     return;
                 }

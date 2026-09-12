@@ -84,7 +84,7 @@
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;">
                 ${distanceHtml}
-                <button onclick="window.openNursingMap('${esc(p.title).replace(/'/g, "")}')" style="background: #F2F4F6; color: #4E5968; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='#E5E8EB'" onmouseup="this.style.background='#F2F4F6'">
+                <button data-nursing-go="${esc(p.title)}" style="background: #F2F4F6; color: #4E5968; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='#E5E8EB'" onmouseup="this.style.background='#F2F4F6'">
                     길찾기 〉
                 </button>
             </div>
@@ -94,6 +94,22 @@
     window.openNursingMap = function (name) {
         window.open("https://map.naver.com/v5/search/" + encodeURIComponent(name), "_blank");
     };
+
+    /* ⚠️ 예전에는 장소 이름을 onclick 문자열 안에 직접 넣었다.
+          esc() 가 ' 를 &#39; 로 바꿔놓지만, HTML 파서가 속성을 읽을 때
+          그걸 다시 ' 로 되돌린다. 그러면 JS 문자열이 그 자리에서 끊긴다.
+
+              window.openNursingMap('엄마's 카페 수유실')
+                                        ↑ 여기서 깨진다
+
+          이름에 따옴표가 들어간 수유실은 길찾기 버튼이 안 눌렸다.
+          공공데이터라 우리가 이름을 고를 수 없으니, 아예 문자열에 안 넣는다.
+          속성에 담아두고 눌릴 때 읽는다. */
+    document.addEventListener("click", function (e) {
+        var b = e.target && e.target.closest ? e.target.closest("[data-nursing-go]") : null;
+        if (!b) return;
+        window.openNursingMap(b.getAttribute("data-nursing-go"));
+    });
 
     function render(list, hasPos) {
         var body = document.getElementById("nursing-body");
@@ -134,7 +150,7 @@
             </div>
             
             <div style="font-size:12px; font-weight:600; color:#8B95A1; margin-bottom:16px; background:#F9FAFB; padding:10px 14px; border-radius:10px; word-break:keep-all; line-height:1.4;">
-                전국 1,102곳 (공공데이터 기준)<br>오래된 정보가 있을 수 있으니 꼭 전화를 먼저 해보세요!
+                <span id="nursing-total">공공데이터 기준</span><br>오래된 정보가 있을 수 있으니 꼭 전화를 먼저 해보세요!
             </div>
             
             <div id="nursing-body" style="overflow-y:auto; flex:1; padding-bottom:20px; scrollbar-width:none;">
@@ -156,7 +172,19 @@
             return toast("수유실 자료를 불러오지 못했어요");
         }
   
-        list = list.filter(p => !p.title.includes('001') && !p.title.includes('테스트'));
+        /* ⚠️ 예전엔 '001' 이 들어간 이름을 전부 버렸다.
+              "제001호 수유실" 같은 멀쩡한 이름까지 같이 사라진다.
+              시험 데이터는 이름이 통째로 숫자이거나 '테스트' 로 시작한다. */
+        list = list.filter(function (p) {
+            var t = String(p && p.title || "").trim();
+            if (!t) return false;
+            if (/^[0-9]+$/.test(t)) return false;
+            return t.indexOf("테스트") !== 0;
+        });
+
+        /* 실제로 들고 있는 개수를 그대로 적는다. 1,102 는 자료가 늘면 거짓말이 된다. */
+        var tot = document.getElementById("nursing-total");
+        if (tot) tot.textContent = "전국 " + list.length.toLocaleString() + "곳 (공공데이터 기준)";
   
         var pos = myPos || await locate();
         myPos = pos;

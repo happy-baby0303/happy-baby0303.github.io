@@ -253,7 +253,7 @@
     function boot() {
         setTimeout(mount, 2000);
         setTimeout(mount, 4500);
-        setInterval(mount, 3000);
+        setInterval(mount, 8000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

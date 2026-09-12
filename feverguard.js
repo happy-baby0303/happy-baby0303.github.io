@@ -227,6 +227,12 @@
                 'border-radius:12px; padding:12px 13px;">' +
             '<div style="font-size:11.5px; font-weight:900; color:var(--text-m); margin-bottom:6px;">' +
                 (type === "red" ? "빨간약" : "파란약") + ' · ' + rule.name + '</div>' +
+            /* ⚠️ 이 파일 머리말이 "어떤 농도를 전제한 값인지 화면에 밝힌다" 고
+                  적어놓고, 정작 syrup 값을 만들어만 두고 안 밝히고 있었다.
+                  용량(mL)은 농도가 바뀌면 통째로 틀린다.
+                  약병에 다른 숫자가 적혀 있으면 부모가 알아채야 한다. */
+            '<div style="font-size:10.5px; font-weight:700; color:var(--text-sub); ' +
+                'margin-bottom:7px; letter-spacing:-0.2px;">' + rule.syrup + ' 기준</div>' +
             '<div style="font-size:13px; font-weight:900; color:' + color + '; line-height:1.4; word-break:keep-all;">' +
                 head + '</div>' +
             '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-top:5px; line-height:1.5; white-space:pre-line; word-break:keep-all;">' +
