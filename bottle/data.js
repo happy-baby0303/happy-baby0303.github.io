@@ -1,6 +1,21 @@
 // ==========================================
 // 🍼 배냇함 젖병 통합 데이터베이스 V2.1 (bottle/data.js)
-// (총 40종: 열탕/UV 소독 팩트체크 및 쿠팡 파트너스 딥링크 내장)
+// (총 40종: 열탕/UV 소독 정보 및 쿠팡 파트너스 딥링크 내장)
+//
+// ⚠️ 소독 방법은 제조사가 정한 것을 그대로 옮긴다. 우리가 판단하지 않는다.
+//
+//    예전에 이렇게 적혀 있었다.
+//      "UV(공식금지, 현실은 변색 감수하고 씀)"
+//
+//    이건 제조사가 하지 말라는 걸 해도 된다고 읽힌다.
+//    아기가 입에 무는 물건이고, 변색은 소재가 상하고 있다는 신호다.
+//    앱을 보고 그렇게 했다가 탈이 나면 그건 우리 책임이 된다.
+//    "제조사 비권장" 까지만 적고, 할지 말지는 부모가 정한다.
+//
+// ⚠️ 제품을 치켜세우는 말을 쓰지 않는다.
+//    수수료를 받는 링크가 달린 화면이다.
+//    "가장 잘 맞아" · "예술적으로" 같은 말은 근거를 대야 하는 표현이고,
+//    근거 없이 쓰면 표시광고법 문제가 된다. 사실만 적는다.
 // ==========================================
 
 const bottleData = [
@@ -9,8 +24,8 @@ const bottleData = [
         id: "b01", brand: "더블하트", name: "모유실감 3세대 PPSU", 
         age: ["newborn", "infant", "toddler"], rejection: "super", wash: "normal",
         material: "ppsu", price: "mid", antiColic: "normal", compatible: "yes", 
-        sterilization: "열탕(권장) / UV(공식금지, 현실은 변색 감수하고 씀)",
-        desc: "국민 젖병의 대명사. 한국 아기 구강 구조에 가장 잘 맞아 '젖꼭지 거부'가 거의 없습니다. 공식적으론 열탕 소독만 권장합니다.",
+        sterilization: "열탕(권장) / UV(제조사 비권장)",
+        desc: "국내에서 오래 팔린 제품이라 젖꼭지 거부가 적다는 후기가 많습니다. 제조사는 열탕 소독만 권장합니다.",
         searchKeyword: "더블하트 3세대 젖병 트윈팩",
         coupangLink: "https://link.coupang.com/a/gB3IhV0bsW"
     },
@@ -19,7 +34,7 @@ const bottleData = [
         age: ["newborn", "infant"], rejection: "normal", wash: "easy",
         material: "ppsu", price: "high", antiColic: "strong", compatible: "no", 
         sterilization: "열탕(O) / 식세기(O) / UV(변색주의)",
-        desc: "입구가 넓어 손이 쑥쑥 들어가 세척(설거지)이 예술적으로 편합니다. 나중에 뚜껑만 바꿔 이유식 용기로 쓸 수 있어 활용도가 높아요.",
+        desc: "입구가 넓어 손이 들어가서 세척이 수월합니다. 뚜껑을 바꿔 이유식 용기로도 쓸 수 있어요.",
         searchKeyword: "헤겐 신생아 젖병 스타터 세트",
         coupangLink: "https://link.coupang.com/a/gB5YIbpDvE"
     },
@@ -37,7 +52,7 @@ const bottleData = [
         age: ["newborn", "infant"], rejection: "super", wash: "easy",
         material: "silicone", price: "high", antiColic: "strong", compatible: "no", 
         sterilization: "열탕(O) / 전자레인지(O) / UV(오래 돌리면 끈적해짐)",
-        desc: "엄마 가슴과 가장 비슷한 촉감. 혼합수유를 하거나 젖병 거부가 심한 아기들의 구세주입니다. 단, UV 소독은 피하는 게 좋습니다.",
+        desc: "젖꼭지가 말랑해 혼합수유나 젖병 거부에 많이 찾는 제품입니다. 제조사는 UV 소독을 권하지 않습니다.",
         searchKeyword: "코모토모 실리콘 젖병 2팩",
         coupangLink: "https://link.coupang.com/a/gB4byGHwf6"
     },
@@ -64,7 +79,7 @@ const bottleData = [
         age: ["toddler"], rejection: "normal", wash: "normal",
         material: "ppsu", price: "mid", antiColic: "normal", compatible: "yes", 
         sterilization: "열탕(O) / UV(변색주의)",
-        desc: "6개월 이후 아기가 스스로 쥐고 먹기 편하며, 나중에 그로미미 빨대를 꽂아 '빨대컵'으로 호환해서 쓰기 가장 좋은 브랜드입니다.",
+        desc: "6개월 이후 아기가 쥐고 먹기 편한 모양입니다. 같은 브랜드 빨대를 꽂아 빨대컵으로 이어 쓸 수 있어요.",
         searchKeyword: "그로미미 젖병 트윈팩",
         coupangLink: "https://link.coupang.com/a/gB4kuzQ8hE"
     },
@@ -118,7 +133,7 @@ const bottleData = [
         age: ["newborn", "infant"], rejection: "normal", wash: "uv",
         material: "glass", price: "mid", antiColic: "strong", compatible: "no", 
         sterilization: "열탕(O) / UV(무제한 가능)",
-        desc: "전 세계적으로 가장 많이 팔리는 글로벌 스탠다드. 꽃잎 모양의 젖꼭지가 함몰을 방지합니다.",
+        desc: "여러 나라에서 오래 팔린 제품입니다. 꽃잎 모양 젖꼭지가 함몰을 줄이도록 설계돼 있습니다.",
         searchKeyword: "아벤트 내추럴 유리젖병 세트",
         coupangLink: "https://link.coupang.com/a/gB4EFMKPJc"
     },
@@ -145,7 +160,7 @@ const bottleData = [
         age: ["newborn"], rejection: "super", wash: "uv",
         material: "glass", price: "mid", antiColic: "strong", compatible: "no", 
         sterilization: "열탕(O) / 식세기(O) / UV(O)",
-        desc: "젖꼭지 구멍이 하나가 아니라 여러 개의 유출공이 있어, 모유가 나오는 방식과 가장 흡사하게 설계되었습니다.",
+        desc: "젖꼭지에 유출공이 여러 개라 모유가 나오는 방식에 가깝게 설계돼 있습니다.",
         searchKeyword: "누크 네이처센스 유리 젖병 세트",
         coupangLink: "https://link.coupang.com/a/gB4LP4K2Wi"
     },
@@ -201,7 +216,7 @@ const bottleData = [
         age: ["newborn", "infant"], rejection: "normal", wash: "easy",
         material: "ppsu", price: "high", antiColic: "strong", compatible: "no", 
         sterilization: "열탕(O) / 식세기(O)",
-        desc: "신생아부터 영아기까지 쭉 쓸 수 있는 용량별 혼합 세트. 출산 준비물이나 지인 선물용으로 가장 많이 팔리는 베스트 구성입니다.",
+        desc: "신생아부터 영아기까지 쓸 수 있는 용량별 세트입니다. 출산 준비물이나 선물로 많이 찾습니다.",
         searchKeyword: "헤겐 젖병 150 240 세트",
         coupangLink: "https://link.coupang.com/a/gB4ZRsUkOy"
     },
@@ -353,7 +368,7 @@ const bottleData = [
         id: "b39", brand: "더블하트", name: "160ml 신생아 스타터 세트", 
         age: ["newborn"], rejection: "super", wash: "normal",
         material: "ppsu", price: "mid", antiColic: "normal", compatible: "yes", 
-        sterilization: "열탕(권장) / UV(공식금지)",
+        sterilization: "열탕(권장) / UV(제조사 비권장)",
         desc: "신생아 시기에 딱 맞는 작은 160ml 사이즈와 SS사이즈 젖꼭지가 포함된 조리원 퇴소 필수 출산 준비물 세트입니다.",
         searchKeyword: "더블하트 160 젖병 세트",
         coupangLink: "https://link.coupang.com/a/gB5kMCp7oO"

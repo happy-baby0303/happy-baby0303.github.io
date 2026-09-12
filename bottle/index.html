@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 젖병 고르기</title>
+    <!-- ⚠️ 폰트는 style.css 의 @import 가 아니라 여기서 받는다.
+         버전을 본 앱(@v1.3.8)과 똑같이 고정해야 글자 모양이 안 갈린다. -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -172,6 +176,17 @@
         <div class="legal-footer">
             <p><strong>※ 면책 조항</strong><br>
             본 서비스의 호환성 및 소재 정보는 제조사 스펙을 기준으로 제공되나, 제품 리뉴얼에 따라 변경될 수 있습니다. 구매 전 한 번 더 확인하시기 바랍니다.</p>
+
+            <!-- ⚠️ 이 문단은 지우지 마세요.
+                 40종 전부에 쿠팡 파트너스 딥링크가 들어 있는데
+                 수수료를 받는다는 말이 화면 어디에도 없었습니다.
+                 공정거래위원회 추천·보증 심사지침은 경제적 이해관계를
+                 '소비자가 쉽게 찾을 수 있는 곳에' 밝히도록 하고 있고,
+                 쿠팡 파트너스 약관도 같은 문구를 요구합니다.
+                 안 적으면 과태료 대상이고, 무엇보다 속이는 일이 됩니다. -->
+            <p style="margin-top:14px;"><strong>※ 제휴 고지</strong><br>
+            배냇함은 쿠팡 파트너스 활동의 일환으로, 제품 구매 링크를 통해 <strong>일정액의 수수료를 제공받습니다.</strong>
+            다만 추천 순서는 회원님이 고른 조건으로만 정해지며, <strong>수수료가 순위에 영향을 주지 않습니다.</strong></p>
         </div>
     </main>
     
@@ -185,7 +200,11 @@
     <script src="bottlerefuse.js"></script>
     <script src="bottlemilk.js"></script>
     <script src="bottletabs.js"></script>
-    <script src="../shared/plusmark.js"></script> 
+    <script src="../shared/plusmark.js"></script>
+    <!--        잠긴 PLUS 안내에 실제로 살 수 있는 문을 단다 -->
+    <script src="../shared/plusgate.js"></script>
+    <!-- ❤️ 찜을 부부가 같이 본다 -->
+    <script src="../shared/favsync.js"></script> 
 
 <!-- 🚀 우측 하단 위로 가기 버튼 -->
         <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">
@@ -194,20 +213,32 @@
 
         <script>
             // 스크롤 감지해서 300px 이상 내려가면 버튼 보이기
-            window.addEventListener('scroll', () => {
-                const topBtn = document.getElementById('scrollToTopBtn');
-                if (window.scrollY > 300) {
-                    topBtn.style.display = 'flex';
-                } else {
-                    topBtn.style.display = 'none';
-                }
-            });
+            /* ⚠️ 스크롤은 1초에 수십 번 일어난다.
+                  그때마다 style 을 건드리면 브라우저가 매번 화면을 다시 재고,
+                  긴 목록에서 스크롤이 뚝뚝 끊긴다.
+                  값이 '바뀔 때만' 손대고, passive 로 스크롤을 안 붙잡는다. */
+            (function () {
+                var shown = null;
+                window.addEventListener('scroll', function () {
+                    var want = window.scrollY > 300;
+                    if (want === shown) return;
+                    shown = want;
+                    var b = document.getElementById('scrollToTopBtn');
+                    if (b) b.style.display = want ? 'flex' : 'none';
+                }, { passive: true });
+            })();
         </script>
 
        <script>
-    if (localStorage.getItem('tosil_dark_mode') === 'on') {
-        document.body.classList.add('dark-mode');
-    }
+    /* ⚠️ 다크모드는 본 앱에서 뺐다(theme.js).
+          여기만 tosil_dark_mode 를 보고 있어서, 예전에 켠 적 있는 사람은
+          큐레이터만 까맣게 뜨고 본 앱은 크림색인 상태가 된다.
+          본 앱과 같은 기준(dark-mode 클래스)을 쓰고, 옛 키는 정리한다. */
+    try {
+        if (localStorage.getItem('tosil_dark_mode') === 'on') {
+            localStorage.removeItem('tosil_dark_mode');
+        }
+    } catch (e) {}
       </script>
 </body>
 </html>

@@ -199,7 +199,9 @@ function generateCardHTML(item, rank) {
             </div>
             
             <div class="coupang-safety-guard" style="font-size: 11px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
-                ※ 안전하고 빠른 교환/환불을 위해 가급적 <b>[로켓배송]</b> 마크가 있는 상품을 선택하세요.
+                ※ 안전하고 빠른 교환/환불을 위해 가급적 <b>[로켓배송]</b> 마크가 있는 상품을 선택하세요.<br>
+                <span style="color:#A3958A; font-weight:500;">이 링크는 쿠팡 파트너스 활동의 일환으로,
+                이에 따른 일정액의 수수료를 제공받습니다.</span>
             </div>
         `;
     } else {

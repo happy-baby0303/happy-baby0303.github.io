@@ -75,7 +75,7 @@ self.addEventListener('notificationclick', function (event) {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v7';
+const CACHE = 'baenaet-v10';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -157,7 +157,21 @@ const ASSETS = [
     './toolbrief.js',
     './voice.js',
     './voicereel.js',
-    './waveform.js'
+    './waveform.js',
+
+    /* ⚠️ 큐레이터 다섯 곳이 통째로 빠져 있었다.
+          PLUS 열아홉 개가 거기 들어 있는데, 데이터가 끊기면
+          돈 낸 사람이 유료 기능을 못 연다.
+          각 폴더의 화면과 자료만 담는다 — 나머지는
+          한 번 열어보면 fetch 핸들러가 알아서 담는다. */
+    './bottle/index.html',    './bottle/data.js',    './bottle/app.js',    './bottle/style.css',
+    './stroller/index.html',  './stroller/data.js',  './stroller/app.js',  './stroller/style.css',
+    './carseat/index.html',   './carseat/data.js',   './carseat/app.js',   './carseat/style.css',
+    './food/index.html',      './food/data.js',      './food/app.js',      './food/style.css',
+    './toy/index.html',       './toy/data.js',       './toy/app.js',
+    './shared/babyswitch.js', './shared/disclosure.js', './shared/plusmark.js',
+    './shared/plusgate.js',
+    './shared/favsync.js'
 ];
 
 /* 바깥에서 오는데 '고정된' 것들 — 이게 없으면 오프라인에서 앱이 안 산다 */

@@ -3342,7 +3342,20 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
         var go = new URLSearchParams(location.search).get('go');
         if (!go) return;
-        var map = { toolbox: 'nav-toolbox', home: 'nav-home', info: 'nav-info' };
+        /* ⚠️ 큐레이터(젖병·이유식·놀이·카시트·유모차)는 별도 페이지라
+              거기서는 결제창을 열 수가 없다. script.js 가 없기 때문이다.
+              그쪽 잠긴 화면에서 '플러스 보러 가기' 를 누르면
+              ?go=plus 를 달고 앱으로 돌아온다. 여기서 받아준다. */
+        if (go === 'plus') {
+            setTimeout(function () {
+                if (typeof window.openPlus === 'function') window.openPlus('curator');
+                else if (typeof window.showPaywall === 'function') window.showPaywall();
+            }, 1200);
+            return;
+        }
+
+        var map = { toolbox: 'nav-toolbox', home: 'nav-home', info: 'nav-info',
+                    memorybox: 'nav-memorybox', photo: 'nav-memorybox', baton: 'nav-toolbox' };
         var navId = map[go];
         if (!navId) return;
         var run = function () {
