@@ -4248,7 +4248,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 <div id="feed-ml-area" style="text-align: center; margin-bottom: 20px;">
                     <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
                     <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 16px;">
-                        <input type="number" id="v-feed-amount" placeholder="${uniqueAmounts[0] || 160}" style="font-size: 46px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 130px; padding: 0; margin: 0; transition: 0.3s;">
+                        <input type="number" id="v-feed-amount" placeholder="${uniqueAmounts[0] || 160}" class="feed-amt-input" style="font-size: 46px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 130px; padding: 0; margin: 0; transition: 0.3s;">
                         <span style="font-size: 17px; font-weight: 800; color: var(--text-s);">ml</span>
                     </div>
                     <div style="display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
@@ -4319,7 +4319,12 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             
             <div id="diaper-status-area" style="display:none; margin-bottom:10px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px; text-align:left;">어떤 색깔인가요?</div>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between;">
+                <!-- ⚠️ 고른 버튼은 scale(1.05) 로 살짝 커지고 그림자가 퍼진다.
+                     그런데 이 줄에 여백이 0 이라, 맨 왼쪽·맨 오른쪽 버튼은
+                     커진 만큼이 시트 밖으로 나가서 잘렸다.
+                     가운데 버튼만 멀쩡했던 이유가 이것이다.
+                     커질 자리를 미리 비워둔다. 안쪽 여백만 주면 된다. -->
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; padding: 6px 6px 14px; margin: -6px -6px -8px;">
                     <button onclick="window.selectTrackerBtn(this, 'status_golden')" style="flex:1; min-width:30%; padding: 14px 0; background: var(--bg-sub); color: #8B95A1; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor:pointer; transition:0.2s;">황금</button>
                     <button onclick="window.selectTrackerBtn(this, 'status_green')" style="flex:1; min-width:30%; padding: 14px 0; background: var(--bg-sub); color: #8B95A1; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor:pointer; transition:0.2s;">녹색</button>
                     <button onclick="window.selectTrackerBtn(this, 'status_brown')" style="flex:1; min-width:30%; padding: 14px 0; background: var(--bg-sub); color: #8B95A1; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor:pointer; transition:0.2s;">갈색</button>
@@ -9547,6 +9552,43 @@ window.showComingSoon = function(feature) {
 // ==========================================
 // 🍞 무적의 토스트 알람 마스터 (글자 잘림 완벽 해결!)
 // ==========================================
+/* ⚠️ 앱 안에 alert() 가 39곳 남아 있었다.
+      안드로이드에서 이걸 띄우면 이렇게 보인다.
+
+          ┌─ happy-baby.web.app 내용: ───┐
+          │        먹은 양(ml)을 입력해주세요!  │
+          │                        [확인] │
+          └───────────────────────────┘
+
+      도메인 주소가 그대로 뜨고, 화면이 멈추고, 반드시 눌러야 사라진다.
+      돈 받는 앱에서 이게 뜨면 만들다 만 것처럼 보인다.
+      우리는 예쁜 토스트를 이미 갖고 있으면서 안 쓰고 있었다.
+
+      39곳을 하나씩 고치면 빠뜨린다. 창구에서 한 번에 돌린다.
+      확인해보니 39곳 전부 alert 뒤에 return 이거나 그 줄이 끝이라
+      '멈춰 세우는' 성질이 사라져도 뒤탈이 없다.
+
+      ⚠️ confirm() 은 건드리지 않는다. 예/아니오 답을 받아서
+         그 값으로 갈라지기 때문에, 안 멈추면 로직이 깨진다. */
+/* ⚠️ 수유량 칸의 '160' 은 입력값이 아니라 안내 글자(placeholder)다.
+      그런데 46px 굵은 글씨라 이미 적어놓은 값처럼 보였다.
+      그대로 저장을 누르면 "먹은 양을 입력해주세요" 가 떠서
+      "160 이라고 적혀 있는데 왜?" 가 된다.
+      안내 글자는 안내 글자처럼 보이게 연하게 깔아둔다. */
+(function () {
+    var st = document.createElement('style');
+    st.textContent =
+        '.feed-amt-input::placeholder{color:var(--text-sub);opacity:.42;font-weight:700;}' +
+        '.feed-amt-input::-webkit-input-placeholder{color:var(--text-sub);opacity:.42;font-weight:700;}';
+    if (document.head) document.head.appendChild(st);
+    else document.addEventListener('DOMContentLoaded', function () { document.head.appendChild(st); });
+})();
+
+window.alert = function (message) {
+    if (typeof window.showToast === 'function') window.showToast(String(message));
+    else console.log(String(message));
+};
+
 window.showToast = function(message) {
     const oldToast = document.getElementById('super-toast-msg');
     if (oldToast) oldToast.remove();
@@ -14039,7 +14081,19 @@ window.showPaywall = function() {
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#38BDF8; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:13px; font-weight:700;">소아과 제출용 A4 종합 리포트 발급</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">배냇함 포토북 — 담긴 걸 한 권으로</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">그날의 목소리 — 소리까지 담기</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">큐레이터 다섯 곳이 전부 열려요</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">소아과 제출용 A4 종합 리포트 발급</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#38BDF8; font-size:16px;">✓</span>
@@ -14058,29 +14112,32 @@ window.showPaywall = function() {
                 <!-- 💰 3단 프라이싱 앵커링 (연간 유도) -->
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
                     
-                    <div id="plan-month" class="plan-card" onclick="window.selectPlan('month')" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;">
-                        <div>
-                            <div style="font-size: 14px; font-weight: 800; color: #E2E8F0; margin-bottom: 2px;">1개월 플랜</div>
-                            <div style="font-size: 12px; color: #94A3B8;">언제든 해지 가능</div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="font-size: 16px; font-weight: 900; color: #FFF;">₩4,900<span style="font-size: 12px; color: #94A3B8; font-weight: 600;"> /월</span></div>
-                            <div class="check-circle" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #64748B; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: #FFF; transition: 0.2s;"></div>
-                        </div>
-                    </div>
+                    <!-- ⚠️ 여기 요금제 카드 두 장이 있었다.
+                         ₩4,900 / ₩39,000 을 걸어놓고 눌러도 테두리 색만 바뀌었다.
+                         결제 연동이 한 줄도 없다 (포트원·토스·구글 결제 전부 0곳).
+                         아래 버튼은 '첫 1개월 무료 체험 시작하기' 인데
+                         실제로는 대기자 명단에 이름만 올라간다.
 
-                    <div id="plan-year" class="plan-card" onclick="window.selectPlan('year')" style="background: rgba(56,189,248,0.1); border: 2px solid #38BDF8; border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; position: relative;">
-                        <div style="position: absolute; top: -10px; left: 16px; background: #38BDF8; color: #0F172A; font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 6px; letter-spacing: 0.5px;">BEST VALUE (34% 할인)</div>
-                        <div>
-                            <div style="font-size: 14px; font-weight: 800; color: #38BDF8; margin-bottom: 2px;">1년 플랜</div>
-                            <div style="font-size: 12px; color: #94A3B8;">연 ₩39,000 일시불</div>
+                         받지도 않을 돈을 받는다고 적어둔 화면이다.
+                         심사자가 누르면 반려 사유가 되고, 무엇보다 거짓말이다.
+
+                         결제가 붙기 전까지는 '예정 가격' 으로만 말한다.
+                         숫자는 그대로 보여준다 — 얼마일지 궁금한 건 당연하니까. -->
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; padding: 18px 16px;">
+                        <div style="font-size: 11px; font-weight: 800; color: #64748B; letter-spacing: 2px; margin-bottom: 13px;">예정 가격</div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">달마다</span>
+                            <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩4,900</span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="text-align: right;">
-                                <div style="font-size: 11px; color: #94A3B8; text-decoration: line-through;">₩58,800</div>
-                                <div style="font-size: 16px; font-weight: 900; color: #FFF;">₩3,250<span style="font-size: 12px; color: #38BDF8; font-weight: 600;"> /월</span></div>
-                            </div>
-                            <div class="check-circle" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #38BDF8; background: #38BDF8; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: #FFF; transition: 0.2s;">✓</div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">1년치 한 번에<span style="font-size: 11px; font-weight: 800; color: #38BDF8; margin-left: 6px;">34% 살다</span></span>
+                            <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩39,000</span>
+                        </div>
+
+                        <div style="font-size: 11.5px; color: #64748B; margin-top: 14px; line-height: 1.65;">
+                            아직 확정된 값이 아니고, 지금은 결제를 받지 않습니다.
                         </div>
                     </div>
 
@@ -14103,9 +14160,11 @@ window.showPaywall = function() {
                 <!-- 🚀 최종 액션 버튼 -->
                 <div style="text-align: center;">
                     <button onclick="window.applyPremiumWaitlist(this)" style="width: 100%; padding: 18px; background: linear-gradient(135deg, #38BDF8 0%, #2563EB 100%); color: #FFF; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'">
-                        첫 1개월 무료 체험 시작하기
+                        열리면 제일 먼저 알려주세요
                     </button>
-                    <div style="font-size: 11px; color: #64748B; margin-top: 14px;">무료 체험 기간(30일) 종료 전까지 결제되지 않습니다.</div>
+                    <div style="font-size: 12px; color: #94A3B8; margin-top: 14px; line-height: 1.7;">
+                        아직 결제를 받지 않습니다.<br>여는 날 미리 신청하신 분께 먼저 알려드려요.
+                    </div>
                 </div>
 
             </div>
@@ -14123,7 +14182,12 @@ window.showPaywall = function() {
 };
 
 // 💡 3단 요금제 클릭 시 토글되는 애니메이션 엔진
+/* ⚠️ 요금제 카드를 걷어내서 이제 부르는 곳이 없다.
+      지우지 않고 남겨둔다 — 결제를 붙일 때 이 자리를 다시 쓴다.
+      다만 카드가 없을 때 불리면 null 을 만져 터지므로 먼저 막는다. */
 window.selectPlan = function(planId) {
+    var target = document.getElementById('plan-' + planId);
+    if (!target) return;
     if (navigator.vibrate) navigator.vibrate(10);
     
     // 1. 모든 카드 초기화
@@ -14138,7 +14202,6 @@ window.selectPlan = function(planId) {
     });
     
     // 2. 선택된 카드에 파란색 형광펜 칠하기
-    const target = document.getElementById('plan-' + planId);
     target.style.borderColor = '#38BDF8';
     target.style.background = 'rgba(56,189,248,0.1)';
     target.style.borderWidth = '2px';
