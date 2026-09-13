@@ -301,7 +301,11 @@
                 'style="background:var(--bg-sub); border-radius:16px; padding:15px 17px; margin-top:14px; cursor:pointer;">' +
                 '<div style="font-size:10px; font-weight:800; color:var(--text-sub); letter-spacing:1.8px; margin-bottom:8px;">' +
                     esc(n.who || myTitle()) + '의 한 줄</div>' +
-                '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:22px; line-height:1.55; color:var(--text-m); word-break:keep-all; white-space:pre-wrap;">' +
+                /* ⚠️ 22px 이었다. 아기 편지가 20px 인데 부모 한 줄이 더 컸다.
+                   그러면 눈이 아래(부모 글)로 먼저 가고 편지가 묻힌다.
+                   이 화면의 주인공은 아기 편지다. 한 줄은 거기 붙는 말이다.
+                   17px 로 낮춘다. 같은 손글씨라 작아도 결이 안 깨진다. */
+                '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:17px; line-height:1.6; color:var(--text-s); word-break:keep-all; white-space:pre-wrap;">' +
                     esc(n.text) + '</div>' +
             '</div>';
         }).join("");

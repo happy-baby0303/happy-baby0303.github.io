@@ -452,4 +452,14 @@ document.querySelectorAll('.matrix-panel select').forEach(select => {
 window.onload = () => { 
     applyGlobalBabyProfile(); 
     runBottleEngine(); 
+
+    /* ⚠️ 헤더의 "젖병 40종" 이 글자로 박혀 있었다.
+          data.js 에 한 종 더 넣는 날 여기를 같이 안 고치면 그대로 거짓말이 된다.
+          수수료를 받는 화면이라 숫자 하나도 맞아야 한다. 세어서 적는다. */
+    try {
+        var badge = document.getElementById("bottle-count-badge");
+        if (badge && typeof bottleData !== "undefined" && bottleData.length) {
+            badge.textContent = "젖병 " + bottleData.length + "종";
+        }
+    } catch (e) {}
 };

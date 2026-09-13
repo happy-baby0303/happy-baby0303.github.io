@@ -75,7 +75,7 @@ self.addEventListener('notificationclick', function (event) {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v10';
+const CACHE = 'baenaet-v12';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -171,7 +171,8 @@ const ASSETS = [
     './toy/index.html',       './toy/data.js',       './toy/app.js',
     './shared/babyswitch.js', './shared/disclosure.js', './shared/plusmark.js',
     './shared/plusgate.js',
-    './shared/favsync.js'
+    './shared/favsync.js',
+    './shared/curatorback.js'
 ];
 
 /* 바깥에서 오는데 '고정된' 것들 — 이게 없으면 오프라인에서 앱이 안 산다 */

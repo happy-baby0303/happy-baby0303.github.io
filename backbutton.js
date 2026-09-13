@@ -78,6 +78,38 @@
     var MARK = "baenat-layer";
     var stack = [];        // 지금 열려 있는 것들 (나중에 열린 게 뒤)
 
+    var EXIT_WINDOW = 2000;   // 이 시간 안에 한 번 더 누르면 진짜 종료
+    var lastAsk = 0;          // 마지막으로 "한 번 더" 를 띄운 시각
+
+    /* ----------------------------------------------------------
+       지금 어느 탭인가
+
+       ⚠️ switchTab 은 주소 기록을 안 남긴다.
+          그래서 툴박스·나들이·육아정보에서 뒤로가기를 누르면
+          홈으로 가는 게 아니라 앱이 그냥 꺼졌다.
+          안드로이드에서 뒤로가기는 '한 단계 취소' 다.
+          탭을 옮겨놓고 취소했는데 앱이 죽으면 그건 사고다.
+       ---------------------------------------------------------- */
+
+    function currentTab() {
+        var el = document.querySelector(".nav-item.active");
+        if (!el || !el.id) return null;
+        return el.id.replace(/^nav-/, "");
+    }
+
+    function goHome() {
+        var el = document.getElementById("nav-home");
+        if (el && typeof window.switchTab === "function") {
+            try { window.switchTab("home", el); return true; } catch (e) {}
+        }
+        if (el) { try { el.click(); return true; } catch (e) {} }
+        return false;
+    }
+
+    function say(m) {
+        if (typeof window.showToast === "function") window.showToast(m);
+    }
+
     function byId(id) { return document.getElementById(id); }
 
     function visible(el) {
@@ -148,19 +180,50 @@
        뒤로가기
        ---------------------------------------------------------- */
 
+    function guard() {
+        try { history.pushState({ baenat: MARK, id: "guard" }, "", location.href); } catch (e) {}
+    }
+
     window.addEventListener("popstate", function () {
         scan();
-        if (!stack.length) return;        // 덮은 게 없으면 평소대로
 
-        var top = stack[stack.length - 1];
-        if (NEVER_CLOSE.indexOf(top.id) > -1) {
-            // 진행 중인 작업. 칸을 도로 쌓아서 앱이 닫히지 않게만 한다.
-            try { history.pushState({ baenat: MARK, id: top.id }, "", location.href); } catch (e) {}
+        /* 1단계 — 덮은 화면이 있으면 그것부터 닫는다 */
+        if (stack.length) {
+            var top = stack[stack.length - 1];
+            if (NEVER_CLOSE.indexOf(top.id) > -1) {
+                // 진행 중인 작업. 칸을 도로 쌓아서 앱이 닫히지 않게만 한다.
+                guard();
+                return;
+            }
+            stack.pop();
+            closeLayer(top);
+            guard();
             return;
         }
 
-        stack.pop();
-        closeLayer(top);
+        /* 2단계 — 홈이 아니면 홈으로.
+                  이게 안드로이드에서 뒤로가기가 원래 하는 일이다. */
+        var tab = currentTab();
+        if (tab && tab !== "home") {
+            if (goHome()) { guard(); return; }
+        }
+
+        /* 3단계 — 홈에서 눌렀다.
+                  한 번은 붙잡고, 2초 안에 또 누르면 보내드린다.
+
+           ⚠️ 한 번에 꺼지면 아기 안고 한 손으로 쓰다가
+              잘못 누른 사람이 그대로 쫓겨난다.
+              기록을 쓰다 만 상태였으면 그게 다 날아간다. */
+        if (Date.now() - lastAsk < EXIT_WINDOW) {
+            /* 칸을 다시 안 쌓는다. 그리고 한 칸 더 물러난다.
+               첫 진입 기록보다 뒤로 가면 앱이 닫힌다. */
+            try { history.back(); } catch (e) {}
+            return;
+        }
+
+        lastAsk = Date.now();
+        say("\uD83D\uDC4B 한 번 더 누르면 배냇함이 닫혀요");
+        guard();
     });
 
     /* ----------------------------------------------------------
@@ -169,6 +232,11 @@
 
     function boot() {
         scan();
+
+        /* ⚠️ 시작할 때 칸을 하나 쌓아둔다.
+              이게 없으면 첫 뒤로가기가 곧바로 앱 밖으로 나가서
+              우리가 붙잡을 기회조차 없다. */
+        guard();
 
         if (window.MutationObserver) {
             var pending = null;
@@ -196,5 +264,7 @@
         console.log("지금 덮여 있는 화면:", stack.map(function (x) { return x.id; }).join(", ") || "없음");
         console.log("쌓인 주소 칸:", stack.length);
         console.log("history.state:", history.state);
+        console.log("지금 탭:", currentTab() || "모름");
+        console.log("종료 확인 대기중:", Date.now() - lastAsk < EXIT_WINDOW);
     };
 })();

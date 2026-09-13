@@ -203,18 +203,29 @@
         });
     };
 
-    // 다음에 맞을 것 (아직 안 맞은 것 중 가장 가까운 날)
+    /* ⚠️ 예전엔 '아직 안 온 것' 을 먼저 골랐다.
+          그래서 6개월 접종이 9일 지났는데도 "다음은 MMR 1차 · D-172" 라고 떴다.
+          부모가 지금 해야 할 일은 172일 뒤가 아니라 9일 지난 그거다.
+
+          지난 것부터 본다. 단, 60일 넘게 지난 건 안 센다 —
+          그건 이미 병원에서 정리했거나 체크를 안 한 것이고,
+          몇 달 된 걸 계속 들이밀면 그냥 무시하게 된다. */
     window.nextVaccine = function () {
         var list = window.vaccineList().filter(function (v) { return !v.done; });
         if (!list.length) return null;
 
-        // 아직 안 온 것 중 제일 가까운 것
+        var late = list.filter(function (v) { return v.left < 0 && v.left >= -60; });
+        if (late.length) {
+            late.sort(function (a, b) { return b.left - a.left; });   // 가장 최근에 지난 것
+            return late[0];
+        }
+
         var future = list.filter(function (v) { return v.left >= 0; });
         if (future.length) {
             future.sort(function (a, b) { return a.left - b.left; });
             return future[0];
         }
-        // 전부 지났으면 가장 최근에 지난 것
+
         list.sort(function (a, b) { return b.left - a.left; });
         return list[0];
     };
@@ -321,6 +332,26 @@
         '</div>';
     }
 
+    /* infopick.js 의 카드가 이걸 부른다.
+       거기서 정의한 게 있으면 존중하고, 없을 때만 우리가 연다. */
+    (function bridge() {
+        var t = setInterval(function () {
+            if (typeof window.goVaccineSchedule !== "function") return;
+            clearInterval(t);
+            var orig = window.goVaccineSchedule;
+            if (orig.__sheet) return;
+            var w = function () {
+                if (typeof window.openVaccineSheet === "function") {
+                    try { return window.openVaccineSheet(); } catch (e) {}
+                }
+                return orig.apply(this, arguments);
+            };
+            w.__sheet = true;
+            window.goVaccineSchedule = w;
+        }, 300);
+        setTimeout(function () { clearInterval(t); }, 12000);
+    })();
+
     window.openVaccineSheet = function () {
         var old = document.getElementById("vaccine-sheet");
         if (old) old.remove();
@@ -426,14 +457,20 @@
 
     /* ---------- 시작 ---------- */
 
-    function boot() {
-        setTimeout(function () { mount(); mountEntry(); }, 1600);
-        setTimeout(function () { mount(); mountEntry(); watch(); }, 4000);
-        setInterval(function () { mount(); mountEntry(); }, 10 * 60000);
+    /* ⚠️ 화면에 카드를 두 개 더 만들고 있었다. 그런데 infopick.js 가
+          이미 같은 걸 하고 있었다(info-vaccine). 그쪽이 더 낫다 —
+          한 달 안쪽일 때만 뜨고, 지났으면 빨갛게 알려준다.
 
-        document.addEventListener("visibilitychange", function () {
-            if (!document.hidden) setTimeout(function () { mount(); mountEntry(); }, 500);
-        });
+          우리가 또 만드니 육아정보 탭 맨 위에 "다음은 MMR 1차 · D-172" 가
+          덩그러니 붙고, 바로 밑에 "생후 6개월 접종 9일 지남" 이 따로 떴다.
+          같은 화면에서 두 카드가 서로 다른 말을 하고 있었던 것이다.
+
+          카드는 infopick 에 맡기고, 우리는 '일정표' 만 맡는다.
+          infopick 의 카드를 누르면 goVaccineSchedule() 이 불리는데
+          그게 우리 일정표를 연다. 역할이 깔끔하게 갈린다. */
+
+    function boot() {
+        setTimeout(function () { watch(); }, 4000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
