@@ -1,4 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+/* ⚠️ 폰트는 index.html <head> 로 옮겼다. @import 는 느리고 버전이 없었다. */
 
 * { 
     box-sizing: border-box; 
@@ -21,10 +21,11 @@ body {
     overflow-wrap: break-word; 
 }
 a { text-decoration: none; color: inherit; }
-.container { max-width: 600px; margin: 0 auto; padding: 0 20px 120px; } 
+.container { max-width: 600px; margin: 0 auto; padding: 0 20px calc(120px + env(safe-area-inset-bottom, 0px)); } 
 
 /* 헤더와 홈버튼 설정 */
-.app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; padding: 0; width: 100%; }
+/* ⚠️ viewport-fit=cover 를 켜면 sticky 헤더가 노치 밑으로 파고든다. */
+.app-header { background: #FFFFFF; border-bottom: 1px solid #E5E8EB; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; padding: 0; width: 100%;  padding-top: env(safe-area-inset-top, 0px); }
 
 .back-btn { 
     font-size: 14px; 

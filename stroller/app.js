@@ -657,9 +657,22 @@ function shareResult() {
     } else {
         // 카카오톡이 안 될 때는 그냥 주소를 복사해 줌!
         navigator.clipboard.writeText(shareUrl).then(() => {
-            alert('결과 페이지 주소가 복사되었습니다! 남편에게 붙여넣기 해주세요 🤍');
+            alert('주소를 복사했어요. 짝꿍에게 붙여넣기 해주세요 🤍');
         }).catch(err => {
-            prompt("아래 주소를 복사해서 남편에게 보내주세요!", shareUrl);
+            prompt("아래 주소를 복사해서 짝꿍에게 보내주세요", shareUrl);
         });
     }
 }
+
+/* ⚠️ 헤더의 "유모차 49종" 이 글자로 박혀 있었다.
+      data.js 에 한 종 더 넣는 날 같이 안 고치면 그대로 거짓말이 된다. */
+(function () {
+    function paintCount() {
+        var b = document.getElementById("stroller-count-badge");
+        if (!b) return;
+        var list = (typeof strollerData !== "undefined" && strollerData) ? strollerData : null;
+        if (list && list.length) b.textContent = "유모차 " + list.length + "종";
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(paintCount, 200); });
+    else setTimeout(paintCount, 200);
+})();
