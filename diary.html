@@ -236,13 +236,33 @@
             
            <!-- 🌟 투명하고 세련된 출판 안내 하단 바 (오해 방지 & 기대감 고취) -->
             <div style="padding: 20px 24px; background:#FFFFFF; border-top:1px solid #E8E3DD; text-align:center; flex-shrink: 0;">
-                <div style="font-size: 11.5px; color: #8A7E78; margin-bottom: 12px; line-height: 1.5; font-weight: 600; letter-spacing: -0.3px;">
-                    ✨ 100일의 기록이 완성되면, 세상에 단 한 권뿐인<br>
-                    <b style="color: #4A413C;">하드커버 양장본 실물 책 (유료 제작 상품)</b>으로 소장하실 수 있습니다.
+                <!-- ⚠️ 여기 있던 문구와 버튼을 고쳤습니다. 이유를 적어둡니다.
+
+                     전에는 이렇게 되어 있었습니다.
+                       "하드커버 양장본 실물 책으로 소장하실 수 있습니다"
+                       [실물 양장본 출판 사전 안내 신청하기]
+                       → 누르면 alert 하나. 신청이 어디에도 안 남습니다.
+
+                     세 가지가 문제였습니다.
+                       ① "소장하실 수 있습니다" 는 이미 되는 것처럼 들립니다.
+                          제작처도 값도 아직 없습니다.
+                       ② "사전 예약" 은 법적으로 청약 유인입니다.
+                          받아놓고 안 만들면 그건 약속을 어긴 게 됩니다.
+                       ③ 버튼을 눌러도 아무 데도 안 남으니, 정작 열었을 때
+                          누구에게 알려야 할지 모릅니다. 알려준다는 말도 거짓말이 됩니다.
+
+                     지금 사실대로 적고, 신청은 진짜로 남깁니다. -->
+
+                <div style="font-size: 11.5px; color: #8A7E78; margin-bottom: 12px; line-height: 1.6; font-weight: 600; letter-spacing: -0.3px;">
+                    100쪽이 차면 <b style="color: #4A413C;">종이책으로 만드는 걸 준비하고 있어요.</b><br>
+                    아직 값과 제작처를 정하는 중이라 신청은 못 받습니다.
                 </div>
-                <button onclick="alert('💌 [사전 예약 안내]\n\n정식 출판 서비스 오픈 시, 앱을 통해 가장 먼저 제작 신청을 하실 수 있도록 안내해 드릴게요! 열심히 기록을 채워주세요 🤍');" style="width:100%; padding:16px; background:#4A413C; color:#FFF; border:none; border-radius:16px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 8px 16px rgba(74, 65, 60, 0.15); transition: 0.2s;">
-                    실물 양장본 출판 사전 안내 신청하기
+                <button id="book-notify-btn" onclick="window.notifyPaperBook && window.notifyPaperBook()" style="width:100%; padding:16px; background:#4A413C; color:#FFF; border:none; border-radius:16px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 8px 16px rgba(74, 65, 60, 0.15); transition: 0.2s;">
+                    열리면 알려주세요
                 </button>
+                <div style="font-size:10.5px; color:#A79C90; margin-top:9px; line-height:1.5; font-weight:600;">
+                    이름만 적어두는 거예요. 결제도, 예약도 아닙니다.
+                </div>
             </div>
         </div>
     </div>
@@ -861,5 +881,7 @@
     <script src="diarylock.js"></script>
     <!--        100장마다 책 한 권이 꽂히는 책장 -->
     <script src="bookshelf.js?v=1"></script>
+    <!-- 📖 종이책 알림 신청 — 진짜로 남긴다 -->
+    <script src="paperbook.js?v=1"></script>
 </body>
 </html>

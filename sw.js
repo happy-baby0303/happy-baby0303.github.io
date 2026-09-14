@@ -75,7 +75,7 @@ self.addEventListener('notificationclick', function (event) {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v12';
+const CACHE = 'baenaet-v18';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -139,6 +139,7 @@ const ASSETS = [
     './nursing.js',
     './outingreturn.js',
     './outingsmart.js',
+    './paperbook.js',
     './photobook.js',
     './photos.js',
     './placefilter.js',
@@ -166,7 +167,7 @@ const ASSETS = [
           한 번 열어보면 fetch 핸들러가 알아서 담는다. */
     './bottle/index.html',    './bottle/data.js',    './bottle/app.js',    './bottle/style.css',
     './stroller/index.html',  './stroller/data.js',  './stroller/app.js',  './stroller/style.css',
-    './carseat/index.html',   './carseat/data.js',   './carseat/app.js',   './carseat/style.css',
+    './carseat/index.html',   './carseat/data.js',   './carseat/app.js',   './carseat/style.css',   './carseat/carseatcrash.js',
     './food/index.html',      './food/data.js',      './food/app.js',      './food/style.css',
     './toy/index.html',       './toy/data.js',       './toy/app.js',
     './shared/babyswitch.js', './shared/disclosure.js', './shared/plusmark.js',

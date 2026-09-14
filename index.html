@@ -116,18 +116,39 @@
       가리고 있는데, 덮개 z-index 9999 가 헤더(2000) 위를 덮어서
       헤더 윗부분을 잘라먹고 있었다. */
 
+/* ⚠️ 두 번째로 틀렸다. 이유를 적어둔다.
+
+      style.css 는 .global-header 를 position:fixed; height:56px 로 쓴다.
+      그런데 HTML 의 <header> 태그에 인라인으로
+        style="padding: 12px 20px; position: sticky; top: 0; z-index: 100"
+      이 박혀 있다. 인라인이 CSS 파일을 이기므로 실제로는 sticky 다.
+
+      sticky 는 흐름 안에 있다. 그래서 body 의 padding-top 만큼
+      '아래에서' 시작한다. fixed 라고 착각하고 body 에 60+inset 을 주니
+
+          body padding-top   100px   (헤더 위 빈칸)
+        + 헤더 자기 padding    40px
+        ─────────────────────────
+          로고 위에 140px      🔴
+
+      이게 형님이 보신 그 공백이다.
+
+      바로잡는다.
+        · 헤더는 sticky 그대로 둔다 (흐름 안에 있으면 body 여백이 필요 없다)
+        · 안전영역은 헤더 '위' 가 아니라 body 맨 위에 한 번만 준다
+        · 높이는 건드리지 않는다. 인라인 padding 12px 이 이미 알아서 한다 */
+
 .global-header {
-    height: calc(56px + env(safe-area-inset-top, 0px)) !important;
-    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-top: 12px !important;              /* 인라인 값 그대로 */
+    height: auto !important;                   /* 56px 고정 해제 — 내용대로 */
     box-sizing: border-box !important;
     background: #FAF7F2 !important;
     backdrop-filter: none !important;
 }
 
-/* 헤더가 커진 만큼 본문도 내려야 헤더 밑에 숨지 않는다.
-   style.css 의 body{padding-top:60px} 을 대신한다. */
+/* 안전영역은 여기 한 번만. 헤더가 sticky 라 이 위쪽에서 시작한다. */
 body {
-    padding-top: calc(60px + env(safe-area-inset-top, 0px)) !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
 }
 /* ========================================== */
 /* 👵 조부모 / 시터 모드 전용 프라이버시 철통 방어 패치 */
@@ -2743,7 +2764,12 @@ input[type="number"] { -moz-appearance: textfield; }
 </div> <!-- 여기가 전체 화면(wrapper) 닫히는 곳! -->
 
 
-<footer style="text-align: center; padding: 24px 16px 100px 16px; font-size: 11px; color: var(--text-s); line-height: 1.6; margin-top: 0; border-top: 1px solid var(--border);">
+<!-- ⚠️ 아래 여백이 100px 이었다. 하단 탭을 피하려고 넣은 값인데,
+     그 일은 mobile.js 가 .tab-content 에 이미 하고 있다(78 + 안전영역).
+     둘이 겹쳐서 저작권 한 줄 밑에 200px 가 비어 있었다.
+     footer 는 wrapper 바깥이라 .tab-content 여백을 안 받는다.
+     여기는 탭 높이만큼만 준다. -->
+<footer style="text-align: center; padding: 24px 16px calc(20px + env(safe-area-inset-bottom, 0px)) 16px; font-size: 11px; color: var(--text-s); line-height: 1.6; margin-top: 0; border-top: 1px solid var(--border);">
     <div style="font-size: 10.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">
       <p style="margin-bottom: 6px; font-weight: 800;">© 2026. 배냇함(Baenaet). All rights reserved.</p>
         <p style="margin: 0; font-size: 10.5px; font-weight: 500; color: #B0B8C1; line-height: 1.6;">이 앱에는 네이버 나눔글꼴, 고운바탕(류양희), Pretendard가 사용되었습니다.</p>

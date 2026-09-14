@@ -133,7 +133,10 @@
         /* 머리말 \u2014 숫자보다 말이 먼저다 */
         var head, sub;
         if (st.done === 0) {
-            head = "아직 빈 책장이에요";
+            /* ⚠️ "아직 빈 책장이에요" 는 사실이지만 힘이 빠지는 말이다.
+                  처음 들어온 사람이 제일 먼저 읽는 문장이다.
+                  없다고 말하지 말고, 시작되는 중이라고 말한다. */
+            head = "첫 쪽을 기다리는 중이에요";
             sub  = "둘 다 답한 날이 한 쪽이 됩니다";
         } else if (inBook === 0 && full > 0) {
             head = full + "권 「" + bookTitle(full) + "」 이 방금 꽂혔어요";
@@ -142,8 +145,16 @@
             head = "이번 권이 " + left + "쪽 남았어요";
             sub  = "곧 「" + bookTitle(nextVol) + "」 이 꽂힙니다";
         } else {
-            head = full > 0 ? (full + "권까지 꽂혔어요") : "첫 권을 쓰는 중이에요";
-            sub  = "「" + bookTitle(nextVol) + "」 까지 " + left + "쪽";
+            /* ⚠️ 여기가 제일 오래 보이는 문구인데
+                  "「처음」까지 98쪽" 이 먼저 눈에 들어왔다.
+                  이제 두 쪽 쓴 사람에게 98쪽은 그냥 막막한 숫자다.
+
+                  채운 걸 먼저 말한다. 남은 건 그 뒤에 작게.
+                  쌓인 걸 보여주는 게 이 화면이 하려던 일이다. */
+            head = full > 0
+                ? (full + "권 하고 " + inBook + "쪽")
+                : (inBook + "쪽을 썼어요");
+            sub  = "한 쪽씩 「" + bookTitle(nextVol) + "」 이 되어갑니다";
         }
 
         /* 혼자만 쓴 날이 있으면 조용히 알려준다. 재촉이 아니라 안내다. */
@@ -196,8 +207,12 @@
         'overflow-x:auto;overflow-y:hidden;padding:0 2px 0 0;' +
         '-webkit-overflow-scrolling:touch;scrollbar-width:none;}' +
     '.bs-books::-webkit-scrollbar{display:none;}' +
-    '.bs-board{height:7px;border-radius:0 0 4px 4px;background:' + LINE + ';' +
-        'box-shadow:0 3px 10px rgba(120,100,80,0.16);}' +
+    /* ⚠️ 선반이 7px 짜리 연한 선이라 '책장' 으로 안 읽혔다.
+          책이 아직 없을 땐 선반이 화면의 전부인데 그게 안 보이면
+          그냥 빈 종이가 된다. 두껍게, 나뭇결처럼. */
+    '.bs-board{height:11px;border-radius:0 0 5px 5px;' +
+        'background:linear-gradient(180deg,#D9CBB8,#BFAE99);' +
+        'box-shadow:0 5px 14px rgba(120,100,80,0.22);}' +
 
     /* 꽂힌 책 */
     '.bs-spine{position:relative;flex:0 0 auto;width:46px;height:118px;' +
@@ -213,19 +228,28 @@
         'line-height:1.15;max-height:66px;overflow:hidden;}' +
 
     /* 만들어지는 중인 책 \u2014 테두리만 있고 아래에서 찬다 */
-    '.bs-making{background:' + PAPER + ';color:' + INK_S + ';' +
-        'border:1.5px dashed ' + LINE + ';box-shadow:none;}' +
+    /* ⚠️ 쓰는 중인 책이 점선 윤곽뿐이라 '아직 없음' 으로 보였다.
+          첫 권을 쓰는 사람 화면엔 이것 하나뿐인데 그게 비어 보이면
+          책장 전체가 텅 빈 것처럼 읽힌다.
+          실선으로 세우고, 찬 만큼 보라가 차오르게 한다. */
+    '.bs-making{background:#FFFFFF;color:' + INK_S + ';' +
+        'border:1.5px solid rgba(142,124,240,0.45);' +
+        'box-shadow:2px 2px 7px rgba(80,64,48,0.12);}' +
     '.bs-fill{position:absolute;left:0;right:0;bottom:0;' +
-        'background:linear-gradient(180deg,rgba(142,124,240,0.30),rgba(142,124,240,0.16));' +
+        'background:linear-gradient(180deg,rgba(142,124,240,0.55),rgba(142,124,240,0.30));' +
+        'min-height:5px;' +      /* 0쪽이어도 바닥에 한 줄은 보이게 */
         'transition:height .5s cubic-bezier(.22,1,.36,1);}' +
     '.bs-making-in{position:relative;display:flex;flex-direction:column;' +
         'align-items:center;justify-content:flex-end;height:100%;' +
         'padding-bottom:12px;box-sizing:border-box;}' +
 
     /* 빈 자리 */
-    '.bs-slot{flex:0 0 auto;width:46px;height:74px;border-radius:3px;' +
-        'background:repeating-linear-gradient(135deg,' + PAPER + ' 0 6px,' +
-        'rgba(235,227,217,0.55) 6px 12px);opacity:0.55;}' +
+    /* ⚠️ 빈 자리가 빗금이었다. 빗금은 '없음' 이 아니라 '고장' 으로 읽힌다.
+          앞으로 꽂힐 자리니까 조용한 그림자로만 둔다.
+          존재감을 더 낮춰서 지금 쓰는 책이 주인공이 되게. */
+    '.bs-slot{flex:0 0 auto;width:46px;height:62px;border-radius:3px;' +
+        'background:rgba(191,174,153,0.10);' +
+        'border:1px solid rgba(191,174,153,0.18);opacity:0.8;}' +
 
     '.bs-alone{margin-top:15px;font-size:12.5px;font-weight:600;' +
         'color:' + INK_L + ';line-height:1.65;word-break:keep-all;}' +

@@ -42,7 +42,15 @@
         { id: "stroller-sheet",  close: "closeStrollerSheet" },
         { id: "carseat-sheet",   close: "closeCarseatSheet" },
         { id: "food-sheet",      close: "closeFoodSheet" },
-        { id: "toy-sheet",       close: "closeToySheet" }
+        { id: "toy-sheet",       close: "closeToySheet" },
+        { id: "crash-card-sheet", close: null },
+        { id: "passed-sheet",    close: "closePassedSheet" },
+        { id: "food-paywall",    close: "closeFoodPaywall" },
+        { id: "baby-picker",     close: null },
+        { id: "install-guide-modal", close: null },
+        { id: "cooking-mode-modal",  close: "closeCookingMode" },
+        { id: "meal-bottom-sheet",   close: null },
+        { id: "test-bottom-sheet",   close: null }
     ];
 
     function visible(el) {
@@ -84,14 +92,47 @@
 
     /* ---------- 둘째 탭에 있나 ---------- */
 
+    /* ⚠️ 여기가 젖병 것만 보고 있었다. 제가 젖병에서 만들고
+          다섯 곳에 그대로 복사했기 때문이다.
+
+              젖병    view-bottle-tools   switchBottleTab
+              유모차   view-stroller-use   switchStrollerTab
+              카시트   view-carseat-use    switchCarseatTab
+              이유식   (탭 이름이 또 다름)
+
+          그래서 젖병 말고는 2단계(둘째 탭 → 첫 탭)가 아예 안 돌았다.
+          유모차에서 '쓰면서 챙길 것' 을 열고 뒤로가기를 누르면
+          첫 탭으로 가는 게 아니라 큐레이터 밖으로 나갔다.
+
+          폴더마다 이름이 다르니 이름을 다 적어둔다. */
+
+    var SECOND_TABS = [
+        "view-bottle-tools", "view-stroller-use", "view-carseat-use",
+        "view-food-use", "view-toy-use", "view-bottle-use"
+    ];
+
+    var TO_FIRST = [
+        ["switchBottleTab",   "pick"],
+        ["switchStrollerTab", "pick"],
+        ["switchCarseatTab",  "pick"],
+        ["switchFoodTab",     "pick"],
+        ["switchToyTab",      "pick"],
+        ["switchFoodView3",   "cook"]
+    ];
+
     function onSecondTab() {
-        var t = document.getElementById("view-bottle-tools");
-        return !!(t && visible(t));
+        for (var i = 0; i < SECOND_TABS.length; i++) {
+            var t = document.getElementById(SECOND_TABS[i]);
+            if (t && visible(t)) return true;
+        }
+        return false;
     }
 
     function toFirstTab() {
-        if (typeof window.switchBottleTab === "function") {
-            try { window.switchBottleTab("pick"); return true; } catch (e) {}
+        for (var i = 0; i < TO_FIRST.length; i++) {
+            var fn = window[TO_FIRST[i][0]];
+            if (typeof fn !== "function") continue;
+            try { fn(TO_FIRST[i][1]); return true; } catch (e) {}
         }
         return false;
     }

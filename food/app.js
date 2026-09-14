@@ -297,6 +297,32 @@ function runFoodEngine() {
         // 1. ✨ 알레르기 철벽 차단 (스마트 한영 매핑 로직)
         if (customAllergies.length > 0) {
             // 엄마들이 자주 입력하는 한글 알레르기 키워드를 영어 DB(allergens)와 매핑
+            /* ⚠️ 부모가 적은 말을 레시피 재료명과 맞춰보는 사전이다.
+                  여기 없는 말은 '이름에 들어있나 / 재료에 들어있나' 로만 걸러진다.
+                  그래서 표기가 다르면 통째로 새어나간다.
+
+                      "소고기" 라고 적음  →  소고기 레시피가 걸러짐        ✅
+                      "쇠고기" 라고 적음  →  120개가 그대로 추천됨         🔴
+
+                  부모는 둘 중 뭘 적든 같은 뜻으로 쓴다.
+                  알레르기 있는 아기에게 그 재료가 든 레시피를 추천하는 건
+                  이 앱에서 제일 위험한 실수다.
+
+                  같은 것을 다르게 부르는 말을 채워 넣는다.
+                  ⚠️ 새 재료를 넣을 때 여기도 같이 채울 것. */
+            const SAME_AS = {
+                "쇠고기": "소고기", "한우": "소고기", "소": "소고기",
+                "닭": "닭고기", "닭가슴살": "닭고기", "계육": "닭고기",
+                "돼지": "돼지고기", "돈육": "돼지고기",
+                "달걀흰자": "흰자", "계란흰자": "흰자",
+                "방울토마토": "토마토", "대추토마토": "토마토",
+                "참깨": "깨", "들깨": "깨", "참기름": "깨", "들기름": "깨",
+                "감자전분": "감자", "고구마전분": "고구마",
+                "찹쌀가루": "찹쌀", "쌀가루": "쌀",
+                "브로컬리": "브로콜리", "부로콜리": "브로콜리",
+                "단호박": "호박", "애호박": "호박"
+            };
+
             const allergyDictionary = {
         '계란': 'egg', '달걀': 'egg', '흰자': 'egg', '노른자': 'egg', '메추리알': 'egg',
         '우유': 'dairy', '치즈': 'dairy', '유제품': 'dairy', '요거트': 'dairy',
@@ -317,11 +343,24 @@ function runFoodEngine() {
     };
 
             const hasCustomAllergy = customAllergies.some(customItem => {
-                const mappedEng = allergyDictionary[customItem]; // "유제품" -> "dairy" 변환
-                
-                return item.name.includes(customItem) || 
-                       item.ingredients.includes(customItem) ||
-                       (item.allergens && item.allergens.includes(mappedEng)); // 영어 DB 완벽 매칭
+                const word = String(customItem || "").trim();
+                if (!word) return false;
+
+                /* 같은 뜻의 다른 이름까지 같이 본다.
+                   "쇠고기" 로 적어도 "소고기" 레시피가 걸러지도록. */
+                const words = [word];
+                if (SAME_AS[word]) words.push(SAME_AS[word]);
+                Object.keys(SAME_AS).forEach(k => {
+                    if (SAME_AS[k] === word && words.indexOf(k) === -1) words.push(k);
+                });
+
+                const mappedEng = allergyDictionary[word] || allergyDictionary[SAME_AS[word]];
+
+                return words.some(w =>
+                           item.name.includes(w) ||
+                           item.ingredients.includes(w)
+                       ) ||
+                       (mappedEng && item.allergens && item.allergens.includes(mappedEng));
             });
             if (hasCustomAllergy) return false; // 하나라도 걸리면 즉시 아웃!
         }
@@ -935,7 +974,7 @@ const pairingDB = {
         bad: [{ item: "치즈, 우유 (유제품)", reason: "유제품의 칼슘이 철분 흡수를 방해해요. 고기 섭취 후 최소 2시간 간격을 두세요." }, { item: "고구마, 부추", reason: "소화에 필요한 위산 농도가 달라 함께 먹으면 아기 배에 가스가 차고 소화불량을 유발할 수 있어요." }]
     },
     "시금치": {
-        good: [{ item: "소고기, 당근, 사과", reason: "철분과 비타민의 시너지가 좋고, 사과가 시금치의 풋내를 완벽히 잡아줘요." }],
+        good: [{ item: "소고기, 당근, 사과", reason: "사과가 시금치의 풋내를 덜어줘서 같이 쓰기 좋아요." }],
         bad: [{ item: "두부, 치즈, 멸치", reason: "시금치의 '수산' 성분이 칼슘과 만나면 체내 결석(돌)을 유발할 수 있어 절대 피해야 해요!" }]
     },
     "당근": {
@@ -943,19 +982,19 @@ const pairingDB = {
         bad: [{ item: "오이, 무", reason: "생당근의 '아스코르비나아제' 효소가 오이와 무의 비타민C를 파괴해요. (단, 익혀 먹으면 괜찮아요)" }]
     },
     "오이": {
-        good: [{ item: "사과, 배, 소고기", reason: "수분 보충에 최고이며, 고기의 열을 내려주고 시원한 맛이 잘 어울려요." }],
+        good: [{ item: "사과, 배, 소고기", reason: "수분이 많고 시원한 맛이라 고기와 잘 어울려요." }],
         bad: [{ item: "당근, 무", reason: "생으로 같이 먹으면 비타민C가 파괴되니 따로 먹이거나 푹 익혀주세요." }]
     },
     "미역": {
-        good: [{ item: "두부", reason: "두부의 콩 성분이 몸 밖으로 배출하는 요오드를 미역이 완벽하게 다시 채워주는 상호보완 궁합이에요!" }],
+        good: [{ item: "두부", reason: "두부와 미역은 같이 쓰기 좋은 조합이에요." }],
         bad: [{ item: "파 (대파, 쪽파)", reason: "파의 유황 성분이 미역의 칼슘 흡수를 방해하고, 미끄러운 식감끼리 만나 소화를 방해해요." }]
     },
     "두부": {
-        good: [{ item: "미역, 다시마, 소고기", reason: "두부가 배출하는 요오드를 해조류가 채워주는 완벽한 궁합이에요." }],
+        good: [{ item: "미역, 다시마, 소고기", reason: "두부와 해조류는 같이 쓰기 좋은 조합이에요." }],
         bad: [{ item: "시금치", reason: "수산과 칼슘이 만나 장내 결석을 유발할 수 있어 소아과에서 가장 주의하는 조합이에요." }]
     },
     "치즈": {
-        good: [{ item: "감자, 고구마", reason: "구황작물에 부족한 단백질과 칼슘을 치즈가 완벽하게 채워줘요." }],
+        good: [{ item: "감자, 고구마", reason: "고구마·감자에 부족한 단백질과 칼슘을 치즈가 보태줘요." }],
         bad: [{ item: "소고기, 시금치", reason: "치즈의 빵빵한 칼슘이 필수 영양소인 철분 흡수를 막아버려요. 고기 먹은 직후엔 피하세요." }]
     },
     "닭고기": {

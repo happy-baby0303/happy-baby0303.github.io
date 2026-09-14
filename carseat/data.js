@@ -1,3 +1,12 @@
+/* ⚠️ 수수료를 받는 링크가 달린 화면이다.
+      "가장" · "완벽" · "예술" 같은 말은 근거를 대야 하는 표현이고,
+      근거 없이 쓰면 표시광고법 문제가 된다. 사실만 적는다.
+
+   ⚠️ 카시트는 아기 목숨이 걸린 물건이다.
+      ADAC 점수는 실제 값만 적는다 (1.6~2.5 가 '좋음' 등급이다).
+      시험을 안 받은 제품은 "미참여" 라고 그대로 적는다.
+      좋아 보이게 등급을 올려 적지 않는다. */
+
 const carseatData = [
     // --------------------------------------------------------
     // 🚀 [수익 창출] 쿠팡 파트너스 가성비 & 베스트셀러 라인업
@@ -5,7 +14,7 @@ const carseatData = [
     {
         id: "cs01", brand: "조이", name: "아이스핀 360",
         age: ["newborn", "toddler"], install: ["isofix_leg"], carSize: ["compact", "sedan", "suv"], 
-        compactOk: true, // 👈 [추가됨] 소형차 장착 쌉가능!
+        compactOk: true,   // 소형차 장착 가능
         rotation: "yes", safety: ["isize", "adac"], price: "mid",
         bodySpec: "📏 40~105cm / ⚖️ 최대 19kg",
         specs: { adacScore: "1.8 (좋음)", reboundStopper: "컴팩트 베이스" }, // 👈 [수정됨] 최우수 -> 좋음
@@ -106,7 +115,7 @@ const carseatData = [
         rotation: "no", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 100~150cm / ⚖️ 15~50kg",
         specs: { adacScore: "1.9 (좋음)", reboundStopper: "특허 헤드레스트 각도 조절" },
-        desc: "주니어 카시트에서 자주 비교되는 제품입니다. 차에서 아이가 잠들어도 목이 앞으로 고꾸라지지 않는 특허받은 헤드레스트 기술이 예술입니다.",
+        desc: "주니어 카시트에서 자주 비교되는 제품입니다. 차에서 아이가 잠들었을 때 머리가 앞으로 쏠리는 걸 줄이도록 헤드레스트 각도를 조절할 수 있습니다.",
         purchasePlatform: "official", linkUrl: "https://cybex-online.com/ko-kr", searchKeyword: "싸이벡스 솔루션 T 아이픽스"
     },
     {
@@ -133,7 +142,7 @@ const carseatData = [
         rotation: "no", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 40~75cm",
         specs: { adacScore: "1.7 (좋음)", reboundStopper: "스토케 유모차 어댑터 프리 결합" }, // 👈 [수정됨] 최우수 -> 좋음
-        desc: "스토케 유모차를 쓰신다면 고민할 필요가 없습니다. 귀찮은 어댑터 조립 없이 스토케 프레임에 바로 꽂히는 프리미엄 카시트입니다.",
+        desc: "스토케 유모차를 쓰신다면 어댑터 없이 프레임에 바로 꽂힙니다.",
         purchasePlatform: "official", linkUrl: "https://www.stokke.com/KOR/ko-kr/", searchKeyword: "스토케 이지고 모듈러"
     }
 ];

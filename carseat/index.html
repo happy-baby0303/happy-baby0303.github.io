@@ -8,7 +8,7 @@
     })(window,document,'script','dataLayer','GTM-N8RVVNWZ');</script>
     <meta charset="UTF-8">
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 카시트 고르기</title>
 
     <meta property="og:type" content="website">
@@ -17,6 +17,10 @@
     <meta property="og:image" content="https://happy-baby0303.github.io/baby-master/stroller/og-image.png"> 
     <meta property="og:url" content="https://happy-baby0303.github.io/baby-master/carseat/index.html">
 
+    <!-- ⚠️ 폰트는 style.css 의 @import 가 아니라 여기서 받는다.
+         버전을 본 앱(@v1.3.8)과 똑같이 고정해야 글자 모양이 안 갈린다. -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -158,6 +162,12 @@
         <div class="legal-footer">
             <p><strong>※ 면책 조항</strong><br>
             본 서비스의 차량 호환성 및 안전 스펙 정보는 제조사 기준에 따르며, 차종의 연식이나 실내 옵션에 따라 미세한 차이가 있을 수 있습니다. 구매 전 반드시 확인하시기 바랍니다.</p>
+
+            <!-- ⚠️ 여기 제휴 고지를 넣었다가 뺐습니다.
+     ../shared/disclosure.js 가 이미 화면 맨 위에 같은 고지를 띄웁니다.
+     한 화면에 두 번 적는다고 더 안전해지지 않습니다.
+     공정위 지침이 요구하는 건 '소비자가 쉽게 인식할 수 있는 곳에 한 번' 이고,
+     최상단 배너가 그 자리입니다. 중복은 오히려 지저분해 보입니다. -->
         </div>
 
         <!-- 💡 [팝업] 차알못을 위한 카시트 장착 방식 10초 가이드 -->
@@ -226,6 +236,8 @@
     <script src="app.js"></script>
     <script src="../shared/disclosure.js"></script>
     <script src="carseatguide.js"></script>
+    <!-- 🚨 사고 후 교체 판단 + 리콜 확인 -->
+    <script src="carseatcrash.js"></script>
     <script src="carseatown.js"></script>
     <script src="carseatcry.js"></script>
     <script src="carseattabs.js"></script>

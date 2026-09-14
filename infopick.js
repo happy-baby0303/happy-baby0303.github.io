@@ -766,14 +766,61 @@
         opened = res.list;
         place(shell, libBlock, CARD_ID, res.list.length ? pickHTML(res) : "");
 
-        place(shell, libBlock, MON_ID, monthHTML());
+        /* ⚠️ 이번 달 밤중 수유는 여기서 뺐다.
+              육아정보 탭은 '읽을거리' 다. 접종 일정, 백과사전, 월령별 글.
+              그런데 이것만 '내 기록 통계' 라서 혼자 성격이 달랐다.
+              읽을거리 사이에 숫자 카드가 끼어 있으니 뜬금없어 보인다.
+
+              홈의 통계 바로 밑으로 옮긴다. 거기가 숫자들이 사는 자리다.
+              mountHome() 이 그 일을 한다. */
     }
+
+    /* ==========================================================
+       이번 달 밤중 수유 — 홈 통계 밑에 놓는다
+       ----------------------------------------------------------
+       다른 육아앱이 못 하는 자리가 여기다.
+       걔넨 그 아기가 지난달에 몇 번 깼는지 모른다.
+
+       ⚠️ 홈 카드로 만들지 않는다.
+          homelayout.js 가 카드를 둘까지만 남기는데, 거기 끼어들면
+          배냇함 카드나 기한 알림을 밀어낸다.
+          통계의 한 줄로 조용히 붙는다.
+       ========================================================== */
+
+    function mountHome() {
+        var old = document.getElementById(MON_ID + "-home");
+        var html = monthHTML();
+
+        if (!html) { if (old) old.remove(); return; }
+
+        var stats = document.getElementById("tracker-stats-container");
+        if (!stats || !stats.parentNode) { if (old) old.remove(); return; }
+
+        var box = document.createElement("div");
+        box.innerHTML = html;
+        var el = box.firstChild;
+        if (!el) return;
+        el.id = MON_ID + "-home";
+        el.style.marginTop = "-10px";      // 통계 블록에 붙여둔다
+
+        if (old) old.parentNode.replaceChild(el, old);
+        else stats.parentNode.insertBefore(el, stats.nextSibling);
+    }
+
+    window.refreshNightFeedRow = mountHome;
 
     window.refreshInfoPick = mount;
 
     /* ---------- 시작 ---------- */
 
     function boot() {
+        setTimeout(mountHome, 1800);
+        setTimeout(mountHome, 4200);
+        setInterval(mountHome, 10 * 60000);
+        document.addEventListener("visibilitychange", function () {
+            if (!document.hidden) setTimeout(mountHome, 600);
+        });
+
         setTimeout(mount, 1600);
         setTimeout(mount, 3800);
 
