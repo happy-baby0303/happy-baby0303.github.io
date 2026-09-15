@@ -2,8 +2,11 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 놀이와 장난감</title>
+    <!-- ⚠️ 폰트는 style.css 의 @import 가 아니라 여기서. 본 앱과 같은 v1.3.8 로 고정. -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 </head>
@@ -214,11 +217,15 @@
     <script src="playlike.js"></script>
     <script src="playlog.js"></script>
     <script src="bathmold.js"></script>
+    <!-- 🔋 단추형 전지 · KC · 리콜 — 안전이라 무료 -->
+    <script src="toysafety.js"></script>
     <script src="toylife.js"></script>
     <script src="../shared/plusmark.js"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <script src="../shared/curatorback.js"></script>
+    <!-- 📐 놀이 탭 카드 순서 고정 — 맨 끝에 로드해야 다 꽂힌 뒤에 정리한다 -->
+    <script src="toyorder.js"></script>
 
 <!-- 🚀 우측 하단 위로 가기 버튼 (높이 30px로 정상화 완료!) -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">
@@ -238,9 +245,12 @@
     </script>
 
 <script>
-    if (localStorage.getItem('tosil_dark_mode') === 'on') {
-        document.body.classList.add('dark-mode');
-    }
+    /* ⚠️ 다크모드는 본 앱에서 뺐다. 여기만 켜면 큐레이터만 까맣게 뜬다. */
+    try {
+        if (localStorage.getItem('tosil_dark_mode') === 'on') {
+            localStorage.removeItem('tosil_dark_mode');
+        }
+    } catch (e) {}
 </script>
 </body>
 </html>
