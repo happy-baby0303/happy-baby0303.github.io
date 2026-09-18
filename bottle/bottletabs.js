@@ -207,6 +207,21 @@
     }
 
     function orderPlus() {
+            /* ⚠️ 여기서 PLUS_TITLE 로 다시 판단하면 안 된다.
+                     plusmark.js 도 자기 목록으로 같은 판단을 하는데,
+                     두 목록이 어긋나면 '배지는 붙었는데 정렬은 무료' 가 된다.
+                     카시트('이번 주행 계획' 오타)와 유모차('카시트를 얹을 수 있나요')가
+                     둘 다 그렇게 됐다. 목록을 두 벌 두면 반드시 어긋난다.
+
+                     plusmark 가 붙인 배지를 그대로 믿는다. 진실은 하나여야 한다.
+                     배지가 아직 안 붙었을 때만 제목으로 짐작한다. */
+            var isPlusCard = function (el) {
+                if (el.querySelector && el.querySelector(".plus-badge")) return true;
+                var h = el.querySelector ? el.querySelector(".matrix-header, [data-plus-head]") : null;
+                var t = h ? (h.textContent || "") : (el.textContent || "").slice(0, 120);
+                return PLUS_TITLE.test(t);
+            };
+
         var pane = document.getElementById(PANE.tools);
         if (!pane) return;
         var kids = Array.prototype.slice.call(pane.children).filter(function (el) {
@@ -216,7 +231,7 @@
         kids.forEach(function (el) {
             var h = el.querySelector ? el.querySelector(".matrix-header") : null;
             var t = h ? (h.textContent || "") : (el.textContent || "").slice(0, 120);
-            (PLUS_TITLE.test(t) ? plus : free).push(el);
+            (isPlusCard(el) ? plus : free).push(el);
         });
         if (!plus.length || !free.length) return;
 

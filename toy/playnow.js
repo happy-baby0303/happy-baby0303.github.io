@@ -216,9 +216,15 @@
 
         if (!plus) {
             var one = list[0];
-            return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:14px;">' +
-                '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                    'color:' + DARK + ';">⏱️ 지금 몇 분 있으세요</div>' +
+            /* ⚠️ .matrix-panel 을 쓰면 안 된다.
+                     바로 아래 '이번 주 놀이'(playweek)는 카드 없이
+                     18px 제목만 쓴다. 둘이 붙어 있는데 하나만 흰 상자면
+                     같은 화면에서 두 가지 디자인이 싸운다.
+                     playweek 모양에 맞춘다. */
+            return '<div id="' + ID + '" style="padding:4px 0 20px;">' +
+                '<div data-plus-head style="font-size:18px; font-weight:900; ' +
+                    'color:' + DARK + '; word-break:keep-all; margin-bottom:6px;">' +
+                    '⏱️ 지금 몇 분 있으세요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '밥 올려놓고 10분, 설거지하는 5분.<br>' +
@@ -239,9 +245,10 @@
             '</div>';
         }
 
-        return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:14px;">' +
-            '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                'color:' + DARK + ';">⏱️ 지금 몇 분 있으세요</div>' +
+        return '<div id="' + ID + '" style="padding:4px 0 20px;">' +
+            '<div data-plus-head style="font-size:18px; font-weight:900; ' +
+                'color:' + DARK + '; word-break:keep-all; margin-bottom:6px;">' +
+                '⏱️ 지금 몇 분 있으세요</div>' +
             '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 (n ? '오늘 <b>' + n + '개</b> 하셨어요. 한 건 빼고 골랐습니다.'

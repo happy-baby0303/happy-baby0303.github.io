@@ -91,14 +91,48 @@
         if (typeof window.nextFoodRepaint === "function") window.nextFoodRepaint();
     };
 
+    /* ⚠️ 전에는 무조건 '오늘' 로 넣었다.
+          그런데 이건 '예전에 먹여본 것' 을 적는 자리다.
+          두 달 전에 먹인 소고기가 오늘로 찍히면 달력이 거짓말을 한다.
+          언제쯤이었는지 한 번만 고르게 한다. */
+
+    function startGuess() {
+        var s = localStorage.getItem("tosil_startDate");
+        if (s) {
+            var p = String(s).split("-").map(Number);
+            if (p.length === 3) {
+                var d = new Date(p[0], p[1] - 1, p[2]);
+                d.setMonth(d.getMonth() + 6);              // 이유식은 대개 6개월쯤 시작
+                var t = new Date(); t.setHours(0, 0, 0, 0);
+                if (d > t) d = new Date(t.getTime() - 7 * 86400000);
+                return d;
+            }
+        }
+        var t2 = new Date(); t2.setDate(t2.getDate() - 30);
+        return t2;
+    }
+
+    function keyOf(d) {
+        return d.getFullYear() + "-" +
+               String(d.getMonth() + 1).padStart(2, "0") + "-" +
+               String(d.getDate()).padStart(2, "0");
+    }
+
     window.savePassed = function () {
         var db = cal();
-        var today = new Date();
-        var key = today.getFullYear() + "-" +
-                  String(today.getMonth() + 1).padStart(2, "0") + "-" +
-                  String(today.getDate()).padStart(2, "0");
 
-        // 이미 달력에 있는 건 건드리지 않는다. 없는 것만 오늘 날짜로 채운다.
+        var when = window.prompt(
+            "언제쯤 먹여보셨어요?  (YYYY-MM-DD)\n" +
+            "정확하지 않아도 됩니다. 비워두면 이유식 시작 무렵으로 넣을게요.",
+            keyOf(startGuess()));
+        if (when === null) return;
+
+        var key;
+        var mm = String(when).match(/(\d{4})\D*(\d{1,2})\D*(\d{1,2})/);
+        if (mm) key = mm[1] + "-" + String(mm[2]).padStart(2, "0") + "-" + String(mm[3]).padStart(2, "0");
+        else key = keyOf(startGuess());
+
+        // 이미 달력에 있는 건 건드리지 않는다. 없는 것만 채운다.
         var already = passed();
         var add = picked.filter(function (n) { return already.indexOf(n) === -1; });
         if (add.length) {
@@ -106,7 +140,7 @@
             add.forEach(function (n) {
                 // ⚠️ time 은 화면에 그대로 찍힌다. 숫자를 넣으면 일련번호처럼 보인다.
                 db[key].push({ type: "test", ingredient: n, status: "pass",
-                               memo: "이미 먹여본 재료로 등록", time: "" });
+                               memo: "예전에 먹여본 재료", past: true, time: "" });
             });
             try { localStorage.setItem(CAL, JSON.stringify(db)); } catch (e) {}
         }
@@ -114,7 +148,7 @@
 
         window.closePassedSheet();
         if (typeof window.renderAutoPilotUI === "function") window.renderAutoPilotUI();
-        alert(picked.length + "가지를 등록했어요.\n이제 이미 먹여본 재료는 '새 테스트'로 안 뜹니다.");
+        alert(picked.length + "가지를 " + key + " 로 등록했어요.\n이제 이미 먹여본 재료는 '새 테스트'로 안 뜹니다.");
     };
 
     function paintSheet() {

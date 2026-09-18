@@ -67,6 +67,35 @@
 
     function myCar() { return localStorage.getItem(KEY) || ""; }
 
+    /* ⚠️ carDB 의 트렁크 치수는 웹에서 모은 값이다. 제조사 공식 제원이 아니다.
+          같은 차종도 연식·트림·스페어타이어·서브우퍼 유무로 달라진다.
+
+          우리 숫자가 틀리면 "들어갑니다" 를 믿고 갔다가 트렁크 앞에서 낭패를 본다.
+          그래서 직접 잰 값을 받아 그걸 먼저 쓴다.
+          줄자 한 번이면 우리 추정치보다 정확하다. */
+    var MY_DEPTH = "tosil_trunk_depth";
+
+    function myDepth() {
+        var v = parseFloat(localStorage.getItem(MY_DEPTH));
+        return (isFinite(v) && v > 20 && v < 250) ? v : null;
+    }
+
+    window.setTrunkDepth = function () {
+        var cur = myDepth();
+        var a = window.prompt(
+            "트렁크를 열고 안쪽 깊이를 재주세요.\n" +
+            "뒷좌석 등받이부터 트렁크 문까지, 가장 긴 쪽입니다. (cm, 숫자만)",
+            cur === null ? "" : String(cur));
+        if (a === null) return;
+        var v = parseFloat(String(a).replace(/[^0-9.]/g, ""));
+        if (!isFinite(v) || v <= 0) {
+            if (String(a).trim() === "") { try { localStorage.removeItem(MY_DEPTH); } catch (e) {} paint(); }
+            return;
+        }
+        try { localStorage.setItem(MY_DEPTH, String(v)); } catch (e) {}
+        paint();
+    };
+
     window.setStrollerCar = function (key) {
         try {
             if (key) localStorage.setItem(KEY, key);
@@ -87,7 +116,10 @@
         var d = st.foldedDims.slice().sort(function (a, b) { return b - a; });   // 큰 순
         var longest = d[0], shortest = d[2];
 
-        var depthLeft  = car.limitDepth  - longest;
+        var mine = myDepth();
+        var depth = (mine !== null) ? mine : car.limitDepth;
+
+        var depthLeft  = depth - longest;
         var heightLeft = car.limitHeight - shortest;
 
         var kind;
@@ -96,7 +128,7 @@
         else kind = "ok";
 
         return {
-            kind: kind, car: car, dims: d,
+            kind: kind, car: car, dims: d, measured: (mine !== null),
             depthLeft: Math.round(depthLeft), heightLeft: Math.round(heightLeft)
         };
     }
@@ -184,10 +216,21 @@
 
             body = '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
                    'line-height:1.8; word-break:keep-all;">' + body + '</div>' +
-                   '<div style="margin-top:12px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
-                   'line-height:1.7; word-break:keep-all;">' +
-                   '같은 차종도 연식·트림·스페어타이어 유무에 따라 다릅니다. ' +
-                   '<b>재본 값이지 보증이 아니에요.</b></div>' +
+                   (r.measured
+                        ? '<div style="margin-top:12px; padding:12px 14px; background:#EAF7F1; ' +
+                          'border:1px solid #A7DFC8; border-radius:12px; font-size:11.5px; ' +
+                          'font-weight:700; color:#1F6F52; line-height:1.7;">' +
+                          '✅ <b>직접 재신 ' + myDepth() + 'cm</b> 로 계산했어요. ' +
+                          '<span onclick="window.setTrunkDepth()" style="text-decoration:underline; ' +
+                          'cursor:pointer;">다시 재기</span></div>'
+                        : '<div style="margin-top:12px; padding:13px 14px; background:#FFF9E6; ' +
+                          'border:1px solid #FDE68A; border-radius:12px; font-size:11.5px; ' +
+                          'font-weight:700; color:' + GOLD + '; line-height:1.75; word-break:keep-all;">' +
+                          '⚠️ 이 트렁크 치수는 <b>저희가 모은 추정값</b>이에요. 제조사 공식 제원이 아닙니다.<br>' +
+                          '연식·트림·스페어타이어에 따라 달라서, <b>줄자로 한 번 재면 훨씬 정확합니다.</b><br>' +
+                          '<span onclick="window.setTrunkDepth()" style="display:inline-block; margin-top:9px; ' +
+                          'padding:10px 14px; background:' + DARK + '; color:#FFFFFF; border-radius:10px; ' +
+                          'font-weight:900; cursor:pointer;">우리 차 깊이 직접 재서 넣기</span></div>') +
                    carPicker(carKey);
 
             return '<div id="' + ID + '" class="matrix-panel" style="background:' + bg + '; ' +
