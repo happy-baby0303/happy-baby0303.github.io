@@ -376,10 +376,40 @@
 
     var HOST = "carseat-guide";
 
+    /* ⚠️ 다섯 장을 한 상자에 담고 있었다. 그래서 전부 '고르기' 탭에 있었다.
+
+          그런데 성격이 갈린다.
+
+              고르기   어떤 상황인가요 · ADAC 점수 · 중고로 사기 전에
+                       → 아직 안 산 사람이 고를 때 보는 것
+
+              쓰면서   뒤보기·앞보기 · 태우기 전 3분 점검
+                       → 이미 산 사람이 매번 보는 것
+                       특히 3분 점검은 태우기 직전에 여는 화면이다.
+                       고르기 탭에 두면 살 때 한 번 보고 다시 안 본다.
+
+          상자를 둘로 나눈다. carseattabs.js 는 한 줄도 안 고친다 —
+          '고르기 목록에 없으면 쓰면서로 간다' 는 규칙이 이미 있다. */
+
+    var HOST_USE = "carseat-guide-use";
+
     function paint() {
         var host = document.getElementById(HOST);
-        if (!host) return;
-        host.innerHTML = facingCard() + casesHTML() + checkCard() + adacCard() + usedCard();
+        if (host) host.innerHTML = casesHTML() + adacCard() + usedCard();
+
+        var hostUse = document.getElementById(HOST_USE);
+        if (hostUse) hostUse.innerHTML = facingCard() + checkCard();
+    }
+
+    function mountUse() {
+        if (document.getElementById(HOST_USE)) return;
+        var pane = document.getElementById("view-carseat-use");
+        if (!pane) return;
+        var box = document.createElement("div");
+        box.id = HOST_USE;
+        /* 맨 위에 둔다. 태우기 직전에 여는 화면이라 찾지 않아도 보여야 한다. */
+        pane.insertBefore(box, pane.firstChild);
+        paint();
     }
 
     function mount() {
@@ -402,8 +432,23 @@
             var grid = panel.querySelector(".matrix-grid");
             if (grid) {
                 grid.style.display = "none";
+
+                /* ⚠️ 접었는데도 카드가 컸다.
+                      .matrix-panel 이 padding 28px 24px 이고
+                      .matrix-header 가 margin-bottom 24px 다.
+                      내용을 숨겨도 28 + 글자 + 24 + 28 = 80px 넘게 남는다.
+                      한 줄짜리 접힘 막대인데 카드 하나만큼 자리를 먹었다.
+                      접혀 있을 때만 여백을 줄인다. */
+                var slim = function (folded) {
+                    panel.style.padding = folded ? "16px 20px" : "";
+                    panel.style.marginBottom = folded ? "12px" : "";
+                    head.style.marginBottom = folded ? "0" : "";
+                };
+                slim(true);
+                head.setAttribute("data-slim", "1");
                 head.onclick = function () {
                     var on = (grid.style.display === "none");
+                    slim(!on);
                     grid.style.display = on ? "grid" : "none";
                     var mk = document.getElementById("cg-fold");
                     if (mk) mk.textContent = on ? "접기 ▴" : "펼치기 ▾";
@@ -417,8 +462,11 @@
     /* ---------- 시작 ---------- */
 
     function boot() {
-        setTimeout(mount, 200);
-        setTimeout(mount, 900);
+        setTimeout(function () { mount(); mountUse(); }, 200);
+        setTimeout(function () { mount(); mountUse(); }, 900);
+        setTimeout(function () { mount(); mountUse(); }, 2200);
+        /* 탭을 옮기면 '쓰면서' 칸이 그때 만들어지기도 한다 */
+        setInterval(mountUse, 3000);
         setTimeout(markTooEarly, 1200);
 
         // 결과가 다시 그려질 때마다 표시도 다시 붙인다

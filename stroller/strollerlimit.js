@@ -94,13 +94,13 @@
         var kg  = babyKg();
 
         if (lim === null) {
-            return '<div id="' + ID + '" onclick="window.setStrollerLimit()" ' +
+            return '<div id="' + ID + '" class="matrix-panel" onclick="window.setStrollerLimit()" ' +
                 'style="display:flex; align-items:center; gap:12px; background:#FFFFFF; ' +
                 'border:1px solid #E5E8EB; border-radius:16px; padding:15px 16px; ' +
                 'margin-bottom:14px; cursor:pointer;">' +
                 '<div style="font-size:20px; flex-shrink:0;">⚖️</div>' +
                 '<div style="flex:1; min-width:0;">' +
-                    '<div style="font-size:14px; font-weight:900; color:' + DARK + ';">' +
+                    '<div class="matrix-header" style="font-size:14px; font-weight:900; color:' + DARK + ';">' +
                         '최대 몇 kg까지 쓸 수 있나요</div>' +
                     '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; ' +
                         'margin-top:3px; word-break:keep-all; line-height:1.6;">' +
@@ -127,20 +127,27 @@
                        "한도를 넘으면 프레임이 휘거나 브레이크가 제 힘을 못 냅니다. " +
                        "겉으로는 표가 안 나서 더 조심하셔야 해요. 설명서를 한 번 더 확인해 주세요.";
             } else if (left <= 2) {
+                /* ⚠️ 머리말에 '최대' 를 안 쓴다.
+                      strollertabs.js 가 "최대" 가 든 카드를 접기 상자에 넣는데,
+                      곧 한도에 닿거나 넘었을 때는 접히면 안 된다.
+                      접힌 채로 두면 못 보고, 그게 제일 위험한 순간이다. */
                 tone = GOLD; bg = "#FFF9E6"; bd = "#FDE68A";
-                head = lim + "kg 까지 · " + left + "kg 남았어요";
+                head = "곧 한도예요 · " + left + "kg 남았어요";
                 body = "<b>" + esc(nm("는")) + " 지금 " + kg + "kg</b>예요. 곧 한도에 닿습니다.<br>" +
                        "다음 유모차를 슬슬 보실 때예요. 급하게 고르면 비싸게 삽니다.";
             } else {
-                head = lim + "kg 까지 · " + left + "kg 남았어요";
+                head = "최대 " + lim + "kg 까지 · " + left + "kg 남았어요";
                 body = "<b>" + esc(nm("는")) + " 지금 " + kg + "kg</b>예요. 아직 넉넉합니다.";
             }
         }
 
-        return '<div id="' + ID + '" style="background:' + bg + '; border:1px solid ' + bd + '; ' +
-            'border-radius:16px; padding:16px; margin-bottom:14px;">' +
-            '<div style="font-size:14px; font-weight:900; color:' + tone + '; margin-bottom:6px;">' +
-                '⚖️ ' + esc(head) + '</div>' +
+        /* ⚠️ .matrix-panel / .matrix-header 를 써야 한다.
+              strollertabs.js 의 접기와 PLUS 배지가 그 두 클래스로 카드를 찾는다.
+              혼자 다른 모양이면 접기 상자에 안 들어가고 혼자 떠 있게 된다. */
+        return '<div id="' + ID + '" class="matrix-panel" style="background:' + bg + '; ' +
+            'border:1px solid ' + bd + '; border-radius:16px; padding:16px; margin-bottom:14px;">' +
+            '<div class="matrix-header" style="font-size:14px; font-weight:900; color:' + tone + '; ' +
+                'margin-bottom:6px;">⚖️ ' + esc(head) + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
                 'line-height:1.75; word-break:keep-all;">' + body + '</div>' +
             '<div onclick="window.setStrollerLimit()" style="margin-top:11px; font-size:11.5px; ' +

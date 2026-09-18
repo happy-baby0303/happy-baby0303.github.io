@@ -647,7 +647,12 @@ function renderSelectedDateRecords() {
             // 💡 [핵심 디테일] 계획됨 상태면 '기록 완료' 파란 버튼 띄우기 (문자열 포함 여부로 확실히 체크!)
             if (r.amount && r.amount.includes('계획됨')) {
                 amountHtml = `<span style="background:#FFF7ED; border:1px solid #FDBA74; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; color:#9A3412; cursor:pointer;" onclick="openMealSheetForUpdate('${selectedDateStr}', ${i}, '${r.menu}')">⏳ 아직 안 먹었어요 · 눌러서 기록</span>`;
+                /* ⚠️ '계획됨' 일 때는 [기록하기] 만 있고 삭제가 없었다.
+                   식단표가 자동으로 넣어준 계획인데, 그날 안 먹이기로 했거나
+                   메뉴를 바꿨으면 지울 방법이 없다. 달력에 영영 남는다.
+                   이미 먹은 기록에는 삭제가 있는데 계획에만 없었다. */
                 actionBtnHtml = `<button onclick="openMealSheetForUpdate('${selectedDateStr}', ${i}, '${r.menu}')" style="background:#3182F6; color:#FFF; border:none; border-radius:8px; font-size:12px; font-weight:800; padding:8px 12px; cursor:pointer; box-shadow:0 2px 4px rgba(49,130,246,0.2); transition:0.2s;">기록 완료 ✏️</button>`;
+                actionBtnHtml += `<button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:8px; font-size:12px; font-weight:700; color:#8B95A1; cursor:pointer; padding:6px 10px; margin-left:6px;">삭제</button>`;
             } else {
                 // 이미 먹은 기록일 경우 (기존)
                 amountHtml = `<span style="background:#F0F7FF; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#3182F6;">${r.amount}</span>`;
@@ -723,8 +728,22 @@ function saveFoodCalendar(status) {
 }
 
 function deleteFoodRecord(dateStr, index) {
-    if (!confirm(`'${JSON.parse(localStorage.getItem('tosil_food_calendar'))[dateStr][index].ingredient}' 기록을 삭제할까요?`)) return;
-    let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
+    /* ⚠️ 예전엔 첫 줄에서 바로 .ingredient 를 읽었다. 두 가지가 터졌다.
+
+         ① 식단 기록(type:'meal')에는 ingredient 가 없다. menu 다.
+            그래서 "undefined 기록을 삭제할까요?" 가 떴다.
+         ② 그 칸이 이미 비었으면 [dateStr][index] 가 undefined 라
+            읽는 순간 통째로 죽었다. 버튼이 아무 반응도 안 한다.
+
+       먼저 꺼내서 확인하고, 이름은 있는 것으로 고른다. */
+    let records = {};
+    try { records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {}; } catch (e) {}
+
+    const row = (records[dateStr] || [])[index];
+    if (!row) { renderSelectedDateRecords(); return; }
+
+    const label = row.ingredient || row.menu || '이 기록';
+    if (!confirm(`'${label}' 기록을 삭제할까요?`)) return;
     if (records[dateStr]) {
         records[dateStr].splice(index, 1);
         if (records[dateStr].length === 0) delete records[dateStr];
@@ -1271,7 +1290,20 @@ window.triggerAutoDeduction = function() {
         if(rawName === "이름모름") return false;
 
         const safeCubeName = String(rawName).replace(/\s+/g, '');
-        return safeMenuName.includes(safeCubeName) && rawQty > 0;
+
+        /* ⚠️ 글자가 그대로 들어있어야만 차감됐다.
+              큐브에 '쇠고기' 라고 적어두면 '소고기 가지 죽' 을 만들어도
+              차감이 안 된다. 같은 재료인데 표기만 다른 것이다.
+              알레르기 필터에서 쓰는 것과 같은 표를 여기서도 쓴다. */
+        const SAME = { '쇠고기': '소고기', '한우': '소고기', '닭': '닭고기',
+                       '닭가슴살': '닭고기', '돼지': '돼지고기', '참깨': '깨',
+                       '방울토마토': '토마토', '단호박': '호박', '애호박': '호박' };
+        const alt = SAME[safeCubeName];
+
+        return rawQty > 0 && (
+            safeMenuName.includes(safeCubeName) ||
+            (alt && safeMenuName.includes(alt))
+        );
     });
 
     if(matchedCubesForDeduction.length > 0) {

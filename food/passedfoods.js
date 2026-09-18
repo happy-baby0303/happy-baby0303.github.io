@@ -87,6 +87,8 @@
         var el = document.getElementById(SHEET);
         if (el) el.remove();
         paint();
+        paintAllergy();
+        if (typeof window.nextFoodRepaint === "function") window.nextFoodRepaint();
     };
 
     window.savePassed = function () {
@@ -228,9 +230,61 @@
         anchor.parentNode.insertBefore(box.firstChild, anchor);
     }
 
+    /* ⚠️ 이 카드가 '식단표' 탭에만 붙어 있었다.
+          그런데 '먹여본 재료' 는 알레르기 얘기다.
+          알레르기 탭에서 달력을 보다가 "아 이거 예전에 먹였는데" 하는 순간이
+          제일 많은데, 거기서는 등록할 길이 없었다.
+          같은 창(openPassedSheet)을 여는 작은 줄을 하나 더 놓는다. */
+
+    var ID_A = "passed-foods-aller";
+
+    function paintAllergy() {
+        var host = document.getElementById("tab-allergy");
+        if (!host) return;
+
+        var p = passed();
+        var old = document.getElementById(ID_A);
+
+        var inner =
+            '<div style="display:flex; align-items:center; gap:11px;">' +
+                '<div style="font-size:18px; flex-shrink:0;">🥄</div>' +
+                '<div style="flex:1; min-width:0;">' +
+                    '<div style="font-size:13.5px; font-weight:900; color:' +
+                        (p.length ? "#1F6F52" : DARK) + ';">' +
+                        (p.length ? "먹여본 재료 " + p.length + "가지" : "지금까지 먹여본 재료 등록하기") + '</div>' +
+                    '<div style="font-size:11px; font-weight:700; color:#4E5968; margin-top:2px; ' +
+                        'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                        (p.length
+                            ? esc(p.slice(0, 6).join(" · ")) + (p.length > 6 ? " 외 " + (p.length - 6) + "가지" : "")
+                            : "이미 통과한 재료를 다시 테스트로 띄우지 않아요") + '</div>' +
+                '</div>' +
+                '<div style="font-size:11.5px; font-weight:800; color:' +
+                    (p.length ? "#1F6F52" : BLUE) + '; flex-shrink:0;">' +
+                    (p.length ? "고치기" : "등록") + '</div>' +
+            '</div>';
+
+        var css = p.length
+            ? "background:#EAF7F1; border:1px solid #A7DFC8;"
+            : "background:#FFFFFF; border:1px solid #E5E8EB;";
+
+        if (old) { old.style.cssText = css + " border-radius:14px; padding:13px 15px; margin-bottom:14px; cursor:pointer;"; old.innerHTML = inner; return; }
+
+        var box = document.createElement("div");
+        box.id = ID_A;
+        box.onclick = window.openPassedSheet;
+        box.style.cssText = css + " border-radius:14px; padding:13px 15px; margin-bottom:14px; cursor:pointer;";
+        box.innerHTML = inner;
+
+        /* '다음엔 뭘 먹여볼까' 바로 위. 둘 다 '뭘 먹였나' 얘기다. */
+        var nf = document.getElementById("next-food");
+        if (nf && nf.parentNode === host) host.insertBefore(box, nf);
+        else host.insertBefore(box, host.firstChild);
+    }
+
     function boot() {
-        setTimeout(paint, 700);
-        setTimeout(paint, 2000);
+        setTimeout(function () { paint(); paintAllergy(); }, 700);
+        setTimeout(function () { paint(); paintAllergy(); }, 2000);
+        setInterval(paintAllergy, 4000);
         var sel = document.getElementById("food-age");
         if (sel) sel.addEventListener("change", function () { setTimeout(paint, 60); });
     }

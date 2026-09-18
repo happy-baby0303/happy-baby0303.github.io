@@ -138,8 +138,31 @@
 
     var PLUS_IDS  = ["carseat-own", "carseat-cry"];
     /* 접을 무료 카드. ⚠️ 3분 점검과 뒤보기는 넣지 않는다 — 안전이다. */
+    /* 접을 무료 카드.
+
+       ⚠️ 뒤보기와 3분 점검도 접는다. 다만 조건이 하나 있다.
+
+          뒤보기는 한 번 정하면 한동안 안 바뀌는 결정이다.
+          3분 점검도 목록이라 매번 읽는 게 아니라 한 번 익히면 된다.
+          그래서 평소엔 접어두는 게 맞다 — 안 그러면 탭이 길어져서
+          정작 오늘 볼 것(주행 계획·PLUS)이 아래로 밀린다.
+
+          그런데 15개월 전 아기는 다르다.
+          그때 앞을 보게 두면 정면 충돌에서 목에 힘이 그대로 간다.
+          그 경우에만 카드 머리말에 '반드시' 가 붙는다(carseatguide.js).
+          그때는 접지 않고 밖에 세워둔다. 아래 NEVER_FOLD 가 그 일을 한다. */
+
     var FOLD_KEYS = ["ADAC", "어떤 상황", "중고로", "쿨시트", "차에서 뭘",
-                     "사고가 났다면", "토했을 때", "하네스를 스스로", "장거리"];
+                     "사고가 났다면", "토했을 때", "하네스를 스스로", "장거리",
+                     "리콜", "뒤보기", "태우기 전", "3분"];
+
+    /* ⚠️ 머리말 글자로는 급한지 알 수 없다.
+          "🔄 뒤보기 · 앞보기" 는 6개월이든 30개월이든 똑같기 때문이다.
+          그래서 카드를 만드는 쪽(carseatguide.js)이 급할 때만
+          data-never-fold="1" 을 달아준다. 그것만 본다. */
+    function neverFoldEl(el) {
+        return !!(el && el.getAttribute && el.getAttribute("data-never-fold") === "1");
+    }
 
     var BOXES = ["carseat-own", "carseat-cry"];
 
@@ -151,7 +174,20 @@
             || localStorage.getItem("tosil_is_master") === "true";
     }
 
-    var PLUS_TITLE = /우리 카시트|카시트만 타면 울어요|이번 주행 계획/;
+    /* ⚠️ '이번 주행 계획' 이라고 적혀 있었다.
+          실제 카드 제목은 '이번 주 여행 계획' 이다. 한 글자가 다르다.
+
+              화면   이번 주 여행 계획
+              여기   이번 주행 계획        ← 안 맞는다
+
+          그래서 이 카드가 PLUS 로 분류되지 않았고,
+          정렬에서 빠져 뒤보기·3분점검 아래에 혼자 남았다.
+          plusmark.js 는 '이번 주 여행 계획' 으로 맞게 적혀 있어서
+          자물쇠 배지는 붙고 순서만 안 맞는, 찾기 어려운 상태였다.
+
+          ⚠️ 새 PLUS 카드를 만들면 여기와 shared/plusmark.js 둘 다 고칠 것.
+             둘 중 하나만 고치면 꼭 이런 일이 난다. */
+    var PLUS_TITLE = /우리 카시트|카시트만 타면 울어요|이번 주 여행 계획/;
 
     /* \u26a0\ufe0f carseatown.js 와 carseatcry.js 는 한 그릇에 여러 패널을 담는다.
           (우리 카시트 + 쿨시트 + 차에서 + 사고 + 세탁 이 한 덩어리)
@@ -215,16 +251,46 @@
         var kids = Array.prototype.slice.call(pane.children).filter(function (el) {
             return el.style.display !== "none";
         });
+        /* ⚠️ 뒤보기·3분 점검은 '무료' 로 분류돼서 PLUS 카드 사이에 끼었다.
+              접자니 안 펴서 못 보고, 맨 아래 두자니 역시 못 본다.
+
+              이건 자리가 정해져 있는 물건이다 — 맨 위다.
+              방향이 틀리면 사고 때 목에 힘이 그대로 가고,
+              3분 점검은 태우기 직전에 여는 화면이다.
+              PLUS 든 무료든 이 둘보다 위에 올 건 없다. */
+        var pin = [];
+        kids = kids.filter(function (el) {
+            if (el.id === "carseat-guide-use") { pin.push(el); return false; }
+            return true;
+        });
+
         var plus = [], free = [];
         kids.forEach(function (el) {
             var h = el.querySelector ? el.querySelector(".matrix-header") : null;
             var t = h ? (h.textContent || "") : (el.textContent || "").slice(0, 120);
             (PLUS_TITLE.test(t) ? plus : free).push(el);
         });
-        if (!plus.length || !free.length) return;
+        if (!plus.length && !free.length) return;
 
-        var want = plusFirst ? plus.concat(free) : free.concat(plus);
-        var same = want.every(function (el, i) { return kids[i] === el; });
+        /* ⚠️ '알아두면 좋은 것' 상자는 어느 쪽도 아니다.
+              무료로 치면 PLUS 사이에 끼고, 유료로 치면 거짓말이 된다.
+              접어둔 것이니 늘 맨 아래로 보낸다. */
+        var extra = [];
+        free = free.filter(function (el) {
+            if (el.id === "carseat-extra") { extra.push(el); return false; }
+            return true;
+        });
+
+        /* ⚠️ 접힘 상자도 무료다. 무료 유저에게는 무료끼리 묶어서 먼저 보여준다.
+              안 그러면 못 쓰는 PLUS 카드가 중간에 벽처럼 서고,
+              그 뒤에 있는 무료 내용을 아무도 못 본다.
+              PLUS 회원은 반대다 — 돈 낸 것부터 위로. */
+        var want = pin.concat(
+            plusFirst ? plus.concat(free).concat(extra)
+                      : free.concat(extra).concat(plus));
+
+        var now = pin.concat(kids);
+        var same = want.every(function (el, i) { return now[i] === el; });
         if (same) return;
         want.forEach(function (el) { pane.appendChild(el); });
     }
@@ -233,7 +299,54 @@
 
     function foldExtras() {
         var pane = document.getElementById(PANE.use);
-        if (!pane || document.getElementById("carseat-extra")) return;
+        if (!pane) return;
+
+        /* 상태가 바뀌면(15개월이 지나면) 밖에 있던 카드를 안으로 들여야 한다.
+           반대로 접혀 있던 게 위험해지면 밖으로 꺼내야 한다. */
+        var wrapNow = document.getElementById("carseat-extra");
+        if (wrapNow) {
+            var b = wrapNow.querySelector(".cs-extra-body");
+            if (b) {
+                Array.prototype.slice.call(b.children).forEach(function (el) {
+                    if (neverFoldEl(el)) pane.insertBefore(el, wrapNow);   // 위험해졌다 → 밖으로
+                });
+            }
+        }
+
+        /* ⚠️ 예전엔 여기서 끝냈다.
+                 if (document.getElementById("carseat-extra")) return;
+
+              상자를 한 번 만들고 나면 다시는 안 돌았다.
+              그런데 모듈들이 800ms · 2500ms 에도 카드를 붙인다.
+              상자가 생긴 뒤에 붙은 카드는 영영 밖에 남는다.
+              그래서 어떤 건 접히고 어떤 건 안 접혀 보였던 것이다.
+
+              이제 상자가 있으면 '그 안으로 마저 넣는' 일을 한다. */
+        var wrapOld = document.getElementById("carseat-extra");
+        if (wrapOld) {
+            var body = wrapOld.querySelector(".cs-extra-body");
+            if (body) {
+                var late = [];
+                var ps0 = pane.querySelectorAll(":scope > .matrix-panel");
+                for (var z = 0; z < ps0.length; z++) {
+                    var h0 = ps0[z].querySelector(".matrix-header");
+                    if (!h0) continue;
+                    if (h0.querySelector(".plus-badge")) continue;
+                    var t0 = h0.textContent || "";
+                    if (neverFoldEl(ps0[z])) continue;
+                    for (var y = 0; y < FOLD_KEYS.length; y++) {
+                        if (t0.indexOf(FOLD_KEYS[y]) > -1) { late.push(ps0[z]); break; }
+                    }
+                }
+                late.forEach(function (el) { body.appendChild(el); });
+
+                /* 개수 표시도 따라가야 한다. '3' 이라 적혀 있는데
+                   펼치면 다섯이 나오면 그게 더 이상하다. */
+                var n = wrapOld.querySelector(".cs-extra-n");
+                if (n) n.textContent = String(body.children.length);
+            }
+            return;
+        }
 
         var targets = [];
         var scan = function (root) {
@@ -243,6 +356,7 @@
                 if (!h) continue;
                 var t = h.textContent || "";
                 if (h.querySelector(".plus-badge")) continue;          // 유료는 안 접는다
+                if (neverFoldEl(ps[i])) continue;                      // 지금 위험한 건 안 접는다
                 for (var k = 0; k < FOLD_KEYS.length; k++) {
                     if (t.indexOf(FOLD_KEYS[k]) > -1) { targets.push(ps[i]); break; }
                 }
@@ -263,11 +377,13 @@
         head.innerHTML =
             '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
                 '\uD83D\uDCD6 알아두면 좋은 것</span>' +
-            '<span style="font-size:12.5px; font-weight:800; color:#8B95A1;">' + targets.length + '</span>' +
+            '<span class="cs-extra-n" style="font-size:12.5px; font-weight:800; color:#8B95A1;">' + targets.length + '</span>' +
             '<span id="cse-mark" style="margin-left:auto; font-size:13px; font-weight:800; ' +
                 'color:#8B95A1;">펼치기 \u25BE</span>';
 
         var body = document.createElement("div");
+        /* ⚠️ 나중에 붙는 카드를 여기로 마저 넣으려면 찾을 수 있어야 한다. */
+        body.className = "cs-extra-body";
         body.style.cssText = "display:none; margin-top:12px;";
 
         wrap.appendChild(head);
@@ -421,7 +537,11 @@
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
-        setInterval(function () { calmEmoji(); hookRefresh(); adopt(); flatten(); orderPlus(); }, 4000);   // 다시 그려져도 유지
+        /* ⚠️ foldExtras 도 같이 돌려야 한다.
+              늦게 붙은 카드를 상자 안으로 마저 넣는 일을 여기서 한다. */
+        setInterval(function () {
+            calmEmoji(); hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus();
+        }, 4000);   // 다시 그려져도 유지
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

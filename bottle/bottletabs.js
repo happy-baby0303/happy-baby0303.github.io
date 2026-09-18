@@ -57,6 +57,15 @@
     var PLUS_TITLE = /갈 때가 된 것|다음에 준비할 것|젖병을 안 물어요|우리 집 모유 재고|쪽쪽이, 자꾸 뱉나요/;
     var BOXES = ["bottle-guide", "bottle-gear", "bottle-refuse", "bottle-milk", "paci-guide"];
 
+    /* ⚠️ 접을 무료 카드. 카시트와 같은 기준이다 — '안 급한 것' 만.
+
+          유축 모유 보관 기간과 쪽쪽이 안전은 넣지 않는다.
+          모유는 잘못 먹이면 아기가 탈 나고,
+          쪽쪽이 안전은 끈·수면 얘기라 급하다.
+          접어두면 아무도 안 펴고, 그러면 없는 것과 같다. */
+    var FOLD_KEYS = ["어떤 상황", "몇 개 사면", "젖꼭지, 지금 단계",
+                     "소독", "세척", "젖병 크기"];
+
     function isPlusUser() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
         if (!localStorage.getItem("firebase_uid")) return false;
@@ -115,6 +124,88 @@
         });
     }
 
+    /* ---------- 안 급한 무료 카드 접기 ----------
+       젖병 '쓰면서' 탭에 흰 패널이 열 장 넘게 쌓여 있었다.
+       전부 똑같이 생겨서 어디부터 봐야 할지 모른다.
+
+       ⚠️ 한 번 만들고 끝내지 않는다.
+          모듈들이 800ms 뒤에도 카드를 붙인다. 상자가 생긴 뒤에 붙은 건
+          영영 밖에 남아서 '어떤 건 접히고 어떤 건 안 접힌' 상태가 된다.
+          카시트에서 똑같은 일이 있었다. -------- */
+
+    function foldExtras() {
+        var pane = document.getElementById(PANE.tools);
+        if (!pane) return;
+
+        var pickTargets = function () {
+            var out = [];
+            var ps = pane.querySelectorAll(".matrix-panel");
+            for (var i = 0; i < ps.length; i++) {
+                var h = ps[i].querySelector(".matrix-header");
+                if (!h) continue;
+                if (h.querySelector(".plus-badge")) continue;      // 유료는 안 접는다
+                var t = h.textContent || "";
+                for (var k = 0; k < FOLD_KEYS.length; k++) {
+                    if (t.indexOf(FOLD_KEYS[k]) > -1) { out.push(ps[i]); break; }
+                }
+            }
+            return out;
+        };
+
+        var wrapOld = document.getElementById("bottle-extra");
+        if (wrapOld) {
+            var body0 = wrapOld.querySelector(".bt-extra-body");
+            if (body0) {
+                pickTargets().forEach(function (el) {
+                    if (el.parentNode !== body0) body0.appendChild(el);
+                });
+                var n0 = wrapOld.querySelector(".bt-extra-n");
+                if (n0) n0.textContent = String(body0.children.length);
+            }
+            return;
+        }
+
+        var targets = pickTargets();
+        if (targets.length < 2) return;
+
+        var wrap = document.createElement("div");
+        wrap.id = "bottle-extra";
+        wrap.style.cssText = "margin-bottom:20px;";
+
+        var head = document.createElement("div");
+        head.style.cssText =
+            "display:flex; align-items:center; gap:8px; background:#FFFFFF; " +
+            "border:1px solid #F2F5F8; border-radius:20px; padding:16px 20px; " +
+            "cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
+        head.innerHTML =
+            '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
+                '\uD83D\uDCD6 알아두면 좋은 것</span>' +
+            '<span class="bt-extra-n" style="font-size:12.5px; font-weight:800; color:#8B95A1;">' +
+                targets.length + '</span>' +
+            '<span class="bt-extra-mark" style="margin-left:auto; font-size:13px; ' +
+                'font-weight:800; color:#8B95A1;">펼치기 \u25BE</span>';
+
+        var body = document.createElement("div");
+        body.className = "bt-extra-body";
+        body.style.cssText = "display:none; margin-top:12px;";
+
+        head.onclick = function () {
+            var on = (body.style.display === "none");
+            body.style.display = on ? "block" : "none";
+            var m = wrap.querySelector(".bt-extra-mark");
+            if (m) m.textContent = on ? "접기 \u25B4" : "펼치기 \u25BE";
+        };
+
+        wrap.appendChild(head);
+        wrap.appendChild(body);
+
+        /* targets[0] 가 pane 의 직계가 아니면 insertBefore 가 터진다 */
+        var ref = targets[0];
+        while (ref && ref.parentNode !== pane) ref = ref.parentNode;
+        if (ref) pane.insertBefore(wrap, ref); else pane.appendChild(wrap);
+        targets.forEach(function (el) { body.appendChild(el); });
+    }
+
     function orderPlus() {
         var pane = document.getElementById(PANE.tools);
         if (!pane) return;
@@ -128,7 +219,18 @@
             (PLUS_TITLE.test(t) ? plus : free).push(el);
         });
         if (!plus.length || !free.length) return;
-        var want = isPlusUser() ? plus.concat(free) : free.concat(plus);
+
+        /* 접힘 상자도 무료다. 무료 유저에게는 무료끼리 묶어서 먼저.
+           안 그러면 못 쓰는 PLUS 카드가 중간에 벽처럼 선다. */
+        var extra = [];
+        free = free.filter(function (el) {
+            if (el.id === "bottle-extra") { extra.push(el); return false; }
+            return true;
+        });
+
+        var want = isPlusUser()
+            ? plus.concat(free).concat(extra)
+            : free.concat(extra).concat(plus);
         if (want.every(function (el, i) { return kids[i] === el; })) return;
         want.forEach(function (el) { pane.appendChild(el); });
     }
@@ -273,7 +375,7 @@
         var go = function () {
             if (build()) {
                 setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 900);
-                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 2400);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus(); }, 2400);
                 return;
             }
             if (++tries < 20) setTimeout(go, 150);
@@ -282,7 +384,9 @@
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
-        setInterval(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 4000);
+        setInterval(function () {
+            hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus();
+        }, 4000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

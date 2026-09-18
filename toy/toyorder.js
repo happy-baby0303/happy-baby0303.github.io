@@ -36,7 +36,10 @@
     var HOST = "view-toy-play";
 
     /* 위에서부터 이 차례로 세운다. 목록에 없는 건 건드리지 않고 뒤에 둔다. */
-    var ORDER = ["play-week", "my-shelf", "toy-idle", "play-log", "toy-gift"];
+    /* ⚠️ '지금 몇 분' 이 제일 위다.
+          주간 처방은 일요일에 한 번 보지만, 이건 하루에 여러 번 연다.
+          자주 쓰는 것이 위에 있어야 한다. */
+    var ORDER = ["play-now", "play-week", "my-shelf", "toy-idle", "play-log", "toy-gift"];
 
     function host() { return document.getElementById(HOST); }
 

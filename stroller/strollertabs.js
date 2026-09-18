@@ -151,8 +151,11 @@
 
         /* 접을 무료 카드. ⚠️ 3분 점검과 뒤보기는 넣지 않는다 — 안전이다. */
     /* \u26a0\ufe0f '이 시기엔 이렇게' 와 '유모차 안전' 은 넣지 않는다 \u2014 안전이다. */
+    /* ⚠️ '최대 몇 kg' 은 한 번 적어두면 끝나는 것이다.
+          매일 볼 카드가 아니라 접힘 상자가 맞다.
+          다만 한도를 넘었을 때는 접히면 안 된다 — 그건 아래에서 따로 뺀다. */
     var FOLD_KEYS = ["기내 반입", "비 오는 날", "유모차에서 잠들었을 때",
-                     "숨은 비용", "A/S", "중고"];
+                     "숨은 비용", "A/S", "중고", "최대 "];
 
     function isPlusUser() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
@@ -232,7 +235,18 @@
         });
         if (!plus.length || !free.length) return;
 
-        var want = plusFirst ? plus.concat(free) : free.concat(plus);
+        /* ⚠️ 접힘 상자도 무료다. 무료 유저에게는 무료끼리 묶어서 먼저.
+              안 그러면 못 쓰는 PLUS 카드가 중간에 벽처럼 서고,
+              그 뒤에 있는 무료 내용을 아무도 못 본다. */
+        var extra = [];
+        free = free.filter(function (el) {
+            if (el.id === "stroller-extra") { extra.push(el); return false; }
+            return true;
+        });
+
+        var want = plusFirst
+            ? plus.concat(free).concat(extra)
+            : free.concat(extra).concat(plus);
         var same = want.every(function (el, i) { return kids[i] === el; });
         if (same) return;
         want.forEach(function (el) { pane.appendChild(el); });
@@ -242,7 +256,32 @@
 
     function foldExtras() {
         var pane = document.getElementById(PANE.use);
-        if (!pane || document.getElementById("stroller-extra")) return;
+        if (!pane) return;
+
+        /* ⚠️ 예전엔 상자가 있으면 그냥 돌아갔다.
+              그런데 모듈들이 뒤늦게도 카드를 붙인다.
+              상자가 생긴 뒤에 붙은 건 영영 밖에 남아서
+              '어떤 건 접히고 어떤 건 안 접힌' 상태가 된다.
+              이제 있으면 '그 안으로 마저 넣는' 일을 한다. */
+        var wrapOld = document.getElementById("stroller-extra");
+        if (wrapOld) {
+            var body0 = wrapOld.querySelector(".st-extra-body");
+            if (body0) {
+                var ps0 = pane.querySelectorAll(".matrix-panel");
+                for (var z = 0; z < ps0.length; z++) {
+                    var h0 = ps0[z].querySelector(".matrix-header");
+                    if (!h0 || h0.querySelector(".plus-badge")) continue;
+                    if (ps0[z].parentNode === body0) continue;
+                    var t0 = h0.textContent || "";
+                    for (var y = 0; y < FOLD_KEYS.length; y++) {
+                        if (t0.indexOf(FOLD_KEYS[y]) > -1) { body0.appendChild(ps0[z]); break; }
+                    }
+                }
+                var n0 = wrapOld.querySelector(".st-extra-n");
+                if (n0) n0.textContent = String(body0.children.length);
+            }
+            return;
+        }
 
         var targets = [];
         var scan = function (root) {
@@ -272,11 +311,13 @@
         head.innerHTML =
             '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
                 '\uD83D\uDCD6 알아두면 좋은 것</span>' +
-            '<span style="font-size:12.5px; font-weight:800; color:#8B95A1;">' + targets.length + '</span>' +
+            '<span class="st-extra-n" style="font-size:12.5px; font-weight:800; color:#8B95A1;">' + targets.length + '</span>' +
             '<span id="sse-mark" style="margin-left:auto; font-size:13px; font-weight:800; ' +
                 'color:#8B95A1;">펼치기 \u25BE</span>';
 
         var body = document.createElement("div");
+        /* 나중에 붙는 카드를 여기로 마저 넣으려면 찾을 수 있어야 한다 */
+        body.className = "st-extra-body";
         body.style.cssText = "display:none; margin-top:12px;";
 
         wrap.appendChild(head);
@@ -442,7 +483,7 @@
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
-        setInterval(function () { calmEmoji(); hookRefresh(); adopt(); flatten(); orderPlus(); }, 4000);   // 다시 그려져도 유지
+        setInterval(function () { calmEmoji(); hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus(); }, 4000);   // 다시 그려져도 유지
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

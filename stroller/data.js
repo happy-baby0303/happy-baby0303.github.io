@@ -2,16 +2,36 @@
 // 🗄️ 배냇함 DB (데이터 전담 파일 V13.6 - 링크 철통 방어 패치 및 최신화 완료)
 // ==========================================
 
+/* ⚠️ 트렁크 수치의 출처를 적어둔다. 나중에 고칠 사람을 위해서다.
+
+     vol (리터)
+       제조사가 공개하는 값이다. 10개 중 8개가 공식 제원과 맞았다.
+       틀린 둘을 고쳤다.
+         팰리세이드  1297 → 509   (1297 은 3열까지 접은 값이다.
+                                  다른 차는 전부 안 접은 값이라 기준이 달랐다)
+         캐스퍼       301 → 233   (2열을 밀면 늘어나지만 기본은 233 이다)
+
+     limitDepth / limitHeight (cm)
+       ⚠️ 제조사가 발표하지 않는다. 자동차 매체도 줄자로 직접 잰다.
+          탑라이더 기사에도 "트렁크의 길이도 줄자를 이용해 직접 측정했다" 고 나온다.
+
+          찾은 실측값 하나 — 오토뷰 쏘렌토: 세로 110cm · 높이 84cm
+          우리 값은 105 / 80 이다. 방향은 맞지만 정확하진 않다.
+
+          그래서 strollertrunk.js 는 이 값을 '추정치' 라고 화면에 밝히고,
+          부모가 직접 잰 값이 있으면 그걸 먼저 쓴다.
+          줄자 한 번이 우리 추정보다 정확하다. */
+
 const carDB = {
     'ray': { name: '기아 레이', limitDepth: 35, limitHeight: 80, vol: 319 },
-    'casper': { name: '캐스퍼/모닝', limitDepth: 45, limitHeight: 70, vol: 301 },
+    'casper': { name: '캐스퍼/모닝', limitDepth: 45, limitHeight: 70, vol: 233 },
     'avante': { name: '아반떼(K3)', limitDepth: 100, limitHeight: 45, vol: 474 },
     'sonata': { name: '쏘나타(K5)', limitDepth: 105, limitHeight: 48, vol: 510 },
     'grandeur': { name: '그랜저/G80', limitDepth: 110, limitHeight: 50, vol: 480 },
     'seltos': { name: '셀토스/코나', limitDepth: 80, limitHeight: 70, vol: 498 },
     'qm6': { name: '르노 QM6', limitDepth: 95, limitHeight: 75, vol: 676 },
     'sorento': { name: '쏘렌토/싼타페', limitDepth: 105, limitHeight: 80, vol: 705 },
-    'palisade': { name: '팰리세이드', limitDepth: 115, limitHeight: 85, vol: 1297 },
+    'palisade': { name: '팰리세이드', limitDepth: 115, limitHeight: 85, vol: 509 },
     'carnival': { name: '카니발(3열)', limitDepth: 30, limitHeight: 100, vol: 400 } // 3열 펴면 트렁크 극악임
 };
 
