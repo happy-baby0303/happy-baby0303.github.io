@@ -79,6 +79,15 @@
     }
 
     function stage() {
+        /* ⚠️ 도감에 발달 도장이 찍혀 있으면 그걸 먼저 쓴다.
+              playstage.js 가 만든 창구다. 없으면 개월수로 돌아간다. */
+        try {
+            if (typeof window.babyPlayStage === "function") {
+                var s = window.babyPlayStage();
+                if (s) return s;
+            }
+        } catch (e) {}
+
         var m = monthsOld();
         if (m === null) return null;
         if (m < 2) return "newborn";

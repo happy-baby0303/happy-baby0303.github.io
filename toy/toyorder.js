@@ -39,7 +39,7 @@
     /* ⚠️ '지금 몇 분' 이 제일 위다.
           주간 처방은 일요일에 한 번 보지만, 이건 하루에 여러 번 연다.
           자주 쓰는 것이 위에 있어야 한다. */
-    var ORDER = ["play-now", "play-week", "my-shelf", "toy-idle", "play-log", "toy-gift"];
+    var ORDER = ["play-now", "play-stage", "play-week", "my-shelf", "toy-idle", "play-log", "toy-gift"];
 
     function host() { return document.getElementById(HOST); }
 
