@@ -171,11 +171,45 @@
           why: "새는 건 컵이 아니라 대개 이 고무입니다. 이것만 따로 팝니다" }
     ];
 
+    // 언제깠지(본 앱)에 들어갈 아이콘 — 비워두면 그쪽에 빈 칸이 떴다
+    var PART_EMOJI = { nipple: "\uD83C\uDF7C", paci: "\uD83D\uDC76", brush: "\uD83E\uDDFD", straw: "\uD83E\uDD64", gasket: "\uD83D\uDD18" };
+
+    // 2026-08-01 → 8월 1일 (올해가 아니면 연도까지)
+    function md(k) {
+        var q = String(k || "").split("-");
+        if (q.length !== 3) return "";
+        return (Number(q[0]) !== new Date().getFullYear() ? Number(q[0]) + "년 " : "") +
+               Number(q[1]) + "월 " + Number(q[2]) + "일";
+    }
+
     function parts() {
         try { return JSON.parse(localStorage.getItem(PART_KEY)) || {}; } catch (e) { return {}; }
     }
+    /* 언제깠지(본 앱)에서 '새로 뜯음' 을 누르면 거기 날짜만 새로워졌다.
+       이 카드는 옛 날짜로 '볼 때가 됐어요' 를 계속 띄웠다. 더 새로운 쪽을 쓰고, 여기에도 적어둔다. */
+    function openDateOf(label) {
+        var best = "";
+        try {
+            (JSON.parse(localStorage.getItem("tosil_open_records")) || []).forEach(function (r) {
+                if (!r || String(r.name) !== label) return;
+                var d = String(r.openDate || "");
+                if (/^\d{4}-\d{2}-\d{2}$/.test(d) && d > best) best = d;
+            });
+        } catch (e) {}
+        return best;
+    }
     function partDate(p) {
-        return p.key ? localStorage.getItem(p.key) : (parts()[p.id] || "");
+        var mine = (p.key ? localStorage.getItem(p.key) : (parts()[p.id] || "")) || "";
+        var theirs = openDateOf(p.label);
+        if (theirs && theirs > mine && daysSince(theirs) >= 0) {
+            if (p.key) { try { localStorage.setItem(p.key, theirs); } catch (e) {} }
+            else {
+                var o = parts(); o[p.id] = theirs;
+                try { localStorage.setItem(PART_KEY, JSON.stringify(o)); } catch (e) {}
+            }
+            return theirs;
+        }
+        return mine;
     }
 
     /* \u26a0\ufe0f '오늘 갈았어요' 만 있으면 오늘 간 사람만 쓸 수 있다.
@@ -198,21 +232,16 @@
 
         /* 배냇함 '언제깠지' 에도 적어둔다 — 기한을 세는 곳은 거기다.
 
-           ⚠️ 이름·날짜·기한만 넣으면 그쪽 화면에 undefined 가 찍힌다.
-              '언제깠지' 는 이름 앞에 아이콘을, 위쪽 칩에 분류를 쓴다.
-
-           ⚠️ 아이콘은 안 쓰기로 했다. 그렇다고 필드를 빼면 안 된다.
-              빼면 undefined 가 다시 찍힌다. 빈 문자열이어야 앞에 아무것도 안 붙는다.
-
-              분류는 script.js 의 정확한 필드 이름을 몰라 후보를 다 넣어뒀다.
-              확인되면 맞는 것 하나만 남기고 지우면 된다. */
+           ⚠️ 예전엔 분류 자리에 "수유" 를 넣었다. 언제깠지는 그걸 모르는 분류로 읽어서
+              위쪽 칩에 'undefined' 가 찍혔고, 아이콘은 비워서 빈 네모가 떴다 (문의 들어온 것).
+              언제깠지가 읽는 모양 그대로 넣는다 — 이름 · 아이콘 · 종류 · 날짜 · 기한.
+              종류는 bottle_part (언제깠지에서 '🧺 육아용품' 칩으로 묶이고, 날짜 옆에 '교체' 로 뜬다) */
         try {
             var list = JSON.parse(localStorage.getItem("tosil_open_records")) || [];
-            list = list.filter(function (r) { return !r || String(r.name) !== p.label; });
+            list = list.filter(function (r) { return r && String(r.name) !== p.label; });
             list.push({
                 id: "gear_" + id + "_" + Date.now(), name: p.label,
-                emoji: "", icon: "",
-                category: "수유", cat: "수유", type: "수유",
+                emoji: PART_EMOJI[id] || "\uD83C\uDF7C", type: "bottle_part", from: "bottle",
                 openDate: k, limitDays: p.days
             });
             localStorage.setItem("tosil_open_records", JSON.stringify(list));
@@ -461,7 +490,7 @@
                 (over ? '<b>' + over + '개</b>는 한 번 볼 때가 됐어요. '
                       : '갈아 끼운 날만 눌러두시면 다음에 볼 때가 됐을 때 알려드려요. ') +
                 '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>입니다.<br>' +
-                '<span style="font-size:11.5px;">예전에 갈았으면 옆 <b>달력</b>에서 그 날짜를 고르세요.</span></div>' +
+                '<span style="font-size:11.5px;">예전에 갈았으면 옆 <b>\uD83D\uDCC5</b> 에서 그 날짜를 고르세요.</span></div>' +
 
             show.map(function (r) {
                 var c = r.over ? RED : (r.n === null ? GRAY : "#4E5968");
@@ -474,7 +503,8 @@
                                 r.p.days + '일쯤</span></div>' +
                             '<div style="margin-top:3px; font-size:12px; font-weight:700; color:' + c + ';">' +
                                 (r.n === null ? "아직 안 적으셨어요"
-                                              : r.n + "일 지났어요" + (r.over ? " \u2014 볼 때가 됐어요" : "")) +
+                                              : md(r.d) + "에 갈았어요 \u00b7 " + (r.n === 0 ? "오늘" : r.n + "일 지났어요") +
+                                                (r.over ? " \u2014 볼 때가 됐어요" : "")) +
                             '</div>' +
                         '</div>' +
                         '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center;">' +
@@ -482,12 +512,18 @@
                                 'style="padding:10px 13px; border-radius:11px; cursor:pointer; ' +
                                 'font-size:12px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
                                 'border:1px solid #D1D5DB; white-space:nowrap;">오늘 갈았어요</div>' +
-                            '<input type="date" value="' + esc(r.d || "") + '" max="' + today() + '" ' +
-                                'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
-                                'title="예전에 갈았으면 그 날짜를 고르세요" ' +
-                                'style="width:34px; padding:10px 4px; border-radius:11px; ' +
-                                'border:1px solid #D1D5DB; background: #FFFFFF; color:#8B95A1; ' +
-                                'font-size:11px; cursor:pointer;">' +
+                            /* ⚠️ 날짜 칸이 34px 이라, 고른 날짜가 '2' 한 글자로만 보였다 ("2026-…" 의 첫 글자).
+                                  달력 모양 단추로 바꾸고, 고른 날짜는 왼쪽 줄에 글자로 적는다 ("8월 1일에 갈았어요"). */
+                            '<label title="예전에 갈았으면 그 날짜를 고르세요" ' +
+                                'style="position:relative; overflow:hidden; display:flex; align-items:center; ' +
+                                'justify-content:center; width:42px; height:38px; box-sizing:border-box; ' +
+                                'border-radius:11px; border:1px solid #D1D5DB; background:#FFFFFF; ' +
+                                'font-size:15px; cursor:pointer;">\uD83D\uDCC5' +
+                                '<input type="date" value="' + esc(r.d || "") + '" max="' + today() + '" ' +
+                                    'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
+                                    'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; ' +
+                                    'cursor:pointer; font-size:16px; border:0; padding:0;">' +
+                            '</label>' +
                         '</div>' +
                     '</div>' +
                     '<div style="margin-top:5px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +

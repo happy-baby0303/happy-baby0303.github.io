@@ -79,6 +79,14 @@
         return Math.floor((t - d) / 86400000);
     }
 
+    // 2026-08-01 → 8월 1일 (올해가 아니면 연도까지)
+    function md(k) {
+        var p = String(k || "").split("-");
+        if (p.length !== 3) return "";
+        return (Number(p[0]) !== new Date().getFullYear() ? Number(p[0]) + "년 " : "") +
+               Number(p[1]) + "월 " + Number(p[2]) + "일";
+    }
+
     function own() {
         try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
     }
@@ -639,7 +647,7 @@
             '<div style="margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '<b>고장은 늘 브레이크와 바퀴에서</b> 시작합니다.<br>' +
-                '<span style="font-size:11.5px;">예전에 하셨으면 옆 <b>달력</b>에서 그 날짜를 고르세요.</span></div>' +
+                '<span style="font-size:11.5px;">예전에 하셨으면 옆 <b>📅</b> 에서 그 날짜를 고르세요.</span></div>' +
 
             CARE.map(function (x) {
                 var d = daysSince(c[x.id]);
@@ -654,20 +662,26 @@
                             '<div style="margin-top:3px; font-size:11.5px; font-weight:800; color:' +
                                 (bad ? GOLD : "#4E5968") + ';">' +
                                 (d === null ? "아직 안 적으셨어요"
-                                            : d + "일 지났어요" + (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
+                                            : md(c[x.id]) + "에 봤어요 \u00b7 " + (d === 0 ? "오늘" : d + "일 지났어요") +
+                                              (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
                         '</div>' +
                         '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center;">' +
                             '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
                                 'style="padding:9px 12px; border-radius:10px; cursor:pointer; ' +
                                 'font-size:11.5px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
                                 'border:1px solid #D1D5DB; white-space:nowrap;">오늘 봤어요</div>' +
-                            '<input type="date" value="' + esc(c[x.id] || "") + '" ' +
-                                'max="' + today() + '" ' +
-                                'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
-                                'title="예전에 하셨으면 그 날짜를 고르세요" ' +
-                                'style="width:34px; padding:9px 4px; border-radius:10px; ' +
-                                'border:1px solid #D1D5DB; background: #FFFFFF; color:#8B95A1; ' +
-                                'font-size:11px; cursor:pointer;">' +
+                            /* ⚠️ 날짜 칸이 34px 이라, 고른 날짜가 '2' 한 글자로만 보였다 ("2026-…" 의 첫 글자).
+                                  달력 모양 단추로 바꾸고, 고른 날짜는 왼쪽 줄에 글자로 적는다 ("8월 1일에 봤어요"). */
+                            '<label title="예전에 하셨으면 그 날짜를 고르세요" ' +
+                                'style="position:relative; overflow:hidden; display:flex; align-items:center; ' +
+                                'justify-content:center; width:40px; height:36px; box-sizing:border-box; ' +
+                                'border-radius:10px; border:1px solid #D1D5DB; background:#FFFFFF; ' +
+                                'font-size:15px; cursor:pointer;">\uD83D\uDCC5' +
+                                '<input type="date" value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
+                                    'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
+                                    'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; ' +
+                                    'cursor:pointer; font-size:16px; border:0; padding:0;">' +
+                            '</label>' +
                         '</div>' +
                     '</div>' +
                     '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +

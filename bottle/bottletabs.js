@@ -400,6 +400,7 @@
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
         setInterval(function () {
+            if (document.hidden) return;   // 다른 앱을 보는 동안은 쉰다 (배터리)
             hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus();
         }, 4000);
     }

@@ -86,7 +86,7 @@
         Object.keys(db).forEach(function (day) {
             (db[day] || []).forEach(function (r) {
                 if (r && r.type === "test" && r.ingredient)
-                    out.push({ day: day, name: String(r.ingredient).trim(), status: r.status || "pass" });
+                    out.push({ day: day, name: String(r.ingredient).trim(), status: r.status || "pass", past: !!r.past });
             });
         });
         out.sort(function (a, b) { return a.day < b.day ? 1 : -1; });
@@ -109,10 +109,19 @@
             if (r.status === "fail") fail[r.name] = 1; else pass[r.name] = 1;
         });
 
+        /* ⚠️ 글자가 조금만 겹쳐도 '해본 재료' 로 쳤다. '배추' 를 해봤으면 '배' 를,
+              '찹쌀' 을 해봤으면 '쌀' 을 영영 안 권했다. 이름을 다듬어 같은 것만 같다고 본다.
+              ('소고기 안심' → 소고기 · '노른자' → 달걀 노른자 는 해본 것으로 친다) */
+        var nz = function (s) { return String(s || "").replace(/\([^)]*\)/g, "").replace(/\s+/g, ""); };
+        var keys = Object.keys(pass).concat(Object.keys(fail)).map(nz);
         var known = function (n) {
-            var keys = Object.keys(pass).concat(Object.keys(fail));
+            var t = nz(n);
             for (var i = 0; i < keys.length; i++) {
-                if (keys[i].indexOf(n) > -1 || n.indexOf(keys[i]) > -1) return true;
+                var k = keys[i];
+                if (!k) continue;
+                if (k === t) return true;
+                if (t.length >= 2 && k.indexOf(t) === 0) return true;
+                if (k.length >= 2 && (t.indexOf(k) === 0 || t.slice(-k.length) === k)) return true;
             }
             return false;
         };
@@ -123,12 +132,19 @@
             return true;
         });
 
-        return { next: pool[0] || null, left: pool.length, pass: Object.keys(pass), last: recs[0] || null };
+        /* '사흘 지켜보기' 는 진짜 테스트만 센다. 예전에 먹여본 재료를 오늘 날짜로 적었다고
+           "3일 더 지켜보세요" 가 뜨면 안 된다. */
+        var real = recs.filter(function (r) { return !r.past; });
+        return { next: pool[0] || null, left: pool.length, pass: Object.keys(pass), last: real[0] || null };
     }
 
     /* ---------- 화면 ---------- */
 
     window.startNextFood = function (name) {
+        /* '오늘 먹여봤어요' 인데, 달력에서 다른 날을 눌러 둔 채면 그날로 적혔다. 오늘로 맞춘다. */
+        var d0 = new Date();
+        var tk = d0.getFullYear() + "-" + String(d0.getMonth() + 1).padStart(2, "0") + "-" + String(d0.getDate()).padStart(2, "0");
+        if (typeof window.selectDate === "function") { try { window.selectDate(tk); } catch (e) {} }
         if (typeof window.openTestSheet === "function") {
             window.openTestSheet();
             setTimeout(function () {
@@ -210,6 +226,9 @@
         if (anchor) host.insertBefore(box.firstChild, anchor);
         else host.insertBefore(box.firstChild, host.firstChild);
     }
+
+    // passedfoods.js 가 먹여본 재료를 바꾸면 이걸 부른다 (없어서 카드가 옛 재료를 권했다)
+    window.nextFoodRepaint = paint;
 
     function boot() {
         setTimeout(paint, 500);

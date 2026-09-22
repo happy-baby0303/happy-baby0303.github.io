@@ -258,11 +258,11 @@
             : '';
 
         if (!list.length) {
-            return '<div id="' + ID + '" style="background:#EAF7F1; border:1px solid #A7DFC8; ' +
-                'border-radius:18px; padding:17px 18px; margin-bottom:14px;">' +
-                '<div style="font-size:13.5px; font-weight:900; color:#1F6F52;">' +
+            /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) */
+            return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+                '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
                     '\u2705 사두신 것 ' + have.length + '개, 다 쓰고 계세요</div>' +
-                '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.7; word-break:keep-all;">' +
                     '한 달 안에 전부 한 번씩은 나왔어요. 이거 쉬운 일 아닙니다.</div>' +
                 sideLine +
@@ -273,10 +273,9 @@
         var show = plus ? list : list.slice(0, 2);
         var hidden = plus ? 0 : list.length - show.length;
 
-        return '<div id="' + ID + '" style="background: #FFFFFF; border:1px solid #E5E8EB; ' +
-            'border-radius:18px; padding:18px; margin-bottom:14px;">' +
+        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
 
-            '<div data-plus-head style="font-size:14.5px; font-weight:900; color:' + DARK + ';">' +
+            '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
                 '\uD83D\uDE34 잠자고 있는 장난감 ' + list.length + '개</div>' +
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
@@ -284,7 +283,8 @@
                 '새로 사기 전에 이것부터 꺼내보세요.</div>' +
             sideLine +
 
-            '<div style="margin-top:13px;">' +
+            /* 항목은 흰 칸 하나에 모은다 */
+            '<div style="margin-top:13px; background:#FFFFFF; border:1px solid #E5E8EB; border-radius:16px; padding:2px 16px;">' +
                 show.map(function (x) { return row(x, false); }).join("") +
                 (hidden > 0
                     ? list.slice(2, 4).map(function (x) { return row(x, true); }).join("")

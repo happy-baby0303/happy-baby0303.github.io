@@ -65,10 +65,11 @@
         var list = myBatt();
         var names = list.slice(0, 4).map(function (t) { return t.name; }).join(" · ");
 
-        return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:14px;">' +
+        /* 칸은 상자 없이 — 아래 'SOS 처방전 · 발달 상태' 와 같은 모양. 빨간 안내 상자만 남긴다 */
+        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
 
-            '<div data-plus-head style="font-size:15px; font-weight:900; color:' + RED + '; ' +
-                'margin-bottom:7px;">🔋 단추형 전지, 이것만은 알아두세요</div>' +
+            '<div data-plus-head style="font-size:18px; font-weight:900; color:' + RED + '; ' +
+                'letter-spacing:-0.4px; margin-bottom:8px;">🔋 단추형 전지, 이것만은 알아두세요</div>' +
 
             '<div style="font-size:13px; font-weight:600; color:#4E5968; ' +
                 'line-height:1.8; word-break:keep-all;">' +

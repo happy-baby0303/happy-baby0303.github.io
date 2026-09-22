@@ -455,9 +455,9 @@
     </script>
 
 <script>
-    if (localStorage.getItem('tosil_dark_mode') === 'on') {
-        document.body.classList.add('dark-mode');
-    }
+    /* ⚠️ 다크모드는 본 앱에서 뺐다. 여기만 옛 키를 보고 있어서, 예전에 한 번 켠 사람은
+          이유식만 까맣게 떴다. 젖병·유모차와 같은 방식으로 옛 키를 정리한다. */
+    try { if (localStorage.getItem('tosil_dark_mode') === 'on') localStorage.removeItem('tosil_dark_mode'); } catch (e) {}
 </script>
 
     <script>

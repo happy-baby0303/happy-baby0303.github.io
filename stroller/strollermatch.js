@@ -43,6 +43,18 @@
             .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
+
+    // 받침에 맞는 조사만 돌려준다 — 제품 이름이 숫자·영문으로 끝나도 (Z2 → 를 · 폭스5 → 를 · 3 → 을)
+    function pp(w, pair) {
+        var s = String(w || "").trim(), c = s.charCodeAt(s.length - 1), jong;
+        if (c >= 0xAC00 && c <= 0xD7A3) jong = (c - 0xAC00) % 28 !== 0;
+        else if (/[0-9]$/.test(s)) jong = /[013678]$/.test(s);      // 영·일·삼·육·칠·팔
+        else if (/[a-z]$/i.test(s)) jong = /[lmnr]$/i.test(s);       // 엘·엠·엔·알
+        else jong = false;
+        var p = pair.split("/");
+        return jong ? p[0] : p[1];
+    }
+
     function isPlus() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
         if (!localStorage.getItem("firebase_uid")) return false;
@@ -129,14 +141,14 @@
         } else if (v.kind === "ok") {
             tone = GREEN; bg = "#EAF7F1"; bd = "#A7DFC8";
             head = "얹힙니다 · 어댑터 없이";
-            body = "<b>" + esc(seat) + "</b> 를 <b>" + esc(st.name) + "</b> 에 바로 꽂을 수 있어요.<br>" +
+            body = "<b>" + esc(seat) + "</b>" + pp(seat, "을/를") + " <b>" + esc(st.name) + "</b>에 바로 꽂을 수 있어요.<br>" +
                    "<b>차에서 잠들었으면 카시트째 들어 올려</b> 유모차에 얹으세요. " +
                    "아기를 안 깨우고 옮기는 유일한 방법입니다.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span>';
         } else if (v.kind === "adapter") {
             tone = GOLD; bg = "#FFF9E6"; bd = "#FDE68A";
             head = "어댑터가 있으면 얹힙니다";
-            body = "<b>" + esc(seat) + "</b> 와 <b>" + esc(st.name) + "</b> 는 " +
+            body = "<b>" + esc(seat) + "</b>" + pp(seat, "과/와") + " <b>" + esc(st.name) + "</b>" + pp(st.name, "은/는") + " " +
                    "<b>따로 파는 어댑터</b>가 있어야 연결됩니다.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span><br><br>' +
                    "⚠️ 사기 전에 <b>두 제품 모델명을 함께</b> 제조사에 물어보세요. " +
@@ -144,7 +156,7 @@
         } else if (v.kind === "no") {
             tone = RED; bg = "#FFF2F2"; bd = "#FCA5A5";
             head = "이 조합은 안 얹힙니다";
-            body = "<b>" + esc(seat) + "</b> 는 <b>" + esc(st.name) + "</b> 에 연결되지 않아요. " +
+            body = "<b>" + esc(seat) + "</b>" + pp(seat, "은/는") + " <b>" + esc(st.name) + "</b>에 연결되지 않아요. " +
                    "어댑터를 사도 안 됩니다.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span><br><br>' +
                    "차에서 잠들면 <b>아기를 안아서</b> 옮기셔야 합니다. " +
@@ -152,7 +164,7 @@
         } else {
             tone = GRAY; bg = "#F9FAFB"; bd = "#E5E8EB";
             head = "이 조합은 저희도 모릅니다";
-            body = "<b>" + esc(seat) + "</b> 와 <b>" + esc(st.name) + "</b> 의 연결은 " +
+            body = "<b>" + esc(seat) + "</b>" + pp(seat, "과/와") + " <b>" + esc(st.name) + "</b>의 연결은 " +
                    "저희가 가진 자료에 없어요.<br>" +
                    "<b>아마 될 거예요</b> 라고 말씀드리면 10만원짜리 어댑터를 잘못 사시게 됩니다. " +
                    "두 제조사 중 한 곳에 모델명을 대고 물어보시는 게 확실합니다.";
@@ -165,7 +177,7 @@
                     'color:' + DARK + ';">🔗 우리 카시트가 이 유모차에 얹히나</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
-                    '<b>' + esc(seat) + '</b> 와 <b>' + esc(st.name) + '</b>.<br>' +
+                    '<b>' + esc(seat) + '</b>' + pp(seat, "과/와") + ' <b>' + esc(st.name) + '</b>.<br>' +
                     '차에서 잠든 아기를 <b>안 깨우고 옮길 수 있는지</b>가 이 둘로 정해집니다.' +
                 '</div>' +
                 '<div style="margin-top:13px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
@@ -195,7 +207,24 @@
         '</div>';
     }
 
+
+    /* ⚠️ 6초마다 카드를 통째로 다시 그렸다. 읽는 중에 카드가 깜빡이고,
+          위 카드 높이가 바뀌면 화면이 들썩였다. 적어둔 값이 바뀌었을 때만 다시 그린다. */
+    var lastSig = null;
+    function sig() {
+        return [localStorage.getItem("tosil_stroller_own"), localStorage.getItem("tosil_carseat_own"),
+                localStorage.getItem("tosil_stroller_car"), localStorage.getItem("tosil_trunk_depth"),
+                localStorage.getItem("tosil_plan_cache"), localStorage.getItem("tosil_is_founder"),
+                localStorage.getItem("tosil_is_master"), localStorage.getItem("firebase_uid")].join("|");
+    }
+    function paintIfChanged() {
+        if (document.hidden) return;
+        if (sig() === lastSig && (document.getElementById(ID) || !myStroller())) return;
+        paint();
+    }
+
     function paint() {
+        lastSig = sig();
         var old = document.getElementById(ID);
         var h = html();
 
@@ -220,7 +249,7 @@
     function boot() {
         setTimeout(paint, 900);
         setTimeout(paint, 2400);
-        setInterval(paint, 6000);
+        setInterval(paintIfChanged, 6000);
 
         ["pickMyStroller", "closeStrollerSheet", "switchStrollerTab"].forEach(function (n) {
             var f = window[n];

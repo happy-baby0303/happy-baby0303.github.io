@@ -287,6 +287,28 @@
 
     var NIPPLE_KEY = "tosil_nipple_changed";
 
+    /* ⚠️ 이 큐레이터는 저장할 때마다 브라우저 기본 창(alert)을 띄웠다.
+          '확인' 을 눌러야 넘어가고, 앱이 싸 보인다. 화면 아래 짧은 안내로 바꾼다.
+          (bottleguide.js 가 app.js 바로 다음에 읽혀서, 이 큐레이터 전체에 적용된다) */
+    window.bottleToast = function (msg) {
+        var old = document.getElementById("bottle-toast");
+        if (old) old.remove();
+        var t = document.createElement("div");
+        t.id = "bottle-toast";
+        t.setAttribute("style",
+            "position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); " +
+            "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
+            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "font-size:13px; font-weight:700; line-height:1.55; text-align:center; word-break:keep-all; " +
+            "white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); transition:opacity .25s;");
+        t.textContent = String(msg == null ? "" : msg);
+        document.body.appendChild(t);
+        var ms = Math.min(5200, 2200 + String(msg || "").length * 35);
+        setTimeout(function () { t.style.opacity = "0"; }, ms);
+        setTimeout(function () { if (t.parentNode) t.remove(); }, ms + 300);
+    };
+    window.alert = function (msg) { window.bottleToast(msg); };
+
     window.logNippleChange = function () {
         var today = new Date();
         var key = today.getFullYear() + "-" +
@@ -297,14 +319,13 @@
         // 배냇함 '언제깠지' 에도 같이 적어둔다 — 거기가 기한을 세는 곳이다
         try {
             var list = JSON.parse(localStorage.getItem("tosil_open_records")) || [];
-            list = list.filter(function (r) { return !r || String(r.name).indexOf("젖꼭지") === -1; });
-                       /* ⚠️ '언제깠지' 는 이름 앞에 아이콘을, 위쪽 칩에 분류를 쓴다.
-                  그 둘을 안 넣으면 화면에 undefined 가 찍힌다.
-                  필드 이름을 확인하기 전이라 후보를 다 넣어둔다. */
+            // '젖꼭지' 가 든 이름을 다 지웠다 (예: '젖꼭지 세정제' 까지). 같은 이름만 바꾼다.
+            list = list.filter(function (r) { return r && String(r.name) !== "젖꼭지"; });
+            /* 언제깠지가 읽는 모양 그대로 — bottlegear.js 의 '갈 때가 된 것' 과 같은 줄이다.
+               (분류 "수유" 를 넣었더니 언제깠지 칩에 undefined 가 찍혔다) */
             list.push({
                 id: "nip_" + Date.now(), name: "젖꼭지",
-                emoji: "🍼", icon: "🍼",
-                category: "수유", cat: "수유", type: "수유",
+                emoji: "\uD83C\uDF7C", type: "bottle_part", from: "bottle",
                 openDate: key, limitDays: 60
             });
             localStorage.setItem("tosil_open_records", JSON.stringify(list));

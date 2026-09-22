@@ -40,6 +40,18 @@
             .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
+
+    // 받침에 맞는 조사만 돌려준다 — 제품 이름이 숫자·영문으로 끝나도 (Z2 → 를 · 폭스5 → 를 · 3 → 을)
+    function pp(w, pair) {
+        var s = String(w || "").trim(), c = s.charCodeAt(s.length - 1), jong;
+        if (c >= 0xAC00 && c <= 0xD7A3) jong = (c - 0xAC00) % 28 !== 0;
+        else if (/[0-9]$/.test(s)) jong = /[013678]$/.test(s);      // 영·일·삼·육·칠·팔
+        else if (/[a-z]$/i.test(s)) jong = /[lmnr]$/i.test(s);       // 엘·엠·엔·알
+        else jong = false;
+        var p = pair.split("/");
+        return jong ? p[0] : p[1];
+    }
+
     function isPlus() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
         if (!localStorage.getItem("firebase_uid")) return false;
@@ -183,7 +195,7 @@
         if (!r) {
             body = '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                '<b>' + esc(st.name) + '</b> 는 접으면 ' +
+                '<b>' + esc(st.name) + '</b>' + pp(st.name, "은/는") + ' 접으면 ' +
                 esc(st.foldedDims.join(" × ")) + 'cm 예요.<br>' +
                 '어느 차에 실을지 골라주세요.</div>' + carPicker(carKey);
         } else {
@@ -196,7 +208,7 @@
             } else if (r.kind === "tight") {
                 tone = GOLD; bg = "#FFF9E6"; bd = "#FDE68A";
                 head = "빠듯합니다";
-                body = '<b>' + esc(r.car.name) + '</b> 에 <b>' + esc(st.name) + '</b> 는 ' +
+                body = '<b>' + esc(r.car.name) + '</b>에 <b>' + esc(st.name) + '</b>' + pp(st.name, "은/는") + ' ' +
                        '깊이 <b>' + r.depthLeft + 'cm</b> · 높이 <b>' + r.heightLeft + 'cm</b> 여유뿐이에요.<br>' +
                        '들어가도 <b>다른 짐은 못 넣습니다.</b> 장 보는 날은 뒷좌석을 비워두세요.';
             } else {
@@ -248,7 +260,24 @@
         '</div>';
     }
 
+
+    /* ⚠️ 6초마다 카드를 통째로 다시 그렸다. 읽는 중에 카드가 깜빡이고,
+          위 카드 높이가 바뀌면 화면이 들썩였다. 적어둔 값이 바뀌었을 때만 다시 그린다. */
+    var lastSig = null;
+    function sig() {
+        return [localStorage.getItem("tosil_stroller_own"), localStorage.getItem("tosil_carseat_own"),
+                localStorage.getItem("tosil_stroller_car"), localStorage.getItem("tosil_trunk_depth"),
+                localStorage.getItem("tosil_plan_cache"), localStorage.getItem("tosil_is_founder"),
+                localStorage.getItem("tosil_is_master"), localStorage.getItem("firebase_uid")].join("|");
+    }
+    function paintIfChanged() {
+        if (document.hidden) return;
+        if (sig() === lastSig && (document.getElementById(ID) || !myStroller())) return;
+        paint();
+    }
+
     function paint() {
+        lastSig = sig();
         var old = document.getElementById(ID);
         var h = html();
         if (!h) { if (old) old.remove(); return; }
@@ -272,7 +301,7 @@
     function boot() {
         setTimeout(paint, 1100);
         setTimeout(paint, 2600);
-        setInterval(paint, 6000);
+        setInterval(paintIfChanged, 6000);
         ["pickMyStroller", "closeStrollerSheet", "switchStrollerTab"].forEach(function (n) {
             var f = window[n];
             if (typeof f !== "function" || f.__trunk) return;

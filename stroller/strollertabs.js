@@ -498,7 +498,8 @@
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
-        setInterval(function () { calmEmoji(); hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus(); }, 4000);   // 다시 그려져도 유지
+        setInterval(function () { if (document.hidden) return;   /* 다른 앱을 보는 동안은 쉰다 (배터리) */
+            calmEmoji(); hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus(); }, 4000);   // 다시 그려져도 유지
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

@@ -62,6 +62,14 @@
         setTimeout(function () { if (m) m.remove(); }, 280);
     };
 
+    /* ⚠️ 'PLUS 둘러보기' 가 openPremiumModal 을 불렀는데, 이 큐레이터 어디에도 그 함수가 없다.
+          눌러도 창만 닫히고 아무 일이 없었다 — 결제로 가는 길이 끊겨 있었다.
+          있으면 그걸 쓰고, 없으면 본 앱으로 돌아가 PLUS 안내를 연다 (script.js 가 ?go=plus 를 받는다). */
+    window.goFoodPlus = function () {
+        if (typeof window.openPremiumModal === "function") return window.openPremiumModal();
+        location.href = "../index.html?go=plus";
+    };
+
     window.showFoodPaywall = function () {
         var old = document.getElementById("food-paywall");
         if (old) old.remove();
@@ -106,7 +114,7 @@
                 '<b style="color:#4E5968;">레시피 135종과 알레르기 기록은 계속 무료예요.</b><br>' +
                 '뭘 먹일지 고르는 건 원래 열려 있습니다.</div>' +
 
-            '<div onclick="window.closeFoodPaywall(); window.openPremiumModal && window.openPremiumModal();" ' +
+            '<div onclick="window.closeFoodPaywall(); window.goFoodPlus();" ' +
                 'style="margin-top:20px; text-align:center; padding:17px; background:#191F28; ' +
                 'color:#FFFFFF; border-radius:14px; font-size:15.5px; font-weight:900; cursor:pointer;">' +
                 'PLUS 둘러보기</div>' +

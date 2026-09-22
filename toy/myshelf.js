@@ -45,6 +45,27 @@
         try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
     }
 
+    /* ⚠️ 이 큐레이터도 복사·저장 때마다 브라우저 기본 창(alert)을 띄웠다.
+          화면 아래 짧은 안내로 바꾼다 (이유식 · 젖병과 같은 방식). myshelf.js 가 app.js 바로 다음이라 전체에 적용된다. */
+    window.toyToast = function (msg) {
+        var old = document.getElementById("toy-toast");
+        if (old) old.remove();
+        var t = document.createElement("div");
+        t.id = "toy-toast";
+        t.setAttribute("style",
+            "position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); " +
+            "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
+            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "font-size:13px; font-weight:700; line-height:1.55; text-align:center; word-break:keep-all; " +
+            "white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); transition:opacity .25s;");
+        t.textContent = String(msg == null ? "" : msg);
+        document.body.appendChild(t);
+        var ms = Math.min(5200, 2200 + String(msg || "").length * 35);
+        setTimeout(function () { t.style.opacity = "0"; }, ms);
+        setTimeout(function () { if (t.parentNode) t.remove(); }, ms + 300);
+    };
+    window.alert = function (msg) { window.toyToast(msg); };
+
     window.hasToy = function (id) { return owned().indexOf(Number(id)) > -1; };
     window.myToyIds = owned;
 
@@ -132,41 +153,33 @@
 
     /* ---------- 놀이 탭 위의 요약 줄 ---------- */
 
+    /* ⚠️ 이 칸만 흰 상자(없을 때) · 초록 상자(있을 때)로 감싸져 있었다.
+          바로 옆 '지금 몇 분 · 이번 주 놀이' 는 상자 없이 제목만 쓴다.
+          전에 장난감 추천 탭(SOS 처방전 · 발달 상태)에서 정한 규칙과 같게 —
+          칸은 상자 없이 18px 제목, 안의 항목만 흰 칸 하나. */
     function html() {
         var have = owned();
-        if (!have.length) {
-            return '<div id="' + ID + '" onclick="window.openShelfSheet()" ' +
-                'style="display:flex; align-items:center; gap:12px; background:#FFFFFF; ' +
-                'border:1px solid #E5E8EB; border-radius:16px; padding:15px 16px; ' +
-                'margin-bottom:14px; cursor:pointer;">' +
-                '<div style="font-size:21px; flex-shrink:0;">🧸</div>' +
-                '<div style="flex:1; min-width:0;">' +
-                    '<div style="font-size:14px; font-weight:900; color:' + DARK + ';">' +
-                        '우리 집에 있는 장난감 알려주세요</div>' +
-                    '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; ' +
-                        'margin-top:3px; word-break:keep-all;">' +
-                        '이미 있는 걸로 놀이를 짜드리고, 두 번 사지 않게 표시해드려요</div>' +
-                '</div>' +
-                '<div style="font-size:12px; color:' + BLUE + '; flex-shrink:0;">〉</div>' +
-            '</div>';
-        }
-
         var names = toys().filter(function (t) { return have.indexOf(t.id) > -1; })
                           .slice(0, 4).map(function (t) { return t.name; });
 
-        return '<div id="' + ID + '" onclick="window.openShelfSheet()" ' +
-            'style="background:#EAF7F1; border:1px solid #A7DFC8; border-radius:16px; ' +
-            'padding:14px 16px; margin-bottom:14px; cursor:pointer;">' +
-            '<div style="display:flex; align-items:center; gap:10px;">' +
-                '<div style="font-size:19px; flex-shrink:0;">🧸</div>' +
-                '<div style="flex:1; min-width:0;">' +
-                    '<div style="font-size:13.5px; font-weight:900; color:#1F6F52;">' +
-                        '우리 집 장난감 ' + have.length + '개</div>' +
-                    '<div style="font-size:11px; font-weight:700; color:#4E5968; margin-top:2px; ' +
-                        'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
-                        esc(names.join(" · ")) + (have.length > 4 ? " 외 " + (have.length - 4) + "개" : "") + '</div>' +
-                '</div>' +
-                '<div style="font-size:11.5px; font-weight:800; color:#1F6F52; flex-shrink:0;">고치기</div>' +
+        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+            '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
+                '\uD83E\uDDF8 우리 집 장난감' + (have.length ? ' ' + have.length + '개' : '') + '</div>' +
+            '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
+                'margin-bottom:12px; word-break:keep-all;">' +
+                (have.length
+                    ? '이미 있는 걸로 놀이를 짜고, 목록에는 \'이미 갖고 계세요\' 로 표시해요.'
+                    : '갖고 계신 걸 알려주시면 그걸로 놀이를 짜드리고, 두 번 사지 않게 표시해드려요.') + '</div>' +
+            '<div onclick="window.openShelfSheet()" style="display:flex; align-items:center; gap:10px; ' +
+                'background:#FFFFFF; border:1px solid #E5E8EB; border-radius:16px; padding:14px 16px; ' +
+                'cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
+                '<div style="flex:1; min-width:0; font-size:13.5px; font-weight:800; ' +
+                    'color:' + (have.length ? '#4E5968' : DARK) + '; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                    (have.length
+                        ? esc(names.join(" \u00b7 ")) + (have.length > 4 ? " 외 " + (have.length - 4) + "개" : "")
+                        : "갖고 계신 장난감 고르기") + '</div>' +
+                '<div style="flex-shrink:0; font-size:12px; font-weight:800; color:' + (have.length ? GREEN : BLUE) + ';">' +
+                    (have.length ? "고치기 \u3009" : "\u3009") + '</div>' +
             '</div>' +
         '</div>';
     }

@@ -168,6 +168,14 @@
 
     /* ---------- 카드 ---------- */
 
+    // 받침에 맞는 조사만 ('터미타임를' · '배밀이이 되면' 이 나왔다)
+    function pp(w, pair) {
+        var t = String(w || ""), c = t.charCodeAt(t.length - 1);
+        var jong = (c >= 0xAC00 && c <= 0xD7A3) && ((c - 0xAC00) % 28 !== 0);
+        var q = pair.split("/");
+        return jong ? q[0] : q[1];
+    }
+
     function html() {
         var st = monthStats();
         var s = stageNow(), m = monthsOld();
@@ -192,12 +200,12 @@
         var topP = st.top ? byId(st.top) : null;
         var t = new Date();
 
-        return '<div id="play-log" style="background:#FFFFFF; border:1px solid #E5E8EB; ' +
-            'border-radius:18px; padding:18px 16px; margin-bottom:14px;">' +
+        /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) — 흰 상자로 감싸져 있었다 */
+        return '<div id="play-log" style="padding:4px 0 24px;">' +
 
-            '<div style="font-size:15px; font-weight:900; color:' + DARK + '; margin-bottom:3px;">' +
+            '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
                 '📔 ' + (t.getMonth() + 1) + '월 놀이 기록</div>' +
-            '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; margin-bottom:14px;">' +
+            '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; margin-bottom:14px;">' +
                 '처방전에서 <b>놀았어요</b>를 누르면 여기 쌓입니다</div>' +
 
             (st.days === 0
@@ -231,7 +239,7 @@
                 'word-break:keep-all; margin-bottom:8px;">' +
                 '지금 할 수 있는 놀이 <b>' + canNow + '개</b> 중에 <b style="color:' + PURPLE + ';">' +
                 doneNow + '개</b> 해보셨어요' +
-                (nextStage && canNext ? '<br><b>' + nextStage.name + '</b>이 되면 <b>' + canNext + '개</b>가 더 열려요.' : '') +
+                (nextStage && canNext ? '<br><b>' + nextStage.name + '</b>' + pp(nextStage.name, "이/가") + ' 되면 <b>' + canNext + '개</b>가 더 열려요.' : '') +
             '</div>' +
 
             '<div style="height:7px; background:#F2F4F6; border-radius:4px; overflow:hidden;">' +
@@ -245,7 +253,7 @@
                 ? '<div style="margin-top:14px; background:#F5F3FF; border:1px solid #DDD6FE; ' +
                   'border-radius:13px; padding:14px 15px;">' +
                   '<div style="font-size:12.5px; font-weight:900; color:#6D28D9; margin-bottom:6px;">' +
-                      '⏳ ' + cs.next.name + '를 시작하면 이 놀이들은 끝나요</div>' +
+                      '⏳ ' + cs.next.name + pp(cs.next.name, "을/를") + ' 시작하면 이 놀이들은 끝나요</div>' +
                   '<div style="font-size:12px; font-weight:600; color:#4E5968; line-height:1.7; ' +
                       'word-break:keep-all;">아직 안 해보신 게 <b>' + closeLeft.length + '개</b> 남았어요. ' +
                       '지금이 아니면 다시 못 하는 놀이예요.</div>' +

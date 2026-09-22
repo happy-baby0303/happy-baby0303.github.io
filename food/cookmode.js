@@ -17,6 +17,24 @@
 
     var steps = [], at = 0;
 
+    /* 손에 물 묻힌 채 요리하는데 화면이 30초 만에 꺼졌다.
+       요리 모드가 열려 있는 동안은 화면을 켜둔다 (지원하는 폰에서만. 안 되면 조용히 넘어간다). */
+    var wake = null;
+    function keepAwake(on) {
+        try {
+            if (on) {
+                if (wake || !navigator.wakeLock || !navigator.wakeLock.request) return;
+                navigator.wakeLock.request("screen").then(function (l) {
+                    wake = l;
+                    if (l && l.addEventListener) l.addEventListener("release", function () { wake = null; });
+                }).catch(function () {});
+            } else if (wake) {
+                var w = wake; wake = null;
+                w.release().catch(function () {});
+            }
+        } catch (e) {}
+    }
+
     // ✨ 글씨를 삭제하지 않고, 앞의 숫자("1. ")만 깔끔하게 지우는 함수
     function cleanNum(t) {
         return String(t || "").replace(/^\s*\d+\s*[.)]\s*/, "").trim();
@@ -129,11 +147,25 @@
             steps = (r && r.recipe) ? r.recipe.slice() : [];
             at = 0;
             if (steps.length) setTimeout(paint, 20);
+            keepAwake(true);
 
             return out;
         };
         wrapped.__cook = true;
         window.openCookingMode = wrapped;
+
+        var oc = window.closeCookingMode;
+        if (typeof oc === "function" && !oc.__cook) {
+            var wc = function () { keepAwake(false); return oc.apply(this, arguments); };
+            wc.__cook = true;
+            window.closeCookingMode = wc;
+        }
+        // 화면이 한 번 꺼졌다 켜지면 잠금이 풀린다 — 요리 중이면 다시 건다
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden) return;
+            var m = document.getElementById("cooking-mode-modal");
+            if (m && window.getComputedStyle(m).display !== "none") keepAwake(true);
+        });
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

@@ -82,12 +82,11 @@
 
         var names = list.slice(0, 4).map(function (t) { return t.name; }).join(" · ");
 
-        return '<div id="' + ID + '" style="background:' + (over ? "#FFF2F2" : "#EAF7F1") + '; ' +
-            'border:1px solid ' + (over ? "#FCA5A5" : "#A7DFC8") + '; border-radius:16px; ' +
-            'padding:16px; margin-bottom:14px;">' +
+        /* 칸은 상자 없이 18px 제목 — 탭 전체가 같은 모양. 할 일(①~⑤)만 빨간 안내 칸에 담는다 */
+        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
 
-            '<div style="font-size:14px; font-weight:900; color:' + (over ? RED : GREEN) + '; ' +
-                'margin-bottom:6px;">' +
+            '<div style="font-size:18px; font-weight:900; color:' + (over ? RED : GREEN) + '; ' +
+                'letter-spacing:-0.4px; margin-bottom:8px;">' +
                 (over ? "🦠 목욕 장난감 속을 볼 때가 됐어요" : "✅ 목욕 장난감 씻긴 지 " + d + "일") + '</div>' +
 
             '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
@@ -101,7 +100,7 @@
             '</div>' +
 
             (over
-                ? '<div style="background:#FFFFFF; border-radius:12px; padding:13px 14px; margin-top:12px; ' +
+                ? '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; padding:13px 14px; margin-top:12px; ' +
                   'font-size:12px; font-weight:600; color:#4E5968; line-height:1.8;">' +
                   '① 구멍을 <b>손으로 꾹 눌러 물을 다 빼세요</b><br>' +
                   '② 따뜻한 물 1L + 식초 한 큰술에 <b>30분</b> 담가둡니다<br>' +

@@ -88,7 +88,7 @@
                 }).observe(h, { childList: true });
             }
         }
-        setInterval(tidy, 4000);
+        setInterval(function () { if (!document.hidden) tidy(); }, 4000);   // 다른 앱을 보는 동안은 쉰다
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
