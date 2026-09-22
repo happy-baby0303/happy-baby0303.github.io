@@ -31,6 +31,7 @@
     'use strict';
 
     var KEY   = "tosil_vaccines";        // { 접종id: "2026-09-12" }
+    var TKEY  = "tosil_vaccines_t";      // { 접종id: 마지막으로 누른 시각 } — 두 폰 중 나중에 누른 쪽이 이긴다
     var CARD  = "home-vaccine-card";
     var DAY   = 86400000;
 
@@ -74,7 +75,7 @@
         { id: "pcv4",    months: 12, name: "폐렴구균 4차",       dose: "4/4",   note: "12~15개월" },
         { id: "hepa1",   months: 12, name: "A형간염 1차",        dose: "1/2",   note: "12~23개월" },
         { id: "je1",     months: 12, name: "일본뇌염 1차",       dose: "1/2~3", note: "12~23개월" },
-        { id: "je2",     months: 13, name: "일본뇌염 2차",       dose: "2/2~3", note: "1차 뒤 1개월(불활성화)" },
+        { id: "je2",     months: 13, name: "일본뇌염 2차",       dose: "2/2~3", note: "불활성화 백신: 1차 뒤 7~30일" },
 
         { id: "dtap4",   months: 15, name: "DTaP 4차",          dose: "4/5",   note: "15~18개월" },
         { id: "hepa2",   months: 18, name: "A형간염 2차",        dose: "2/2",   note: "1차 뒤 6~12개월" }
@@ -129,13 +130,33 @@
         sync();
     }
 
+    function edits() {
+        try {
+            var v = JSON.parse(localStorage.getItem(TKEY));
+            return (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+        } catch (e) { return {}; }
+    }
+    function saveEdits(o) {
+        try { localStorage.setItem(TKEY, JSON.stringify(o)); } catch (e) {}
+    }
+
     window.toggleVaccine = function (id) {
         var o = done();
         if (o[id]) delete o[id];
         else o[id] = keyOf(new Date());
+        var te = edits(); te[id] = Date.now(); saveEdits(te);   // 누른 시각
         saveDone(o);
         paint();
         mount();
+        /* ⚠️ 일정표를 연 채로 눌러도 체크 표시가 안 바뀌었다 (닫았다 다시 열어야 보였다).
+              제자리에서 다시 그린다. 보던 자리(스크롤)는 그대로. */
+        var sh = document.getElementById("vaccine-sheet");
+        if (sh && sh.firstElementChild) {
+            var top = sh.firstElementChild.scrollTop;
+            window.openVaccineSheet();
+            var sh2 = document.getElementById("vaccine-sheet");
+            if (sh2 && sh2.firstElementChild) sh2.firstElementChild.scrollTop = top;
+        }
         toast(o[id] ? "맞은 것으로 표시했어요" : "표시를 지웠어요");
     };
 
@@ -152,28 +173,51 @@
     function sync() {
         var r = ref();
         if (!r || typeof window.setDoc !== "function") return;
-        try { window.setDoc(r, { list: done(), at: Date.now() }, { merge: true }); }
+        /* ⚠️ { merge: true } 로 올렸다. 그러면 서버 목록(list)에서 지운 칸이 안 지워진다.
+              체크를 풀어도 서버엔 남아 있다가 다음 동기화 때 되살아나서,
+              가족 연동을 켠 집은 한 번 누른 접종을 영영 못 풀었다.
+              통째로 올리고, 칸마다 '마지막으로 누른 시각'(t) 을 같이 올려서 나중에 누른 쪽이 이긴다. */
+        try {
+            var pr = window.setDoc(r, { list: done(), t: edits(), at: Date.now() });
+            if (pr && pr.catch) pr.catch(function () {});
+        }
         catch (e) {}
     }
 
-    var unsub = null;
+    var unsub = null, repush = null;
     function watch() {
         var r = ref();
         if (!r || typeof window.onSnapshot !== "function") return;
         if (unsub) { try { unsub(); } catch (e) {} }
         var u = window.onSnapshot(r, function (snap) {
             if (!snap.exists()) return;
-            var remote = (snap.data() || {}).list || {};
-            var local = done(), merged = {}, changed = false;
-            Object.keys(local).concat(Object.keys(remote)).forEach(function (k) {
-                if (merged[k]) return;
-                // 둘 다 있으면 먼저 적은 날을 남긴다 (진짜 맞은 날이 이긴다)
-                var a = local[k], b = remote[k];
-                merged[k] = (a && b) ? (a <= b ? a : b) : (a || b);
+            var data = snap.data() || {};
+            var remote = data.list || {}, rt = data.t || {};
+            var local = done(), lt = edits(), merged = {}, mt = {};
+            Object.keys(local).concat(Object.keys(remote), Object.keys(lt), Object.keys(rt)).forEach(function (k) {
+                if (k in mt) return;
+                var a = Number(lt[k]) || 0, b = Number(rt[k]) || 0;
+                if (!a && !b) {
+                    // 예전 기록(누른 시각 없음) — 둘 중 하나라도 맞았으면 맞은 것, 날짜는 먼저 적은 날
+                    var x = local[k], y = remote[k];
+                    var v = (x && y) ? (x <= y ? x : y) : (x || y);
+                    if (v) merged[k] = v;
+                    mt[k] = 0;
+                    return;
+                }
+                if (a >= b) { if (local[k]) merged[k] = local[k]; mt[k] = a; }
+                else        { if (remote[k]) merged[k] = remote[k]; mt[k] = b; }
             });
-            if (JSON.stringify(merged) !== JSON.stringify(local)) changed = true;
-            if (!changed) return;
-            try { localStorage.setItem(KEY, JSON.stringify(merged)); } catch (e) {}
+
+            // 이 폰에서 더 나중에 누른 게 있으면(짝꿍 폰이 옛 목록으로 덮었으면) 다시 올린다
+            var needPush = Object.keys(mt).some(function (k) { return (Number(mt[k]) || 0) > (Number(rt[k]) || 0); });
+            if (needPush) { clearTimeout(repush); repush = setTimeout(sync, 1500); }
+
+            if (JSON.stringify(merged) === JSON.stringify(local) && JSON.stringify(mt) === JSON.stringify(lt)) return;
+            try {
+                localStorage.setItem(KEY, JSON.stringify(merged));
+                localStorage.setItem(TKEY, JSON.stringify(mt));
+            } catch (e) {}
             paint(); mount();
         }, function () {});
         unsub = (typeof window.addLiveListener === "function") ? window.addLiveListener(u) : u;
@@ -234,8 +278,9 @@
     Object.defineProperty(window, "vacSoon", {
         configurable: true,
         get: function () {
-            var n = window.nextVaccine();
-            return (n && n.left >= 0) ? n.left : 0;
+            // '다음 접종까지 며칠' — 지난 것 말고, 앞으로 올 것 중 가장 가까운 것
+            var f = nextFuture();
+            return f ? f.left : 0;
         }
     });
 
@@ -267,12 +312,72 @@
         '</div>';
     }
 
+    /* 앞으로 올 접종 중 가장 가까운 것.
+       ⚠️ 홈 카드가 nextVaccine() 을 썼다. 그건 '지난 것' 을 먼저 돌려줘서,
+          태어날 때 맞은 BCG 를 체크 안 한 집은 2개월 접종이 5일 남아도 홈 카드가 안 떴다. */
+    function nextFuture() {
+        return window.vaccineList().filter(function (v) { return !v.done && v.left >= 0; })
+            .sort(function (a, b) { return a.left - b.left; })[0] || null;
+    }
+
+    /* ---------- 접종 뒤 이틀 ----------
+       머리말의 흐름(접종 → 48시간 열 지켜보기 → 해열제 안전장치)에서 가운데 칸이 비어 있었다.
+       오늘·어제 '맞았어요' 를 누른 게 있으면 그 이틀은 이 카드가 뜬다.
+       ⚠️ 몇 달 전 접종을 오늘 몰아서 체크한 건 빼야 한다 (그날 맞은 게 아니다).
+          권장일에서 45일 넘게 떨어진 체크는 '밀린 체크' 로 보고 안 띄운다. */
+    function vKey(k) {
+        var p = String(k).split("-");
+        return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    }
+
+    function recentShot() {
+        var best = null;
+        window.vaccineList().forEach(function (v) {
+            if (!v.done || !v.doneAt) return;
+            var shot = vKey(v.doneAt);
+            var days = Math.round((todayStart().getTime() - shot.getTime()) / DAY);
+            if (days < 0 || days > 1) return;
+            if (Math.abs(v.left) > 45) return;
+            if (!best || shot.getTime() > best.shot.getTime()) best = { v: v, shot: shot, days: days };
+        });
+        return best;
+    }
+
+    function monthsNow() {
+        var b = birth();
+        if (!b) return null;
+        var n = new Date(), m = (n.getFullYear() - b.getFullYear()) * 12 + (n.getMonth() - b.getMonth());
+        if (n.getDate() < b.getDate()) m--;
+        return Math.max(0, m);
+    }
+
+    function watchHTML(s) {
+        var mo = monthsNow();
+        return '<div id="' + CARD + '" onclick="window.directGoToolbox && window.directGoToolbox(\'fever\')" ' +
+            'style="display:flex; align-items:center; gap:13px; ' +
+            'background:rgba(127,119,221,0.07); border:1px solid rgba(127,119,221,0.20); ' +
+            'border-radius:20px; padding:15px 16px; margin-bottom:24px; cursor:pointer;">' +
+            '<div style="font-size:20px; flex-shrink:0;">🌡️</div>' +
+            '<div style="flex:1; min-width:0;">' +
+                '<div style="font-size:14px; font-weight:900; color:' + PURPLE + '; letter-spacing:-0.3px; ' +
+                    'word-break:keep-all; line-height:1.4;">' + (s.days === 0 ? "오늘" : "어제") + ' ' + esc(s.v.name) +
+                    ' 맞았어요 · 이틀은 열을 지켜봐 주세요</div>' +
+                '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:3px; ' +
+                    'word-break:keep-all; line-height:1.55;">' +
+                    ((mo !== null && mo < 3) ? '생후 3개월 전에는 38도가 넘으면 바로 병원에 가요'
+                                             : '열이 나면 해열제 기록에서 먹일 수 있는 시간을 확인하세요') + '</div>' +
+            '</div>' +
+            '<div style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">〉</div>' +
+        '</div>';
+    }
+
     function mount() {
         var old = document.getElementById(CARD);
-        var v = window.nextVaccine();
+        var v = nextFuture();
+        var shot = recentShot();
 
         // 일주일 안쪽일 때만. 매일 뜨면 그냥 벽지가 된다.
-        if (!v || v.left < 0 || v.left > 7) { if (old) old.remove(); return; }
+        if (!shot && (!v || v.left < 0 || v.left > 7)) { if (old) old.remove(); return; }
 
         var anchor = document.getElementById("baby-dashboard") ||
                      document.getElementById("now-status-card");
@@ -284,7 +389,7 @@
         if (!block || block.parentNode !== home) block = anchor;
 
         var box = document.createElement("div");
-        box.innerHTML = cardHTML(v);
+        box.innerHTML = shot ? watchHTML(shot) : cardHTML(v);
         var el = box.firstChild;
 
         if (old) old.parentNode.replaceChild(el, old);
@@ -470,7 +575,11 @@
           그게 우리 일정표를 연다. 역할이 깔끔하게 갈린다. */
 
     function boot() {
-        setTimeout(function () { watch(); }, 4000);
+        setTimeout(function () { watch(); mount(); }, 4000);   // 일주일 안쪽이면 홈에 (켤 때부터)
+        setInterval(mount, 60 * 60000);                        // 자정을 넘기면 D-7 이 바뀐다
+        document.addEventListener("visibilitychange", function () {
+            if (!document.hidden) setTimeout(mount, 600);
+        });
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

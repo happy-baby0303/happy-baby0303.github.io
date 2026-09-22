@@ -71,7 +71,9 @@
         "첫 추석":       "처음 한가위를 맞은",
         "첫 크리스마스": "첫 크리스마스를 맞은",
         "첫 어린이날":   "첫 어린이날을 맞은",
-        "오십일":        "쉰 밤을 지난"
+        "오십일":        "쉰 밤을 지난",
+        "오백일":        "오백일을 지난",
+        "천일":          "천 밤을 건넌"
     };
 
     window.sealSoonPresets = function () {
@@ -165,7 +167,7 @@
                     esc(one.label || "편지") + '에 열리는 편지가 도착했어요' + esc(more) + '</div>' +
                 '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:4px;">' +
                     comma(Math.max(0, Math.round((Date.now() - (one.ts || Date.now())) / DAY))) +
-                    '일 전에 ' + esc(one.who || "부모님") + '가 남긴 편지예요</div>' +
+                    '일 전에 ' + (one.who ? esc(one.who) + '가' : '부모님이') + ' 남긴 편지예요</div>' +
             '</div>' +
 
             '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">〉</div>' +

@@ -27,6 +27,25 @@
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
     function toast(m) { if (typeof window.showToast === "function") window.showToast(m); }
 
+    /* 엽서는 명조(Gowun Batang)와 손글씨(Nanum Pen Script)로 그린다.
+       처음 굽는 날엔 글꼴이 아직 안 받아져서 기본 글꼴로 구워졌다 (추억 엽서와 같은 일).
+       받고 나서 굽는다. 늦어도 2.5초 뒤엔 그냥 굽는다. */
+    function waitFonts(cb) {
+        var done = false;
+        var go = function () { if (done) return; done = true; setTimeout(cb, 150); };
+        setTimeout(go, 2500);
+        try {
+            if (document.fonts && document.fonts.load) {
+                Promise.all([
+                    document.fonts.load("700 54px 'Gowun Batang'"),
+                    document.fonts.load("38px 'Nanum Pen Script'")
+                ]).then(go, go);
+                return;
+            }
+        } catch (e) {}
+        setTimeout(go, 400);
+    }
+
     function pretty(k) {
         var p = String(k).split("-");
         return p[0] + ". " + p[1] + ". " + p[2];
@@ -98,13 +117,19 @@
     };
 
     // 저장된 게 있으면 그걸 쓰고, 없으면 한 번 계산해서 넣어둔다
+    // 한 번 못 그린 소리(주소가 막힌 것 등)는 이번 실행 동안 다시 받지 않는다.
+    // 예전엔 배냇함을 다시 그릴 때마다 같은 소리를 또 내려받아 풀었다 (데이터 · 배터리)
+    var waveFailed = {};
+
     window.voicePeaks = async function (key, id) {
         var v = (typeof window.getDayVoices === "function")
             ? window.getDayVoices(key).filter(function (x) { return x.id === id; })[0] : null;
         if (!v) return null;
         if (Array.isArray(v.peaks) && v.peaks.length) return v.peaks;
 
+        if (waveFailed[id]) return null;
         var p = await window.peaksFrom(v.url);
+        if (!p) waveFailed[id] = 1;
         if (p && typeof window.attachVoicePeaks === "function") window.attachVoicePeaks(key, id, p);
         return p;
     };
@@ -216,14 +241,15 @@
 
         document.body.appendChild(stage);
 
-        setTimeout(function () {
+        waitFonts(function () {
             html2canvas(stage, { scale: 1, backgroundColor: "#F8F6F4", useCORS: true, logging: false })
             .then(function (canvas) {
                 // 🚨 캔버스를 덩어리(Blob)로 변환해서 모바일 브라우저 공유 기능에 태움
                     canvas.toBlob(function(blob) {
                     if (!blob) { stage.remove(); return toast("저장 중 문제가 생겼어요"); }   // 👈 추가
                     var fileName = babyName() + "_" + title + "_소리엽서.png";
-                    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);   // 아이패드는 맥으로 나온다
                     var file = new File([blob], fileName, { type: "image/png" });
                     
                     // 🚨 모바일 공유 기능(Web Share API) 지원 여부 확인
@@ -231,14 +257,14 @@
                         if (typeof window.showConfirm === "function") {
                             window.showConfirm(
                                 isIOS 
-                                ? "엽서가 완성되었어요!<br><span style='font-size:12px;color:#8B95A1;'>아이폰은 창이 뜨면 '이미지 저장'을 눌러주세요.</span>"
-                                : "엽서가 완성되었습니다!<br><span style='font-size:12px;color:#8B95A1;'>가족들에게 바로 공유하시겠어요?</span>",
+                                ? "엽서가 완성되었어요!<br><span style='font-size:12px;color:#A3958A;'>아이폰은 창이 뜨면 '이미지 저장'을 눌러주세요.</span>"
+                                : "엽서가 완성되었어요!<br><span style='font-size:12px;color:#A3958A;'>가족들에게 바로 공유하시겠어요?</span>",
                                 function() {
-                                    navigator.share({ files: [file], title: '우리아기 소리 엽서' }).catch(function(){});
+                                    navigator.share({ files: [file], title: babyName() + ' 소리 엽서' }).catch(function(){});
                                 }, "💌", "저장 및 공유하기", "#B98A2E" // 골드 색상으로 럭셔리하게
                             );
                         } else {
-                            navigator.share({ files: [file], title: '우리아기 소리 엽서' }).catch(function(){});
+                            navigator.share({ files: [file], title: babyName() + ' 소리 엽서' }).catch(function(){});
                         }
                     } else {
                         // PC나 구형 브라우저를 위한 기존 다운로드 방식 유지
@@ -258,7 +284,7 @@
                 stage.remove();
                 toast("저장 중 문제가 생겼어요");
             });
-        }, 400);
+        });
     };
 
     /* ---------- 점검용 ---------- */

@@ -34,6 +34,14 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
+    /* ⚠️ "하윤가 열어보게", "하윤는", "하윤를 기다리고" 가 나왔다. 받침이 있으면 '이' 를 붙인다. */
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
+
     function myTitle() {
         var a = localStorage.getItem("user_role");
         if (a) return a === "dad" ? "아빠" : "엄마";
@@ -147,7 +155,7 @@
         } catch (e) { console.warn("[봉인 편지] 동기화 실패", e); }
     };
 
-    var unsub = null;
+    var unsub = null, repushTimer = null;
     window.startSealedRealtimeSync = function () {
         var code = syncCode();
         if (!code || !window.db || typeof window.onSnapshot !== "function") return;
@@ -158,11 +166,12 @@
             var data = snap.data() || {};
             var remote = data.list || [];
             if (window.Grave) window.Grave.merge("seal", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
+            var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("seal") : {};
             var local = load(), seen = {}, out = [];
 
             local.concat(remote).forEach(function (l) {
                 if (!l || !l.id) return;
-                if (window.Grave && window.Grave.has("seal", l.id)) return;   // 👈 지운 건 되살리지 않기
+                if (gone[l.id]) return;   // 👈 지운 건 되살리지 않기
                 if (seen[l.id]) {
                     // 한쪽에서 열었으면 열린 상태가 이긴다
                     if (l.opened && !seen[l.id].opened) {
@@ -173,6 +182,12 @@
                 }
                 seen[l.id] = l; out.push(l);
             });
+
+            // 짝꿍 폰의 옛 사본이 서버를 덮었으면 한 번 더 올린다 (봉인 편지는 스무 해를 맡긴다)
+            if (window.syncNeedsPush && window.syncNeedsPush(remote, out, data.deleted, "seal")) {
+                clearTimeout(repushTimer);
+                repushTimer = setTimeout(window.syncSealedToFirebase, 1500);
+            }
 
             if (JSON.stringify(out) === JSON.stringify(local)) return;
             save(out);
@@ -217,10 +232,12 @@
     // fixed 를 주면 '언제 열까요' 단계를 건너뛰고 바로 쓰기로 간다.
     // 온보딩처럼 고민할 여유가 없는 자리에서는 선택지가 곧 이탈이다.
     window.openSealSheet = function (fixed) {
-        var pro = (typeof window.isPremium !== "function") || window.isPremium();
-        if (!pro && load().length >= FREE_MAX) {
-            if (typeof window.openUpsell === "function") return window.openUpsell("book");
-            return toast("봉인 편지는 " + FREE_MAX + "통까지 담을 수 있어요");
+        /* ⚠️ 한도를 여기서 따로 셌고, 막히면 '포토북' 안내가 떴다(openUpsell("book")).
+              한도는 premium.js 표 한 곳에서 읽고, 안내는 '봉인 편지' 로 연다. */
+        var cap = (typeof window.sealedCapTotal === "function") ? window.sealedCapTotal() : FREE_MAX;
+        if (load().length >= cap) {
+            if (typeof window.openUpsell === "function") return window.openUpsell("seal");
+            return toast("봉인 편지는 " + cap + "통까지 담을 수 있어요");
         }
         if (!birth()) return toast("생년월일을 먼저 등록해 주세요");
 
@@ -281,7 +298,7 @@
         var left = comma(daysLeft(draft.at));
         if (typeof window.showConfirm === "function") {
             window.showConfirm(
-                "이 편지는 " + pretty(draft.at) + "에\n" + babyName() + "가 열어보게 됩니다.\n\n" +
+                "이 편지는 " + pretty(draft.at) + "에\n" + callName("가") + " 열어보게 됩니다.\n\n" +
                 "그때까지 " + left + "일,\n조용히 기다릴게요.",
                 go, "🕯️", "봉인하기", GOLD);
         } else if (confirm("이 편지는 " + pretty(draft.at) + "에 열립니다. 봉인할까요?")) go();
@@ -300,7 +317,9 @@
 
         var body;
         if (step === "when") {
-            var rows = presets().map(function (p) {
+            /* ⚠️ 안쪽 presets() 를 바로 불러서, sealsoon.js 가 얹은 '백일 · 첫 명절' 같은 가까운 날이
+                  고르는 칸에 한 번도 안 떴다. 바깥 창구(window.sealPresets)로 부른다. */
+            var rows = (typeof window.sealPresets === "function" ? window.sealPresets() : presets()).map(function (p) {
                 var left = daysLeft(p.at);
                 return '<div onclick="window.pickSealDate(\'' + p.at + '\',\'' + esc(p.label) + '\',\'' + esc(p.to) + '\')" ' +
                     'style="display:flex; justify-content:space-between; align-items:center; padding:15px 16px; ' +
@@ -318,7 +337,7 @@
                     '언제 열어보게 할까요' +
                 '</div>' + rows +
                 '<div style="display:flex; gap:8px; align-items:center; margin-top:12px;">' +
-                    '<input id="seal-custom" type="date" style="flex:1; box-sizing:border-box; padding:13px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-m); font-size:14px;">' +
+                    '<input id="seal-custom" type="date" min="' + keyOf(new Date(today0().getTime() + DAY)) + '" style="flex:1; box-sizing:border-box; padding:13px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-m); font-size:14px;">' +
                     '<div onclick="window.pickSealCustom()" style="padding:13px 18px; background:var(--bg-sub); color:var(--text-s); border-radius:14px; font-size:13.5px; font-weight:800; cursor:pointer; white-space:nowrap;">직접 정하기</div>' +
                 '</div>';
         } else {
@@ -330,7 +349,7 @@
                 '</div>' +
 
                 '<textarea id="seal-text" rows="9" maxlength="' + MAX_LEN + '" ' +
-                    'placeholder="' + esc(draft.to) + ' ' + esc(babyName()) + '에게,&#10;&#10;오늘 너는…" ' +
+                    'placeholder="' + esc(draft.to) + ' ' + esc(callName("에게")) + ',&#10;&#10;오늘 너는…" ' +
                     'style="width:100%; box-sizing:border-box; padding:16px; border-radius:16px; border:1px solid var(--border); ' +
                     'background:var(--bg-sub); color:var(--text-m); font-family:\'Nanum Pen Script\',cursive; ' +
                     'font-size:22px; line-height:1.65; outline:none; resize:none;"></textarea>' +
@@ -343,14 +362,14 @@
                 '</div>' +
                 '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:14px; line-height:1.75; word-break:keep-all;">' +
                     '한 줄이어도 괜찮아요.<br>' +
-                    esc(draft.to) + ' ' + esc(babyName()) + '는 그 한 줄도 오래 읽을 거예요.' +
+                    esc(draft.to) + ' ' + esc(callName("는")) + ' 그 한 줄도 오래 읽을 거예요.' +
                 '</div>';
         }
 
         wrap.innerHTML =
         '<div style="width:100%; max-width:480px; max-height:88vh; overflow-y:auto; background:var(--bg-card); border-radius:26px 26px 0 0; padding:22px 20px calc(28px + env(safe-area-inset-bottom, 0px));">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">' +
-                '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🕯️ 미래의 ' + esc(babyName()) + '에게</span>' +
+                '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🕯️ 미래의 ' + esc(callName("에게")) + '</span>' +
                 '<span onclick="window.closeSealSheet()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1; padding:0 4px;">×</span>' +
             '</div>' +
             '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:16px;">' + esc(myTitle()) + '가 쓰는 편지</div>' +
@@ -378,20 +397,23 @@
             repaint();
         }
 
+        var oldView = document.getElementById("sealed-view");
+        if (oldView) oldView.remove();
+
         var w = document.createElement("div");
         w.id = "sealed-view";
         w.setAttribute("style", "position:fixed; inset:0; z-index:100003; background:var(--bg-main); overflow-y:auto; -webkit-overflow-scrolling:touch;");
         w.innerHTML =
         '<div style="max-width:520px; margin:0 auto; padding:0 22px 60px;">' +
             '<div style="display:flex; justify-content:flex-end; padding:20px 0 6px;">' +
-                '<span onclick="document.getElementById(\'sealed-view\').remove(); document.body.style.overflow=\'\';" ' +
+                '<span onclick="window.closeSealedView()" ' +
                     'style="font-size:24px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="text-align:center; margin-bottom:30px;">' +
                 '<div style="font-size:34px; margin-bottom:14px;">🕯️</div>' +
                 '<div style="font-size:11px; font-weight:800; color:' + GOLD + '; letter-spacing:3px; margin-bottom:10px;">' + esc(l.label) + '</div>' +
                 '<div class="serif-display" style="font-size:21px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' +
-                    esc(l.to) + ' ' + esc(babyName()) + '에게</div>' +
+                    esc(l.to) + ' ' + esc(callName("에게")) + '</div>' +
                 '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:8px;">' +
                     esc(l.who) + '가 ' + esc(pretty(keyOf(new Date(l.ts)))) + '에 씀</div>' +
             '</div>' +
@@ -434,7 +456,7 @@
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:10px; font-weight:800; color:' + GOLD + '; letter-spacing:1.8px; margin-bottom:4px;">' + esc(l.label) + '</div>' +
                     '<div style="font-size:14.5px; font-weight:800; color:var(--text-m); letter-spacing:-0.3px;">' +
-                        esc(l.to) + ' ' + esc(babyName()) + '에게</div>' +
+                        esc(l.to) + ' ' + esc(callName("에게")) + '</div>' +
                     '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:4px;">' +
                         (done ? "열어봤어요  ·  " + esc(l.who) + " 씀"
                               : ready ? "이제 열어볼 수 있어요"
@@ -470,7 +492,7 @@
                     '<div>' +
                         '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">봉인된 편지</div>' +
                         '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">' +
-                            (list.length ? esc(list.length + "통이 " + babyName() + "를 기다리고 있어요") : "미래로 보내는 편지함") + '</div>' +
+                            (list.length ? esc(list.length + "통이 " + callName("를") + " 기다리고 있어요") : "미래로 보내는 편지함") + '</div>' +
                     '</div>' +
                     '<div onclick="window.closeSealedBox()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; padding:2px 8px; line-height:1;">×</div>' +
                 '</div>' +
@@ -500,6 +522,13 @@
         document.body.style.overflow = "";
     };
 
+    // 봉인 편지 보기 닫기 — 뒤로가기(backbutton.js)도 이걸 부른다. 봉인함이 밑에 있으면 스크롤은 잠근 채로 둔다
+    window.closeSealedView = function () {
+        var el = document.getElementById("sealed-view");
+        if (el) el.remove();
+        if (!document.getElementById("sealed-box")) document.body.style.overflow = "";
+    };
+
     /* ---------- 배냇함에 놓이는 한 줄 ---------- */
 
     window.renderSealedBar = function () {
@@ -518,7 +547,7 @@
             'background:' + GOLD_BG + '; border-radius:16px; margin-bottom:14px; cursor:pointer;' +
             (ready ? ' border:1px solid ' + GOLD + ';' : '') + '">' +
             '<span style="font-size:12.5px; font-weight:800; color:' + GOLD + ';">🕯️ ' +
-                (list.length ? '봉인된 편지 ' + list.length + '통' : '미래의 ' + esc(babyName()) + '에게') + '</span>' +
+                (list.length ? '봉인된 편지 ' + list.length + '통' : '미래의 ' + esc(callName("에게"))) + '</span>' +
             '<span style="font-size:11.5px; font-weight:700; color:' + GOLD + '; opacity:0.8; white-space:nowrap;">' + right + '</span>' +
         '</div>';
     };

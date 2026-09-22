@@ -67,9 +67,15 @@
                      color: PURPLE, urgent: false };
         }
 
-        var h = Math.floor(pick.minsLeft / 60), m = pick.minsLeft % 60;
+        /* 둘 다 막혀 있으면 먼저 풀리는 쪽을 말한다 (같은 약 간격 vs 교차 2시간).
+           예전엔 늘 빨간약 기준 시간이라, 파란약이 먼저 되는데도 더 늦은 시간을 알렸다. */
+        var soon = pick;
+        if (other.kind !== "daily" && isFinite(other.minsLeft) && other.minsLeft < pick.minsLeft) soon = other;
+        var mins = isFinite(soon.minsLeft) ? soon.minsLeft : 0;
+        var h = Math.floor(mins / 60), m = mins % 60;
+        var soonName = (soon === red) ? "아세트아미노펜" : "이부프로펜 계열";
         return { tool: "fever", icon: "🌡️", label: "해열제",
-                 text: (h ? h + "시간 " : "") + m + "분 뒤부터 가능해요",
+                 text: soonName + " " + (h ? h + "시간 " : "") + m + "분 뒤부터 가능해요",
                  color: GOLD, urgent: false };
     }
 
@@ -129,7 +135,8 @@
             var open = new Date(r.openDate); open.setHours(0, 0, 0, 0);
             if (isNaN(open.getTime())) return;
             var left = r.limitDays - Math.floor((today - open) / 86400000);
-            if (left < 0) gone.push(r.name);
+            // 큐레이터(젖병·유모차)가 넣은 칸은 이름 자리가 다를 수 있다 — 'undefined 기한이 지났어요' 가 떴다
+            if (left < 0) gone.push(r.name || r.title || r.item || "이름 없는 물건");
         });
 
         if (!gone.length) return null;

@@ -123,14 +123,16 @@
 
     var KEY = "baenat_iospush_hide";
 
+    /* ⚠️ '버튼만 누르면 되는' 상태는 나중에를 눌러도 앱을 열 때마다 다시 떴다.
+          재촉하지 않는다. 그 상태는 하루, 나머지는 사흘 쉰다. */
     function snoozed() {
-        if (state === "ask") return false;
         var until = Number(localStorage.getItem(KEY) || 0);
         return !!(until && Date.now() < until);
     }
 
     function snooze() {
-        localStorage.setItem(KEY, String(Date.now() + 3 * 24 * 60 * 60 * 1000));
+        var days = (state === "ask") ? 1 : 3;
+        localStorage.setItem(KEY, String(Date.now() + days * 24 * 60 * 60 * 1000));
     }
 
     /* ----------------------------------------------------------
@@ -163,9 +165,10 @@
         ask: {
             icon: "\uD83D\uDD14",
             title: "알림을 켤까요",
+            /* ⚠️ '이것 말고는 울리지 않습니다' 라고 약속했는데, 이제 문답 답장 · 육퇴 알림도 간다. */
             body:
-                "짝꿍이 바통을 넘기면 바로 알려드릴게요.<br>" +
-                "이것 말고는 울리지 않습니다.",
+                "짝꿍이 바통을 넘기거나 문답에 답하면 바로 알려드릴게요.<br>" +
+                "꼭 필요한 것만 보내요.",
             steps: null,
             cta: "알림 켜기"
         },
@@ -174,7 +177,7 @@
             title: "알림이 꺼져 있어요",
             body:
                 "아이폰 <b>설정 → 알림 → 배냇함</b>에서<br>" +
-                "알림 허용을 켜주시면 바통터치가 울립니다.",
+                "알림 허용을 켜주시면 바통터치 · 문답 알림이 울립니다.",
             steps: null,
             cta: null
         }

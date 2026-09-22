@@ -21,8 +21,19 @@
         if (!m) return;
         var c = m.getAttribute("content") || "";
         if (c.indexOf("viewport-fit") === -1) {
-            m.setAttribute("content", c + ", viewport-fit=cover");
+            c += ", viewport-fit=cover";
         }
+        /* 아이폰은 글씨가 16px 보다 작은 입력창을 누르면 화면을 확 당겨 확대한다.
+           그걸 막겠다고 모든 입력창 글씨를 16px 로 강제했었다 (아래 CSS).
+           그게 형님이 짚은 '생년월일·선택칸 글씨가 잘린다', '숫자와 단위 크기가 안 맞는다' 의 원인이었다.
+             12px 로 설계한 생년월일 칸, 90px 짜리 선택칸 → 16px 이 되며 잘림
+             42px 금액 · 22px 체온·몸무게 → 16px 로 작아져 옆의 '원·℃·kg' 보다 작아짐
+           아이폰만 viewport 로 확대를 막는다 (아이폰은 이렇게 해도 두 손가락 확대는 된다).
+           안드로이드는 원래 확대를 안 하니 아무것도 안 건드린다. */
+        var ua = navigator.userAgent || "";
+        var isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.indexOf("Mac") > -1 && "ontouchend" in document);
+        if (isIOS && c.indexOf("maximum-scale") === -1) c += ", maximum-scale=1";
+        m.setAttribute("content", c);
     })();
 
     /* ---------- 2. 스타일 ---------- */
@@ -69,8 +80,7 @@ body { overscroll-behavior-y: contain; }
     #home-postcard-tile,
     #tab-home div[style*="grid-template-columns: 1fr 1fr"] > div { padding: 18px 12px !important; }
 
-    /* 입력창 — 16px 보다 작으면 아이폰이 화면을 확 당겨버린다 */
-    input, textarea, select { font-size: 16px !important; }
+    /* ⚠️ 입력창 글씨를 전부 16px 로 강제하던 줄을 뺐다 — 위 fixViewport 설명 참고 */
 
     /* 하단 탭 자체는 건드리지 않는다.
        style.css 37행이 이미 safe-area 를 계산하고 있다. */

@@ -62,9 +62,10 @@
 
     function voiceLatest() {
         if (typeof window.voiceDays !== "function") return 0;
-        var newest = 0;
+        var me = myUid(), newest = 0;
         window.voiceDays().forEach(function (k) {
             (window.getDayVoices(k) || []).forEach(function (v) {
+                if (v && v.by && me && v.by === me) return;   // 내가 담은 소리는 새 소식이 아니다
                 var t = Number(v.ts || 0);
                 if (t > newest) newest = t;
             });
@@ -72,16 +73,45 @@
         return newest;
     }
 
+    /* ⚠️ '편지함' 점을 봉인 편지로 세고 있었다. 편지함은 아기가 쓰는 하루 편지와
+          부부의 한 줄이 쌓이는 곳이다. 새 편지가 왔거나, 짝꿍이 한 줄을 남겼으면 점을 찍는다. */
     function letterLatest() {
-        var list = [];
-        if (typeof window.sealedLetters === "function") { try { list = window.sealedLetters() || []; } catch (e) {} }
-        var newest = 0;
-        list.forEach(function (l) {
-            // 이미 열어본 편지는 새 소식이 아니다
-            if (l.opened) return;
-            var t = Number(l.ts || l.at || l.createdAt || 0);
-            if (t > newest) newest = t;
+        var newest = 0, now = Date.now();
+        var L = {};
+        try { L = JSON.parse(localStorage.getItem("tosil_letters")) || {}; } catch (e) {}
+        Object.keys(L).forEach(function (k) {
+            var l = L[k] || {};
+            var t = Number(l.at) || 0;
+            if (!t) {                                   // 예전 편지는 도착 시각이 없다 — 그날 밤 9시로 본다
+                var p = String(k).split("-");
+                var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 21, 0, 0).getTime();
+                if (!isNaN(d)) t = d;
+            }
+            if (t > newest && t <= now) newest = t;
         });
+
+        // 짝꿍이 남긴 한 줄 — 편지함 답장 + 배냇함 한 줄
+        var meSlot = localStorage.getItem("user_role") === "dad" ? "dad" : "mom";
+        var meWord = meSlot === "dad" ? "아빠" : "엄마";
+        var R = {};
+        try { R = JSON.parse(localStorage.getItem("tosil_replies")) || {}; } catch (e) {}
+        Object.keys(R).forEach(function (k) {
+            var o = R[k] || {};
+            ["mom", "dad"].forEach(function (slot) {
+                if (slot === meSlot || !o[slot]) return;
+                var t = Number(o[slot].at) || 0;
+                if (t > newest) newest = t;
+            });
+        });
+        if (typeof window.noteDays === "function" && typeof window.getDayNotes === "function") {
+            window.noteDays().forEach(function (k) {
+                (window.getDayNotes(k) || []).forEach(function (n) {
+                    if (!n || !n.who || n.who === meWord) return;
+                    var t = Number(n.ts) || 0;
+                    if (t > newest) newest = t;
+                });
+            });
+        }
         return newest;
     }
 
@@ -147,6 +177,9 @@
     function paint() {
         // 보관함 칸은 '3열 격자 안의, 글자가 함 이름인 칸'으로 찾는다
         var labels = Object.keys(BOXES);
+        // 배냇함 탭이 안 보일 때는 훑지 않는다 (배터리)
+        var tabEl = document.getElementById("tab-memorybox");
+        if (!tabEl || tabEl.style.display === "none") return;
         var cards = document.querySelectorAll('#tab-memorybox div[onclick]');
 
                for (var i = 0; i < cards.length; i++) {
@@ -155,7 +188,7 @@
             // 카드 안의 '이름 줄'을 직접 찾는다.
             // textContent 는 이모지·설명까지 다 붙어 나와서 맨 앞 비교가 안 먹는다.
             var hit = null;
-            var divs = c.querySelectorAll("div");
+            var divs = c.children;   // 칸 이름은 바로 아래 자식이다 — 날짜 카드 속까지 훑지 않는다
             for (var d = 0; d < divs.length && !hit; d++) {
                 var t = (divs[d].textContent || "").trim();
                 for (var j = 0; j < labels.length; j++) {
@@ -194,7 +227,6 @@
     }
 
       function boot() {
-        setInterval(paint, 5000);      /* ⚠️ 1.2초마다 DOM 전체를 훑고 있었다. 하루 종일 켜두는 앱이라 이게 발열이 된다 */        // 👈 이 줄 추가
 
         setTimeout(paint, 1500);
         setTimeout(paint, 3500);

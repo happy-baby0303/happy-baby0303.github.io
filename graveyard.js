@@ -77,6 +77,9 @@
             if (changed) save(kind, prune(o));
         },
 
+        // 여러 개를 물어볼 때 — 한 번만 읽는다 (고치지도, 저장하지도 않는다)
+        peek: function (kind) { return load(kind); },
+
         // 되돌리기가 필요할 때 (실수로 지웠을 때 대비)
         forgive: function (kind, id) {
             var o = load(kind);
@@ -86,10 +89,57 @@
 
         /* ---------- 점검용 ---------- */
         debug: function () {
-                       ["photo", "voice", "seal", "note", "word"].forEach(function (k) {
+                       ["photo", "voice", "seal", "note", "word", "trk"].forEach(function (k) {
                 var o = load(k);
                 console.log("[묘비] " + k + ": " + Object.keys(o).length + "개");
             });
         }
     };
+
+    /* ==========================================================
+       합친 뒤 다시 올려야 하나 — 사진 · 목소리 · 한 줄 · 봉인 편지가 같이 쓴다
+       ----------------------------------------------------------
+       ⚠️ 동기화가 '통째로 올리기' 라서, 두 폰이 비슷한 때에 올리면
+          나중에 올린 폰의 옛 사본이 서버에 남았다.
+          그러면 방금 담은 사진·한 줄이 짝꿍 폰에 끝내 안 갔다
+          (이 폰에서 뭔가를 새로 담아야 그제야 같이 올라갔다).
+          합칠 때 서버에 없는 게 이 폰에 있으면(새로 담은 것 · 고친 것 · 지운 표시)
+          한 번 더 올린다. 서버가 다 가지면 멈춘다 — 무한히 주고받지 않는다.
+          서버는 열쇠 순서를 바꿔서 돌려주므로 순서와 상관없이 비교한다.
+       ---------------------------------------------------------- */
+    function sig(v) {
+        if (Array.isArray(v)) return "[" + v.map(sig).join(",") + "]";
+        if (v && typeof v === "object") {
+            return "{" + Object.keys(v).sort()
+                .filter(function (k) { return v[k] !== undefined; })
+                .map(function (k) { return JSON.stringify(k) + ":" + sig(v[k]); }).join(",") + "}";
+        }
+        return JSON.stringify(v === undefined ? null : v);
+    }
+
+    // { 날짜: [항목] } 이든 [항목] 이든 → { id: 내용 }
+    function flat(x) {
+        var out = {};
+        var add = function (it) { if (it && it.id) out[it.id] = sig(it); };
+        if (Array.isArray(x)) x.forEach(add);
+        else if (x && typeof x === "object") {
+            Object.keys(x).forEach(function (k) { if (Array.isArray(x[k])) x[k].forEach(add); });
+        }
+        return out;
+    }
+
+    window.syncNeedsPush = function (remote, merged, remoteDeleted, kind) {
+        var r = flat(remote), m = flat(merged);
+        var ids = Object.keys(m);
+        for (var i = 0; i < ids.length; i++) if (r[ids[i]] !== m[ids[i]]) return true;
+        if (kind) {
+            var mine = load(kind), theirs = (remoteDeleted && typeof remoteDeleted === "object") ? remoteDeleted : {};
+            var gs = Object.keys(mine);
+            for (var g = 0; g < gs.length; g++) {
+                if (!(gs[g] in theirs) && Date.now() - (Number(mine[gs[g]]) || 0) < TTL) return true;
+            }
+        }
+        return false;
+    };
+    window.syncSig = sig;
 })();

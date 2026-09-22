@@ -50,9 +50,23 @@
     function q(s) { return String(s == null ? "" : s).replace(/\\/g, "").replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
+
+    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = localStorage.getItem("tosil_babyName") || "우리 아기", c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
+
     function toast(m) { if (typeof window.showToast === "function") window.showToast(m); }
 
     function monthsOld() {
+        // 나들이 탭의 칩 · 수유실 줄과 같은 개월 수를 말하게 (달력 기준 셈 하나로)
+        if (typeof window.babyMonthsForPlaces === "function") {
+            var pm = window.babyMonthsForPlaces();
+            if (pm !== null) return pm;
+        }
         var s = localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var b = new Date(s + "T00:00:00").getTime();
@@ -670,7 +684,7 @@
     function napShort() {
         var h = napHour();
         if (h === null) return "";
-        return babyName() + " 낮잠은 보통 " + ampm(h) + "이라, " + ampm(h - 2) + " 전에 나서면 이동 중에 재울 수 있어요";
+        return callName("") + " 낮잠은 보통 " + ampm(h) + "이라, " + ampm(h - 2) + " 전에 나서면 이동 중에 재울 수 있어요";
     }
 
     /* ---------- 내 지역 눌러주기 ----------
@@ -774,7 +788,7 @@
                   'line-height:1.55; word-break:keep-all;">아직 어려서 갈 만한 곳이 많지 않아요. 우선 전체를 보여드릴게요</div>'
                 : (hidden
                     ? '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin:-3px 0 9px;">' +
-                      esc(babyName()) + '에게 아직 이른 곳 ' + hidden + '군데를 숨겼어요 · ' +
+                      esc(callName("에게")) + ' 아직 이른 곳 ' + hidden + '군데를 숨겼어요 · ' +
                       '<span onclick="window.toggleOutingFilter(\'age\')" style="color:' + PURPLE + '; ' +
                       'font-weight:900; cursor:pointer;">전부 보기</span></div>'
                     : ""));

@@ -1,9 +1,10 @@
 /* ============================================================
    배냇함 — 해열제 안전장치 (feverguard.js)
 
-   ⚠️ 이 파일은 아기 목숨과 직결된다. 규칙 하나만 지킨다.
-      "확실하지 않으면 막는다."
-      어떤 경우에도 기존보다 느슨해지지 않는다.
+   ⚠️ 이 파일은 아기 목숨과 직결된다. 규칙 둘만 지킨다.
+      "확실하지 않으면 크게 경고한다." 어떤 경우에도 기존보다 느슨해지지 않는다.
+      "기록은 막지 않는다." 이미 먹인 약을 못 적으면 마지막 투약 시각이 틀리게 남고,
+      그러면 몇 시간 뒤 앱이 초록불을 켠다. 경고 → 확인 → 사실대로 기록 (script.js 가 묻는다).
 
    기존 checkPillLock 이 하던 일
      · 직전 1회와의 간격만 확인 (같은 약 4시간 / 다른 약 2시간)
@@ -11,17 +12,21 @@
    여기서 더하는 것 넷
      1. 24시간 총 횟수 상한        — 없으면 하루 6회도 통과했다
      2. 약별로 자기 간격을 따로 계산 — 이부프로펜은 6시간이 맞다
-     3. 6개월 미만 이부프로펜 차단  — 금기다
+     3. 월령 — 이부프로펜 6개월 미만 금기 · 아세트아미노펜 4개월 미만은 처방 있을 때만
+        (script.js 의 PILL_RULES 와 같은 기준. 여기만 빠져 있어서 두 달 아기에게 '줄 수 있어요' 가 떴다)
      4. 다음 투약 가능 시각을 항상 화면에 — 저장 눌러야 알던 걸 미리 보여준다
+     5. 생후 3개월 미만 — 38℃ 이상이면 해열제보다 진료가 먼저라는 안내
 
    근거
      · 아세트아미노펜 10~15mg/kg, 4~6시간, 24시간 5회 이내, 하루 75mg/kg 이내
      · 이부프로펜 5~10mg/kg, 6~8시간, 6개월 미만 금기
      · 교차투여 시에도 각 약의 자기 간격은 그대로 지킨다
 
-   ❗ 용량 계산 자체는 건드리지 않는다.
-      지금 값(체중×0.3~0.38 / ×0.4~0.5)은 안전 범위 안이다.
-      다만 어떤 농도를 전제로 한 값인지 화면에 밝힌다.
+   ❗ 용량(mL) 계산은 script.js 에서 걷어냈다. 제품마다 농도가 달라 앱이 답을 낼 수 없다.
+      그래서 '32mg/mL 기준' 같은 농도 표시도 이제 뜻이 없다 — 화면에서 뺐다.
+      용량은 약 상자의 몸무게별 표를 본다. 이 파일은 '지금 줘도 되나' 만 답한다.
+
+   ❗ 기준 숫자는 출시 전 약사 · 소아과 확인을 받는다.
 
    index.html 에서 script.js 다음에 로드하세요.
    ============================================================ */
@@ -36,14 +41,17 @@
             name: "아세트아미노펜",
             gapMin: 240,             // 같은 약 최소 4시간
             maxPerDay: 5,            // 24시간 5회 이내
-            syrup: "32mg/mL"
+            minMonths: 4,            // 4개월 미만은 의사 처방이 있을 때만 (script.js PILL_RULES 와 같게)
+            head: "진료가 먼저예요",
+            ageWhy: "의사가 처방했을 때만 주세요.\n처방 없이 열이 나면 먼저 소아과로 가세요."
         },
-        blue: {                      // 이부프로펜 (부루펜)
+        blue: {                      // 이부프로펜 (부루펜) · 덱시부프로펜 (챔프 파랑 · 맥시부펜)
             name: "이부프로펜",
             gapMin: 360,             // 같은 약 최소 6시간  ← 기존 4시간에서 강화
             maxPerDay: 4,            // 24시간 4회 이내
-            syrup: "20mg/mL",
-            minMonths: 6             // 6개월 미만 금기
+            minMonths: 6,            // 6개월 미만 금기
+            head: "먹이면 안 돼요",
+            ageWhy: "6개월 미만은 금기예요.\n의사 처방 없이는 절대 먹이지 마세요."
         },
         crossMin: 120                // 다른 약으로 바꿔 줄 때 최소 2시간
     };
@@ -107,7 +115,7 @@
         var m = Math.ceil(ms / 60000);
         if (m <= 0) return "";
         var h = Math.floor(m / 60), mm = m % 60;
-        return h ? (h + "시간 " + (mm ? mm + "분" : "")) : (mm + "분");
+        return h ? (h + "시간" + (mm ? " " + mm + "분" : "")) : (mm + "분");   // "3시간  남음" 겹공백 없이
     }
 
     /* ==========================================================
@@ -121,19 +129,20 @@
 
         var now = Date.now();
 
-       // 1) 6개월 미만 이부프로펜 금기 (초압축 2줄 텍스트)
+        // 1) 월령 — 모르면 모른다고 하고 크게 경고한다 (넘겨짚지 않는다)
         if (rule.minMonths) {
             var m = ageMonths();
             if (m === null) {
                 return {
-                    ok: false, hard: true,
-                    why: "생년월일 정보가 없어 안전을 위해 투약이 차단됩니다.\n설정 탭에서 아기 생일을 먼저 등록해주세요."
+                    ok: false, hard: true, short: "생일 미등록",
+                    why: "생일이 없어 월령을 확인할 수 없어요.\n설정에서 아기 생일을 먼저 등록해주세요."
                 };
             }
             if (m < rule.minMonths) {
                 return {
-                    ok: false, hard: true,
-                    why: "생후 " + rule.minMonths + "개월 미만(현재 " + Math.floor(m) + "개월) 투약 불가\n전문의 상담 전에는 절대 먹이지 마세요!"
+                    ok: false, hard: true, head: rule.head,
+                    short: rule.minMonths + "개월 미만",
+                    why: "생후 " + rule.minMonths + "개월 미만이에요 (지금 " + Math.floor(m) + "개월).\n" + rule.ageWhy
                 };
             }
         }
@@ -142,7 +151,7 @@
         var n = countIn24h(type);
         if (n >= rule.maxPerDay) {
             return {
-                ok: false, hard: true,
+                ok: false, hard: true, short: "하루 " + rule.maxPerDay + "회 채움",
                 why: "최근 24시간 안에 " + rule.name + "을 " + n + "번 줬어요.\n" +
                      "하루 " + rule.maxPerDay + "회가 상한입니다.\n" +
                      "더 필요하면 소아과에 연락해주세요."
@@ -220,30 +229,42 @@
         var v = window.feverCheck(type);
         var n = countIn24h(type);
         var color = v.ok ? "#00B37A" : "#F04452";
-        var head = v.ok ? "지금 줄 수 있어요" : "지금은 안 돼요";
+        var head = v.ok ? "지금 줄 수 있어요" : (v.head || "지금은 안 돼요");
+
+        /* ⚠️ 막힌 이유를 첫 줄을 뗀 나머지만 보여줬다.
+              간격 이유는 첫 줄이 제목이라 괜찮았지만, 월령 · 생일 이유는 첫 줄이 '왜' 였다.
+              "생후 6개월 미만(현재 3개월)" 이 잘리고 "전문의 상담 전에는…" 만 남았다.
+              큰 이유(hard)는 통째로 보여준다. */
+        var sub = v.ok ? ("24시간 안에 " + n + "번 줬어요 (상한 " + rule.maxPerDay + "회)")
+                       : (v.hard ? v.why : (v.why.split("\n").slice(1).join("\n") || v.why));
 
         return '<div style="flex:1; min-width:0; background:var(--bg-card); border:1px solid var(--border); ' +
                 'border-left:3px solid ' + (type === "red" ? "#F04452" : "#3182F6") + '; ' +
                 'border-radius:12px; padding:12px 13px;">' +
-            '<div style="font-size:11.5px; font-weight:900; color:var(--text-m); margin-bottom:6px;">' +
+            '<div style="font-size:11.5px; font-weight:900; color:var(--text-m); margin-bottom:7px;">' +
                 (type === "red" ? "빨간약" : "파란약") + ' · ' + rule.name + '</div>' +
-            /* ⚠️ 이 파일 머리말이 "어떤 농도를 전제한 값인지 화면에 밝힌다" 고
-                  적어놓고, 정작 syrup 값을 만들어만 두고 안 밝히고 있었다.
-                  용량(mL)은 농도가 바뀌면 통째로 틀린다.
-                  약병에 다른 숫자가 적혀 있으면 부모가 알아채야 한다. */
-            '<div style="font-size:10.5px; font-weight:700; color:var(--text-sub); ' +
-                'margin-bottom:7px; letter-spacing:-0.2px;">' + rule.syrup + ' 기준</div>' +
             '<div style="font-size:13px; font-weight:900; color:' + color + '; line-height:1.4; word-break:keep-all;">' +
                 head + '</div>' +
             '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-top:5px; line-height:1.5; white-space:pre-line; word-break:keep-all;">' +
-                (v.ok ? "24시간 안에 " + n + "번 줬어요 (상한 " + rule.maxPerDay + "회)"
-                      : v.why.split("\n").slice(1).join("\n") || v.why) +
+                sub +
             '</div>' +
         '</div>';
     }
 
+    /* 생후 3개월 미만의 열은 해열제로 버틸 일이 아니다. 진료가 먼저다.
+       (막지는 않는다 — 의사가 처방했을 수 있다. 다만 제일 먼저 보이게 둔다) */
+    function youngBanner() {
+        var m = ageMonths();
+        if (m === null || m >= 3) return "";
+        return '<div style="background:rgba(211,46,46,0.08); border:1px solid rgba(211,46,46,0.28); border-radius:12px; ' +
+                'padding:12px 14px; margin:0 0 10px; font-size:12.5px; font-weight:800; color:#C62828; line-height:1.6; word-break:keep-all;">' +
+                '생후 3개월 미만이에요. 38.0℃ 이상이면 해열제보다 진료가 먼저예요.<br>' +
+                '<span style="font-weight:700;">바로 소아과나 응급실로 가세요.</span></div>';
+    }
+
 function cardHTML() {
-        return '<div style="font-size:12px; font-weight:900; color:var(--text-sub); margin:0 2px 8px;">지금 줘도 되나요</div>' +
+        return youngBanner() +
+            '<div style="font-size:12px; font-weight:900; color:var(--text-sub); margin:0 2px 8px;">지금 줘도 되나요</div>' +
             '<div style="display:flex; gap:8px;">' + row("red") + row("blue") + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); line-height:1.6; ' +
                 'margin-top:9px; padding:14px 16px; background:var(--bg-sub); border-radius:12px; word-break:keep-all;">' +

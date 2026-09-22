@@ -81,27 +81,52 @@
     function heroImg() { return document.querySelector(".home-hero-img"); }
     function heroCard() { return document.getElementById("baby-dashboard"); }
 
+    /* ⚠️ 위치를 숫자 하나로만 저장해서, 사진을 바꿔도 예전 사진에 맞춘 위치가 그대로 적용됐다.
+          새 사진의 얼굴이 엉뚱하게 잘렸다. 어느 사진에 맞춘 위치인지 같이 적는다.
+          (아기마다 따로 — script.js 의 BABY_SPECIFIC_KEYS 에 tosil_hero_pos 를 넣었다) */
+    function srcOf(img) { return (img && (img.getAttribute("src") || "")) || ""; }
+    function savedPos(img) {
+        var raw = get(POS_KEY);
+        if (raw == null || raw === "") return null;
+        var o = null;
+        try { o = JSON.parse(raw); } catch (e) {}
+        if (typeof o === "number") return (o >= 0 && o <= 100) ? o : null;       // 예전 방식 (숫자만)
+        if (!o || typeof o !== "object") return null;
+        if (o.src && img && o.src !== srcOf(img)) return null;                     // 다른 사진에 맞춘 위치
+        var y = Number(o.y);
+        return (y >= 0 && y <= 100) ? y : null;
+    }
+    function storePos(img, y) {
+        try { localStorage.setItem(POS_KEY, JSON.stringify({ y: y, src: srcOf(img) })); } catch (e) {}
+    }
+
     function applyPos() {
         var img = heroImg();
         if (!img) return;
-        var y = Number(get(POS_KEY));
-        if (!(y >= 0 && y <= 100)) y = 30;
+        var y = savedPos(img);
+        if (y === null) y = 30;
         img.style.objectPosition = "center " + y + "%";
     }
     window.refreshHeroPos = applyPos;
 
     /* 카드를 위아래로 끌면 보이는 지점이 바뀐다.
        \u26a0\ufe0f 원본은 안 건드린다. 보는 위치만 저장한다. */
+    /* ⚠️ 카드 위에서 손가락을 조금만 움직여도 사진 위치가 바뀌었다.
+          홈에서 제일 큰 게 이 사진 카드라, 화면을 내리려고 사진 위를 쓸면
+          스크롤은 안 되고 얼굴 위치만 움직이고 '위치를 저장했어요' 가 떴다.
+          길게 눌렀을 때(0.35초)만 맞추기 모드로 들어간다. 그냥 쓸면 스크롤이다. */
     function makeDraggable() {
         var card = heroCard(), img = heroImg();
         if (!card || !img || card.getAttribute("data-drag")) return;
         card.setAttribute("data-drag", "1");
+        try { img.setAttribute("draggable", "false"); } catch (e) {}
 
-        var startY = 0, startPos = 30, moved = false, dragging = false;
+        var startY = 0, startX = 0, startPos = 30, moved = false, dragging = false;
+        var armed = false, holdTimer = null, HOLD_MS = 350;
 
         var cur = function () {
-            var y = Number(get(POS_KEY));
-            return (y >= 0 && y <= 100) ? y : 30;
+            var y = savedPos(img);
+            return (y === null) ? 30 : y;
         };
         var begin = function (y) {
             dragging = true; moved = false; startY = y; startPos = cur();
@@ -111,7 +136,7 @@
             if (!dragging) return;
             var dy = y - startY;
             if (Math.abs(dy) > 4) moved = true;
-            /* 카드 높이의 절반을 끌면 0~100% 를 다 훑는다 */
+            /* 카드 높이만큼 끌면 0~100% 를 다 훑는다 */
             var next = Math.max(0, Math.min(100, startPos - (dy / (card.offsetHeight || 220)) * 100));
             img.style.objectPosition = "center " + Math.round(next) + "%";
         };
@@ -121,26 +146,67 @@
             card.style.cursor = "pointer";
             if (!moved) return;
             var m = (img.style.objectPosition || "").match(/(\d+)%/);
-            if (m) { try { localStorage.setItem(POS_KEY, m[1]); } catch (e) {} }
+            if (m) storePos(img, Number(m[1]));
+            var tip = document.getElementById("hero-drag-tip");
+            if (tip) tip.style.display = "none";
             hint("위치를 저장했어요");
         };
 
         card.addEventListener("touchstart", function (e) {
-            if (e.touches && e.touches[0]) begin(e.touches[0].clientY);
+            var t = e.touches && e.touches[0];
+            if (!t) return;
+            startX = t.clientX; startY = t.clientY; armed = false;
+            clearTimeout(holdTimer);
+            holdTimer = setTimeout(function () {
+                holdTimer = null;
+                armed = true;
+                begin(startY);
+                moved = true;                 // 손을 떼도 사진 바꾸기 창이 안 뜨게
+                card.classList.add("hero-armed");
+                if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e2) {} }
+                hint("위아래로 움직여 얼굴을 맞춰보세요");
+            }, HOLD_MS);
         }, { passive: true });
-        card.addEventListener("touchmove", function (e) {
-            if (e.touches && e.touches[0]) { move(e.touches[0].clientY); if (moved) e.preventDefault(); }
-        }, { passive: false });
-        card.addEventListener("touchend", end);
 
+        card.addEventListener("touchmove", function (e) {
+            var t = e.touches && e.touches[0];
+            if (!t) return;
+            if (!armed) {
+                // 길게 누르기 전에 움직이면 그냥 스크롤이다
+                if (holdTimer && (Math.abs(t.clientY - startY) > 8 || Math.abs(t.clientX - startX) > 8)) {
+                    clearTimeout(holdTimer); holdTimer = null;
+                }
+                return;
+            }
+            move(t.clientY);
+            e.preventDefault();
+        }, { passive: false });
+
+        var finish = function () {
+            if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+            if (!armed) return;
+            armed = false;
+            card.classList.remove("hero-armed");
+            end();
+        };
+        card.addEventListener("touchend", finish);
+        card.addEventListener("touchcancel", finish);
+
+        // 길게 누르면 뜨는 '이미지 저장' 메뉴는 여기선 필요 없다
+        card.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+        // 컴퓨터에서는 마우스로 바로 끈다 (스크롤과 안 겹친다)
         card.addEventListener("mousedown", function (e) { begin(e.clientY); });
         document.addEventListener("mousemove", function (e) { move(e.clientY); });
         document.addEventListener("mouseup", end);
 
         /* \u26a0\ufe0f 끌고 나서 손을 떼면 원래 onclick(사진 바꾸기)이 같이 터진다.
-              끈 경우에는 막는다. 안 그러면 위치만 맞추려다 파일 선택창이 뜬다. */
+              끈 경우 · 길게 누른 경우에는 막는다. 안 그러면 위치만 맞추려다 파일 선택창이 뜬다. */
         card.addEventListener("click", function (e) {
-            if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+            if (moved) {
+                e.stopImmediatePropagation(); e.stopPropagation(); e.preventDefault();
+                moved = false;
+            }
         }, true);
     }
 
@@ -170,15 +236,26 @@
         if (document.getElementById("hero-drag-tip")) return;
         var tip = document.createElement("div");
         tip.id = "hero-drag-tip";
-        tip.innerHTML = "\u2195\uFE0E 위아래로 끌면 얼굴 위치를 맞출 수 있어요";
+        tip.innerHTML = "\u2195\uFE0E 사진을 길게 누른 채 움직이면 얼굴 위치를 맞출 수 있어요";
         tip.style.cssText =
             "position:absolute; left:0; right:0; bottom:0; padding:9px 14px; " +
             "background:linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0)); " +
             "color:rgba(255,255,255,0.92); font-size:11.5px; font-weight:700; text-align:center; " +
             "pointer-events:none;";
         card.appendChild(tip);
-        /* 한 번 맞춰본 사람에게는 안 띄운다 */
-        if (get(POS_KEY)) tip.style.display = "none";
+        /* 이 사진을 한 번 맞춰본 사람에게는 안 띄운다 */
+        if (savedPos(heroImg()) !== null) tip.style.display = "none";
+
+        if (!document.getElementById("hero-drag-css")) {
+            var st = document.createElement("style");
+            st.id = "hero-drag-css";
+            st.textContent =
+                "#baby-dashboard{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}" +
+                "#baby-dashboard img{-webkit-user-drag:none;}" +
+                "#baby-dashboard.hero-armed{transform:scale(.985);transition:transform .15s ease;" +
+                    "box-shadow:0 0 0 3px rgba(127,119,221,.55) !important;}";
+            document.head.appendChild(st);
+        }
     }
 
     /* ==========================================================
@@ -328,7 +405,7 @@
                           '나머지 ' + hidden + '개는 PLUS에서 보여요</div>' +
                       '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GOLD + '; ' +
                           'line-height:1.7; word-break:keep-all;">' +
-                          '젖꼭지\\u00b7어깨끈\\u00b7모유 기한을 <b>대신 세어드립니다.</b> ' +
+                          '젖꼭지 · 어깨끈 · 모유 기한을 <b>대신 세어드립니다.</b> ' +
                           '기억하고 계실 필요가 없어요.</div></div>')
                 : '') +
         '</div>';
@@ -388,6 +465,148 @@
     }
 
     /* ==========================================================
+       4. 돌봄 도우미 화면의 '엄마에게 / 아빠에게 전화'
+       ----------------------------------------------------------
+       ⚠️ index.html 에 010-0000-0000 이 박혀 있었다.
+          할머니·시터가 급할 때 누르면 없는 번호로 걸렸다.
+          엄마·아빠 폰의 설정에서 번호를 넣으면 가족 보관함(settings_코드 / family_names)에
+          올라가고, 도우미 폰은 거기서 받아서 건다. 번호가 없으면 걸지 않고 알려준다.
+       ---------------------------------------------------------- */
+
+    var PHONE_KEY = "tosil_parent_phones";
+    function phones() { var o = getJSON(PHONE_KEY, {}); return (o && typeof o === "object") ? o : {}; }
+    function cleanPhone(v) {
+        var t = String(v || "").replace(/[^\d+]/g, "");
+        return /^\+?\d{9,13}$/.test(t) ? t : "";
+    }
+    function prettyPhone(t) { return String(t || "").replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3"); }
+
+    function familyRef() {
+        var code = get("family_sync_code");
+        if (!code || !window.db || typeof window.doc !== "function") return null;
+        return window.doc(window.db, "settings_" + code, "family_names");
+    }
+
+    var phonesPulledAt = 0;
+    function pullPhones() {
+        if (Date.now() - phonesPulledAt < 60000) return;
+        phonesPulledAt = Date.now();
+        var ref = familyRef();
+        if (!ref || typeof window.getDoc !== "function") return;
+        window.getDoc(ref).then(function (snap) {
+            if (!snap || !snap.exists()) return;
+            var d = snap.data() || {}, o = phones(), changed = false;
+            ["mom", "dad"].forEach(function (k) {
+                var v = cleanPhone(d[k + "Phone"]);
+                if (v && v !== o[k]) { o[k] = v; changed = true; }
+            });
+            if (changed) {
+                try { localStorage.setItem(PHONE_KEY, JSON.stringify(o)); } catch (e) {}
+                paintSeniorCalls();
+            }
+        }).catch(function () {});
+    }
+
+    function paintSeniorCalls() {
+        var block = document.querySelector(".show-on-senior-block");
+        if (!block) return;
+        var links = block.querySelectorAll('a[href^="tel:"], a[data-parent-call]');
+        var o = phones();
+        for (var i = 0; i < links.length; i++) {
+            var a = links[i];
+            var txt = a.textContent || "";
+            var who = txt.indexOf("엄마") > -1 ? "mom" : (txt.indexOf("아빠") > -1 ? "dad" : null);
+            if (!who) continue;
+            a.setAttribute("data-parent-call", who);
+            var num = o[who];
+            if (num) {
+                a.setAttribute("href", "tel:" + num);
+                a.onclick = null;
+                a.style.opacity = "";
+            } else {
+                a.setAttribute("href", "#");
+                a.style.opacity = "0.55";
+                a.onclick = (function (w) {
+                    return function (e) {
+                        e.preventDefault();
+                        hint((w === "mom" ? "엄마" : "아빠") + " 번호가 아직 없어요 · 엄마·아빠 폰의 설정에서 넣을 수 있어요");
+                    };
+                })(who);
+            }
+        }
+        // 도우미 폰이면 가족 보관함에서 최신 번호를 받아온다 (1분에 한 번)
+        if (document.body && document.body.classList.contains("mode-senior")) pullPhones();
+    }
+
+    function phoneCardHTML() {
+        var o = phones();
+        var input = function (k, label) {
+            return '<div style="flex:1; min-width:0;">' +
+                '<div style="font-size:11.5px; font-weight:800; color:var(--text-sub); margin-bottom:6px;">' + label + '</div>' +
+                '<input id="pp-' + k + '" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-1234-5678" ' +
+                    'value="' + esc(o[k] ? prettyPhone(o[k]) : "") + '" ' +
+                    'style="width:100%; box-sizing:border-box; padding:12px; border-radius:12px; border:1px solid var(--border); ' +
+                    'background:var(--bg-sub); font-size:14px; font-weight:700; color:var(--text-m); outline:none;">' +
+            '</div>';
+        };
+        return '<div style="font-size:15px; font-weight:900; color:var(--text-m);">📞 도우미가 걸 번호</div>' +
+            '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin:4px 0 14px; line-height:1.6; word-break:keep-all;">' +
+                '할머니·시터 화면의 \'엄마에게 전화 / 아빠에게 전화\' 가 이 번호로 걸려요. 우리 가족에게만 보여요.</div>' +
+            '<div style="display:flex; gap:8px;">' + input("mom", "엄마") + input("dad", "아빠") + '</div>' +
+            '<div onclick="window.saveParentPhones()" style="margin-top:12px; text-align:center; padding:13px; background:#7F77DD; ' +
+                'color:#FFF; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer;">저장하기</div>';
+    }
+
+    window.refreshSeniorCalls = paintSeniorCalls;
+
+    window.saveParentPhones = function () {
+        var o = phones(), bad = false;
+        ["mom", "dad"].forEach(function (k) {
+            var el = document.getElementById("pp-" + k);
+            if (!el) return;
+            var raw = String(el.value || "").trim();
+            if (!raw) { delete o[k]; return; }
+            var v = cleanPhone(raw);
+            if (!v) { bad = true; return; }
+            o[k] = v;
+        });
+        if (bad) return hint("번호를 다시 확인해주세요 (숫자 9~13자리)");
+        try { localStorage.setItem(PHONE_KEY, JSON.stringify(o)); } catch (e) {}
+        var ref = familyRef();
+        if (ref && typeof window.setDoc === "function") {
+            window.setDoc(ref, { momPhone: o.mom || "", dadPhone: o.dad || "" }, { merge: true })
+                .catch(function (e) { console.warn("[도우미 번호] 올리기 실패", e); });
+        }
+        hint("저장했어요. 도우미 폰에서 바로 걸 수 있어요");
+        paintSeniorCalls();
+    };
+
+    function hookSettings() {
+        var orig = window.renderSettingsTab;
+        if (typeof orig !== "function" || orig.__phones) return;
+        var w = function () {
+            var out = orig.apply(this, arguments);
+            try {
+                var host = document.getElementById("tab-settings");
+                var senior = document.body && document.body.classList.contains("mode-senior");
+                if (host && !senior && !document.getElementById("parent-phone-card")) {
+                    var card = document.createElement("div");
+                    card.id = "parent-phone-card";
+                    card.style.cssText = "background:var(--bg-card); padding:18px 20px; border-radius:16px; " +
+                        "border:1px solid var(--border); margin-bottom:12px; box-sizing:border-box; width:100%;";
+                    card.innerHTML = phoneCardHTML();
+                    var after = document.getElementById("push-permission-card");
+                    if (after && after.parentNode === host) host.insertBefore(card, after.nextSibling);
+                    else host.insertBefore(card, host.firstChild);
+                }
+            } catch (e) {}
+            return out;
+        };
+        w.__phones = true;
+        window.renderSettingsTab = w;
+    }
+
+    /* ==========================================================
        붙이기
        ---------------------------------------------------------- */
 
@@ -400,31 +619,40 @@
         var anchor = document.getElementById("now-status-card") ||
                      document.getElementById("home-expiry-alert");
 
-        /* 오늘 챙길 것 — 사진 바로 아래 */
+        /* ⚠️ 매번 지우고 새로 꽂았다. 그러면 homelayout.js 가 정해둔 자리가 흔들리고
+              부팅 6초 동안 카드가 위아래로 튀었다. 있으면 그 자리에서 내용만 바꾼다. */
+
+        /* 오늘 챙길 것 — 기록 버튼 위 */
         var todo = todoHTML();
         var old = document.getElementById("home-todo");
-        if (old) old.remove();
-        if (todo && anchor && anchor.parentNode) {
+        if (!todo) { if (old) old.remove(); }
+        else {
             var box = document.createElement("div");
             box.innerHTML = todo;
-            anchor.parentNode.insertBefore(box.firstChild, anchor);
+            if (old && old.parentNode) old.parentNode.replaceChild(box.firstChild, old);
+            else if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box.firstChild, anchor);
         }
 
         /* PLUS 안내 — 아래쪽, 닫는 인상이 되지 않게 */
         var ph = plusHTML();
         var oldp = document.getElementById("home-plus");
-        if (oldp) oldp.remove();
-        if (ph) {
-            var tail = document.getElementById("routine-checklist-container") ||
-                       host.lastElementChild;
+        if (!ph) { if (oldp) oldp.remove(); }
+        else {
             var box2 = document.createElement("div");
             box2.innerHTML = ph;
-            if (tail && tail.parentNode) tail.parentNode.insertBefore(box2.firstChild, tail);
+            if (oldp && oldp.parentNode) oldp.parentNode.replaceChild(box2.firstChild, oldp);
+            else {
+                var tail = document.getElementById("routine-checklist-container") || host.lastElementChild;
+                if (tail && tail.parentNode) tail.parentNode.insertBefore(box2.firstChild, tail);
+            }
         }
+
+        paintSeniorCalls();
     }
     window.refreshHomeFix = paint;
 
     function boot() {
+        hookSettings();
         paint();
         var t = 0;
         var again = setInterval(function () {
@@ -445,7 +673,8 @@
     else boot();
 
     window.homeFixDebug = function () {
-        console.log("PLUS:", isPlus(), "\u00b7 사진 위치:", get(POS_KEY) || "기본 30%");
+        console.log("PLUS:", isPlus(), "\u00b7 사진 위치:", savedPos(heroImg()) !== null ? savedPos(heroImg()) + "%" : "기본 30%");
+        console.log("도우미 비상 연락처:", JSON.stringify(phones()));
         var l = collect();
         console.log("오늘 챙길 것:", l.length + "개");
         l.forEach(function (x) { console.log("   " + x.icon + " " + x.text + "  \u00b7 " + x.sub); });

@@ -126,7 +126,11 @@
 
         // 앱으로 돌아올 때마다 다시 확인한다
         document.addEventListener("visibilitychange", function () {
-            if (!document.hidden) setTimeout(window.verifyMyRole, 500);
+            // 실시간 감시(watchMyRole)가 이미 따라간다. 돌아올 때마다 다시 묻지 않고 10분에 한 번만 (읽기 비용)
+            if (!document.hidden && Date.now() - (window.__roleCheckedAt || 0) > 10 * 60000) {
+                window.__roleCheckedAt = Date.now();
+                setTimeout(window.verifyMyRole, 500);
+            }
         });
     }
 

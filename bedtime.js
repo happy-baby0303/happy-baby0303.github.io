@@ -17,6 +17,7 @@
     var LEARN_DAYS  = 14;           // 이만큼 거슬러 올라가 그 집 시계를 배운다
     var MIN_SAMPLES = 3;            // 표본이 이만큼은 있어야 믿는다
     var NIGHT_MIN   = 60;           // 60분 넘게 잔 것만 밤잠 후보
+    var GRACE_END   = 2 * 60;       // 자정을 넘겨 새벽 2시까지는 '어젯밤 편지' 를 남겨 둔다
 
     /* ---------- 작은 도구들 ---------- */
 
@@ -27,6 +28,15 @@
 
     function babyName() {
         return localStorage.getItem("tosil_babyName") || "우리 아기";
+    }
+
+    /* ⚠️ 이름 뒤에 '가' 를 그냥 붙여서 "하윤가 영수증을 두고 갔어요" 가 나왔다.
+          받침이 있으면 '이' 를 붙인다 (data.js 의 babyCall).  하윤 → 하윤이가 · 지우 → 지우가 */
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
     }
 
     function records() {
@@ -94,6 +104,18 @@
             if (!best || ts > best) best = ts;
         });
 
+        /* ⚠️ 재우는 중(수면 타이머)은 기록이 아니라 tosil_sleep_start 에만 있다.
+              기록은 깨서 타이머를 멈출 때 생긴다. 그래서 위의 '재우는 중이면 그 자체로 육퇴' 가
+              한 번도 맞은 적이 없다 — 저녁에 타이머를 켜도 배너가 안 떴다.
+              밤잠으로 켰거나 저녁 7시가 넘어 켠 잠이면 육퇴로 본다 (저녁 낮잠 오인 방지). */
+        var run = Number(localStorage.getItem("tosil_sleep_start")) || 0;
+        if (run && run >= s0 && minOfDay(run) >= EARLIEST) {
+            var typ = localStorage.getItem("tosil_sleep_type") || "";
+            if (typ === "밤잠" || minOfDay(run) >= 19 * 60) {
+                if (!best || run > best) best = run;
+            }
+        }
+
         return best;
     }
 
@@ -152,6 +174,23 @@
 
     function readKey() { return "tosil_letter_read_" + todayKey(); }
     function isRead()  { return !!localStorage.getItem(readKey()); }
+
+    /* 자정 ~ 새벽 2시 — 아직 '어젯밤' 이다 */
+    function inGrace() { return minOfDay(Date.now()) < GRACE_END; }
+    function yesterdayKey() { return dayKey(dayStart(Date.now()) - 12 * 3600000); }
+    function yesterdayRead() { return !!localStorage.getItem("tosil_letter_read_" + yesterdayKey()); }
+    function yesterdayRecordCount() {
+        var s0 = dayStart(Date.now()), y0 = s0 - 86400000;
+        return records().filter(function (r) { var t = Number(r.timestamp); return t >= y0 && t < s0; }).length;
+    }
+
+    // 어젯밤 편지 열기 — 영수증은 '오늘' 로 계산되니 편지함(어젯밤 편지가 있는 곳)을 연다
+    function openLastNight() {
+        try { localStorage.setItem("tosil_letter_read_" + yesterdayKey(), String(Date.now())); } catch (e) {}
+        if (typeof window.openLetterBox === "function") window.openLetterBox();
+        else if (typeof window.openReceiptModal === "function") window.openReceiptModal();
+        setTimeout(function () { try { applyBanner(); } catch (e) {} }, 300);
+    }
     function markRead() {
         try { localStorage.setItem(readKey(), String(Date.now())); } catch (e) {}
     }
@@ -189,6 +228,9 @@
 
     function shouldShow() {
         if (document.body && document.body.classList.contains("mode-senior")) return false;
+        /* ⚠️ 자정이 되면 배너가 바로 내려갔다. 11시 반에 재우고 정리까지 하면 벌써 12시가 넘는다.
+              새벽 2시까지는 어젯밤 편지를 남겨 둔다 — 읽으면 내려간다. */
+        if (inGrace()) return yesterdayRecordCount() >= MIN_RECORDS && !yesterdayRead();
         if (todayRecordCount() < MIN_RECORDS) return false;
         return window.isWindDownTime();
     }
@@ -202,18 +244,30 @@
             return;
         }
 
+        var wasHidden = !btn.classList.contains("letter-in");
+
+        if (inGrace()) {
+            btn.innerHTML =
+                '<span style="font-size:16px; font-weight:800; letter-spacing:-0.5px;">' +
+                    esc(callName("가")) + ' 어젯밤 편지를 두고 갔어요</span>' +
+                '<span style="font-size:12px; font-weight:600; opacity:0.62;">주무시기 전에 한 줄만 읽어보세요</span>';
+            btn.onclick = openLastNight;          // 이 배너만 — 다른 곳의 영수증 버튼은 그대로
+            btn.classList.add("letter-in");
+            return;                               // 새벽엔 '정산 완료' 토스트를 띄우지 않는다
+        }
+        btn.onclick = function () { window.openReceiptModal(); };
+
         var read = isRead();
         btn.innerHTML =
             '<span style="font-size:16px; font-weight:800; letter-spacing:-0.5px;">' +
                 (read ? "오늘 영수증 다시 보기"
-                      : esc(babyName()) + "가 영수증을 두고 갔어요") +
+                      : esc(callName("가")) + " 영수증을 두고 갔어요") +
             '</span>' +
             '<span style="font-size:12px; font-weight:600; opacity:0.62;">' +
                 (read ? arrivedAt() + "에 도착했어요"
                       : "이제 좀 앉으셨죠. 천천히 읽어보세요") +
             '</span>';
 
-        var wasHidden = !btn.classList.contains("letter-in");
         btn.classList.add("letter-in");
 
         // 도착은 하루 한 번만 알린다
@@ -245,12 +299,27 @@
         return out;
     };
 
+    // 수면 타이머를 켜는 순간 바로 (1분 기다리지 않는다)
+    var origStart = window.startSleepTimer;
+    if (typeof origStart === "function" && !origStart.__bedtime) {
+        var wrappedStart = function () {
+            var r = origStart.apply(this, arguments);
+            setTimeout(function () { try { applyBanner(); } catch (e) {} }, 400);
+            return r;
+        };
+        wrappedStart.__bedtime = true;
+        window.startSleepTimer = wrappedStart;
+    }
+
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", applyBanner);
     } else {
         applyBanner();
     }
-    setInterval(applyBanner, 60000);   // 육퇴에 올라오고, 자정에 내려간다
+    setInterval(applyBanner, 60000);   // 육퇴에 올라오고, 새벽 2시에 내려간다
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) setTimeout(function () { try { applyBanner(); } catch (e) {} }, 300);
+    });
 
     /* ---------- 점검용 ---------- */
     window.bedtimeDebug = function () {
@@ -260,5 +329,7 @@
         console.log("지금 육퇴인가:", window.isWindDownTime());
         console.log("오늘 기록 수:", todayRecordCount());
         console.log("오늘 편지 읽음:", isRead());
+        console.log("지금 '어젯밤' 시간대(0~2시):", inGrace(), "· 어젯밤 기록 수:", yesterdayRecordCount(), "· 어젯밤 편지 읽음:", yesterdayRead());
+        console.log("재우는 중(타이머):", localStorage.getItem("tosil_sleep_start") ? new Date(Number(localStorage.getItem("tosil_sleep_start"))).toLocaleTimeString() + " 부터" : "아니오");
     };
 })();

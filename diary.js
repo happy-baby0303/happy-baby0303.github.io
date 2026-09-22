@@ -15,7 +15,10 @@
 (function () {
     'use strict';
 
-    var MAX_DAY = 200;      // day_N 을 이만큼까지 훑는다
+    /* ⚠️ 200 이었다. 매일 쓰는 부부는 6개월 반이면 넘고, 그 뒤 문답은 연대기에서 사라졌다.
+          diary.html · bookshelf.js 와 같은 2000 으로 맞춘다. */
+    var MAX_DAY = 2000;     // day_N 을 이만큼까지 훑는다
+    var DAD = "#4F86E0", MOM = "#E0705B";   // 문답 화면(diary.html)과 같은 색 — 아빠 파랑 · 엄마 코랄
     var DAY = 86400000;
 
     function esc(s) {
@@ -25,6 +28,14 @@
     }
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
+
+    /* 하윤 + 가 → 하윤이가 · 지우 + 가 → 지우가 */
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
 
     function keyOf(ts) {
         var d = new Date(ts);
@@ -47,7 +58,10 @@
         var it = list[(day - 1) % list.length];
         if (!it) return null;
         return {
-            text: String(it.question || "").replace(/{babyName}/g, babyName()),
+            // 조사(하윤이가 · 지우가)와 {day} 는 data.js 의 창구가 맞춘다
+            text: (typeof window.diaryQuestion === "function")
+                ? window.diaryQuestion(day)
+                : String(it.question || "").replace(/{babyName}/g, babyName()),
             context: it.context || "",
             category: it.category || ""
         };
@@ -103,7 +117,8 @@
     function side(who, text, tone) {
         return '<div style="margin-top:10px;">' +
             '<div style="font-size:10px; font-weight:800; color:' + tone + '; letter-spacing:1.5px; margin-bottom:5px;">' + esc(who) + '</div>' +
-            '<div style="font-size:13px; font-weight:500; color:var(--text-s); line-height:1.7; word-break:keep-all; white-space:pre-wrap;">' + esc(text) + '</div>' +
+            // user-text — 부부가 쓴 글이다. 이모지 정리(emoji.js)가 손대지 않게 표시한다
+            '<div class="user-text" style="font-size:13px; font-weight:500; color:var(--text-s); line-height:1.7; word-break:keep-all; white-space:pre-wrap;">' + esc(text) + '</div>' +
         '</div>';
     }
 
@@ -118,8 +133,8 @@
                 '<div class="serif-display" style="font-size:14.5px; font-weight:700; color:var(--text-title); line-height:1.6; word-break:keep-all;">' +
                     esc(e.q) + '</div>' +
                 '<div style="height:1px; background:var(--border); margin:13px 0 3px;"></div>' +
-                side("아빠", e.husband, "#7F77DD") +
-                side("엄마", e.wife, "#B98A2E") +
+                side("아빠", e.husband, DAD) +
+                side("엄마", e.wife, MOM) +
             '</div>';
         }).join("");
     };
@@ -146,8 +161,8 @@
                     '</div>' +
                     '<div class="serif-display" style="font-size:15px; font-weight:700; color:var(--text-title); line-height:1.6; word-break:keep-all;">' + esc(e.q) + '</div>' +
                     '<div style="height:1px; background:var(--border); margin:14px 0 4px;"></div>' +
-                    side("아빠", e.husband, "#7F77DD") +
-                    side("엄마", e.wife, "#B98A2E") +
+                    side("아빠", e.husband, DAD) +
+                    side("엄마", e.wife, MOM) +
                 '</div>';
               }).join("")
             : '<div style="text-align:center; padding:80px 24px; font-family:\'Nanum Pen Script\',cursive; font-size:26px; color:var(--text-sub); line-height:1.6;">' +
@@ -168,7 +183,7 @@
             '</div>' +
             body +
             (list.length ? '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:32px; line-height:1.7;">' +
-                esc(babyName()) + '가 크면 이 대화를 읽게 됩니다<br>그때 우리가 어떤 사이였는지 알게 될 거예요</div>' : "") +
+                esc(callName("가")) + ' 크면 이 대화를 읽게 됩니다<br>그때 우리가 어떤 사이였는지 알게 될 거예요</div>' : "") +
         '</div>';
 
         document.body.appendChild(wrap);

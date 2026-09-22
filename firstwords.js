@@ -32,6 +32,14 @@
     }
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
+
+    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
     function toast(m) { if (typeof window.showToast === "function") window.showToast(m); }
     function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -183,7 +191,8 @@
                 'style="width:100%; box-sizing:border-box; padding:13px 14px; border-radius:13px; border:1px solid var(--border); ' +
                 'background:var(--bg-sub); color:var(--text-m); font-size:13px; font-weight:600; margin-bottom:10px;">' +
 
-            '<input id="word-date" type="date" value="' + todayKey() + '" ' +
+            '<input id="word-date" type="date" value="' + todayKey() + '" max="' + todayKey() + '"' +
+                (localStorage.getItem("tosil_startDate") ? ' min="' + esc(localStorage.getItem("tosil_startDate")) + '"' : '') + ' ' +
                 'style="width:100%; box-sizing:border-box; padding:13px 14px; border-radius:13px; border:1px solid var(--border); ' +
                 'background:var(--bg-sub); color:var(--text-m); font-size:13px; font-weight:700; margin-bottom:16px;">' +
 
@@ -204,6 +213,8 @@
             var n = (document.getElementById("word-note")  || {}).value;
             var d = (document.getElementById("word-date")  || {}).value;
             if (!String(w || "").trim()) return toast("한 마디를 적어주세요");
+            // 달력에서 미래 날짜를 고를 수 있었다 — 오늘 이후면 오늘로
+            if (d && d > todayKey()) d = todayKey();
             wrap.remove();
             window.addFirstWord(w, d, n);
         };
@@ -278,7 +289,7 @@
                 '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     (latest
                         ? '가장 최근 · “' + esc(latest.word) + '”  ' + esc(dday(latest.date))
-                        : esc(babyName()) + '가 처음 한 말을 남겨보세요') +
+                        : esc(callName("가")) + ' 처음 한 말을 남겨보세요') +
                 '</div>' +
             '</div>' +
             '<div onclick="event.stopPropagation(); window.openWordSheet();" ' +

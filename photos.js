@@ -33,6 +33,14 @@
     var TH_SIDE     = 320;
     var TH_QUALITY  = 0.7;
     var MAX_PER_DAY = 3;      // '그날의 사진'만 해당. 첫 순간 사진은 항목마다 1장씩 따로.
+
+    /* ⚠️ 여기 3 이 못 박혀 있었다. premium.js 가 플러스를 통과시켜도
+          이 파일이 다시 3장에서 막았다. '플러스 하루 사진 무제한' 이 거짓이었다.
+          한도는 premium.js 의 표(window.PLAN) 한 곳에서만 읽는다. */
+    function dayCap() {
+        try { if (typeof window.photoCapPerDay === "function") return window.photoCapPerDay(); } catch (e) {}
+        return MAX_PER_DAY;
+    }
     var DAY         = 86400000;
 
     /* ---------- 작은 도구들 ---------- */
@@ -174,7 +182,7 @@
     function setCaption(key, id, text) {
         var idx = loadIndex();
         if (!Array.isArray(idx[key])) return;
-        idx[key].forEach(function (p) { if (p.id === id) p.caption = text; });
+        idx[key].forEach(function (p) { if (p.id === id) { p.caption = text; p.ets = Date.now(); } });
         saveIndex(idx);
     }
 
@@ -190,20 +198,29 @@
        올릴 때 압축본을 이 기기에 같이 남겨둔다. 용량 제한이 사실상
        없는 IndexedDB 를 쓴다 (localStorage 는 사진 몇 장에 터진다). -------- */
 
-    var DB_NAME = "tosil-photos", STORE = "thumbs";
+    var DB_NAME = "tosil-photos", STORE = "thumbs", QSTORE = "pending";
 
-    function idb() {
+    /* ⚠️ 이 저장소를 여는 곳이 둘이었다 (idb · qdb). 둘 다 2번판으로 열었는데
+          칸(store)을 만드는 건 '처음 여는 쪽' 뿐이다.
+          사진을 먼저 담은 폰은 idb 가 먼저 열어서 'thumbs' 칸만 생겼고,
+          나중에 지하철에서 올리다 실패하면 qdb 가 'pending' 칸을 못 찾아
+          못 올린 사진 · 옹알이를 재워두지 못하고 그대로 잃었다.
+          여는 곳을 하나로 합치고 3번판으로 올려서, 칸이 빠진 폰도 이번에 채운다. */
+    function openPhotoDB() {
         return new Promise(function (res, rej) {
             if (!window.indexedDB) return rej(new Error("no indexedDB"));
-            var req = indexedDB.open(DB_NAME, 2);
+            var req = indexedDB.open(DB_NAME, 3);
             req.onupgradeneeded = function () {
                 var db = req.result;
-                if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+                if (!db.objectStoreNames.contains(STORE))  db.createObjectStore(STORE);
+                if (!db.objectStoreNames.contains(QSTORE)) db.createObjectStore(QSTORE);
             };
             req.onsuccess = function () { res(req.result); };
             req.onerror = function () { rej(req.error); };
         });
     }
+
+    function idb() { return openPhotoDB(); }
 
     window.cachePhotoData = async function (id, dataUrl) {
         try {
@@ -232,21 +249,7 @@
        지하철에서 옹알이를 녹음했는데 업로드가 실패하면 그대로 날아갔다.
        실패하면 기기에 재워뒀다가, 연결이 돌아오면 다시 올린다. -------- */
 
-    var QSTORE = "pending";
-
-    function qdb() {
-        return new Promise(function (res, rej) {
-            if (!window.indexedDB) return rej(new Error("no indexedDB"));
-            var req = indexedDB.open(DB_NAME, 2);
-            req.onupgradeneeded = function () {
-                var db = req.result;
-                if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
-                if (!db.objectStoreNames.contains(QSTORE)) db.createObjectStore(QSTORE);
-            };
-            req.onsuccess = function () { res(req.result); };
-            req.onerror = function () { rej(req.error); };
-        });
-    }
+    function qdb() { return openPhotoDB(); }
 
     // job = { id, kind:'photo'|'voice', path, dataUrl, meta }
     window.queueUpload = async function (job) {
@@ -356,7 +359,7 @@
         } catch (e) { console.warn("[배냇함 사진] 동기화 실패", e); }
     };
 
-    var photoUnsub = null;
+    var photoUnsub = null, repushTimer = null;
     window.startPhotoRealtimeSync = function () {
         var code = syncCode();
         if (!code || !window.db || typeof window.onSnapshot !== "function" || typeof window.doc !== "function") return;
@@ -370,19 +373,36 @@
             if (window.Grave) window.Grave.merge("photo", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
             var local = loadIndex();
             var merged = {};
+            var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("photo") : {};   // 묘비는 한 번만 읽는다
 
             Object.keys(local).concat(Object.keys(remote)).forEach(function (k) {
                 if (merged[k]) return;
                 var seen = {}, out = [];
-                (local[k] || []).concat(remote[k] || []).forEach(function (p) {
-                    if (!p || !p.id || seen[p.id]) return;
-                    if (window.Grave && window.Grave.has("photo", p.id)) return;   // 👈 지운 건 되살리지 않기
-                    seen[p.id] = 1;
+                /* ⚠️ 이 폰 것을 먼저 놓아서, 짝꿍이 캡션을 고쳐도 이 폰의 옛 글이 늘 이겼다.
+                      서버 것을 먼저 놓고, 이 폰에서 더 나중에 고친 것(ets)만 이 폰 것으로 바꾼다. */
+                (remote[k] || []).concat(local[k] || []).forEach(function (p) {
+                    if (!p || !p.id) return;
+                    if (gone[p.id]) return;                                    // 👈 지운 건 되살리지 않기
+                    if (seen[p.id]) {
+                        if ((Number(p.ets) || 0) > (Number(seen[p.id].ets) || 0)) {
+                            out[out.indexOf(seen[p.id])] = p; seen[p.id] = p;
+                        }
+                        return;
+                    }
+                    seen[p.id] = p;
                     out.push(p);
                 });
                 out.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); });
                 if (out.length) merged[k] = out;
             });
+
+            /* ⚠️ 사진 목록 전체를 문서 하나에 통째로 올린다. 두 폰이 비슷한 때에 올리면
+                  나중에 올린 폰의 옛 사본이 서버에 남아서, 방금 담은 사진이 짝꿍 폰에 끝내 안 갔다.
+                  서버에 없는 게 이 폰에 있으면 한 번 더 올린다 (서버가 다 가지면 멈춘다). */
+            if (window.syncNeedsPush && window.syncNeedsPush(remote, merged, data.deleted, "photo")) {
+                clearTimeout(repushTimer);
+                repushTimer = setTimeout(window.syncPhotosToFirebase, 1500);
+            }
 
             if (JSON.stringify(merged) === JSON.stringify(local)) return;
             saveIndex(merged);
@@ -418,8 +438,8 @@
     window.addDayPhoto = function (key) {
         pendingKey = key || todayKey();
         pendingMs = null;
-        if (window.getLoosePhotos(pendingKey).length >= MAX_PER_DAY) {
-            toast("이 날은 이미 " + MAX_PER_DAY + "장이 담겨 있어요");
+        if (window.getLoosePhotos(pendingKey).length >= dayCap()) {
+            toast("이 날은 이미 " + dayCap() + "장이 담겨 있어요");
             return;
         }
         fileInput().click();
@@ -439,10 +459,11 @@
         if (msId) {
             picked = files.slice(0, 1);           // 첫 순간은 한 장이면 된다
         } else {
-            var room = MAX_PER_DAY - window.getLoosePhotos(key).length;
+            var cap = dayCap();
+            var room = cap - window.getLoosePhotos(key).length;
             if (room <= 0) return;
             picked = files.slice(0, room);
-            if (files.length > room) toast("이 날은 " + MAX_PER_DAY + "장까지만 담겨요");
+            if (files.length > room) toast("이 날은 " + cap + "장까지만 담겨요");
         }
 
         var uidNow = window.auth && window.auth.currentUser && window.auth.currentUser.uid;
@@ -453,20 +474,26 @@
         }
 
         toast("⏳ 배냇함에 담는 중이에요…");
-        var done = 0;
+        /* ⚠️ 한 장이라도 실패하면(읽기 실패 · 업로드 실패) '다 끝났다' 가 안 와서
+              잘 올라간 사진까지 가족 동기화가 안 됐고, '담겼어요' 도 안 떴다.
+              성공이든 실패든 끝난 걸 센다. */
+        var finished = 0, ok = 0;
+        var finish = function (success) {
+            finished++;
+            if (success) ok++;
+            if (finished < picked.length) return;
+            if (ok) {
+                var t = msId ? milestoneTitle(msId) : "";
+                toast(t ? "🧺 '" + t + "'에 사진을 붙였어요"
+                        : "🧺 " + babyName() + "의 배냇함에 담겼어요");
+                window.syncPhotosToFirebase();
+            }
+            repaint();
+        };
         picked.forEach(function (file) {
             shrinkBoth(file, !!msId, function (dataUrl, thumbUrl) {
-                if (!dataUrl) return;
-                upload(key, msId, uidNow, dataUrl, thumbUrl, function () {
-                    done++;
-                    if (done === picked.length) {
-                        var t = msId ? milestoneTitle(msId) : "";
-                        toast(t ? "🧺 '" + t + "'에 사진을 붙였어요"
-                                : "🧺 " + babyName() + "의 배냇함에 담겼어요");
-                        window.syncPhotosToFirebase();
-                    }
-                    repaint();
-                });
+                if (!dataUrl) { toast("사진 한 장을 읽지 못했어요"); finish(false); return; }
+                upload(key, msId, uidNow, dataUrl, thumbUrl, finish);
             });
         });
     }
@@ -549,7 +576,7 @@
                 ts: Date.now(), caption: "", msId: msId || null
             });
             if (window.cachePhotoData) window.cachePhotoData(id, dataUrl);   // 엽서용
-            done();
+            done(true);
         } catch (err) {
             console.error("[배냇함 사진] 업로드 실패", err);
             if (window.queueUpload) {
@@ -561,6 +588,7 @@
             } else {
                 toast("사진을 담지 못했어요. 연결을 확인해 주세요");
             }
+            done(false);
         }
     }
 
@@ -580,7 +608,7 @@
         if (list.length === 1) {
             return '<div onclick="window.openLoosePhoto(\'' + key + '\',0)" style="margin-bottom:16px; border-radius:16px; overflow:hidden; cursor:pointer; background:var(--bg-sub);">' +
                 '<img src="' + esc(list[0].url) + '" loading="lazy" alt="" style="width:100%; display:block; object-fit:cover; max-height:340px;">' +
-                (list[0].caption ? '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:19px; line-height:1.5; color:var(--text-m); padding:12px 14px 14px; word-break:keep-all;">' + esc(list[0].caption) + '</div>' : '') +
+                (list[0].caption ? '<div class="user-text" style="font-family:\'Nanum Pen Script\',cursive; font-size:19px; line-height:1.5; color:var(--text-m); padding:12px 14px 14px; word-break:keep-all;">' + esc(list[0].caption) + '</div>' : '') +
             '</div>';
         }
 
@@ -590,12 +618,15 @@
             '</div>';
         }).join("");
 
-        return '<div style="display:flex; gap:7px; margin-bottom:16px;">' + cells + '</div>';
+        // 네 장부터는 세 칸씩 줄을 바꾼다 (플러스). 한 줄에 다 넣으면 손톱만 해진다.
+        return list.length > 3
+            ? '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:16px;">' + cells + '</div>'
+            : '<div style="display:flex; gap:7px; margin-bottom:16px;">' + cells + '</div>';
     };
 
     window.renderPhotoAdd = function (key) {
         var n = window.getLoosePhotos(key).length;
-        if (n >= MAX_PER_DAY) return "";
+        if (n >= dayCap()) return "";
         return '<div onclick="event.stopPropagation(); window.addDayPhoto(\'' + key + '\')" style="margin-top:14px; padding-top:13px; border-top:1px dashed var(--border); font-size:12px; font-weight:700; color:var(--text-sub); cursor:pointer;">' +
             (n ? "사진 한 장 더 담기" : "이 날의 사진 담기") + ' +</div>';
     };
@@ -672,8 +703,14 @@
 
         var go = function () {
             if (window.deleteObject && window.storage && window.storageRef) {
-                if (p.path)      try { window.deleteObject(window.storageRef(window.storage, p.path)); } catch (e) {}
-                if (p.thumbPath) try { window.deleteObject(window.storageRef(window.storage, p.thumbPath)); } catch (e) {}
+                var del = function (path) {
+                    try {
+                        var pr = window.deleteObject(window.storageRef(window.storage, path));
+                        if (pr && pr.catch) pr.catch(function () {});
+                    } catch (e) {}
+                };
+                if (p.path) del(p.path);
+                if (p.thumbPath) del(p.thumbPath);
             }
             if (window.dropCachedPhotoData) window.dropCachedPhotoData(p.id);
             if (window.Grave) window.Grave.add("photo", p.id);   // 👈 묘비 세우기

@@ -32,15 +32,43 @@
 
     /* 홈에 놓일 순서.
        id 가 없는 덩어리는 그 안에 있는 id 로 찾는다. */
+    /* ⚠️ 형님이 짚은 문제 — '하루 패턴·통계가 사진 카드를 사이에 두고 떨어져 있다'.
+          지금 상태(기록 버튼) 바로 밑에 하루의 띠·오늘 통계가 와야 하는데
+          그 사이에 배냇함 사진 카드 · 그날의 오늘 · 첫 단어가 끼어 있었다.
+          기록 → 오늘 숫자 → 추억 순서로 다시 세운다.
+
+       ⚠️ 목록에 없는 덩어리는 '목록에 있는 것들 뒤로' 밀려난다 (relayout 이 그렇게 꽂는다).
+          그래서 돌봄 도우미 화면 · 오늘 챙길 것 · 밤중 수유 · 오늘의 우리 같은
+          나중에 붙는 것들도 전부 자리를 적어 둔다. 안 적으면 맨 아래로 떨어진다. */
     var ORDER = [
         { find: "home-main-banner-wrapper", note: "공지 배너" },
-        { find: "baby-dashboard",           note: "D+171 아기 카드" },
-        { find: "now-status-card",          note: "지금 상태 (기록 버튼)" },
+        /* ⚠️ 다둥이 아기 전환 칩(#baby-profile-switcher)이 목록에 없어서 맨 아래로 밀려 있었다.
+              renderBabyInfo 는 사진 카드 바로 위에 꽂는데, 여기서 다시 끌어내린 것이다.
+              원래 자리(사진 위)를 목록에 적어 둔다. */
+        { find: "baby-profile-switcher",    note: "아기 전환 (다둥이일 때만)" },
+        { find: "baby-dashboard",           note: "아기 사진 (D+)" },
+        { find: "senior-status-board",      note: "돌봄 도우미 화면 (그 모드에서만 보임)" },
+        { find: "home-e119",                note: "열 — 119에 읽어줄 카드 (열날 때만)" },
+        { find: "home-expiry-alert",        note: "기한 지남 (그때만)" },
+        /* ⚠️ 아래 둘도 목록에 없어서 홈 맨 아래로 밀려 있었다 (아기 전환 칩과 같은 일).
+              "봉인이 풀렸어요" 는 그날 맨 위에서 봐야 하는 카드다. */
+        { find: "home-seal-open",           note: "봉인 편지가 열린 날 (그날만)" },
+        { find: "home-vaccine-card",        note: "예방접종 D-7 (일주일 안쪽일 때만)" },
+        { find: "home-todo",                note: "오늘 챙길 것" },
+        { find: "em-letter",                note: "오늘의 편지 한 줄" },
+        { find: "now-status-card",          note: "지금 상태 + 기록 버튼" },
+        { find: "tracker-stats-container",  note: "하루의 띠 + 오늘 통계" },
+        { find: "info-month-home",          note: "이번 달 밤중 수유 (통계에 붙어서)" },
+        { find: "em-count",                 note: "오늘의 우리" },
         { find: "home-memorybox-card",      note: "배냇함" },
         { find: "home-memory-card",         note: "그날의 오늘" },
         { find: "home-words-card",          note: "첫 단어 사전" },
-        { find: "tracker-stats-container",  note: "통계" },
+        { find: "home-month-gift",          note: "이달의 배냇함" },
+        { find: "outing-return-card",       note: "나들이 돌아옴" },
+        { find: "em-moment",                note: "지나간 순간" },
+        { find: "em-resume",                note: "다시 시작된 순간" },
         { find: "routine-checklist-container", note: "루틴" },
+        { find: "home-plus",                note: "PLUS 안내 (무료 회원만)" },
         { find: "receipt-banner-btn",       note: "영수증·바통·도감·엽서·가계부" },
         { find: "dad-quest-container",      note: "아빠 작전 상황판" }
     ];

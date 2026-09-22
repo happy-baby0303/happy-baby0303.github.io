@@ -95,6 +95,7 @@
 
     /* ---------- 폰 알림 ---------- */
 
+    // 아이콘은 manifest 처럼 상대 경로로 — '/icon…' 은 앱이 하위 경로에 있으면 없는 주소였다
     async function push() {
         if (!("Notification" in window)) return;
         if (Notification.permission !== "granted") return;
@@ -111,7 +112,7 @@
             if (reg) {
                 await reg.showNotification("나들이는 즐거우셨나요?", {
                     body: body,
-                    icon: "/icon-192x192.png",
+                    icon: "icon-192x192.png",
                     /* ⚠️ badge 는 상태바에 뜨는 작은 아이콘이다.
                           안드로이드는 알파 채널만 읽어서 단색 실루엣으로 그린다.
                           컬러 PNG 를 넣으면 흰 네모 덩어리로 뜬다.
@@ -121,7 +122,7 @@
                     tag: "outing-return"
                 });
             } else {
-                new Notification("나들이는 즐거우셨나요?", { body: body, icon: "/icon-192x192.png" });
+                new Notification("나들이는 즐거우셨나요?", { body: body, icon: "icon-192x192.png" });
             }
             p._pushed = true;
             save(p);
@@ -232,7 +233,8 @@
     else boot();
 
     /* ---------- 점검용 ---------- */
-    window.outingDebug = function () {
+    // outingsmart.js 에도 outingDebug 가 있어서 하나가 다른 하나를 덮었다
+    window.outingReturnDebug = function () {
         var p = plan();
         if (!p) return console.log("예정된 나들이 없음 — 체크리스트에서 항목을 하나 체크해 보세요");
         console.log("테마:", p.theme, "/ 예상", p.hours + "시간");

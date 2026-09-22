@@ -33,6 +33,7 @@
         "#seal-sheet", "#sealed-sheet", "#voice-sheet", "#postcard-picker",
         "#kiosk-modal",                      // 연습장은 실제 매장과 같아야 한다
         "#mb-photo-viewer",
+        "#letterbox-modal",                  // ⚠️ 엄마·아빠 답장(사용자 글)이 있는데 빠져 있었다
         "[contenteditable]", "textarea", "input", "select", "option",
         ".note-text", ".letter-body", ".user-text",
         "#tab-community", "#milestone-capture-area"
@@ -107,10 +108,31 @@
 
     /* ---------- 다시 그려도 따라가기 ---------- */
 
-    var pending = null;
-    function schedule() {
+    /* ⚠️ 무엇이 바뀌든 화면 전체를 처음부터 다시 훑었다.
+          해열제 타이머 · 수면 타이머처럼 자주 다시 그리는 곳이 있으면
+          그때마다 앱 전체 글자를 다 읽어서 배터리와 발열로 돌아왔다.
+          바뀐 가지만 훑는다. 한꺼번에 많이 바뀌었을 때만 전체를 본다. */
+    var pending = null, roots = [], whole = false;
+    function schedule(root) {
+        if (!root) whole = true;
+        else if (roots.indexOf(root) < 0) roots.push(root);
         if (pending) return;
-        pending = setTimeout(function () { pending = null; walk(); }, 120);
+        pending = setTimeout(function () {
+            pending = null;
+            var list = roots; roots = [];
+            var all = whole || list.length > 40; whole = false;
+            if (all) { walk(); return; }
+            for (var i = 0; i < list.length; i++) {
+                var r = list[i];
+                if (!r || !r.isConnected) continue;
+                // 이미 훑을 더 큰 가지 안에 있으면 건너뛴다
+                var inside = false;
+                for (var j = 0; j < list.length; j++) {
+                    if (j !== i && list[j] !== r && list[j].contains && list[j].contains(r)) { inside = true; break; }
+                }
+                if (!inside) walk(r);
+            }
+        }, 120);
     }
 
     function boot() {
@@ -121,7 +143,8 @@
         if (window.MutationObserver) {
             new MutationObserver(function (muts) {
                 for (var i = 0; i < muts.length; i++) {
-                    if (muts[i].addedNodes && muts[i].addedNodes.length) { schedule(); return; }
+                    // 바뀐 자리(부모)만 적어 둔다
+                    if (muts[i].addedNodes && muts[i].addedNodes.length) schedule(muts[i].target);
                 }
             }).observe(document.body, { childList: true, subtree: true });
         }

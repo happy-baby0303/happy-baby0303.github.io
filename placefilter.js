@@ -87,6 +87,15 @@
     }
     window.babyMonthsForPlaces = babyMonths;
 
+
+    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = localStorage.getItem("tosil_babyName") || "우리 아기", c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
+
     var ageOn = false;   // "우리 아기가 갈 만한 곳" 켜짐 여부
 
     window.toggleAgeFilter = function () {
@@ -203,7 +212,7 @@
             'font-size:12px; font-weight:900; white-space:nowrap; ' +
             (ageOn ? 'background:' + GOLD + '; color:#FFF;'
                    : 'background:rgba(185,138,46,0.12); color:' + GOLD + '; border:1px solid rgba(185,138,46,0.3);') +
-            '">👶 ' + esc(name) + '(' + m + '개월)가 갈 만한</span>';
+            '">👶 ' + m + '개월 ' + esc(callName("가")) + ' 갈 만한</span>';   // "하윤(8개월)가" → "8개월 하윤이가"
     }
 
     function paintBar() {
@@ -220,7 +229,9 @@
     function mount() {
         var box = document.getElementById("tab-hotplace");
         if (!box) return;
-        if (document.getElementById(BAR_ID)) { paintBar(); countUp(); return; }
+        /* ⚠️ 8초마다 칩 줄을 통째로 다시 그려서, 옆으로 밀어 둔 칩이 8초마다 맨 앞으로 튀었다.
+              이미 있으면 숫자만 고친다. (칩은 누를 때 다시 그린다) */
+        if (document.getElementById(BAR_ID)) { countUp(); return; }
         if (!(window.hotplacesData || []).length) return;   // 데이터가 아직 안 왔다
 
         var bar = document.createElement("div");

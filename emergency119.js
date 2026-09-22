@@ -260,6 +260,12 @@
 
         if (s.symptom) body += row("적어둔 증상", s.symptom);
 
+        var youngNote = (a.days !== null && a.days < 91)
+            ? '<div style="background:rgba(211,46,46,0.08); border:1px solid rgba(211,46,46,0.28); border-radius:13px; ' +
+                  'padding:12px 15px; margin-top:14px; font-size:12.5px; font-weight:800; color:' + RED + '; line-height:1.6; word-break:keep-all;">' +
+                  '생후 3개월 미만이에요. 38.0℃ 이상이면 해열제로 기다리지 말고 바로 진료를 받으세요.</div>'
+            : '';
+
         var hint = empty
             ? '<div style="background:var(--bg-sub); border-radius:13px; padding:13px 15px; margin-top:14px; ' +
                   'font-size:12px; font-weight:700; color:var(--text-sub); line-height:1.6; word-break:keep-all;">' +
@@ -287,7 +293,7 @@
             '<div style="background:var(--bg-card); border:1px solid var(--border); ' +
                 'border-radius:18px; padding:4px 16px 2px;">' + body + '</div>' +
 
-            hint +
+            youngNote + hint +
 
             '<a href="tel:119" style="display:flex; align-items:center; justify-content:center; gap:7px; ' +
                 'text-decoration:none; margin-top:16px; padding:17px; ' +
@@ -367,6 +373,9 @@
         if (!block || block.parentNode !== home) block = anchor;
 
         var temp = s.last ? Number(s.last.temp).toFixed(1) : "";
+        // 생후 3개월 미만의 38도는 '병원에 가게 되면' 이 아니라 '지금 가야 하는' 열이다
+        var a = ageText();
+        var young = a.days !== null && a.days < 91;
 
         var box = document.createElement("div");
         box.innerHTML =
@@ -377,7 +386,9 @@
                 '<div style="font-size:20px; flex-shrink:0;">🚨</div>' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:13.5px; font-weight:900; color:' + RED + '; word-break:keep-all;">' +
-                        (temp ? temp + '도예요. 병원에 가게 되면' : '병원에 가게 되면') + '</div>' +
+                        (young
+                            ? (temp ? temp + '도 · ' : '') + '3개월 미만은 바로 진료가 필요해요'
+                            : (temp ? temp + '도예요. 병원에 가게 되면' : '병원에 가게 되면')) + '</div>' +
                     '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:2px;">' +
                         '119에 읽어줄 카드가 준비돼 있어요</div>' +
                 '</div>' +
@@ -386,7 +397,7 @@
 
         var el = box.firstChild;
         if (old) old.parentNode.replaceChild(el, old);
-        else block.parentNode.insertBefore(el, block.nextSibling);
+        else block.parentNode.insertBefore(el, block.nextSibling);   // 아기 카드 바로 아래 — 다른 알림보다 위
     }
 
     function mount() { mountInfo(); mountHome(); }

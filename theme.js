@@ -15,7 +15,8 @@
      경고색  빨강 #F04452  — 진짜 위험할 때만 (그대로 둔다)
      나머지는 전부 따뜻한 먹색과 미색
 
-   index.html 에서 mobile.js 앞에 로드하세요.
+   index.html 의 <head> 맨 위 (theme-booting 스크립트 바로 다음) 에서 로드하세요.
+   그래야 문서가 읽히는 동안 그려지는 칸도 파랗게 한 번 뜨지 않는다.
    ============================================================ */
 (function () {
     'use strict';
@@ -68,7 +69,23 @@
         "#FBBF24": "#D2A340",
         "#D97706": "#A07722",
         "#FFFBEB": "#FDF9EE",
-        "#FEF3C7": "#F7EBD2"
+        "#FEF3C7": "#F7EBD2",
+
+        /* ⚠️ 지도에 없던 파랑들 — 모유 수유 중 상자 · 진행 막대 · 역할 고르기 칸 · 뱃지.
+              배경만 보라가 되고 테두리·글씨는 파랑으로 남아 반반이었다. */
+        "#B1D6FF": "#D5D1F4",
+        "#1C64F2": "#6A61CE",
+        "#2563EB": "#6A61CE",
+        "#1A73E8": "#6A61CE",
+        "#BFDBFE": "#D5D1F4",
+        "#D0E6FF": "#E4E0F8",
+        "#D1E4FF": "#DEDAF6",
+        "#D3E4FF": "#DEDAF6",
+        "#E0F2FE": "#F2F0FC",
+        "#E8F0FE": "#F0EEFB",
+        "#F0F7FF": "#F2F0FC",
+        "#F1F5F9": "#F6F2EC",
+        "#F8FAFC": "#FAF7F2"
 
         // #F04452, #FFF0F1, #D32F2F, #EF4444 는 손대지 않는다.
         // 경고는 경고로 남아야 눈에 띈다.
@@ -78,6 +95,15 @@
     var RE = new RegExp(KEYS.join("|"), "gi");
     var LOOKUP = {};
     KEYS.forEach(function (k) { LOOKUP[k.toUpperCase()] = MAP[k]; });
+
+    /* ⚠️ 파랑이 #3182F6 으로만 박힌 게 아니었다. rgba(49,130,246,…) 로 64군데.
+          맘마 수정 화면의 시간 선택 칸 하이라이트 · 입력칸 테두리 빛 · 옅은 파랑 바탕이
+          전부 이 모양이라 지도에 안 걸려서 끝까지 파랗게 남았다. 투명도는 두고 색만 바꾼다. */
+    var RGBA = [
+        [/rgba?\(\s*49\s*,\s*130\s*,\s*246\s*/gi, "rgba(127, 119, 221"],
+        [/rgba?\(\s*15\s*,\s*23\s*,\s*42\s*/gi,   "rgba(59, 50, 44"]
+    ];
+    var HAS_RGBA = /rgba?\(\s*(49\s*,\s*130|15\s*,\s*23)\s*,/i;
 
     /* ---------- 2. 다크모드는 '재서' 뒤집는다 ----------
        이 앱은 색이 인라인에 천 군데 넘게 박혀 있다.
@@ -168,6 +194,7 @@
         var out = text.replace(RE, function (m) {
             return LOOKUP[m.toUpperCase()] || m;
         });
+        for (var ri = 0; ri < RGBA.length; ri++) out = out.replace(RGBA[ri][0], RGBA[ri][1]);
         return isDark() ? darkify(out) : out;
     }
 
@@ -228,11 +255,14 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
         if (el.closest && el.closest("#mb-photo-viewer")) return;   // 사진 뷰어는 원래 어둡다
         if (el.closest && el.closest("#premium-paywall-modal, #vip-modal-overlay")) return;   // 👈 결제 화면은 원래 색 그대로
         if (el.closest && el.closest("#kiosk-modal")) return;   // 👈 키오스크는 실제 매장과 같아야 연습이 된다
+        /* 👈 파란약(덱시부프로펜·이부프로펜)은 파랑이어야 한다. 빨간약·파란약은 실제 시럽 색이고,
+              새벽에 약병과 화면을 맞춰 보는 색이다. 보라로 바뀌면 안 된다. */
+        if (el.closest && el.closest("#btn-pill-blue, [data-keep-color]")) return;
 
         var src = el.getAttribute("data-theme-src");
         if (src === null) {
             src = el.getAttribute("style") || "";
-            if (src.indexOf("#") === -1) return;                    // 색이 없으면 볼 일 없다
+            if (src.indexOf("#") === -1 && !HAS_RGBA.test(src)) return;   // 색이 없으면 볼 일 없다
             el.setAttribute("data-theme-src", src);
         }
 
@@ -259,69 +289,75 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
 
     function paint(root) {
         root = root || document.body;
-        if (!root.querySelectorAll) return;
+        if (!root || !root.querySelectorAll) return;
         one(root);
-        var list = root.querySelectorAll('[style*="#"], [data-theme-src]');
+        var list = root.querySelectorAll('[style*="#"], [style*="rgba(49"], [style*="rgba(15"], [data-theme-src]');
         for (var i = 0; i < list.length; i++) one(list[i]);
     }
 
-    /* ---------- 5. 다시 그려도 따라가기 ---------- */
+    /* ---------- 5. 다시 그려도 따라가기 ----------
+       ⚠️ 두 가지가 '파랑이 보라로 스르륵 물드는' 걸 만들었다.
+          ① 새로 뜬 화면을 다음 장면(requestAnimationFrame)에 칠했다.
+             그 사이 한 장면이 파랗게 그려지고, 버튼의 0.2초 전환 효과가 그걸 보라로 '물들였다'.
+          ② 무엇이 바뀌든 문서 전체(수천 칸)를 다시 훑었다.
+             수유 타이머가 1초마다 글자를 바꾸면 1초마다 전체를 훑었다 (배터리).
+          이제 바뀐 가지만, 화면에 그려지기 전에(같은 순간에) 칠한다. 파란 장면이 아예 없다. -------- */
 
-    var pending = null;
-    function schedule() {
-        if (pending) return;
-              // 60ms 는 눈에 보인다. 다음 화면 그리기 직전에 칠하면 안 보인다.
-        pending = requestAnimationFrame(function () { pending = null; paint(); });
+    function onMutations(muts) {
+        for (var i = 0; i < muts.length; i++) {
+            var m = muts[i];
+            if (m.type === "childList") {
+                for (var a = 0; a < m.addedNodes.length; a++) {
+                    var n = m.addedNodes[a];
+                    if (n.nodeType === 1) paint(n);          // 글자(텍스트)만 바뀐 건 볼 일이 없다
+                }
+                continue;
+            }
+            if (m.type === "attributes" && m.attributeName === "style") {
+                var t = m.target;
+                if (t.getAttribute("data-theme-applied") === "true") {
+                    t.removeAttribute("data-theme-applied");   // theme.js 가 칠한 것 — 표시만 지운다 (무한 반복 방지)
+                } else {
+                    t.removeAttribute("data-theme-src");       // 다른 코드가 바꾼 것 — 새 값으로 다시 칠한다
+                    one(t);
+                }
+            }
+        }
     }
 
     function watch() {
-        if (!window.MutationObserver) return;
-
-            new MutationObserver(function (muts) {
-            // 👇 return 으로 빠져나가면 나머지 변경을 통째로 놓친다.
-            //    다른 모듈이 DOM 을 먼저 건드리면 스타일 변경이 묻혀서
-            //    캐시가 안 지워지고, 옛 스타일로 덮어쓰는 사고가 난다.
-            var need = false;
-
-            for (var i = 0; i < muts.length; i++) {
-                var m = muts[i];
-
-                if (m.type === "childList" && m.addedNodes.length) { need = true; continue; }
-
-                if (m.type === "attributes" && m.attributeName === "style") {
-                    if (m.target.getAttribute("data-theme-applied") === "true") {
-                        // theme.js가 칠한 거면 마커만 지운다 (무한루프 방지)
-                        m.target.removeAttribute("data-theme-applied");
-                    } else {
-                        // 외부 JS가 바꾼 거면 캐시를 버리고 새 값을 기억한다
-                        m.target.removeAttribute("data-theme-src");
-                        need = true;
-                    }
-                }
-            }
-
-            if (need) schedule();
-        }).observe(document.body, {
+        if (!window.MutationObserver || !document.documentElement) return;
+        /* 문서 맨 위에서부터 지켜본다 (theme.js 를 <head> 로 올렸다).
+           index.html 이 읽히는 동안 붙는 칸도 그려지기 전에 칠해진다. */
+        new MutationObserver(onMutations).observe(document.documentElement, {
             childList: true, subtree: true,
             attributes: true, attributeFilter: ["style"]
         });
+    }
 
-        // 다크모드를 켜고 끄면 전부 다시 계산
+    // 다크모드를 켜고 끌 때만 전부 다시 계산 (body 의 다른 class 가 바뀔 때마다 훑지 않는다)
+    var lastDark = null;
+    function watchDarkToggle() {
+        if (!document.body || !window.MutationObserver) return;
+        lastDark = isDark();
         new MutationObserver(function () {
+            var d = isDark();
+            if (d === lastDark) return;
+            lastDark = d;
             paint();
         }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
     }
 
-       function boot() {
-        paint();
+    watch();
+
+    function boot() {
+        paint();                        // 이미 그려진 것 한 번 (혹시 놓친 칸)
 
         // 👇 첫 덧칠이 끝났다. 이제 애니메이션을 풀어준다.
-        //    이 줄이 없으면 파란색이 보라색으로 물드는 게 그대로 보인다.
         document.documentElement.classList.remove("theme-booting");
 
-        watch();
-        setTimeout(paint, 800);      // script.js 가 늦게 그리는 화면들
-        setTimeout(paint, 2500);
+        watchDarkToggle();
+        setTimeout(paint, 2500);        // 안전망 한 번
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
@@ -330,4 +366,5 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
     /* ---------- 점검용 ---------- */
     window.themeRepaint = function () { paint(); };
     window.themeMap = MAP;
+    window.themeConvert = convert;   // 점검용: themeConvert('color:#3182F6')
 })();

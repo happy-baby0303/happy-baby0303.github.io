@@ -30,6 +30,15 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
+    /* ⚠️ 가입하고 제일 먼저 보는 화면인데 "하윤를", "하윤가 꺼내 볼" 이 나왔다.
+          받침이 있으면 '이' 를 붙인다 (data.js 의 babyCall). */
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
+
     function todayKey() {
         var d = new Date();
         return d.getFullYear() + "-" +
@@ -185,7 +194,7 @@
                     '<div class="serif-display" style="font-size:25px; font-weight:700; color:var(--text-title); ' +
                         'letter-spacing:-0.6px; line-height:1.45;">' + name + '의 배냇함을<br>열었어요</div>' +
                     '<div style="font-size:14px; font-weight:600; color:var(--text-sub); line-height:1.9; margin-top:20px; word-break:keep-all;">' +
-                        '여기 담긴 건 나중에<br>' + name + '가 꺼내 볼 것들이에요.<br><br>' +
+                        '여기 담긴 건 나중에<br>' + esc(callName("가")) + ' 꺼내 볼 것들이에요.<br><br>' +
                         '3분이면 첫 세 가지를 담을 수 있어요.' +
                     '</div>' +
                 '</div>' +
@@ -199,7 +208,7 @@
 
         } else if (step === 1) {
             shell(ask(1, "📷",
-                "오늘의 " + name + "를<br>한 장만",
+                "오늘의 " + esc(callName("를")) + "<br>한 장만",
                 "잘 찍을 필요 없어요.<br>지금 자고 있는 얼굴이면 충분합니다.",
                 "사진 고르기", "window.firstFillPhoto()"));
 
@@ -215,8 +224,8 @@
             shell(ask(3, "🕯️",
                 "스무 살 " + name + "에게<br>한 줄만 남겨두기",
                 "지금의 마음은 지금밖에 못 씁니다.<br>" +
-                (left ? '<span style="color:' + GOLD + '; font-weight:800;">' + comma(left) + '일</span> 뒤에 ' + name + '가 읽게 됩니다.'
-                      : name + "가 언젠가 읽게 됩니다."),
+                (left ? '<span style="color:' + GOLD + '; font-weight:800;">' + comma(left) + '일</span> 뒤에 ' + esc(callName("가")) + ' 읽게 됩니다.'
+                      : esc(callName("가")) + " 언젠가 읽게 됩니다."),
                 "편지 남기기", "window.firstFillSeal()"));
 
         } else {
@@ -239,8 +248,8 @@
             var tail;
             if (c.seal) {
                 var d = daysToTwenty();
-                tail = d ? comma(d) + '일 뒤에<br>' + name + '가 그 편지를 엽니다.'
-                         : name + '가 언젠가 그 편지를 엽니다.';
+                tail = d ? comma(d) + '일 뒤에<br>' + esc(callName("가")) + ' 그 편지를 엽니다.'
+                         : esc(callName("가")) + ' 언젠가 그 편지를 엽니다.';
             } else if (got.length) {
                 tail = '오늘부터 하나씩 쌓입니다.';
             } else {

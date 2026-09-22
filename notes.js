@@ -150,7 +150,7 @@
         } catch (e) { console.warn("[한 줄] 동기화 실패", e); }
     };
 
-    var unsub = null;
+    var unsub = null, repushTimer = null;
     window.startNoteRealtimeSync = function () {
         var code = syncCode();
         if (!code || !window.db || typeof window.onSnapshot !== "function") return;
@@ -161,6 +161,7 @@
             var data = snap.data() || {};
             var remote = data.days || {};
             if (window.Grave) window.Grave.merge("note", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
+            var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("note") : {};   // 묘비는 한 번만 읽는다
             var local = loadIndex(), merged = {};
 
             Object.keys(local).concat(Object.keys(remote)).forEach(function (k) {
@@ -168,7 +169,7 @@
                 var seen = {}, out = [];
                 (local[k] || []).concat(remote[k] || []).forEach(function (n) {
                     if (!n || !n.id) return;
-                    if (window.Grave && window.Grave.has("note", n.id)) return;   // 👈 지운 건 되살리지 않기
+                    if (gone[n.id]) return;   // 👈 지운 건 되살리지 않기
                     // 같은 글이 양쪽에 있으면 나중에 고친 쪽을 남긴다
                     if (seen[n.id]) {
                         if ((n.ts || 0) > (seen[n.id].ts || 0)) {
@@ -183,6 +184,14 @@
                 if (out.length) merged[k] = out;
             });
 
+            /* ⚠️ 한 줄 전체를 문서 하나에 통째로 올린다. 엄마·아빠가 비슷한 때에 쓰면
+                  나중에 올린 폰의 옛 사본이 서버에 남아서, 먼저 쓴 한 줄이 짝꿍 폰에 끝내 안 갔다.
+                  서버에 없는 게 이 폰에 있으면 한 번 더 올린다 (서버가 다 가지면 멈춘다). */
+            if (window.syncNeedsPush && window.syncNeedsPush(remote, merged, data.deleted, "note")) {
+                clearTimeout(repushTimer);
+                repushTimer = setTimeout(window.syncNotesToFirebase, 1500);
+            }
+
             if (JSON.stringify(merged) === JSON.stringify(local)) return;
             saveIndex(merged);
             repaint();
@@ -196,6 +205,11 @@
     var editing = { key: null, id: null };
 
     window.openNoteSheet = function (key, id) {
+        /* 짝꿍이 쓴 한 줄은 짝꿍 것이다. 내 폰에서 고치거나 지우지 않는다 (편지함과 같은 규칙). */
+        if (id) {
+            var owner = window.getDayNotes(key || todayKey()).filter(function (x) { return x.id === id; })[0];
+            if (owner && owner.who && owner.who !== myTitle()) return toast("짝꿍이 쓴 한 줄은 짝꿍 폰에서 고칠 수 있어요");
+        }
         editing = { key: key || todayKey(), id: id || null };
 
         var cur = "";
@@ -296,16 +310,20 @@
         var list = window.getDayNotes(key);
         if (!list.length) return "";
 
+        var me = myTitle();
         return list.map(function (n) {
-            return '<div onclick="event.stopPropagation(); window.openNoteSheet(\'' + key + '\',\'' + esc(n.id) + '\')" ' +
-                'style="background:var(--bg-sub); border-radius:16px; padding:15px 17px; margin-top:14px; cursor:pointer;">' +
-                '<div style="font-size:10px; font-weight:800; color:var(--text-sub); letter-spacing:1.8px; margin-bottom:8px;">' +
-                    esc(n.who || myTitle()) + '의 한 줄</div>' +
+            var who = n.who || me;
+            var mine = (who === me);          // 내 것만 눌러서 고친다. 짝꿍 것은 읽기만.
+            return '<div' + (mine ? ' onclick="event.stopPropagation(); window.openNoteSheet(\'' + key + '\',\'' + esc(n.id) + '\')"' : '') + ' ' +
+                'style="background:var(--bg-sub); border-radius:16px; padding:15px 17px; margin-top:14px;' + (mine ? ' cursor:pointer;' : '') + '">' +
+                // 엄마는 코랄, 아빠는 파랑 — 편지함·문답과 같은 색
+                '<div style="font-size:10px; font-weight:800; color:' + (who === "아빠" ? "#4F86E0" : "#E0705B") + '; letter-spacing:1.8px; margin-bottom:8px;">' +
+                    esc(who) + '의 한 줄</div>' +
                 /* ⚠️ 22px 이었다. 아기 편지가 20px 인데 부모 한 줄이 더 컸다.
                    그러면 눈이 아래(부모 글)로 먼저 가고 편지가 묻힌다.
                    이 화면의 주인공은 아기 편지다. 한 줄은 거기 붙는 말이다.
                    17px 로 낮춘다. 같은 손글씨라 작아도 결이 안 깨진다. */
-                '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:17px; line-height:1.6; color:var(--text-s); word-break:keep-all; white-space:pre-wrap;">' +
+                '<div class="user-text" style="font-family:\'Nanum Pen Script\',cursive; font-size:17px; line-height:1.6; color:var(--text-s); word-break:keep-all; white-space:pre-wrap;">' +
                     esc(n.text) + '</div>' +
             '</div>';
         }).join("");

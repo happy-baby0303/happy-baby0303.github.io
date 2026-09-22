@@ -170,6 +170,25 @@
         '</div>';
     }
 
+    /* ⚠️ 엽서는 명조(Gowun Batang)와 손글씨(Nanum Pen Script)로 그린다.
+          처음 굽는 날엔 글꼴이 아직 안 받아져서 기본 글꼴로 구워졌다.
+          받고 나서 굽는다. 늦어도 2.5초 뒤엔 그냥 굽는다. */
+    function waitFonts(cb) {
+        var done = false;
+        var go = function () { if (done) return; done = true; setTimeout(cb, 150); };
+        setTimeout(go, 2500);
+        try {
+            if (document.fonts && document.fonts.load) {
+                Promise.all([
+                    document.fonts.load("700 52px 'Gowun Batang'"),
+                    document.fonts.load("38px 'Nanum Pen Script'")
+                ]).then(go, go);
+                return;
+            }
+        } catch (e) {}
+        setTimeout(go, 400);
+    }
+
     /* ---------- 굽기 ----------
        예전에는 <a download> 하나로 끝냈다. PC 에서는 되지만
        아이폰 사파리와 홈 화면 PWA 에서는 download 속성이 무시된다.
@@ -191,7 +210,7 @@
 
         toast("엽서를 굽고 있어요…");
 
-        setTimeout(function () {
+        waitFonts(function () {
             html2canvas(stage, { scale: 1, backgroundColor: "#F8F6F4", useCORS: true, logging: false })
             .then(function (canvas) {
 
@@ -242,7 +261,7 @@
                 stage.remove();
                 toast("저장 중 문제가 생겼어요");
             });
-        }, 400);
+        });
     }
 
     /* ---------- 1. 도감 엽서 ----------

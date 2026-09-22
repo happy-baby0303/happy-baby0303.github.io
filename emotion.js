@@ -80,12 +80,25 @@
         return (localStorage.getItem('user_role') || 'mom') === 'dad' ? '아빠' : '엄마';
     }
 
+    /* ⚠️ 이름 뒤에 '가' 를 그냥 붙여서 "하윤가 밤중수유를…", 편지 끝 서명 "— 하윤가" 가 나왔다.
+          받침이 있으면 '이' 를 붙인다.  하윤 → 하윤이가 · 지우 → 지우가 */
+    function callName(j) {
+        try { if (typeof window.babyCall === 'function') return window.babyCall(j || ''); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== '우리 아기' ? '이' : '') + (j || '');
+    }
+    var SOFT = { '이가': '가', '가': '가', '은': '는', '는': '는', '을': '를', '를': '를',
+                 '과': '와', '와': '와', '이라': '라', '라': '라', '아': '야', '야': '야', '의': '의' };
+
     function fill(text) {
         var me = myTitle();
         var partner = me === '아빠' ? '엄마' : '아빠';
         return String(text).replace(/{me}/g, me)
                            .replace(/{partner}/g, partner)
-                           .replace(/{name}/g, babyName());
+                           .replace(/{name}(이가|이라|가|은|는|을|를|과|와|라|아|야|의)?/g, function (m, j) {
+                               return j ? callName(SOFT[j] || j) : babyName();
+                           });
     }
 
     function esc(s) {
@@ -273,8 +286,18 @@
 
         // 400일 넘은 날짜, 800개 넘은 기록표는 정리
         var keys = Object.keys(ledger.days).sort();
+        /* ⚠️ 400일 넘은 날은 그냥 지웠다. 그러면 '모두 N번 안아줬어요' 가
+              돌이 지나면서 오히려 줄어들고, 첫 해의 기록이 영영 사라진다.
+              날짜별 칸(잠 조각 포함)은 400일만 두고, 횟수는 달별로 접어서 평생 남긴다. */
         if (keys.length > 400) {
-            keys.slice(0, keys.length - 400).forEach(function (k) { delete ledger.days[k]; });
+            if (!ledger.months) ledger.months = {};
+            keys.slice(0, keys.length - 400).forEach(function (k) {
+                var d = ledger.days[k] || {}, ym = k.slice(0, 7);
+                var m = ledger.months[ym] || (ledger.months[ym] = { care: 0, dawn: 0, feed: 0, diaper: 0, sleep: 0 });
+                m.care += d.care || 0; m.dawn += d.dawn || 0; m.feed += d.feed || 0;
+                m.diaper += d.diaper || 0; m.sleep += d.sleep || 0;
+                delete ledger.days[k];
+            });
         }
         var ids = Object.keys(ledger.seen);
         if (ids.length > 800) {
@@ -337,6 +360,147 @@
         try { localStorage.setItem(REPLIES_KEY, JSON.stringify(o)); } catch (e) {}
     }
 
+    /* ---------- 가족 보관함 (편지 · 답장) ----------
+       ⚠️ 편지와 답장이 이 기기에만 있었다.
+          · 폰을 바꾸면 편지함이 통째로 사라졌다 (기록은 100건만 남아 다시 지을 수도 없다)
+          · '엄마의 답장 / 아빠의 답장' 칸을 만들어 두고, 짝꿍이 쓴 답장은
+            짝꿍 폰에만 있어서 내 편지함엔 한 번도 안 보였다
+       letters_{가족코드}{아기번호} 안에 해마다 문서 하나씩 둔다.
+          letters_2026   그해 편지 (한 해 400KB 안쪽 — 문서 한도 1MB)
+          replies_2026   그해 답장 (엄마·아빠 칸이 따로라 서로 안 덮는다)
+       ⚠️ 처음엔 settings_ 에 뒀다. 그런데 settings_ 는 돌봄 도우미(시터)도 읽는 자리라
+          엄마·아빠의 답장이 시터 폰에 내려갔다. 보안 규칙의 사생활 목록(isPrivateBucket)에
+          letters 를 넣고 여기로 옮긴다. 시터 폰은 아예 서버에 묻지 않는다.
+       서버가 안 되면 조용히 예전처럼 이 기기에서만 돈다. -------- */
+
+    function cloudRef(kind, year) {
+        var code = localStorage.getItem("family_sync_code");
+        if (!code || !window.db || typeof window.doc !== "function") return null;
+        if (!(window.auth && window.auth.currentUser)) return null;
+        if (localStorage.getItem("tosil_role_locked") === "viewer") return null;   // 시터 폰
+        return window.doc(window.db, "letters_" + code + (window.currentBabySuffix || ""), kind + "_" + year);
+    }
+
+    function cloudReady() {
+        return typeof window.setDoc === "function" && typeof window.getDoc === "function" &&
+               !!cloudRef("letters", new Date().getFullYear());
+    }
+
+    // patch = { "2026-09-19": {...}, ... } → 해마다 한 번씩 merge 로 올린다
+    function cloudPush(kind, patch) {
+        if (!patch || !cloudReady()) return false;
+        var byYear = {};
+        Object.keys(patch).forEach(function (k) {
+            var y = String(k).slice(0, 4);
+            if (!/^\d{4}$/.test(y) || !patch[k]) return;
+            (byYear[y] = byYear[y] || {})[k] = patch[k];
+        });
+        Object.keys(byYear).forEach(function (y) {
+            var ref = cloudRef(kind, y);
+            if (!ref) return;
+            window.setDoc(ref, byYear[y], { merge: true }).catch(function (e) {
+                console.warn("[편지 보관] 올리기 실패", kind, y, e);
+            });
+        });
+        return true;
+    }
+
+    async function cloudPull(kind) {
+        if (!cloudReady()) return null;
+        var y1 = new Date().getFullYear();
+        var birth = String(localStorage.getItem("tosil_startDate") || "");
+        var y0 = /^\d{4}/.test(birth) ? Number(birth.slice(0, 4)) : y1;
+        if (!(y0 <= y1) || y0 < y1 - 25) y0 = y1;
+        var out = {};
+        for (var y = y0; y <= y1; y++) {
+            var ref = cloudRef(kind, y);
+            if (!ref) return null;
+            try {
+                var snap = await window.getDoc(ref);
+                if (snap && snap.exists()) {
+                    var d = snap.data() || {};
+                    Object.keys(d).forEach(function (k) { out[k] = d[k]; });
+                }
+            } catch (e) { console.warn("[편지 보관] 받기 실패", kind, y, e); return null; }
+        }
+        return out;
+    }
+
+    // 서버에만 있는 편지를 채운다. 이 기기에서 지은 편지는 덮지 않는다.
+    function mergeLetters(server) {
+        if (!server) return false;
+        var box = loadLetters(), changed = false;
+        Object.keys(server).forEach(function (k) {
+            var v = server[k];
+            if (!v || typeof v.text !== "string" || box[k]) return;
+            box[k] = v; changed = true;
+        });
+        if (changed) saveLetters(box);
+        return changed;
+    }
+
+    // 답장은 칸(엄마·아빠)마다 더 나중에 쓴 쪽이 이긴다. 빈 글 = 지운 답장.
+    function mergeReplies(server) {
+        if (!server) return false;
+        var box = loadReplies(), changed = false;
+        Object.keys(server).forEach(function (k) {
+            var sv = server[k] || {};
+            ["mom", "dad"].forEach(function (slot) {
+                var r = sv[slot];
+                if (!r || typeof r.text !== "string") return;
+                var mine = box[k] && box[k][slot];
+                if (!mine || (Number(r.at) || 0) > (Number(mine.at) || 0)) {
+                    if (!box[k]) box[k] = {};
+                    box[k][slot] = { text: r.text, at: Number(r.at) || 0 };
+                    changed = true;
+                }
+            });
+        });
+        if (changed) saveReplies(box);
+        return changed;
+    }
+
+    var syncing = false;
+    async function cloudSync(force) {
+        if (syncing || !cloudReady()) return;
+        var last = Number(localStorage.getItem("tosil_letters_pulled_at") || 0);
+        if (!force && Date.now() - last < 12 * 3600000) return;
+        syncing = true;
+        try {
+            var ls = await cloudPull("letters");
+            var rs = await cloudPull("replies");
+            if (ls === null || rs === null) {
+                // 못 받았으면 한 시간 뒤에 다시 (앱을 열 때마다 서버를 두드리지 않는다)
+                localStorage.setItem("tosil_letters_pulled_at", String(Date.now() - 11 * 3600000));
+                return;
+            }
+            var changed = mergeLetters(ls);
+            if (mergeReplies(rs)) changed = true;
+
+            /* 처음 한 번 — 이 폰에만 있던 편지와 '내' 답장을 올린다.
+               짝꿍 칸은 올리지 않는다. 오래된 사본으로 짝꿍 글을 덮을 수 있어서다. */
+            if (!localStorage.getItem("tosil_letters_cloud_v1")) {
+                var mine = loadLetters(), up = {};
+                Object.keys(mine).forEach(function (k) { if (!ls[k]) up[k] = mine[k]; });
+                if (Object.keys(up).length) cloudPush("letters", up);
+
+                var slot = myRoleSlot(), rp = loadReplies(), upR = {};
+                Object.keys(rp).forEach(function (k) {
+                    if (rp[k] && rp[k][slot]) { upR[k] = {}; upR[k][slot] = rp[k][slot]; }
+                });
+                if (Object.keys(upR).length) cloudPush("replies", upR);
+                localStorage.setItem("tosil_letters_cloud_v1", "1");
+            }
+            localStorage.setItem("tosil_letters_pulled_at", String(Date.now()));
+            if (changed && document.getElementById("letterbox-modal") && editingKey === null) {
+                window.openLetterBox(true);
+            }
+        } finally {
+            syncing = false;
+        }
+    }
+    window.syncLetterBox = function () { return cloudSync(true); };
+
     /* ---------- 편지함: 저장소와 생성기 ---------- */
 
     var LETTERS_KEY = "tosil_letters";
@@ -345,7 +509,8 @@
         try { return JSON.parse(localStorage.getItem(LETTERS_KEY)) || {}; } catch (e) { return {}; }
     }
     function saveLetters(o) {
-        try { localStorage.setItem(LETTERS_KEY, JSON.stringify(o)); } catch (e) {}
+        try { localStorage.setItem(LETTERS_KEY, JSON.stringify(o)); }
+        catch (e) { console.warn("[편지함] 이 기기에 저장 못 함 (용량) — 가족 보관함 사본은 남습니다", e); }
     }
 
     // 날짜를 씨앗으로 쓰는 고정 선택. 같은 날은 몇 번을 열어도 같은 편지가 나온다.
@@ -360,10 +525,31 @@
         var records = [];
         try { records = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
         var e0 = s0 + DAY;
-        var st = { milk: 0, breastMins: 0, breastCount: 0, sleepMins: 0, poop: 0, diaper: 0, care: 0, dawn: 0 };
+        var st = { milk: 0, breastMins: 0, breastCount: 0, sleepMins: 0, restMins: 0, poop: 0, diaper: 0, care: 0, dawn: 0 };
         records.forEach(function (r) {
             var ts = Number(r && r.timestamp);
-            if (!ts || ts < s0 || ts >= e0) return;
+            if (!ts) return;
+
+            /* ⚠️ 잠을 '시작한 날' 에 셌다. 편지는 재운 직후(육퇴)에 쓰이는데
+                  그때 오늘 밤잠은 아직 안 끝났고, 어젯밤 11시간은 어제 몫이었다.
+                  그래서 오늘 편지엔 낮잠만 들어갔고, 어젯밤 잠은 어느 편지에도 안 들어갔다.
+                  낮잠이 3시간이 안 되는 돌 무렵 아기는 매일 '잠이 부족했어' 편지를 받았다.
+                  잠은 '깬 날' 에 센다. 오늘 편지 = 어젯밤 잠 + 오늘 낮잠. 겹치지도 빠지지도 않는다. */
+            if (r.type === "sleep") {
+                var end = r.endTs ? Number(r.endTs) : (Number(r.amount) ? ts + Number(r.amount) * 60000 : 0);
+                var len = end ? Math.round((end - ts) / 60000) : 0;
+                // 20시간 넘는 건 '끝났다' 를 안 누른 기록이다
+                if (end && len > 0 && len <= 20 * 60) {
+                    /* 화면에 찍는 숫자(sleepMins)는 그날 0시~24시 안에 든 잠 — 홈 '총 수면시간' · 영수증과 같은 셈.
+                       숫자가 화면마다 다르면 부모는 앱을 못 믿는다.
+                       '잘 잤다 / 못 잤다' 문장(restMins)은 깬 날 기준 — 어젯밤 잠 + 오늘 낮잠. */
+                    var inA = Math.max(ts, s0), inB = Math.min(end, e0);
+                    if (inB > inA) st.sleepMins += Math.floor((inB - inA) / 60000);
+                    if (end >= s0 && end < e0) st.restMins += len;
+                }
+            }
+
+            if (ts < s0 || ts >= e0) return;
             st.care++;
             if (new Date(ts).getHours() < DAWN_END) st.dawn++;
 
@@ -377,12 +563,8 @@
             } else if (r.type === "diaper") {
                 st.diaper++;
                 if (r.subType && String(r.subType).indexOf("대변") > -1) st.poop++;
-            } else if (r.type === "sleep") {
-                // 타이머로 잰 잠은 amount 가 비어 있고 endTs 만 있다. 그게 대개 밤잠이다.
-                st.sleepMins += r.endTs
-                    ? Math.max(0, Math.round((Number(r.endTs) - ts) / 60000))
-                    : (Number(r.amount) || 0);
             }
+            // 잠은 위에서 '깬 날' 기준으로 셌다
         });
         return st;
     }
@@ -399,7 +581,7 @@
         try { if (typeof receiptData !== "undefined" && receiptData) rd = receiptData; } catch (e) {}
         if (!rd) rd = window.receiptData;
         if (!rd || !rd.intro) return "";
-        var hours = st.sleepMins / 60;
+        var hours = st.restMins / 60;          // 어젯밤 잠 + 오늘 낮잠
         var clean = function (x) { return stripEmoji(String(x || "")); };
 
         // 날짜에서 뽑은 고정 난수. 같은 날은 늘 같은 편지가 나온다.
@@ -413,10 +595,14 @@
         // 있는 날만 넣고, 가끔은 통째로 뺀다.
         var paras = [];
 
-        paras.push([
-            seedPick(rd.intro, key + "a"),
-            (hours >= 3) ? seedPick(rd.sleepGood, key + "b") : seedPick(rd.sleepBad, key + "c")
-        ]);
+        /* ⚠️ 잠을 하나도 안 적은 날도 '잘 못 잤어' 가 나갔다 (0시간 < 3시간).
+              잠을 안 재는 집은 매일 거짓말 편지를 받았다. 모르면 말하지 않는다.
+              기준은 밤잠을 포함한 하루치라 9시간으로 올린다. */
+        var sleepLine = "";
+        if (st.restMins > 0) {
+            sleepLine = (hours >= 9) ? seedPick(rd.sleepGood, key + "b") : seedPick(rd.sleepBad, key + "c");
+        }
+        paras.push([seedPick(rd.intro, key + "a"), sleepLine]);
 
         // 새벽에 깬 날 — 부모가 제일 힘든 시간을 아기가 알아봐 주는 자리
         if (st.dawn >= 2 && rd.dawn && rd.dawn.length) {
@@ -505,10 +691,12 @@
         var box = loadLetters();
         var cur = box[key];
         if (cur && cur.text === text && cur.ms === ms && cur.milk === st.milk && cur.sleepMins === st.sleepMins && cur.poop === st.poop) return;
-        box[key] = { text: text, ms: ms, milk: st.milk, breastMins: st.breastMins, breastCount: st.breastCount, sleepMins: st.sleepMins, poop: st.poop, care: st.care, dawn: st.dawn };
-        var keys = Object.keys(box).sort();
-        if (keys.length > 400) keys.slice(0, keys.length - 400).forEach(function (k) { delete box[k]; });
+        box[key] = { at: Date.now(), text: text, ms: ms, milk: st.milk, breastMins: st.breastMins, breastCount: st.breastCount, sleepMins: st.sleepMins, poop: st.poop, care: st.care, dawn: st.dawn };
+        /* ⚠️ 400통이 넘으면 오래된 편지부터 지웠다. 평생 보관함에서 첫 해 편지가 지워지는 셈이다.
+              지우지 않는다. 대신 가족 보관함(서버)에도 한 벌 둔다. */
         saveLetters(box);
+        var patch = {}; patch[key] = box[key];
+        cloudPush("letters", patch);
     }
 
     // 설치 전에 쌓인 기록으로 지난 편지를 뒤늦게 써둔다
@@ -520,6 +708,7 @@
         var tk = todayKey();
         var seenDays = {};
         var touched = false;
+        var added = {};
 
         records.forEach(function (r) {
             var ts = Number(r && r.timestamp);
@@ -532,10 +721,11 @@
             if (st.care < 2) return;
             var text = composeLetter(st, key);
             if (!text) return;
-            box[key] = { text: text, ms: milestoneLine(key), milk: st.milk, breastMins: st.breastMins, breastCount: st.breastCount, sleepMins: st.sleepMins, poop: st.poop, care: st.care, dawn: st.dawn };
+            box[key] = { at: Date.now(), text: text, ms: milestoneLine(key), milk: st.milk, breastMins: st.breastMins, breastCount: st.breastCount, sleepMins: st.sleepMins, poop: st.poop, care: st.care, dawn: st.dawn };
+            added[key] = box[key];
             touched = true;
         });
-        if (touched) saveLetters(box);
+        if (touched) { saveLetters(box); cloudPush("letters", added); }
     }
 
     // 영수증이 이 함수를 불러서 같은 편지를 인화한다
@@ -568,17 +758,12 @@
         var today = ledger.days[todayKey()];
         if (!today || today.care < 2) return '';
 
-        var records = [];
-        try { records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || []; } catch (e) {}
-
-        var start = new Date(); start.setHours(0, 0, 0, 0);
-        var startTs = start.getTime();
-        var milk = 0, sleepMins = 0;
-        records.forEach(function (r) {
-            if (!r || r.timestamp < startTs) return;
-            if (r.type === 'feed' && r.amount) milk += Number(r.amount) || 0;
-            if (r.type === 'sleep' && r.amount) sleepMins += Number(r.amount) || 0;
-        });
+        /* ⚠️ 여기서 따로 셌는데 두 군데가 틀려 있었다.
+              · 모유(분)와 분유(ml)를 그냥 더했다 → "나 오늘 엄청 잘 먹었지?" 가 엉뚱하게 떴다
+              · 타이머로 잰 잠(endTs)은 안 셌다 → 10시간 잔 날에 "90분밖에 못 잤는데" 가 떴다
+              편지함과 같은 계산(todayStats)을 쓴다. */
+        var tst = todayStats();
+        var milk = tst.milk, sleepMins = tst.sleepMins;
 
         var lines;
         if (today.dawn >= 2) {
@@ -589,7 +774,7 @@
             ];
         } else if (sleepMins > 0 && sleepMins < 240) {
             lines = [
-                '오늘 나 ' + sleepMins + '분밖에 못 잤는데 계속 안아줘서 고마워.',
+                '오늘 나 ' + dur(sleepMins) + '밖에 못 잤는데 계속 안아줘서 고마워.',
                 '잠이 안 왔어. 근데 {me} 품에서는 좀 괜찮았어.',
                 '오늘은 잠이랑 싸웠어. {me}도 같이 싸워줬지.'
             ];
@@ -654,11 +839,13 @@
             total += n;
             if (k.indexOf(ym) === 0) month += n;
         });
+        // 400일 넘어 달별로 접어 둔 것까지 — 이 숫자는 줄어들면 안 된다
+        Object.keys(ledger.months || {}).forEach(function (k) { total += ledger.months[k].care || 0; });
 
         // 🌟 [추가됨] 방문 횟수에 따른 훈장 수여식
         var gradeMsg = '';
         if (today.care >= 20) gradeMsg = "오늘 하루 '1분 대기조' 명예 훈장을 드려요.";
-        else if (today.dawn >= 3) gradeMsg = "새벽의 수호자' 임명장 쾅쾅!";
+        else if (today.dawn >= 3) gradeMsg = "'새벽의 수호자' 임명장 쾅쾅!";
         else if (today.care <= 5) gradeMsg = "오늘은 우리 서로 조금 여유로웠네요.";
 
         var sub = '';
@@ -674,7 +861,7 @@
 
         return '' +
         '<div class="hide-on-senior" style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:22px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">' +
-            '<div style="font-size:11.5px; font-weight:800; color:var(--text-sub); letter-spacing:1px; margin-bottom:12px;">오늘의 ' + esc(myTitle()) + '</div>' +
+            '<div style="font-size:11.5px; font-weight:800; color:var(--text-sub); letter-spacing:1px; margin-bottom:12px;">오늘의 우리</div>' +
             '<div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">' +
                 '<span style="font-size:16px; font-weight:700; color:var(--text-m);">' + esc(babyName()) + '에게</span>' +
                 '<span style="font-size:32px; font-weight:900; color:#3182F6; letter-spacing:-1px;">' + today.care + '</span>' +
@@ -696,6 +883,21 @@
         return until > Date.now();
     }
 
+    /* ⚠️ 여행 가서 일주일 앱을 안 열면 돌아와서 "밤중수유를 끊은 지 8일째예요" 가 떴다.
+          끊은 게 아니라 안 적은 거다. 그 사이에도 기록을 이어갔을 때만 말한다.
+          (그 기간 날의 60% 이상이 하루 3건 넘게 적힌 날) */
+    function keptLogging(ledger, fromTs, toTs) {
+        var a = new Date(fromTs); a.setHours(0, 0, 0, 0);
+        var b = new Date(toTs);   b.setHours(0, 0, 0, 0);
+        var days = 0, active = 0;
+        for (var t = a.getTime() + DAY; t < b.getTime(); t += DAY) {
+            days++;
+            var d = ledger.days[dayKey(t)];
+            if (d && d.care >= 3) active++;
+        }
+        return days === 0 || active / days >= 0.6;
+    }
+
     function buildLastMoment(ledger) {
         if (Object.keys(ledger.days).length < MIN_DAYS) return '';
 
@@ -704,10 +906,10 @@
 
         if (ledger.last.nightFeed) {
             var g1 = daysAgo(ledger.last.nightFeed.ts);
-            if (g1 >= GAP_DAYS && g1 <= GAP_MAX) {
+            if (g1 >= GAP_DAYS && g1 <= GAP_MAX && keptLogging(ledger, ledger.last.nightFeed.ts, Date.now())) {
                 picks.push({
                     id: 'nightFeed',
-                    head: name + '가 밤중수유를 끊은 지 ' + g1 + '일째예요',
+                    head: callName('가') + ' 밤중수유를 끊은 지 ' + g1 + '일째예요',
                     body: '마지막 밤중수유는 ' + fmtWhen(ledger.last.nightFeed.ts) +
                           (ledger.last.nightFeed.amount ? ', ' + ledger.last.nightFeed.amount + 'ml' : '') + '였어요.'
                 });
@@ -717,7 +919,7 @@
         if (ledger.last.manyFeeds) {
             var t2 = new Date(ledger.last.manyFeeds.date + 'T12:00:00').getTime();
             var g2 = daysAgo(t2);
-            if (g2 >= GAP_DAYS * 2 && g2 <= GAP_MAX) {
+            if (g2 >= GAP_DAYS * 2 && g2 <= GAP_MAX && keptLogging(ledger, t2, Date.now())) {
                 picks.push({
                     id: 'manyFeeds',
                     head: '수유 텀이 길어진 지 ' + g2 + '일째예요',
@@ -729,7 +931,7 @@
 
         if (ledger.last.dawnDiaper) {
             var g3 = daysAgo(ledger.last.dawnDiaper.ts);
-            if (g3 >= GAP_DAYS && g3 <= GAP_MAX) {
+            if (g3 >= GAP_DAYS && g3 <= GAP_MAX && keptLogging(ledger, ledger.last.dawnDiaper.ts, Date.now())) {
                 picks.push({
                     id: 'dawnDiaper',
                     head: '새벽에 기저귀를 간 지 ' + g3 + '일 됐어요',
@@ -790,13 +992,14 @@
             if (daysAgo(it.last.ts) > 2) continue;                 // 막 다시 나타난 것만
             var gap = Math.floor((it.last.ts - it.prev.ts) / DAY);
             if (gap < GAP_DAYS) continue;                          // 충분히 오래 끊겼던 것만
+            if (!keptLogging(ledger, it.prev.ts, it.last.ts)) continue;   // 그 사이 기록이 비었으면 모른다
             if (isDismissed(it.id)) continue;
             pick = { id: it.id, gap: gap, it: it };
             break;
         }
         if (!pick) return "";
 
-        var head = name + "가 " + pick.gap + "일 만에 " + pick.it.act;
+        var head = callName("가") + " " + pick.gap + "일 만에 " + pick.it.act;
         var body = fmtWhen(pick.it.last.ts) + "이었어요. " + pick.it.tail + fmtWhen(pick.it.prev.ts) + "이었고요.";
 
         var closers = [
@@ -843,7 +1046,47 @@
         return bits.join("   ·   ");
     }
 
-    window.openLetterBox = function () {
+    /* 그날 아이에게 남긴 한 줄 — 엄마는 코랄, 아빠는 파랑 (문답 화면과 같은 색) */
+    function lineBlock(slot, text, editAct) {
+        var color = slot === "dad" ? "#4F86E0" : "#E0705B";
+        var bg = slot === "dad" ? "rgba(79,134,224,0.07)" : "rgba(224,112,91,0.07)";
+        return '<div style="margin-top:14px; padding:16px 18px; background:' + bg + '; border-left:3px solid ' + color + '; border-radius:0 14px 14px 0;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">' +
+                '<span style="font-size:11px; font-weight:800; color:' + color + '; letter-spacing:1.5px;">' + esc(slotTitle(slot)) + '의 한 줄</span>' +
+                (editAct ? '<span onclick="' + editAct + '" style="font-size:11.5px; font-weight:700; color:var(--text-sub); cursor:pointer;">고치기</span>' : '') +
+            '</div>' +
+            '<div class="user-text" style="font-family:\'Nanum Pen Script\', cursive; font-size:21px; line-height:1.6; color:var(--text-m); white-space:pre-line; word-break:keep-all;">' + esc(text) + '</div>' +
+        '</div>';
+    }
+
+    /* 편지함 위에서 '한 줄' 시트로 쓰고 나면 편지함도 바로 다시 그린다 (notes.js 는 배냇함만 다시 그린다) */
+    function hookNotes() {
+        ["saveNote", "deleteNote"].forEach(function (name) {
+            var f = window[name];
+            if (typeof f !== "function" || f.__lb) return;
+            var w = function () {
+                var out = f.apply(this, arguments);
+                setTimeout(function () {
+                    if (document.getElementById("letterbox-modal") && editingKey === null) window.openLetterBox(true);
+                }, 80);
+                return out;
+            };
+            w.__lb = true;
+            window[name] = w;
+        });
+    }
+
+    window.openLetterBox = function (fromSync) {
+        hookNotes();
+        // 사람이 열 때만 서버를 본다 (고치기·저장으로 다시 그릴 땐 안 본다)
+        if (!fromSync) {
+            cloudPull("replies").then(function (rs) {
+                if (mergeReplies(rs) && document.getElementById("letterbox-modal") && editingKey === null) {
+                    window.openLetterBox(true);
+                }
+            });
+            cloudSync(false);
+        }
         var box = loadLetters();
         var keys = Object.keys(box).sort().reverse();
         var tk = todayKey();
@@ -876,36 +1119,49 @@
                 var mySlot = myRoleSlot();
                 var replyHtml = "";
 
-                // 이미 남긴 답장들을 먼저 보여준다 (엄마 → 아빠 순)
+                /* ⚠️ 배냇함 날짜 카드의 '+ 한 줄' 과 편지함의 '답장' 이 따로 놀았다.
+                      부부가 배냇함에서 편지 밑에 한 줄씩 남겨도, 편지를 열면 아무것도 없었다.
+                      둘 다 '그날 아이에게 남긴 한 줄' 이다. 편지함에도 같이 보인다.
+                      (엄마 → 아빠 순, 각자 편지함에서 쓴 것 + 배냇함에서 쓴 것) */
+                var dayNotes = (typeof window.getDayNotes === "function") ? (window.getDayNotes(k) || []) : [];
+                var iWrote = false;
+
                 ["mom", "dad"].forEach(function (slot) {
-                    var r = reply && reply[slot];
-                    if (!r || !r.text) return;
-                    if (editing && slot === mySlot) return;   // 지금 고치는 중이면 아래 편집기가 대신 뜬다
+                    var who = slotTitle(slot);
                     var mine = (slot === mySlot);
-                    replyHtml +=
-                    '<div style="margin-top:14px; padding:16px 18px; background:' + (slot === "dad" ? "rgba(49,130,246,0.06)" : "rgba(127,119,221,0.06)") + '; border-left:3px solid ' + (slot === "dad" ? "#3182F6" : "#7F77DD") + '; border-radius:0 14px 14px 0;">' +
-                        '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">' +
-                            '<span style="font-size:11px; font-weight:800; color:' + (slot === "dad" ? "#3182F6" : "#7F77DD") + '; letter-spacing:1.5px;">' + esc(slotTitle(slot)) + '의 답장</span>' +
-                            (mine ? '<span onclick="window.editReply(\'' + k + '\')" style="font-size:11.5px; font-weight:700; color:var(--text-sub); cursor:pointer;">고치기</span>' : "") +
-                        '</div>' +
-                        '<div style="font-family:\'Nanum Pen Script\', cursive; font-size:21px; line-height:1.6; color:var(--text-m); white-space:pre-line; word-break:keep-all;">' + esc(r.text) + '</div>' +
-                    '</div>';
+
+                    var r = reply && reply[slot];
+                    if (r && r.text && !(editing && mine)) {
+                        if (mine) iWrote = true;
+                        replyHtml += lineBlock(slot, r.text, mine ? "window.editReply('" + k + "')" : "");
+                    }
+                    dayNotes.forEach(function (n) {
+                        if (!n || !n.text) return;
+                        if ((n.who || me) !== who) return;
+                        if (mine) iWrote = true;
+                        var act = (mine && typeof window.openNoteSheet === "function" && n.id)
+                            ? "window.openNoteSheet('" + k + "','" + esc(String(n.id)) + "')" : "";
+                        replyHtml += lineBlock(slot, n.text, act);
+                    });
                 });
 
                 var myReply = reply && reply[mySlot];
                 if (editing) {
                     replyHtml +=
                     '<div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">' +
-                        '<div style="font-size:11px; font-weight:800; color:#7F77DD; letter-spacing:1.5px; margin-bottom:10px;">' + esc(me) + '의 답장</div>' +
-                        '<textarea id="reply-input" placeholder="' + esc(name) + '에게 한 줄 남겨보세요" style="width:100%; min-height:84px; box-sizing:border-box; background:rgba(127,119,221,0.05); border:1px solid var(--border); border-radius:14px; padding:14px; font-family:\'Nanum Pen Script\', cursive; font-size:21px; line-height:1.5; color:var(--text-m); resize:vertical; outline:none;">' + esc(myReply ? myReply.text : "") + '</textarea>' +
+                        '<div style="font-size:11px; font-weight:800; color:#7F77DD; letter-spacing:1.5px; margin-bottom:10px;">' + esc(me) + '의 한 줄</div>' +
+                        '<textarea id="reply-input" placeholder="' + esc(name) + '에게 한 줄 남겨보세요" style="width:100%; min-height:84px; box-sizing:border-box; background:rgba(127,119,221,0.05); border:1px solid var(--border); border-radius:14px; padding:14px; font-family:\'Nanum Pen Script\', cursive; font-size:21px; line-height:1.5; color:var(--text-m); resize:vertical; outline:none;">' + esc(myReply && myReply.text ? myReply.text : "") + '</textarea>' +
                         '<div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">' +
                             '<div onclick="window.cancelReply()" style="font-size:12.5px; font-weight:700; color:var(--text-sub); cursor:pointer; padding:8px 14px;">취소</div>' +
                             '<div onclick="window.saveReply(\'' + k + '\')" style="font-size:12.5px; font-weight:800; color:#FFF; background:#7F77DD; cursor:pointer; padding:8px 18px; border-radius:12px;">남기기</div>' +
                         '</div>' +
                     '</div>';
-                } else if (!myReply || !myReply.text) {
+                } else if (!iWrote) {
+                    // 새로 쓰는 한 줄은 배냇함과 같은 곳에 남긴다 — 어디서 쓰든 두 화면에 다 보인다
+                    var writeAct = (typeof window.openNoteSheet === "function")
+                        ? "window.openNoteSheet('" + k + "')" : "window.editReply('" + k + "')";
                     replyHtml +=
-                    '<div onclick="window.editReply(\'' + k + '\')" style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); font-size:12.5px; font-weight:700; color:#7F77DD; cursor:pointer;">' + esc(me) + '도 답장 쓰기 ›</div>';
+                    '<div onclick="' + writeAct + '" style="margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); font-size:12.5px; font-weight:700; color:#7F77DD; cursor:pointer;">✍️ ' + esc(me) + '도 한 줄 남기기</div>';
                 }
                 body +=
                 '<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:26px 22px 22px; margin-bottom:14px; box-shadow:0 4px 14px rgba(0,0,0,0.03); position:relative;">' +
@@ -922,7 +1178,7 @@
                             '<div style="color:#6C63D8;">' + esc(l.ms) + '</div>' +
                         '</div>' : '') +
                         '<div style="white-space:pre-line;">' + esc(l.text) + '</div>' +
-                        '<div style="text-align:right; margin-top:16px;">— ' + esc(name) + '가</div>' +
+                        '<div style="text-align:right; margin-top:16px;">— ' + esc(callName('가')) + '</div>' +
                     '</div>' +
                     (stats ? '<div style="margin-top:18px; padding-top:14px; border-top:1px dashed var(--border); font-size:11.5px; font-weight:600; color:var(--text-sub);">' + esc(stats) + '</div>' : "") +
                     replyHtml +
@@ -931,6 +1187,7 @@
         }
 
         var wrap = document.getElementById("letterbox-modal");
+        var keepTop = wrap ? wrap.scrollTop : 0;     // 다시 그려도 읽던 자리 그대로
         if (!wrap) {
             wrap = document.createElement("div");
             wrap.id = "letterbox-modal";
@@ -952,14 +1209,17 @@ wrap.innerHTML =
         '</div>' +
     '</div>' +
             body +
-            (keys.length ? '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:34px; line-height:1.7;">편지는 이 기기에만 저장돼요<br>하루에 한 통씩, 기록을 남기면 도착합니다</div>' : "") +
+            (keys.length ? '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:34px; line-height:1.7;">' +
+                (cloudReady() ? "편지와 한 줄은 가족 보관함에도 함께 보관돼요" : "편지는 이 기기에만 저장돼요") +
+                '<br>하루에 한 통씩, 기록을 남기면 도착합니다</div>' : "") +
         '</div>';
         document.body.style.overflow = "hidden";
+        if (fromSync && keepTop) wrap.scrollTop = keepTop;
     };
 
     window.editReply = function (key) {
         editingKey = key;
-        window.openLetterBox();
+        window.openLetterBox(true);
         setTimeout(function () {
             var ta = document.getElementById("reply-input");
             try { if (ta && ta.focus) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } } catch (e) {}
@@ -968,7 +1228,7 @@ wrap.innerHTML =
 
     window.cancelReply = function () {
         editingKey = null;
-        window.openLetterBox();
+        window.openLetterBox(true);
     };
 
     window.saveReply = function (key) {
@@ -977,12 +1237,14 @@ wrap.innerHTML =
         var box = loadReplies();
         var slot = myRoleSlot();
         if (!box[key]) box[key] = {};
-        if (text) box[key][slot] = { text: text, at: Date.now() };
-        else delete box[key][slot];
-        if (!box[key].mom && !box[key].dad) delete box[key];
+        /* 지울 때도 칸을 비워 둔다. 칸을 없애면 짝꿍 폰에서 서버 사본이 되살아난다. */
+        var entry = { text: text, at: Date.now() };
+        box[key][slot] = entry;
         saveReplies(box);
+        var patch = {}; patch[key] = {}; patch[key][slot] = entry;
+        cloudPush("replies", patch);
         editingKey = null;
-        window.openLetterBox();
+        window.openLetterBox(true);
     };
 
     window.closeLetterBox = function () {
@@ -1152,7 +1414,6 @@ wrap.innerHTML =
             // 👇 본드 역할을 하는 속성을 지우고 배경색과 여백만 남겼습니다!
             '<div style="background:var(--bg-main); padding:22px 0 16px;">' +
                 '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
-                '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
                     '<div>' +
                         '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' + esc(name) + '의 잠 무늬</div>' +
                         '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">이레 동안 쌓인 잠의 결</div>' +
@@ -1217,7 +1478,6 @@ wrap.innerHTML =
             var ledger = syncLedger();
             saveTodayLetter();
             backfillLetters();
-            cleanStoredLetters();
 
             var hero = document.getElementById('baby-dashboard');
             var heroWrap = hero ? hero.parentElement : null;
@@ -1283,6 +1543,14 @@ wrap.innerHTML =
     }
     setInterval(render, 60000);
 
+    try { cleanStoredLetters(); } catch (e) {}
+    // 로그인이 붙을 시간을 주고 맞춘다 (12시간에 한 번)
+    setTimeout(function () { cloudSync(false); }, 7000);
+    setTimeout(function () { cloudSync(false); }, 25000);
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) setTimeout(function () { cloudSync(false); }, 1500);
+    });
+
     /* ---------- 점검용 ----------
        콘솔에서 window.emotionDebug() 를 치면 장부 상태가 보입니다. */
     /* 잠 무늬 점검 — 하루 경계가 제대로 옮겨졌는지 눈으로 본다 */
@@ -1308,9 +1576,29 @@ wrap.innerHTML =
 
     window.emotionDebug = function () {
         var l = loadLedger();
-        console.log('기록된 날짜 수:', Object.keys(l.days).length);
+        console.log('기록된 날짜 수:', Object.keys(l.days).length, '· 달별로 접은 달:', Object.keys(l.months || {}).length);
         console.log('오늘:', l.days[todayKey()]);
         console.log('마지막 순간들:', l.last);
+        console.log('편지:', Object.keys(loadLetters()).length + '통 · 답장:', Object.keys(loadReplies()).length + '날');
+        console.log('가족 보관함 준비:', cloudReady(),
+                    '· 마지막으로 맞춘 때:', new Date(Number(localStorage.getItem('tosil_letters_pulled_at') || 0)).toLocaleString());
         return l;
+    };
+
+    /* 가족 보관함이 서버에 실제로 쓰이는지 한 번에 본다 (보안 규칙 확인용)
+       콘솔에서 window.letterCloudTest() */
+    window.letterCloudTest = async function () {
+        if (!cloudReady()) { console.log('❌ 준비 안 됨 — 로그인 · 가족 코드 · 시터 폰 여부를 확인하세요'); return false; }
+        var ref = cloudRef('letters', new Date().getFullYear());
+        try {
+            await window.setDoc(ref, { _check: Date.now() }, { merge: true });
+            var snap = await window.getDoc(ref);
+            console.log('✅ 쓰기·읽기 됨 —', ref.path, '· 이 폰 편지', Object.keys(loadLetters()).length + '통 /',
+                        '서버 편지', Object.keys((snap.exists() && snap.data()) || {}).filter(function (k) { return k !== '_check'; }).length + '통');
+            return true;
+        } catch (e) {
+            console.log('❌ 막힘 —', e.code || '', e.message || e);
+            return false;
+        }
     };
 })();

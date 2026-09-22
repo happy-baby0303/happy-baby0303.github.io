@@ -18,7 +18,8 @@
 (function () {
     'use strict';
 
-    var CARD_IDS = ["remind-card", "export-card", "push-permission-card"];
+    // parent-phone-card — 도우미가 걸 번호 (homefix.js). 빠져 있으면 설정 맨 위에 혼자 떠 있었다
+    var CARD_IDS = ["remind-card", "push-permission-card", "parent-phone-card", "export-card"];
     var GROUP_ID = "bnh-care-group";
     var BODY_ID  = "bnh-care-body";
 
@@ -63,7 +64,7 @@
         g.style.cssText = "margin:0 0 24px;";
         g.innerHTML =
             '<div style="font-size:12px; font-weight:900; color:var(--text-sub); ' +
-                'letter-spacing:0.2px; margin:0 4px 10px;">알림과 보관</div>' +
+                'letter-spacing:0.2px; margin:0 4px 10px;">알림 · 가족 · 보관</div>' +
             '<div id="' + BODY_ID + '"></div>';
         return g;
     }

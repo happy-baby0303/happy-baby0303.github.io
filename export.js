@@ -32,6 +32,21 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리아기"; }
 
+    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong ? "이" : "") + (j || "");
+    }
+
+    // 이 폰 시계 기준 날짜 (toISOString 은 영국 시각이라 오전 9시 전엔 하루 전으로 찍힌다)
+    function localKey(ts) {
+        var d = new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
     function toast(m) { if (typeof window.showToast === "function") window.showToast(m); }
 
     function todayStr() {
@@ -123,6 +138,94 @@
     function allLetters() {
         if (typeof window.sealedLetters === "function") return window.sealedLetters();
         try { return JSON.parse(localStorage.getItem("tosil_sealed")) || []; } catch (e) { return []; }
+    }
+
+    /* ⚠️ '통째로 꺼내 간다' 고 해놓고 두 가지가 빠져 있었다.
+          · 우리 둘의 문답 (육아문답) — 부부가 매일 쓴 글. 종이책으로 팔 계획인 그것
+          · 아기가 쓴 편지와 엄마·아빠의 답장 (편지함)
+          떠날 때 제일 아까운 게 이 둘이다. */
+
+    // 문답 — 둘 다 쓴 날은 둘 다, 나만 쓴 날은 내 것만.
+    //        짝꿍만 쓴 날은 담지 않는다 (앱에서도 내 답을 써야 열리는 글이다)
+    function diaryPages() {
+        var role = localStorage.getItem("user_role");
+        var mine = role === "dad" ? "husbandAns" : role === "mom" ? "wifeAns"
+                 : ((localStorage.getItem("tosil_userRole") || "husband") === "husband" ? "husbandAns" : "wifeAns");
+        var out = [];
+        for (var i = 1; i <= 2000; i++) {
+            var raw = localStorage.getItem("day_" + i + "_data");
+            if (!raw) continue;
+            var d;
+            try { d = JSON.parse(raw) || {}; } catch (e) { continue; }
+            if (!d[mine]) continue;
+            var both = !!(d.husbandAns && d.wifeAns);
+            out.push({
+                day: i,
+                q: (typeof window.diaryQuestion === "function") ? window.diaryQuestion(i) : "",
+                date: d.date ? localKey(d.date) : "",
+                dad: (both || mine === "husbandAns") ? (d.husbandAns || "") : "",
+                mom: (both || mine === "wifeAns") ? (d.wifeAns || "") : ""
+            });
+        }
+        return out;
+    }
+
+    // 편지함 — 아기 시점 편지 + 엄마·아빠 답장
+    function babyLetters() {
+        var L = {}, R = {};
+        try { L = JSON.parse(localStorage.getItem("tosil_letters")) || {}; } catch (e) {}
+        try { R = JSON.parse(localStorage.getItem("tosil_replies")) || {}; } catch (e) {}
+        return Object.keys(L).sort().map(function (k) {
+            var l = L[k] || {}, r = R[k] || {};
+            // 배냇함에서 남긴 한 줄도 그날 편지에 같이 (편지함 화면과 같게)
+            var lines = [];
+            if (r.mom && r.mom.text) lines.push({ who: "엄마", text: r.mom.text });
+            if (r.dad && r.dad.text) lines.push({ who: "아빠", text: r.dad.text });
+            dayNotes(k).forEach(function (n) { if (n && n.text) lines.push({ who: n.who || "", text: n.text }); });
+            return { date: k, ms: l.ms || "", text: l.text || "", lines: lines };
+        }).filter(function (x) { return x.text; });
+    }
+
+    // 부모의 한 줄 (notes.js) — 편지가 없는 날에 쓴 것도 빠짐없이
+    function dayNotes(k) {
+        try { if (typeof window.getDayNotes === "function") return window.getDayNotes(k) || []; } catch (e) {}
+        return [];
+    }
+    function allNotes() {
+        var days = [];
+        try { if (typeof window.noteDays === "function") days = window.noteDays() || []; } catch (e) {}
+        return days.slice().sort().map(function (k) {
+            return { date: k, lines: dayNotes(k).filter(function (n) { return n && n.text; })
+                                   .map(function (n) { return { who: n.who || "", text: n.text }; }) };
+        }).filter(function (d) { return d.lines.length; });
+    }
+
+    var RULE_LINE = "\n────────────────────────────\n\n";
+
+    function diaryText(pages) {
+        return "우리 둘의 문답 — " + callName("를") + " 키우며\n\n" +
+            pages.map(function (p) {
+                return "DAY " + p.day + (p.date ? "  ·  " + pretty(p.date) : "") + "\n" +
+                       (p.q ? "Q. " + p.q + "\n\n" : "\n") +
+                       (p.dad ? "아빠\n" + p.dad + "\n\n" : "") +
+                       (p.mom ? "엄마\n" + p.mom + "\n\n" : "") +
+                       ((p.dad && p.mom) ? "" : "(짝꿍의 답은 아직이에요)\n");
+            }).join(RULE_LINE);
+    }
+
+    function lettersByYear(list) {
+        var by = {};
+        list.forEach(function (l) {
+            var y = String(l.date).slice(0, 4);
+            (by[y] = by[y] || []).push(
+                pretty(l.date) + (dday(l.date) ? "  " + dday(l.date) : "") + "\n\n" +
+                (l.ms ? l.ms + "\n\n" : "") + l.text + "\n\n— " + callName("가") + "\n" +
+                (l.lines || []).map(function (x) {
+                    return "\n" + (x.who ? x.who + "의 한 줄" : "한 줄") + "\n" + x.text + "\n";
+                }).join("")
+            );
+        });
+        return by;
     }
 
     /* ---------- 파일 가져오기 ----------
@@ -242,7 +345,7 @@
             '.box{background:#FFF;border:1px solid #EDE6DE;border-radius:16px;padding:18px 20px;margin-top:34px;font-size:13px;color:#7A6F68;}' +
             '</style></head><body>' +
             '<h1>' + esc(babyName()) + '의 배냇함</h1>' +
-            '<div class="sub">' + esc(d.stamp) + ' 에 꺼냈어요' +
+            '<div class="sub">' + esc(d.stamp) + '에 꺼냈어요' +
                 (d.birth ? ' · 태어난 날 ' + esc(pretty(d.birth)) : '') + '</div>' +
             rows("처음 해낸 일", d.milestones.map(function (m) {
                 return m.title + (m.date ? "  (" + pretty(m.date) + ")" : "");
@@ -250,11 +353,14 @@
             rows("봉인 편지", d.letters.map(function (l) {
                 return l.label + " · " + (l.opened ? "열어봤어요" : "개봉일 " + pretty(l.openAt));
             })) +
+            (d.diaryN ? '<h2>우리 둘의 문답 <small>' + d.diaryN + '쪽</small></h2><ul><li>우리 둘의 문답.txt 에 날짜순으로 들어 있어요</li></ul>' : '') +
+            (d.babyN ? '<h2>아기가 쓴 편지 <small>' + d.babyN + '통</small></h2><ul><li>아기가 쓴 편지 폴더에 해마다 한 파일씩, 엄마·아빠의 한 줄과 함께 들어 있어요</li></ul>' : '') +
+            (d.noteN ? '<h2>부모의 한 줄 <small>' + d.noteN + '줄</small></h2><ul><li>부모의 한 줄.txt 에 날짜순으로 들어 있어요</li></ul>' : '') +
             '<h2>사진 <small>' + d.photoN + '장</small></h2><ul><li>사진 폴더에 날짜순으로 들어 있어요</li></ul>' +
             '<h2>소리 <small>' + d.voiceN + '개</small></h2><ul><li>소리 폴더에 날짜순으로 들어 있어요</li></ul>' +
             '<div class="box">이 폴더는 배냇함 없이도 열립니다.<br>' +
-            '기록.json 에는 모든 원본 데이터가 그대로 들어 있어요.<br>' +
-            '어디에 두시든, 이건 온전히 ' + esc(babyName()) + ' 의 것입니다.</div>' +
+            '기록.json 에는 여기 담긴 기록이 앱에 저장된 모양 그대로 들어 있어요. 다른 프로그램으로도 열 수 있어요.<br>' +
+            '어디에 두시든, 이건 온전히 ' + esc(babyName()) + '의 것입니다.</div>' +
             '</body></html>';
     }
 
@@ -268,6 +374,9 @@
         var voices  = withMedia ? allVoices() : [];
         var letters = allLetters();
         var stones  = achievedMilestones();
+        var pages   = diaryPages();
+        var baby    = babyLetters();
+        var notes   = allNotes();
 
         openProgress();
 
@@ -278,7 +387,8 @@
 
             var zip = new JSZip();
             var stamp = todayStr();
-            var rootName = "배냇함_" + safe(babyName()) + "_배냇함_" + stamp;
+            // ⚠️ "배냇함_하윤_배냇함_20260919" — 앱 이름을 바꾸면서 두 번 들어갔다
+            var rootName = "배냇함_" + safe(babyName()) + "_" + stamp;
             var root = zip.folder(rootName);
 
             var failed = [];
@@ -293,6 +403,9 @@
                 태어난날: localStorage.getItem("tosil_startDate") || "",
                 처음해낸일: stones,
                 봉인편지: letters,
+                우리둘의문답: pages,
+                아기가쓴편지: baby,
+                부모의한줄: notes,
                 사진목록: allPhotos().map(function (x) {
                     return { 날짜: x.key, id: x.p.id, 한마디: x.p.caption || "", 도감: x.p.msId || "", 주소: x.p.url || "" };
                 }),
@@ -321,6 +434,23 @@
                         "\n────────────────────────────\n\n";
                     lf.file(safe((l.openAt || "언젠가") + "_" + (l.label || ("편지" + (i + 1)))) + ".txt",
                             head + (l.body || l.text || l.message || ""));
+                });
+            }
+
+            if (pages.length) root.file("우리 둘의 문답.txt", diaryText(pages));
+
+            if (notes.length) {
+                root.file("부모의 한 줄.txt", "엄마 · 아빠가 " + callName("에게") + " 남긴 한 줄\n\n" +
+                    notes.map(function (d) {
+                        return pretty(d.date) + (dday(d.date) ? "  " + dday(d.date) : "") + "\n" +
+                            d.lines.map(function (x) { return (x.who ? x.who + " — " : "") + x.text; }).join("\n");
+                    }).join(RULE_LINE));
+            }
+
+            if (baby.length) {
+                var byY = lettersByYear(baby), bf = root.folder("아기가 쓴 편지");
+                Object.keys(byY).sort().forEach(function (y) {
+                    bf.file(y + "년.txt", callName("가") + " 쓴 편지 — " + y + "년\n\n" + byY[y].join(RULE_LINE));
                 });
             }
 
@@ -379,7 +509,10 @@
 
             /* 4. 목차와 실패 목록 */
             root.file("읽어주세요.html", readmeHtml({
-                stamp: pretty(new Date().toISOString().split("T")[0]),
+                stamp: pretty(localKey(Date.now())),   // ⚠️ toISOString 은 오전 9시 전이면 어제 날짜였다
+                diaryN: pages.length,
+                babyN: baby.length,
+                noteN: notes.reduce(function (n, d) { return n + d.lines.length; }, 0),
                 birth: localStorage.getItem("tosil_startDate") || "",
                 milestones: stones,
                 letters: letters,
@@ -440,6 +573,7 @@
     window.openExportSheet = function () {
         var pN = allPhotos().length, vN = allVoices().length;
         var lN = allLetters().length, mN = achievedMilestones().length;
+        var dN = diaryPages().length, bN = babyLetters().length;
         var heavy = pN > 120;
 
         var old = document.getElementById("export-sheet");
@@ -470,9 +604,9 @@
                 '어디에 두시든 이건 온전히 우리 아기 것입니다.' +
             '</div>' +
                                    btn("window.exportMemoryBox(true)", "전부 받기",
-                "사진 " + pN + "장 · 소리 " + vN + "개 · 편지 " + lN + "통" + (heavy ? " · 와이파이에서 받으세요" : ""), true) +
+                "사진 " + pN + "장 · 소리 " + vN + "개 · 글 전부" + (heavy ? " · 와이파이에서 받으세요" : ""), true) +
             btn("window.exportMemoryBox(false)", "사진 빼고 받기",
-                (lN ? "편지 " + lN + "통과 도감 " + mN + "가지만" : "편지와 도감 목록만")) +
+                "봉인 편지 " + lN + " · 아기 편지 " + bN + " · 문답 " + dN + "쪽 · 도감 " + mN) +
             '<div style="text-align:center; font-size:11px; font-weight:600; color:var(--text-sub); margin-top:10px; line-height:1.6;">' +
                 '이 파일은 어디에도 올라가지 않아요. 이 기기에서 바로 만들어집니다.</div>' +
         '</div>';
@@ -513,5 +647,8 @@
         console.log("소리:", allVoices().length);
         console.log("편지:", allLetters().length);
         console.log("도감:", achievedMilestones().length);
+        console.log("문답:", diaryPages().length + "쪽 (짝꿍만 쓴 날은 뺌)");
+        console.log("아기 편지:", babyLetters().length + "통");
+        console.log("부모의 한 줄:", allNotes().length + "일");
     };
 })();

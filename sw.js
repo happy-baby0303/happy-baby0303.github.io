@@ -11,28 +11,39 @@ firebase.initializeApp({
     appId: "1:1075311024495:web:b9212eab58802dabf9709a"
 });
 
-const messaging = firebase.messaging();
+/* 🔔 알림을 누르면 그 화면으로 데려간다
+   ⚠️ 이 줄은 반드시 firebase.messaging() '위' 에 있어야 한다.
+      파이어베이스는 자기 알림이 눌리면 먼저 받아서 stopImmediatePropagation() 으로
+      다른 처리기를 끊어버린다. 그래서 아래에 있던 우리 처리기는 한 번도 안 불렸고,
+      알림을 눌러도 링크가 없으니 아무 데도 안 갔다.
+      먼저 등록한 처리기가 먼저 불린다. 우리가 먼저 받는다. */
+function linkOf(n) {
+    // 서버가 실어 보낸 주소 (functions: fcmOptions.link 또는 data.link)
+    var p = n && n.data && (n.data.FCM_MSG || n.data);
+    var link = p && ((p.fcmOptions && p.fcmOptions.link) || (p.data && p.data.link) || p.link);
+    if (link) return link;
 
-// 🚨 여기를 수정했습니다! (중복 알림 방지)
-messaging.onBackgroundMessage((payload) => {
-    // 구글 파이어베이스가 알아서 알림을 띄우므로 우렁각시는 조용히 로그만 남깁니다!
-    console.log('[SW] 백그라운드 푸시 수신 성공!');
-});
+    // 옛 서버가 보낸 알림 — 제목으로 짐작한다
+    var t = (n && n.title) || '';
+    if (t.indexOf('바통') > -1)      return './index.html?go=toolbox';
+    if (t.indexOf('문답') > -1)      return './diary.html';
+    if (t.indexOf('답') > -1)        return './diary.html';
+    return './index.html';
+}
 
-// 🔔 알림을 터치하면 배냇함 앱이 짠! 하고 열리게 해주는 마법
 self.addEventListener('notificationclick', function (event) {
     event.notification.close();
+    if (event.stopImmediatePropagation) event.stopImmediatePropagation();
 
-    /* ⚠️ 예전에는 창이 이미 열려 있으면 focus() 만 하고 끝냈다.
-          그래서 바통터치 알림을 눌러도 보던 화면 그대로였다.
-          알림을 눌렀다는 건 '그걸 보러 가겠다' 는 뜻이다. 데려다준다. */
-    var t = (event.notification && event.notification.title) || '';
-    var go = './index.html';
-    if (t.indexOf('바통') > -1)      go = './index.html?go=toolbox';
-    else if (t.indexOf('문답') > -1) go = './diary.html';
-    else if (t.indexOf('답') > -1)   go = './diary.html';
-
-    var target = new URL(go, self.location.href).href;
+    var target;
+    try {
+        target = new URL(linkOf(event.notification), self.location.href);
+        // 우리 앱 밖으로는 안 보낸다
+        if (target.origin !== self.location.origin) target = new URL('./index.html', self.location.href);
+    } catch (e) {
+        target = new URL('./index.html', self.location.href);
+    }
+    target = target.href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (list) {
@@ -47,6 +58,16 @@ self.addEventListener('notificationclick', function (event) {
         })
     );
 });
+
+const messaging = firebase.messaging();
+
+// 🚨 여기를 수정했습니다! (중복 알림 방지)
+messaging.onBackgroundMessage((payload) => {
+    // 구글 파이어베이스가 알아서 알림을 띄우므로 우렁각시는 조용히 로그만 남깁니다!
+    console.log('[SW] 백그라운드 푸시 수신 성공!');
+});
+
+// (알림을 눌렀을 때 처리는 맨 위, firebase.messaging() 앞으로 옮겼다)
 
 /* ============================================================
    💾 오프라인 엔진 — 다시 씀
@@ -75,7 +96,7 @@ self.addEventListener('notificationclick', function (event) {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v32';
+const CACHE = 'baenaet-v36';
 
 /* 우리 서버 파일 */
 const ASSETS = [

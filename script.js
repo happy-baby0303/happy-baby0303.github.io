@@ -33,7 +33,14 @@ const BABY_SPECIFIC_KEYS = [
     'tosil_baby', 'tosil_open_records', 'tosil_cube_records', 'tosil_cube_quicks',
         'tosil_parent_notice', 'tosil_baton_records',
     // 이달의 배냇함은 아이마다 따로 도착해야 한다
-    'tosil_monthgift_done'
+    'tosil_monthgift_done',
+    // emotion.js 의 기록 장부 · 편지 가족 보관함 표시도 아이마다 따로
+    //   (이게 없어서 다둥이일 때 '모두 N번 안아줬어요' · '지나간 순간' 이 두 아이 기록으로 섞였다)
+    'tosil_life_ledger', 'tosil_letters_cloud_v1', 'tosil_letters_pulled_at',
+    // 홈 사진 얼굴 위치(homefix.js)
+    'tosil_hero_pos',
+    // 예방접종 체크 (vaccine.js) — 쌍둥이면 따로 맞는다
+    'tosil_vaccines', 'tosil_vaccines_t'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')
@@ -225,19 +232,19 @@ window.myPushToken = function () {
       창구를 하나로 만든다. 있는 것부터 차례로 시도하고,
       전부 없으면 조용히 넘어가지 않고 사람에게 말한다. */
 window.openPlus = function (key) {
+    /* ⚠️ 예전엔 '돌려준 값' 으로 열렸는지를 판단했다. openUpsell 은 아무것도 안 돌려줘서(undefined)
+          실패로 보고 다음 것(결제 화면)까지 이어서 열었다 — 안내 시트 위에 결제 화면이 겹쳤다.
+          있는 함수 하나를 부르고 멈춘다. 에러가 날 때만 다음으로 넘어간다. */
     var tries = [
-        function () { return window.openUpsell && window.openUpsell(key || 'curator'); },
-        function () { return window.showPaywall && window.showPaywall(); },
-        function () { return window.startPremium && window.startPremium(); },
-        function () { return window.openPremiumModal && window.openPremiumModal(); }
+        ['openUpsell',       function () { window.openUpsell(key || 'curator'); }],
+        ['showPaywall',      function () { window.showPaywall(); }],
+        ['startPremium',     function () { window.startPremium(); }],
+        ['openPremiumModal', function () { window.openPremiumModal(); }]
     ];
     for (var i = 0; i < tries.length; i++) {
-        try {
-            var r = tries[i]();
-            if (r !== undefined && r !== false) return r;
-        } catch (e) {
-            console.warn('[PLUS] 여는 중 에러', e);
-        }
+        if (typeof window[tries[i][0]] !== 'function') continue;
+        try { tries[i][1](); return true; }
+        catch (e) { console.warn('[PLUS] 여는 중 에러', e); }
     }
     console.warn('[PLUS] 열 수 있는 함수를 못 찾았습니다.');
     if (typeof window.showToast === 'function') window.showToast('잠시 뒤 다시 눌러주세요');
@@ -1665,10 +1672,15 @@ function selectPill(type) {
     
     if (!type) { selectedPillType = ''; return; }
     
+    /* ⚠️ 여기서 return 해 버려서 약 버튼 자체가 안 눌렸다.
+          그래서 addFeverRecord 의 '이미 먹이셨나요? → 기록할게요' 확인창까지 한 번도 못 갔다.
+          (간격이 안 지나도 막지 않고, 확인받고 사실대로 남긴다 — 그렇게 정했다)
+          이미 먹인 약을 못 적으면 마지막 투약 시각이 틀리게 남는다. 그게 진짜 사고 지점이다.
+          버튼은 눌리게 두고 경고는 크게 띄운다. 저장할 때 한 번 더 묻는다. */
     const lockStatus = checkPillLock(type);
-    if (lockStatus.locked) { 
-        showToast('🚨 ' + lockStatus.reason.replace(/\n/g, '<br>')); 
-        return; 
+    if (lockStatus.locked) {
+        showToast('🚨 ' + lockStatus.reason.replace(/\n/g, '<br>') +
+                  '<br><span style="font-size:12.5px; opacity:0.8;">이미 먹였다면 그대로 기록하세요. 저장할 때 한 번 더 물어요</span>');
     }
     
     selectedPillType = type;
@@ -1685,6 +1697,9 @@ function selectPill(type) {
         blueBtn.style.setProperty('color', '#3182F6', 'important');
         blueBtn.style.setProperty('border', '1px solid #3182F6', 'important');
     }
+    // 잠금 때문에 흐리게 칠해 둔 버튼이어도, 고른 순간엔 또렷하게 (타이머가 다음에 칠할 때까지 기다리지 않는다)
+    const picked = (type === 'red') ? redBtn : blueBtn;
+    if (picked) { picked.style.opacity = '1'; picked.style.filter = 'none'; picked.style.cursor = 'pointer'; }
 }
 
 function toggleCheck(e) { if(e.target.tagName !== 'INPUT') { const cb = document.getElementById('agree-check'); if(cb) cb.checked = !cb.checked; } }
@@ -1739,10 +1754,13 @@ async function addFeverRecord() {
        이미 먹였는데 앱이 거부하면 '마지막 투약 시각'이 틀리게 남고,
        그러면 두 시간 뒤에 앱이 초록불을 켠다. 그게 진짜 사고 지점이다.
        대신 크게 경고하고, 확인을 받고, 사실대로 남긴다. */
-    const st = window.doseStatus(selectedPillType);
-    if (st.locked) {
+    /* 간격만 보던 doseStatus 대신 checkPillLock 으로 묻는다.
+       feverguard.js 가 여기에 월령(아세트 4개월 · 이부 6개월) · 24시간 횟수를 더해 둔다.
+       어느 이유든 막지 않는다. 크게 경고하고, 확인받고, 사실대로 남긴다. */
+    const lock = checkPillLock(selectedPillType);
+    if (lock.locked) {
         const ok = confirm(
-            st.reason + '\n' + st.advice + '\n\n' +
+            String(lock.reason || '') + '\n\n' +
             '이미 먹이셨나요?\n' +
             '먹였다면 사실대로 남겨야 다음 계산이 맞습니다.\n\n' +
             '[확인] 기록할게요   [취소] 안 먹였어요'
@@ -1767,14 +1785,22 @@ async function addFeverRecord() {
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     records.unshift(record); if(records.length > 10) records.pop(); 
     
-    // 🚨 [다둥이 패치] 등 서버 연동 로직 100% 무사히 보존 완료!
-    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
-        const syncCode = window.getSyncCode(); if (!syncCode) return;
-        const docRef = doc(db, "fever_" + syncCode + window.currentBabySuffix, "status");
-        try { await setDoc(docRef, { records: records }, { merge: true }); } catch (e) {}
-    }
-    
+    /* ⚠️ 서버가 '받았다' 고 답할 때까지 await 한 뒤에야 이 폰에 저장했다.
+          파이어베이스는 연결이 없으면 에러 없이 연결될 때까지 기다린다.
+          그래서 신호 없는 곳(병원 지하 · 엘리베이터)에서 투약을 기록하면
+          저장도, 타이머도, 완료 안내도 안 됐다. 부모는 한 번 더 누르게 된다.
+          이 폰에 먼저 남긴다. 서버는 연결되면 알아서 따라온다 (파이어베이스가 줄 세워 둔다). */
     localStorage.setItem('tosil_fever_records', JSON.stringify(records));
+
+    if (typeof db !== 'undefined' && typeof setDoc === 'function') {
+        const syncCode = window.getSyncCode();
+        if (syncCode) {
+            // 🚨 [다둥이 패치] 해열제 저장 경로 분리
+            const docRef = doc(db, "fever_" + syncCode + window.currentBabySuffix, "status");
+            setDoc(docRef, { records: records }, { merge: true })
+                .catch(function (e) { console.warn('[해열제] 서버 저장 실패 — 이 폰엔 남아 있어요', e); });
+        }
+    }
     
     // ✨ 입력 후 원래대로 리셋!
     const tempInput = document.getElementById('v-temp');
@@ -1833,7 +1859,8 @@ function renderFeverTimeline() {
     if (typeof drawFeverChart === 'function') drawFeverChart(records);
     if(feverTimerInterval) clearInterval(feverTimerInterval); 
     updateFeverTimer(records); 
-    feverTimerInterval = setInterval(() => updateFeverTimer(records), 1000);
+    // 화면에 뜨는 건 '14:00부터 (2시간 5분)' — 분 단위라 1초마다 다시 그릴 필요가 없다 (배터리)
+    feverTimerInterval = setInterval(() => updateFeverTimer(records), 15000);
 }
 
 // ==========================================
@@ -1850,9 +1877,9 @@ window.updateFeverTimer = function(records) {
         // 1. 하드 락 (월령 제한, 하루 상한선 초과 등 최우선 검사!)
         const hardCheck = window.feverCheck(type);
         if (!hardCheck.ok && hardCheck.hard) {
-            // 🚨 핵심: [1]이 아니라 [0]으로 바꿔서 첫 번째 줄 텍스트를 가져옵니다!
-            let msg = hardCheck.why.split('\n')[0]; 
-            msg = msg.replace(/[\(\)]/g, ''); // 괄호 깔끔하게 제거
+            // feverguard 가 짧은 이름표(short)를 준다. 없으면 첫 줄에서 괄호 부분을 통째로 뺀다.
+            //   (괄호 글자만 지우면 "생후 6개월 미만현재 3개월" 처럼 붙었다)
+            let msg = hardCheck.short || hardCheck.why.split('\n')[0].replace(/\s*\([^)]*\)/g, '');
             return { 
                 html: `<div style="background:#F2F5F8; color:#4E5968; padding:5px 8px; border-radius:8px; font-size:11.5px; font-weight:800; white-space:nowrap; letter-spacing:-0.5px;">🚫 불가 (${msg})</div>`, 
                 locked: true 
@@ -1897,9 +1924,11 @@ window.updateFeverTimer = function(records) {
 
     // 💡 화면에 색깔 및 디자인 쏴주는 함수
     const applyStatus = (timerEl, btnEl, status) => {
-        if (timerEl) timerEl.innerHTML = status.html;
+        // ⚠️ 1초마다 같은 글을 다시 넣었다. 그때마다 화면 감시자(이모지 · 뒤로가기)가 깨어나 배터리를 썼다.
+        if (timerEl && timerEl.__lastHtml !== status.html) { timerEl.innerHTML = status.html; timerEl.__lastHtml = status.html; }
         if (btnEl) {
-            if (status.locked) {
+            // 잠겨 있어도 부모가 이미 고른 버튼은 고른 게 보여야 한다 (기록은 확인받고 남긴다)
+            if (status.locked && !btnEl.classList.contains('active')) {
                 btnEl.style.cursor = 'not-allowed'; 
                 btnEl.style.opacity = '0.3'; 
                 btnEl.style.filter = 'grayscale(100%)'; 
@@ -1911,11 +1940,10 @@ window.updateFeverTimer = function(records) {
         }
     };
 
-    if (!records || records.length === 0) {
-        applyStatus(timerRedEl, redBtn, { html: `<div style="background:#E6F7F2; color:#00B37A; padding:5px 8px; border-radius:8px; font-size:11.5px; font-weight:800; white-space:nowrap; letter-spacing:-0.5px;">✅ 즉시 복용 가능</div>`, locked: false });
-        applyStatus(timerBlueEl, blueBtn, { html: `<div style="background:#E6F7F2; color:#00B37A; padding:5px 8px; border-radius:8px; font-size:11.5px; font-weight:800; white-space:nowrap; letter-spacing:-0.5px;">✅ 즉시 복용 가능</div>`, locked: false });
-        return;
-    }
+    /* ⚠️ 기록이 하나도 없으면 무조건 '✅ 즉시 복용 가능' 이었다.
+          생후 3개월 아기가 처음 열이 난 날 — 이 화면을 제일 처음 여는 그 순간에
+          파란약(이부프로펜, 6개월 미만 금기)도 '즉시 복용 가능' 으로 떴다.
+          기록이 없어도 월령 검사는 한다. 아래 getStatusHtml 이 빈 기록도 처리한다. */
 
     // 빨간약, 파란약 동시 적용!
     applyStatus(timerRedEl, redBtn, getStatusHtml('red'));
@@ -1953,14 +1981,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 해열제 기록 전체 지우기 - ✨ 퀄리티업 완료 ✨
 async function clearFeverRecord() {
-    showConfirm("전체 투약 기록을 지우시겠습니까?", async function() {
-        
-        localStorage.removeItem('tosil_fever_records'); 
-        
+    /* ⚠️ '전체 지우기 → 즉시 새 기록이 가능합니다' 였다.
+          30분 전에 먹인 약도 같이 지워져서, 지운 순간 타이머가 초록불(복용 가능)이 됐다.
+          안전 잠금을 푸는 버튼이 된 셈이다. 최근 24시간 투약은 다음 투약 계산에 필요해서 남긴다. */
+    showConfirm("지난 투약 기록을 정리할까요?<br><span style=\"font-size:12.5px; color:var(--text-sub);\">최근 24시간 기록은 다음 투약 시각 계산에 필요해서 남겨둬요</span>", async function() {
+        const floor = Date.now() - 24 * 3600000;
+        let all = [];
+        try { all = JSON.parse(localStorage.getItem('tosil_fever_records')) || []; } catch (e) {}
+        const keep = all.filter(function (r) { return r && Number(r.timestamp) >= floor; });
+        if (keep.length) localStorage.setItem('tosil_fever_records', JSON.stringify(keep));
+        else localStorage.removeItem('tosil_fever_records');
+
         if (typeof db !== 'undefined' && typeof setDoc === 'function') {
-            const syncCode = window.getSyncCode(); if (!syncCode) return;
-            // 🚨 [다둥이 패치] 해열제 삭제 경로 분리
-            try { await setDoc(doc(db, "fever_" + syncCode + window.currentBabySuffix, "status"), { records: [] }); } catch (e) {}
+            const syncCode = window.getSyncCode();
+            // 🚨 [다둥이 패치] 해열제 삭제 경로 분리 · 기다리지 않는다 (오프라인이면 화면이 안 풀렸다)
+            if (syncCode) {
+                setDoc(doc(db, "fever_" + syncCode + window.currentBabySuffix, "status"), { records: keep })
+                    .catch(function () {});
+            }
         }
         
         // ✨ 핵심: 체온 숫자, 체크박스 버튼, 약 종류 전부 완벽하게 빈칸으로 강제 초기화!
@@ -1980,13 +2018,15 @@ async function clearFeverRecord() {
 
         selectPill(''); // 약 버튼 선택 풀기
         renderFeverTimeline(); // 타임라인 다시 그리기
-        updateFeverTimer([]); // 쐐기 박기 (타이머 글자 완벽 해제)
+        updateFeverTimer(keep); // 남겨둔 24시간 기록 기준으로 다시 계산
         
         setTimeout(updateHomeDashboard, 100); 
         
-        showToast("💊 해열제 투약 기록이 초기화되었습니다! 즉시 새 기록이 가능합니다.");
+        showToast(keep.length
+            ? "🧹 지난 기록을 정리했어요. 최근 24시간 투약 " + keep.length + "건은 남겨뒀어요"
+            : "🧹 투약 기록을 정리했어요");
         
-    }, "🧹", "초기화", "#F04452");
+    }, "🧹", "정리하기", "#F04452");
 }
 
 window.addFeverRecord = addFeverRecord;
@@ -3477,7 +3517,9 @@ async function createBatonTask(text, reward) {
             /* \u26a0\ufe0f "[OOO]님이 OOO을 요청합니다" 는 업무 알림 말투다.
                   부부 사이에 쓰는 말이 아니다. 이름을 앞세우지 않는다. */
             title: "\uD83D\uDC8C " + roleWord + "가 손을 내밀었어요",
-            body: text
+            body: text,
+            // 알림을 누르면 바통터치로 (제목에 '바통' 이 없어서 sw.js 가 짐작을 못 했다)
+            link: "index.html?go=toolbox"
         }).catch(e => console.error("푸시 발송 에러", e));
     }
 }
@@ -4518,22 +4560,35 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 });
 
                 if (recordToEdit.type === 'feed' || recordToEdit.type === 'babyfood') {
+                    /* ⚠️ 'tab-food' · 'tab-milk' 라는 칸은 이제 없다 (예전 라디오 버튼).
+                          없는 칸에 .checked 를 넣다가 에러가 나서 그 아래가 통째로 멈췄다.
+                          그래서 이유식을 고치려 해도 분유 화면이 떴고(탭 글씨만 이유식),
+                          양도 안 채워졌고, 숨은 이유식 칸이 비어 있으니
+                          저장을 누르면 '양을 입력해주세요' 만 떴다. 분유·모유 수정도 같이 멈춰 있었다. */
                     if (recordToEdit.subType === '이유식') {
-                        document.getElementById('tab-food').checked = true;
-                        window.toggleMammaTab('food');
-                        document.getElementById('v-food-amount').value = recordToEdit.amount;
-                    } else if (recordToEdit.subType === '모유') {
-                        document.getElementById('tab-milk').checked = true;
-                        window.toggleMammaTab('milk');
-                        document.getElementById('v-breast-amount').value = recordToEdit.amount;
-                        if (recordToEdit.status === '왼쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_left']"), 'breast_left');
-                        if (recordToEdit.status === '오른쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_right']"), 'breast_right');
-                        if (recordToEdit.status === '양쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_both']"), 'breast_both');
+                        window.toggleMammaTab('food');                       // 이유식 칸을 연다 (subType 도 이유식)
+                        const fa = document.getElementById('v-food-amount');
+                        if (fa) fa.value = recordToEdit.amount;
                     } else {
-                        document.getElementById('tab-milk').checked = true;
                         window.toggleMammaTab('milk');
-                        const amtInput = document.getElementById('v-feed-amount');
-                        if (amtInput) amtInput.value = recordToEdit.amount;
+                        const isBreast = recordToEdit.subType === '모유';
+                        const feedBtns = document.querySelectorAll('#milk-input-area button[onclick*="\'feed\'"]');
+                        let pick = null;
+                        for (let i = 0; i < feedBtns.length; i++) {
+                            if ((feedBtns[i].innerText || '').indexOf(isBreast ? '모유' : '분유') > -1) { pick = feedBtns[i]; break; }
+                        }
+                        if (pick) window.selectTrackerBtn(pick, 'feed');     // 분유/모유 칸을 열고 표시
+                        if (isBreast) {
+                            const ba = document.getElementById('v-breast-amount');
+                            if (ba) ba.value = recordToEdit.amount;
+                            if (recordToEdit.status === '왼쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_left']"), 'breast_left');
+                            if (recordToEdit.status === '오른쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_right']"), 'breast_right');
+                            if (recordToEdit.status === '양쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_both']"), 'breast_both');
+                        } else {
+                            window.trackerState.subType = recordToEdit.subType || '분유';   // 분유 · 유축 그대로
+                            const amtInput = document.getElementById('v-feed-amount');
+                            if (amtInput) amtInput.value = recordToEdit.amount;
+                        }
                     }
                 }
                 
@@ -5715,7 +5770,10 @@ window.updateTrackerDashboard = function() {
 
     let briefBadge = `<div style="font-size:11px; font-weight:800; color:var(--primary); background:var(--bg-sub); padding:4px 8px; border-radius:8px;">실시간 연동</div>`;
 
-    if (latestFeed && diffFeedMins >= feedInterval) {
+    /* ⚠️ 며칠 동안 기록을 안 하면 '맘마 먹은 지 204시간 경과!' 가 빨갛게 떴다.
+          그건 아기 상태가 아니라 기록이 없는 것이다. 놀라게만 하고 할 일은 없다.
+          12시간 안쪽일 때만 알린다. */
+    if (latestFeed && diffFeedMins >= feedInterval && diffFeedMins <= 12 * 60) {
         isFeedAlert = true;
         briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
         briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과!`;
@@ -5778,7 +5836,15 @@ window.updateTrackerDashboard = function() {
         // 💡 텍스트 색상을 var(--text-m)으로 깔끔하게 통일!
         if (m < 1) return `<span style="color:var(--text-m); font-weight:900;">방금 전</span>`;
         if (m < 60) return `<span style="font-size:16px; font-weight:900; color:var(--text-m);">${m}</span>분 전`;
-        
+
+        /* ⚠️ 하루가 넘어가도 '204시간 28분 전' 이라고 적혔다. 사람은 그렇게 안 센다. */
+        if (m >= 1440) {
+            const dd = Math.floor(m / 1440);
+            const hh = Math.floor((m % 1440) / 60);
+            return `<span style="font-size:16px; font-weight:900; color:var(--text-m);">${dd}</span>일` +
+                   (hh ? ` <span style="font-size:16px; font-weight:900; color:var(--text-m);">${hh}</span>시간` : '') + ' 전';
+        }
+
         const hours = Math.floor(m / 60);
         const mins = m % 60;
         if (mins === 0) return `<span style="font-size:16px; font-weight:900; color:var(--text-m);">${hours}</span>시간 전`;
@@ -5845,6 +5911,13 @@ window.updateNowStatusCard = function() {
 
     // 3. 🚨 수면: 숫자만 16px로 키워주는 통일된 포맷 함수로 교체!
     const fmtMin = (m) => {
+        // 하루가 넘으면 '107시간 4분' 이 아니라 '4일 11시간'
+        if (m >= 1440) {
+            let d = Math.floor(m / 1440);
+            let h = Math.floor((m % 1440) / 60);
+            return `<span style="font-size:16px; font-weight:900;">${d}</span>일` +
+                   (h ? ` <span style="font-size:16px; font-weight:900;">${h}</span>시간` : '');
+        }
         let h = Math.floor(m / 60);
         let mins = m % 60;
         if (h > 0 && mins > 0) return `<span style="font-size:16px; font-weight:900;">${h}</span>시간 <span style="font-size:16px; font-weight:900;">${mins}</span>분`;
@@ -6125,12 +6198,92 @@ window.toggleRoutine = async function(id) {
         } catch(e) {}
     }
 };
+/* ==========================================================
+   🧩 트래커 합치기 — '가끔 저장이 안 돼요' CS 의 뿌리
+   ----------------------------------------------------------
+   ⚠️ 기록 전체를 문서 하나에 통째로 덮어쓴다 (setDoc).
+      엄마 폰과 아빠 폰이 비슷한 때에 저장하면 나중에 쓴 쪽 배열만 남고,
+      먼저 쓴 쪽의 새 기록이 사라졌다.
+   ⚠️ 서버 사본을 받을 때 '서버에 없는 내 기록' 은 기록 시각이 서버 저장 시각보다
+      뒤일 때만 살렸다. 그런데 기록 시각은 '먹인 시각' 이다.
+      30분 전 수유를 지금 적으면(흔한 일이다) 그 기록은 버려졌다.
+   ⚠️ 서버가 '받았다' 할 때까지 기다렸다. 신호가 약하면 '저장 중' 에서 멈췄다.
+
+   그래서 규칙을 바꾼다.
+     · 합칠 때는 '서버 ∪ 이 폰' — 한쪽에만 있으면 채운다
+     · 지운 기록은 묘비(Grave)로 알린다 — 묘비가 있으면 어느 폰에서도 안 되살린다
+     · 같은 기록이 양쪽에서 다르면 '더 나중에 고친 쪽' 이 이긴다 (기록마다 mt = 고친 시각)
+       — 짝꿍 폰에 남아 있던 옛 사본이 내가 방금 고친 걸 덮어도 되살아난다
+     · 합친 결과가 서버와 다르면 다시 올린다 (짝꿍이 덮어쓴 걸 되돌린다)
+     · 서버는 기다리지 않는다 — 이 폰에 먼저 남기고 화면은 바로 닫힌다
+   ========================================================== */
+const TRK_MAX = 100;
+// 지운 기록 목록은 한 번만 읽는다 (기록 100개마다 저장소를 다시 읽으면 느리다)
+function trkGrave() { return (window.Grave && typeof window.Grave.peek === 'function') ? window.Grave.peek('trk') : {}; }
+// 고친 시각(mt)을 뺀 내용 — '내용이 바뀌었나' 를 볼 때 쓴다
+function trkSig(r) {
+    if (!r) return '';
+    const c = {};
+    Object.keys(r).forEach(k => { if (k !== 'mt') c[k] = r[k]; });
+    return JSON.stringify(c);
+}
+function trkNorm(list, gone) {
+    gone = gone || trkGrave();
+    const out = (list || []).filter(r => r && r.id && !gone[r.id]);
+    // 두 폰이 늘 같은 순서로 자르게 — 시각이 같으면 id 로
+    out.sort((a, b) => ((Number(b.timestamp) || 0) - (Number(a.timestamp) || 0)) || (a.id < b.id ? -1 : (a.id > b.id ? 1 : 0)));
+    return out.length > TRK_MAX ? out.slice(0, TRK_MAX) : out;
+}
+window.mergeTrackerRecords = function (localArr, serverArr) {
+    const gone = trkGrave();
+    const map = new Map();
+    (serverArr || []).forEach(r => { if (r && r.id && !gone[r.id]) map.set(r.id, r); });
+    (localArr || []).forEach(r => {
+        if (!r || !r.id || gone[r.id]) return;
+        const s = map.get(r.id);
+        // 서버에 없으면 채우고, 둘 다 있으면 더 나중에 고친 쪽
+        if (!s || (Number(r.mt) || 0) > (Number(s.mt) || 0)) map.set(r.id, r);
+    });
+    return trkNorm(Array.from(map.values()), gone);
+};
+
 // ==========================================
 // 🚀 [CS 방어 1&4번] 불사조 오프라인 큐 & 1인 유저 자동 백업 엔진
 // ==========================================
 window.saveTrackerToFirebase = async function(records) {
+    records = Array.isArray(records) ? records : [];
+
+    // 0. 이 폰에서 지운 기록 → 묘비 (짝꿍 폰에서도 안 되살아나게)
+    let prevLocal = [];
+    try { prevLocal = JSON.parse(localStorage.getItem('tosil_tracker_records')) || []; } catch (e) {}
+    const nowIds = {};
+    records.forEach(r => { if (r && r.id) nowIds[r.id] = 1; });
+    // (100개가 넘어 잘려 나간 가장 옛 기록은 지운 게 아니다 — 두 폰이 똑같이 자르니 묘비가 필요 없다)
+    const oldestKept = records.reduce((m, r) => Math.min(m, Number(r && r.timestamp) || Infinity), Infinity);
+    const nearFull = records.length >= TRK_MAX - 1;
+    if (window.Grave) prevLocal.forEach(r => {
+        if (!r || !r.id || nowIds[r.id]) return;
+        if (nearFull && (Number(r.timestamp) || 0) <= oldestKept) return;
+        window.Grave.add('trk', r.id);
+    });
+
+    // 1. 이번에 새로 쓰거나 고친 기록 → 고친 시각(mt)을 붙인다 (바로 전 이 폰 사본과 비교)
+    const prevSig = {};
+    prevLocal.forEach(r => { if (r && r.id) prevSig[r.id] = trkSig(r); });
+    const editedAt = Date.now();
+    records = records.map(r => {
+        if (!r || !r.id) return r;
+        if (prevSig[r.id] === trkSig(r)) return r;
+        const c = Object.assign({}, r);
+        c.mt = editedAt;
+        return c;
+    });
+
+    // 2. 마지막으로 본 서버 사본과 합친다 (짝꿍이 방금 넣은 걸 내가 덮어쓰지 않게)
+    records = window.mergeTrackerRecords(records, window._trkServerArr || []);
+
    
-    // 1. 내 폰(로컬)에 먼저 저장해서 화면은 0.1초 만에 바뀌게 (체감속도 유지)
+    // 3. 내 폰(로컬)에 먼저 저장해서 화면은 0.1초 만에 바뀌게 (체감속도 유지)
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
 
@@ -6153,16 +6306,19 @@ window.saveTrackerToFirebase = async function(records) {
         try { stamp = JSON.stringify(records); } catch (e) {}
         if (stamp && window._lastTrackerStamp === stamp) return;
 
-        try { 
-            // 🚨 [긴급 패치] 트래커에도 다둥이 꼬리표(currentBabySuffix) 부착 완료!
-        await setDoc(doc(db, "tracker_" + syncCode + window.currentBabySuffix, "status"), { records: records, updatedAt: Date.now() }); 
-            window._lastTrackerStamp = stamp;                    // 성공했을 때만 도장을 찍는다
-            localStorage.removeItem('tosil_offline_queue_tracker'); 
-        } catch (e) { 
-            window._lastTrackerStamp = null;                     // 실패하면 다음에 다시 시도한다
-            console.error("트래커 클라우드 저장 실패", e); 
-             localStorage.setItem('tosil_offline_queue_tracker', 'true');
-        }
+        // 🚨 [긴급 패치] 트래커에도 다둥이 꼬리표(currentBabySuffix) 부착 완료!
+        // ⚠️ 기다리지 않는다. 신호가 약하면 '저장 중… 💾' 에서 멈춰서 저장이 안 된 줄 알았다.
+        const payload = { records: records, updatedAt: Date.now(), deleted: (window.Grave ? window.Grave.list('trk') : {}) };
+        setDoc(doc(db, "tracker_" + syncCode + window.currentBabySuffix, "status"), payload)
+            .then(function () {
+                window._lastTrackerStamp = stamp;                // 성공했을 때만 도장을 찍는다
+                localStorage.removeItem('tosil_offline_queue_tracker');
+            })
+            .catch(function (e) {
+                window._lastTrackerStamp = null;                 // 실패하면 다음에 다시 시도한다
+                console.error("트래커 클라우드 저장 실패", e);
+                localStorage.setItem('tosil_offline_queue_tracker', 'true');
+            });
     }
 };
 
@@ -6477,19 +6633,31 @@ window.startTrackerRealtimeSync = function() {
         if (window.isFlushingOfflineData) return; 
 
       if (docSnap.exists()) {
-            const serverData = docSnap.data().records || [];
-            const serverUpdatedAt = docSnap.data().updatedAt || 0;
+            const data = docSnap.data() || {};
+            const serverData = data.records || [];
+            // 짝꿍 폰이 지운 기록 (묘비) 을 먼저 받는다
+            if (window.Grave && data.deleted) window.Grave.merge('trk', data.deleted);
+
+            // 서버가 가진 것을 기억한다 — 다음 저장 때 여기에 합쳐서 올린다
+            window._trkServerArr = serverData;
+
             const localData = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
 
-            const mergedMap = new Map();
-            serverData.forEach(r => mergedMap.set(r.id, r));
-            localData.forEach(r => {
-                if (!mergedMap.has(r.id) && r.timestamp > serverUpdatedAt) mergedMap.set(r.id, r);
-            });
-
-            const mergedArray = Array.from(mergedMap.values());
-            mergedArray.sort((a, b) => b.timestamp - a.timestamp);
+            /* ⚠️ 예전: '서버에 없는 내 기록' 은 기록 시각이 서버 저장 시각보다 뒤일 때만 살렸다.
+                  30분 전 수유를 지금 적으면 버려졌다. 이제 서버 ∪ 이 폰 (지운 건 묘비로 뺀다). */
+            const mergedArray = window.mergeTrackerRecords(localData, serverData);
             localStorage.setItem('tosil_tracker_records', JSON.stringify(mergedArray));
+
+            // 합친 게 서버와 다르면 (짝꿍이 내 기록 없이 덮어썼거나, 아직 못 올린 게 있으면) 다시 올린다
+            if (JSON.stringify(mergedArray) !== JSON.stringify(trkNorm(serverData))) {
+                window._lastTrackerStamp = null;
+                clearTimeout(window._trkRepushTimer);
+                window._trkRepushTimer = setTimeout(function () {
+                    let cur = [];
+                    try { cur = JSON.parse(localStorage.getItem('tosil_tracker_records')) || []; } catch (e) {}
+                    window.saveTrackerToFirebase(cur);
+                }, 1500);
+            }
         }
        if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
         if (typeof window.checkReceiptVisibility === 'function') window.checkReceiptVisibility();
@@ -6707,7 +6875,8 @@ window.openReceiptModal = function() {
     const dateStr = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
     const orderNo = Math.floor(Math.random() * 8999) + 1000; // 랜덤 주문번호
     
-    const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
+    // 이름은 글자 그대로 (짝꿍 폰에서 동기화돼 온 이름에 < 가 있어도 화면이 안 깨지게)
+    const babyName = window.escapeHTML(localStorage.getItem('tosil_babyName') || '우리아기');
     const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
 
@@ -6715,28 +6884,45 @@ window.openReceiptModal = function() {
     let totalPoop = 0; let totalPee = 0;
     let totalSleepMins = 0;
 
+    let breastCount = 0, breastMins = 0;
+    const endOfToday = startOfToday + 86400000;
     records.forEach(record => {
-        if (record.timestamp >= startOfToday) {
+        const ts = Number(record.timestamp) || 0;
+        /* ⚠️ 잠을 '시작한 날' 로 셌다. 영수증은 육퇴 직후에 보는데
+              그때 오늘 밤잠은 아직 진행 중이고, 어젯밤 잠은 어제 몫이라 빠졌다 → 낮잠만 찍혔다.
+              편지(emotion.js)와 같은 기준 — 잠은 '깬 날' 에 센다. 어젯밤 잠 + 오늘 낮잠. */
+        if (record.type === 'sleep') {
+            /* 홈의 '총 수면시간' 과 같은 셈 — 오늘 0시~24시 안에 든 잠만 더한다.
+               (어젯밤 잠은 자정 뒤 부분만, 지금 자는 잠은 지금까지) 두 화면 숫자가 달라지면 안 된다. */
+            const sr = window.getSleepRange ? window.getSleepRange(record)
+                     : { start: ts, end: record.endTs ? Number(record.endTs) : ts + (Number(record.amount) || 0) * 60000 };
+            if (sr.end - sr.start <= 20 * 3600000) totalSleepMins += window.minsInRange(sr.start, sr.end, startOfToday, endOfToday);
+            return;
+        }
+        if (ts >= startOfToday) {
             if (record.type === 'feed') {
+                // ⚠️ 모유는 amount 에 '분' 이 들어간다. 분유 ml 에 더하면 20분 + 120ml = 140ml 가 됐다.
                 if (record.subType === '이유식') totalFood += parseInt(record.amount) || 0;
+                else if (record.subType === '모유') { breastCount += 1; breastMins += parseInt(record.amount) || 0; }
                 else totalMilk += parseInt(record.amount) || 0;
             } 
             else if (record.type === 'diaper') {
                 if (record.subType === '소변') totalPee += 1;
                 else if (record.subType === '대변') totalPoop += 1;
                 else if (record.subType === '둘 다' || record.subType === '소변+대변') { totalPee += 1; totalPoop += 1; }
-            } 
-            else if (record.type === 'sleep') {
-                totalSleepMins += parseInt(record.amount) || 0;
             }
         }
     });
+
+    // 지금 자는 중이면 진행분도 (홈 통계와 같게)
+    const sleepingSince = Number(localStorage.getItem('tosil_sleep_start')) || 0;
+    if (sleepingSince) totalSleepMins += window.minsInRange(sleepingSince, Date.now(), startOfToday, endOfToday);
 
     let sleepH = Math.floor(totalSleepMins / 60);
     let sleepM = totalSleepMins % 60;
     let sleepStr = sleepH > 0 ? `${sleepH}H ${sleepM}M` : `${sleepM}M`;
 
-    let isEmpty = (totalMilk === 0 && totalFood === 0 && totalPoop === 0 && totalPee === 0 && totalSleepMins === 0);
+    let isEmpty = (totalMilk === 0 && totalFood === 0 && totalPoop === 0 && totalPee === 0 && totalSleepMins === 0 && breastCount === 0);
 
     const contentDiv = document.getElementById('receipt-content');
     
@@ -6812,7 +6998,8 @@ window.openReceiptModal = function() {
             </div>
 
             <!-- 아이템 리스트 -->
-            ${totalMilk > 0 ? makeItem('Formula Latte', '라떼 (분유/모유)', `${totalMilk} ml`) : ''}
+            ${totalMilk > 0 ? makeItem('Formula Latte', '라떼 (분유·유축)', `${totalMilk} ml`) : ''}
+            ${breastCount > 0 ? makeItem("Mom's Signature", '엄마표 모유', breastMins > 0 ? `${breastMins} MIN` : `${breastCount} EA`) : ''}
             ${totalFood > 0 ? makeItem("Chef's Puree", '오마카세 (이유식)', `${totalFood} g`) : ''}
             ${totalPoop > 0 ? makeItem('Golden Drop', '황금 응가', `${totalPoop} EA`) : ''}
             ${totalPee > 0 ? makeItem('Water Drop', '쉬야', `${totalPee} EA`) : ''}
@@ -7784,7 +7971,7 @@ window.clearExpiredRecords = function() {
             const passedDays = Math.floor((today - openDate) / (1000 * 60 * 60 * 24));
             const remainDays = record.limitDays - passedDays;
             
-            return remainDays >= 0; // 0일 이상 남은 것만 통과
+            return !(remainDays < 0); // 0일 이상 남은 것만 통과 (주기를 모르는 것은 남긴다)
         });
 
         const deletedCount = records.length - validRecords.length;
@@ -7796,6 +7983,11 @@ window.clearExpiredRecords = function() {
 };
 
 // 5. [수정 패치] 언제깠지 화면 렌더링 (필터 + 리필버튼 + 대청소버튼 통합)
+/* 언제깠지 칸에 들어가는 글은 사용자가 쓴 것이다 (짝꿍 폰에서도 온다) — 그대로 넣지 않는다 */
+function openEsc(v) {
+    return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 window.renderOpenRecords = function() {
     const container = document.getElementById('open-list-container');
     if (!container) return;
@@ -7806,6 +7998,26 @@ window.renderOpenRecords = function() {
    if (dateInput && !dateInput.value) {
         dateInput.value = window.getSafeTodayStr();
     }
+
+    /* ⚠️ 젖병·유모차 큐레이터의 '오늘 갈았어요' 가 이 목록에 기록을 넣는데 모양이 조금 달랐다.
+          이모지·이름이 비면 'undefined' 가 찍혔고, 날짜가 비거나 '2026. 09. 17' 모양이면
+          남은 날이 NaN 이 되거나 목록 전체가 멈췄다. 어떤 모양으로 들어와도 읽히게 편다.
+          주기를 모르는 품목은 '주기 정보 없음' 으로 두고, 만료로 치지 않는다. */
+    records = records.filter(r => r && typeof r === 'object').map(r => {
+        const c = Object.assign({}, r);
+        c.name = String(c.name || c.title || c.item || c.label || '이름 없는 물건');
+        c.emoji = c.emoji || c.icon || '🧺';
+        let od = c.openDate || c.date || c.changedAt || c.at;
+        if (typeof od === 'number') {
+            const d0 = new Date(od);
+            od = d0.getFullYear() + '-' + String(d0.getMonth() + 1).padStart(2, '0') + '-' + String(d0.getDate()).padStart(2, '0');
+        }
+        const dm = String(od || '').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+        c.openDate = dm ? (dm[1] + '-' + dm[2].padStart(2, '0') + '-' + dm[3].padStart(2, '0')) : window.getSafeTodayStr();
+        const lim = Number(c.limitDays != null ? c.limitDays : (c.cycleDays || c.days || c.limit));
+        c.limitDays = (isFinite(lim) && lim > 0) ? lim : NaN;
+        return c;
+    });
 
     if (records.length === 0) {
         container.innerHTML = `
@@ -7823,7 +8035,9 @@ window.renderOpenRecords = function() {
         'wipe': 'hygiene'
     };
     const catGroupNames = {
-        'food': '🍼 수유/식품', 'med': '💊 약/영양제', 'skin': '🧴 연고/스킨케어', 'hygiene': '🧻 위생용품'
+        'food': '🍼 수유/식품', 'med': '💊 약/영양제', 'skin': '🧴 연고/스킨케어', 'hygiene': '🧻 위생용품',
+        // ⚠️ 이 칸이 없어서 젖병·유모차 큐레이터가 넣은 품목의 칸 이름이 'undefined' 로 떴다
+        'etc': '🧺 육아용품'
     };
 
     let existingGroups = new Set();
@@ -7840,7 +8054,7 @@ window.renderOpenRecords = function() {
     });
     html += `</div>`;
 
-    let filteredRecords = window.currentOpenFilter === 'all' ? records : records.filter(r => catGroupMap[r.type] === window.currentOpenFilter);
+    let filteredRecords = window.currentOpenFilter === 'all' ? records : records.filter(r => (catGroupMap[r.type] || 'etc') === window.currentOpenFilter);
 
     if (filteredRecords.length === 0) {
         html += `<div style="text-align:center; padding:20px; color:var(--text-s); font-size:13px; font-weight:700;">해당 카테고리의 품목이 없습니다.</div>`;
@@ -7850,8 +8064,8 @@ window.renderOpenRecords = function() {
     today.setHours(0,0,0,0);
     
     filteredRecords.sort((a, b) => {
-        const endA = new Date(a.openDate).getTime() + (a.limitDays * 24 * 60 * 60 * 1000);
-        const endB = new Date(b.openDate).getTime() + (b.limitDays * 24 * 60 * 60 * 1000);
+        const endA = new Date(a.openDate).getTime() + ((isFinite(a.limitDays) ? a.limitDays : 99999) * 24 * 60 * 60 * 1000);
+        const endB = new Date(b.openDate).getTime() + ((isFinite(b.limitDays) ? b.limitDays : 99999) * 24 * 60 * 60 * 1000);
         return endA - endB;
     });
 
@@ -7862,7 +8076,7 @@ window.renderOpenRecords = function() {
         openD.setHours(0,0,0,0);
         
         const passedDays = Math.floor((today - openD) / (1000 * 60 * 60 * 24));
-        const remainDays = r.limitDays - passedDays;
+        const remainDays = isFinite(r.limitDays) ? r.limitDays - passedDays : Infinity;   // 주기를 모르면 만료로 치지 않는다
 
         let statusHtml = '';
         let borderColor = 'var(--border)';
@@ -7875,7 +8089,9 @@ window.renderOpenRecords = function() {
             statusHtml = `<span style="color:#FF823A; font-weight:800; font-size:12.5px; white-space:nowrap;">⚠️ D-${remainDays}</span>`;
             borderColor = '#FDBA74';
         } else {
-            statusHtml = `<span style="color:#00B37A; font-weight:800; font-size:12.5px; white-space:nowrap;">✅ D-${remainDays} (여유)</span>`;
+            statusHtml = isFinite(remainDays)
+                ? `<span style="color:#00B37A; font-weight:800; font-size:12.5px; white-space:nowrap;">✅ D-${remainDays} (여유)</span>`
+                : `<span style="color:var(--text-sub); font-weight:800; font-size:12.5px; white-space:nowrap;">🗓️ 주기 정보 없음</span>`;
         }
 
                // 뱃지 줄을 아래 단으로 내린다.
@@ -7885,9 +8101,9 @@ window.renderOpenRecords = function() {
         <div style="padding:14px 16px; background:#FFFFFF; border:1px solid ${borderColor}; border-radius:16px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
 
             <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:22px; background:var(--bg-sub); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${r.emoji}</div>
+                <div style="font-size:22px; background:var(--bg-sub); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${openEsc(r.emoji || r.icon || '📦')}</div>
 
-                <div style="flex:1; min-width:0; font-size:15px; font-weight:900; color:var(--text-m); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.name}</div>
+                <div style="flex:1; min-width:0; font-size:15px; font-weight:900; color:var(--text-m); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${openEsc(r.name || r.title || r.item || '이름 없는 물건')}</div>
 
                 <div style="display:flex; gap:6px; flex-shrink:0;">
                     <button onclick="window.renewOpenRecord('${r.id}')" style="background:#E8F3FF; border:1px solid #B1D6FF; border-radius:10px; width:38px; height:38px; color:#3182F6; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="오늘 새로 뜯음">🔄</button>
@@ -8114,7 +8330,8 @@ async function completeBaton(id) {
                   완료 알림은 완료만 말한다. */
             body: reward && reward !== "없음"
                 ? ("부탁하신 일, 끝났어요. 약속한 " + reward + " 잊지 마세요")
-                : "부탁하신 일, 끝났어요"
+                : "부탁하신 일, 끝났어요",
+            link: "index.html?go=toolbox"
         }).catch(e => console.error("푸시 발송 에러", e));
     }
 }
@@ -13778,10 +13995,20 @@ window.deleteBabyProfile = function(targetId, babyName) {
             if (!code || !window.db || !window.deleteDoc || !window.doc) return;
             const prefixes = ['photos', 'voices', 'sealed', 'notes', 'words', 'milestones',
                               'tracker', 'fever', 'growth', 'cube', 'ledger', 'routine', 'settings'];
-            for (const p of prefixes) {
-                try { await window.deleteDoc(window.doc(window.db, p + '_' + code + targetId, 'status')); }
-                catch (e) {}
+            const refs = prefixes.map(function (p) { return window.doc(window.db, p + '_' + code + targetId, 'status'); });
+            /* ⚠️ 위는 'status' 문서만 지운다. 설정 폴더는 문서 이름이 달라서 그대로 남았다.
+                  (info = 아기 설정 · baby_profile = 아기 사진)
+                  편지함(letters_)은 해마다 문서가 하나씩 생긴다 (2026년에 시작). */
+            ['info', 'baby_profile'].forEach(function (id) {
+                refs.push(window.doc(window.db, 'settings_' + code + targetId, id));
+            });
+            for (let y = 2026; y <= new Date().getFullYear(); y++) {
+                refs.push(window.doc(window.db, 'letters_' + code + targetId, 'letters_' + y));
+                refs.push(window.doc(window.db, 'letters_' + code + targetId, 'replies_' + y));
             }
+            /* ⚠️ 하나씩 await 했다. 0.4초 뒤 새로고침되면서 뒤쪽 삭제는 보내지도 못했다.
+                  한 번에 다 보낸다 (연결이 없으면 파이어베이스가 줄 세워 뒀다가 보낸다). */
+            refs.forEach(function (r) { window.deleteDoc(r).catch(function () {}); });
         })();
 
         window.showToast(`🗑️ ${babyName}의 기록이 모두 삭제되었습니다.`);
@@ -14268,7 +14495,9 @@ window.applyPremiumWaitlist = function(btn) {
             if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
             
             // 🚨 1. 성공 시 토스트 알림 텍스트 변경 (1개월 무료 강조)
-            window.showToast('🎉 얼리버드 명단에 등록되었습니다! 승인되면 첫 1개월(30일)간 프리미엄을 무료로 이용하실 수 있습니다 💎');
+            /* ⚠️ 30일 무료를 약속하지 않는다. 결제가 아직 없어서 31일째에 못 받는다.
+              그러면 '무료 30일' 이 아니라 '무기한 무료' 가 된다. */
+        window.showToast('🤍 명단에 담아두었어요. 열리는 날 제일 먼저 알려드릴게요');
             
             setTimeout(() => {
                 const paywall = document.getElementById('premium-paywall-modal');
@@ -14279,7 +14508,7 @@ window.applyPremiumWaitlist = function(btn) {
             console.error("얼리버드 저장 실패:", e);
             
             // 🚨 2. 에러 나서 튕겼을 때 원래대로 돌아가는 버튼 텍스트 변경
-            btn.innerText = "첫 1개월 무료 체험 시작하기";
+            btn.innerText = "열리면 제일 먼저 알려주세요";
             btn.disabled = false;
             
             window.showToast(
@@ -15312,12 +15541,14 @@ window.openSettingsTab = function() {
         var sub =
             p === 'unsupported' ? '이 브라우저는 알림을 지원하지 않아요'
           : p === 'denied'      ? '브라우저에서 막혀 있어요. 눌러서 방법 보기'
-          : on                 ? '요청이 오면 바로 알려드려요'
+          : on                 ? '바통터치 · 문답 소식이 오면 바로 알려드려요'
                                : '지금은 꺼져 있어요';
 
         return '<div style="font-size:22px;">🔔</div>' +
             '<div style="flex:1; min-width:0;">' +
-                '<div style="font-size:15px; font-weight:900; color:var(--text-m);">바통터치 알림</div>' +
+                /* ⚠️ '바통터치 알림' 이라고 적혀 있었는데, 끄면 서버가 이 사람에게
+                      가족 알림을 전부 안 보낸다 (문답 답장 · 재촉 포함). 이름을 사실대로. */
+                '<div style="font-size:15px; font-weight:900; color:var(--text-m);">가족 알림</div>' +
                 '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' + sub + '</div>' +
             '</div>' +
             '<div id="baton-push-toggle" style="width:46px; height:27px; border-radius:14px; flex-shrink:0; cursor:pointer; ' +
@@ -15347,7 +15578,7 @@ window.openSettingsTab = function() {
             }
             localStorage.setItem(OFF_KEY, 'false');
             await tellServer(true);
-            window.showToast('🔔 요청이 오면 바로 알려드릴게요');
+            window.showToast('🔔 바통터치 · 문답 소식을 바로 알려드릴게요');
         }
         card.innerHTML = inner();
     }

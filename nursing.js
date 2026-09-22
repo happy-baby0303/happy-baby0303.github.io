@@ -9,6 +9,13 @@
     var loading = false;
     var myPos = null;
 
+    // 하윤 → 하윤이 (받침이 있으면 '이') · 화면에 넣으니 escape 까지
+    function nameCall() {
+        var n = localStorage.getItem("tosil_babyName") || "우리 아기";
+        try { if (typeof window.babyCall === "function") n = window.babyCall(""); } catch (e) {}
+        return String(n).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
     function esc(s) {
         return String(s == null ? "" : s)
             .replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -37,7 +44,8 @@
     function load() {
         if (data) return Promise.resolve(data);
         if (loading) return new Promise(function (r) {
-            var t = setInterval(function () { if (data) { clearInterval(t); r(data); } }, 200);
+            // ⚠️ 먼저 받던 쪽이 실패하면 data 가 영영 안 차서 이 타이머가 계속 돌았다
+            var t = setInterval(function () { if (data || !loading) { clearInterval(t); r(data || []); } }, 200);
         });
 
                 // 지도가 이미 받아뒀으면 그걸 쓴다. 800KB 를 두 번 받을 이유가 없다.
@@ -131,7 +139,7 @@
         if (old) old.remove();
 
         // 아기 정보 연동
-        var babyName = localStorage.getItem('tosil_babyName') || '우리아기';
+        var babyName = nameCall();
         
         var wrap = document.createElement("div");
         wrap.id = SHEET_ID;
@@ -206,12 +214,14 @@
         if (!box || document.getElementById("nursing-entry")) return;
 
         // 🌟 아기 나이 & 이름 가져오기
-        var babyName = localStorage.getItem('tosil_babyName') || '우리아기';
+        var babyName = nameCall();
         var startDate = localStorage.getItem('tosil_startDate');
         var ageText = '';
         if (startDate) {
             var diffDays = Math.floor((new Date() - new Date(startDate)) / (1000 * 60 * 60 * 24));
-            var months = Math.floor(diffDays / 30);
+            // 나들이 칩(placefilter)과 같은 셈 — 30일로 나누면 달 경계에서 한 달씩 어긋났다
+                var months = (typeof window.babyMonthsForPlaces === "function" && window.babyMonthsForPlaces() !== null)
+                    ? window.babyMonthsForPlaces() : Math.floor(diffDays / 30);
             if(months >= 0) ageText = `${months}개월 `;
         }
 
@@ -252,6 +262,7 @@
 window.safeOpenMap = function(mapType, query) {
     // 1. 커스텀 팝업 생성
     const overlay = document.createElement('div');
+    overlay.id = 'navi-nudge';   // 뒤로가기(backbutton.js)로 닫히게
     overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(3px); animation:fadeIn 0.2s;';
     
     overlay.innerHTML = `
@@ -273,6 +284,7 @@ window.safeOpenMap = function(mapType, query) {
         </div>
     `;
     document.body.appendChild(overlay);
+    overlay.onclick = function (e) { if (e.target === overlay) overlay.remove(); };   // 바깥을 누르면 닫힌다
 
     // 내비 켜기 버튼
     document.getElementById('btn-go-navi').onclick = function() {

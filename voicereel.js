@@ -442,7 +442,14 @@
             wrapped.__reel = true;
             window.openVoiceBox = wrapped;
         }
-        setInterval(mountBar, 1500);      // 소리함을 다시 그려도 따라간다
+        /* ⚠️ 1.5초마다 소리함이 열렸는지 들여다봤다 (하루 종일).
+              소리함을 여는 함수를 감싸서, 열릴 때만 '이어듣기' 를 붙인다. */
+        var ob = window.openVoiceBox;
+        if (typeof ob === "function" && !ob.__reel) {
+            var wob = function () { var out = ob.apply(this, arguments); setTimeout(mountBar, 0); return out; };
+            wob.__reel = true;
+            window.openVoiceBox = wob;
+        }
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

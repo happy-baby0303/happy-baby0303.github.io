@@ -294,12 +294,11 @@
         var mine = pages.slice((vol - 1) * PER_BOOK, vol * PER_BOOK);
         if (!mine.length) return;
 
-        var qDB = window.questionDB || [];
-        var baby = window.babyName || "우리 아기";
-
+        /* ⚠️ window.questionDB 를 찾았는데 data.js 는 const 로 선언한다.
+              const 는 window 에 안 붙어서 책을 펼치면 질문 없이 답만 나왔다.
+              이제 data.js 가 여는 창구(diaryQuestion)를 쓴다. 조사도 거기서 맞춘다. */
         var rows = mine.map(function (p) {
-            var q = qDB.length ? qDB[(p.day - 1) % qDB.length] : null;
-            var qt = q ? String(q.question).replace(/\{babyName\}/g, baby) : "";
+            var qt = (typeof window.diaryQuestion === "function") ? window.diaryQuestion(p.day) : "";
             return '<div style="padding:22px 0;border-bottom:1px solid ' + LINE + ';">' +
                 '<div style="font-size:11px;font-weight:700;color:' + INK_L + ';' +
                     'letter-spacing:1.5px;margin-bottom:9px;">DAY ' + p.day + '</div>' +
@@ -428,21 +427,11 @@
             if (hook() || ++n > 40) clearInterval(t);
         }, 200);
 
-        /* 답을 저장하면 쪽수가 늘어난다. 그때도 다시 센다. */
-        setTimeout(function () {
-            var names = ["submitAnswer", "saveAnswer", "onSubmit"];
-            names.forEach(function (nm) {
-                var f = window[nm];
-                if (typeof f !== "function" || f.__shelf) return;
-                var w = async function () {
-                    var r = await f.apply(this, arguments);
-                    try { paint(); } catch (e) {}
-                    return r;
-                };
-                w.__shelf = true;
-                window[nm] = w;
-            });
-        }, 900);
+        /* 답을 저장하면 쪽수가 늘어난다. 그때도 다시 센다.
+           ⚠️ 감싸려던 submitAnswer 는 diary.html 에 없었다. 저장 끝 이벤트를 듣는다. */
+        window.addEventListener("diary:saved", function () {
+            try { paint(); } catch (e) {}
+        });
     }
 
     if (document.readyState === "loading") {

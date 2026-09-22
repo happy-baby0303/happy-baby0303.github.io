@@ -57,7 +57,11 @@
     }
 
     // 둘 중 먼저 달성한 것을 남긴다
+    //  ⚠️ 단, 사람이 직접 고친 날짜(editedAt)가 있으면 그게 이긴다 — 더 나중에 고친 쪽.
+    //     '먼저 날짜' 만 보면, 잘못 찍은 날짜를 뒤로 고쳐도 짝꿍 폰의 옛 날짜가 되돌려 놓았다.
     function earlier(a, b) {
+        var ea = Number(a.editedAt) || 0, eb = Number(b.editedAt) || 0;
+        if (ea || eb) return ea >= eb ? a : b;
         if (!realDate(a.date)) return b;
         if (!realDate(b.date)) return a;
         return a.date <= b.date ? a : b;

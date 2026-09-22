@@ -338,7 +338,12 @@
        function boot() {
         // 배냇함 탭이 열릴 때마다 확인한다.
         // 부팅 때 한두 번 재는 것만으로는, 그 순간 탭이 닫혀 있으면 영영 못 붙는다.
-        setInterval(paint, 1200);
+        // ⚠️ 1.2초마다 돌았다. 그림은 renderMemoryBox 를 감싸서 이미 따라간다.
+        //    혹시 놓친 것만 줍게, 배냇함 탭이 열려 있을 때 5초에 한 번.
+        setInterval(function () {
+            var tab = document.getElementById("tab-memorybox");
+            if (tab && tab.style.display !== "none" && tab.classList.contains("active")) paint();
+        }, 5000);
 
         setTimeout(paint, 1500);
         setTimeout(paint, 3500);

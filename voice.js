@@ -16,8 +16,23 @@
 
     var IDX_KEY   = "tosil_day_voices";
     var MAX_SEC   = 30;      // 30초. 길면 다시 안 듣는다.
-    var FREE_MAX  = 3;       // 맛은 보여준다. 그 다음부터 프리미엄.
+    var FREE_MAX  = 10;      // premium.js 표(PLAN.free.voiceTotal)와 같아야 한다
     var DAY       = 86400000;
+
+    /* ⚠️ 여기가 3 이었다. 안내 시트 · 배냇함은 '무료 10개' 라고 하는데
+          네 번째 옹알이에서 막혔고, 막는 창에는 '무료로 10개까지' 라고 떴다.
+          한도는 premium.js 한 곳에서만 읽는다 (플러스는 끝없음). */
+    function voiceCap() {
+        try { if (typeof window.voiceCapTotal === "function") return window.voiceCapTotal(); } catch (e) {}
+        return FREE_MAX;
+    }
+
+    // 받침이 있으면 '을', 없으면 '를' ("까르르 웃는 소리을" → "소리를")
+    function eulReul(word) {
+        var w = String(word || ""), c = w.charCodeAt(w.length - 1);
+        if (!(c >= 0xAC00 && c <= 0xD7A3)) return "을";
+        return (c - 0xAC00) % 28 ? "을" : "를";
+    }
 
     /* ---------- 작은 도구들 ---------- */
 
@@ -171,7 +186,7 @@
 
     window.attachVoicePeaks = function (key, id, peaks) {
         var idx = loadIndex();
-        (idx[key] || []).forEach(function (v) { if (v.id === id) v.peaks = peaks; });
+        (idx[key] || []).forEach(function (v) { if (v.id === id) { v.peaks = peaks; v.ets = Date.now(); } });
         saveIndex(idx);
     };
 
@@ -199,7 +214,7 @@
         } catch (e) { console.warn("[목소리] 동기화 실패", e); }
     };
 
-    var unsub = null;
+    var unsub = null, repushTimer = null;
     window.startVoiceRealtimeSync = function () {
         var code = syncCode();
         if (!code || !window.db || typeof window.onSnapshot !== "function") return;
@@ -211,18 +226,32 @@
             var remote = data.days || {};
             if (window.Grave) window.Grave.merge("voice", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
             var local = loadIndex(), merged = {};
+            var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("voice") : {};   // 묘비는 한 번만 읽는다
 
             Object.keys(local).concat(Object.keys(remote)).forEach(function (k) {
                 if (merged[k]) return;
                 var seen = {}, out = [];
-                (local[k] || []).concat(remote[k] || []).forEach(function (v) {
-                    if (!v || !v.id || seen[v.id]) return;
-                    if (window.Grave && window.Grave.has("voice", v.id)) return;   // 👈 지운 건 되살리지 않기
-                    seen[v.id] = 1; out.push(v);
+                // 서버 것을 먼저 놓고, 이 폰에서 더 나중에 고친 것(ets)만 이 폰 것으로 (사진과 같은 규칙)
+                (remote[k] || []).concat(local[k] || []).forEach(function (v) {
+                    if (!v || !v.id) return;
+                    if (gone[v.id]) return;                                    // 👈 지운 건 되살리지 않기
+                    if (seen[v.id]) {
+                        if ((Number(v.ets) || 0) > (Number(seen[v.id].ets) || 0)) {
+                            out[out.indexOf(seen[v.id])] = v; seen[v.id] = v;
+                        }
+                        return;
+                    }
+                    seen[v.id] = v; out.push(v);
                 });
                 out.sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); });
                 if (out.length) merged[k] = out;
             });
+
+            // 짝꿍 폰의 옛 사본이 서버를 덮었으면 한 번 더 올린다 (옹알이는 다시 안 난다)
+            if (window.syncNeedsPush && window.syncNeedsPush(remote, merged, data.deleted, "voice")) {
+                clearTimeout(repushTimer);
+                repushTimer = setTimeout(window.syncVoicesToFirebase, 1500);
+            }
 
             if (JSON.stringify(merged) === JSON.stringify(local)) return;
             saveIndex(merged);
@@ -345,6 +374,9 @@
     }
 
     function resetRec() {
+        /* ⚠️ 녹음 중에 창을 닫으면, 멈춤 신호(onstop)가 한 박자 늦게 와서
+              닫은 창을 '다시 듣기' 화면으로 도로 열었다. 닫을 땐 신호를 끊고 멈춘다. */
+        if (rec) { rec.onstop = null; rec.ondataavailable = null; }
         stopRec(); stopMeter(); releaseMic();
         if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
         blob = null; blobSec = 0; chunks = [];
@@ -394,7 +426,7 @@
             }
 
             putVoice(key, {
-                id: id, url: url, path: path, ts: Date.now(),
+                id: id, url: url, path: path, ts: Date.now(), by: uid,
                 sec: Math.round(blobSec), note: note, msId: msId, peaks: peaks
             });
             window.syncVoicesToFirebase();
@@ -419,7 +451,7 @@
                 // 사진은 다시 찍으면 되지만 옹알이는 다시 안 난다. 반드시 붙잡는다.
                 await window.queueUpload({
                     id: id, kind: "voice", path: path, dataUrl: dataUrl,
-                    meta: { key: key, ts: Date.now(), sec: Math.round(blobSec), note: note, msId: msId }
+                    meta: { key: key, ts: Date.now(), sec: Math.round(blobSec), note: note, msId: msId, by: uid }
                 });
                 resetRec();
                 window.closeVoiceSheet();
@@ -436,20 +468,32 @@
         var m = job.meta || {};
         putVoice(m.key, {
             id: job.id, url: url, path: job.path, ts: m.ts || Date.now(),
-            sec: m.sec || 0, note: m.note || "", msId: m.msId || null
+            sec: m.sec || 0, note: m.note || "", msId: m.msId || null, by: m.by || null
         });
         window.syncVoicesToFirebase();
+
+        // 늦게 올라간 소리만 파형이 비어 있었다. 재워둔 소리로 여기서 만든다.
+        if (job.dataUrl && typeof window.peaksFrom === "function" && window.fetch) {
+            fetch(job.dataUrl).then(function (r) { return r.blob(); })
+                .then(function (b) { return window.peaksFrom(b); })
+                .then(function (pk) {
+                    if (!pk) return;
+                    window.attachVoicePeaks(m.key, job.id, pk);
+                    window.syncVoicesToFirebase();
+                    repaint();
+                })
+                .catch(function () {});
+        }
     };
 
     /* ---------- 시트 ---------- */
 
     window.openVoiceSheet = function (key, msId) {
-        // 무료는 세 개까지. 맛은 보여준다.
+        // 무료는 열 개까지 (한도는 premium.js 표). 플러스는 끝없다.
         var have = window.voiceCount();
-        var pro = (typeof window.isPremium === "function") && window.isPremium();
-        if (!pro && have >= FREE_MAX) {
+        if (have >= voiceCap()) {
             if (typeof window.openUpsell === "function") return window.openUpsell("voice");
-            return toast("목소리는 프리미엄 기능이에요");
+            return toast("목소리는 플러스에서 더 담을 수 있어요");
         }
 
         target = { key: key || todayKey(), msId: msId || null };
@@ -550,7 +594,7 @@
                 '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🎙️ ' + esc(babyName()) + '의 목소리</span>' +
                 '<span onclick="window.closeVoiceSheet()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1; padding:0 4px;">×</span>' +
             '</div>' +
-            '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:8px;">D+' + ddays() + '일 · ' + esc(g.what) + '을 담아보세요</div>' +
+            '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:8px;">D+' + ddays() + '일 · ' + esc(g.what) + eulReul(g.what) + ' 담아보세요</div>' +
             body +
         '</div>';
     }
@@ -697,7 +741,7 @@
             '<div id="vplay-' + esc(v.id) + '" onclick="window.playVoice(\'' + key + '\',\'' + esc(v.id) + '\')" ' +
                 'style="width:38px; height:38px; border-radius:50%; background:#7F77DD; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">' + playIcon + '</div>' +
             '<div style="flex:1; min-width:0;">' +
-                '<div style="font-size:13px; font-weight:800; color:var(--text-m); letter-spacing:-0.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                '<div class="user-text" style="font-size:13px; font-weight:800; color:var(--text-m); letter-spacing:-0.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     (v.msId ? esc(msTitle(v.msId) || "목소리") : (v.note ? esc(v.note) : "그날의 소리")) + '</div>' +
                 wave(v, key, 26) +
                 
@@ -730,8 +774,7 @@
     // 배냇함 머리
     window.renderVoiceBar = function () {
         var n = window.voiceCount();
-        var pro = (typeof window.isPremium === "function") && window.isPremium();
-        var lock = (!pro && n >= FREE_MAX && typeof window.lockChip === "function") ? window.lockChip("프리미엄") : "";
+        var lock = (n >= voiceCap() && typeof window.lockChip === "function") ? window.lockChip("플러스") : "";
         var act = n ? "window.openVoiceBox()" : "window.openVoiceSheet()";
         return '<div onclick="' + act + '" style="display:flex; justify-content:space-between; align-items:center; padding:17px 18px; border:1px dashed var(--border); border-radius:18px; margin-bottom:14px; cursor:pointer;">' +
             '<span style="font-size:13.5px; font-weight:800; color:var(--text-m);">🎙️ ' + (n ? "소리함 열기" : "오늘 목소리 담기") + '</span>' +
@@ -824,7 +867,7 @@
                                   'font-size:11px; font-weight:800; color:#B98A2E; cursor:pointer;">🎵 파형 엽서</span>' : '') +
                             
                             '<span onclick="window.downloadVoiceAudio(\'' + k + '\',\'' + esc(v.id) + '\')" ' +
-                                  'style="flex:1.5; text-align:center; padding:9px; border-radius:11px; background:#E8F3FF; font-size:11px; font-weight:800; color:#3182F6; cursor:pointer;">💾 음성 저장</span>' +
+                                  'style="flex:1.5; text-align:center; padding:9px; border-radius:11px; background:rgba(127,119,221,0.12); font-size:11px; font-weight:800; color:#7F77DD; cursor:pointer;">💾 음성 저장</span>' +
 
                             '<span onclick="event.stopPropagation(); window.removeVoice(\'' + k + '\',\'' + esc(v.id) + '\');" ' +
                                 'style="flex:1; text-align:center; padding:9px; border-radius:11px; background:var(--bg-sub); font-size:11px; font-weight:700; color:var(--text-sub); cursor:pointer;">빼기</span>' +
@@ -917,14 +960,23 @@ window.downloadVoiceAudio = async function(key, id) {
         // 3. 파일 객체로 변환
         const file = new File([blob], fileName, { type: blob.type });
 
-        // 🚀 4. 아이폰/갤럭시 네이티브 공유창 띄우기 (이게 모바일 무적입니다)
+        // 🚀 4. 아이폰/갤럭시 네이티브 공유창 띄우기
+        /* ⚠️ 파일을 받아오는 동안 '누른 손' 이 식는다. 그 뒤에 공유창을 부르면 아이폰이 거절해서
+              catch 로 떨어지고, 엉뚱하게 '보안 설정' 이라며 새 창이 열렸다.
+              공유창을 그냥 닫아도 같은 길로 떨어졌다.
+              엽서처럼 '저장하기' 를 한 번 더 누르게 해서, 그 손으로 공유창을 연다. */
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: '우리아기 옹알이',
-                text: '배냇함에 보관된 우리 아기 목소리예요 🤍'
-            });
-            window.showToast("✅ 목소리 파일이 안전하게 저장/공유되었습니다!");
+            const doShare = function () {
+                navigator.share({ files: [file], title: bName + ' 목소리', text: '배냇함에 보관된 ' + bName + ' 목소리예요 🤍' })
+                    .then(function () { window.showToast("✅ 목소리 파일을 보냈어요"); })
+                    .catch(function (se) { if (se && se.name !== "AbortError") console.warn("[음성 공유]", se); });
+            };
+            if (typeof window.showConfirm === "function") {
+                window.showConfirm("목소리 파일이 준비됐어요.<br><span style='font-size:12px;color:#A3958A;'>아이폰은 창이 뜨면 '파일에 저장'을 눌러주세요.</span>",
+                    doShare, "🎙️", "저장하기", "#7F77DD");
+            } else {
+                doShare();
+            }
         } else {
             // PC나 구형 브라우저를 위한 강제 다운로드 (기존 방식 유지)
             const blobUrl = window.URL.createObjectURL(blob);

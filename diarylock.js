@@ -26,6 +26,7 @@
     'use strict';
 
     var NUDGE_KEY = "tosil_diary_nudge";      // 마지막 재촉 날짜
+    var PUSH_AT_KEY = "tosil_diary_push_at";  // 마지막 '답 남겼어요' 알림 시각
     var GOLD = "#D48806", GRAY = "#8B95A1", INK = "#4A413C";
 
     function esc(s) {
@@ -98,6 +99,23 @@
         '</div>';
     }
 
+    function teaser(show) {
+        var old = document.getElementById("diary-partner-teaser");
+        if (!show) { if (old) old.remove(); return; }
+        var host = document.getElementById("input-mode");
+        if (!host || old) return;
+        var el = document.createElement("div");
+        el.id = "diary-partner-teaser";
+        el.setAttribute("style", "margin:0 0 16px; padding:15px 16px; background:#FFF9E6; " +
+            "border:1px solid #F5E1A4; border-radius:16px; text-align:center;");
+        el.innerHTML =
+            '<div style="font-size:14px; font-weight:800; color:' + GOLD + '; line-height:1.65; word-break:keep-all;">' +
+                esc(otherWord()) + '가 먼저 답을 남겼어요</div>' +
+            '<div style="font-size:12.5px; font-weight:700; color:#A67C1B; margin-top:3px; word-break:keep-all;">' +
+                '내 답을 쓰면 바로 열려요. 먼저 보면 따라 쓰게 되니까요</div>';
+        host.insertBefore(el, host.firstChild);
+    }
+
     /* renderCurrentCard 를 감싼다. 원래 코드는 안 건드린다. */
     function wrap() {
         var orig = window.renderCurrentCard;
@@ -125,8 +143,12 @@
         var textEl = document.getElementById(yourTextId);
         if (!card || !textEl) return;
 
-        // 내가 아직 안 썼으면 잠금 자체를 안 건다 (입력 화면이라 카드가 안 보인다)
-        if (!mine) { lockCard(card, textEl, false); return; }
+        /* 내가 아직 안 썼으면 카드는 안 보인다 (입력 화면).
+           ⚠️ 그래서 머리말의 '짝꿍이 먼저 썼어요 · 내 답을 쓰면 열립니다' 가
+              한 번도 화면에 나온 적이 없었다. 궁금증을 만드는 자리가 비어 있었다.
+              입력창 위에 띄운다. */
+        if (!mine) { lockCard(card, textEl, false); teaser(!!yours); return; }
+        teaser(false);
 
         var old = card.querySelector(".diary-lock-veil");
         if (old) old.remove();
@@ -169,7 +191,8 @@
                 syncCode: code,
                 excludeToken: localStorage.getItem('fcm_token') || null,
                 title: "\uD83D\uDC8C 오늘의 문답이 기다려요",
-                body: day ? (day + "일차 질문에 한 사람만 답했어요") : "한 사람만 답했어요"
+                body: day ? (day + "일차 질문에 한 사람만 답했어요") : "한 사람만 답했어요",
+                link: "diary.html"
             }).catch(function (e) { console.warn("재촉 실패", e); });
             localStorage.setItem(NUDGE_KEY, today());
             toast("\uD83D\uDC8C 살짝 알려드렸어요");
@@ -183,41 +206,59 @@
        3. 내가 답하면 짝꿍에게 알림
        ---------------------------------------------------------- */
 
+    /* ⚠️ submitAnswer · saveAnswer · onSubmit 를 감싸려 했는데
+          diary.html 엔 그런 함수가 없다. 저장은 이름 없는 클릭 리스너 안에서 끝난다.
+          그래서 이 파일이 생긴 뒤로 '답 남겼어요' 알림은 한 번도 나간 적이 없다.
+          이제 diary.html 이 저장 끝에 'diary:saved' 를 쏜다. 그걸 듣는다. */
+    var listening = false;
     function hookSubmit() {
-        var names = ["submitAnswer", "saveAnswer", "onSubmit"];
-        for (var i = 0; i < names.length; i++) {
-            var f = window[names[i]];
-            if (typeof f !== "function" || f.__pushed) continue;
-            (function (orig, nm) {
-                var w = async function () {
-                    var r = await orig.apply(this, arguments);
-                    try { pushAfterAnswer(); } catch (e) {}
-                    return r;
-                };
-                w.__pushed = true;
-                window[nm] = w;
-            })(f, names[i]);
-        }
+        if (listening) return;
+        listening = true;
+        window.addEventListener("diary:saved", function (e) {
+            var d = (e && e.detail) || {};
+            if (d.isEditing) return;               // 고친 건 알리지 않는다
+            try { pushAfterAnswer(d); } catch (err) {}
+            try { repaint(); } catch (err) {}
+        });
     }
 
-    function pushAfterAnswer() {
+    function pushAfterAnswer(d) {
+        d = d || {};
         var code = (window.getSyncCode ? window.getSyncCode() : null)
                 || localStorage.getItem("family_sync_code");
         if (!code || !window.functions || !window.httpsCallable) return;
 
-        var day = (typeof window.getCurrentDay === "function") ? window.getCurrentDay() : "";
+        /* 밀린 날을 한 번에 몰아 쓰면 알림이 연달아 여러 통 갔다. 10분에 한 통만. */
+        var lastAt = Number(localStorage.getItem(PUSH_AT_KEY) || 0);
+        if (Date.now() - lastAt < 10 * 60000) return;
+
+        // 저장한 그 날. (화면의 DAY 글자보다 저장 이벤트가 정확하다)
+        var day = d.day || ((typeof window.getCurrentDay === "function") ? window.getCurrentDay() : "");
         var me = (typeof window.myRoleWord === "function")
             ? window.myRoleWord()
             : ((myRole() === "husband") ? "아빠" : "엄마");
+
+        /* 먼저 쓴 사람과 나중에 쓴 사람의 알림은 달라야 한다.
+           짝꿍이 이미 썼는데 "내 답을 쓰면 열립니다" 가 가면 틀린 말이다. */
+        var title, body;
+        if (d.complete) {
+            title = "\uD83D\uDC8C " + me + "도 답했어요";
+            body  = day ? (day + "일차 페이지가 완성됐어요 \u00b7 지금 열어보세요") : "오늘 페이지가 완성됐어요";
+        } else {
+            title = "\uD83D\uDCD6 " + me + "가 오늘의 답을 남겼어요";
+            body  = day ? (day + "일차 \u00b7 내 답을 쓰면 열립니다") : "내 답을 쓰면 열립니다";
+        }
 
         try {
             var fn = window.httpsCallable(window.functions, "sendFamilyPush");
             fn({
                 syncCode: code,
                 excludeToken: localStorage.getItem('fcm_token') || null,
-                title: "\uD83D\uDCD6 " + me + "가 오늘의 답을 남겼어요",
-                body: day ? (day + "일차 \u00b7 내 답을 쓰면 열립니다") : "내 답을 쓰면 열립니다"
-            }).catch(function () {});
+                title: title,
+                body: body,
+                link: "diary.html"      // 알림을 누르면 문답으로 (sw.js · functions 가 이 값을 쓸 때)
+            }).catch(function (e) { console.warn("[문답] 알림 실패", e); });
+            try { localStorage.setItem(PUSH_AT_KEY, String(Date.now())); } catch (e) {}
         } catch (e) {}
     }
 
@@ -261,5 +302,7 @@
         console.log("  엄마 답:", d.wifeAns ? "썼음" : "아직");
         console.log("  오늘 재촉:", localStorage.getItem(NUDGE_KEY) === today() ? "보냄" : "아직");
         console.log("  renderCurrentCard 감쌌나:", !!(window.renderCurrentCard || {}).__locked);
+        console.log("  저장 이벤트 듣는 중:", listening);
+        console.log("  Functions 준비:", !!(window.functions && window.httpsCallable));
     };
 })();

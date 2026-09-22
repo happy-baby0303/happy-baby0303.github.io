@@ -98,5 +98,66 @@ const questionDB = [
     { id: 97, context: "육아", category: "감동", question: "{babyName}의 아주 작고 귀여운 첫 신발을 샀을 때의 뭉클함. 이 신발을 신고 아이가 어디까지 밝게 걸어나가길 바라나요?" },
     { id: 98, context: "부부", category: "추억", question: "연애 시절, 우리가 팝콘을 나누어 먹으며 처음으로 함께 본 영화나 드라마는 무엇이었고, 그때 극장 안팎의 공기와 떨림은 어땠나요?" },
     { id: 99, context: "육아", category: "감사", question: "매일 반복되는 쳇바퀴 같은 육아 일상이지만, 곰곰이 생각해보면 '아무 일 없는 이 일상 자체가 기적이구나' 싶었던 사소한 일은 무엇인가요?" },
-    { id: 100, context: "부부", category: "사랑", question: "100번째 일기의 마지막 문장을 쓰는 오늘 밤, 서로의 눈을 아주 깊게 맞추며 \"당신을 만나 내 인생이 완성되었다\"라는 단단한 마침표를 찍어볼까요?" }
+    { id: 100, context: "부부", category: "사랑", question: "{day}번째 일기의 마지막 문장을 쓰는 오늘 밤, 서로의 눈을 아주 깊게 맞추며 \"당신을 만나 내 인생이 완성되었다\"라는 단단한 마침표를 찍어볼까요?" }
 ];
+
+/* ============================================================
+   질문 꺼내는 창구 — 문답·책장·배냇함·포토북이 전부 이것 하나를 쓴다
+
+   ⚠️ const 는 window 에 안 붙는다.
+      bookshelf.js 가 window.questionDB 로 찾다가 못 찾아서
+      책을 펼치면 질문 없이 답만 나왔다.
+
+   ⚠️ 이름 뒤 조사를 받침에 맞춘다.
+      "{babyName}가" 를 그냥 바꾸면 "하윤가 처음으로…" 가 된다.
+      받침이 있으면 '이' 를 붙인다  →  하윤이가 · 지우가
+
+   ⚠️ 100일이 지나면 질문이 처음부터 다시 돈다.
+      100번 질문에 "100번째 일기" 가 박혀 있어서
+      200일째에도 "100번째" 라고 나왔다. {day} 로 바꿨다.
+   ============================================================ */
+window.questionDB = questionDB;
+
+(function () {
+    function rawName() {
+        return (localStorage.getItem("tosil_babyName") || "").trim() || "우리 아기";
+    }
+    function hasJong(s) {
+        var c = s.charCodeAt(s.length - 1);
+        return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+    }
+    /* 조사는 받침 없는 꼴로 받는다. 받침 있는 이름엔 '이' 가 앞에 붙는다.
+       babyCall("가") → 하윤이가 / 지우가      babyCall("") → 하윤이 / 지우 */
+    window.babyCall = window.babyCall || function (josa) {
+        try { if (typeof window.babyNm === "function") return window.babyNm(josa || ""); } catch (e) {}
+        var n = rawName();
+        if (n === "우리 아기") return n + (josa || "");
+        return n + (hasJong(n) ? "이" : "") + (josa || "");
+    };
+
+    var SOFT = { "이가": "가", "가": "가", "은": "는", "는": "는", "을": "를", "를": "를",
+                 "과": "와", "와": "와", "이라": "라", "라": "라", "아": "야", "야": "야", "의": "의" };
+
+    window.diaryQuestion = function (day) {
+        var list = questionDB;
+        if (!list || !list.length) return "";
+        day = Math.max(1, parseInt(day, 10) || 1);
+        var it = list[(day - 1) % list.length];
+        if (!it) return "";
+        var named = rawName() !== "우리 아기";
+        return String(it.question)
+            // 이름을 아직 안 정했으면 "아기 이름(우리 아기)을" 이 된다 → 괄호째 뺀다
+            .replace(/\(\{babyName\}\)/g, named ? "(" + rawName() + ")" : "")
+            .replace(/\{babyName\}(이가|이라|가|은|는|을|를|과|와|라|아|야|의)?/g, function (m, j) {
+                return j ? window.babyCall(SOFT[j] || j) : rawName();
+            })
+            .replace(/\{day\}/g, String(day));
+    };
+
+    /* 같은 질문을 다시 만나는 날인가 (101일째 = 1일째 질문) */
+    window.diaryEchoDay = function (day) {
+        var n = questionDB.length;
+        day = parseInt(day, 10) || 0;
+        return day > n ? day - n : 0;
+    };
+})();

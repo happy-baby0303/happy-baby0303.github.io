@@ -34,6 +34,13 @@
     }
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
+    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
     function toast(m) { if (typeof window.showToast === "function") window.showToast(m); }
 
     function birth() {
@@ -230,6 +237,23 @@
             });
         }
 
+        /* 엄마·아빠의 한 줄 — 편지함 답장과 배냇함 한 줄을 같이. 그날 첫 장, 편지 밑에 붙는다.
+           한 쪽에 두 줄까지, 한 줄은 100자까지 (넘치면 종이 밖으로 잘린다) */
+        var replies = {};
+        try { replies = JSON.parse(localStorage.getItem("tosil_replies")) || {}; } catch (e) {}
+        var cut = function (t) { t = String(t || ""); return t.length > 100 ? t.slice(0, 99) + "…" : t; };
+        Object.keys(days).forEach(function (k) {
+            var out = [], r = replies[k] || {};
+            if (r.mom && r.mom.text) out.push({ who: "엄마", text: cut(r.mom.text) });
+            if (r.dad && r.dad.text) out.push({ who: "아빠", text: cut(r.dad.text) });
+            if (typeof window.getDayNotes === "function") {
+                (window.getDayNotes(k) || []).forEach(function (n) {
+                    if (n && n.text) out.push({ who: n.who || "", text: cut(n.text) });
+                });
+            }
+            days[k].lines = out.slice(0, 2);
+        });
+
         return Object.keys(days).sort().map(function (k) { return days[k]; });
     }
 
@@ -273,7 +297,7 @@
             '<div style="height:100%; display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
                 '<div style="font-size:19px; font-weight:800; color:' + GOLD + '; letter-spacing:6px; margin-bottom:40px;">D + 0</div>' +
                 '<div style="font-family:\'Gowun Batang\',serif; font-size:54px; font-weight:700; letter-spacing:-2px; line-height:1.4;">' +
-                    esc(babyName()) + '가<br>세상에 온 날</div>' +
+                    esc(callName("가")) + '<br>세상에 온 날</div>' +
                 '<div style="font-size:25px; font-weight:500; color:' + INK_S + '; margin-top:34px;">' + esc(when) + '</div>' +
                 '<div style="width:1px; height:120px; background:' + LINE + '; margin:56px auto 0;"></div>' +
                 '<div style="font-size:22px; font-weight:400; color:' + INK_L + '; margin-top:48px; line-height:1.9;">' +
@@ -350,11 +374,14 @@
         // o = { key, img, caption, kicker, title, desc, letter }
         var l = o.letter || null;
         var text = l ? String(l.text || "") : "";
-        var chars = text.length + String(o.desc || "").length + String(o.caption || "").length;
+        var lines = (o.lines && o.lines.length) ? o.lines : [];
+        var chars = text.length + String(o.desc || "").length + String(o.caption || "").length +
+                    lines.reduce(function (n, x) { return n + String(x.text || "").length; }, 0);
 
         /* 글 길이로 사진 칸을 정한다. 종이 높이는 shell 이 잡아준다. */
         var imgH = 820;
-        if (chars > 320) imgH = 480;
+        if (chars > 520) imgH = 400;
+        else if (chars > 320) imgH = 480;
         else if (chars > 180) imgH = 620;
         else if (chars > 80) imgH = 720;
         if (!o.img) imgH = 0;
@@ -363,7 +390,7 @@
               그런 쪽은 사진 밑이 통째로 빈 종이였다.
               돈 받고 파는 책에서 반 장이 비면 그건 낭비로 보인다.
               글이 없으면 사진에게 남은 자리를 전부 준다. */
-        var hasText = !!(o.title || o.desc || o.caption || text || (l && l.ms));
+        var hasText = !!(o.title || o.desc || o.caption || text || (l && l.ms) || lines.length);
         var photoBox = o.img
             ? (hasText
                 ? 'height:' + imgH + 'px;'
@@ -415,6 +442,16 @@
 
                     (l && l.ms ? '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:40px; ' +
                         'color:' + GOLD + '; margin-top:26px; line-height:1.6;">' + esc(l.ms) + '</div>' : '') +
+
+                    /* 엄마·아빠의 한 줄 — 아기 편지 밑에, 조금 작게 */
+                    (lines.length ? '<div style="margin-top:26px; padding-top:20px; border-top:1px dashed ' + LINE + ';">' +
+                        lines.map(function (x) {
+                            return '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:32px; color:' + INK_S + '; ' +
+                                'line-height:1.5; word-break:keep-all; margin-bottom:8px;">' +
+                                (x.who ? '<span style="font-family:\'Pretendard\',sans-serif; font-size:16px; font-weight:800; ' +
+                                    'color:' + INK_L + '; letter-spacing:2px; margin-right:12px;">' + esc(x.who) + '</span>' : '') +
+                                esc(x.text) + '</div>';
+                        }).join("") + '</div>' : '') +
                 '</div>' +
 
                 '<div style="margin-top:auto; padding-top:30px; border-top:1px solid ' + LINE + '; ' +
@@ -634,6 +671,7 @@
             d.anni.forEach(function (a) { pages.push({ type: "anni", a: a, key: d.key }); });
 
             var letter = d.letter || null;   // 그 날 첫 장에만 싣는다
+            var lines = (d.lines && d.lines.length) ? d.lines : null;   // 엄마·아빠의 한 줄도 첫 장에
 
             d.ms.forEach(function (m) {
                 var found = (typeof window.getMilestonePhoto === "function") ? window.getMilestonePhoto(m.id) : null;
@@ -641,9 +679,9 @@
                     type: "day", key: d.key, src: found ? found.photo : null,
                     kicker: "처음 해낸 일", title: m.title, desc: m.desc,
                     caption: found ? (found.photo.caption || "") : "",
-                    letter: letter
+                    letter: letter, lines: lines
                 });
-                letter = null;
+                letter = null; lines = null;
             });
 
             d.photos.filter(function (p) { return !p.msId; }).forEach(function (p) {
@@ -651,9 +689,9 @@
                     type: "day", key: d.key, src: p,
                     kicker: "그날의 사진", title: "", desc: "",
                     caption: p.caption || "",
-                    letter: letter
+                    letter: letter, lines: lines
                 });
-                letter = null;
+                letter = null; lines = null;
             });
 
             /* 부부 문답은 collect() 에서 아예 안 담는다. 여기도 만들지 않는다. */
@@ -662,7 +700,7 @@
             if (letter) pages.push({
                 type: "day", key: d.key, src: null,
                 kicker: "그날의 편지", title: "", desc: "", caption: "",
-                letter: letter
+                letter: letter, lines: lines
             });
         });
 
@@ -701,15 +739,18 @@
             toast("기록이 많아 " + MAX_PAGES + "쪽까지만 담았어요");
         }
 
-        // 2) 사진을 미리 전부 데이터로 바꾼다
+        /* ⚠️ 미리보기는 앞 세 쪽만 굽는데, 사진은 80쪽 치를 전부 먼저 받고 있었다.
+              무료 회원이 한 번 눌러볼 때마다 폰에서 수십 장을 내려받았다. 자르고 나서 받는다. */
+        var total = pages.length;
+        if (previewOnly) pages = pages.slice(0, 3);      // 표지 · 태어난 날 · 첫 장면
+
+        // 2) 사진을 미리 데이터로 바꾼다
         progress(0, pages.length, "사진을 옮기는 중이에요");
         for (var j = 0; j < pages.length; j++) {
             if (pages[j].src) pages[j].img = await photoData(pages[j].src);
         }
 
         // 3) 한 장씩 굽는다
-        var total = pages.length;
-        if (previewOnly) pages = pages.slice(0, 3);      // 표지 · 태어난 날 · 첫 장면
 
         var jsPDF = window.jspdf.jsPDF;
         var pdf = previewOnly ? null
@@ -732,7 +773,7 @@
                 else if (p.type === "diary")  html = diaryPage(p.e, String(folioNo));
                 else if (p.type === "day") html = dayPage({
                     img: p.img, kicker: p.kicker, title: p.title,
-                    desc: p.desc, caption: p.caption, key: p.key, letter: p.letter
+                    desc: p.desc, caption: p.caption, key: p.key, letter: p.letter, lines: p.lines
                 }, String(folioNo));
                 else html = scenePage({
                     img: p.img, kicker: p.kicker, title: p.title,
@@ -751,8 +792,32 @@
         if (previewOnly) { showPreview(shots, total); return; }
 
         progress(pages.length, pages.length, "책을 묶는 중이에요");
-        pdf.save(babyName() + "의 배냇함.pdf");
+        var fname = babyName() + "의 배냇함.pdf";
+        var ua = navigator.userAgent || "";
+        var mobile = /Android|iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        var file = null;
+        if (mobile && typeof File === "function") {
+            try { file = new File([pdf.output("blob")], fname, { type: "application/pdf" }); } catch (e) { file = null; }
+        }
         closeProgress();
+
+        /* ⚠️ pdf.save() 는 '내려받기 링크' 다. 아이폰 홈 화면 앱에서는 다 굽고 나서 아무 일도 없었다.
+              폰에서는 공유창에 태운다 (엽서·음성과 같은 방식).
+              다 굽는 동안 '누른 손' 이 식어서, '저장하기' 를 한 번 더 받아 새 손으로 연다. */
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+            var shareBook = function () {
+                navigator.share({ files: [file], title: babyName() + "의 배냇함" }).catch(function (e) {
+                    if (e && e.name === "AbortError") return;      // 사람이 닫은 건 실패가 아니다
+                    pdf.save(fname);
+                });
+            };
+            if (typeof window.showConfirm === "function") {
+                window.showConfirm("📖 " + pages.length + "쪽짜리 책이 만들어졌어요.<br><span style='font-size:12px;color:#A3958A;'>창이 뜨면 '파일에 저장'을 누르거나 인쇄소로 바로 보내세요.</span>",
+                    shareBook, "📖", "저장하기", "#B98A2E");
+            } else shareBook();
+            return;
+        }
+        pdf.save(fname);
         toast("📖 " + pages.length + "쪽짜리 책이 만들어졌어요");
     };
 
@@ -881,15 +946,15 @@
               창을 못 열어도 통과는 절대 안 시킨다. */
         if (wantBook) {
             if (!pro) {
-                if (typeof window.openPlus === "function") window.openPlus("book");
+                /* ⚠️ 무료 회원은 여기서 곧장 결제창으로 갔다. 배냇함의 '포토북' 칸이 이 길을 타서
+                      "앞 세 쪽은 무료로 구워서 보여준다" 는 미리보기에 닿을 길이 없었다.
+                      미리보기로 보낸다. 전체 책은 여전히 못 뽑는다 (미리보기 끝의 버튼이 플러스로 안내한다). */
+                window.previewMemoryBook();
                 return;
             }
             window.makeMemoryBook();          // 내부에서 다시 잡아둔 이름
         } else {
-            if (!pro) {
-                if (typeof window.openPlus === "function") window.openPlus("voice");
-                return;
-            }
+            // 목소리는 무료도 열 개까지 담긴다. 여기서 막지 않는다 — 한도는 openVoiceSheet 가 센다.
             if (typeof window.openVoiceSheet === "function") window.openVoiceSheet();
         }
     }, true);

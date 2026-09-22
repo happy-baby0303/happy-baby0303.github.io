@@ -61,7 +61,7 @@
         alwaysFree: [
             "도감 100가지와 그 사진",
             "수유·수면·기저귀·체온·성장·가계부·다이어리",
-            "짝꿍 연동 2인과 바통터치 알림",
+            "가족 3명 연동과 바통터치 알림",   // 표(free.familySize: 3)와 같게. "2인" 이라고 적혀 있었다
             "추억 엽서와 파형 엽서 저장",
             "배냇함 통째로 내려받기"
         ]
@@ -133,7 +133,7 @@
         family: {
             icon: "👵",
             title: "가족 " + PLAN.pro.familySize + "명까지",
-            free: "부모 " + PLAN.free.familySize + "명",
+            free: "가족 " + PLAN.free.familySize + "명",   // 부모 둘 + 한 명. "부모 3명" 이라고 적혀 있었다
                       line: PLAN.free.familySize + "명까지는 무료예요. 할머니 할아버지까지 " + babyName() + "의 배냇함을 보려면 다섯 자리가 필요합니다."
         },
         book: {
@@ -246,6 +246,7 @@
         '</div>';
 
         document.body.appendChild(wrap);
+        return true;   // 열었다 — openPlus 가 결제 화면을 겹쳐 열지 않게
     };
 
     /* ---------- 결제 화면은 하나 ---------- */

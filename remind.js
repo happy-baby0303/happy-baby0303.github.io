@@ -52,7 +52,7 @@
     window.setManualBedtime = function (minutes) {
         if (minutes === null) localStorage.removeItem(MANUAL_KEY);
         else localStorage.setItem(MANUAL_KEY, String(minutes));
-        window.syncBedtimeReminder(true);
+        window.syncBedtimeReminder(true, "time");
         redrawCard();
     };
 
@@ -96,7 +96,20 @@
 
     /* ---------- 서버에 우리집 시계 적어두기 ---------- */
 
-    window.syncBedtimeReminder = async function (force) {
+    function learnedMinutes() {
+        if (typeof window.getBedtimeMinutes === "function") {
+            try { return window.getBedtimeMinutes(); } catch (e) {}
+        }
+        return 20 * 60;
+    }
+
+    /* ⚠️ 엄마 폰과 아빠 폰이 서버의 같은 문서 하나(reminders/가족코드)를 쓴다.
+          예전엔 폰마다 하루 한 번 '내 폰의 켜짐 · 시각' 을 통째로 올렸다.
+          그래서 엄마가 알림을 꺼도 다음 날 아빠 폰이 켜 두었고,
+          아빠가 직접 정한 시각도 엄마 폰이 배운 시각으로 되돌려 놓았다.
+          이제 켜고 끄기 · 직접 정한 시각은 '누른 폰' 만 올리고, 다른 폰은 서버 것을 따른다.
+          what: "toggle"(켜고 끄기) · "time"(시각을 정하거나 지움) · 없으면 하루 한 번 맞추기 */
+    window.syncBedtimeReminder = async function (force, what) {
         var code = syncCode();
         if (!code) return;
         if (!window.db || typeof window.setDoc !== "function" || typeof window.doc !== "function") return;
@@ -104,22 +117,54 @@
         var today = todayKey();
         if (!force && localStorage.getItem(SYNCED_KEY) === today) return;
 
-        var min = bedtimeMinutes();
+        var ref = window.doc(window.db, "reminders", code);
+        var srv = null;
+        if (typeof window.getDoc === "function") {
+            try {
+                var snap = await window.getDoc(ref);
+                if (snap && snap.exists()) srv = snap.data() || {};
+            } catch (e) {}
+        }
+
+        var payload = { babyName: babyName(), lastPhotoAt: lastPhotoDay(), updatedAt: Date.now() };
+
+        // 켜짐/꺼짐 — 누른 폰만 정한다
+        if (what === "toggle" || !srv || typeof srv.enabled !== "boolean") {
+            payload.enabled = !isOff();
+        } else {
+            localStorage.setItem(OFF_KEY, srv.enabled ? "false" : "true");
+        }
+
+        // 시각
+        var manual = window.getManualBedtime();
+        if (what === "time") {
+            var m1 = (manual !== null) ? manual : learnedMinutes();
+            payload.manual = (manual !== null);
+            payload.bedtimeMinutes = m1;
+            payload.sendBucket = bucketOf(m1);
+        } else if (srv && srv.manual === true && isFinite(Number(srv.bedtimeMinutes))) {
+            // 짝꿍이 직접 정해 둔 시각 — 덮지 않고 이 폰도 따른다
+            localStorage.setItem(MANUAL_KEY, String(Number(srv.bedtimeMinutes)));
+        } else if (manual !== null && srv && srv.manual === false) {
+            // 짝꿍이 '정한 시간 지우기' 를 눌렀다 — 이 폰의 것도 지우고 배운 시각으로
+            localStorage.removeItem(MANUAL_KEY);
+            var m2 = learnedMinutes();
+            payload.bedtimeMinutes = m2;
+            payload.sendBucket = bucketOf(m2);
+        } else {
+            var m3 = bedtimeMinutes();
+            payload.bedtimeMinutes = m3;
+            payload.sendBucket = bucketOf(m3);
+            if (manual !== null) payload.manual = true;       // 예전 버전에서 이 폰에 정해 둔 것
+        }
 
         try {
-            await window.setDoc(window.doc(window.db, "reminders", code), {
-                enabled:        !isOff(),
-                sendBucket:     bucketOf(min),
-                bedtimeMinutes: min,
-                babyName:       babyName(),
-                lastPhotoAt:    lastPhotoDay(),
-                updatedAt:      Date.now()
-            }, { merge: true });
-
+            await window.setDoc(ref, payload, { merge: true });
             localStorage.setItem(SYNCED_KEY, today);
         } catch (e) {
             console.warn("[육퇴 알림] 시계 등록 실패", e);
         }
+        redrawCard();
     };
 
     /* ---------- 사진을 담으면 바로 알려준다 ---------- */
@@ -136,7 +181,7 @@
 
     window.setBedtimeReminder = async function (on) {
         localStorage.setItem(OFF_KEY, on ? "false" : "true");
-        await window.syncBedtimeReminder(true);
+        await window.syncBedtimeReminder(true, "toggle");
         toast(on ? "🌙 육퇴 시간에 살짝 알려드릴게요" : "알림을 껐어요");
         redrawCard();
     };

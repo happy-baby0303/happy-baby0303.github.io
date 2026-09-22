@@ -38,6 +38,14 @@
         return localStorage.getItem("tosil_babyName") || "우리 아기";
     }
 
+    // 하윤 + 가 → 하윤이가 · 지우 + 가 → 지우가 (data.js 의 babyCall 과 같은 규칙)
+    function callName(j) {
+        try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");
+    }
+
     function pad(n) { return String(n).padStart(2, "0"); }
 
     function keyOf(d) {
@@ -116,7 +124,7 @@
         for (var y = 1; y <= 10; y++) {
             var bd = plusMonths(b, y * 12);
             put(bd, y === 1 ? "첫 번째 생일" : y + "번째 생일",
-                   y === 1 ? babyName() + "가 한 살이 되었어요" : "", 1);
+                   y === 1 ? callName("가") + " 한 살이 되었어요" : "", 1);
         }
 
         // 4) 첫 명절 — 태어난 뒤 처음 오는 한 번만

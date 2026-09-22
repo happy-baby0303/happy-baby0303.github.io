@@ -26,6 +26,23 @@
     var KEYS  = ["tosil_sleep_start", "tosil_sleep_type"];
     var QUIET = false;      // 서버에서 받아 쓰는 중엔 되쏘지 않는다
 
+    /* ⚠️ 둘째 아기부터는 script.js 가 열쇠 끝에 꼬리표(_2)를 붙여서 저장한다.
+          'tosil_sleep_start_2' 는 목록에 없다고 보고 지나쳐서,
+          둘째의 '재우는 중' 은 서버에 한 번도 안 올라갔다. */
+    function isSleepKey(k) {
+        k = String(k || "");
+        for (var i = 0; i < KEYS.length; i++) {
+            if (k === KEYS[i] || k.indexOf(KEYS[i] + "_") === 0) return true;
+        }
+        return false;
+    }
+
+    // 누가 눌렀는지 — 짝꿍 폰에 "도우미가 재우기 시작했어요" 처럼 그대로 보여준다
+    function roleWord() {
+        var r = localStorage.getItem("user_role");
+        return r === "dad" ? "아빠" : r === "mom" ? "엄마" : r === "senior" ? "도우미" : "";
+    }
+
     function syncCode() { return localStorage.getItem("family_sync_code"); }
     function suffix() { return window.currentBabySuffix || ""; }
 
@@ -63,6 +80,7 @@
                 start: start ? Number(start) : null,
                 type: type || null,
                 by: myUid(),
+                byName: roleWord(),
                 at: Date.now()
             });
         } catch (e) {
@@ -84,13 +102,13 @@
 
         proto.setItem = function (k, v) {
             var out = origSet.apply(this, arguments);
-            if (this === window.localStorage && KEYS.indexOf(k) > -1) pushSoon();
+            if (this === window.localStorage && isSleepKey(k)) pushSoon();
             return out;
         };
 
         proto.removeItem = function (k) {
             var out = origDel.apply(this, arguments);
-            if (this === window.localStorage && KEYS.indexOf(k) > -1) pushSoon();
+            if (this === window.localStorage && isSleepKey(k)) pushSoon();
             return out;
         };
 
@@ -123,9 +141,10 @@
 
         // 내가 누른 게 아니면 알려준다
         if (d.by && d.by !== myUid() && typeof window.showToast === "function") {
-            var who = localStorage.getItem("user_role") === "dad" ? "엄마" : "아빠";
-            window.showToast(newStart ? who + "가 재우기 시작했어요"
-                                      : who + "가 수면 기록을 마쳤어요");
+            /* ⚠️ '내가 아빠면 누른 사람은 엄마' 로 짐작했다. 할머니·시터가 눌러도 "엄마가" 로 떴다.
+                  누른 사람을 같이 적어 두고 그대로 읽는다. */
+            var who = d.byName ? d.byName + "가" : "가족이";
+            window.showToast(newStart ? who + " 재우기 시작했어요" : who + " 수면 기록을 마쳤어요");
         }
     }
 
@@ -176,13 +195,16 @@
         var s = localStorage.getItem(KEYS[0]);
         if (!s) return;
         var hours = (Date.now() - Number(s)) / 3600000;
-        if (hours < 12) return;
+        /* ⚠️ 12시간이었다. 저녁 8시에 재우고 아침 8시 반에 '깼어요' 를 누르면
+              그 사이에 표시가 지워져서 밤잠 기록이 통째로 사라졌다 (저장이 안 됐다는 문의).
+              한 번에 20시간을 자는 아기는 없다. 그때만 '누가 끝을 못 누른 것' 으로 본다. */
+        if (hours < 20) return;
 
         localStorage.removeItem(KEYS[0]);
         localStorage.removeItem(KEYS[1]);
         repaint();
         if (typeof window.showToast === "function") {
-            window.showToast("12시간 넘게 '자는 중'이라 표시를 정리했어요");
+            window.showToast("20시간 넘게 '자는 중'이라 표시를 정리했어요");
         }
     }
 

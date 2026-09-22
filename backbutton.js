@@ -69,6 +69,39 @@
         /* 이번 배치에서 더 찾은 것 */
         { id: "nursing-sheet",          close: null },   // 수유실 — 급할 때 여는 화면
         { id: "bedtime-sheet",          close: null },   // 육퇴 시간 고르기
+
+        /* ⚠️ 출시 전 점검에서 더 찾은 것 — 이 화면들을 연 채 뒤로가기를 두 번 누르면 앱이 꺼졌다.
+              "emergency-card" 는 옛 이름이다. 119 카드의 진짜 id 는 e119-card 다.
+              close: "hide" 는 index.html 에 원래 박혀 있는 화면 — 지우면 다시 못 여니 숨기기만 한다. */
+        { id: "e119-card",              close: "close119Card" },           // 119에 읽어줄 카드 — 급할 때 여는 화면
+        { id: "receipt-modal",          close: "closeReceiptModal" },      // 오늘의 영수증 (육퇴 배너)
+        { id: "weekly-report-modal",    close: "closeWeeklyReport" },
+        { id: "global-image-viewer",    close: "closeImageViewer" },
+        { id: "family-sync-modal",      close: "closeFamilySyncModalForce" },
+        { id: "premium-modal",          close: "closeFestivalModalForce" },
+        { id: "checklist-modal",        close: "closeChecklistForce" },
+        { id: "emergency-modal",        close: "closeEmergencyModalForce" },
+        { id: "routine-settings-modal", close: "closeRoutineSettingsForce" },
+        { id: "tracker-settings-modal", close: "closeTrackerSettingsForce" },
+        { id: "diaper-bottom-sheet",    close: "closeDiaperSheet" },
+        { id: "notice-controller-overlay", close: "closeNoticeController" },
+        { id: "vip-modal-overlay",      close: "hide" },
+        { id: "kiosk-option-modal",     close: "hide" },
+        { id: "baby-mgmt-modal",        close: null },     // ✕ 가 remove() 로 닫는 화면
+        { id: "sync-ticket-modal",      close: null },
+        { id: "ms-date-sheet",          close: "closeMilestoneDate" },     // 도감 날짜 고르기
+        { id: "word-input-sheet",       close: null },                     // 첫 단어 담기
+        { id: "voice-box",              close: "closeVoiceBox" },          // 소리함
+        { id: "sealed-box",             close: "closeSealedBox" },         // 봉인함
+        { id: "sealed-view",            close: "closeSealedView" },        // 봉인 편지 읽기
+        { id: "vaccine-sheet",          close: null },                     // 예방접종 일정표
+        { id: "voice-reel",             close: "closeVoiceReel" },         // 소리 모아듣기
+        { id: "navi-nudge",             close: null },                     // 내비 켜기 전 '기저귀 가방' 확인
+        /* 진행 중인 작업 — NEVER_CLOSE 에 있어도 이 목록에 없으면 지켜지지 않았다.
+           내려받는 도중 뒤로가기 두 번이면 앱이 꺼졌다. */
+        { id: "export-progress",        close: null },
+        { id: "book-progress",          close: null },
+        /* 배냇함 — 소리함 · 봉인함 · 봉인 편지 보기. 여기서 뒤로가기를 누르면 앱이 꺼졌다 */
     ];
 
     /* 진행 중인 작업은 뒤로가기로 닫으면 안 된다.
@@ -126,7 +159,10 @@
     function closeLayer(entry) {
         var el = byId(entry.id);
 
-        if (entry.close && typeof window[entry.close] === "function") {
+        if (entry.close === "hide") {
+            // index.html 에 박혀 있는 화면 — 지우면 다음에 못 연다. 숨기기만.
+            if (el) el.style.display = "none";
+        } else if (entry.close && typeof window[entry.close] === "function") {
             try { window[entry.close](); } catch (e) {}
         } else if (el) {
             /* 원래 닫는 함수가 없는 화면들.

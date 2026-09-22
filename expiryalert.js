@@ -164,8 +164,13 @@
         box.innerHTML = cardHTML(s);
         var el = box.firstChild;
 
+        /* ⚠️ 119 카드와 같은 자리(아기 카드 바로 아래)에 끼어들어서, 열이 나는 날
+              '퓨레 버리세요' 가 '119에 읽어줄 카드' 위로 올라가곤 했다. 열이 먼저다. */
+        var fever = document.getElementById("home-e119");
+        var after = (fever && fever.parentNode === block.parentNode) ? fever : block;
+
         if (old) old.parentNode.replaceChild(el, old);
-        else block.parentNode.insertBefore(el, block.nextSibling);
+        else after.parentNode.insertBefore(el, after.nextSibling);
     }
 
     window.refreshExpiryAlert = mount;
