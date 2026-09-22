@@ -464,13 +464,23 @@ function initQuickScrollDrag() {
 function getV(id) { const el = document.getElementById(id); return !el ? 0 : Number(el.value.replace(/,/g,'')) || 0; }
 function formatNum(el) { let v = el.value.replace(/[^0-9]/g, ''); if(v) el.value = Number(v).toLocaleString(); }
 
+// 한국 날짜 'YYYY-MM-DD' (toISOString 은 영국 시각이라 새벽~아침 9시엔 하루 전이 나온다)
+function localDayKey(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
 async function loadAllExternalData() {
     filterPlaces();
     try {
         if (window.location.protocol !== 'file:') {
-            const resFest = await fetch('festivals.json?v=' + new Date().getTime());
+            /* ⚠️ 주소 끝에 매번 다른 숫자(?v=지금 시각)를 붙여 받았다.
+                  그래서 앱을 열 때마다 두 파일(약 350KB)을 새로 내려받았고,
+                  sw.js 가 그걸 주소마다 따로 담아서 폰 저장공간에 계속 쌓였다.
+                  같은 주소로 받는다. 바뀌었는지는 브라우저가 서버에 짧게 물어보고 판단한다. */
+            const resFest = await fetch('festivals.json');
             if (resFest.ok) { apiFestivals = await resFest.json(); filterPlaces(); }
-            const resPlaces = await fetch('places.json?v=' + new Date().getTime());
+            const resPlaces = await fetch('places.json');
             if (resPlaces.ok) { hotplacesData = await resPlaces.json(); filterPlaces(); }
         }
     } catch (e) { console.warn("데이터 로드 실패 - 앱은 정상 작동 중"); }
@@ -513,12 +523,12 @@ function generateSubFilters(mainRegion) {
     // 🚨 1. 현재 탭에 맞춰서 행사 데이터인지 핫플 데이터인지 원본 데이터를 정합니다.
     if (currentSubTab === 'event') {
         const now = new Date();
-        const todayNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,''));
-        const currentMonthNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'').substring(0, 6));
+        const todayNum = parseInt(localDayKey(now).replace(/-/g,''));   // ⚠️ toISOString 은 영국 시각 — 아침 9시 전엔 어제였다
+        const currentMonthNum = parseInt(localDayKey(now).replace(/-/g,'').substring(0, 6));
 
         // 행사 데이터는 끝나버린 행사인지 여기서 미리 한 번 걸러냅니다! (빈 깡통 지역 방지)
         source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].filter(p => {
-            if (p.expiryDate && now.toISOString().split('T')[0] > p.expiryDate) return false; 
+            if (p.expiryDate && localDayKey(now) > p.expiryDate) return false; 
             
             let rawStartDate = String(p.eventstartdate || p.datetime || '').replace(/[^0-9]/g, '');
             let rawEndDate = String(p.eventenddate || p.endDate || '').replace(/[^0-9]/g, '');
@@ -602,14 +612,14 @@ function filterPlaces() {
     container.innerHTML = ''; 
     
     const now = new Date();
-    const todayNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,''));
-    const currentMonthNum = parseInt(now.toISOString().split('T')[0].replace(/-/g,'').substring(0, 6));
+    const todayNum = parseInt(localDayKey(now).replace(/-/g,''));   // ⚠️ toISOString 은 영국 시각 — 아침 9시 전엔 어제였다
+    const currentMonthNum = parseInt(localDayKey(now).replace(/-/g,'').substring(0, 6));
 
     if (currentSubTab === 'event') {
         let eventSource = Array.from(new Map([...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].map(i => [i.title, i])).values());
         const filteredEvents = eventSource.filter(p => {
             let addr = p.addr1 || p.addr || p.locText || '', title = p.title || '';
-            if (p.expiryDate && now.toISOString().split('T')[0] > p.expiryDate) return false; 
+            if (p.expiryDate && localDayKey(now) > p.expiryDate) return false; 
             
             let rawStartDate = String(p.eventstartdate || p.datetime || '').replace(/[^0-9]/g, '');
             let rawEndDate = String(p.eventenddate || p.endDate || '').replace(/[^0-9]/g, '');
@@ -637,7 +647,7 @@ function filterPlaces() {
         if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 이번 달에 예정된 행사가 없습니다.</p>`; return; }
         const gridEl = document.createElement('div'); gridEl.className = 'festival-grid';
         filteredEvents.forEach(item => {
-            const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = item.firstimage || '';
+            const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = String(item.firstimage || '').replace(/^http:\/\//i, 'https://');
             let sd = item.eventstartdate || item.datetime || '', ed = item.eventenddate || '';
             if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
             const dateText = ed ? `${sd} ~ ${ed}` : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
@@ -649,6 +659,12 @@ function filterPlaces() {
             card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
             gridEl.appendChild(card);
         }); container.appendChild(gridEl);
+        /* ⚠️ 행사 정보와 사진은 한국관광공사(TourAPI) 자료다. 공공누리 제3유형이라
+              '출처 표시' 가 쓰는 조건인데 화면 어디에도 없었다. 목록 맨 아래에 적는다. */
+        const credit = document.createElement('div');
+        credit.style.cssText = 'text-align:center; font-size:11px; font-weight:600; color:var(--text-sub); padding:18px 0 6px; line-height:1.6;';
+        credit.textContent = '행사 정보·사진 출처: 한국관광공사 (공공누리 제3유형)';
+        container.appendChild(credit);
 
     } else {
         // [검증 육아지도 핫플 리스트 - 🚨 이모티콘 싹 뺀 초깔끔 모드]
@@ -3398,11 +3414,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     memorybox: 'nav-memorybox', photo: 'nav-memorybox', baton: 'nav-toolbox' };
         var navId = map[go];
         if (!navId) return;
+        /* ⚠️ 탭 이름 대신 go 값을 그대로 넘겼다. 'photo' · 'baton' 은 탭 이름이 아니라서
+              홈 화면 아이콘을 길게 눌러 '사진 담기' · '바통터치' 로 들어오면 빈 화면이 떴다. */
+        var tab = navId.replace('nav-', '');
         var run = function () {
             var el = document.getElementById(navId);
             if (el && typeof window.switchTab === 'function') {
-                window.switchTab(go, el);
+                window.switchTab(tab, el);
                 history.replaceState(null, '', location.pathname);   // 주소는 깔끔하게
+                if (go === 'baton') setTimeout(function () {
+                    if (typeof window.switchTool === 'function') window.switchTool('baton');
+                    else if (typeof window.directGoToolbox === 'function') window.directGoToolbox('baton');
+                }, 300);
+                // 사진 고르는 창은 손으로 눌러야만 열린다 (바로가기로는 못 연다). 자리만 알려준다.
+                if (go === 'photo') setTimeout(function () {
+                    if (typeof window.showToast === 'function') window.showToast('📷 맨 위 오늘 칸에서 사진을 담아주세요');
+                }, 700);
                 return true;
             }
             return false;

@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v36';
+const CACHE = 'baenaet-v37';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -265,7 +265,13 @@ self.addEventListener('fetch', (e) => {
                opaque 는 내용을 볼 수 없어 담아도 쓸모가 없으니 뺀다. */
             if (res && res.ok && (res.type === 'basic' || res.type === 'cors')) {
                 const clone = res.clone();
-                caches.open(CACHE).then(c => c.put(e.request, clone)).catch(() => {});
+                /* ⚠️ 우리 서버 주소는 '?' 뒤를 떼고 담는다.
+                      '?v=시각' 처럼 매번 다른 주소를 그대로 담아서, 같은 파일이 앱을 열 때마다
+                      한 벌씩 더 쌓였다 (한 달이면 수십 MB). 꺼낼 때도 ignoreSearch 로 꺼내므로
+                      떼고 담아도 똑같이 찾는다. 이번 버전으로 바뀌면 쌓인 옛 칸은 통째로 지워진다. */
+                const sameOrigin = url.indexOf(self.location.origin) === 0;
+                const key = sameOrigin ? url.split('?')[0] : e.request;
+                caches.open(CACHE).then(c => c.put(key, clone)).catch(() => {});
             }
             return res;
 
