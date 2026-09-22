@@ -25,6 +25,9 @@ const US = { maxInstances: 10 };
 // 스토리지 버킷 (명시해두면 환경이 바뀌어도 안 흔들린다)
 const BUCKET = "happybaby-6de42.firebasestorage.app";
 
+// 앱 주소 — 알림을 눌렀을 때 여는 곳 (https 여야 한다)
+const APP_URL = "https://happy-baby0303.github.io/";
+
 /* ==================================================================
  * 💛 1. 카카오 로그인 우회 서버 (2세대 / us-central1)
  * ================================================================== */
@@ -58,8 +61,17 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
   const senderUid = request.auth && request.auth.uid;
   if (!senderUid) return { success: false, error: "로그인이 필요합니다." };
 
-  const { syncCode, title, body, excludeToken } = request.data || {};
+  const { syncCode, title, body, excludeToken, link } = request.data || {};
   if (!syncCode) return { success: false, error: "가족 코드가 없습니다." };
+
+  /* 알림을 누르면 갈 곳 (예: "diary.html", "index.html?go=toolbox")
+     우리 앱 안의 상대 주소만 받는다. 바깥 주소는 버린다 — 가짜 링크로 남의 사이트에 보내지 못하게. */
+  const path = (typeof link === "string" && /^[a-zA-Z0-9_\-./?=&]{1,80}$/.test(link) &&
+                !link.startsWith("/") && !link.includes("..") && !link.includes("//"))
+    ? link : "";
+  // 링크가 없으면 싣지 않는다 → sw.js 가 제목으로 짐작한다 (바통 → 툴박스)
+  const linkData = path ? { data: { link: path } } : {};
+  const linkWeb  = path ? { fcmOptions: { link: APP_URL + path } } : {};
 
   try {
     const db = admin.firestore();
@@ -134,6 +146,7 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
       notification: { title, body },
+      ...linkData,
       webpush: {
         notification: {
           title,
@@ -141,6 +154,8 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
           icon: "/icon-192x192.png",
           // badge: "/icon-badge.png",   // ⚠️ 컬러 PNG 는 안드로이드 상태바에서 흰 네모가 된다
         },
+        // ⚠️ 이게 없어서 알림을 눌러도 어디로 갈지 몰랐다 (sw.js 가 먼저 받아서 이 주소로 보낸다)
+        ...linkWeb,
       },
       android: { priority: "high" },
       apns: { payload: { aps: { sound: "default" } } },
@@ -218,24 +233,35 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
 const FAMILY_PREFIXES = [
   "tracker", "fever", "growth", "cube", "ledger", "routine", "settings",
   "nightduty", "baton", "photos", "voices", "sealed", "words", "notes",
-  "parentNotice", "diary",
+  "parentNotice", "diary", "letters",
 ];
 
-// 다둥이는 photos_TS-XXXX_2 처럼 뒤에 번호가 붙는다
+/* ⚠️ 다둥이 꼬리표는 "_2" 가 아니다.
+      script.js 가 '_' + 시각 (예: _1726712345678) 으로 만든다.
+      그래서 둘째·셋째 사진·기록은 탈퇴해도 서버에 그대로 남았다. (스토어 데이터 삭제 정책 위반)
+      접두어·꼬리표 목록에 기대지 않는다. 전체 컬렉션을 훑어서
+      '두 번째 조각이 이 방 코드' 인 것을 전부 지운다 — 보안 규칙이 방을 가르는 기준과 같다. */
 const BABY_SUFFIXES = ["", "_2", "_3", "_4"];
 
 // 내가 올린 파일이 사는 곳 (전부 uid 로 나뉘어 있다)
 const STORAGE_ROOTS = ["memories", "voices", "profiles", "mamsuda"];
 
 async function purgeFamilyData(db, code) {
+  const names = new Set();
   for (const prefix of FAMILY_PREFIXES) {
-    for (const suffix of BABY_SUFFIXES) {
-      const name = `${prefix}_${code}${suffix}`;
-      try {
-        await db.recursiveDelete(db.collection(name));
-      } catch (e) {
-        logger.warn("컬렉션 정리 실패", { name, message: e.message });
-      }
+    for (const suffix of BABY_SUFFIXES) names.add(`${prefix}_${code}${suffix}`);
+  }
+  try {
+    const cols = await db.listCollections();
+    cols.forEach((c) => { if (c.id.split("_")[1] === code) names.add(c.id); });
+  } catch (e) {
+    logger.warn("컬렉션 목록 실패 — 접두어 목록으로만 정리", { message: e.message });
+  }
+  for (const name of names) {
+    try {
+      await db.recursiveDelete(db.collection(name));
+    } catch (e) {
+      logger.warn("컬렉션 정리 실패", { name, message: e.message });
     }
   }
   await db.collection("reminders").doc(code).delete().catch(() => {});
@@ -418,10 +444,14 @@ exports.bedtimeReminder = onSchedule(
           .where("firebase_uid", "in", members)
           .get();
 
+        /* ⚠️ fcm_token 하나만 읽었다. 가족 알림은 이미 fcm_tokens 배열로 고쳤는데
+              여기만 옛날 방식이라, 폰·태블릿을 같이 쓰면 한 대에만 갔다. */
         const tokenMap = new Map();
         users.forEach((u) => {
-          const t = u.data().fcm_token;
-          if (t) tokenMap.set(t, u.id);
+          const ud = u.data() || {};
+          const list = Array.isArray(ud.fcm_tokens) ? ud.fcm_tokens.slice() : [];
+          if (ud.fcm_token && !list.includes(ud.fcm_token)) list.push(ud.fcm_token);
+          list.forEach((t) => { if (t) tokenMap.set(t, u.id); });
         });
         const tokens = [...tokenMap.keys()];
         if (!tokens.length) continue;
@@ -441,7 +471,9 @@ exports.bedtimeReminder = onSchedule(
               // badge: "/icon-badge.png",   // ⚠️ 컬러 PNG 는 안드로이드 상태바에서 흰 네모가 된다
               tag: "yukamate-bedtime",
             },
+            fcmOptions: { link: APP_URL + "index.html?go=memorybox" },
           },
+          data: { link: "index.html?go=memorybox" },
           android: { priority: "normal" },
           apns: { payload: { aps: { sound: "default" } } },
         });
@@ -457,14 +489,18 @@ exports.bedtimeReminder = onSchedule(
             dead.push(tokens[i]);
           }
         });
+        // 죽은 토큰만 정확히 뺀다 (필드를 통째로 지우면 그 사람 알림이 전부 끊긴다)
         await Promise.all(
-          dead.map((t) =>
-            db
-              .collection("users")
-              .doc(tokenMap.get(t))
-              .update({ fcm_token: admin.firestore.FieldValue.delete() })
-              .catch(() => {})
-          )
+          dead.map((t) => {
+            const ref = db.collection("users").doc(tokenMap.get(t));
+            return ref.get().then((snap) => {
+              const update = { fcm_tokens: admin.firestore.FieldValue.arrayRemove(t) };
+              if (snap.exists && snap.data().fcm_token === t) {
+                update.fcm_token = admin.firestore.FieldValue.delete();
+              }
+              return ref.update(update);
+            }).catch(() => {});
+          })
         );
 
         // 3번 연속 무시하면 일주일 쉰다
