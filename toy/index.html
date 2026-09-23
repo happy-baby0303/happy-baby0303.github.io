@@ -52,14 +52,20 @@
         }
 
         /* 🚨 엄마아빠 SOS 긴급 처방전 (회색 배경 완벽 제거) */
-        .sos-theme-panel { background: transparent; padding: 0 0 8px; margin: 0 0 24px; border: none; }
+        .sos-theme-panel { background: #FFFFFF; border: 1px solid #F2F5F8; border-radius: 20px;
+                           padding: 20px 18px; margin: 0 0 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
         /* 칸 제목은 두 탭 모두 18px 하나로 (놀이 탭의 '지금 몇 분 · 이번 주 놀이' 와 같게) */
+        /* ⚠️ 어떤 칸은 회색 배경에 제목만, 어떤 칸은 흰 카드라 한 화면에 두 모양이 섞여 있었다.
+              젖병·유모차·카시트는 전부 흰 카드다. 장난감도 같은 모양으로 맞춘다.
+              칸 = 흰 카드 / 카드 안의 묶음 = 연회색 / 색 상자는 안내에만. */
+        .bnh-card { background: #FFFFFF; border: 1px solid #F2F5F8; border-radius: 20px;
+                    padding: 20px 18px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
         .panel-header { font-size: 18px; font-weight: 900; color: #191F28; letter-spacing: -0.4px; margin-bottom: 14px; }
         
         .theme-scroll-wrapper { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; scrollbar-width: none; -ms-overflow-style: none; }
         .theme-scroll-wrapper::-webkit-scrollbar { display: none; }
         
-        .theme-card { flex-shrink: 0; background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 16px; padding: 16px; width: 145px; text-align: left; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
+        .theme-card { flex-shrink: 0; background: #F9FAFB; border: 1px solid #E5E8EB; border-radius: 16px; padding: 16px; width: 145px; text-align: left; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
         .theme-card.active { border: 2px solid #3182F6; background: #F0F7FF; box-shadow: 0 4px 12px rgba(49,130,246,0.15); }
         .theme-emoji { font-size: 30px; margin-bottom: 10px; line-height: 1; }
         .theme-text { font-size: 13.5px; color: #4E5968; line-height: 1.4; word-break: keep-all; }
@@ -70,7 +76,7 @@
         /* 👶 발달 마일스톤 칩 CSS */
         .panel-header-dark { font-size: 18px; font-weight: 900; color: #191F28; letter-spacing: -0.4px; margin-bottom: 14px; margin-top: 8px; }
                /* SOS 처방전 카드(.theme-card)와 같은 흰 칸으로. 상자 속 상자를 만들지 않는다. */
-        .ms-chip { padding: 13px 18px; border-radius: 16px; background: #FFFFFF; color: #4E5968; border: 1px solid #E5E8EB; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .ms-chip { padding: 13px 18px; border-radius: 16px; background: #F9FAFB; color: #4E5968; border: 1px solid #E5E8EB; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .ms-chip.active { background: #191F28; color: #FFFFFF; border: 1px solid #191F28; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         /* ⚠️ 생일을 모르면 나이 배지가 비어서, 제목 옆에 빈 파란 알약이 떴다 (미완성처럼 보이던 것) */
         .dynamic-age-badge:empty { display: none !important; }
@@ -110,7 +116,7 @@
         <div id="view-toy-play" style="display: block;">
             <!-- 🎈 놀이 모아보기 — 위의 칸들(지금 몇 분 · 이번 주 놀이 · 우리 집 장난감)과 같은 모양.
                  파란 상자였고 '기적의 시간 떼우기' 라고 적혀 있었다 (떼우기 → 때우기, '기적' 은 과장). -->
-            <div id="play-list-head" style="padding:4px 0 12px;">
+            <div id="play-list-head" class="bnh-card">
                 <div style="font-size:18px; font-weight:900; color:#191F28; letter-spacing:-0.4px; margin-bottom:6px;">🎈 놀이 모아보기</div>
                 <div style="font-size:12.5px; font-weight:600; color:#8B95A1; line-height:1.7; word-break:keep-all;">집에 있는 장난감이 지겹다면, 일상용품으로 15분을 버텨보세요. 돈 드는 놀이는 없어요.</div>
             </div>
@@ -184,7 +190,8 @@
                 </button>
             </div>
 
-                       <!-- 👶 발달 마일스톤 칩 필터 -->
+            <!-- 👶 발달 마일스톤 칩 필터 — 이 칸도 카드 -->
+            <div class="bnh-card">
             <div class="panel-header-dark" style="margin-bottom: 4px;">👶 우리 아기 현재 발달 상태는?</div>
             <div style="font-size: 12.5px; font-weight: 600; color: #8B95A1; line-height: 1.6; margin-bottom: 14px; word-break: keep-all;">개월수에 맞게 미리 골라뒀어요. 바꾸시면 아래 목록도 같이 바뀝니다.</div>
             <div class="chip-group" id="milestone-filters" style="display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
@@ -194,7 +201,8 @@
                 <button class="ms-chip" data-milestone="flip" style="flex-shrink: 0; white-space: nowrap;"> 엎드려 뒤집기</button>
                 <button class="ms-chip" data-milestone="crawl" style="flex-shrink: 0; white-space: nowrap;"> 배밀이/기어가기</button>
                 <button class="ms-chip" data-milestone="stand" style="flex-shrink: 0; white-space: nowrap;"> 잡고 일어서기</button>
-                                    </div>
+            </div>
+            </div>
 
             <style>
                 #milestone-filters::-webkit-scrollbar { display: none; }

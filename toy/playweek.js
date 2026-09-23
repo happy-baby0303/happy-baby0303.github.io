@@ -529,8 +529,8 @@
                   : (p.relatedToyId && haveToy(p.relatedToyId))
                       ? badge("갖고 계신 걸로", "#EAF7F1", "#1F6F52") : "";
 
-        return '<div style="background: #FFFFFF; border-radius:20px; padding:22px 20px; ' +
-            'border:1.5px solid #CBE0FF; box-shadow:0 4px 20px rgba(49,130,246,0.07);">' +
+        return '<div style="background:#F9FAFB; border-radius:16px; padding:18px 16px; ' +
+            'border:1px solid #EEF0F2;">' +   /* 카드 안이라 연회색 */
             '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
                 badge("오늘 \u00B7 " + esc(d.day) + "요일", "#E8F3FF", "#1B64DA") +
                 '<div style="flex-shrink:0;">' + right + '</div>' +
@@ -642,7 +642,7 @@
         var ti = todayIdx();
 
         if (!plan) {
-            return '<div id="' + ID + '" style="padding:6px 0 20px;">' +
+            return '<div id="' + ID + '" class="bnh-card">' +
                 '<div onclick="window.openCuratorModal()" style="display:flex; justify-content:center; ' +
                     'align-items:center; gap:8px; padding:18px; background:' + DARK + '; color:#FFFFFF; ' +
                     'border-radius:16px; font-size:15.5px; font-weight:800; cursor:pointer; ' +
@@ -661,7 +661,7 @@
             rows.push(weekRow(plan[i], i, !isOpen(i), expanded === i, k === 6));
         }
 
-        return '<div id="' + ID + '" style="padding:4px 0 20px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
             '<div style="display:flex; align-items:center; justify-content:space-between; ' +
                 'gap:8px; margin-bottom:12px;">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
@@ -679,14 +679,14 @@
                       'padding:14px 16px; margin-bottom:14px;">' +
                       '<div style="font-size:13px; font-weight:800; color:' + GOLD + ';">지난주에 짠 놀이예요.</div>' +
                       '<div onclick="window.openCuratorModal()" style="margin-top:10px; text-align:center; ' +
-                          'padding:12px; background:' + DARK + '; color:#FFFFFF; border-radius:11px; ' +
-                          'font-size:13px; font-weight:800; cursor:pointer;">이번 주 걸로 다시 짜기</div></div>'
+                          'padding:12px; background:#FFFFFF; color:' + GOLD + '; border:1.5px solid ' + GOLD + '; ' +
+                          'border-radius:11px; font-size:13px; font-weight:800; cursor:pointer;">이번 주 걸로 다시 짜기</div></div>'
                     : '') +
 
                 todayCard(plan[ti], ti) +
 
-                '<div style="margin-top:16px; background: #FFFFFF; border:1px solid #F2F5F8; ' +
-                    'border-radius:18px; padding:2px 18px;">' +
+                '<div style="margin-top:16px; background:#F9FAFB; border:1px solid #EEF0F2; ' +
+                    'border-radius:16px; padding:2px 16px;">' +
                     '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                         'padding:15px 0 4px;">' +
                         '<div style="font-size:13.5px; font-weight:900; color:' + DARK + ';">이번 주 나머지</div>' +

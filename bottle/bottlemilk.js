@@ -90,7 +90,7 @@
     window.addMilk = function (place) {
         var a = stock();
         a.push({ id: "m" + Date.now(), at: today(), place: place, n: 1 });
-        save(a); paint();
+        save(a); paintStock();
     };
     window.bumpMilk = function (id, d) {
         var a = stock();
@@ -100,7 +100,7 @@
             if (!a[i].n) a.splice(i, 1);
             break;
         }
-        save(a); paint();
+        save(a); paintStock();
     };
     /* 냉동 한 팩을 해동으로 옮긴다. 기한은 해동한 날부터 24시간. */
     window.thawMilk = function (id) {
@@ -110,11 +110,11 @@
         src.n = Math.max(0, (src.n || 1) - 1);
         a.push({ id: "m" + Date.now(), at: src.at, place: "thaw", thawAt: today(), n: 1 });
         a = a.filter(function (r) { return r.n > 0; });
-        save(a); paint();
+        save(a); paintStock();
     };
     window.clearMilk = function () {
         try { localStorage.removeItem(KEY); } catch (e) {}
-        paint();
+        paintStock();
     };
 
     /* ==========================================================
@@ -236,7 +236,7 @@
         var byPlace = { fridge: 0, freeze: 0, thaw: 0 };
         a.forEach(function (r) { byPlace[r.place] = (byPlace[r.place] || 0) + (r.n || 1); });
 
-        var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
+        var out = '<div id="milk-stock-card" class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83E\uDDCA 우리 집 모유 재고</div>';
 
         if (!a.length) {
@@ -270,13 +270,16 @@
             out += a.map(row).join("");
         }
 
+        /* ⚠️ 한쪽만 검게 칠해져 있어서 '이미 눌러둔 것' 처럼 보였다 (문의 들어온 것).
+              둘 다 누르는 단추다. 같은 모양으로 두고 아이콘으로 구분한다.
+              누르는 느낌(살짝 눌리는 효과)도 같이 준다. */
         out += '<div style="display:flex; gap:8px; margin-top:14px;">' +
-            '<div onclick="window.addMilk(\'freeze\')" style="flex:1; text-align:center; padding:14px; ' +
-                'background:' + DARK + '; color:#FFFFFF; border-radius:12px; font-size:13px; ' +
-                'font-weight:800; cursor:pointer;">+ 냉동했어요</div>' +
-            '<div onclick="window.addMilk(\'fridge\')" style="flex:1; text-align:center; padding:14px; ' +
-                'background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB; border-radius:12px; ' +
-                'font-size:13px; font-weight:800; cursor:pointer;">+ 냉장했어요</div>' +
+            '<div class="milk-btn" onclick="window.addMilk(\'freeze\')" style="flex:1; text-align:center; padding:14px; ' +
+                'background:#F0F7FF; color:#1B64DA; border:1px solid #C9E2FF; border-radius:12px; ' +
+                'font-size:13px; font-weight:800; cursor:pointer;">\u2744\uFE0F 냉동했어요</div>' +
+            '<div class="milk-btn" onclick="window.addMilk(\'fridge\')" style="flex:1; text-align:center; padding:14px; ' +
+                'background:#F2F4F6; color:#4E5968; border:1px solid #E5E8EB; border-radius:12px; ' +
+                'font-size:13px; font-weight:800; cursor:pointer;">\uD83E\uDDCA 냉장했어요</div>' +
         '</div>';
 
         if (a.length) {
@@ -290,7 +293,7 @@
     }
 
     function teaseHTML() {
-        return '<div class="matrix-panel" style="margin-bottom:20px;">' +
+        return '<div id="milk-stock-card" class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83E\uDDCA 우리 집 모유 재고</div>' +
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
@@ -305,6 +308,15 @@
         '</div>';
     }
 
+    /* 누르는 느낌 — 색이 아니라 크기로 (덧칠과 안 부딪힌다) */
+    (function pressStyle() {
+        if (document.getElementById("milk-press")) return;
+        var st = document.createElement("style");
+        st.id = "milk-press";
+        st.textContent = ".milk-btn{transition:transform .08s ease;} .milk-btn:active{transform:scale(0.97);}";
+        (document.head || document.documentElement).appendChild(st);
+    })();
+
     /* ---------- 자리 ---------- */
 
     function paint() {
@@ -313,6 +325,17 @@
         host.innerHTML = (isPlus() ? stockHTML() : teaseHTML()) + guideHTML();
         try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
     }
+    /* ⚠️ 팩을 하나 더할 때마다 안내문까지 통째로 다시 만들고, 그때마다 공용 파일들이
+          화면 전체를 다시 훑었다. 그래서 누르고 한참 뒤에 숫자가 바뀌는 것처럼 느껴졌다.
+          바뀌는 건 재고 칸 하나뿐이다. 그 카드만 갈아끼운다. */
+    function paintStock() {
+        var el = document.getElementById("milk-stock-card");
+        if (!el || !el.parentNode) return paint();
+        var box = document.createElement("div");
+        box.innerHTML = (isPlus() ? stockHTML() : teaseHTML());
+        if (box.firstChild) el.parentNode.replaceChild(box.firstChild, el);
+    }
+
     window.refreshMilk = paint;
 
     function mount() {

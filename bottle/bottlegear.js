@@ -490,44 +490,38 @@
                 (over ? '<b>' + over + '개</b>는 한 번 볼 때가 됐어요. '
                       : '갈아 끼운 날만 눌러두시면 다음에 볼 때가 됐을 때 알려드려요. ') +
                 '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>입니다.<br>' +
-                '<span style="font-size:11.5px;">예전에 갈았으면 옆 <b>\uD83D\uDCC5</b> 에서 그 날짜를 고르세요.</span></div>' +
+                '<span style="font-size:11.5px;">예전에 갈았으면 <b>아래 날짜 칸</b>에서 그 날짜를 고르세요.</span></div>' +
 
             show.map(function (r) {
                 var c = r.over ? RED : (r.n === null ? GRAY : "#4E5968");
+                /* ⚠️ 이름·날짜를 한 줄에 두고 오른쪽에 단추와 날짜 칸을 같이 넣었더니
+                      글자 자리가 100px 밖에 안 남아 세 줄로 접혔다 (문의 들어온 것).
+                      위에 글, 아래에 단추 둘을 나란히. 이러면 접히지 않는다. */
                 return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
-                    '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">' +
-                        '<div style="min-width:0;">' +
-                            '<div style="font-size:13.5px; font-weight:900; color:' + DARK + ';">' +
-                                esc(r.p.label) +
-                                '<span style="font-weight:700; color:' + GRAY + '; font-size:11.5px;"> \u00b7 ' +
-                                r.p.days + '일쯤</span></div>' +
-                            '<div style="margin-top:3px; font-size:12px; font-weight:700; color:' + c + ';">' +
-                                (r.n === null ? "아직 안 적으셨어요"
-                                              : md(r.d) + "에 갈았어요 \u00b7 " + (r.n === 0 ? "오늘" : r.n + "일 지났어요") +
-                                                (r.over ? " \u2014 볼 때가 됐어요" : "")) +
-                            '</div>' +
-                        '</div>' +
-                        '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center;">' +
-                            '<div onclick="window.logBottlePart(\'' + r.p.id + '\')" ' +
-                                'style="padding:10px 13px; border-radius:11px; cursor:pointer; ' +
-                                'font-size:12px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
-                                'border:1px solid #D1D5DB; white-space:nowrap;">오늘 갈았어요</div>' +
-                            /* ⚠️ 날짜 칸이 34px 이라, 고른 날짜가 '2' 한 글자로만 보였다 ("2026-…" 의 첫 글자).
-                                  달력 모양 단추로 바꾸고, 고른 날짜는 왼쪽 줄에 글자로 적는다 ("8월 1일에 갈았어요"). */
-                            '<label title="예전에 갈았으면 그 날짜를 고르세요" ' +
-                                'style="position:relative; overflow:hidden; display:flex; align-items:center; ' +
-                                'justify-content:center; width:42px; height:38px; box-sizing:border-box; ' +
-                                'border-radius:11px; border:1px solid #D1D5DB; background:#FFFFFF; ' +
-                                'font-size:15px; cursor:pointer;">\uD83D\uDCC5' +
-                                '<input type="date" value="' + esc(r.d || "") + '" max="' + today() + '" ' +
-                                    'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
-                                    'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; ' +
-                                    'cursor:pointer; font-size:16px; border:0; padding:0;">' +
-                            '</label>' +
-                        '</div>' +
+                    '<div style="font-size:13.5px; font-weight:900; color:' + DARK + ';">' +
+                        esc(r.p.label) +
+                        '<span style="font-weight:700; color:' + GRAY + '; font-size:11.5px;"> \u00b7 ' +
+                        r.p.days + '일쯤</span></div>' +
+                    '<div style="margin-top:3px; font-size:12px; font-weight:700; color:' + c + ';">' +
+                        (r.n === null ? "아직 안 적으셨어요"
+                                      : md(r.d) + " \u00b7 " + (r.n === 0 ? "오늘 갈았어요" : r.n + "일째") +
+                                        (r.over ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
+                    '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
+                        'line-height:1.65; word-break:keep-all;">' + r.p.why + '</div>' +
+                    '<div style="display:flex; gap:7px; margin-top:10px;">' +
+                        '<div onclick="window.logBottlePart(\'' + r.p.id + '\')" ' +
+                            'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
+                            'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
+                            'color:#4E5968; border:1px solid #D1D5DB;">오늘 갈았어요</div>' +
+                        '<input type="date" title="예전에 갈았으면 그 날짜를 고르세요" ' +
+                            'value="' + esc(r.d || "") + '" max="' + today() + '" ' +
+                            'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
+                            'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                            'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
+                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#4E5968; ' +
+                            'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:11px; ' +
+                            'padding:10px 8px; cursor:pointer;">' +
                     '</div>' +
-                    '<div style="margin-top:5px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
-                        'line-height:1.6; word-break:keep-all;">' + esc(r.p.why) + '</div>' +
                 '</div>';
             }).join("") +
 

@@ -240,12 +240,14 @@
 
         var here = PLACES.filter(function (p) { return p.id === cur; })[0] || PLACES[0];
 
-        return '<div id="' + ID + '" style="padding:4px 0 20px;">' +
-            '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
-                'word-break:keep-all; margin-bottom:6px;">🧭 오늘 어디 가세요</div>' +
+        /* ⚠️ 이 칸만 흰 상자가 없어서 혼자 맨바닥에 떠 있었다.
+              유모차 큐레이터의 다른 칸(우리 유모차 · 트렁크 · 중고 · 최대 체중)은 전부
+              .matrix-panel 흰 상자다. 여기도 같은 모양으로 맞춘다. */
+        return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:20px;">' +
+            '<div class="matrix-header" data-plus-head>🧭 오늘 어디 가세요</div>' +
 
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
-                'line-height:1.75; word-break:keep-all;">' +
+                'margin:-16px 0 0; line-height:1.75; word-break:keep-all;">' +
                 '<b>' + esc(st.name) + '</b> 로 ' + esc(here.name) + ' 갈 때 걸리는 것들이에요.<br>' +
                 '가져갈지 말지는 직접 정하시고, 저희는 뭐가 걸리는지만 짚어드릴게요.</div>' +
 

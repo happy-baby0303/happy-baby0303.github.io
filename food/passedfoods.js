@@ -249,8 +249,10 @@
         Object.keys(db).forEach(function (d) {
             var keep = [];
             (db[d] || []).forEach(function (r) {
-                if (r && r.type === "test" && r.past && nm(r.ingredient) === name) taken.push(r);
-                else keep.push(r);
+                /* ⚠️ 여기서 past 인 것만 꺼냈다. 그래서 달력에서 적은 재료는 못 고쳤다.
+                      이제 둘 다 꺼낸다. 다만 '이상 있었던 기록(fail)' 은 건드리지 않는다 — 안전 기록이다. */
+                var hit = r && r.type === "test" && r.status !== "fail" && nm(r.ingredient) === name;
+                if (hit) taken.push(r); else keep.push(r);
             });
             if (keep.length) db[d] = keep; else delete db[d];
         });
@@ -401,25 +403,29 @@
                     '</div>';
                 }
 
-                var editable = e.past && !e.fromCal;
+                /* ⚠️ 달력에서 적힌 재료는 못 고치게 막아뒀더니, 예전에 적어둔 것이 전부
+                      손댈 수 없는 줄이 됐다 (문의 들어온 것). 전부 고칠 수 있게 연다.
+                      어디서 적은 것인지는 아래 작은 글씨로 계속 알려준다. */
+                var editable = true;
                 return '<div style="display:flex; align-items:center; gap:9px; padding:12px 0; ' + sep + '">' +
                     '<div style="flex:1; min-width:0; font-size:14px; font-weight:800; color:' + DARK + '; ' +
                         'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(e.name) + '</div>' +
                     (editable
                         /* 글자처럼 보이는 날짜 위에 투명한 달력 칸을 덮는다 — 누르면 폰의 달력이 뜬다 */
-                        ? '<label style="position:relative; flex-shrink:0; display:inline-flex; align-items:center; gap:4px; ' +
-                              'font-size:12px; font-weight:800; color:' + GREEN + '; background:#EAF7F1; ' +
-                              'border-radius:9px; padding:7px 10px; cursor:pointer; overflow:hidden;">' +
-                              esc(pretty(e.day)) + ' <span style="opacity:.7;">✎</span>' +
-                              '<input type="date" value="' + esc(e.day) + '" max="' + today + '"' + (b ? ' min="' + b + '"' : '') +
-                              ' onchange="window.passedMove(' + q(e.name) + ', this.value)" ' +
-                              'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:16px;">' +
-                          '</label>' +
+                        ? '<input type="date" value="' + esc(e.day) + '" max="' + today + '"' + (b ? ' min="' + b + '"' : '') +
+                              ' onchange="window.passedMove(' + q(e.name) + ', this.value)"' +
+                              ' onclick="try{ this.showPicker && this.showPicker(); }catch(e){}"' +
+                              ' style="flex-shrink:0; appearance:none; -webkit-appearance:none; font-family:inherit; ' +
+                              'font-size:15px; font-weight:800; color:#1F6F52; background:#EAF7F1; ' +
+                              'border:1px solid #A7DFC8; border-radius:10px; padding:7px 9px; cursor:pointer;">' +
                           '<span onclick="window.passedAskRemove(' + q(e.name) + ')" style="flex-shrink:0; font-size:19px; ' +
                               'font-weight:300; color:' + GRAY + '; cursor:pointer; padding:2px 4px; line-height:1;">×</span>'
-                        : '<span style="flex-shrink:0; font-size:11.5px; font-weight:700; color:' + GRAY + ';">' +
-                              esc(pretty(e.day)) + ' · 달력 기록</span>') +
-                '</div>';
+                        : '') +
+                '</div>' +
+                (e.fromCal
+                    ? '<div style="margin:-4px 0 10px; font-size:11px; font-weight:700; color:' + GRAY + ';">' +
+                          '달력에 적어둔 기록이에요</div>'
+                    : '');
             }).join("") +
             '</div>';
     }
@@ -440,12 +446,16 @@
                     return '<span onclick="window.passedSetDay(\'' + x.k + '\')" style="' + chipCss(x.k === pickDay) + '">' +
                         esc(x.label) + ' <span style="opacity:.72; font-weight:700;">' + esc(pretty(x.k)) + '</span></span>';
                 }).join("") +
-                '<label style="position:relative; overflow:hidden; ' + chipCss(!isQuick) + '">📅 ' +
-                    (isQuick ? "날짜 고르기" : esc(pretty(pickDay))) +
-                    '<input type="date" value="' + esc(pickDay) + '" max="' + today + '"' + (b ? ' min="' + b + '"' : '') +
-                    ' onchange="window.passedSetDay(this.value)" ' +
-                    'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; font-size:16px;">' +
-                '</label>' +
+                /* ⚠️ 투명한 달력 칸을 글자 위에 덮어놨더니 폰에서 안 열렸다 (문의 들어온 것).
+                      숨기지 말고 보이는 날짜 칸을 그대로 쓴다. 누르면 폰 달력이 뜬다. */
+                '<input type="date" value="' + esc(pickDay) + '" max="' + today + '"' + (b ? ' min="' + b + '"' : '') +
+                    ' onchange="window.passedSetDay(this.value)"' +
+                    ' onclick="try{ this.showPicker && this.showPicker(); }catch(e){}"' +
+                    ' style="appearance:none; -webkit-appearance:none; font-family:inherit; ' +
+                    'padding:9px 12px; border-radius:11px; min-height:40px; cursor:pointer; ' +
+                    'border:1px solid ' + (isQuick ? '#E5E8EB' : GREEN) + '; ' +
+                    'background:' + (isQuick ? '#F9FAFB' : '#EAF7F1') + '; ' +
+                    'color:' + (isQuick ? '#4E5968' : '#1F6F52') + '; font-size:16px; font-weight:800;">' +
             '</div>' +
         '</div>';
     }
@@ -488,9 +498,12 @@
                       (have.length ? "새로 더하기" : "먹여본 재료 고르기") + '</div>' + groups
                 : '') +
 
-            '<div style="display:flex; gap:8px; margin:2px 0 22px;">' +
+            /* ⚠️ '쉼표로 여러 개' 라고만 적어놔서 무슨 말인지 알 수 없었다 (문의 들어온 것) */
+            '<div style="font-size:12px; font-weight:700; color:' + GRAY + '; margin:2px 0 7px;">' +
+                '목록에 없는 재료는 직접 적어주세요. 여러 개면 <b>쉼표(,)</b>로 나눠 한 번에 넣을 수 있어요.</div>' +
+            '<div style="display:flex; gap:8px; margin:0 0 22px;">' +
                 '<input id="passed-custom" type="text" maxlength="60" enterkeyhint="done" ' +
-                    'placeholder="목록에 없는 재료 (쉼표로 여러 개)" ' +
+                    'placeholder="예: 아보카도, 귀리" ' +
                     'onkeydown="if(event.key===\'Enter\'){event.preventDefault(); window.passedAddCustom();}" ' +
                     'style="flex:1; min-width:0; box-sizing:border-box; padding:12px 13px; border:1px solid #E5E8EB; ' +
                     'border-radius:11px; font-size:16px; font-weight:600; color:' + DARK + '; background:#FFFFFF; ' +

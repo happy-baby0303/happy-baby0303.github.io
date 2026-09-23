@@ -230,7 +230,7 @@
                      18px 제목만 쓴다. 둘이 붙어 있는데 하나만 흰 상자면
                      같은 화면에서 두 가지 디자인이 싸운다.
                      playweek 모양에 맞춘다. */
-            return '<div id="' + ID + '" style="padding:4px 0 20px;">' +
+            return '<div id="' + ID + '" class="bnh-card">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; ' +
                     'color:' + DARK + '; word-break:keep-all; margin-bottom:6px;">' +
                     '⏱️ 지금 몇 분 있으세요</div>' +
@@ -254,7 +254,7 @@
             '</div>';
         }
 
-        return '<div id="' + ID + '" style="padding:4px 0 20px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
             '<div data-plus-head style="font-size:18px; font-weight:900; ' +
                 'color:' + DARK + '; word-break:keep-all; margin-bottom:6px;">' +
                 '⏱️ 지금 몇 분 있으세요</div>' +

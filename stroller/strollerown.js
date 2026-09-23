@@ -394,10 +394,35 @@
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '한 대로 다 하시니까, <b>힘들어지는 상황만</b> 미리 짚어드릴게요.</div>' +
             tips.map(function (t) {
-                return '<div style="padding:11px 0; border-bottom:1px solid #F2F4F6;">' +
-                    '<div style="font-size:12.5px; font-weight:900; color:#4E5968;">' + t[0] + '</div>' +
-                    '<div style="margin-top:4px; font-size:12px; font-weight:600; color:#4E5968; ' +
-                        'line-height:1.75; word-break:keep-all;">' + t[1] + '</div>' +
+                /* ⚠️ 이름·날짜를 한 줄에 두고 오른쪽에 단추와 날짜 칸을 같이 넣었더니
+                      글자 자리가 100px 밖에 안 남아 세 줄로 접혔다 (문의 들어온 것).
+                      위에 글, 아래에 단추 둘을 나란히. 이러면 접히지 않는다. */
+                return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+                    '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
+                        esc(x.label) +
+                        '<span style="font-weight:700; color:' + GRAY + '; font-size:11px;"> \u00b7 ' +
+                        (x.days >= 30 ? (x.days / 30) + '달' : x.days + '일') + '마다</span></div>' +
+                    '<div style="margin-top:3px; font-size:11.5px; font-weight:800; color:' +
+                        (bad ? GOLD : "#4E5968") + ';">' +
+                        (d === null ? "아직 안 적으셨어요"
+                                    : md(c[x.id]) + " \u00b7 " + (d === 0 ? "오늘 봤어요" : d + "일째") +
+                                      (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
+                    '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
+                        'line-height:1.65; word-break:keep-all;">' + x.why + '</div>' +
+                    '<div style="display:flex; gap:7px; margin-top:10px;">' +
+                        '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
+                            'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
+                            'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
+                            'color:#4E5968; border:1px solid #D1D5DB;">오늘 봤어요</div>' +
+                        '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
+                            'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
+                            'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
+                            'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                            'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
+                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#4E5968; ' +
+                            'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:11px; ' +
+                            'padding:10px 8px; cursor:pointer;">' +
+                    '</div>' +
                 '</div>';
             }).join("") +
             '<div style="margin-top:10px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -647,7 +672,7 @@
             '<div style="margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '<b>고장은 늘 브레이크와 바퀴에서</b> 시작합니다.<br>' +
-                '<span style="font-size:11.5px;">예전에 하셨으면 옆 <b>📅</b> 에서 그 날짜를 고르세요.</span></div>' +
+                '<span style="font-size:11.5px;">예전에 하셨으면 <b>아래 날짜 칸</b>에서 그 날짜를 고르세요.</span></div>' +
 
             CARE.map(function (x) {
                 var d = daysSince(c[x.id]);
@@ -665,23 +690,21 @@
                                             : md(c[x.id]) + "에 봤어요 \u00b7 " + (d === 0 ? "오늘" : d + "일 지났어요") +
                                               (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
                         '</div>' +
-                        '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center;">' +
+                        '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">' +
                             '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
                                 'style="padding:9px 12px; border-radius:10px; cursor:pointer; ' +
                                 'font-size:11.5px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
                                 'border:1px solid #D1D5DB; white-space:nowrap;">오늘 봤어요</div>' +
-                            /* ⚠️ 날짜 칸이 34px 이라, 고른 날짜가 '2' 한 글자로만 보였다 ("2026-…" 의 첫 글자).
-                                  달력 모양 단추로 바꾸고, 고른 날짜는 왼쪽 줄에 글자로 적는다 ("8월 1일에 봤어요"). */
-                            '<label title="예전에 하셨으면 그 날짜를 고르세요" ' +
-                                'style="position:relative; overflow:hidden; display:flex; align-items:center; ' +
-                                'justify-content:center; width:40px; height:36px; box-sizing:border-box; ' +
-                                'border-radius:10px; border:1px solid #D1D5DB; background:#FFFFFF; ' +
-                                'font-size:15px; cursor:pointer;">\uD83D\uDCC5' +
-                                '<input type="date" value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
-                                    'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
-                                    'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; ' +
-                                    'cursor:pointer; font-size:16px; border:0; padding:0;">' +
-                            '</label>' +
+                            /* ⚠️ 투명한 달력 칸을 아이콘 위에 덮어놨더니 눌러도 안 열렸다 (문의 들어온 것).
+                                  숨기지 말고 보이는 날짜 칸을 그대로 쓴다. 누르면 폰 달력이 뜬다. */
+                            '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
+                                'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
+                                'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
+                                'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                                'style="flex-shrink:0; width:132px; appearance:none; -webkit-appearance:none; ' +
+                                'font-family:inherit; font-size:13px; font-weight:800; color:#4E5968; ' +
+                                'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:10px; ' +
+                                'padding:9px 8px; cursor:pointer;">' +
                         '</div>' +
                     '</div>' +
                     '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +

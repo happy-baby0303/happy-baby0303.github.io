@@ -83,7 +83,7 @@
         var names = list.slice(0, 4).map(function (t) { return t.name; }).join(" · ");
 
         /* 칸은 상자 없이 18px 제목 — 탭 전체가 같은 모양. 할 일(①~⑤)만 빨간 안내 칸에 담는다 */
-        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
 
             '<div style="font-size:18px; font-weight:900; color:' + (over ? RED : GREEN) + '; ' +
                 'letter-spacing:-0.4px; margin-bottom:8px;">' +
@@ -136,6 +136,31 @@
 
     /* ---------- 목욕 장난감 카드에 한 줄 붙이기 ---------- */
 
+
+    /* ⚠️ 카드 위에 안내 줄을 붙이는 모듈이 넷이다 (전지 · 곰팡이 · 이미 있어요 · 시기).
+          각자 맨 앞에 끼워 넣어서 순서가 로딩 순서대로 바뀌고, 줄끼리 딱 붙어 보였다.
+          한 칸(.card-notes)에 모아 같은 간격(8px)으로 쌓는다. 급한 것(안전)이 위로. */
+    function putNote(card, el, p) {
+        var zone = card.querySelector(".card-notes");
+        if (!zone) {
+            zone = document.createElement("div");
+            zone.className = "card-notes";
+            zone.style.cssText = "display:flex; flex-direction:column; gap:8px; margin-bottom:16px;";
+            card.insertBefore(zone, card.firstChild);
+        }
+        el.setAttribute("data-p", p);
+        var before = null;
+        for (var i = 0; i < zone.children.length; i++) {
+            if (Number(zone.children[i].getAttribute("data-p")) > p) { before = zone.children[i]; break; }
+        }
+        zone.insertBefore(el, before);
+    }
+
+    function cleanZone(card) {
+        var zone = card.querySelector(".card-notes");
+        if (zone && !zone.children.length) zone.parentNode.removeChild(zone);
+    }
+
     function markCards() {
         toys().forEach(function (t) {
             if (!WET.test(t.name) || SAFE.test(t.name)) return;
@@ -145,12 +170,11 @@
             var d = document.createElement("div");
             d.className = "mold-note";
             d.style.cssText =
-                "background:#FFF9E6; border:1px solid #FDE68A; border-radius:11px; " +
-                "padding:11px 13px; margin-bottom:12px; font-size:12px; font-weight:700; " +
-                "color:#8A6D00; line-height:1.65;";
+                "padding:11px 13px; border-radius:12px; margin:0; font-size:12px; font-weight:700; line-height:1.65; " +
+                "background:#FFF9E6; border:1px solid #FDE68A; color:#8A6D00;";
             d.innerHTML = "🦠 <b>안에 구멍이 있으면 물이 고입니다.</b> 쓰고 나서 물을 빼고 " +
                           "구멍이 아래로 가게 말리세요. 2주에 한 번은 식초물에 담가 주시고요.";
-            card.insertBefore(d, card.firstChild);
+            putNote(card, d, 2);
         });
     }
 

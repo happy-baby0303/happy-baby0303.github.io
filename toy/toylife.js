@@ -157,8 +157,15 @@
                 "line-height:1.6; margin:-14px 0 18px; word-break:keep-all;";
             d.innerHTML = "\uD83D\uDD52 " + esc(L.t);
 
-            /* 헤더(아이콘·이름·찜) 바로 다음 = 이름 밑에 붙는다 */
-            if (card.children.length > 1) card.insertBefore(d, card.children[1]);
+            /* ⚠️ '헤더 다음' 이라고 children[1] 에 넣었는데, 위에 '이미 갖고 계세요' 상자가
+                  생기면 그게 children[0] 이 되어서 이 줄이 이름 위로 올라갔다.
+                  게다가 이 줄은 이름 밑에 붙으라고 위쪽 여백이 음수(-14px)라,
+                  초록 상자에 딱 붙어 보였다 (문의 들어온 것).
+                  상자들은 건너뛰고, 진짜 헤더 다음에 넣는다. */
+            var head = card.querySelector(".card-notes");
+            head = head ? head.nextElementSibling : card.firstElementChild;
+            if (head && head.nextSibling) card.insertBefore(d, head.nextSibling);
+            else if (head) card.appendChild(d);
             else card.appendChild(d);
         });
     }
@@ -259,7 +266,7 @@
 
         if (!list.length) {
             /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) */
-            return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+            return '<div id="' + ID + '" class="bnh-card">' +
                 '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
                     '\u2705 사두신 것 ' + have.length + '개, 다 쓰고 계세요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -273,7 +280,7 @@
         var show = plus ? list : list.slice(0, 2);
         var hidden = plus ? 0 : list.length - show.length;
 
-        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
 
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
                 '\uD83D\uDE34 잠자고 있는 장난감 ' + list.length + '개</div>' +
@@ -284,7 +291,7 @@
             sideLine +
 
             /* 항목은 흰 칸 하나에 모은다 */
-            '<div style="margin-top:13px; background:#FFFFFF; border:1px solid #E5E8EB; border-radius:16px; padding:2px 16px;">' +
+            '<div style="margin-top:13px; background:#F9FAFB; border:1px solid #EEF0F2; border-radius:14px; padding:2px 16px;">' +
                 show.map(function (x) { return row(x, false); }).join("") +
                 (hidden > 0
                     ? list.slice(2, 4).map(function (x) { return row(x, true); }).join("")
@@ -293,8 +300,8 @@
 
             (plus
                 ? '<div onclick="window.planWithIdleToys()" style="margin-top:14px; text-align:center; ' +
-                  'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:13px; ' +
-                  'font-size:13.5px; font-weight:900; cursor:pointer;">' +
+                  'padding:15px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #D1D5DB; ' +
+                  'border-radius:13px; font-size:13.5px; font-weight:900; cursor:pointer;">' +
                   '이걸로 다음 주 처방전 짜기</div>'
 
                 : '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #FDE68A; ' +

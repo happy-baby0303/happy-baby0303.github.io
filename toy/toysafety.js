@@ -66,7 +66,7 @@
         var names = list.slice(0, 4).map(function (t) { return t.name; }).join(" · ");
 
         /* 칸은 상자 없이 — 아래 'SOS 처방전 · 발달 상태' 와 같은 모양. 빨간 안내 상자만 남긴다 */
-        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
 
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + RED + '; ' +
                 'letter-spacing:-0.4px; margin-bottom:8px;">🔋 단추형 전지, 이것만은 알아두세요</div>' +
@@ -168,6 +168,31 @@
 
     /* ---------- 전지 들어가는 카드에 한 줄 ---------- */
 
+
+    /* ⚠️ 카드 위에 안내 줄을 붙이는 모듈이 넷이다 (전지 · 곰팡이 · 이미 있어요 · 시기).
+          각자 맨 앞에 끼워 넣어서 순서가 로딩 순서대로 바뀌고, 줄끼리 딱 붙어 보였다.
+          한 칸(.card-notes)에 모아 같은 간격(8px)으로 쌓는다. 급한 것(안전)이 위로. */
+    function putNote(card, el, p) {
+        var zone = card.querySelector(".card-notes");
+        if (!zone) {
+            zone = document.createElement("div");
+            zone.className = "card-notes";
+            zone.style.cssText = "display:flex; flex-direction:column; gap:8px; margin-bottom:16px;";
+            card.insertBefore(zone, card.firstChild);
+        }
+        el.setAttribute("data-p", p);
+        var before = null;
+        for (var i = 0; i < zone.children.length; i++) {
+            if (Number(zone.children[i].getAttribute("data-p")) > p) { before = zone.children[i]; break; }
+        }
+        zone.insertBefore(el, before);
+    }
+
+    function cleanZone(card) {
+        var zone = card.querySelector(".card-notes");
+        if (zone && !zone.children.length) zone.parentNode.removeChild(zone);
+    }
+
     function markCards() {
         toys().forEach(function (t) {
             if (!BATT.test(t.name) || NOT.test(t.name)) return;
@@ -177,12 +202,11 @@
             var d = document.createElement("div");
             d.className = "batt-note";
             d.style.cssText =
-                "background:#FFF2F2; border:1px solid #FCA5A5; border-radius:11px; " +
-                "padding:11px 13px; margin-bottom:12px; font-size:12px; font-weight:700; " +
-                "color:#C62828; line-height:1.65;";
+                "padding:11px 13px; border-radius:12px; margin:0; font-size:12px; font-weight:700; line-height:1.65; " +
+                "background:#FFF2F2; border:1px solid #FCA5A5; color:#C62828;";
             d.innerHTML = "🔋 <b>전지함이 나사로 잠기는지 확인하세요.</b> " +
                           "손으로 열리는 뚜껑이면 아기 손에도 열립니다.";
-            card.insertBefore(d, card.firstChild);
+            putNote(card, d, 1);
         });
     }
     window.refreshBattMarks = markCards;

@@ -164,7 +164,7 @@
         if (mo === null) return "";
 
         if (!plus) {
-            return '<div id="' + ID + '" style="padding:4px 0 16px;">' +
+            return '<div id="' + ID + '" class="bnh-card">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
                     'word-break:keep-all; margin-bottom:6px;">🎯 개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -186,7 +186,7 @@
 
         /* PLUS */
         if (!st) {
-            return '<div id="' + ID + '" style="padding:4px 0 16px;">' +
+            return '<div id="' + ID + '" class="bnh-card">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
                     'word-break:keep-all; margin-bottom:6px;">🎯 개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -194,9 +194,11 @@
                     '배냇함 도감에 <b>뒤집기·배밀이·잡고서기</b> 도장을 찍으시면, ' +
                     '개월수 대신 그걸 보고 놀이를 골라드려요.<br>' +
                     '지금은 <b>' + mo + '개월</b> 기준으로 <b>' + NAME[ms] + '</b> 놀이를 드리고 있습니다.</div>' +
+                /* 한 화면에 검은 막대가 셋이라 무거웠다. 이 칸의 단추는 테두리만. */
                 '<div onclick="location.href=\'../index.html\'" ' +
-                    'style="margin-top:12px; text-align:center; padding:13px; background:' + DARK + '; ' +
-                    'color:#FFFFFF; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer;">' +
+                    'style="margin-top:12px; text-align:center; padding:13px; background:#FFFFFF; ' +
+                    'color:' + DARK + '; border:1.5px solid #D1D5DB; border-radius:12px; ' +
+                    'font-size:13.5px; font-weight:900; cursor:pointer;">' +
                     '배냇함 도감 열기</div>' +
             '</div>';
         }
@@ -219,7 +221,7 @@
                    '<b>' + NAME[st.stage] + '</b> 에 맞춰 드립니다. 지금 할 수 있는 걸 충분히 하는 게 낫습니다.';
         }
 
-        return '<div id="' + ID + '" style="padding:4px 0 16px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
                 'word-break:keep-all; margin-bottom:6px;">🎯 ' + esc(nm("")) + ' 기준으로 고르는 중</div>' +
             '<div style="background:' + (same ? "#F9FAFB" : "#F5F3FF") + '; ' +

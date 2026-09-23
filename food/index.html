@@ -279,8 +279,11 @@
             </div>
 <div id="cal-detail-area" style="background: #FFF9F9; border: 2px solid #FFE5E5; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636;">7월 1일 기록</div>
+                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636; flex-shrink: 0;">7월 1일 기록</div>
                     <button onclick="openMealSheet()" style="background: #FFFFFF; color: #4E5968; border: 1px solid #D1D5DB; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">+ 식단 기록</button>
+                    <!-- ⚠️ 달력에 '식단 기록' 문만 있었다. 재료 테스트 창은 만들어져 있는데
+                         그걸 여는 버튼이 어디에도 없어서, 통과·알레르기 재료를 날짜에 적을 길이 없었다. -->
+                    <button onclick="openTestSheet()" style="background: #191F28; color: #FFFFFF; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; margin-left: 6px;">🥄 재료 먹여봤어요</button>
                 </div>
                 <div id="cal-record-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
@@ -338,7 +341,7 @@
         </div><div id="test-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
             <div style="background: #ffffff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">🧪 새로운 식재료 테스트</h3>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #191F28;">🥄 새 재료 먹여봤어요</h3>
                     <button onclick="closeSheets()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8B95A1; padding: 0;">✕</button>
                 </div>
                 

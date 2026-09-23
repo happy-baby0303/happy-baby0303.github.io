@@ -162,7 +162,7 @@
         var names = toys().filter(function (t) { return have.indexOf(t.id) > -1; })
                           .slice(0, 4).map(function (t) { return t.name; });
 
-        return '<div id="' + ID + '" style="padding:4px 0 24px;">' +
+        return '<div id="' + ID + '" class="bnh-card">' +
             '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
                 '\uD83E\uDDF8 우리 집 장난감' + (have.length ? ' ' + have.length + '개' : '') + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
@@ -171,8 +171,8 @@
                     ? '이미 있는 걸로 놀이를 짜고, 목록에는 \'이미 갖고 계세요\' 로 표시해요.'
                     : '갖고 계신 걸 알려주시면 그걸로 놀이를 짜드리고, 두 번 사지 않게 표시해드려요.') + '</div>' +
             '<div onclick="window.openShelfSheet()" style="display:flex; align-items:center; gap:10px; ' +
-                'background:#FFFFFF; border:1px solid #E5E8EB; border-radius:16px; padding:14px 16px; ' +
-                'cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
+                'background:#F9FAFB; border:1px solid #EEF0F2; border-radius:14px; padding:14px 16px; ' +
+                'cursor:pointer;">' +
                 '<div style="flex:1; min-width:0; font-size:13.5px; font-weight:800; ' +
                     'color:' + (have.length ? '#4E5968' : DARK) + '; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     (have.length
@@ -205,6 +205,31 @@
        중복 구매를 막는 게 이 기능의 절반이다.
        카드에 id="toy-card-N" 이 붙어 있어서 그걸로 찾는다. -------- */
 
+
+    /* ⚠️ 카드 위에 안내 줄을 붙이는 모듈이 넷이다 (전지 · 곰팡이 · 이미 있어요 · 시기).
+          각자 맨 앞에 끼워 넣어서 순서가 로딩 순서대로 바뀌고, 줄끼리 딱 붙어 보였다.
+          한 칸(.card-notes)에 모아 같은 간격(8px)으로 쌓는다. 급한 것(안전)이 위로. */
+    function putNote(card, el, p) {
+        var zone = card.querySelector(".card-notes");
+        if (!zone) {
+            zone = document.createElement("div");
+            zone.className = "card-notes";
+            zone.style.cssText = "display:flex; flex-direction:column; gap:8px; margin-bottom:16px;";
+            card.insertBefore(zone, card.firstChild);
+        }
+        el.setAttribute("data-p", p);
+        var before = null;
+        for (var i = 0; i < zone.children.length; i++) {
+            if (Number(zone.children[i].getAttribute("data-p")) > p) { before = zone.children[i]; break; }
+        }
+        zone.insertBefore(el, before);
+    }
+
+    function cleanZone(card) {
+        var zone = card.querySelector(".card-notes");
+        if (zone && !zone.children.length) zone.parentNode.removeChild(zone);
+    }
+
     function markToyCards() {
         var have = owned();
         toys().forEach(function (t) {
@@ -212,16 +237,15 @@
             if (!card) return;
             var old = card.querySelector(".shelf-mark");
             if (old) old.parentNode.removeChild(old);
-            if (have.indexOf(t.id) === -1) return;
+            if (have.indexOf(t.id) === -1) { cleanZone(card); return; }
 
             var tag = document.createElement("div");
             tag.className = "shelf-mark";
             tag.style.cssText =
-                "background:#EAF7F1; border:1px solid #A7DFC8; border-radius:11px; " +
-                "padding:11px 14px; margin-bottom:12px; font-size:12.5px; font-weight:800; " +
-                "color:#1F6F52; line-height:1.6;";
+                "padding:11px 13px; border-radius:12px; margin:0; font-size:12px; font-weight:700; line-height:1.65; " +
+                "background:#EAF7F1; border:1px solid #A7DFC8; color:#1F6F52;";
             tag.innerHTML = "✓ <b>이미 갖고 계세요.</b> 또 사지 마세요.";
-            card.insertBefore(tag, card.firstChild);
+            putNote(card, tag, 3);
         });
     }
     window.refreshShelfMarks = markToyCards;

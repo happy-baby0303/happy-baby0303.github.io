@@ -185,7 +185,7 @@
         var show = plus ? list : list.slice(0, 1);
 
         /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) — 흰 상자로 감싸져 있었다 */
-        var out = '<div style="padding:4px 0 24px;">' +
+        var out = '<div class="bnh-card">' +
 
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
                 '\uD83C\uDF81 뭐 사줄까 물어보면</div>' +
@@ -217,7 +217,7 @@
             return out + '</div>';
         }
 
-        out += '<div style="margin-top:14px; background:#FFFFFF; border:1px solid #E5E8EB; border-radius:16px; padding:2px 16px;">' +
+        out += '<div style="margin-top:14px; background:#F9FAFB; border:1px solid #EEF0F2; border-radius:14px; padding:2px 16px;">' +
             show.map(function (t, i) {
                 return '<div style="display:flex; gap:10px; padding:11px 0; ' +
                     'border-bottom:1px solid #F2F4F6;">' +

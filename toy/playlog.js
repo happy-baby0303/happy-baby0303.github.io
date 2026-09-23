@@ -201,7 +201,7 @@
         var t = new Date();
 
         /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) — 흰 상자로 감싸져 있었다 */
-        return '<div id="play-log" style="padding:4px 0 24px;">' +
+        return '<div id="play-log" class="bnh-card">' +
 
             '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
                 '📔 ' + (t.getMonth() + 1) + '월 놀이 기록</div>' +
