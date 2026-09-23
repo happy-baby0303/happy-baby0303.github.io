@@ -706,11 +706,14 @@
 
     function crashHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDE97 사고가 났다면</div>' +
+            /* ⚠️ carseatcrash.js 에도 '사고가 났다면' 카드가 있다 (바꿔야 하나를 다섯 가지로 묻는 것).
+                  같은 탭에 같은 제목이 두 번 뜨고 있었다. 여긴 '그 다음에 할 일' 이라 이름을 나눈다. */
+            '<div class="matrix-header">\uD83D\uDCC4 사고 뒤에 챙길 것</div>' +
             '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '\u26A0\uFE0F <b>가벼운 접촉사고라도 카시트는 교체 대상일 수 있습니다.</b> ' +
-                '겉이 멀쩡해도 안쪽 구조가 상해요. 눈에 안 보입니다.</div>' +
+                '겉이 멀쩡해도 안쪽 구조가 상해요. 눈에 안 보입니다.<br>' +
+                '바꿔야 하는지는 <b>\uD83D\uDEA8 사고가 났다면</b> 카드에서 다섯 가지로 확인하세요.</div>' +
 
             '<div style="background: #F9FAFB; border:1px solid #E5E8EB; border-radius:14px; ' +
                 'padding:15px 16px; font-size:12.5px; font-weight:600; color:#4E5968; ' +

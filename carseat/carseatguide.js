@@ -41,6 +41,37 @@
             .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
+    /* 이름 + 조사 — '하윤는 지금 8개월' 이 화면에 찍히고 있었다 */
+    function nm(j) {
+        try { if (typeof window.babyNm === "function") return window.babyNm(j); } catch (e) {}
+        var n = localStorage.getItem("tosil_babyName") || "우리 아기";
+        var ch = n.charCodeAt(n.length - 1);
+        var jong = (ch >= 0xAC00 && ch <= 0xD7A3) && ((ch - 0xAC00) % 28 !== 0);
+        return n + (jong ? "이" : "") + (j || "");
+    }
+
+    /* ⚠️ 이 큐레이터도 복사할 때마다 브라우저 기본 창(alert)을 띄웠다.
+          화면 아래 짧은 안내로 바꾼다 (다른 큐레이터 넷과 같은 방식).
+          carseatguide.js 가 app.js 바로 다음이라 이 폴더 전체에 적용된다. */
+    window.carseatToast = function (msg) {
+        var old = document.getElementById("carseat-toast");
+        if (old) old.remove();
+        var t = document.createElement("div");
+        t.id = "carseat-toast";
+        t.setAttribute("style",
+            "position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); " +
+            "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
+            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "font-size:13px; font-weight:700; line-height:1.55; text-align:center; word-break:keep-all; " +
+            "white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); transition:opacity .25s;");
+        t.textContent = String(msg == null ? "" : msg);
+        document.body.appendChild(t);
+        var ms = Math.min(5200, 2200 + String(msg || "").length * 35);
+        setTimeout(function () { t.style.opacity = "0"; }, ms);
+        setTimeout(function () { if (t.parentNode) t.remove(); }, ms + 300);
+    };
+    window.alert = function (msg) { window.carseatToast(msg); };
+
     /* 다크모드에서 연한 배경만 어두워지고 글씨는 그대로라 안 보였다.
        글씨 색을 변수로 빼서 다크일 때만 밝게 바꾼다. */
     (function darkVars() {
@@ -79,7 +110,6 @@
 
     function facingCard() {
         var m = monthsOld();
-        var name = esc(babyName());
 
         var head, body, tone;
         if (m === null) {
@@ -88,18 +118,18 @@
                    "가능하면 <b>24개월, 카시트가 허용하면 그 이상까지</b> 뒤보기로 두세요.";
             tone = "--cg-blue";
         } else if (m < 15) {
-            head = name + "는 지금 " + m + "개월 — 반드시 뒤보기입니다";
+            head = esc(nm("는")) + " 지금 " + m + "개월 \u2014 반드시 뒤보기입니다";
             body = "생후 15개월 전에는 앞을 보게 앉히면 안 됩니다. 목뼈가 아직 머리 무게를 못 버텨서, " +
                    "정면 충돌 때 뒤보기가 아니면 목에 힘이 그대로 갑니다. <b>" + (15 - m) + "개월 더</b> 남았어요.";
             tone = "--cg-red";
         } else if (m < 24) {
-            head = name + "는 지금 " + m + "개월 — 아직 두시는 게 낫습니다";
+            head = esc(nm("는")) + " 지금 " + m + "개월 \u2014 아직 두시는 게 낫습니다";
             body = "돌려도 되는 나이는 지났지만, <b>더 오래 뒤를 볼수록 안전합니다.</b> " +
                    "다리가 접히는 건 문제가 되지 않아요. 아이는 우리보다 훨씬 유연합니다. " +
                    "카시트가 허용하는 키·몸무게까지는 뒤보기로 두시길 권합니다.";
             tone = "--cg-gold";
         } else {
-            head = name + "는 지금 " + m + "개월 — 돌리셔도 됩니다";
+            head = esc(nm("는")) + " 지금 " + m + "개월 \u2014 돌리셔도 됩니다";
             body = "이제 앞보기로 바꾸셔도 괜찮습니다. 다만 카시트에 적힌 <b>키와 몸무게 한계</b>를 넘지 않았는지 확인하세요. " +
                    "나이보다 <b>체격이 기준</b>입니다.";
             tone = "--cg-green";
@@ -466,7 +496,7 @@
         setTimeout(function () { mount(); mountUse(); }, 900);
         setTimeout(function () { mount(); mountUse(); }, 2200);
         /* 탭을 옮기면 '쓰면서' 칸이 그때 만들어지기도 한다 */
-        setInterval(mountUse, 3000);
+        setInterval(function () { if (!document.hidden) mountUse(); }, 3000);
         setTimeout(markTooEarly, 1200);
 
         // 결과가 다시 그려질 때마다 표시도 다시 붙인다

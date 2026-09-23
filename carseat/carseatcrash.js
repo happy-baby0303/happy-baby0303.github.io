@@ -232,7 +232,7 @@
            탭이 아직 안 만들어졌으면 다음 차례에 다시 시도한다. */
         var host = document.getElementById("view-carseat-use");
         if (!host) return;
-        if (document.getElementById("crash-card")) { repaint(); return; }
+        if (document.getElementById("crash-card")) return;   // 이미 있으면 그대로 둔다
 
         var box = document.createElement("div");
         box.innerHTML = cardHTML() + recallHTML();
@@ -254,7 +254,16 @@
     function boot() {
         setTimeout(mount, 800);
         setTimeout(mount, 2500);
-        setInterval(mount, 4000);
+        /* ⚠️ 카시트 탭이 굼뜨던 가장 큰 이유가 여기였다.
+              4초마다 mount() 를 불렀는데, 카드가 이미 있으면 repaint() 로 들어가서
+              질문 다섯 개짜리 카드를 통째로 다시 만들어 갈아끼웠다 — 하루 종일, 4초마다.
+              그때마다 공용 파일 셋(plusmark · plusgate · curatorback)이 그 변화를 보고
+              화면 전체를 다시 훑는다. 화면이 한 번 움직일 때마다 네 군데가 같이 일한 셈이다.
+              이제 카드가 없을 때만 붙인다. 다시 그리는 건 답을 눌렀을 때뿐이다. */
+        setInterval(function () {
+            if (document.hidden) return;
+            if (!document.getElementById("crash-card")) mount();
+        }, 4000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
