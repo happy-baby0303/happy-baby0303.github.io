@@ -64,6 +64,8 @@
         var go = function () {
             /* 본 앱 안에서 열렸다면 그 자리에서 연다 */
             if (typeof window.openPlus === "function") { window.openPlus("curator"); return; }
+            /* 이유식에는 그 폴더 안에 안내 시트가 있다 — 페이지를 떠나지 않는 쪽이 낫다 */
+            if (typeof window.showFoodPaywall === "function") { window.showFoodPaywall(); return; }
             if (typeof window.showPaywall === "function") { window.showPaywall(); return; }
             location.href = "../index.html?go=plus";
         };
@@ -100,6 +102,8 @@
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
+
+    window.plusGateVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.plusGateDebug = function () {

@@ -39,7 +39,21 @@
         'tosil_food_calendar', 'tosil_passed_asked', 'tosil_my_toys',
         'tosil_playweek', 'tosil_nipple_changed', 'tosil_food_tool',
         'tosil_bottle_gear', 'tosil_bottle_parts', 'tosil_paci_tried', 'tosil_paci_symptom',
-        'tosil_bottle_refuse', 'tosil_milk_stock', 'tosil_carseat_own'
+        'tosil_bottle_refuse', 'tosil_milk_stock', 'tosil_carseat_own',
+
+        /* ⚠️ 놀이 기록 · 계량은 아이마다 다른데 목록에 없었다.
+              둘째로 바꿔도 첫째의 놀이 기록을 보고 '잠자는 장난감' 을 세고,
+              첫째의 한 번 먹는 양으로 계산해 주고 있었다. */
+        'tosil_play_log', 'tosil_play_likes', 'tosil_playnow_done', 'tosil_bathtoy_washed',
+        'tosil_meal_size', 'tosil_food_yield', 'tosil_shop_bought',
+
+        /* 본 앱(script.js)에도 있는 것들 — 두 목록이 같아야 한다 */
+        'tosil_hero_pos', 'tosil_vaccines', 'tosil_vaccines_t', 'tosil_life_ledger',
+        'tosil_letters_cloud_v1', 'tosil_letters_pulled_at'
+
+        /* ⚠️ 유모차·트렁크·차종(tosil_stroller_own · tosil_stroller_car · tosil_trunk_depth ·
+              tosil_stroller_limit)은 일부러 넣지 않는다. 그건 아이가 아니라 '집 물건' 이다.
+              쌍둥이라도 유모차는 한 대고, 아이를 바꿨다고 우리 차가 바뀌지 않는다. */
     ];
 
     if (window.__babySwitchOn) return;
@@ -183,7 +197,7 @@
     });
     else { setTimeout(mount, 300); setTimeout(mount, 1200); }
 
-    window.babySwitchVersion = '2026-09-07';   // 다섯 폴더가 같은 날짜여야 한다
+    window.babySwitchVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
 
     window.babySwitchDebug = function () {
         console.log('이 폴더의 babyswitch 판:', window.babySwitchVersion);

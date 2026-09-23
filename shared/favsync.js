@@ -47,9 +47,13 @@
     function code() { return localStorage.getItem("family_sync_code"); }
     function suffix() { return window.currentBabySuffix || ""; }
 
+    /* ⚠️ 서버 주소에만 아기 꼬리표를 붙이고 있었다. 그런데 찜 목록(favBottles…)은
+          폰에서는 아이와 상관없이 한 벌이다. 그래서 둘째로 바꿔서 찜하면
+          첫째 찜이 둘째 칸으로 올라가 섞였다. 찜은 '살 물건' 이라 집에 한 벌이면 된다.
+          폰과 서버를 똑같이 한 벌로 맞춘다. */
     function ref() {
         if (!code() || !window.db || typeof window.doc !== "function") return null;
-        return window.doc(window.db, "settings_" + code() + suffix(), "curator_favs");
+        return window.doc(window.db, "settings_" + code(), "curator_favs");
     }
 
     function mine() {
@@ -101,11 +105,20 @@
         repaint();
     }
 
+    /* ⚠️ 목록을 다시 그리는 함수 이름이 폴더마다 다른데 여기 적힌 여섯 개 중
+          장난감·이유식 것이 하나도 없었다. 짝꿍이 찜해도 화면이 그대로였다.
+          찾은 것 하나를 부르고, 찜 목록 화면도 열려 있으면 같이 다시 그린다. */
     function repaint() {
-        ["renderBottleList", "renderList", "applyFilters", "filterAndRender",
-         "renderResults", "refreshList"].forEach(function (n) {
-            if (typeof window[n] === "function") { try { window[n](); return; } catch (e) {} }
+        var done = false;
+        ["renderBottleList", "renderList", "renderToys", "renderPlays", "runFoodEngine",
+         "updateToyView", "applyFilters", "filterAndRender", "renderResults", "refreshList"]
+        .forEach(function (n) {
+            if (done || typeof window[n] !== "function") return;
+            try { window[n](); done = true; } catch (e) {}
         });
+        if (typeof window.renderFavorites === "function") {
+            try { window.renderFavorites(); } catch (e) {}
+        }
     }
 
     /* ---------- localStorage 가로채기 ----------
@@ -154,6 +167,8 @@
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
+
+    window.favSyncVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.favSyncDebug = function () {

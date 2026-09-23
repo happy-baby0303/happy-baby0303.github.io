@@ -45,6 +45,11 @@
         { id: "toy-sheet",       close: "closeToySheet" },
         { id: "crash-card-sheet", close: null },
         { id: "passed-sheet",    close: "closePassedSheet" },
+        /* ⚠️ 아래 셋이 빠져 있었다. 일반 규칙(화면을 덮은 fixed 상자)으로 잡히긴 하지만,
+              그 길은 그냥 지워버려서 닫을 때 할 일(목록 다시 그리기 등)을 건너뛴다. */
+        { id: "shelf-sheet",     close: "closeShelfSheet" },      // 장난감 · 우리 집 육아템
+        { id: "curator-modal",   close: "closeCuratorModal" },    // 장난감 · 이번 주 목표 고르기
+        { id: "ai-deduction-modal", close: null },                // 이유식 · 큐브 차감
         { id: "food-paywall",    close: "closeFoodPaywall" },
         { id: "baby-picker",     close: null },
         { id: "install-guide-modal", close: null },
@@ -106,18 +111,25 @@
 
           폴더마다 이름이 다르니 이름을 다 적어둔다. */
 
+    /* ⚠️ 장난감은 'view-toy-use' 가 아니라 view-toy-gear 이고,
+          이유식은 탭이 세 칸(tab-recipe · tab-plan · tab-allergy)으로 바뀌었다.
+          그래서 그 둘은 2단계(둘째 탭 → 첫 탭)가 아예 안 돌아서,
+          '장난감 추천' 이나 '식단표' 에서 뒤로가기를 누르면 큐레이터 밖으로 나갔다. */
     var SECOND_TABS = [
         "view-bottle-tools", "view-stroller-use", "view-carseat-use",
+        "view-toy-gear", "tab-plan", "tab-allergy",
         "view-food-use", "view-toy-use", "view-bottle-use"
     ];
 
     var TO_FIRST = [
-        ["switchBottleTab",   "pick"],
-        ["switchStrollerTab", "pick"],
-        ["switchCarseatTab",  "pick"],
-        ["switchFoodTab",     "pick"],
-        ["switchToyTab",      "pick"],
-        ["switchFoodView3",   "cook"]
+        ["switchBottleTab",    "pick"],
+        ["switchStrollerTab",  "pick"],
+        ["switchCarseatTab",   "pick"],
+        ["switchToyMainTab",   "play"],     // 장난감 — 진짜 함수 이름
+        ["foodTabGo",          "recipe"],   // 이유식 — 세 칸 탭
+        ["switchFoodTab",      "pick"],
+        ["switchToyTab",       "pick"],
+        ["switchFoodView3",    "cook"]
     ];
 
     function onSecondTab() {
@@ -181,12 +193,14 @@
                 attributes: true, attributeFilter: ["style"]
             });
         }
-        setInterval(check, 1500);
+        setInterval(function () { if (!document.hidden) check(); }, 1500);   // 다른 앱을 보는 동안은 쉰다
         check();
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
+
+    window.curatorBackVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.curatorBackDebug = function () {

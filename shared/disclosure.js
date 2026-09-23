@@ -70,8 +70,12 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
     else mount();
     setTimeout(mount, 600);
+    setTimeout(mount, 2500);        // 모듈이 화면을 다시 그린 뒤에도 남아 있게
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) setTimeout(mount, 300);
+    });
 
-    window.disclosureVersion = '2026-09-07';   // 다섯 폴더가 같은 날짜여야 한다
+    window.disclosureVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
 
     window.disclosureDebug = function () {
         console.log('이 폴더의 disclosure 판:', window.disclosureVersion);
