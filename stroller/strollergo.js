@@ -99,6 +99,14 @@
         { id: "trip",   icon: "✈️", name: "여행 · 비행기" }
     ];
 
+    // 받침에 맞는 '로/으로' (웨건으로 · 그램플러스로)
+    function ro(w) {
+        var t = String(w || "").trim(), ch = t.charCodeAt(t.length - 1);
+        if (!(ch >= 0xAC00 && ch <= 0xD7A3)) return "로";
+        var jong = (ch - 0xAC00) % 28;
+        return (jong === 0 || jong === 8) ? "로" : "으로";     // 받침 없음 · ㄹ 받침이면 '로'
+    }
+
     function place() { return localStorage.getItem(KEY) || "mall"; }
 
     window.setStrollerGo = function (id) {
@@ -206,25 +214,32 @@
 
     /* ---------- 화면 ---------- */
 
+    /* ⚠️ 칩 길이가 제각각이라 줄이 2-1-2-1 로 들쭉날쭉했다 (폰에서 특히).
+          여섯 개뿐이라 가로 스와이프로 숨기는 것보다 한눈에 다 보이는 쪽이 낫다.
+          반반씩 고정하고, 아이콘 자리를 맞춰 글자 시작점을 같게 한다. */
     function chips(cur) {
-        return '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;">' +
+        return '<div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:12px;">' +
             PLACES.map(function (p) {
                 var on = (p.id === cur);
                 return '<div onclick="window.setStrollerGo(\'' + p.id + '\')" ' +
-                    'style="padding:10px 13px; border-radius:12px; cursor:pointer; ' +
-                    'font-size:12.5px; font-weight:800; white-space:nowrap; ' +
-                    (on ? 'background:' + DARK + '; color:#FFFFFF;'
+                    'style="display:flex; align-items:center; gap:7px; padding:12px 12px; ' +
+                    'border-radius:12px; cursor:pointer; font-size:12.5px; font-weight:800; ' +
+                    'line-height:1.35; word-break:keep-all; box-sizing:border-box; ' +
+                    (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
                         : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
-                    p.icon + ' ' + esc(p.name) + '</div>';
+                    '<span style="flex-shrink:0; width:18px; text-align:center;">' + p.icon + '</span>' +
+                    '<span style="flex:1; min-width:0;">' + esc(p.name) + '</span></div>';
             }).join("") +
         '</div>';
     }
 
+    /* ⚠️ 왼쪽 라벨이 78px 을 먹어서 폰에서는 설명이 세 줄로 접혔다.
+          라벨을 위로 올리면 설명이 한 줄 폭을 다 쓴다. */
     function rowHTML(r) {
-        return '<div style="display:flex; gap:11px; padding:12px 0; border-bottom:1px solid #F2F4F6;">' +
-            '<div style="flex-shrink:0; min-width:78px; font-size:12px; font-weight:900; ' +
-                'color:' + r.tone + '; line-height:1.5;">' + esc(r.t) + '</div>' +
-            '<div style="flex:1; min-width:0; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+        return '<div style="padding:12px 0; border-bottom:1px solid #F2F4F6;">' +
+            '<div style="font-size:11.5px; font-weight:900; color:' + r.tone + '; ' +
+                'letter-spacing:0.2px; margin-bottom:4px;">' + esc(r.t) + '</div>' +
+            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
                 'line-height:1.75; word-break:keep-all;">' + r.d + '</div>' +
         '</div>';
     }
@@ -248,7 +263,7 @@
 
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 0; line-height:1.75; word-break:keep-all;">' +
-                '<b>' + esc(st.name) + '</b> 로 ' + esc(here.name) + ' 갈 때 걸리는 것들이에요.<br>' +
+                '<b>' + esc(st.name) + '</b>' + ro(st.name) + ' ' + esc(here.name) + ' 갈 때 걸리는 것들이에요.<br>' +
                 '가져갈지 말지는 직접 정하시고, 저희는 뭐가 걸리는지만 짚어드릴게요.</div>' +
 
             chips(cur) +

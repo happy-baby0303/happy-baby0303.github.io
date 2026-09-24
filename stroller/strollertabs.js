@@ -110,6 +110,34 @@
         };
         apply(grid.style.display === "none");
 
+        /* ⚠️ 젖병·카시트는 '직접 조건 고르기' 를 접을 수 있는데 유모차만 늘 펼쳐져 있었다.
+              그쪽은 안내 파일이 제목에 접기를 걸어두는데 유모차엔 그게 없다.
+              걸려 있는 게 없으면 여기서 직접 단다. 처음엔 접어둔다 (젖병·카시트와 같게). */
+        if (typeof head.onclick !== "function") {
+            var mark = document.createElement("span");
+            mark.id = "sf-mark";
+            mark.style.cssText = "margin-left:auto; font-size:13px; font-weight:800; color:#8B95A1;";
+            try {
+                var disp = window.getComputedStyle ? getComputedStyle(head).display : "";
+                if (String(disp).indexOf("flex") === -1) {
+                    head.style.display = "flex";
+                    head.style.alignItems = "center";
+                    head.style.gap = "8px";
+                }
+            } catch (e) {}
+            head.appendChild(mark);
+            head.style.cursor = "pointer";
+
+            var setFold = function (folded) {
+                grid.style.display = folded ? "none" : "";
+                mark.textContent = folded ? "펼치기 \u25BE" : "접기 \u25B4";
+                apply(folded);
+            };
+            setFold(true);
+            head.onclick = function () { setFold(grid.style.display !== "none"); };
+            return;
+        }
+
         /* strollerguide 가 head.onclick 을 이미 걸어뒀다. 지우지 않고 뒤에 얹는다. */
         var orig = head.onclick;
         head.onclick = function (e) {
@@ -184,11 +212,16 @@
             if (!box || box.parentNode !== pane) return;
             var fresh = Array.prototype.slice.call(box.children);
             if (!fresh.length) return;
-            Array.prototype.slice.call(pane.querySelectorAll('[data-from="' + id + '"]'))
-                .forEach(function (old) { if (old.parentNode === pane) pane.removeChild(old); });
+            var olds = Array.prototype.slice.call(pane.querySelectorAll('[data-from="' + id + '"]'));
+            /* ⚠️ 새로 그린 카드를 늘 '그릇 자리'(대개 맨 아래)에 놓고, 그 다음 정렬이 위로 올렸다.
+                  그래서 누를 때마다 카드가 아래에서 위로 튀어 올랐다.
+                  지난번에 있던 그 자리에 그대로 놓는다. 그러면 움직이지 않는다. */
+            var ref = olds.length ? olds[olds.length - 1].nextSibling : box;
+            olds.forEach(function (old) { if (old.parentNode === pane) pane.removeChild(old); });
+            if (ref && ref.parentNode !== pane) ref = box;
             fresh.forEach(function (p) {
                 p.setAttribute("data-from", id);
-                pane.insertBefore(p, box);
+                pane.insertBefore(p, ref);
             });
             box.style.display = "none";
         });
@@ -305,7 +338,12 @@
                 var h = ps[i].querySelector(".matrix-header");
                 if (!h) continue;
                 var t = h.textContent || "";
-                if (h.querySelector(".plus-badge")) continue;          // 유료는 안 접는다
+                /* ⚠️ 배지가 붙기 전에 이 검사가 돌면 유료 카드가 접기 상자로 들어간다.
+                      그 다음에 배지가 붙으면 정렬이 다시 위로 올려서, 카드가 혼자 자리를 옮긴 것처럼 보였다
+                      (밑에 있던 '쪽쪽이' 카드가 누르면 맨 위로 올라온 것이 이것이다).
+                      배지가 없으면 제목으로 판단한다 — orderPlus 와 같은 기준. */
+                if (h.querySelector(".plus-badge")) continue;
+                if (PLUS_TITLE.test(h.textContent || "")) continue;          // 유료는 안 접는다
                 for (var k = 0; k < FOLD_KEYS.length; k++) {
                     if (t.indexOf(FOLD_KEYS[k]) > -1) { targets.push(ps[i]); break; }
                 }
@@ -498,8 +536,43 @@
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
+
+        /* ⚠️ 모듈이 카드를 다시 그리면 그릇(box) 안에 새로 만들어진다.
+              그런데 그 그릇은 flatten() 이 숨겨둔 상태라, 4초짜리 타이머가 돌아
+              꺼내줄 때까지 화면이 안 바뀌었다. 누르고 몇 초 뒤에 반응하는 것처럼
+              느껴진 게 이것이다. 그릇이 바뀌는 즉시 꺼낸다. */
+        if (window.MutationObserver) {
+            var qt = null;
+            var mo = new MutationObserver(function () {
+                if (qt) return;
+                qt = setTimeout(function () {
+                    qt = null;
+                    flatten();
+                /* 카드를 다시 그리면 PLUS 배지도 같이 지워진다. 배지 담당(plusmark)은
+                   0.4초 뒤에야 다시 붙여서, 누를 때마다 배지가 사라졌다 생겼다 했다.
+                   여기서 바로 붙여준다. */
+                if (window.refreshPlusMark) window.refreshPlusMark();
+                foldExtras(); orderPlus();
+                }, 60);
+            });
+            var watchBoxes = function () {
+                BOXES.forEach(function (id) {
+                    var b = document.getElementById(id);
+                    if (b) mo.observe(b, { childList: true });
+                });
+            };
+            watchBoxes();
+            setTimeout(watchBoxes, 1200);     // 늦게 생기는 그릇도 있다
+            setTimeout(watchBoxes, 3000);
+        }
+
         setInterval(function () { if (document.hidden) return;   /* 다른 앱을 보는 동안은 쉰다 (배터리) */
-            calmEmoji(); hookRefresh(); adopt(); flatten(); foldExtras(); orderPlus(); }, 4000);   // 다시 그려져도 유지
+            calmEmoji(); hookRefresh(); adopt(); flatten();
+                /* 카드를 다시 그리면 PLUS 배지도 같이 지워진다. 배지 담당(plusmark)은
+                   0.4초 뒤에야 다시 붙여서, 누를 때마다 배지가 사라졌다 생겼다 했다.
+                   여기서 바로 붙여준다. */
+                if (window.refreshPlusMark) window.refreshPlusMark();
+                foldExtras(); orderPlus(); }, 4000);   // 다시 그려져도 유지
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

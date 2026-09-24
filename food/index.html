@@ -278,12 +278,17 @@
                 <div id="cal-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;"></div>
             </div>
 <div id="cal-detail-area" style="background: #FFF9F9; border: 2px solid #FFE5E5; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636; flex-shrink: 0;">7월 1일 기록</div>
-                    <button onclick="openMealSheet()" style="background: #FFFFFF; color: #4E5968; border: 1px solid #D1D5DB; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">+ 식단 기록</button>
+                <!-- ⚠️ 날짜 글자와 단추 둘을 한 줄에 욱여넣어서, 단추 글씨가 두 줄로 접히고
+                         빨간 날짜와 딱 붙어 있었다. 날짜는 위, 단추는 아래 한 줄에 반반으로. -->
+                <div style="margin-bottom: 16px;">
+                    <div id="cal-selected-date-text" style="font-size: 16.5px; font-weight: 900; color: #E32636; margin-bottom: 10px;">7월 1일 기록</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="openMealSheet()" style="flex: 1; background: #FFFFFF; color: #4E5968; border: 1px solid #D1D5DB; padding: 12px 8px; border-radius: 12px; font-weight: 800; font-size: 13px; white-space: nowrap; cursor: pointer;">🍚 식단 기록</button>
                     <!-- ⚠️ 달력에 '식단 기록' 문만 있었다. 재료 테스트 창은 만들어져 있는데
                          그걸 여는 버튼이 어디에도 없어서, 통과·알레르기 재료를 날짜에 적을 길이 없었다. -->
-                    <button onclick="openTestSheet()" style="background: #191F28; color: #FFFFFF; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; margin-left: 6px;">🥄 재료 먹여봤어요</button>
+                        <button onclick="openTestSheet()" style="flex: 1; background: #191F28; color: #FFFFFF; border: none; padding: 12px 8px; border-radius: 12px; font-weight: 800; font-size: 13px; white-space: nowrap; cursor: pointer;">🥄 재료 기록</button>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 11.0px; font-weight: 600; color: #8B95A1; line-height: 1.6;">식단 기록은 뭘 먹었는지, 재료 기록은 통과·알레르기를 적는 곳이에요.</div>
                 </div>
                 <div id="cal-record-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>

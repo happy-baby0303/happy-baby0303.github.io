@@ -1017,13 +1017,96 @@ function drawDonutChart(d, f, e) {
 // ==========================================
 // 💰 가계부 분석 (통합형 엔진 & 부드러운 카피라이팅 패치)
 // ==========================================
+/* ⚠️ 카테고리 합계(ledger.categories)는 한 번도 달을 나눈 적이 없는 '누적' 이다.
+      그래서 9월에 들어와도 8월에 쓴 돈이 '이번 달 소비 패턴' 으로 떴다 (문의 들어온 것).
+      기록 한 줄씩(history)을 달로 나눠서, 고른 달만 센다. */
+
+// 이 기록이 몇 월 것인가 (예전 기록엔 연도가 없다 — "8/20 12:24")
+window.moneyYM = function (h) {
+    if (h && h.ym) return h.ym;
+    const t = String((h && h.time) || "");
+    const m = t.match(/^(\d{1,2})\//);
+    if (!m) return "";
+    const now = new Date();
+    let y = now.getFullYear();
+    if (Number(m[1]) > now.getMonth() + 1) y -= 1;        // 아직 안 온 달이면 작년 것
+    return y + "-" + String(Number(m[1])).padStart(2, "0");
+};
+
+window.moneyThisYM = function () {
+    const n = new Date();
+    return n.getFullYear() + "-" + String(n.getMonth() + 1).padStart(2, "0");
+};
+
+// 기록이 있는 달 + 이번 달
+window.moneyMonths = function () {
+    const led = JSON.parse(localStorage.getItem('tosil_ledger_data') || '{}');
+    const set = {};
+    (led.history || []).forEach(h => { const k = window.moneyYM(h); if (k) set[k] = 1; });
+    set[window.moneyThisYM()] = 1;
+    return Object.keys(set).sort();
+};
+
+window.moneyPickedYM = function () {
+    const list = window.moneyMonths();
+    return (window.moneySelectedYM && list.indexOf(window.moneySelectedYM) > -1)
+        ? window.moneySelectedYM : window.moneyThisYM();
+};
+
+window.moneyMonthLabel = function (ym) {
+    const p = String(ym).split("-");
+    return (Number(p[0]) === new Date().getFullYear() ? "" : p[0] + "년 ") + Number(p[1]) + "월";
+};
+
+window.shiftMoneyMonth = function (delta) {
+    const list = window.moneyMonths();
+    const i = list.indexOf(window.moneyPickedYM());
+    window.moneySelectedYM = list[Math.min(list.length - 1, Math.max(0, i + delta))];
+    window.analyzeMoney();
+    window.updateLedgerUI();
+};
+
+// 그 달의 항목별 합계
+window.moneyMonthSums = function (ym) {
+    const led = JSON.parse(localStorage.getItem('tosil_ledger_data') || '{}');
+    const s = { diaper: 0, food: 0, etc: 0, saved: 0, n: 0 };
+    (led.history || []).forEach(h => {
+        if (window.moneyYM(h) !== ym) return;
+        const a = Number(h.amount) || 0;
+        if (h.type === 'saving') { s.saved += a; return; }
+        const cat = String(h.catName || "");
+        if (cat.indexOf('위생') > -1) s.diaper += a;
+        else if (cat.indexOf('식비') > -1) s.food += a;
+        else s.etc += a;
+        s.n++;
+    });
+    return s;
+};
+
+// 달 고르는 줄  ‹ 9월 ›
+window.paintMoneyMonthBar = function (ym) {
+    const t = document.getElementById('money-month-title');
+    if (t) t.innerText = window.moneyMonthLabel(ym);
+    const bar = document.getElementById('money-month-bar');
+    if (!bar) return;
+    const list = window.moneyMonths(), i = list.indexOf(ym);
+    const arrow = (dir, on) =>
+        `<span onclick="window.shiftMoneyMonth(${dir})" style="padding:7px 13px; border-radius:10px; ` +
+        `cursor:${on ? 'pointer' : 'default'}; background:var(--bg-sub); font-size:15px; font-weight:900; ` +
+        `color:${on ? 'var(--text-m)' : 'var(--border)'};">${dir < 0 ? '\u2039' : '\u203A'}</span>`;
+    bar.innerHTML = arrow(-1, i > 0) +
+        `<span style="font-size:14px; font-weight:900; color:var(--text-m);">${window.moneyMonthLabel(ym)}</span>` +
+        arrow(1, i < list.length - 1);
+};
+
 window.analyzeMoney = function() {
-    const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { categories: { diaper: 0, food: 0, etc: 0 } };
-    if(!ledger.categories) ledger.categories = { diaper: 0, food: 0, etc: 0 };
-    
-    const d = ledger.categories.diaper || 0;
-    const f = ledger.categories.food || 0;
-    const e = ledger.categories.etc || 0;
+    const ym = window.moneyPickedYM();
+    window.paintMoneyMonthBar(ym);
+
+    const sums = window.moneyMonthSums(ym);
+    const d = sums.diaper;
+    const f = sums.food;
+    const e = sums.etc;
     const detailsTotal = d + f + e;
 
     const budgetInput = document.getElementById('v-budget');
@@ -1041,7 +1124,12 @@ window.analyzeMoney = function() {
 
     if(detailsTotal === 0) {
         if(resBox) resBox.style.display = 'none';
-        if(emptyState) emptyState.style.display = 'block';
+        if(emptyState) {
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = (ym === window.moneyThisYM())
+                ? '아직 이번 달 기록이 없어요.<br>위에 금액을 적고 항목을 눌러주세요.'
+                : window.moneyMonthLabel(ym) + '엔 기록이 없어요.<br>위 화살표로 다른 달을 볼 수 있어요.';
+        }
         return; 
     }
 
@@ -1064,7 +1152,7 @@ window.analyzeMoney = function() {
             statusText.style.color = '#EF4444';
         } else {
             // 90% 미만: 시원한 파란색 게이지 🌊
-            statusText.innerText = `이번 달 예산의 ${budgetPercent}%를 썼어요 💸`;
+            statusText.innerText = `${window.moneyMonthLabel(ym)} 예산의 ${budgetPercent}%를 썼어요 💸`;
             progressBox.style.background = `linear-gradient(90deg, #BFDBFE ${visualPercent}%, #EBF4FF ${visualPercent}%)`;
             statusText.style.color = '#2563EB';
         }
@@ -1194,11 +1282,12 @@ window.addDailyExpense = async function(type) {
 
     const now = new Date();
     const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const ymNow = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');   // 달로 나누려면 연도가 있어야 한다
     let typeName = "";
 
     if(type === 'saving') {
         ledger.savedTotal += amount;
-        ledger.history.unshift({ time: timeStr, amount: amount, type: 'saving', catName: '저축' });
+        ledger.history.unshift({ time: timeStr, ym: ymNow, amount: amount, type: 'saving', catName: '저축' });
         if(typeof showToast === 'function') showToast(`🎉 목표 달성을 위해 ${amount.toLocaleString()}원 저금 완료!`);
     } else {
         ledger.total += amount;
@@ -1206,11 +1295,12 @@ window.addDailyExpense = async function(type) {
         else if(type === 'food') { ledger.categories.food += amount; typeName = "🍼 식비"; }
         else if(type === 'etc') { ledger.categories.etc += amount; typeName = "🧸 기타"; }
         
-        ledger.history.unshift({ time: timeStr, amount: amount, type: 'expense', catName: typeName });
+        ledger.history.unshift({ time: timeStr, ym: ymNow, amount: amount, type: 'expense', catName: typeName });
         if(typeof showToast === 'function') showToast(`✅ ${typeName} ${amount.toLocaleString()}원 기록 완료!`);
     }
     
-    if(ledger.history.length > 30) ledger.history.pop(); 
+    // 달별로 보려면 한 달치가 다 남아 있어야 한다 (30개면 두 달도 안 된다)
+    if(ledger.history.length > 200) ledger.history.pop(); 
     
     if (typeof saveLedgerToFirebase === 'function') await saveLedgerToFirebase(ledger);
     
@@ -1225,6 +1315,7 @@ window.addDailyExpense = async function(type) {
     window.toggleCategoryButtons(input);
     window.resizeInput(input);
 
+    window.moneySelectedYM = null;          // 방금 적은 건 이번 달이니 이번 달로 돌아온다
     window.updateLedgerUI(); 
     window.analyzeMoney(); // 👈 입력과 동시에 차트를 알아서 다시 그림!
     if(typeof updateHomeDashboard === 'function') updateHomeDashboard();
@@ -1276,10 +1367,14 @@ window.updateLedgerUI = function() {
     const listContainer = document.getElementById('ledger-history-list');
     if(listContainer) {
         let html = '';
-        if (!ledger.history || ledger.history.length === 0) {
-            html = `<div style="text-align:center; padding:20px; font-size:13px; color:#8B95A1;">아직 입력된 머니로그 기록이 없습니다.</div>`;
+        /* 위 소비 패턴에서 고른 달과 같은 달만 보여준다. 8월 기록이 9월 목록에 섞이면
+           소비 패턴 숫자와 목록이 서로 안 맞는다. */
+        const pickYM = (typeof window.moneyPickedYM === 'function') ? window.moneyPickedYM() : null;
+        const rows = (ledger.history || []).filter(h => !pickYM || window.moneyYM(h) === pickYM);
+        if (rows.length === 0) {
+            html = `<div style="text-align:center; padding:20px; font-size:13px; color:#8B95A1;">${pickYM ? window.moneyMonthLabel(pickYM) + '엔 기록이 없어요.' : '아직 입력된 머니로그 기록이 없습니다.'}</div>`;
         } else {
-            ledger.history.forEach(h => {
+            rows.forEach(h => {
                 const isSave = h.type === 'saving';
                 
                 let bgColor = "#F2F4F6", textColor = "#4E5968";
@@ -1302,7 +1397,7 @@ window.updateLedgerUI = function() {
 };
 
 window.resetMoneyAll = async function() {
-    if(!confirm("이번 달 기록된 모든 지출 내역 및 카테고리를 초기화하시겠습니까?\n(설정하신 예산과 목표는 유지됩니다)")) return;
+    if(!confirm("가계부에 기록된 모든 달의 지출 내역을 지울까요?\n(설정하신 예산과 목표는 그대로 둡니다)")) return;
     
     let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
     ledger.total = 0;
@@ -1536,8 +1631,9 @@ async function sendHotdealToLedger(price, cat) {
     ledger.total += price;
     const now = new Date();
     const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    const ymNow = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
     if(!ledger.history) ledger.history = [];
-    ledger.history.unshift({ time: timeStr, amount: price, type: 'expense' });
+    ledger.history.unshift({ time: timeStr, ym: ymNow, amount: price, type: 'expense', catName: '🧸 기타' });
     
     await saveLedgerToFirebase(ledger);
     showToast(`✅ 핫딜 결제액 ${price.toLocaleString()}원 연동 완료!`);
@@ -8140,7 +8236,7 @@ window.renderOpenRecords = function() {
 
             <div style="display:flex; align-items:center; gap:6px; margin-top:10px; padding-left:2px; font-size:11.5px; white-space:nowrap;">
                 <span style="flex-shrink:0; display:inline-flex; align-items:center;">${statusHtml}</span>
-                <span style="color:var(--text-s); font-weight:600; flex-shrink:0;">${r.openDate.substring(5).replace('-', '.')} 오픈</span>
+                <span style="color:var(--text-s); font-weight:600; flex-shrink:0;">${r.openDate.substring(5).replace('-', '.')} ${r.type === 'bottle_part' ? '교체' : '오픈'}</span>
             </div>
 
         </div>`;

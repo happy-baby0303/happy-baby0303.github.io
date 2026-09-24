@@ -394,35 +394,10 @@
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '한 대로 다 하시니까, <b>힘들어지는 상황만</b> 미리 짚어드릴게요.</div>' +
             tips.map(function (t) {
-                /* ⚠️ 이름·날짜를 한 줄에 두고 오른쪽에 단추와 날짜 칸을 같이 넣었더니
-                      글자 자리가 100px 밖에 안 남아 세 줄로 접혔다 (문의 들어온 것).
-                      위에 글, 아래에 단추 둘을 나란히. 이러면 접히지 않는다. */
-                return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
-                    '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
-                        esc(x.label) +
-                        '<span style="font-weight:700; color:' + GRAY + '; font-size:11px;"> \u00b7 ' +
-                        (x.days >= 30 ? (x.days / 30) + '달' : x.days + '일') + '마다</span></div>' +
-                    '<div style="margin-top:3px; font-size:11.5px; font-weight:800; color:' +
-                        (bad ? GOLD : "#4E5968") + ';">' +
-                        (d === null ? "아직 안 적으셨어요"
-                                    : md(c[x.id]) + " \u00b7 " + (d === 0 ? "오늘 봤어요" : d + "일째") +
-                                      (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
-                    '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
-                        'line-height:1.65; word-break:keep-all;">' + x.why + '</div>' +
-                    '<div style="display:flex; gap:7px; margin-top:10px;">' +
-                        '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
-                            'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
-                            'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
-                            'color:#4E5968; border:1px solid #D1D5DB;">오늘 봤어요</div>' +
-                        '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
-                            'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
-                            'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
-                            'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
-                            'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
-                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#4E5968; ' +
-                            'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:11px; ' +
-                            'padding:10px 8px; cursor:pointer;">' +
-                    '</div>' +
+                return '<div style="padding:11px 0; border-bottom:1px solid #F2F4F6;">' +
+                    '<div style="font-size:12.5px; font-weight:900; color:#4E5968;">' + t[0] + '</div>' +
+                    '<div style="margin-top:4px; font-size:12px; font-weight:600; color:#4E5968; ' +
+                        'line-height:1.75; word-break:keep-all;">' + t[1] + '</div>' +
                 '</div>';
             }).join("") +
             '<div style="margin-top:10px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -677,38 +652,35 @@
             CARE.map(function (x) {
                 var d = daysSince(c[x.id]);
                 var bad = (d === null || d >= x.days);
-                return '<div style="padding:11px 0; border-bottom:1px solid #F2F4F6;">' +
-                    '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">' +
-                        '<div style="min-width:0;">' +
-                            '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
-                                esc(x.label) +
-                                '<span style="font-weight:700; color:' + GRAY + '; font-size:11px;"> \u00b7 ' +
-                                (x.days >= 30 ? (x.days / 30) + '달' : x.days + '일') + '마다</span></div>' +
-                            '<div style="margin-top:3px; font-size:11.5px; font-weight:800; color:' +
-                                (bad ? GOLD : "#4E5968") + ';">' +
-                                (d === null ? "아직 안 적으셨어요"
-                                            : md(c[x.id]) + "에 봤어요 \u00b7 " + (d === 0 ? "오늘" : d + "일 지났어요") +
-                                              (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
-                        '</div>' +
-                        '<div style="flex-shrink:0; display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">' +
-                            '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
-                                'style="padding:9px 12px; border-radius:10px; cursor:pointer; ' +
-                                'font-size:11.5px; font-weight:800; background: #FFFFFF; color:#4E5968; ' +
-                                'border:1px solid #D1D5DB; white-space:nowrap;">오늘 봤어요</div>' +
-                            /* ⚠️ 투명한 달력 칸을 아이콘 위에 덮어놨더니 눌러도 안 열렸다 (문의 들어온 것).
-                                  숨기지 말고 보이는 날짜 칸을 그대로 쓴다. 누르면 폰 달력이 뜬다. */
-                            '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
-                                'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
-                                'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
-                                'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
-                                'style="flex-shrink:0; width:132px; appearance:none; -webkit-appearance:none; ' +
-                                'font-family:inherit; font-size:13px; font-weight:800; color:#4E5968; ' +
-                                'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:10px; ' +
-                                'padding:9px 8px; cursor:pointer;">' +
-                        '</div>' +
-                    '</div>' +
+                /* ⚠️ 이름·날짜를 한 줄에 두고 오른쪽에 단추와 날짜 칸을 같이 넣었더니
+                      글자 자리가 100px 밖에 안 남아 세 줄로 접혔다 (문의 들어온 것).
+                      위에 글, 아래에 단추 둘을 나란히. 이러면 접히지 않는다. */
+                return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+                    '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
+                        esc(x.label) +
+                        '<span style="font-weight:700; color:' + GRAY + '; font-size:11px;"> \u00b7 ' +
+                        (x.days >= 30 ? (x.days / 30) + '달' : x.days + '일') + '마다</span></div>' +
+                    '<div style="margin-top:3px; font-size:11.5px; font-weight:800; color:' +
+                        (bad ? GOLD : "#4E5968") + ';">' +
+                        (d === null ? "아직 안 적으셨어요"
+                                    : md(c[x.id]) + " \u00b7 " + (d === 0 ? "오늘 봤어요" : d + "일째") +
+                                      (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
                     '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                         'line-height:1.65; word-break:keep-all;">' + x.why + '</div>' +
+                    '<div style="display:flex; gap:7px; margin-top:10px;">' +
+                        '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
+                            'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
+                            'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
+                            'color:#4E5968; border:1px solid #D1D5DB;">오늘 봤어요</div>' +
+                        '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
+                            'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
+                            'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
+                            'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                            'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
+                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#4E5968; ' +
+                            'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:11px; ' +
+                            'padding:10px 8px; cursor:pointer;">' +
+                    '</div>' +
                 '</div>';
             }).join("") +
         '</div>';
