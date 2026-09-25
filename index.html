@@ -31,6 +31,8 @@
     <!-- 🎨 색 덧칠은 문서 맨 위에서 시작한다.
          맨 끝에서 불렀더니 그 전까지 화면이 파랗게 그려졌다가 보라로 바뀌었다. -->
     <script src="./theme.js"></script>
+    <!-- 🧰 안전망: 한 곳이 죽어도 나머지 화면은 살게. 제일 먼저 켜져 있어야 한다 -->
+    <script src="./shared/safenet.js"></script>
     <!-- 🎨 색 칠하기는 맨 먼저. 예전엔 본문 맨 끝에서 불려서, 그 전까지 화면이 파랗게 한 번 그려졌다.
          여기서 부르면 본문이 만들어지는 순간부터 보라로 칠해서 파란 장면이 아예 안 생긴다. -->
     <!-- 카카오톡 SDK (이게 있어야 카톡이 뜹니다!) -->
@@ -70,7 +72,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                  .then(() => console.log('✅ PWA 세팅 완료!'))
+                  .then(() => console.log('✅ PWA 세팅 완료'))
                   .catch(err => console.error('❌ PWA 세팅 실패:', err));
             });
         }
@@ -924,7 +926,7 @@ input[type="number"] { -moz-appearance: textfield; }
             <div style="flex: 1; padding: 24px; padding-top: 60px; overflow-y: auto; box-sizing: border-box;">
                 <div style="font-size: 40px; margin-bottom: 16px;">👋</div>
                 <h1 style="font-size: 24px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.4; margin: 0 0 16px 0;">
-                    반가워요!<br>우리 아기의 이름(태명)을<br>알려주세요.
+                    반가워요<br>우리 아기의 이름(태명)을<br>알려주세요.
                 </h1>
                 <input type="text" id="ob-name" placeholder="예) 튼튼이" style="width: 100%; padding: 14px 0; border: none; border-bottom: 3px solid #7F77DD; font-size: 24px; font-weight: 900; color: var(--text-m, #4A413C); outline: none; background: transparent; transition: 0.2s;" autocomplete="off">
             </div>
@@ -1065,7 +1067,7 @@ input[type="number"] { -moz-appearance: textfield; }
             <div style="background: rgba(49, 130, 246, 0.08); border: 1px solid rgba(49, 130, 246, 0.2); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
                 <div style="font-size: 24px; flex-shrink: 0;">👨‍👩‍👧‍👦</div>
                 <div>
-                    <div style="font-size: 14.5px; font-weight: 900; color: #3182F6; margin-bottom: 4px;">가족 1명만 결제해도 혜택 공유!</div>
+                    <div style="font-size: 14.5px; font-weight: 900; color: #3182F6; margin-bottom: 4px;">가족 1명만 결제해도 혜택 공유</div>
                     <div style="font-size: 12.5px; font-weight: 700; color: #4E5968; line-height: 1.4;">엄마, 아빠 중 한 명만 VIP가 되어도<br>초대받은 온 가족이 프리미엄 혜택을 같이 써요.</div>
                 </div>
             </div>
@@ -1076,7 +1078,7 @@ input[type="number"] { -moz-appearance: textfield; }
                 <div style="font-size: 24px; font-weight: 900; color: var(--text-m, #191F28);">
                     월 4,900원
                 </div>
-                <div style="font-size: 12px; font-weight: 700; color: #3182F6; margin-top: 8px;">첫 1개월은 무료로 체험해보세요!</div>
+                <div style="font-size: 12px; font-weight: 700; color: #3182F6; margin-top: 8px;">첫 1개월은 무료로 체험해보세요</div>
             </div>
         </div>
 
@@ -1172,7 +1174,7 @@ input[type="number"] { -moz-appearance: textfield; }
 
             <!-- 2. 원터치 아기 기록 (6구 버튼 + 전달사항) -->
             <div class="box-main" style="border-radius: 24px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;">복잡한 입력 없이 터치 한 번에 끝!</div>
+                <div style="font-size: 13px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;">복잡한 입력 없이 터치 한 번에 끝</div>
                 <h2 style="font-size: 18px; font-weight: 900; color: var(--text-m); margin: 0 0 16px 0; letter-spacing: -0.5px;">원터치 아기 기록</h2>
                 
                 <!-- 🎨 알록달록 색상 & 이모지 싹 빼고 통일된 미니멀 디자인 적용 -->
@@ -1350,7 +1352,7 @@ input[type="number"] { -moz-appearance: textfield; }
                 <div id="home-dad-baton-list" style="display:flex; flex-direction:column; gap:10px;">
                     <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
                         <div style="font-size:24px; margin-bottom:10px;">🕊️</div>
-                        <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중! 🤍</div>
+                        <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중 🤍</div>
                     </div>
                 </div>
             </div>
@@ -1362,7 +1364,7 @@ input[type="number"] { -moz-appearance: textfield; }
                 <div onclick="openMilestoneModal()" style="background: linear-gradient(145deg, #F7F4FD 0%, #EFEBFB 100%); border-radius: 24px; padding: 22px 16px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 16px rgba(168, 85, 247, 0.08); border: 1px solid #F6F3FC;">
                     <div style="font-size: 32px; margin-bottom: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">🏅</div>
                     <div style="font-size: 15px; font-weight: 900; color: #6A61CE; margin-bottom: 4px; letter-spacing: -0.3px;">우리아기 첫 도감</div>
-                    <div style="font-size: 12.5px; font-weight: 800; color: #6A61CE; opacity: 0.8;"><span id="milestone-counter">0/100</span> 달성 중!</div>
+                    <div style="font-size: 12.5px; font-weight: 800; color: #6A61CE; opacity: 0.8;"><span id="milestone-counter">0/100</span> 달성 중</div>
                 </div>
 
                 <!-- 2. 놀이 처방전 -->
@@ -1860,7 +1862,7 @@ input[type="number"] { -moz-appearance: textfield; }
 <!-- 안내 문구 박스 (중복 문구 삭제 완료) -->
 <div style="background: #FFF4ED; padding: 16px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #FFE4D6;">
     <p style="font-size: 13.5px; font-weight: 700; color: #E65100; line-height: 1.5; word-break: keep-all; margin: 0;">
-        "남들이 얼마에 샀는지는 중요하지 않아요! <strong>내가 전에 샀던 가격(나의 최저가)을 AI가 기억했다가, 이번 쇼핑이 성공적인 방어였는지 알려드릴게요!"</strong>
+        "남들이 얼마에 샀는지는 중요하지 않아요 <strong>내가 전에 샀던 가격(나의 최저가)을 배냇함이 기억했다가, 이번 쇼핑이 성공적인 방어였는지 알려드릴게요"</strong>
     </p>
 </div>
         
@@ -1995,7 +1997,7 @@ input[type="number"] { -moz-appearance: textfield; }
                         <div id="dad-exp-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #7F77DD, #6B31F6); border-radius: 6px; transition: width 0.5s ease-out;"></div>
                     </div>
                     <div style="font-size: 11px; color: #A3958A; margin-top: 8px; text-align: right;">
-                        💡 바통터치 미션 완료 시 경험치 상승!
+                        💡 바통터치 미션 완료 시 경험치 상승
                     </div>
                 </div>
                 <!-- ▲▲▲ 경험치 바 끝 ▲▲▲ -->
@@ -2078,7 +2080,7 @@ input[type="number"] { -moz-appearance: textfield; }
                                 🚨 1,000ml 초과 시 신장에 무리가 갈 수 있습니다. 초과분은 이유식으로 보충해 주세요.
                             </div>
                             <p style="font-size: 11px; font-weight: 700; color: #A3958A; line-height: 1.5; word-break: keep-all; margin: 0;">
-                                <strong>계산 기준:</strong> 소아과 학회 표준 지침(체중당 130~150ml)을 따릅니다. 아기마다 소화 능력과 활동량이 다르니 이 수치는 <strong>참고용</strong>으로만 봐주세요. <b>우리 아기가 상위 몇 %인지, 성장 곡선을 잘 따라가고 있는지는 '성장 탭'에서 키/몸무게를 입력해 직접 확인해 보세요!</b> 🤍
+                                <strong>계산 기준:</strong> 소아과 학회 표준 지침(체중당 130~150ml)을 따릅니다. 아기마다 소화 능력과 활동량이 다르니 이 수치는 <strong>참고용</strong>으로만 봐주세요. <b>우리 아기가 상위 몇 %인지, 성장 곡선을 잘 따라가고 있는지는 '성장 탭'에서 키/몸무게를 입력해 직접 확인해 보세요</b> 🤍
                             </p>
                         </div>
                     </div>
@@ -2108,7 +2110,7 @@ input[type="number"] { -moz-appearance: textfield; }
                         <button onclick="calcPong(3, this)" class="pong-btn box-main" style="flex:1; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-m); cursor:pointer;">5~6일차</button>
                     </div>
                     <div id="pong-result" style="display: none; background: #FBF8F3; padding: 20px; border-radius: 16px; border: 1px solid #EDE6DE; text-align: center;">
-                        <div id="pong-res-title" style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">이렇게 타주세요!</div>
+                        <div id="pong-res-title" style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">이렇게 타주세요</div>
                         <div style="display: flex; justify-content: center; gap: 16px; align-items: center;">
                             <div style="flex: 1;">
                                 <div style="font-size: 12px; font-weight: 800; color: #A3958A;">기존 분유</div>
@@ -2146,7 +2148,7 @@ input[type="number"] { -moz-appearance: textfield; }
                         </select>
                         <!-- 👇 선택할 때마다 바뀌는 스마트 말풍선 추가! -->
                         <div id="open-item-guide" style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #7F77DD; background: #F0EEFB; padding: 12px 14px; border-radius: 12px; word-break: keep-all; line-height: 1.4;">
-                            💡 습기에 취약해요! 개봉 후 3주(21일) 이내 소진을 권장합니다.
+                            💡 습기에 취약해요 개봉 후 3주(21일) 이내 소진을 권장합니다.
                         </div>
                         <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">2. 언제 뜯었나요? (기본: 오늘)</label>
                         <input type="date" id="open-item-date" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); box-sizing: border-box;">
@@ -2180,7 +2182,7 @@ input[type="number"] { -moz-appearance: textfield; }
             <!-- 🎒 2. 단독 액션 카드: 외출 준비물 체크리스트 -->
             <button class="btn-main checklist-main-btn" onclick="openChecklistModal()" style="width: 100%; background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 18px; padding: 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; justify-content: center; align-items: center; cursor: pointer;">
                 <span style="font-size: 20px; margin-right: 8px;">🎒</span>
-                <span style="font-size: 15.5px; font-weight: 800; color: #4A413C;">3초 컷! 외출 준비물 체크리스트 〉</span>
+                <span style="font-size: 15.5px; font-weight: 800; color: #4A413C;">3초 컷 외출 준비물 체크리스트 〉</span>
             </button>
 
             <!-- 🎛️ 3. 통합 컨트롤 패널 (탭 + 검색 + 필터 합체!) -->
@@ -2424,7 +2426,7 @@ input[type="number"] { -moz-appearance: textfield; }
                                 </div>
                                 <strong style="color: var(--text-m); font-size:14px; margin-bottom:6px; display:block;">💡 집에서 할 수 있는 기본 대처법</strong>
                                 1. <strong>옷 얇게 입히기:</strong> 기저귀나 얇은 면옷만 입혀 열이 발산되게 해주세요.<br>
-                                2. <strong>미온수 마사지:</strong> 30도 정도의 미지근한 물을 수건에 적셔 목, 겨드랑이, 사타구니를 가볍게 닦아주세요. (찬물 절대 금지!)<br>
+                                2. <strong>미온수 마사지:</strong> 30도 정도의 미지근한 물을 수건에 적셔 목, 겨드랑이, 사타구니를 가볍게 닦아주세요. (찬물 절대 금지)<br>
                                 3. <strong>수분 보충:</strong> 열이 나면 탈수가 올 수 있으니 수유나 보리차를 조금씩 자주 먹이세요.
                             </div>
                         </details>
@@ -2437,7 +2439,7 @@ input[type="number"] { -moz-appearance: textfield; }
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
                                 <div class="box-sub" style="padding: 14px; border-radius: 12px; margin-bottom: 16px;">
                                     <strong style="color: var(--text-m); font-size:14px; margin-bottom:8px; display:block;">🗣️ 던스턴 베이비 랭귀지 (전 세계 공통)</strong>
-                                    생후 3~4개월까지 아기들의 반사 작용으로 나오는 울음소리 패턴입니다. 소리를 주의 깊게 들어보세요!
+                                    생후 3~4개월까지 아기들의 반사 작용으로 나오는 울음소리 패턴입니다. 소리를 주의 깊게 들어보세요
                                 </div>
                                 • <strong>네~ (Neh) = 배고파요 🍼</strong><br>
                                 혀가 입천장에 닿으면서 나는 소리. 쪽쪽 빠는 시늉을 같이 합니다.<br><br>
@@ -2445,7 +2447,7 @@ input[type="number"] { -moz-appearance: textfield; }
                                 하품을 하듯 입이 타원형으로 벌어지며 나는 소리. 눈을 비비기도 합니다.<br><br>
                                 • <strong>에~어 (Eairh) = 배에 가스 찼어요 💨</strong><br>
                                 복부에 힘을 주면서 나는 짜증 섞인 소리. 다리를 배 쪽으로 웅크립니다.<br><br>
-                                • <strong>에! (Eh) = 트림 시켜주세요 🗣️</strong><br>
+                                • <strong>에 (Eh) = 트림 시켜주세요 🗣️</strong><br>
                                 가슴에 공기가 차서 짧게 끊어지듯 내는 소리입니다.<br><br>
                                 • <strong>헤~ (Heh) = 불편해요 찝찝해요 🧻</strong><br>
                                 기저귀가 젖었거나, 덥거나, 추울 때 내는 가쁜 숨소리입니다.
@@ -2466,7 +2468,7 @@ input[type="number"] { -moz-appearance: textfield; }
                                 </div>
                                 <div class="box-tint-red" style="padding: 14px; border-radius: 12px; margin-bottom: 12px;">
                                     <strong style="color: var(--danger); font-size:14px; margin-bottom:4px; display:block;">🚨 분수토 (병원 진료 필요)</strong>
-                                    • <strong>증상:</strong> 분수처럼 '왈칵!' 뿜어져 나오며 꽤 멀리 날아가는 형태.<br>
+                                    • <strong>증상:</strong> 분수처럼 '왈칵' 뿜어져 나오며 꽤 멀리 날아가는 형태.<br>
                                     • <strong>이유:</strong> '비대성 유문협착증' 등 장폐색이나 장염, 심한 위식도 역류증일 수 있습니다.<br>
                                     • <strong>대처:</strong> 분수토가 반복되고 아기의 체중이 늘지 않는다면 반드시 소아과 진료를 받아야 합니다.
                                 </div>
@@ -2480,7 +2482,7 @@ input[type="number"] { -moz-appearance: textfield; }
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
                                 <div class="box-tint-blue" style="padding: 14px; border-radius: 12px; margin-bottom: 16px;">
-                                    <strong style="color: var(--primary); font-size:14px; margin-bottom:4px; display:block;">✅ 맹물은 '이유식을 시작하는 6개월'부터!</strong>
+                                    <strong style="color: var(--primary); font-size:14px; margin-bottom:4px; display:block;">✅ 맹물은 '이유식을 시작하는 6개월'부터</strong>
                                     6개월 이전의 아기는 모유나 분유만으로도 필요한 수분이 100% 충당됩니다.
                                 </div>
                                 <strong style="color: var(--text-m); font-size:14px; margin-bottom:6px; display:block;">⚠️ 6개월 이전에 물을 주면 안 되는 이유</strong>
@@ -2527,21 +2529,21 @@ input[type="number"] { -moz-appearance: textfield; }
 
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">💩 당황하지 마세요! 아기 똥 색깔 건강법</div>
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">💩 당황하지 마세요 아기 똥 색깔 건강법</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
                                 <div class="box-tint-green" style="padding: 14px; border-radius: 12px; margin-bottom: 12px;">
                                     <strong style="color: var(--success); font-size:14px; margin-bottom:4px; display:block;">💚 안심해도 되는 '건강한 똥'</strong>
                                     • <strong>🟨 황금색/노란색:</strong> 모유/분유 소화가 잘 된 가장 이상적인 변입니다.<br>
-                                    • <strong>🟩 녹색변:</strong> 담즙이 장에 오래 머물거나, 전유(유당)를 많이 먹었을 때 흔히 나옵니다. 정상입니다!<br>
+                                    • <strong>🟩 녹색변:</strong> 담즙이 장에 오래 머물거나, 전유(유당)를 많이 먹었을 때 흔히 나옵니다. 정상입니다<br>
                                     • <strong>🟫 갈색변:</strong> 이유식을 시작하면 어른처럼 자연스럽게 어두워집니다.
                                 </div>
                                 <div class="box-tint-red" style="padding: 14px; border-radius: 12px; margin-bottom: 16px;">
                                     <strong style="color: var(--danger); font-size:14px; margin-bottom:4px; display:block;">🚨 기저귀 들고 즉시 병원 가야 하는 '위험한 똥'</strong>
                                     • <strong>🔴 붉은색(혈변):</strong> 장출혈, 세균성 장염, 항문 파열 의심<br>
                                     • <strong>⚫ 검은색(흑색변):</strong> 위, 십이지장 등 상부 위장관 출혈 의심<br>
-                                    • <strong>⚪ 흰색/회색(담백색):</strong> 담도폐쇄증 의심 (아기 얼굴에 황달 동반 시 초응급 상태입니다!)
+                                    • <strong>⚪ 흰색/회색(담백색):</strong> 담도폐쇄증 의심 (아기 얼굴에 황달 동반 시 초응급 상태입니다)
                                 </div>
                                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);">
                                     <button class="box-tint-blue" onclick="switchTab('home', document.getElementById('nav-home')); setTimeout(window.openDiaperSheet, 300);" style="width:100%; padding:14px; color:var(--primary); border-radius:12px; font-weight:800; font-size:13.5px; cursor:pointer;">
@@ -2572,7 +2574,7 @@ input[type="number"] { -moz-appearance: textfield; }
                                 </div>
                                 <div class="box-tint-yellow" style="padding: 14px; border-radius: 12px;">
                                     <strong style="color: #B78103; font-size:14px; margin-bottom:4px; display:block;">🍼 식품류</strong>
-                                    • <strong>분유:</strong> 개봉 후 3주 (습기에 취약하므로 냉장고 보관 금지!)<br>
+                                    • <strong>분유:</strong> 개봉 후 3주 (습기에 취약하므로 냉장고 보관 금지)<br>
                                     • <strong>시판 퓨레/이유식:</strong> 침이 닿지 않게 덜어서 냉장 보관 시 2일
                                 </div>
                             </div>
@@ -2581,7 +2583,7 @@ input[type="number"] { -moz-appearance: textfield; }
                             <!-- ✨ [추가 1] 에버그린 상식: 낙상 -->
                     <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                         <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">💥 쿵! 아기가 침대/소파에서 떨어졌어요</div>
+                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">💥 쿵 아기가 침대/소파에서 떨어졌어요</div>
                             <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                         </summary>
                         <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2592,24 +2594,24 @@ input[type="number"] { -moz-appearance: textfield; }
                                 • 눈동자 초점이 안 맞고 경련을 일으킬 때<br>
                                 • 귀나 코에서 맑은 액체(뇌척수액)나 피가 흐를 때
                             </div>
-                            <strong style="color: var(--text-m); font-size:14px; margin-bottom:6px; display:block;">✅ 올바른 대처법 (72시간 관찰 필수!)</strong>
-                            떨어지자마자 확 안아 올리지 마세요! 척추나 목이 다쳤을 수 있으니 팔다리를 움직이는지 10초 정도 살핀 후 천천히 안아주세요. 울음을 그치고 평소처럼 잘 먹고 잘 놀면 일단 안심이지만, <strong>최대 72시간(3일)</strong> 동안은 멍, 구토, 처짐 증상이 없는지 아기의 상태를 주의 깊게 살펴야 합니다.
+                            <strong style="color: var(--text-m); font-size:14px; margin-bottom:6px; display:block;">✅ 올바른 대처법 (72시간 관찰 필수)</strong>
+                            떨어지자마자 확 안아 올리지 마세요 척추나 목이 다쳤을 수 있으니 팔다리를 움직이는지 10초 정도 살핀 후 천천히 안아주세요. 울음을 그치고 평소처럼 잘 먹고 잘 놀면 일단 안심이지만, <strong>최대 72시간(3일)</strong> 동안은 멍, 구토, 처짐 증상이 없는지 아기의 상태를 주의 깊게 살펴야 합니다.
                         </div>
                     </details>
 
                     <!-- ✨ [추가 2] 에버그린 상식: 화상 -->
                     <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                         <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">🔥 앗 뜨거! 화상 응급처치 골든타임</div>
+                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">🔥 앗 뜨거 화상 응급처치 골든타임</div>
                             <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                         </summary>
                         <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
                             <div class="box-tint-blue" style="padding: 14px; border-radius: 12px; margin-bottom: 12px;">
-                                <strong style="color: var(--primary); font-size:14px; margin-bottom:4px; display:block;">💧 흐르는 미온수에 15~20분! (얼음 절대 금지)</strong>
-                                옷 위로 뜨거운 물을 쏟았다면 억지로 옷을 벗기지 마세요! 살점이 같이 떨어질 수 있습니다. <strong>옷을 입힌 채로 흐르는 시원한 물(미지근한 물)</strong>에 20분간 열을 식힌 후, 옷을 가위로 잘라내세요.
+                                <strong style="color: var(--primary); font-size:14px; margin-bottom:4px; display:block;">💧 흐르는 미온수에 15~20분 (얼음 절대 금지)</strong>
+                                옷 위로 뜨거운 물을 쏟았다면 억지로 옷을 벗기지 마세요 살점이 같이 떨어질 수 있습니다. <strong>옷을 입힌 채로 흐르는 시원한 물(미지근한 물)</strong>에 20분간 열을 식힌 후, 옷을 가위로 잘라내세요.
                             </div>
                             <strong style="color: var(--danger); font-size:14px; margin-bottom:6px; display:block;">🚫 절대 하면 안 되는 행동</strong>
-                            얼음을 직접 대면 혈관이 수축해 오히려 열이 빠져나가는 걸 방해하고 동상을 유발합니다. 또한 소주, 된장, 알로에, 화상 연고 등을 임의로 바르지 말고 <strong>깨끗한 수건이나 거즈</strong>로 살짝 덮어 화상 전문 병원으로 가세요. (물집은 세균 감염 보호막이니 절대 터뜨리지 마세요!)
+                            얼음을 직접 대면 혈관이 수축해 오히려 열이 빠져나가는 걸 방해하고 동상을 유발합니다. 또한 소주, 된장, 알로에, 화상 연고 등을 임의로 바르지 말고 <strong>깨끗한 수건이나 거즈</strong>로 살짝 덮어 화상 전문 병원으로 가세요. (물집은 세균 감염 보호막이니 절대 터뜨리지 마세요)
                         </div>
                     </details>
 
@@ -2721,7 +2723,7 @@ input[type="number"] { -moz-appearance: textfield; }
                 <button onclick="window.changeNickname()" style="padding: 6px 10px; background: var(--text-title); color: #FFF; font-weight: 800; font-size: 12px; border: none; border-radius: 8px; cursor: pointer;">변경</button>
             </div>
             <!-- 동탄맘 삭제! 유저 등급과 다정한 인사말로 교체 -->
-            <div id="mypage-user-info" style="font-size: 13px; color: var(--text-sub); font-weight: 600;">일반 회원 · 배냇함과 함께하는 중!</div>
+            <div id="mypage-user-info" style="font-size: 13px; color: var(--text-sub); font-weight: 600;">일반 회원 · 배냇함과 함께하는 중</div>
         </div>
 
         <!-- 활동 요약 보드 (실제 카운트가 들어가도록 id 부여 완료!) -->
@@ -3149,9 +3151,9 @@ input[type="number"] { -moz-appearance: textfield; }
  const auth = getAuth(app);
  window.auth = auth; 
  const functions = getFunctions(app); // 카카오 로그인용 (미국 서버 = us-central1)
- const functionsSeoul = getFunctions(app, "asia-northeast3"); // 👈 추가! 알림/탈퇴용 (서울 서버)
- window.functions = functionsSeoul;   // 👈 수정! 앱이 부르는 건 이제 서울 서버
- window.functionsUS = functions;      // 👈 추가! (혹시 몰라 남겨두는 미국 서버)
+ const functionsSeoul = getFunctions(app, "asia-northeast3"); // 👈 추가 알림/탈퇴용 (서울 서버)
+ window.functions = functionsSeoul;   // 👈 수정 앱이 부르는 건 이제 서울 서버
+ window.functionsUS = functions;      // 👈 추가 (혹시 몰라 남겨두는 미국 서버)
  window.httpsCallable = httpsCallable;
 
  // 카카오 SDK 초기화 (대표님 찐 앱키 자동 세팅 완료!)
@@ -3223,7 +3225,7 @@ input[type="number"] { -moz-appearance: textfield; }
         console.log("✅ 카카오 고유 ID (admin 대조용):", kakaoSub);
         
                 localStorage.setItem('firebase_uid', user.uid); 
-                     localStorage.setItem('kakao_id', kakaoSub); // 👈 부활!
+                     localStorage.setItem('kakao_id', kakaoSub); // 👈 부활
 
         // ✅ [추가] 로그인이 확인되면 푸시 토큰을 서버에 저장/갱신
         setTimeout(() => window.syncPushToken && window.syncPushToken(), 1500);
@@ -3301,7 +3303,7 @@ input[type="number"] { -moz-appearance: textfield; }
                 codeArea.style.display = 'block';
                 codeArea.querySelector('div').innerText = existing;
             }
-            return alert(`🎟️ 우리 가족 코드는 [${existing}] 입니다!\n이 코드를 짝꿍에게 알려주세요.`);
+            return alert(`🎟️ 우리 가족 코드는 [${existing}] 입니다\n이 코드를 짝꿍에게 알려주세요.`);
         }
     };
 
@@ -3383,7 +3385,7 @@ input[type="number"] { -moz-appearance: textfield; }
                 }
 
                 localStorage.removeItem('pending_invite_code');
-                alert(`🎉 [${data.babyName || '우리아기'}]네 가족 연동 완료!`);
+                alert(`🎉 [${data.babyName || '우리아기'}]네 가족 연동 완료`);
                 location.reload(); 
             } else {
                 alert("❌ 서버에 등록되지 않은 코드입니다.");
@@ -3399,7 +3401,7 @@ input[type="number"] { -moz-appearance: textfield; }
      window.upgradeToEarlyBirdVIP = async () => {
         // 캐시가 아니라 '지금 로그인된' UID 를 쓴다. 규칙이 이걸 대조한다.
         const liveUid = (window.auth && window.auth.currentUser) ? window.auth.currentUser.uid : null;
-        if (!liveUid) return alert("🚨 먼저 카카오 로그인을 해주세요!");
+        if (!liveUid) return alert("🚨 먼저 카카오 로그인을 해주세요");
 
         // 연동은 필수가 아니다. 혼자 쓰는 사람도 얼리버드다.
         const syncCode = localStorage.getItem('family_sync_code') || '';
@@ -3415,7 +3417,7 @@ input[type="number"] { -moz-appearance: textfield; }
             }, { merge: true });
 
             localStorage.setItem('tosil_premium_applied', 'true');
-            alert("🎉 얼리버드 신청 완료!\n\n승인되면 첫 1개월간 프리미엄 전 기능을 무료로 이용하실 수 있습니다");
+            alert("🎉 얼리버드 신청 완료\n\n승인되면 첫 1개월간 프리미엄 전 기능을 무료로 이용하실 수 있습니다");
             const modal = document.getElementById('vip-modal-overlay');
             if(modal) modal.style.display = 'none';
         } catch (error) {
@@ -3523,7 +3525,7 @@ input[type="number"] { -moz-appearance: textfield; }
             <div id="ai-poop-result" style="display: none; padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;"></div>
             
             <div class="box-sub" style="font-size: 11px; line-height: 1.5; margin-bottom: 16px; word-break: keep-all; padding: 10px; border-radius: 8px;">
-                <strong style="color: var(--danger);">🚨 단순 참고용:</strong> AI 판독 결과는 일반적인 기준이며 의학적 진단을 대신할 수 없습니다. 아기 컨디션이 평소와 다르다면 반드시 전문의의 진료를 받으세요.
+                <strong style="color: var(--danger);">🚨 단순 참고용:</strong> 성장 곡선 판독은 일반적인 기준이며 의학적 진단을 대신할 수 없습니다. 아기 컨디션이 평소와 다르다면 반드시 전문의의 진료를 받으세요.
             </div>
 
             <button onclick="saveAiPoopRecord()" style="width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 14px; font-weight: 800; font-size: 16px; cursor: pointer;">기록 저장하기</button>
@@ -3653,7 +3655,7 @@ input[type="number"] { -moz-appearance: textfield; }
             <span id="invite-baby-name" style="color: #7F77DD;">우리아기</span> 육아,<br>혼자 다 기록하시게요? 🥲
         </h2>
         <p style="font-size: 14.5px; font-weight: 600; color: #A3958A; margin: 0 0 28px 0; line-height: 1.5; word-break: keep-all;">
-            남편(가족)을 초대하면 폰이 달라도<br>모든 트래커와 가계부가 0.1초 만에 실시간 공유돼요!
+            남편(가족)을 초대하면 폰이 달라도<br>모든 트래커와 가계부가 0.1초 만에 실시간 공유돼요
         </p>
         
         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -3676,7 +3678,7 @@ input[type="number"] { -moz-appearance: textfield; }
 
         <div style="font-size: 40px; margin-bottom: 12px;">💌</div>
         <div style="font-size: 14px; font-weight: 800; color: #F04452; margin-bottom: 8px;">[이번 주] 육아 리포트</div>
-        <div style="font-size: 20px; font-weight: 900; color: var(--text-m); margin-bottom: 24px; line-height: 1.4;">이번 한 주도<br>정말 고생 많으셨어요!</div>
+        <div style="font-size: 20px; font-weight: 900; color: var(--text-m); margin-bottom: 24px; line-height: 1.4;">이번 한 주도<br>정말 고생 많으셨어요</div>
 
      <div class="box-sub" style="border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -3694,7 +3696,7 @@ input[type="number"] { -moz-appearance: textfield; }
             </div>
 
         <p style="font-size: 13.5px; color: var(--text-s); line-height: 1.6; word-break: keep-all; font-weight: 600; margin-bottom: 24px;">
-            보이지 않는 곳에서 밤잠 설치며 아기를 돌본 엄마의 땀방울과, 퇴근 후 달려와 육아에 동참한 아빠의 노력이 모여 우리 아기는 이번 주도 건강하게 자랐습니다. 다가오는 새로운 일주일도 배냇함이 든든하게 응원할게요! 파이팅! 🤍
+            보이지 않는 곳에서 밤잠 설치며 아기를 돌본 엄마의 땀방울과, 퇴근 후 달려와 육아에 동참한 아빠의 노력이 모여 우리 아기는 이번 주도 건강하게 자랐습니다. 다가오는 새로운 일주일도 배냇함이 든든하게 응원할게요 파이팅 🤍
         </p>
 
         <button onclick="window.closeWeeklyReport()" style="width: 100%; padding: 16px; background: var(--text-m); color: var(--bg-card); border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;">
@@ -3738,7 +3740,7 @@ input[type="number"] { -moz-appearance: textfield; }
         <input type="text" class="write-input" id="writeTitle" placeholder="제목을 입력하세요" style="padding: 20px; border-bottom: 1px solid #F6F2EC; font-weight: 800; font-size: 20px;">
 
         <!-- 본문 입력 -->
-        <textarea class="write-input" id="writeContent" placeholder="육아 동지들과 나누고 싶은 이야기를 적어보세요!&#13;&#10;(질문, 꿀팁, 일상 등)" style="flex: 1; min-height: 150px; resize: none; padding: 20px; line-height: 1.6;"></textarea>
+        <textarea class="write-input" id="writeContent" placeholder="육아 동지들과 나누고 싶은 이야기를 적어보세요&#13;&#10;(질문, 꿀팁, 일상 등)" style="flex: 1; min-height: 150px; resize: none; padding: 20px; line-height: 1.6;"></textarea>
     </div>
 
     <!-- 🔥 새롭게 깎은 고급 하단 툴바 (SVG 아이콘) 🔥 -->
@@ -3880,7 +3882,7 @@ input[type="number"] { -moz-appearance: textfield; }
     <!-- 텅 빈 화면 (Empty State) -->
     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: #FBF8F3;">
         <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
-        <div style="font-size: 16px; font-weight: 800; color: #7A6F68; margin-bottom: 8px;">아직 작성한 내역이 없어요!</div>
+        <div style="font-size: 16px; font-weight: 800; color: #7A6F68; margin-bottom: 8px;">아직 작성한 내역이 없어요</div>
         <div style="font-size: 13.5px; color: #A3958A;">첫 게시글을 남기고 소통을 시작해보세요.</div>
     </div>
 </div>
@@ -4017,7 +4019,7 @@ body { overflow-x: hidden !important; } /* 가로로 튀어나오는 모든 찌�
         
         <!-- 어르신 독려 따뜻한 문구 🤍 -->
         <div style="position: absolute; top: 12%; width: 85%; background: rgba(255, 255, 255, 0.1); color: #FFF; padding: 20px; border-radius: 20px; text-align: center; font-size: 17px; font-weight: 800; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); z-index: 2; line-height: 1.5; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-            할머니 할아버지, 어렵지 않아요!<br><span style="color:#38BDF8;">천천히 함께 배워볼까요? 🤍</span>
+            할머니 할아버지, 어렵지 않아요<br><span style="color:#38BDF8;">천천히 함께 배워볼까요? 🤍</span>
         </div>
         
         <div style="z-index: 2; text-align: center;">
@@ -4096,7 +4098,7 @@ body { overflow-x: hidden !important; } /* 가로로 튀어나오는 모든 찌�
         <div style="background: white; border-radius: 24px; padding: 32px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="font-size: 50px; margin-bottom: 16px;">🍰</div>
             <h2 style="font-size: 22px; font-weight: 900; color: #191F28; margin-bottom: 12px;">달콤한 케이크도 추가할까요?</h2>
-            <p style="font-size: 14px; color: #8B95A1; font-weight: 800; margin-bottom: 24px;">지금 추가하시면 500원이 즉시 할인됩니다!</p>
+            <p style="font-size: 14px; color: #8B95A1; font-weight: 800; margin-bottom: 24px;">지금 추가하시면 500원이 즉시 할인됩니다</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <button onclick="window.kioskAddToCart('치즈 케이크', 4500); window.kioskNextStep(4);" style="padding: 20px; background: #F04452; color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 10px rgba(240,68,82,0.3);">예, 할인받고 추가할게요 (+4,500원)</button>
                 <button onclick="window.kioskNextStep(4)" style="padding: 12px; background: transparent; color: #B0B8C1; border: none; font-size: 13px; font-weight: 700; text-decoration: underline; cursor: pointer;">아니요, 선택한 메뉴만 결제할게요</button>
@@ -4158,11 +4160,11 @@ body { overflow-x: hidden !important; } /* 가로로 튀어나오는 모든 찌�
     <!-- 🛑 스텝 7: 완료 -->
     <div id="kiosk-step-7" style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; background: #FFFFFF;">
         <div style="font-size: 80px; margin-bottom: 20px; animation: popIn 0.5s;">🎉</div>
-                <h2 style="font-size: 28px; font-weight: 900; color: #00B37A; margin-bottom: 8px;">결제 성공!</h2>
+                <h2 style="font-size: 28px; font-weight: 900; color: #00B37A; margin-bottom: 8px;">결제 성공</h2>
 
         <div style="font-size: 13px; font-weight: 800; color: #8B95A1; margin-bottom: 16px;">🎓 연습이었어요. 실제 결제는 일어나지 않았습니다</div>
         <div style="font-size: 18px; font-weight: 800; color: #4E5968; line-height: 1.6; margin-bottom: 40px;">
-            영수증과 주문번호표를 받아가세요.<br><span style="color:#3182F6;">할머니 할아버지 최고예요! 👏</span>
+            영수증과 주문번호표를 받아가세요.<br><span style="color:#3182F6;">잘하셨어요 👏</span>
         </div>
         <button onclick="document.getElementById('kiosk-modal').style.display='none'" style="width: 100%; max-width: 300px; padding: 20px; background: #191F28; color: #FFF; border: none; border-radius: 16px; font-size: 18px; font-weight: 900;">완벽하게 마스터 했어요 (닫기)</button>
     </div>

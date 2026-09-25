@@ -128,62 +128,62 @@
         { find: "열날 때", ranges: [[0, 99]], whys: [""], base: 4,
           boost: function (c) {
               if (!c.hot) return null;
-              return { s: 120, why: agoDays(c.feverAgo) + " " + c.maxTemp.toFixed(1) + "도가 있어서" };
+              return { s: 120, why: agoDays(c.feverAgo) + " " + c.maxTemp.toFixed(1) + "도" };
           } },
 
-        { find: "울음",    ranges: [[0, 4]],  whys: ["울음이 제일 잦은 때라"], base: 60 },
-        { find: "분수토",  ranges: [[0, 6]],  whys: ["게워냄이 잦은 때라"],   base: 55 },
+        { find: "울음",    ranges: [[0, 4]],  whys: ["많이 우는 시기"], base: 60 },
+        { find: "분수토",  ranges: [[0, 6]],  whys: ["자주 게워낼 때"],   base: 55 },
 
-        { find: "보리차", ranges: [[4, 9]], whys: ["이유식 시작 무렵이라"], base: 50,
+        { find: "보리차", ranges: [[4, 9]], whys: ["이유식 시작 무렵"], base: 50,
           boost: function (c) {
-              return c.stage.indexOf("이유식") > -1 ? { s: 25, why: c.stage + " 중이라" } : null;
+              return c.stage.indexOf("이유식") > -1 ? { s: 25, why: c.stage + " 중" } : null;
           } },
 
-        { find: "통잠",    ranges: [[2, 9]],           whys: ["밤잠이 길어지는 때라"], base: 58 },
-        { find: "쪽쪽이",  ranges: [[0, 3], [17, 26]], whys: ["쪽쪽이 물릴 때라", "끊을 때가 다가와서"], base: 45 },
-        { find: "똥 색깔", ranges: [[0, 5]],           whys: ["변이 자주 바뀌는 때라"], base: 48 },
+        { find: "통잠",    ranges: [[2, 9]],           whys: ["밤잠이 길어질 즈음"], base: 58 },
+        { find: "쪽쪽이",  ranges: [[0, 3], [17, 26]], whys: ["쪽쪽이 물릴 무렵", "슬슬 끊을 때"], base: 45 },
+        { find: "똥 색깔", ranges: [[0, 5]],           whys: ["변 색이 자주 바뀔 때"], base: 48 },
 
         { find: "개봉 후", ranges: [[0, 99]], whys: [""], base: 3,
           boost: function (c) {
               if (!c.opens) return null;
-              return { s: 40, why: "언제깠지에 " + c.opens + "개가 담겨 있어서" };
+              return { s: 40, why: "언제깠지에 " + c.opens + "개" };
           } },
 
-        { find: "떨어졌어요", ranges: [[4, 15]],  whys: ["뒤집고 기어다닐 때라"],   base: 62 },
-        { find: "화상",       ranges: [[8, 26]],  whys: ["잡고 서기 시작할 때라"], base: 52 },
+        { find: "떨어졌어요", ranges: [[4, 15]],  whys: ["뒤집기 시작하면"],   base: 62 },
+        { find: "화상",       ranges: [[8, 26]],  whys: ["잡고 서기 시작하면"], base: 52 },
 
-        { find: "두드러기", ranges: [[5, 10]], whys: ["새 재료를 늘릴 때라"], base: 50,
+        { find: "두드러기", ranges: [[5, 10]], whys: ["새 재료를 늘릴 때"], base: 50,
           boost: function (c) {
-              return c.stage.indexOf("이유식") > -1 ? { s: 35, why: c.stage + " 중이라" } : null;
+              return c.stage.indexOf("이유식") > -1 ? { s: 35, why: c.stage + " 중" } : null;
           } },
 
         /* ---- libraryplus.js 가 붙이는 여덟 편 ---- */
 
-        { find: "눕히는 자세", ranges: [[0, 12]], whys: ["돌 전에 제일 중요해서"], base: 70 },
-        { find: "코막힘",     ranges: [[0, 24]], whys: ["코가 자주 막히는 때라"], base: 47 },
-        { find: "배앓이",     ranges: [[0, 4]],  whys: ["배앓이가 심한 때라"],   base: 64 },
-        { find: "이앓이",     ranges: [[4, 14]], whys: ["첫니가 나올 때라"],     base: 56 },
+        { find: "눕히는 자세", ranges: [[0, 12]], whys: ["돌 전엔 이게 먼저"], base: 70 },
+        { find: "코막힘",     ranges: [[0, 24]], whys: ["코가 자주 막힐 때"], base: 47 },
+        { find: "배앓이",     ranges: [[0, 4]],  whys: ["배앓이가 잦은 시기"],   base: 64 },
+        { find: "이앓이",     ranges: [[4, 14]], whys: ["첫니 나올 무렵"],     base: 56 },
 
-        { find: "안 쌌어요", ranges: [[4, 24]], whys: ["변이 단단해지는 때라"], base: 46,
+        { find: "안 쌌어요", ranges: [[4, 24]], whys: ["변이 단단해질 즈음"], base: 46,
           boost: function (c) {
-              return c.stage.indexOf("이유식") > -1 ? { s: 18, why: c.stage + " 중이라" } : null;
+              return c.stage.indexOf("이유식") > -1 ? { s: 18, why: c.stage + " 중" } : null;
           } },
 
         { find: "접종 하고", ranges: [[0, 24]], whys: [""], base: 6,
           boost: function (c) {
               return (c.vacSoon !== null && c.vacSoon <= 7 && c.vacSoon >= -3)
-                  ? { s: 70, why: (c.vacSoon > 0 ? "접종이 " + c.vacSoon + "일 남아서" : "접종한 지 얼마 안 돼서") }
+                  ? { s: 70, why: (c.vacSoon > 0 ? "접종 D-" + c.vacSoon : "접종한 지 얼마 안 됐어요") }
                   : null;
           } },
 
         { find: "체온, 어디서", ranges: [[0, 99]], whys: [""], base: 5,
           boost: function (c) {
-              return c.hot ? { s: 44, why: "최근에 열이 있어서" } : null;
+              return c.hot ? { s: 44, why: "최근 열 기록이 있어요" } : null;
           } },
 
         { find: "약 먹이기", ranges: [[0, 99]], whys: [""], base: 4,
           boost: function (c) {
-              return c.hot ? { s: 30, why: "약을 먹일 일이 있어서" } : null;
+              return c.hot ? { s: 30, why: "약 먹인 기록이 있어요" } : null;
           } }
     ];
 
@@ -246,7 +246,7 @@
                 if (hit > -1) {
                     s += r.base;
                     why = (r.whys && r.whys[hit]) ? r.whys[hit]
-                        : ((c.months === 0) ? "갓 태어나서" : "생후 " + c.months + "개월이라");
+                        : ((c.months === 0) ? "갓 태어난 무렵" : "생후 " + c.months + "개월");
                 }
                 if (r.boost) {
                     var b = r.boost(c);

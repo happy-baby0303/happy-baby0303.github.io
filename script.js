@@ -539,7 +539,7 @@ function generateSubFilters(mainRegion) {
             if (eDate && eDate < todayNum) return false; // 이미 끝난 행사
             if (sMonth && sMonth > currentMonthNum) return false; // 다음 달 이후 행사
             
-            return true; // 진짜 현재 유효한 행사만 남김!
+            return true; // 진짜 현재 유효한 행사만 남김
         });
     } else {
         source = hotplacesData.filter(p => !p.isEvent);
@@ -866,7 +866,7 @@ function closeFestivalModalForce() {
     const m = document.getElementById('premium-modal'); 
     if(m) {
         m.style.display = 'none'; 
-        document.body.style.overflow = 'auto'; // 👈 핵심 패치: 닫을 때 스크롤 잠금 강제 해제!
+        document.body.style.overflow = 'auto'; // 👈 핵심 패치: 닫을 때 스크롤 잠금 강제 해제
     }
 }
 function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
@@ -1145,14 +1145,14 @@ window.analyzeMoney = function() {
         if (budgetPercent >= 90) {
             // 90% 이상: 경고 메시지와 빨간색 그라데이션 🚨
             statusText.innerText = budgetPercent >= 100 
-                ? `예산을 초과했어요! 지갑 지킴이 출동 🚨 (${budgetPercent}%)` 
-                : `예산이 얼마 안 남았어요! ⚠️ (${budgetPercent}%)`;
+                ? `예산을 넘었어요 · ${budgetPercent}%` 
+                : `예산이 얼마 안 남았어요 · ${budgetPercent}%`;
             
             progressBox.style.background = `linear-gradient(90deg, #FCA5A5 ${visualPercent}%, #FEF2F2 ${visualPercent}%)`;
             statusText.style.color = '#EF4444';
         } else {
             // 90% 미만: 시원한 파란색 게이지 🌊
-            statusText.innerText = `${window.moneyMonthLabel(ym)} 예산의 ${budgetPercent}%를 썼어요 💸`;
+            statusText.innerText = `${window.moneyMonthLabel(ym)} 예산의 ${budgetPercent}%를 썼어요`;
             progressBox.style.background = `linear-gradient(90deg, #BFDBFE ${visualPercent}%, #EBF4FF ${visualPercent}%)`;
             statusText.style.color = '#2563EB';
         }
@@ -1163,16 +1163,16 @@ window.analyzeMoney = function() {
     if (Math.max(d, f, e) === f) maxLabel = '분유/식비';
     if (Math.max(d, f, e) === e) maxLabel = '장난감/기타';
 
-    let insightText = "알뜰하게 잘 방어하고 계시네요! 아주 좋습니다 🌿";
+    let insightText = "지출이 고르게 나뉘어 있어요.";
     if (detailsTotal > 0) {
-        if (maxLabel === '기저귀/위생용품') insightText = "기저귀는 핫딜 뜰 때 대량으로 쟁여두는 게 최고입니다!";
-        else if (maxLabel === '분유/식비') insightText = "아이의 성장 속도를 고려하면 정상입니다! 잘 먹는 게 최고예요 💪";
-        else insightText = "'당근마켓'을 적절히 활용하면 방어율이 엄청나게 올라갑니다 🥕";
+        if (maxLabel === '기저귀/위생용품') insightText = "기저귀는 쟁여둘수록 개당 값이 내려갑니다. 핫딜 때 몰아 사두세요.";
+        else if (maxLabel === '분유/식비') insightText = "이 시기엔 흔한 비중이에요. 잘 먹는 게 먼저입니다.";
+        else insightText = "중고로 사고파는 걸 섞으면 지출이 꽤 줄어듭니다.";
     }
 
-    let statusHtml = `👍 <strong>안정:</strong> 이상적인 소비 비율입니다.`;
-    if (budgetPercent > 100) statusHtml = `<span style="color:var(--danger)">🚨 <strong>주의:</strong> 지출이 예산을 넘어섰습니다. 항목별 조율이 필요해요!</span>`;
-    else if (budgetPercent < 80) statusHtml = `<span style="color:var(--success)">🌿 <strong>우수:</strong> 예산 안에서 알뜰하게 분배되고 있습니다.</span>`;
+    let statusHtml = `<strong>안정</strong> · 무난한 비율이에요.`;
+    if (budgetPercent > 100) statusHtml = `<span style="color:var(--danger)"><strong>주의</strong> · 예산을 넘었어요. 항목을 한 번 보세요.</span>`;
+    else if (budgetPercent < 80) statusHtml = `<span style="color:var(--success)"><strong>여유</strong> · 예산 안에서 쓰고 계세요.</span>`;
 
     const moneyInsightEl = document.getElementById('money-insight-detail');
     if(moneyInsightEl) {
@@ -1228,7 +1228,7 @@ window.toggleHistory = function() {
             items.innerHTML = `
                 <div style="text-align:center; padding:30px 10px;">
                     <div style="font-size:32px; margin-bottom:10px;">💨</div>
-                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">기록이 텅~ 비어있네요!</div>
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">지난달 기록이 없어요</div>
                     <div style="font-size:12.5px; color:var(--text-s);">아직 지난달에 기록하신 가계부 내역이 없어요.</div>
                 </div>`; 
         } else { 
@@ -1271,8 +1271,8 @@ window.addDailyExpense = async function(type) {
     const amount = parseInt(input.value.replace(/,/g, '')) || 0;
     
     if(amount <= 0) {
-        if(typeof showToast === 'function') return showToast("⚠️ 금액을 정확히 입력해주세요!");
-        else return alert("⚠️ 금액을 정확히 입력해주세요!");
+        if(typeof showToast === 'function') return showToast("⚠️ 금액을 정확히 입력해주세요");
+        else return alert("⚠️ 금액을 정확히 입력해주세요");
     }
 
     let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "", goalAmount: 100000, history: [], categories: { diaper: 0, food: 0, etc: 0 } };
@@ -1288,7 +1288,7 @@ window.addDailyExpense = async function(type) {
     if(type === 'saving') {
         ledger.savedTotal += amount;
         ledger.history.unshift({ time: timeStr, ym: ymNow, amount: amount, type: 'saving', catName: '저축' });
-        if(typeof showToast === 'function') showToast(`🎉 목표 달성을 위해 ${amount.toLocaleString()}원 저금 완료!`);
+        if(typeof showToast === 'function') showToast(`🎉 목표 달성을 위해 ${amount.toLocaleString()}원 저금했어요`);
     } else {
         ledger.total += amount;
         if(type === 'diaper') { ledger.categories.diaper += amount; typeName = "🧻 위생"; }
@@ -1296,7 +1296,7 @@ window.addDailyExpense = async function(type) {
         else if(type === 'etc') { ledger.categories.etc += amount; typeName = "🧸 기타"; }
         
         ledger.history.unshift({ time: timeStr, ym: ymNow, amount: amount, type: 'expense', catName: typeName });
-        if(typeof showToast === 'function') showToast(`✅ ${typeName} ${amount.toLocaleString()}원 기록 완료!`);
+        if(typeof showToast === 'function') showToast(`✅ ${typeName} ${amount.toLocaleString()}원 적었어요`);
     }
     
     // 달별로 보려면 한 달치가 다 남아 있어야 한다 (30개면 두 달도 안 된다)
@@ -1317,7 +1317,7 @@ window.addDailyExpense = async function(type) {
 
     window.moneySelectedYM = null;          // 방금 적은 건 이번 달이니 이번 달로 돌아온다
     window.updateLedgerUI(); 
-    window.analyzeMoney(); // 👈 입력과 동시에 차트를 알아서 다시 그림!
+    window.analyzeMoney(); // 👈 입력과 동시에 차트를 알아서 다시 그림
     if(typeof updateHomeDashboard === 'function') updateHomeDashboard();
 }
 
@@ -1347,14 +1347,14 @@ window.updateLedgerUI = function() {
     const amountInput = document.getElementById('v-goal-amount');
     if(amountInput && document.activeElement !== amountInput && ledger.goalAmount) {
         amountInput.value = Number(ledger.goalAmount).toLocaleString();
-        window.resizeInput(amountInput); // 👈 앱 로딩 시 목표액 칸도 넉넉하게 자동 조절!
+        window.resizeInput(amountInput); // 👈 앱 로딩 시 목표액 칸도 넉넉하게 자동 조절
     }
 
     const budgetInput = document.getElementById('v-budget');
     const savedBudget = localStorage.getItem('tosil_budget');
     if (budgetInput && document.activeElement !== budgetInput && savedBudget) {
         budgetInput.value = Number(savedBudget).toLocaleString();
-        window.resizeInput(budgetInput); // 👈 앱 로딩 시 예산 칸도 넉넉하게 자동 조절!
+        window.resizeInput(budgetInput); // 👈 앱 로딩 시 예산 칸도 넉넉하게 자동 조절
     }
 
     const targetAmount = parseInt(ledger.goalAmount) || 100000;
@@ -1431,8 +1431,8 @@ window.resetMoneyAll = async function() {
     window.updateLedgerUI();
     window.analyzeMoney(); // 👈 0원으로 초기화된 차트 강제 적용
     
-    if(typeof showToast === 'function') showToast("데이터가 깔끔하게 리셋되었습니다! 🌿");
-    else alert("데이터가 깔끔하게 리셋되었습니다! 다시 든든하게 모아봐요! 🌿");
+    if(typeof showToast === 'function') showToast("기록을 정리했어요 🌿");
+    else alert("기록을 정리했어요. 다시 모아봐요 🌿");
     
     if(typeof updateHomeDashboard === 'function') updateHomeDashboard();
 };
@@ -1547,7 +1547,7 @@ function calcHotDeal() {
     const count = Number(countInput.value);
     let pastPrice = Number(standardInput.value.replace(/,/g,'')); 
     
-    if(!price || !count) return alert("최종 결제액과 총 수량을 정확히 입력해주세요!");
+    if(!price || !count) return alert("최종 결제액과 총 수량을 정확히 입력해주세요");
     
     const unitPrice = Math.round(price / count);
     document.getElementById('hd-unit-price').innerText = unitPrice.toLocaleString() + "원";
@@ -1558,9 +1558,9 @@ function calcHotDeal() {
 
     // 과거 최저가 기록이 없거나 비정상적일 때
     if (!pastPrice || pastPrice <= 0) {
-        verdictEl.innerHTML = `✅ 첫 핫딜 기준가 등록 완료!`;
+        verdictEl.innerHTML = `✅ 첫 핫딜 기준가 등록 완료`;
         verdictEl.style.backgroundColor = "#3182F6"; 
-        commentEl.innerHTML = `이 품목의 첫 체감가는 1${unitName}당 <strong>${unitPrice.toLocaleString()}원</strong>입니다. 이 가격을 내 '역대 최저가'로 안전하게 기억해 둘게요! 📝`;
+        commentEl.innerHTML = `이 품목의 첫 체감가는 1${unitName}당 <strong>${unitPrice.toLocaleString()}원</strong>입니다. 이 가격을 내 '역대 최저가'로 안전하게 기억해 둘게요 📝`;
         
         localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
         standardInput.value = unitPrice;
@@ -1568,20 +1568,20 @@ function calcHotDeal() {
         const diffPast = pastPrice - unitPrice;
         
         if (diffPast > 0) {
-            verdictEl.innerHTML = `🎉 역대 최저가 갱신! 1${unitName}당 <span style="color:#FFF; font-weight:900;">${diffPast.toLocaleString()}원 더 싸요!</span>`;
+            verdictEl.innerHTML = `🎉 역대 최저가 갱신 1${unitName}당 <span style="color:#FFF; font-weight:900;">${diffPast.toLocaleString()}원 더 싸요</span>`;
             verdictEl.style.backgroundColor = "#00B37A"; 
-            commentEl.innerHTML = `기존 내 기록(${pastPrice.toLocaleString()}원) 대비 총 <strong>${(diffPast * count).toLocaleString()}원을 아꼈습니다!</strong> 역대급 핫딜 방어 성공! 👏`;
+            commentEl.innerHTML = `기존 내 기록(${pastPrice.toLocaleString()}원) 대비 총 <strong>${(diffPast * count).toLocaleString()}원을 아꼈습니다</strong> 역대급 핫딜 방어 성공 👏`;
             // 더 싸게 샀으므로 최저가 자동 갱신
             localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
             standardInput.value = unitPrice;
         } else if (diffPast < 0) {
             verdictEl.innerHTML = `⚠️ 내 최저가보다 1${unitName}당 <span style="color:#FFF; font-weight:900;">${Math.abs(diffPast).toLocaleString()}원 비싸요.</span>`;
             verdictEl.style.backgroundColor = "#F04452"; 
-            commentEl.innerHTML = `이전에 설정한 최저가(${pastPrice.toLocaleString()}원)보다 <strong>총 ${(Math.abs(diffPast) * count).toLocaleString()}원 손해</strong>입니다. 수량이 급한 게 아니라면 조금 더 기다려보세요! 🤔`;
+            commentEl.innerHTML = `이전에 설정한 최저가(${pastPrice.toLocaleString()}원)보다 <strong>총 ${(Math.abs(diffPast) * count).toLocaleString()}원 손해</strong>입니다. 수량이 급한 게 아니라면 조금 더 기다려보세요 🤔`;
         } else {
-            verdictEl.innerHTML = `⚖️ 역대 최저가 방어 성공!`;
+            verdictEl.innerHTML = `⚖️ 역대 최저가 방어 성공`;
             verdictEl.style.backgroundColor = "#3182F6"; 
-            commentEl.innerHTML = `이전에 설정한 가장 저렴한 가격(${pastPrice.toLocaleString()}원)과 정확히 일치하네요! 이번에도 스마트하게 잘 사셨습니다. 👍`;
+            commentEl.innerHTML = `이전에 설정한 가장 저렴한 가격(${pastPrice.toLocaleString()}원)과 정확히 일치하네요 이번에도 스마트하게 잘 사셨습니다. 👍`;
         }
     }
     
@@ -1636,7 +1636,7 @@ async function sendHotdealToLedger(price, cat) {
     ledger.history.unshift({ time: timeStr, ym: ymNow, amount: price, type: 'expense', catName: '🧸 기타' });
     
     await saveLedgerToFirebase(ledger);
-    showToast(`✅ 핫딜 결제액 ${price.toLocaleString()}원 연동 완료!`);
+    showToast(`✅ 핫딜 결제액 ${price.toLocaleString()}원을 가계부에 적었어요`);
     directGoToolbox('money');
 }
 
@@ -1860,7 +1860,7 @@ async function addFeverRecord() {
     // 🚨 투약 기록 시 체크박스 깐깐하게 검사하는 로직 삭제 완료!
 
     const temp = parseFloat(document.getElementById('v-temp').value);
-    if(!temp || !selectedPillType) return window.showToast('⚠️ 체온과 약 종류를 명확히 지정해주세요!');
+    if(!temp || !selectedPillType) return window.showToast('⚠️ 체온과 약 종류를 명확히 지정해주세요');
     
     /* 기록을 막지 않는다.
        이미 먹였는데 앱이 거부하면 '마지막 투약 시각'이 틀리게 남고,
@@ -1939,7 +1939,7 @@ async function addFeverRecord() {
     renderFeverTimeline(); 
     setTimeout(updateHomeDashboard, 100); 
     
-    window.showToast("💊 투약 기록이 안전하게 저장되었습니다!");
+    window.showToast("💊 약 기록을 저장했어요");
 }
 
 function renderFeverTimeline() {
@@ -2155,11 +2155,11 @@ function drawFeverChart(records) {
 
 function downloadFeverReport() {
     const target = document.getElementById('fever-timeline');
-    if(!target || !target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) return alert("캡처할 기록이 없어요!");
+    if(!target || !target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) return alert("캡처할 기록이 없어요");
     if(typeof html2canvas === 'undefined') return alert("이미지 변환 라이브러리가 준비되지 않았습니다.");
     html2canvas(target, { backgroundColor: '#ffffff', scale: 2, useCORS: true }).then(canvas => {
         const link = document.createElement('a'); link.download = '해열제_기록.png'; link.href = canvas.toDataURL("image/png"); link.click();
-        alert("📸 캡처가 저장되었습니다!");
+        alert("📸 사진으로 저장했어요");
     });
 }
 window.downloadFeverReport = downloadFeverReport;
@@ -2264,7 +2264,7 @@ window.openChecklistModal = function(theme = 'basic') {
     if (months >= 13) {
         baseData.push(
             { id: 'c_toddler_sanitizer', label: '소독티슈 (야외 식당 아기의자 닦기용)', checked: false },
-            { id: 'c_toddler_bag', label: '미아방지 가방 또는 목걸이 (필수!)', checked: false }
+            { id: 'c_toddler_bag', label: '미아방지 가방 또는 목걸이 (필수)', checked: false }
         );
     }
     // 💡 배변 훈련 시기
@@ -2328,7 +2328,7 @@ window.openChecklistModal = function(theme = 'basic') {
     // 테마별 생명줄 분리 (외출 vs 숙박)
     if (theme === 'stay') {
         baseData.push(
-            { id: 'c_doll_stay', label: '🚨 아기 최애 애착 인형 & 수면 이불 (없으면 오늘 밤 아무도 못 잠!)', checked: false },
+            { id: 'c_doll_stay', label: '🚨 아기 최애 애착 인형 & 수면 이불 (없으면 오늘 밤 아무도 못 잠)', checked: false },
             { id: 'c_laundry', label: '🧺 세탁기 안 젖은 빨래 널기 (다녀오면 쉰내 나서 처음부터 다시 빨아야 함)', checked: false }
         );
     } else {
@@ -2637,8 +2637,8 @@ window.calcHealthMaster = function() {
 
     if (wVal) localStorage.setItem('tosil_latest_weight', wVal);
 
-    if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요!");
-    if(!h && !w) return alert("정확한 진단을 위해 키 또는 몸무게를 하나라도 입력해 주세요!");
+    if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요");
+    if(!h && !w) return alert("정확한 진단을 위해 키 또는 몸무게를 하나라도 입력해 주세요");
     
     const birthDate = new Date(b);
     const today = new Date();
@@ -2662,12 +2662,12 @@ window.calcHealthMaster = function() {
             st.className = 'ww-status-box box-tint-red'; 
             st.removeAttribute('style'); 
             st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px'; 
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간!</div><strong style="color:var(--text-m);">특성:</strong> <span style="color:var(--text-s);">${curWW.d}</span>.<br><span style="color:var(--text-s); margin-top:4px; display:inline-block;">이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 아기를 많이 안아주세요!</span>`; 
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간</div><strong style="color:var(--text-m);">특성:</strong> <span style="color:var(--text-s);">${curWW.d}</span>.<br><span style="color:var(--text-s); margin-top:4px; display:inline-block;">이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 아기를 많이 안아주세요</span>`; 
         } else { 
             st.className = 'ww-status-box box-tint-green'; 
             st.removeAttribute('style');
             st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px';
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음! 평온기 유지 중</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 도약기를 이수 완료했습니다.'}</span>`; 
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음 평온기 유지 중</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 도약기를 이수 완료했습니다.'}</span>`; 
         }
     }
 
@@ -2745,11 +2745,11 @@ if (h && w) {
 
     if (kaup < 14) { 
         kaupBadge.innerText = '⚠️ 체중 미달 우려'; kaupBadge.style.background = '#F2F4F6'; kaupBadge.style.color = '#4E5968'; 
-        kaupDesc = "키에 비해 몸무게 증가가 다소 정체되어 있어요. 수유량이나 이유식 양을 조금 더 늘려주시고, 영유아 검진 시 의사 선생님과 상담해 보세요!";
+        kaupDesc = "키에 비해 몸무게 증가가 다소 정체되어 있어요. 수유량이나 이유식 양을 조금 더 늘려주시고, 영유아 검진 시 의사 선생님과 상담해 보세요";
     }
     else if (kaup < 16) { 
         kaupBadge.innerText = '🌱 날씬한 모델 체형'; kaupBadge.style.background = '#E8F3FF'; kaupBadge.style.color = '#3182F6'; 
-        kaupDesc = "키에 비해 체중이 적게 나가는 날씬한 체형이에요! 활동량이 많거나 기초 대사량이 높은 아기일 수 있습니다. 아주 건강하게 잘 자라고 있어요 🏃‍♂️";
+        kaupDesc = "키에 비해 체중이 적게 나가는 날씬한 체형이에요 활동량이 많거나 기초 대사량이 높은 아기일 수 있습니다. 아주 건강하게 잘 자라고 있어요 🏃‍♂️";
     }
     else if (kaup <= 18) { 
        kaupBadge.innerText = '⚖️ 표준 범위'; kaupBadge.style.background = '#ECFDF5'; kaupBadge.style.color = '#059669';
@@ -2757,11 +2757,11 @@ kaupDesc = "키와 몸무게 비율이 또래 표준 범위에 들어와 있어�
     }
     else if (kaup <= 20) { 
         kaupBadge.innerText = '💪 귀여운 통통 우량아'; kaupBadge.style.background = '#FFF9E6'; kaupBadge.style.color = '#B78103'; 
-        kaupDesc = "키보다 몸무게가 묵직한 귀여운 통통 우량아예요! 아주 잘 먹고 쑥쑥 크고 있네요. 걷고 뛰기 시작하면 젖살은 자연스럽게 빠진답니다 🧸";
+        kaupDesc = "키보다 몸무게가 묵직한 귀여운 통통 우량아예요 아주 잘 먹고 쑥쑥 크고 있네요. 걷고 뛰기 시작하면 젖살은 자연스럽게 빠진답니다 🧸";
     }
     else { 
         kaupBadge.innerText = '🚨 소아 비만 주의'; kaupBadge.style.background = '#FFF0F1'; kaupBadge.style.color = '#D32F2F'; 
-        kaupDesc = "키에 비해 체중이 꽤 많이 나가는 편이에요. 소아 비만으로 이어지지 않도록 간식이나 수유 텀을 한 번 점검해 보시는 걸 권장합니다!";
+        kaupDesc = "키에 비해 체중이 꽤 많이 나가는 편이에요. 소아 비만으로 이어지지 않도록 간식이나 수유 텀을 한 번 점검해 보시는 걸 권장합니다";
     }
 
     // 💡 [입력 후 결과 멘트] 다크모드/라이트모드 완벽 대응 변수 적용
@@ -2789,11 +2789,11 @@ kaupDesc = "키와 몸무게 비율이 또래 표준 범위에 들어와 있어�
                 const diffW = (w - sibRecordAtSameAge.weight).toFixed(1);
                 
                 if (diffW > 0) {
-                    insightMsg += `<div style="margin-top:12px; padding:12px; background:rgba(168, 85, 247, 0.1); border-radius:12px; font-size:13px; font-weight:800; color:#9333EA; border:1px dashed #D8B4FE;">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>보다 <b>${diffW}kg 더 큽니다!</b> 폭풍 성장 중 🚀</div>`;
+                    insightMsg += `<div style="margin-top:12px; padding:12px; background:rgba(168, 85, 247, 0.1); border-radius:12px; font-size:13px; font-weight:800; color:#9333EA; border:1px dashed #D8B4FE;">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>보다 <b>${diffW}kg 더 큽니다</b> 폭풍 성장 중 🚀</div>`;
                 } else if (diffW < 0) {
-                    insightMsg += `<div style="margin-top:12px; padding:12px; background:var(--bg-sub); border-radius:12px; font-size:13px; font-weight:800; color:var(--text-s); border:1px dashed var(--border);">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>보다는 <b>${Math.abs(diffW)}kg 작고 아담해요!</b> 🐣</div>`;
+                    insightMsg += `<div style="margin-top:12px; padding:12px; background:var(--bg-sub); border-radius:12px; font-size:13px; font-weight:800; color:var(--text-s); border:1px dashed var(--border);">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>보다는 <b>${Math.abs(diffW)}kg 작고 아담해요</b> 🐣</div>`;
                 } else {
-                    insightMsg += `<div style="margin-top:12px; padding:12px; background:#EBF4FF; border-radius:12px; font-size:13px; font-weight:800; color:#3182F6; border:1px dashed #B1D6FF;">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>와 몸무게가 똑같아요! 판박이네요 👯</div>`;
+                    insightMsg += `<div style="margin-top:12px; padding:12px; background:#EBF4FF; border-radius:12px; font-size:13px; font-weight:800; color:#3182F6; border:1px dashed #B1D6FF;">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>와 몸무게가 똑같아요 판박이네요 👯</div>`;
                 }
             }
         });
@@ -2807,7 +2807,7 @@ kaupDesc = "키와 몸무게 비율이 또래 표준 범위에 들어와 있어�
     // 💡 [입력 전 안내 멘트] 다크모드 변수 적용 완료
     insightMsg = `
         <div style="background: var(--bg-sub, #F2F4F6); color: var(--text-m, #333D4B); padding: 16px; border-radius: 12px; font-size: 13.5px; font-weight: 700; line-height: 1.5; word-break: keep-all; text-align: center;">
-            키와 몸무게를 모두 입력하시면 정확한 체형 밸런스(비만도) 진단과 맞춤 조언을 해드립니다! 💜
+            키와 몸무게를 모두 입력하시면 정확한 체형 밸런스(비만도) 진단과 맞춤 조언을 해드립니다 💜
         </div>
     `;
 }
@@ -2824,7 +2824,7 @@ document.getElementById('growth-insight').innerHTML = insightMsg;
         pctWeight: pctWeight ? (100 - pctWeight) : 0
     };
 
-    // ✨ [대기업 앱 UX] 결과창 띄우기 전 'AI 로딩 중' 딜레이 추가
+    // ✨ [대기업 앱 UX] 결과창 띄우기 전 '계산 중' 딜레이 추가
     const gRes = document.getElementById('growth-result');
     if(gRes) {
         gRes.style.display = 'none'; // 먼저 닫아놓고
@@ -2843,7 +2843,7 @@ document.getElementById('growth-insight').innerHTML = insightMsg;
 
 // ✨ 성장 기록 저장 및 파이어베이스 연동 (폭풍성장 이스터에그 + 오프라인 방어막 패치!)
 async function saveGrowthRecord() {
-    console.log("1. 저장 버튼 클릭됨! 데이터 확인:", window.tempGrowthData);
+    console.log("1. 저장 버튼 클릭됨 데이터 확인:", window.tempGrowthData);
 
     // 🚨 방어 1: 저장할 데이터가 제대로 안 넘어왔을 때
     if (!window.tempGrowthData || (window.tempGrowthData.height === 0 && window.tempGrowthData.weight === 0)) {
@@ -2879,9 +2879,9 @@ async function saveGrowthRecord() {
                 // 키 2cm 이상 OR 몸무게 0.5kg 이상 늘었으면 폭풍 성장!
                 if (diffH >= 2.0 || diffW >= 0.5) {
                     isSuperGrowth = true;
-                    growthMsg = `🌱 대박! 폭풍 성장 중! (지난번보다 ${msgParts.join(', ')})`;
+                    growthMsg = `🌱 잘 자라고 있어요 (지난번보다 ${msgParts.join(', ')})`;
                 } else {
-                    growthMsg = `쑥쑥 잘 크고 있어요! (지난번보다 ${msgParts.join(', ')})`;
+                    growthMsg = `쑥쑥 잘 크고 있어요 (지난번보다 ${msgParts.join(', ')})`;
                 }
             }
         }
@@ -2925,15 +2925,15 @@ async function saveGrowthRecord() {
     // 🌟 [니치 패치 2] 조건에 따라 토스트 팝업 & 폭죽 분기 처리
     if (typeof showToast === 'function') {
         if (isSuperGrowth && typeof window.shootConfetti === 'function') {
-            window.shootConfetti(); // 팡!
+            window.shootConfetti(); // 팡
             showToast(`🎉 ${growthMsg}`);
         } else if (growthMsg) {
             showToast(`✨ ${growthMsg}`);
         } else {
-            showToast("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!"); 
+            showToast("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다"); 
         }
     } else {
-        alert("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다!");
+        alert("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다");
     }
     
     // 🚨 방어 4: 차트 그리는 함수가 아직 없거나 에러 날 때 방지
@@ -2962,7 +2962,7 @@ function deleteGrowthRecord(dateStr) {
         records = records.filter(r => r.date !== dateStr);
         localStorage.setItem('tosil_growth_records', JSON.stringify(records));
         renderGrowthHistory();
-        showToast("🗑️ 성장 기록이 삭제되었습니다!");
+        showToast("🗑️ 성장 기록이 삭제되었습니다");
     }, "🗑️", "삭제", "#F04452");
 }
 window.deleteGrowthRecord = deleteGrowthRecord;
@@ -2978,7 +2978,7 @@ function renderGrowthHistory() {
         return;
     }
     
-    acc.style.display = 'block'; // 기록이 있으면 아코디언 표시!
+    acc.style.display = 'block'; // 기록이 있으면 아코디언 표시
 
     // 1. 차트 그리기
     const canvas = document.getElementById('growthChart'); 
@@ -3035,7 +3035,7 @@ function renderGrowthHistory() {
         } else if (diffDays <= 14) {
             badgeHtml = `<div style="background:#F8F9FA; color:#8B95A1; border:1px solid #E5E8EB; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center;">마지막 계측: ${diffDays}일 전</div>`;
         } else {
-            badgeHtml = `<div style="background:#FFF0F1; color:#F04452; border:1px dashed #F04452; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center;">🚨 앗! 계측한 지 ${diffDays}일이나 지났어요. 오늘 한 번 재볼까요?</div>`;
+            badgeHtml = `<div style="background:#FFF0F1; color:#F04452; border:1px dashed #F04452; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center;">🚨 앗 계측한 지 ${diffDays}일이나 지났어요. 오늘 한 번 재볼까요?</div>`;
         }
         
         html += badgeHtml; // 배지를 리스트 맨 위에 삽입
@@ -3096,7 +3096,7 @@ window.uploadPhoto = function(input) {
                         // 🚨 1. 로그인 검증 (안 되어있으면 칼같이 차단!)
                         const uid = window.auth?.currentUser?.uid;
                         if (!uid) {
-                            if(typeof window.showToast === 'function') window.showToast("🔐 사진 저장은 로그인 후 이용할 수 있어요!");
+                            if(typeof window.showToast === 'function') window.showToast("🔐 사진 저장은 로그인 후 이용할 수 있어요");
                             return;
                         }
 
@@ -3119,7 +3119,7 @@ window.uploadPhoto = function(input) {
                         // 짝꿍 폰에도 같은 얼굴이 뜨게 가족방에 주소를 적어둔다
                         if(typeof window.shareBabyPhoto === 'function') window.shareBabyPhoto(downloadUrl);
                         if(typeof window.loadBabyPhoto === 'function') window.loadBabyPhoto(); 
-                        if(typeof window.showToast === 'function') window.showToast("✅ 사진이 안전하게 저장되었습니다!");
+                        if(typeof window.showToast === 'function') window.showToast("✅ 사진이 안전하게 저장되었습니다");
                     } catch(err) {
                         console.error("아기 사진 업로드 실패", err);
                         alert("사진 업로드 중 통신 지연이 발생했습니다. 인터넷 연결을 확인해주세요.");
@@ -3280,7 +3280,7 @@ async function addCubeRecord() {
     const qty = parseInt(document.getElementById('cube-qty').value);
 
     if (!name || !date || isNaN(qty) || qty <= 0) {
-        return showToast("⚠️ 큐브 이름, 날짜, 수량을 정확히 입력해주세요!"); // 👈 교체
+        return showToast("⚠️ 큐브 이름, 날짜, 수량을 정확히 입력해주세요"); // 👈 교체
     }
 
     const newCube = { id: "cube_" + new Date().getTime(), cat: cat, name: name, date: date, qty: qty, timestamp: new Date().getTime() };
@@ -3298,7 +3298,7 @@ async function addCubeRecord() {
     document.getElementById('cube-name').value = '';
     document.getElementById('cube-qty').value = '';
     renderCubes();
-    showToast("🧊 큐브가 냉장고에 쏙! 저장되었습니다."); // 👈 추가
+    showToast("🧊 큐브가 냉장고에 쏙 저장되었습니다."); // 👈 추가
 }
 
 async function useCube(id) {
@@ -3333,7 +3333,7 @@ function renderCubes() {
         container.innerHTML = `
             <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
                 <div style="font-size:24px; margin-bottom:10px;">🌬️</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">냉동실이 텅 비어있어요!<br>이유식 재료를 얼리고 기록해보세요.</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">냉동실이 텅 비어있어요<br>이유식 재료를 얼리고 기록해보세요.</div>
             </div>`;
         return;
     }
@@ -3585,7 +3585,7 @@ async function addCustomBaton() {
     const input = document.getElementById('baton-text');
     const rewardSelect = document.getElementById('baton-reward');
     const customInput = document.getElementById('baton-reward-custom');
-    if (!input || !input.value.trim()) return alert("부탁할 내용을 입력해 주세요!");
+    if (!input || !input.value.trim()) return alert("부탁할 내용을 입력해 주세요");
     
     let reward = "없음";
     if (rewardSelect) {
@@ -3609,7 +3609,7 @@ async function createBatonTask(text, reward) {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     
     const isDuplicate = records.some(r => r.text === text);
-    if (isDuplicate) return showToast("🚨 이미 똑같은 부탁이 대기 중입니다!"); 
+    if (isDuplicate) return showToast("🚨 이미 똑같은 부탁이 대기 중입니다"); 
 
     const now = new Date(), timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         // 누가 보냈는지 남긴다. 이게 없으면 내가 보낸 걸 내가 접수하게 된다.
@@ -3623,7 +3623,7 @@ async function createBatonTask(text, reward) {
         by: myUid, byRole: myRole
     });
     await saveBatonToFirebase(records);
-    showToast("💌 바통터치 요청이 성공적으로 전달되었습니다!"); 
+    showToast("💌 바통터치 요청이 성공적으로 전달되었습니다"); 
 
     // 🌟 [자동 알림 우체부 호출] 아빠한테 진짜 푸시 알림 쏘기!
     const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
@@ -3679,7 +3679,7 @@ function renderBatonTasks() {
     if (records.length === 0) {
         container.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; min-height: 110px; text-align: center; padding: 20px; background: var(--bg-sub); border-radius: 16px; border: 1px dashed var(--border);">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중! 🤍</div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중 🤍</div>
             </div>`;
         return;
     }
@@ -4079,7 +4079,7 @@ window.openPediatricianReport = function() {
             <div style="background: #E6F7F2; border: 1px dashed #00B37A; border-radius: 12px; padding: 20px; text-align: center;">
                 <div style="font-size: 24px; margin-bottom: 8px;">🌿</div>
                 <div style="font-size: 14px; font-weight: 800; color: #00B37A; margin-bottom: 4px;">최근 발열 및 투약 기록이 없습니다.</div>
-                <div style="font-size: 12px; font-weight: 600; color: #059669;">영유아 검진 및 예방접종 브리핑으로 활용하세요!</div>
+                <div style="font-size: 12px; font-weight: 600; color: #059669;">영유아 검진 및 예방접종 브리핑으로 활용하세요</div>
             </div>
         `;
     } else {
@@ -4181,7 +4181,7 @@ window.copySymptomMemo = function() {
     }
     
     navigator.clipboard.writeText(text).then(() => {
-        window.showToast("📋 브리핑 텍스트가 복사되었어요! 의사 선생님께 보여주세요 🤍");
+        window.showToast("📋 브리핑 텍스트가 복사되었어요 의사 선생님께 보여주세요 🤍");
     });
 };
 
@@ -4497,12 +4497,10 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             
             <div id="diaper-status-area" style="display:none; margin-bottom:10px;">
                 <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px; text-align:left;">어떤 색깔인가요?</div>
-                <!-- ⚠️ 고른 버튼은 scale(1.05) 로 살짝 커지고 그림자가 퍼진다.
-                     그런데 이 줄에 여백이 0 이라, 맨 왼쪽·맨 오른쪽 버튼은
-                     커진 만큼이 시트 밖으로 나가서 잘렸다.
-                     가운데 버튼만 멀쩡했던 이유가 이것이다.
-                     커질 자리를 미리 비워둔다. 안쪽 여백만 주면 된다. -->
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; padding: 6px 6px 14px; margin: -6px -6px -8px;">
+                <!-- ⚠️ 고른 버튼을 1.05배로 키우고 그림자를 퍼뜨렸더니, 시트가 좌우를 잘라내서
+                     맨 끝 칸(황금·갈색)이 잘려 보였다. 여백으로 막아봤지만 부족했다.
+                     칸은 3칸 격자로 고정하고, 고른 티는 '키우기' 가 아니라 '테두리' 로 낸다. -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-bottom: 12px;">
                     <button onclick="window.selectTrackerBtn(this, 'status_golden')" style="flex:1; min-width:30%; padding: 14px 0; background: var(--bg-sub); color: #8B95A1; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor:pointer; transition:0.2s;">황금</button>
                     <button onclick="window.selectTrackerBtn(this, 'status_green')" style="flex:1; min-width:30%; padding: 14px 0; background: var(--bg-sub); color: #8B95A1; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor:pointer; transition:0.2s;">녹색</button>
                     <button onclick="window.selectTrackerBtn(this, 'status_brown')" style="flex:1; min-width:30%; padding: 14px 0; background: var(--bg-sub); color: #8B95A1; border-radius: 14px; font-weight: 700; font-size: 14px; border: none; cursor:pointer; transition:0.2s;">갈색</button>
@@ -4622,8 +4620,8 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
     }
     else if (type === 'med') {
         const medTips = [
-            "💡 <b>팁:</b> 영양제는 홈 화면 <b>[데일리 루틴]</b>에서 체크하는 게 훨씬 편해요!",
-            "💡 <b>팁:</b> 해열제 타이머는 홈 화면 <b>[스마트 해열]</b>을 이용해주세요!",
+            "💡 <b>팁:</b> 영양제는 홈 화면 <b>[데일리 루틴]</b>에서 체크하는 게 훨씬 편해요",
+            "💡 <b>팁:</b> 해열제 타이머는 홈 화면 <b>[스마트 해열]</b>을 이용해주세요",
             "💡 <b>팁:</b> 항생제는 임의로 중단하지 말고 의사 처방을 꼭 지켜주세요."
         ];
         const randomTip = medTips[Math.floor(Math.random() * medTips.length)];
@@ -4988,8 +4986,9 @@ window.selectTrackerBtn = function(btn, category) {
             siblings[i].style.setProperty('opacity', '0.35', 'important');
             siblings[i].style.setProperty('filter', 'grayscale(100%)', 'important');
         }
-        btn.style.setProperty('transform', 'scale(1.05)', 'important');
-        btn.style.setProperty('box-shadow', '0 4px 12px rgba(0,0,0,0.2)', 'important');
+        btn.style.setProperty('transform', 'none', 'important');          // 커지면 시트 밖으로 나가 잘린다
+        btn.style.setProperty('box-shadow', 'inset 0 0 0 2px rgba(0,0,0,0.22)', 'important');
+        btn.style.setProperty('box-sizing', 'border-box', 'important');   // 테두리가 생겨도 칸이 안 커지게
         btn.style.setProperty('opacity', '1', 'important');
         btn.style.setProperty('filter', 'grayscale(0%)', 'important');
         activeBorder = '2px solid var(--text-m)';
@@ -5002,20 +5001,20 @@ window.selectTrackerBtn = function(btn, category) {
             warningTxt = '🟢 흔히 보는 건강한 색이에요<br>평소와 다르거나 걱정되면 소아과에 물어보세요.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
         } else if (category === 'status_green') { 
             activeBg = '#4ADE80'; activeColor = '#FFF'; window.trackerState.status = '녹색'; 
-            warningTxt = '🟢 지극히 정상입니다!<br>담즙, 철분 분유 또는 녹색 채소의 영향일 수 있습니다.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
+            warningTxt = '🟢 지극히 정상입니다<br>담즙, 철분 분유 또는 녹색 채소의 영향일 수 있습니다.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
         } else if (category === 'status_brown') { 
             activeBg = '#B45309'; activeColor = '#FFF'; window.trackerState.status = '갈색'; 
-            if (isSolidFood) { warningTxt = '🟢 건강한 갈색 변입니다!'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)'; }
-            else { warningTxt = '⚠️ 수분 부족 / 변비 의심!'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)'; }
+            if (isSolidFood) { warningTxt = '🟢 건강한 갈색 변입니다'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)'; }
+            else { warningTxt = '⚠️ 수분 부족 / 변비 의심'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)'; }
         } else if (category === 'status_white') { 
             activeBg = 'var(--bg-sub)'; activeColor = 'var(--text-m)'; window.trackerState.status = '흰/회색';
-            warningTxt = '🚨 소아과 방문 요망! 담도폐쇄증 의심'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
+            warningTxt = '🚨 소아과 방문 요망 담도폐쇄증 의심'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
         } else if (category === 'status_red') { 
             activeBg = 'var(--danger)'; activeColor = '#FFF'; window.trackerState.status = '붉은색';
-            warningTxt = '🚨 혈변 주의! 소아과 진료 권장'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
+            warningTxt = '🚨 혈변 주의 소아과 진료 권장'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
         } else if (category === 'status_black') { 
             activeBg = '#1F2937'; activeColor = '#FFF'; window.trackerState.status = '검은색';
-            warningTxt = '🚨 위장 출혈 의심! 진료 권장'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
+            warningTxt = '🚨 위장 출혈 의심 진료 권장'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
         }
         const warningArea = document.getElementById('poop-warning-msg');
         if(warningArea) {
@@ -5116,7 +5115,7 @@ window.startSleepTimer = function(sleepType) {
     // ✨ 타이머를 켰으니 시트를 닫고 홈 화면 배너를 띄웁니다!
     window.closeTrackerSheet(); 
     if (typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
-    window.showToast("타이머가 시작되었습니다! 푹 자길 🌙");
+    window.showToast("타이머가 시작되었습니다 푹 자길 🌙");
 };
 
 window.stopSleepTimer = function() {
@@ -5184,20 +5183,20 @@ window.saveTrackerRecord = function() {
     let record = { id: recordId, time: timeStr, timestamp: timestamp, type: window.trackerState.type };
 
     if (window.trackerState.type === 'feed') {
-        if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요!');
+        if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요');
         const amt = document.getElementById('v-feed-amount').value;
-        if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요!');
+        if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요');
         record.subType = window.trackerState.subType;
         record.amount = parseInt(amt);
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요!');
+        if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요');
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
     else if (window.trackerState.type === 'sleep') {
         const amt = document.getElementById('v-sleep-amount');
-        if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요!');
+        if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요');
         record.amount = parseInt(amt.value);
         if (window.editingTrackerId) {
             const originalRecord = records.find(r => r.id === window.editingTrackerId);
@@ -5267,7 +5266,7 @@ window.deleteTrackerRecord = function(id) {
             window.updateTrackerDashboard();
         }
         
-        window.showToast("🗑️ 기록이 깔끔하게 삭제되었습니다!");
+        window.showToast("🗑️ 기록이 깔끔하게 삭제되었습니다");
     }, "🗑️", "삭제", "#F04452");
 };
 
@@ -5278,12 +5277,12 @@ window.resetTrackerRecords = function() {
         localStorage.removeItem('tosil_sleep_type');
         if (typeof saveTrackerToFirebase === 'function') {
             await saveTrackerToFirebase([]);
-            window.flushOfflineQueue(); // 🚨 여기도 치료 완료!
+            window.flushOfflineQueue(); // 🚨 여기도 치료 완료
         } else {
             localStorage.removeItem('tosil_tracker_records');
             window.updateTrackerDashboard();
         }
-        showToast("🧹 트래커 기록이 싹 비워졌습니다!");
+        showToast("🧹 트래커 기록이 싹 비워졌습니다");
     }, "⚠️", "전체 삭제", "#F04452", "삭제");
 };
 
@@ -5293,7 +5292,7 @@ window.isHistoryView = false;
 window.toggleTrackerHistory = function() {
     const records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     if (records.length === 0) {
-        window.showToast("아직 기록이 없어요. 위에서 첫 기록을 남겨보세요! 🍼");
+        window.showToast("아직 기록이 없어요. 위에서 첫 기록을 남겨보세요 🍼");
         return;
     }
 
@@ -5439,7 +5438,7 @@ window.saveTrackerSettings = function() {
     localStorage.setItem('tosil_diaper_interval', dHour * 60);
     window.closeTrackerSettingsForce();
     window.updateTrackerDashboard();
-    window.showToast("✅ 우리 아기 맞춤형 텀이 저장되었습니다!");
+    window.showToast("✅ 우리 아기 맞춤형 텀이 저장되었습니다");
 };
 // ==========================================
 // 👑 [엄마 모드 고도화] 초직관적 하이엔드 트래커 대시보드 (수면 엇갈림 완벽 자가치유 패치)
@@ -5487,8 +5486,8 @@ window.updateTrackerDashboard = function() {
             container.innerHTML = `
                 <div style="padding:40px 20px; text-align:center; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
                     <div style="font-size:32px; margin-bottom:12px;">🐣</div>
-                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">아직 기록된 일과가 없어요!</div>
-                    <div style="font-size:12.5px; color:var(--text-s); line-height:1.5; word-break:keep-all;">오늘도 육아 출근 완료!<br>우리 아기의 첫 맘마 기록을 남겨볼까요?</div>
+                    <div style="font-size:14.5px; font-weight:800; color:var(--text-m); margin-bottom:6px;">아직 기록된 일과가 없어요</div>
+                    <div style="font-size:12.5px; color:var(--text-s); line-height:1.5; word-break:keep-all;">오늘도 육아 출근 완료<br>우리 아기의 첫 맘마 기록을 남겨볼까요?</div>
                 </div>
                 <button class="btn-main" onclick="window.closeStatsSheet()" style="width:100%; margin-top:12px; padding:14px; font-size:14px; background:#F2F5F8 !important; color:#4E5968 !important; border:1px solid #E5E8EB !important; border-radius:14px; box-shadow:none !important;">닫기 〉</button>
             `;
@@ -5543,7 +5542,7 @@ window.updateTrackerDashboard = function() {
             
             historyHtml += `
                 <div style="background:var(--bg-sub); color:var(--text-s); font-size:12px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:12px; text-align:center; border: 1px dashed var(--border);">
-                    💡 리스트를 <span style="color:var(--text-m);">왼쪽으로 밀면(👈)</span> 수정/삭제할 수 있어요!
+                    💡 리스트를 <span style="color:var(--text-m);">왼쪽으로 밀면(👈)</span> 수정/삭제할 수 있어요
                 </div>
                 <div style="max-height:350px; overflow-y:auto; padding-right:4px;">
             `;
@@ -5717,7 +5716,7 @@ window.updateTrackerDashboard = function() {
                 <span style="font-size:20px;">${sleepIcon}</span>
                 <div class="sleep-banner-text2" style="font-size:15px; font-weight:900; color:#6C31F6;">${hours}시간 ${mins}분째 꿀잠 중</div>
             </div>
-            <div class="sleep-banner-badge" style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿! 🤫</div>
+            <div class="sleep-banner-badge" style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿 🤫</div>
         </div>`;
     }
 
@@ -5883,13 +5882,13 @@ window.updateTrackerDashboard = function() {
     let briefBg = "var(--bg-card)";
     let briefColor = "var(--text-m)";
     let briefBorder = "var(--border)";
-    let briefing = "오늘도 평화로운 육아팅! 🤍";
+    let briefing = "오늘도 평화로운 육아팅 🤍";
     let isFeedAlert = false;
 
-    if (todaySleepMins >= 240) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파! 꿀잠 요정 🌙`;
-    else if (todayFormulaAmt >= 800 || todayBreastMins >= 90 || todayFoodAmt >= 200) briefing = `오늘 수유 빵빵하게 채우는 중! 💪`;
-    else if (todayDiaperCount >= 5) briefing = `기저귀 ${todayDiaperCount}번 클리어! 보송보송 ✨`;
-    else if (todayFormulaAmt > 0 || todayBreastMins > 0 || todayFoodAmt > 0) briefing = `오늘 식사 체크 완벽 진행 중! 🍼`;
+    if (todaySleepMins >= 240) briefing = `오늘 수면 ${Math.floor(todaySleepMins/60)}시간 돌파 꿀잠 요정 🌙`;
+    else if (todayFormulaAmt >= 800 || todayBreastMins >= 90 || todayFoodAmt >= 200) briefing = `오늘 수유 빵빵하게 채우는 중 💪`;
+    else if (todayDiaperCount >= 5) briefing = `기저귀 ${todayDiaperCount}번 클리어 보송보송 ✨`;
+    else if (todayFormulaAmt > 0 || todayBreastMins > 0 || todayFoodAmt > 0) briefing = `오늘 식사 체크 완벽 진행 중 🍼`;
 
     let briefBadge = `<div style="font-size:11px; font-weight:800; color:var(--primary); background:var(--bg-sub); padding:4px 8px; border-radius:8px;">실시간 연동</div>`;
 
@@ -5899,7 +5898,7 @@ window.updateTrackerDashboard = function() {
     if (latestFeed && diffFeedMins >= feedInterval && diffFeedMins <= 12 * 60) {
         isFeedAlert = true;
         briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
-        briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과!`;
+        briefing = `🚨 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 경과`;
         briefBadge = `
             <div style="display:flex; align-items:center; gap:10px;">
                 <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#EF5350; padding:6px 14px; border-radius:8px; cursor:pointer; box-shadow: 0 2px 4px rgba(239,83,80,0.3);">기록</div>
@@ -6090,7 +6089,7 @@ window.updateDiaryCard = function() {
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 12px; cursor: pointer;" onclick="window.location.href='diary.html'">
                 <div style="flex: 1; min-width: 0; text-align: left;">
                     <h3 class="diary-card-title" style="margin: 0 0 6px 0;"><span style="font-size: 1.3rem;">💌</span> 육아 문답</h3>
-                    <p class="diary-card-desc" style="margin: 0; color: #F04452; font-weight: 800;">오늘 문답 작성 완료! 🤍</p>
+                    <p class="diary-card-desc" style="margin: 0; color: #F04452; font-weight: 800;">오늘 문답 작성 완료 🤍</p>
                 </div>
                 <!-- 🚨 flex-shrink: 0 와 white-space: nowrap 으로 버튼 구출! -->
                 <div class="diary-card-btn" style="flex-shrink: 0; white-space: nowrap; margin: 0; background: #FFF0F1; color: #F04452; border: none;">내 답변 보기 〉</div>
@@ -6123,12 +6122,12 @@ window.updateDiaryCard = function() {
 };
 
 window.pokePartner = function() {
-    const text = "[배냇함] 오늘 하루도 정말 고생 많았어 🤍 육아 문답에 내 마음을 남겨뒀으니 얼른 와서 확인해봐!";
+    const text = "[배냇함] 오늘 하루도 정말 고생 많았어 🤍 육아 문답에 내 마음을 남겨뒀으니 얼른 와서 확인해봐";
     const url = "https://happy-baby0303.github.io/"; 
     if (navigator.share) {
         navigator.share({ title: '배냇함의 따뜻한 초대', text: text, url: url }).catch(() => {});
     } else {
-        prompt("아래 텍스트를 복사해서 카톡으로 보내주세요!", text + " " + url);
+        prompt("아래 텍스트를 복사해서 카톡으로 보내주세요", text + " " + url);
     }
 };
 
@@ -6167,13 +6166,13 @@ window.applyTimeBasedGreeting = function(babyName) {
         if (currentHour >= 6 && currentHour < 11) {
             title = `상쾌한 아침이에요 ☀️`; sub = `간밤에 ${babyName}는 푹 잤나요?`;
         } else if (currentHour >= 11 && currentHour < 17) {
-            title = `활기찬 오후네요 🌤️`; sub = `육아 틈틈이 커피 한 잔의 여유를!`;
+            title = `활기찬 오후네요 🌤️`; sub = `육아 틈틈이 커피 한 잔의 여유를`;
         } else if (currentHour >= 17 && currentHour < 22) {
             title = `고생 많은 저녁이에요 🌙`; sub = `오늘 하루도 ${babyName} 돌보느라 수고하셨어요 🤍`;
         } else if (currentHour >= 22 || currentHour < 2) {
             title = `깊은 밤이에요 🌛`; sub = `${babyName} 재우고 이제 좀 쉬었나요?`;
         } else {
-            title = `새벽에도 깨어계시군요 🦉`; sub = `늦은 시간까지 아기 곁을 지키는 당신이 최고예요 👍`;
+            title = `새벽에도 깨어계시군요 🦉`; sub = `늦은 시간까지 아기 곁을 지키고 계시네요`;
         }
         
         greetingEl.innerText = title;
@@ -6446,7 +6445,7 @@ window.saveTrackerToFirebase = async function(records) {
 };
 
 /// 🛠️ [패치 3-1] 무적 락(Lock) 변수 생성 및 오프라인 큐 발사 로직
-window.isFlushingOfflineData = false; // 👈 락 변수 추가!
+window.isFlushingOfflineData = false; // 👈 락 변수 추가
 
 window.flushOfflineQueue = async function() {
     if (!navigator.onLine) return; // 여전히 오프라인이면 패스
@@ -6480,7 +6479,7 @@ window.flushOfflineQueue = async function() {
     }
     
     if (isRecovered && typeof window.showToast === 'function') {
-        window.showToast("☁️ 오프라인 때 기록한 데이터가 클라우드에 안전하게 백업되었습니다!");
+        window.showToast("☁️ 오프라인 때 기록한 데이터가 클라우드에 안전하게 백업되었습니다");
     }
 
     // 🚨 업로드가 완전히 끝나고 2초 뒤에 무적 모드 해제! (레이스 컨디션 완벽 차단)
@@ -6528,7 +6527,7 @@ window.stopSleepTimer = async function() {
     localStorage.removeItem('tosil_sleep_start');
     localStorage.removeItem('tosil_sleep_type'); 
     window.closeTrackerSheet();
-    window.showToast(`✅ ${durationMins}분 동안 자고 일어났어요!`);
+    window.showToast(`✅ ${durationMins}분 동안 자고 일어났어요`);
 };
 
 // 🚨 [저장 엔진 업데이트] 수면 강제 종료 버그 (무한수면) 완벽 킬스위치!
@@ -6576,7 +6575,7 @@ window.saveTrackerRecord = async function() {
             const foodAmt = document.getElementById('v-food-amount').value;
             if(!foodAmt) {
                 if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
-                return window.showToast('⚠️ 먹은 이유식 양을 입력해주세요!');
+                return window.showToast('⚠️ 먹은 이유식 양을 입력해주세요');
             }
             record.type = 'feed'; 
             record.subType = '이유식';
@@ -6586,12 +6585,12 @@ window.saveTrackerRecord = async function() {
         else {
             if(!window.trackerState.subType) {
                 if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
-                return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요!');
+                return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요');
             }
             if (window.trackerState.subType === '모유') {
                 const bAmt = document.getElementById('v-breast-amount').value;
-                if(!bAmt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 수유 시간(분)을 입력해주세요!'); }
-                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 방향(왼쪽/오른쪽/양쪽)을 선택해주세요!'); }
+                if(!bAmt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 수유 시간(분)을 입력해주세요'); }
+                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 방향(왼쪽/오른쪽/양쪽)을 선택해주세요'); }
                 
                 record.type = 'feed';
                 record.subType = '모유';
@@ -6599,7 +6598,7 @@ window.saveTrackerRecord = async function() {
                 record.status = window.trackerState.status; 
             } else {
                 const amt = document.getElementById('v-feed-amount').value;
-                if(!amt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요!'); }
+                if(!amt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요'); }
                 record.type = 'feed';
                 record.subType = window.trackerState.subType; 
                 record.amount = parseInt(amt);
@@ -6608,7 +6607,7 @@ window.saveTrackerRecord = async function() {
         }
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 소변인지 대변인지 선택해주세요!'); }
+        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 소변인지 대변인지 선택해주세요'); }
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
@@ -6618,7 +6617,7 @@ window.saveTrackerRecord = async function() {
         if (!medName) medName = window.trackerState.subType;
         if (!medName) {
             if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; }
-            return window.showToast('⚠️ 어떤 약을 먹였는지 선택하거나 직접 입력해주세요!');
+            return window.showToast('⚠️ 어떤 약을 먹였는지 선택하거나 직접 입력해주세요');
         }
         record.subType = medName;
         record.amount = 0; // 약은 용량보다 시간이 중요하므로 amount는 0 고정
@@ -6628,7 +6627,7 @@ window.saveTrackerRecord = async function() {
     else if (window.trackerState.type === 'sleep') {
         if (!window.trackerState.subType) {
             if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
-            return window.showToast('⚠️ 낮잠인지 밤잠인지 선택해주세요!');
+            return window.showToast('⚠️ 낮잠인지 밤잠인지 선택해주세요');
         }
 
         const amt = document.getElementById('v-sleep-amount');
@@ -6716,11 +6715,11 @@ window.saveTrackerRecord = async function() {
     }
 
     if (record.type === 'feed' && record.subType === '이유식') {
-        window.showToast("🥄 냠냠! 이유식 기록 완료!");
+        window.showToast("🥄 냠냠 이유식 기록 완료");
     } else if (record.type === 'med') {
-        window.showToast(`💊 ${record.subType} 투약 기록 완료!`);
+        window.showToast(`💊 ${record.subType} 투약 기록 완료`);
     } else {
-        window.showToast("💾 기록이 안전하게 저장되었습니다!");
+        window.showToast("💾 기록이 안전하게 저장되었습니다");
     }
 
     if (saveBtn) {
@@ -6891,18 +6890,18 @@ window.openEmergencyModal = function(type) {
         content.innerHTML = `
             <!-- 가독성 높인 다크/라이트 호환 배너 -->
             <div style="background:var(--bg-card); color:var(--text-m); padding:16px; border-radius:14px; font-weight:900; font-size:14.5px; text-align:center; margin-bottom:16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-                ⏱️ 당황하지 말고 <span style="color:#D97706;">경련 시작 시간</span>을 재세요!
+                ⏱️ 당황하지 말고 <span style="color:#D97706;">경련 시작 시간</span>을 재세요
             </div>
             
             <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid #D97706; margin-bottom: 8px;">
-                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">1️⃣ 고개를 돌리고 옷을 느슨하게!</div>
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">1️⃣ 고개를 돌리고 옷을 느슨하게</div>
                 <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">토사물이 기도를 막지 않게 <b>고개를 옆으로</b> 돌리고, 목 주변 단추나 지퍼를 풀어 호흡을 편하게 해주세요.</div>
             </div>
 
             <!-- ✨ 대표님의 날카로운 인사이트 반영: 흔한 부모들의 실수 방지! -->
             <div class="box-tint-red" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--danger); margin-bottom: 8px;">
-                <div style="font-size: 14.5px; font-weight: 900; color: var(--danger); margin-bottom: 6px;">2️⃣ 🚫 억지로 열 내리기 절대 금지!</div>
-                <div style="font-size: 13.5px; color: var(--danger); line-height: 1.5; word-break: keep-all;">경련 중 <b>옷을 억지로 벗기거나 물수건으로 닦지 마세요.</b> 해열제를 입에 물리면 <b>질식 위험</b>이 큽니다. 주무르기도 금지!</div>
+                <div style="font-size: 14.5px; font-weight: 900; color: var(--danger); margin-bottom: 6px;">2️⃣ 🚫 억지로 열 내리기 절대 금지</div>
+                <div style="font-size: 13.5px; color: var(--danger); line-height: 1.5; word-break: keep-all;">경련 중 <b>옷을 억지로 벗기거나 물수건으로 닦지 마세요.</b> 해열제를 입에 물리면 <b>질식 위험</b>이 큽니다. 주무르기도 금지</div>
             </div>
             
             <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid #D97706; margin-bottom: 8px;">
@@ -6911,7 +6910,7 @@ window.openEmergencyModal = function(type) {
             </div>
             
             <div class="box-tint-yellow" style="padding: 14px; border-radius: 16px; text-align:center; margin-bottom: 16px; margin-top:16px;">
-                <div style="font-size: 13.5px; font-weight: 800; color: #B45309; line-height: 1.4;">처음 겪는 경련이거나 대처가 불안하다면<br>주저하지 말고 바로 119에 신고하세요!</div>
+                <div style="font-size: 13.5px; font-weight: 800; color: #B45309; line-height: 1.4;">처음 겪는 경련이거나 대처가 불안하다면<br>주저하지 말고 바로 119에 신고하세요</div>
             </div>
             
             <a href="tel:119" style="display:block; text-align:center; background:var(--danger); color:#FFF; padding:16px; border-radius:14px; font-size:16px; font-weight:900; text-decoration:none; box-shadow:0 4px 12px rgba(240,68,82,0.2);">🚨 119 즉시 전화걸기</a>
@@ -6922,11 +6921,11 @@ window.openEmergencyModal = function(type) {
     else if (type === 'heimlich') {
         header.innerHTML = `
             <div style="font-size: 19px; font-weight: 900; color: var(--danger); margin-bottom: 6px; margin-top: 10px;">영아 기도폐쇄 (1세 미만)</div>
-            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">사탕/장난감 삼켜 숨을 쉬지 못할 때 즉시 실시!</div>
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">사탕/장난감 삼켜 숨을 쉬지 못할 때 즉시 실시</div>
         `;
         content.innerHTML = `
             <div style="background:var(--danger); color:#FFF; padding:12px; border-radius:12px; font-weight:900; font-size:14px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(240,68,82,0.3); animation: pulseSOS 1.5s infinite;">
-                📞 119에 신고하고 "스피커폰"을 켜세요!
+                📞 119에 신고하고 "스피커폰"을 켜세요
             </div>
             
             <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--danger); margin-bottom: 8px;">
@@ -6939,7 +6938,7 @@ window.openEmergencyModal = function(type) {
             </div>
             
             <div class="box-tint-red" style="padding: 14px; border-radius: 16px; text-align:center; margin-bottom: 16px;">
-                <div style="font-size: 13.5px; font-weight: 800; color: var(--danger);">이물질이 나오거나 119가 올 때까지 무한 반복!<br><small>(※ 1세 미만은 간 파열 위험으로 배 밀어내기 금지)</small></div>
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--danger);">이물질이 나오거나 119가 올 때까지 무한 반복<br><small>(※ 1세 미만은 간 파열 위험으로 배 밀어내기 금지)</small></div>
             </div>
 
             <a href="https://www.youtube.com/results?search_query=영아+기도폐쇄+소방청" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#191F28; color:#FFF; padding:14px; border-radius:12px; font-weight:900; font-size:14px; text-decoration:none;">
@@ -6951,11 +6950,11 @@ window.openEmergencyModal = function(type) {
     else if (type === 'cpr') {
         header.innerHTML = `
             <div style="font-size: 19px; font-weight: 900; color: var(--primary); margin-bottom: 6px; margin-top: 10px;">영아 심폐소생술 (1세 미만)</div>
-            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">의식과 호흡이 없을 때 즉시 실시!</div>
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">의식과 호흡이 없을 때 즉시 실시</div>
         `;
         content.innerHTML = `
             <div style="background:var(--primary); color:#FFF; padding:12px; border-radius:12px; font-weight:900; font-size:14px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(49,130,246,0.3); animation: pulseSOS 1.5s infinite;">
-                📞 119에 신고하고 "스피커폰"을 켜세요!
+                📞 119에 신고하고 "스피커폰"을 켜세요
             </div>
             
             <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary); margin-bottom: 8px;">
@@ -7183,7 +7182,7 @@ window.downloadReceipt = function() {
     
     // 🚨 1번 원인 방어: 라이브러리가 로드되지 않았을 때
     if (typeof html2canvas === 'undefined') {
-        return alert("이미지 저장 라이브러리가 필요합니다. HTML 파일에 html2canvas 스크립트가 있는지 확인해주세요!");
+        return alert("이미지 저장 라이브러리가 필요합니다. HTML 파일에 html2canvas 스크립트가 있는지 확인해주세요");
     }
 
     // 캡처하는 동안 저장 버튼 임시 숨김 (버튼까지 사진에 찍히는 것 방지)
@@ -7208,9 +7207,9 @@ window.downloadReceipt = function() {
         document.body.removeChild(link);
 
         if (typeof window.showToast === 'function') {
-            window.showToast("📸 영수증이 앨범에 쏙 저장되었습니다!");
+            window.showToast("📸 영수증이 앨범에 쏙 저장되었습니다");
         } else {
-            alert("📸 영수증이 앨범에 저장되었습니다!");
+            alert("📸 영수증이 앨범에 저장되었습니다");
         }
     }).catch(err => {
         if (btn) btn.style.display = 'block';
@@ -7296,7 +7295,7 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
         inputArea.style.display = 'block';
         inputEl.value = '';
         btnOk.style.opacity = '0.3';
-        btnOk.style.pointerEvents = 'none'; // 입력 전엔 클릭 금지!
+        btnOk.style.pointerEvents = 'none'; // 입력 전엔 클릭 금지
         
         inputEl.onkeyup = function() {
             if (this.value === requireKeyword) {
@@ -7337,14 +7336,14 @@ window.resetTrackerRecords = function() {
             localStorage.removeItem('tosil_tracker_records');
             window.updateTrackerDashboard();
         }
-        showToast("🧹 트래커 기록이 싹 비워졌습니다!");
-    }, "⚠️", "전체 삭제", "#F04452", "삭제"); // 👈 끝에 "삭제" 추가!
+        showToast("🧹 트래커 기록이 싹 비워졌습니다");
+    }, "⚠️", "전체 삭제", "#F04452", "삭제"); // 👈 끝에 "삭제" 추가
 };
 
 // ⚙️ (설정 탭) 기록 데이터 초기화 버튼
 window.clearAllData = function() {
-    showConfirm("정말 모든 기록 데이터를 초기화할까요?<br>이 작업은 되돌릴 수 없습니다!", function() {
-        window.wipeAllRecordsSafely(); // 🚨 무식한 clear() 대신 정밀 타격 엔진 가동!
+    showConfirm("정말 모든 기록 데이터를 초기화할까요?<br>이 작업은 되돌릴 수 없습니다", function() {
+        window.wipeAllRecordsSafely(); // 🚨 무식한 clear() 대신 정밀 타격 엔진 가동
         window.updateTrackerDashboard(); 
         showToast("🗑️ 데이터가 안전하게 모두 초기화되었습니다.");
         setTimeout(() => location.reload(), 1000);
@@ -7391,7 +7390,7 @@ window.calcSleepToNow = function() {
         amountInput.style.color = 'var(--text-m)';
     }, 300);
 
-    window.showToast(`✅ ${diffMins}분 수면으로 계산되었습니다!`);
+    window.showToast(`✅ ${diffMins}분 수면으로 계산되었습니다`);
 };
 
 // ==========================================
@@ -7460,7 +7459,7 @@ window.showForcedLoginStep = function() {
         step0.innerHTML = `
             <div style="font-size: 60px; margin-bottom: 20px; animation: bounce 2s infinite;">🐥</div>
             <h2 style="font-size: 24px; font-weight: 900; color: #191F28; margin: 0 0 12px 0; letter-spacing: -0.5px; line-height: 1.4;">
-                우리 아기 배냇함<br>환영합니다!
+                우리 아기 배냇함<br>환영합니다
             </h2>
             <p style="font-size: 14.5px; font-weight: 600; color: #8B95A1; line-height: 1.5; margin: 0 0 40px 0; word-break: keep-all;">
                 소중한 육아 기록을 평생 안전하게 보관하고<br>
@@ -7487,7 +7486,7 @@ window.showForcedLoginStep = function() {
 window.nextOnboardingStep = function(step) {
     if (step === 2) {
         const name = document.getElementById('ob-name').value.trim();
-        if (!name) return alert('우리 아기의 예쁜 이름을 입력해주세요! 😊');
+        if (!name) return alert('우리 아기의 예쁜 이름을 입력해주세요 😊');
         
         document.getElementById('ob-greeting-name').innerHTML = `<span style="color:#3182F6;">${name}</span>의 생일은<br>언제인가요?`;
         document.getElementById('onboarding-step-1').style.display = 'none';
@@ -7495,7 +7494,7 @@ window.nextOnboardingStep = function(step) {
         document.getElementById('onboarding-step-3').style.display = 'none';
     } else if (step === 3) {
         const date = document.getElementById('ob-date').value;
-        if (!date) return alert('생일(또는 예정일)을 꼭 선택해주세요! 🎂');
+        if (!date) return alert('생일(또는 예정일)을 꼭 선택해주세요 🎂');
         
         const name = document.getElementById('ob-name').value.trim();
         document.getElementById('ob-stage-name').innerText = name; 
@@ -7533,7 +7532,7 @@ window.finishOnboarding = function(feedingStage) {
 
     // ⏱️ 2.4초 뒤: 세 번째 멘트
     setTimeout(() => {
-        loadingText.innerHTML = `[${feedingStage}]에 딱 맞는<br>배냇함 세팅 완료! 🎉`;
+        loadingText.innerHTML = `[${feedingStage}]에 딱 맞는<br>배냇함 세팅 완료 🎉`;
     }, 2400);
 
     // ⏱️ 3.5초 뒤: 마술이 끝나면 데이터 저장 및 서버 동기화 후 새로고침!
@@ -7562,7 +7561,7 @@ window.finishOnboarding = function(feedingStage) {
                     babyName: name,
                     babyBirth: date
                 });
-                console.log("✅ 서버에 아기 정보 반영 성공!");
+                console.log("✅ 서버에 아기 정보 반영 성공");
             } catch (e) {
                 console.warn("⚠️ 서버 반영 실패(오프라인일 수 있음):", e);
             }
@@ -7668,13 +7667,13 @@ window.sendKakaoInvite = function(role = 'master') {
     if(sheet) sheet.style.display = 'none';
     
     const syncCode = localStorage.getItem('family_sync_code');
-    if (!syncCode) return alert("🚨 가족 코드가 없습니다!");
+    if (!syncCode) return alert("🚨 가족 코드가 없습니다");
 
     const inviteUrl = `https://happy-baby0303.github.io/?code=${syncCode}`;
-    const titleText = role === 'master' ? '💌 배냇함 공동양육자 초대장!' : '💌 배냇함 안심 돌봄 초대장!';
+    const titleText = role === 'master' ? '💌 배냇함 공동양육자 초대장' : '💌 배냇함 안심 돌봄 초대장';
     const descText = role === 'master' 
-        ? `여보! 우리 아기 맞춤형 육아 비서 [배냇함]로 나랑 같이 육아 기록 공유하자 🤍`
-        : `시터님/어르신! 우리 아기 기록을 편하게 남길 수 있도록 [배냇함]에 초대합니다 🤍 (사생활 보호 기능 적용)`;
+        ? `여보 우리 아기 맞춤형 육아 비서 [배냇함]로 나랑 같이 육아 기록 공유하자 🤍`
+        : `시터님/어르신 우리 아기 기록을 편하게 남길 수 있도록 [배냇함]에 초대합니다 🤍 (사생활 보호 기능 적용)`;
     
     if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
         Kakao.Share.sendDefault({
@@ -7692,7 +7691,7 @@ window.sendKakaoInvite = function(role = 'master') {
         if (navigator.share) {
             navigator.share({ title: '배냇함 초대장', text: text, url: inviteUrl }).catch(console.error);
         } else {
-            prompt("아래 초대장을 복사해서 카톡으로 보내주세요!", text + " " + inviteUrl);
+            prompt("아래 초대장을 복사해서 카톡으로 보내주세요", text + " " + inviteUrl);
         }
     }
 };
@@ -7709,7 +7708,7 @@ window.checkAndShowInviteNudge = function() {
 
         const sheet = document.getElementById('invite-bottom-sheet');
         if(sheet) sheet.style.display = 'flex';
-        localStorage.setItem('tosil_has_seen_invite', 'true'); // 다시 안 뜨게 도장 쾅!
+        localStorage.setItem('tosil_has_seen_invite', 'true'); // 다시 안 뜨게 도장 쾅
     }
 };
 
@@ -7817,7 +7816,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (savedName && savedDate) {
         document.getElementById('onboarding-overlay').style.display = 'none';
-        renderBabyInfo(); // 👈 여기서 하나로 통합된 엔진 실행!
+        renderBabyInfo(); // 👈 여기서 하나로 통합된 엔진 실행
     } else {
         document.getElementById('onboarding-overlay').style.display = 'flex';
     }
@@ -7845,7 +7844,7 @@ function calcFormulaAmount() {
     const wVal = document.getElementById('calc-weight').value;
     const cntVal = document.getElementById('calc-count').value;
     
-    if (!wVal || !cntVal) return showToast("⚠️ 아기 몸무게와 수유 횟수를 입력해주세요!");
+    if (!wVal || !cntVal) return showToast("⚠️ 아기 몸무게와 수유 횟수를 입력해주세요");
 
     const weight = parseFloat(wVal);
     const count = parseInt(cntVal);
@@ -7906,7 +7905,7 @@ function switchPongTab(mode) {
         tabRatio.style.background = '#FFFFFF'; tabRatio.style.color = '#191F28'; tabRatio.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
         tabCount.style.background = 'transparent'; tabCount.style.color = '#8B95A1'; tabCount.style.boxShadow = 'none';
         
-        desc.innerHTML = '💡 <strong>비율 섞기 (조유량이 같을 때)</strong><br>스푼당 물의 양(조유량)이 <b>같은</b> 분유끼리 바꿀 때만 사용하세요!<br>한 젖병에 가루를 비율대로 섞어 먹이는 방식입니다.';
+        desc.innerHTML = '💡 <strong>비율 섞기 (조유량이 같을 때)</strong><br>스푼당 물의 양(조유량)이 <b>같은</b> 분유끼리 바꿀 때만 사용하세요<br>한 젖병에 가루를 비율대로 섞어 먹이는 방식입니다.';
         label.innerText = '1회 총 수유량';
         input.placeholder = '예: 160';
         unit.innerText = 'ml';
@@ -7914,7 +7913,7 @@ function switchPongTab(mode) {
         tabCount.style.background = '#FFFFFF'; tabCount.style.color = '#191F28'; tabCount.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
         tabRatio.style.background = 'transparent'; tabRatio.style.color = '#8B95A1'; tabRatio.style.boxShadow = 'none';
         
-        desc.innerHTML = '🚨 <strong>교차 수유하기 (조유량이 다를 때)</strong><br>조유량이 <b>다른</b> 분유는 가루를 섞으면 농도가 깨져 배앓이를 해요.<br>꼭 젖병 통째로 횟수를 교차해서 먹여주세요!';
+        desc.innerHTML = '🚨 <strong>교차 수유하기 (조유량이 다를 때)</strong><br>조유량이 <b>다른</b> 분유는 가루를 섞으면 농도가 깨져 배앓이를 해요.<br>꼭 젖병 통째로 횟수를 교차해서 먹여주세요';
         label.innerText = '하루 총 수유 횟수';
         input.placeholder = '예: 5';
         unit.innerText = '회 (병)';
@@ -7943,7 +7942,7 @@ function calcPong(step, btnEl) {
     const inputVal = parseInt(document.getElementById('pong-input-val').value);
     
     if (!inputVal) {
-        return showToast(currentPongMode === 'ratio' ? "⚠️ 1회 수유량(ml)을 입력해주세요!" : "⚠️ 하루 총 수유 횟수를 입력해주세요!");
+        return showToast(currentPongMode === 'ratio' ? "⚠️ 1회 수유량(ml)을 입력해주세요" : "⚠️ 하루 총 수유 횟수를 입력해주세요");
     }
 
     const titleEl = document.getElementById('pong-res-title');
@@ -7958,7 +7957,7 @@ function calcPong(step, btnEl) {
         const newMl = Math.round(inputVal * newRatio);
         const oldMl = inputVal - newMl;
 
-        titleEl.innerText = "한 젖병에 이렇게 가루를 타주세요!";
+        titleEl.innerText = "한 젖병에 이렇게 가루를 타주세요";
         oldValEl.innerText = oldMl; newValEl.innerText = newMl;
         oldUnitEl.innerText = 'ml'; newUnitEl.innerText = 'ml';
     } else {
@@ -7976,7 +7975,7 @@ function calcPong(step, btnEl) {
         
         const oldCount = Math.max(inputVal - newCount, 0);
 
-        titleEl.innerText = `오늘 하루 총 ${inputVal}회 중, 이렇게 교차로 먹이세요!`;
+        titleEl.innerText = `오늘 하루 총 ${inputVal}회 중, 이렇게 교차로 먹이세요`;
         oldValEl.innerText = oldCount; newValEl.innerText = newCount;
         oldUnitEl.innerText = '회'; newUnitEl.innerText = '회';
     }
@@ -8018,7 +8017,7 @@ window.addOpenRecord = function() {
     
     const dateVal = dateInput.value;
     
-    if (!dateVal) return showToast("⚠️ 뜯은 날짜를 선택해주세요!");
+    if (!dateVal) return showToast("⚠️ 뜯은 날짜를 선택해주세요");
 
     // 권장 유통기한(일수) 맵핑
     const limitMap = {
@@ -8047,7 +8046,7 @@ window.addOpenRecord = function() {
     
     window.currentOpenFilter = 'all'; 
     renderOpenRecords();
-    showToast("✍️ 라벨 스티커가 등록되었습니다!");
+    showToast("✍️ 라벨 스티커가 등록되었습니다");
 };
 
 // 2. [기존 유지] 개별 삭제 기능
@@ -8057,7 +8056,7 @@ window.deleteOpenRecord = function(id) {
         records = records.filter(r => r.id !== id);
         localStorage.setItem('tosil_open_records', JSON.stringify(records));
         renderOpenRecords();
-        showToast("🗑️ 삭제되었습니다!");
+        showToast("🗑️ 삭제되었습니다");
     }, "🗑️", "삭제", "#F04452");
 };
 
@@ -8076,7 +8075,7 @@ window.renewOpenRecord = function(id) {
 
         localStorage.setItem('tosil_open_records', JSON.stringify(records));
         window.renderOpenRecords();
-        showToast("🔄 오늘 날짜로 새로 갱신되었습니다!");
+        showToast("🔄 오늘 날짜로 새로 갱신되었습니다");
     }, "🔄", "새로 뜯음", "#3182F6");
 };
 
@@ -8101,7 +8100,7 @@ window.clearExpiredRecords = function() {
 
         localStorage.setItem('tosil_open_records', JSON.stringify(validRecords));
         window.renderOpenRecords();
-        showToast(`🧹 ${deletedCount}개의 만료템을 깔끔하게 치웠습니다!`);
+        showToast(`🧹 ${deletedCount}개의 만료템을 깔끔하게 치웠습니다`);
     }, "🧹", "비우기", "#F04452");
 };
 
@@ -8146,7 +8145,7 @@ window.renderOpenRecords = function() {
         container.innerHTML = `
             <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
                 <div style="font-size:24px; margin-bottom:10px;">✨</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">아직 기록된 개봉품이 없습니다.<br>통에 적지 말고 여기에 저장하세요!</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">아직 기록된 개봉품이 없습니다.<br>통에 적지 말고 여기에 저장하세요</div>
             </div>`;
         return;
     }
@@ -8268,11 +8267,11 @@ window.updateOpenItemGuide = function() {
     const guideEl = document.getElementById('open-item-guide');
     
     const guides = {
-        'formula': '💡 습기에 취약해요! 개봉 후 <strong>3주(21일) 이내</strong> 소진을 권장합니다.',
+        'formula': '💡 습기에 취약해요 개봉 후 <strong>3주(21일) 이내</strong> 소진을 권장합니다.',
         'fever': '💡 처방받은 약은 1주, 시판 병 시럽은 <strong>1달(30일) 권장</strong>',
         'tub_oint': '💡 약국에서 덜어준 둥근 통 연고는 <strong>1달(30일) 이내</strong>',
         'tube_oint': '💡 밀봉된 튜브형 연고(비판텐 등)는 <strong>6개월(180일)</strong>',
-        'eye_drop': '🚨 세균 감염 위험! 개봉 후 무조건 <strong>1달(30일) 이내</strong>',
+        'eye_drop': '🚨 세균 감염 위험 개봉 후 무조건 <strong>1달(30일) 이내</strong>',
         'cream': '💡 아기 피부에 직접 닿는 화장품은 개봉 후 <strong>6개월 권장</strong>',
         'puree': '💡 침이 닿지 않게 덜어서 냉장 보관 시 <strong>2일 이내</strong>',
         'wipe': '💡 수분이 마르고 세균 번식 위험이 있어 <strong>1달 권장</strong>'
@@ -8314,10 +8313,10 @@ const mateLevelData = [
     { level: 4, reqExp: 600, title: "트림 유도 마스터 🌬️", reward: null },
     { level: 5, reqExp: 1000, title: "수면 의식 지배자 🌙", reward: "💆 시원한 전신 마사지 30분권" },
     { level: 6, reqExp: 1500, title: "이유식 마스터셰프 👨‍🍳", reward: null },
-    { level: 7, reqExp: 2200, title: "인간 놀이기구 🎢", reward: "🎮 나만의 힐링/자유시간 2시간!" },
+    { level: 7, reqExp: 2200, title: "인간 놀이기구 🎢", reward: "🎮 나만의 힐링/자유시간 2시간" },
     { level: 8, reqExp: 3000, title: "가족의 든든한 방패 🛡️", reward: null },
-    { level: 9, reqExp: 4200, title: "육아의 신 👼", reward: "🍗 오늘 저녁은 내가 원하는 배달 음식!" },
-    { level: 10, reqExp: 6000, title: "전설의 빛과 소금 ✨ (MAX)", reward: "🎫 묻지도 따지지도 않는 절대 소원권 1장!" }
+    { level: 9, reqExp: 4200, title: "육아의 신 👼", reward: "🍗 오늘 저녁은 내가 원하는 배달 음식" },
+    { level: 10, reqExp: 6000, title: "전설의 빛과 소금 ✨ (MAX)", reward: "🎫 묻지도 따지지도 않는 소원권 한 장" }
 ];
 
 function updateMateLevelUI() {
@@ -8385,11 +8384,11 @@ function gainMateExp(amount) {
     // 🚀 만약 레벨이 올랐다면 축하 팝업 띄우기!
     if (newLevel > oldLevel) {
         setTimeout(() => {
-            let congratsMsg = `🎊 레벨업! [Lv.${newLevel}] 달성! 🎊`;
+            let congratsMsg = `🎊 레벨업 [Lv.${newLevel}] 달성 🎊`;
             if (newReward && (mateLevelData[newLevel-1].reward !== null)) {
-                congratsMsg += `\n\n🎁 특별 보상 언락:\n[${newReward}]\n지금 바로 배우자에게 청구하세요!`;
+                congratsMsg += `\n\n🎁 특별 보상 언락:\n[${newReward}]\n지금 바로 배우자에게 청구하세요`;
             } else {
-                congratsMsg += `\n\n육아 마스터를 향해 한 걸음 더 나아갔습니다!`;
+                congratsMsg += `\n\n육아 마스터를 향해 한 걸음 더 나아갔습니다`;
             }
             alert(congratsMsg);
         }, 300); // 게이지 차는 거 보여주고 0.3초 뒤에 팝업 띄움
@@ -8412,27 +8411,27 @@ async function completeBaton(id) {
     await saveBatonToFirebase(records);
 
     let earnedExp = 20; 
-    let expMsg = "(+20 EXP 획득!)";
+    let expMsg = "(+20 EXP 획득)";
 
     if (taskText.includes("새벽 수유")) {
-        earnedExp = 50; expMsg = "(난이도 극악! +50 EXP 획득🔥)";
+        earnedExp = 50; expMsg = "(난이도 극악 +50 EXP 획득🔥)";
     } else if (taskText.includes("아기 재우기")) {
-        earnedExp = 40; expMsg = "(체력 소모! +40 EXP 획득💪)";
+        earnedExp = 40; expMsg = "(체력 소모 +40 EXP 획득💪)";
     } else if (taskText.includes("장보기")) {
-        earnedExp = 30; expMsg = "(가족의 식량 보급! +30 EXP 획득🛒)";
+        earnedExp = 30; expMsg = "(가족의 식량 보급 +30 EXP 획득🛒)";
     } else if (taskText.includes("기저귀")) {
-        earnedExp = 15; expMsg = "(기본 소양! +15 EXP 획득💩)";
+        earnedExp = 15; expMsg = "(기본 소양 +15 EXP 획득💩)";
     }
 
     if (taskText.includes("커피") || taskText.includes("마사지") || taskText.includes("자유시간") || taskText.includes("쉬어")) {
         earnedExp = 100;
-        expMsg = "(🎉 히든 퀘스트 달성! 짝꿍 감동 보너스 +100 EXP 잭팟!! 🎊)";
+        expMsg = "(🎉 히든 퀘스트 달성 짝꿍 감동 보너스 +100 EXP 잭팟 🎊)";
     }
 
     if (reward && reward !== "없음") {
-        showToast(`🎉 미션 해결! ${expMsg}\n약속된 보상 [${reward}]을(를) 당당히 요구하세요! 👍`);
+        showToast(`🎉 미션 해결 ${expMsg}\n약속된 보상 [${reward}]을(를) 당당히 요구하세요 👍`);
     } else {
-        showToast(`🎉 미션 해결 완료! ${expMsg}`);
+        showToast(`🎉 미션 해결 완료 ${expMsg}`);
     }
 
     // 경험치 지급 쏴라!
@@ -8638,7 +8637,7 @@ window.renderSettingsTab = function() {
         syncHtml = `
             <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
                 <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 8px;">👨‍👩‍👧 우리 아기 함께 키우기</div>
-                <div style="font-size: 11.5px; color: var(--text-s); font-weight: 600; margin-bottom: 16px; line-height: 1.5; letter-spacing: -0.3px; word-break: keep-all;">혼자 하는 육아는 너무 힘들어요.<br>아빠, 할머니, 이모님을 초대해서 기록을 공유하세요!</div>
+                <div style="font-size: 11.5px; color: var(--text-s); font-weight: 600; margin-bottom: 16px; line-height: 1.5; letter-spacing: -0.3px; word-break: keep-all;">혼자 하는 육아는 너무 힘들어요.<br>아빠, 할머니, 이모님을 초대해서 기록을 공유하세요</div>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <button onclick="window.sendKakaoInvite()" style="width: 100%; padding: 14px; border-radius: 12px; background: #FEE500; color: #191F28; font-size: 13.5px; font-weight: 900; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; letter-spacing: -0.5px; white-space: nowrap;">
@@ -8786,7 +8785,7 @@ window.changeUserRole = function(role) {
         window.showToast("👩‍🍼 엄마 모드로 변경되었습니다.");
     }
 
-    window.applyCaregiverRestrictions(); // 사생활 차단 엔진 가동!
+    window.applyCaregiverRestrictions(); // 사생활 차단 엔진 가동
 
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
     if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
@@ -8959,7 +8958,7 @@ window.calcSleepToNow = function() {
         setTimeout(() => { minsInput.style.transform = 'scale(1)'; minsInput.style.color = 'var(--text-m)'; }, 300);
     }
 
-    window.showToast(`✅ 방금 깬 시간으로 자동 셋팅되었습니다!`);
+    window.showToast(`✅ 방금 깬 시간으로 자동 셋팅되었습니다`);
 };
 
 // ==========================================
@@ -9046,10 +9045,10 @@ window.selectRoleOnboarding = function(role) {
     
     if (role === 'dad') {
         document.body.classList.add('mode-dad');
-        window.showToast("👨‍🍼 아빠 모드로 시작합니다!");
+        window.showToast("👨‍🍼 아빠 모드로 시작합니다");
     } else {
         document.body.classList.remove('mode-dad');
-        window.showToast("👩‍🍼 엄마 모드로 시작합니다!");
+        window.showToast("👩‍🍼 엄마 모드로 시작합니다");
     }
     
     if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
@@ -9134,13 +9133,13 @@ window.renderDadQuests = function() {
     let momHpText = ""; let momHpColor = "";
     
     if (todayFever) {
-        momHpText = "🚨 멘탈 붕괴 직전 (아기가 아파요! 칼퇴 요망)"; momHpColor = "var(--danger, #EF4444)";
+        momHpText = "🚨 멘탈 붕괴 직전 (아기가 아파요 칼퇴 요망)"; momHpColor = "var(--danger, #EF4444)";
     } else if (todayEvents >= 15) { 
-        momHpText = "극도 피로 🥵 (디저트 포장 강력 추천!)"; momHpColor = "var(--danger, #EF4444)"; 
+        momHpText = "많이 지치셨어요 (오늘은 좀 쉬세요)"; momHpColor = "var(--danger, #EF4444)"; 
     } else if (todayEvents >= 8) { 
         momHpText = "지침 😮‍💨 (따뜻한 말 한마디 필수)"; momHpColor = "var(--accent, #B98A2E)"; 
     } else { 
-        momHpText = "보통 🙂 (퇴근 후 육아 교대는 필수!)"; momHpColor = "var(--success, #B98A2E)"; 
+        momHpText = "보통 🙂 (퇴근 후 육아 교대는 필수)"; momHpColor = "var(--success, #B98A2E)"; 
     }
 
     const isHeroToday = localStorage.getItem('tosil_hero_mode_date') === new Date().toDateString();
@@ -9185,7 +9184,7 @@ window.renderDadQuests = function() {
             
             ${todayFever ? `
                 <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 13px; font-weight: 800; color: #FECACA; text-align: center; animation: pulseSOS 1.5s infinite;">
-                    현재 아기 체온 ${todayFever.temp}℃! 집에 갈 때 해열제 사갈지 꼭 물어보세요!
+                    현재 아기 체온 ${todayFever.temp}℃! 집에 갈 때 해열제 사갈지 꼭 물어보세요
                 </div>
             ` : ''}
 
@@ -9196,11 +9195,11 @@ window.renderDadQuests = function() {
             ${isHeroToday ? `
                 <div style="text-align:center; padding:16px; background:rgba(185, 138, 46, 0.15); border-radius:16px; border:1px solid rgba(185, 138, 46, 0.3);">
                     <div style="font-size:24px; margin-bottom:4px;">👨‍🍼</div>
-                    <div style="font-size:14px; font-weight:900; color:var(--accent, #B98A2E);">오늘의 메인 육아 참전 완료!</div>
+                    <div style="font-size:14px; font-weight:900; color:var(--accent, #B98A2E);">오늘의 메인 육아 참전 완료</div>
                 </div>
             ` : `
                 <button onclick="window.activateHeroMode()" style="width:100%; padding:16px 10px; border-radius:16px; background:${todayFever ? 'var(--danger, #EF4444)' : 'var(--primary, #7F77DD)'}; color:var(--bg-main, #fff); font-size:14.5px; font-weight:900; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(${todayFever ? '239,68,68' : '127,119,221'},0.4); display:flex; align-items:center; justify-content:center; gap:6px; letter-spacing:-0.5px; white-space:nowrap;">
-                    <span>👨‍🍼</span> ${todayFever ? '긴급 투입! 당장 퇴근하겠습니다' : '퇴근 완료! 이제 내가 전담할게'}
+                    <span>👨‍🍼</span> ${todayFever ? '긴급 투입 당장 퇴근하겠습니다' : '퇴근 완료 이제 내가 전담할게'}
                 </button>
             `}
         `;
@@ -9218,7 +9217,7 @@ window.toggleDadDashboard = function() {
 window.activateHeroMode = function() {
     localStorage.setItem('tosil_hero_mode_date', new Date().toDateString());
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    if (typeof window.showToast === 'function') window.showToast("👨‍🍼 멋진 아빠 등장! 아내에게 자유시간을 선물하세요. (+50 EXP)");
+    if (typeof window.showToast === 'function') window.showToast("👨‍🍼 멋진 아빠 등장 아내에게 자유시간을 선물하세요. (+50 EXP)");
     
     window.updateMateExp(50);
     window.renderDadQuests();
@@ -9330,7 +9329,7 @@ window.updateDadBriefing = function() {
 
     if (isSleeping) {
         missionBg = "var(--primary, #7F77DD)"; 
-        missionMsg = "쉿! 아기 꿀잠 중, 까치발 입장 "; 
+        missionMsg = "쉿 아기 꿀잠 중, 까치발 입장 "; 
     } else {
         const nowTime = now.getTime();
         let feedDiffMins = lastFeed ? Math.floor((nowTime - lastFeed.timestamp) / 60000) : 0;
@@ -9417,7 +9416,7 @@ window.updateDadBriefing = function() {
             <span id="dad-brief-msg" style="display:none;"></span>
         `;
     }
-}; // 🚨 여기가 window.updateDadBriefing 함수를 끝내는 진짜 괄호입니다! 절대 지워지면 안 됩니다!
+}; // 🚨 여기가 window.updateDadBriefing 함수를 끝내는 진짜 괄호입니다 절대 지워지면 안 됩니다
 
 
 // ==========================================
@@ -9580,7 +9579,7 @@ window.completeTopMission = function(btnElement, missionText) {
     btnElement.style.background = "#10B981"; // 초록색으로 변경
     btnElement.style.border = "none";
     btnElement.style.color = "#FFFFFF";
-    btnElement.innerText = "완수! 👏";
+    btnElement.innerText = "완수 👏";
     btnElement.style.transform = "scale(1.1)";
     btnElement.disabled = true; // 중복 클릭 방지
     btnElement.style.cursor = "not-allowed";
@@ -9590,7 +9589,7 @@ window.completeTopMission = function(btnElement, missionText) {
     }, 200);
 
     if (navigator.vibrate) navigator.vibrate(50);
-    window.showToast("💖 멋져요! 아내의 스트레스가 감소했습니다.");
+    window.showToast("💖 멋져요 아내의 스트레스가 감소했습니다.");
 
     // ✨ 핵심 패치: 방금 완료한 미션의 내용과 시간을 브라우저에 콱 박아둡니다.
     localStorage.setItem('tosil_cleared_mission', JSON.stringify({
@@ -9626,7 +9625,7 @@ window.exportToExcel = function() {
     const growths = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
 
     if (trackers.length === 0 && fevers.length === 0 && growths.length === 0) {
-        return window.showToast("⚠️ 아직 내보낼 데이터가 없습니다. 먼저 기록을 남겨주세요!");
+        return window.showToast("⚠️ 아직 내보낼 데이터가 없습니다. 먼저 기록을 남겨주세요");
     }
 
     // 2. 엑셀 파일(CSV) 헤더 만들기
@@ -9689,7 +9688,7 @@ window.exportToExcel = function() {
     link.click();
     document.body.removeChild(link);
 
-    window.showToast("📥 엑셀(CSV) 데이터 다운로드가 완료되었습니다!");
+    window.showToast("📥 엑셀(CSV) 데이터 다운로드가 완료되었습니다");
 };
 
 // ==========================================
@@ -9732,7 +9731,7 @@ window.copySymptomMemo = function() {
     let text = `[증상요약]\n- 최근 체온: ${latest.temp}도\n- 복용 약: ${pillName}\n- 몸무게: ${weight}kg\n- 동반 증상: ${symp}`;
     
     navigator.clipboard.writeText(text).then(() => {
-        window.showToast("📋 진료 접수용 메모가 복사되었어요!<br>예약 앱이나 문자에 바로 붙여넣기 하세요.");
+        window.showToast("📋 진료 접수용 메모가 복사되었어요<br>예약 앱이나 문자에 바로 붙여넣기 하세요.");
     });
 };
 
@@ -9860,7 +9859,7 @@ window.initDrumPicker = function(timeStr) {
 // 📊 [UX 패치] 직전 기록과 비교해서 증감폭 알려주는 멘트 생성기
 // ==========================================
 function getGrowthDeltaMessage(records) {
-    if (!records || records.length < 2) return "✨ 첫 계측 완료! 앞으로의 폭풍 성장이 기대돼요 🌱";
+    if (!records || records.length < 2) return "✨ 첫 계측 완료 앞으로의 폭풍 성장이 기대돼요 🌱";
     const latest = records[0]; 
     const prev = records[1];   
     let messages = [];
@@ -9877,7 +9876,7 @@ function getGrowthDeltaMessage(records) {
         else if (diffW < 0) messages.push(`몸무게 <span style="color:#8B95A1;">${diffW}kg</span>`);
     }
 
-    if (messages.length === 0) return "✨ 오늘 계측 완료! 폭풍 성장 중 🌿";
+    if (messages.length === 0) return "✨ 오늘 계측 완료 폭풍 성장 중 🌿";
     return `✨ 지난번보다 <strong>${messages.join(', ')}</strong>`;
 }
 
@@ -9899,7 +9898,7 @@ window.closeWriteModal = function() {
 
 window.showComingSoon = function(feature) {
     if (navigator.vibrate) navigator.vibrate([10, 30, 10]); // 경쾌한 진동
-    window.showToast(`🚀 <b>${feature}</b> 기능은 열심히 준비 중이에요!<br>조금만 기다려주세요 🤍`);
+    window.showToast(`🚀 <b>${feature}</b> 기능은 열심히 준비 중이에요<br>조금만 기다려주세요 🤍`);
 };
 
 // ==========================================
@@ -10015,7 +10014,7 @@ window.handleImageSelection = function(event) {
     if (files.length === 0) return;
     
     if (window.attachedImages.length + files.length > 5) {
-        return window.showToast('⚠️ 사진은 최대 5장까지만 첨부할 수 있어요!');
+        return window.showToast('⚠️ 사진은 최대 5장까지만 첨부할 수 있어요');
     }
 
     // 🚨 사진이 서버로 날아가는 동안 유저가 기다릴 수 있게 알림 띄우기!
@@ -10050,7 +10049,7 @@ if (window.storage && window.uploadString && window.getDownloadURL) {
         // 🚨 로그인 검증 (안 되어있으면 칼같이 차단!)
         const uid = window.auth?.currentUser?.uid;
         if (!uid) {
-            window.showToast("🔐 사진 첨부는 로그인 후 이용할 수 있어요!");
+            window.showToast("🔐 사진 첨부는 로그인 후 이용할 수 있어요");
             return;
         }
 
@@ -10175,9 +10174,9 @@ window.submitPost = function(btnElement) {
     const isAnonymous = anonEl ? anonEl.checked : false;
 
     // 빈칸 검증 시에도 버튼을 꼭 살려줘야 유저가 다시 누를 수 있습니다.
-    if (!category) { resetBtn(); return window.showToast('⚠️ 게시판 카테고리를 선택해주세요!'); }
-    if (!title.trim()) { resetBtn(); return window.showToast('⚠️ 게시글 제목을 입력해주세요!'); }
-    if (!content.trim()) { resetBtn(); return window.showToast('⚠️ 내용을 입력해주세요!'); }
+    if (!category) { resetBtn(); return window.showToast('⚠️ 게시판 카테고리를 선택해주세요'); }
+    if (!title.trim()) { resetBtn(); return window.showToast('⚠️ 게시글 제목을 입력해주세요'); }
+    if (!content.trim()) { resetBtn(); return window.showToast('⚠️ 내용을 입력해주세요'); }
 
     let posts = JSON.parse(localStorage.getItem('tosil_community_posts')) || [];
     const myName = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함';
@@ -10199,7 +10198,7 @@ window.submitPost = function(btnElement) {
             
             targetPost = posts[postIdx]; // 저장할 대상 지정
         }
-        window.showToast('📝 게시글이 성공적으로 수정되었습니다!');
+        window.showToast('📝 게시글이 성공적으로 수정되었습니다');
     } else {
         // 👉 [new! 새로운 글 등록]
         const timestamp = new Date().getTime();
@@ -10223,7 +10222,7 @@ window.submitPost = function(btnElement) {
             posts = posts.slice(0, 50);
         }
         
-        window.showToast('🎉 게시글이 성공적으로 등록되었습니다!');
+        window.showToast('🎉 게시글이 성공적으로 등록되었습니다');
     }
     
     try {
@@ -10231,7 +10230,7 @@ window.submitPost = function(btnElement) {
     } catch (e) {
         console.error(e);
         resetBtn();
-        return window.showToast('⚠️ 용량이 꽉 찼습니다! 기기의 캐시를 비우거나 사진 갯수를 줄여주세요.');
+        return window.showToast('⚠️ 용량이 꽉 찼습니다 기기의 캐시를 비우거나 사진 갯수를 줄여주세요.');
     }
 
     // 🚨 [수술 완료] 통짜 배열 저장이 아닌 '개별 글 ID'로 파이어베이스에 각각 독립 저장!
@@ -10420,7 +10419,7 @@ window.toggleScrap = function(postId, btnEl, event) {
         btnEl.style.color = post.isScrapped ? 'var(--brand-primary)' : 'var(--text-sub)';
         btnEl.style.background = post.isScrapped ? 'var(--brand-light)' : 'var(--bg-main)';
     }
-    window.showToast(post.isScrapped ? '📌 내 스크랩에 저장되었어요!' : '🔖 스크랩이 해제되었습니다.');
+    window.showToast(post.isScrapped ? '📌 내 스크랩에 저장되었어요' : '🔖 스크랩이 해제되었습니다.');
 };
 
 // ==========================================
@@ -10506,7 +10505,7 @@ if(existing) existing.remove();
 };
 
 window.editPost = function(postId) {
-    window.showToast('🛠️ 글 수정 기능은 준비 중입니다!');
+    window.showToast('🛠️ 글 수정 기능은 준비 중입니다');
     document.getElementById('post-action-sheet').remove();
 };
 
@@ -10728,7 +10727,7 @@ window.updateMyPageProfile = function() {
         const isSubAdmin = localStorage.getItem('tosil_is_subadmin') === 'true';
         
         let roleName = "🧸 일반 회원";
-        if (isMaster) roleName = "👑 최고 관리자(대표이사)";
+        if (isMaster) roleName = "👑 대표 계정";
         else if (isSubAdmin) roleName = "🌟 관리자";
 
         // 대표님 화면(스크린샷)에 맞춰 텍스트 교체
@@ -10815,7 +10814,7 @@ window.changeNickname = function() {
         return; // 닉네임이 실제로 바뀌지 않게 멈춤
     }
 
-    if(!newName) return window.showToast("🚨 닉네임을 입력해주세요!");
+    if(!newName) return window.showToast("🚨 닉네임을 입력해주세요");
     if(newName.length > 10) return window.showToast("🚨 닉네임은 10자 이내로 예쁘게 지어주세요.");
 
     // 🚫 [철통 방어: 등급별 금칙어 시스템]
@@ -10839,7 +10838,7 @@ window.changeNickname = function() {
     comments.forEach(c => { if(c.authorName === oldName) c.authorName = newName; });
     localStorage.setItem('tosil_community_comments', JSON.stringify(comments));
 
-    window.showToast(`✨ [${newName}]님으로 닉네임이 변경되었습니다!`);
+    window.showToast(`✨ [${newName}]님으로 닉네임이 변경되었습니다`);
     
     window.updateMyPageProfile(); 
     if(typeof window.renderCommunityFeed === 'function') window.renderCommunityFeed(); 
@@ -11005,7 +11004,7 @@ window.searchByTag = function(tag) {
 window.applyCommunityWaitlist = function(btn) {
     // 1. 이미 신청했는지 확인 (로컬)
     if(localStorage.getItem('tosil_waitlist_done')) {
-        return window.showToast('이미 신청하셨어요! 조금만 기다려주세요 🤍');
+        return window.showToast('이미 신청하셨어요 조금만 기다려주세요 🤍');
     }
 
     // 2. 카카오 로그인 안 했으면 튕겨내기
@@ -11013,7 +11012,7 @@ window.applyCommunityWaitlist = function(btn) {
     const myNickname = localStorage.getItem('kakao_nickname') || '익명엄빠';
     
     if(!myKakaoId) {
-        return window.showConfirm("알림을 받으시려면 먼저 로그인해주세요!", function() {
+        return window.showConfirm("알림을 받으시려면 먼저 로그인해주세요", function() {
             window.switchTab('settings');
         }, "💬", "로그인 하러가기", "#3182F6");
     }
@@ -11021,7 +11020,7 @@ window.applyCommunityWaitlist = function(btn) {
      // 로그인 세션이 없으면 보내봐야 규칙이 거부한다. 아예 안 보낸다.
     const liveUid = (window.auth && window.auth.currentUser) ? window.auth.currentUser.uid : null;
     if (!liveUid) {
-        return window.showConfirm("알림을 받으시려면 먼저 로그인해주세요!", function() {
+        return window.showConfirm("알림을 받으시려면 먼저 로그인해주세요", function() {
             window.switchTab('settings');
         }, "💬", "로그인 하러가기", "#3182F6");
     }
@@ -11036,7 +11035,7 @@ window.applyCommunityWaitlist = function(btn) {
         }, {merge: true}).then(() => {
             // 성공하면 내 폰에도 완료 도장 쾅!
             localStorage.setItem('tosil_waitlist_done', 'true');
-            window.showToast('🔔 알림 신청 완료! 정식 오픈 시 가장 먼저 알려드릴게요 🤍');
+            window.showToast('🔔 알림 신청 완료 정식 오픈 시 가장 먼저 알려드릴게요 🤍');
             
             // 버튼 모양 바꾸기
             btn.innerText = "✅ 알림 신청 완료";
@@ -11178,7 +11177,7 @@ window.handleProfileImageSelection = function(event) {
             }
             
             if(typeof window.renderCommunityFeed === 'function') window.renderCommunityFeed();
-            window.showToast('📸 내 프로필 사진이 멋지게 변경되었습니다!');
+            window.showToast('📸 내 프로필 사진이 멋지게 변경되었습니다');
         };
         img.src = e.target.result;
     };
@@ -11243,7 +11242,7 @@ window.updateMyPageProfile = async function() {
     const isSubAdmin = localStorage.getItem('tosil_is_subadmin') === 'true';
     
     let roleName = "🧸 일반 회원";
-    if (isMaster) roleName = "👑 최고 관리자(대표이사)";
+    if (isMaster) roleName = "👑 대표 계정";
     else if (isSubAdmin) roleName = "🌟 관리자";
 
     const userInfo = document.getElementById('mypage-user-info');
@@ -11339,7 +11338,7 @@ window.saveUserInfoToFirebase = async function() {
                     
                     // 유저 기분 좋게 1.5초 뒤에 팝업 띄워주기
                     setTimeout(() => {
-                        window.showToast(`🎉 축하합니다! 선착순 얼리버드 당첨!<br>${founderUntil}까지 (1개월) 프리미엄 무료 💎`);
+                        window.showToast(`🎉 축하합니다 선착순 얼리버드 당첨<br>${founderUntil}까지 (1개월) 프리미엄 무료 💎`);
                         if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
                     }, 1500);
                 }
@@ -11457,7 +11456,7 @@ window.unlinkKakao = function() {
                 localStorage.clear();
             }
             
-            window.showToast("💔 회원 탈퇴가 완료되었습니다. 그동안 감사했습니다!");
+            window.showToast("💔 회원 탈퇴가 완료되었습니다. 그동안 감사했습니다");
             setTimeout(() => location.reload(), 1500);
         } else if (answer !== null) {
             alert("입력한 단어가 일치하지 않아 취소되었습니다.");
@@ -11534,7 +11533,7 @@ window.openWriteModal = function() {
                 if(typeof window.renderPreviewImages === 'function') window.renderPreviewImages();
                 
                 executeOpenModal(); 
-                if(typeof window.showToast === 'function') window.showToast("✨ 임시저장된 글을 불러왔습니다!");
+                if(typeof window.showToast === 'function') window.showToast("✨ 임시저장된 글을 불러왔습니다");
             } else {
                 localStorage.removeItem('tosil_post_draft');
                 executeOpenModal();
@@ -11846,7 +11845,7 @@ window.saveNoticeToDB = async function() {
     }
 
     if (!window.db) {
-        return window.showToast("❌ DB 연결 실패! 인터넷 상태를 확인해주세요.");
+        return window.showToast("❌ DB 연결 실패 인터넷 상태를 확인해주세요.");
     }
 
     // 2. 입력값 가져오기
@@ -11873,7 +11872,7 @@ window.saveNoticeToDB = async function() {
         if (typeof window.closeNoticeController === 'function') {
             window.closeNoticeController();
         }
-        window.showToast("✅ 공지사항 라이브 적용 완료!");
+        window.showToast("✅ 공지사항 라이브 적용 완료");
     } catch (error) {
         console.error("공지 업데이트 에러:", error);
         window.showToast("❌ 공지 등록 중 오류 발생 (콘솔 확인)");
@@ -12056,7 +12055,7 @@ window.prepareReply = function(commentId) {
 // 2. 댓글 및 대댓글 등록 엔진 (알림 생성 포함)
 window.addComment = function() { 
     if (!localStorage.getItem('kakao_id')) {
-        return window.showConfirm("따뜻한 소통을 위해<br>로그인 후 댓글을 남겨주세요!", function() {
+        return window.showConfirm("따뜻한 소통을 위해<br>로그인 후 댓글을 남겨주세요", function() {
             if (typeof window.closePostDetail === 'function') window.closePostDetail();
             if (typeof window.switchTab === 'function') window.switchTab('settings');
         }, "💬", "로그인 하러가기", "#3182F6");
@@ -12070,7 +12069,7 @@ window.addComment = function() {
     const postId = inputField.getAttribute('data-post-id');
 
     if (!commentText) {
-        window.showToast('⚠️ 댓글 내용을 입력해주세요!');
+        window.showToast('⚠️ 댓글 내용을 입력해주세요');
         inputField.focus();
         return;
     }
@@ -12136,7 +12135,7 @@ window.addComment = function() {
     if (navigator.vibrate) navigator.vibrate(20);
 
     window.renderComments(postId);
-    window.showToast('💖 따뜻한 댓글이 등록되었습니다!');
+    window.showToast('💖 따뜻한 댓글이 등록되었습니다');
 
     // 파이어베이스 동기화
     /* 
@@ -12161,7 +12160,7 @@ window.renderComments = function(postId) {
     postComments = postComments.filter(c => !blockedUsers.includes(c.authorName));
 
     if (postComments.length === 0) {
-        listContainer.innerHTML = `<div style="text-align:center; padding: 40px 0; color: #8B95A1; font-size: 13px; font-weight: 700;">첫 번째 댓글을 남겨주세요! ✨</div>`;
+        listContainer.innerHTML = `<div style="text-align:center; padding: 40px 0; color: #8B95A1; font-size: 13px; font-weight: 700;">첫 번째 댓글을 남겨주세요 ✨</div>`;
         return;
     }
 
@@ -12383,7 +12382,7 @@ window.sendNaviToDad = function(placeName, address) {
         content: {
             // 🚨 2. 타이틀에 장소 이름을 뽝! 박아서 절대 안 짤리게 만듭니다.
             title: `🚗 목적지: ${placeName}`,
-            description: `여보! 아기 짐 챙겨서 바로 출발하자 🤍 길 안내 켜놨어!`,
+            description: `여보 아기 짐 챙겨서 바로 출발하자 🤍 길 안내 켜놨어`,
             // 🚨 3. 무조건 뜨는 가볍고 귀여운 자동차 아이콘으로 고정!
             imageUrl: 'https://cdn-icons-png.flaticon.com/512/3204/3204933.png', 
             link: { mobileWebUrl: naviUrl, webUrl: naviUrl },
@@ -12397,7 +12396,7 @@ window.sendNaviToDad = function(placeName, address) {
     });
     
     if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
-    window.showToast("🚀 남편 카톡으로 내비게이션을 발사했습니다!");
+    window.showToast("🚀 남편 카톡으로 내비게이션을 발사했습니다");
 };
 
 // ==========================================
@@ -12556,7 +12555,7 @@ window.checkFeedPlateauBreakthrough = function() {
         if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
         const diff = todayFeedTotal - yesterdayFeedTotal;
-        window.showToast(`🎉 <b>우리 아기 뱃골이 늘어나고 있어요!</b><br>어제 이 시간보다 벌써 <b>+${diff}ml</b> 든든하게 채우는 중! 🤍`);
+        window.showToast(`🎉 <b>우리 아기 뱃골이 늘어나고 있어요</b><br>어제 이 시간보다 벌써 <b>+${diff}ml</b> 든든하게 채우는 중 🤍`);
     }
 };
 
@@ -12581,23 +12580,23 @@ const MILESTONE_DATA = [
     // 🐥 영아기 1 (1~3개월)
     { id: 'm11', title: '컬러 모빌 보기', desc: '드디어 세상의 색깔을 보기 시작했어요' },
     { id: 'm12', title: '터미타임 첫 성공', desc: '엎드려서 고개를 빳빳하게 들었어요' },
-    { id: 'm13', title: '소리 내서 웃기', desc: '꺄르르! 처음으로 소리 내어 웃었어요' },
+    { id: 'm13', title: '소리 내서 웃기', desc: '꺄르르 처음으로 소리 내어 웃었어요' },
     { id: 'm14', title: '주먹고기 냠냠', desc: '자신의 손을 발견하고 맛있게 빨아요' },
     { id: 'm15', title: '손싸개 졸업', desc: '자유로운 두 손으로 세상을 탐색해요' },
     { id: 'm16', title: '첫 통잠의 기적', desc: '밤에 깨지 않고 길게 푹 잤어요 (엄빠 오열)' },
     { id: 'm17', title: '뒤집기 첫 시도', desc: '몸을 비틀며 뒤집으려고 용을 써요' },
-    { id: 'm18', title: '백일의 기적', desc: '건강하게 100일을 맞이했어요! 축하해' },
+    { id: 'm18', title: '백일의 기적', desc: '건강하게 100일을 맞이했어요 축하해' },
     { id: 'm19', title: '침샘 폭발', desc: '침을 질질 흘리며 턱받이를 시작했어요' },
     { id: 'm20', title: '낯가림 시작', desc: '엄마 아빠를 확실히 알아보고 낯을 가려요' },
 
     // 🐤 영아기 2 (4~6개월)
-    { id: 'm21', title: '완벽한 뒤집기', desc: '영차! 드디어 세상을 뒤집었어요' },
+    { id: 'm21', title: '완벽한 뒤집기', desc: '영차 드디어 세상을 뒤집었어요' },
     { id: 'm22', title: '되집기 성공', desc: '엎드려 있다가 다시 하늘을 보고 누웠어요' },
     { id: 'm23', title: '발가락 잡고 놀기', desc: '유연하게 자기 발가락을 입으로 가져가요' },
-    { id: 'm24', title: '첫니가 뿅! 났어요', desc: '귀여운 아랫니가 잇몸을 뚫고 올라왔어요' },
+    { id: 'm24', title: '첫니가 뿅 났어요', desc: '귀여운 아랫니가 잇몸을 뚫고 올라왔어요' },
     { id: 'm25', title: '이유식 첫 숟가락', desc: '분유/모유 말고 첫 식사(미음)를 했어요' },
     { id: 'm26', title: '빨대컵 첫 성공', desc: '켁켁대지 않고 빨대로 물을 마셨어요' },
-    { id: 'm27', title: '떡뻥 입문', desc: '입안에서 사르르 녹는 첫 간식의 맛!' },
+    { id: 'm27', title: '떡뻥 입문', desc: '입안에서 사르르 녹는 첫 간식의 맛' },
     { id: 'm28', title: '혼자서 앉았어요', desc: '손을 짚지 않고 허리를 꼿꼿이 세워요' },
     { id: 'm29', title: '배밀이 시작', desc: '배를 바닥에 대고 앞으로 전진해요' },
     { id: 'm30', title: '네발기기 성공', desc: '무릎을 떼고 다다다 기어 다니기 시작해요' },
@@ -12608,44 +12607,44 @@ const MILESTONE_DATA = [
     { id: 'm33', title: '까꿍 놀이 홀릭', desc: '얼굴을 가렸다 보여주면 자지러지게 웃어요' },
     { id: 'm34', title: '잡고 일어서기', desc: '가구나 울타리를 잡고 드디어 두 발로 섰어요' },
     { id: 'm35', title: '소파 잡고 걷기', desc: '게걸음으로 물건을 잡고 옆으로 이동해요' },
-    { id: 'm36', title: '엄마! 불렀어요', desc: '정확하게 엄마를 보며 맘마/엄마 라고 했어요' },
-    { id: 'm37', title: '아빠! 불렀어요', desc: '세상에서 가장 감동적인 아빠 소리!' },
+    { id: 'm36', title: '엄마 불렀어요', desc: '정확하게 엄마를 보며 맘마/엄마 라고 했어요' },
+    { id: 'm37', title: '아빠 불렀어요', desc: '세상에서 가장 감동적인 아빠 소리' },
     { id: 'm38', title: '첫 감기 (맴찢)', desc: '처음으로 열이 나고 아팠어요. 훌쩍 커가는 과정' },
     { id: 'm39', title: '영유아 검진 1차', desc: '키, 몸무게 상위 몇 퍼센트일까요?' },
     { id: 'm40', title: '카시트 적응', desc: '울지 않고 의젓하게 카시트에 잘 타요' },
 
     // 🚶 걸음마기 (10~12개월)
     { id: 'm41', title: '혼자 서 있기 3초', desc: '아무것도 안 잡고 균형을 잡으며 서 있었어요' },
-    { id: 'm42', title: '첫걸음마 성공!', desc: '비틀비틀, 스스로 첫발을 내디뎠어요' },
-    { id: 'm43', title: '도리도리', desc: '싫어요! 고개를 저으며 의사표현을 해요' },
+    { id: 'm42', title: '첫걸음마 성공', desc: '비틀비틀, 스스로 첫발을 내디뎠어요' },
+    { id: 'm43', title: '도리도리', desc: '싫어요 고개를 저으며 의사표현을 해요' },
     { id: 'm44', title: '빠이빠이 손 흔들기', desc: '헤어질 때 안녕~ 하고 손을 흔들어줘요' },
-    { id: 'm45', title: '돌잔치 완료', desc: '축 1년! 돌잡이에서는 무엇을 잡았을까요?' },
+    { id: 'm45', title: '돌잔치 완료', desc: '축 1년 돌잡이에서는 무엇을 잡았을까요?' },
     { id: 'm46', title: '유아식 첫 도전', desc: '진밥과 반찬으로 어른들처럼 밥을 먹어요' },
     { id: 'm47', title: '생우유 입문', desc: '분유를 끊고 멸균우유/생우유로 넘어갔어요' },
     { id: 'm48', title: '어금니가 났어요', desc: '이제 딱딱한 음식도 제법 잘 씹어요' },
     { id: 'm49', title: '스푼 포크 쥐기', desc: '도구를 사용해서 스스로 먹으려고 해요' },
-    { id: 'm50', title: '뽀뽀 쪽!', desc: '입술을 쭉 내밀고 사랑스러운 뽀뽀를 해줘요' },
+    { id: 'm50', title: '뽀뽀 쪽', desc: '입술을 쭉 내밀고 사랑스러운 뽀뽀를 해줘요' },
 
     // 🏃 활동기 (13~18개월)
     { id: 'm51', title: '첫 미용실 이발', desc: '바리캉 소리에도 씩씩하게 머리를 잘랐어요' },
     { id: 'm52', title: '첫 신발 장착', desc: '삑삑이 신발을 신고 밖에서 걸었어요' },
-    { id: 'm53', title: '키즈카페 첫 입장', desc: '신세계 발견! 방방 뛰며 하얗게 불태웠어요' },
-    { id: 'm54', title: '동물 소리 흉내', desc: '강아지는 멍멍! 호랑이는 어흥! 소리를 내요' },
+    { id: 'm53', title: '키즈카페 첫 입장', desc: '신세계 발견 방방 뛰며 하얗게 불태웠어요' },
+    { id: 'm54', title: '동물 소리 흉내', desc: '강아지는 멍멍 호랑이는 어흥 소리를 내요' },
     { id: 'm55', title: '첫 바다 구경', desc: '철썩이는 파도와 모래사장을 처음 밟았어요' },
-    { id: 'm56', title: '두 단어 연결하기', desc: '엄마 맘마, 아빠 와! 등 문장으로 말해요' },
+    { id: 'm56', title: '두 단어 연결하기', desc: '엄마 맘마, 아빠 와 등 문장으로 말해요' },
     { id: 'm57', title: '컵으로 물 마시기', desc: '흘리지 않고 컵을 들고 물을 마셔요' },
     { id: 'm58', title: '공 던지기', desc: '작은 공을 앞으로 힘껏 던질 수 있어요' },
     { id: 'm59', title: '첫 블록 쌓기', desc: '블록을 무너뜨리지 않고 2~3개 쌓아 올려요' },
     { id: 'm60', title: '계단 오르기', desc: '손을 잡아주면 한 칸씩 계단을 올라가요' },
 
     // 🎨 발달 폭발기 (19~24개월)
-    { id: 'm61', title: '두 발로 콩콩 뛰기', desc: '점프! 두 발이 동시에 바닥에서 떨어졌어요' },
+    { id: 'm61', title: '두 발로 콩콩 뛰기', desc: '점프 두 발이 동시에 바닥에서 떨어졌어요' },
     { id: 'm62', title: '양치질 거부 극복', desc: '치카치카 시간을 즐거워하기 시작했어요' },
     { id: 'm63', title: '첫 스티커 놀이', desc: '온 집안에 스티커를 야무지게 붙이고 놀아요' },
     { id: 'm64', title: '크레용 첫 낙서', desc: '스케치북에 예술적인 피카소 선을 그렸어요' },
     { id: 'm65', title: '미끄럼틀 혼자 타기', desc: '계단을 올라가 슝~ 혼자서 미끄럼틀을 타요' },
-    { id: 'm66', title: '배변훈련 시작', desc: '기저귀와 안녕할 준비! 유아 변기와 친해져요' },
-    { id: 'm67', title: '변기에 첫 쉬야', desc: '성공! 기저귀가 아닌 변기에 볼일을 봤어요' },
+    { id: 'm66', title: '배변훈련 시작', desc: '기저귀와 안녕할 준비 유아 변기와 친해져요' },
+    { id: 'm67', title: '변기에 첫 쉬야', desc: '성공 기저귀가 아닌 변기에 볼일을 봤어요' },
     { id: 'm68', title: '스스로 양말 신기', desc: '끙끙대며 혼자 양말을 신으려고 노력해요' },
     { id: 'm69', title: '첫 심부름 성공', desc: '이거 아빠 갖다주세요~ 심부름을 완수했어요' },
     { id: 'm70', title: '친구 이름 부르기', desc: '놀이터나 문센에서 만난 친구를 기억하고 불러요' },
@@ -12663,7 +12662,7 @@ const MILESTONE_DATA = [
     { id: 'm80', title: '젓가락질 첫 시도', desc: '에디슨(교정) 젓가락으로 반찬을 집어봐요' },
 
     // 🌟 완성기 (31~36개월)
-    { id: 'm81', title: '낮잠 패스한 날', desc: '에너자이저! 낮잠 없이 밤까지 버틴 첫날' },
+    { id: 'm81', title: '낮잠 패스한 날', desc: '에너자이저 낮잠 없이 밤까지 버틴 첫날' },
     { id: 'm82', title: '혼자서 손 씻기', desc: '발판에 올라가 비누칠하고 스스로 손을 씻어요' },
     { id: 'm83', title: '퍼즐 맞추기 성공', desc: '조각을 이리저리 돌려가며 그림을 완성해요' },
     { id: 'm84', title: '역할놀이 심취', desc: '엄마 아빠 흉내를 내며 소꿉놀이에 빠졌어요' },
@@ -12672,19 +12671,19 @@ const MILESTONE_DATA = [
     { id: 'm87', title: '첫 영화관/공연', desc: '캄캄한 곳에서도 울지 않고 얌전히 관람했어요' },
     { id: 'm88', title: '영유아 구강검진', desc: '치과 의자에서 아~ 벌리고 충치 검사를 했어요' },
     { id: 'm89', title: '스스로 신발 찍찍이', desc: '신발 혀를 빼고 찍찍이 벨크로를 딱 붙여요' },
-    { id: 'm90', title: '감정 말로 표현하기', desc: '나 화났어! 슬퍼! 기분 좋아! 감정을 설명해요' },
+    { id: 'm90', title: '감정 말로 표현하기', desc: '나 화났어 슬퍼 기분 좋아 감정을 설명해요' },
 
     // 🎒 드디어 사회로! (스페셜 모먼트)
     { id: 'm91', title: '첫 소풍(도시락)', desc: '예쁜 도시락을 싸서 첫 야외 소풍을 다녀왔어요' },
     { id: 'm92', title: '마스크 스스로 쓰기', desc: '귀에 끈을 걸어 스스로 마스크를 챙겨 써요' },
-    { id: 'm93', title: '친구와 양보하기', desc: '내 거야! 하다가도 친구에게 장난감을 빌려줘요' },
+    { id: 'm93', title: '친구와 양보하기', desc: '내 거야 하다가도 친구에게 장난감을 빌려줘요' },
     { id: 'm94', title: '글자에 관심 갖기', desc: '간판이나 그림책의 글자를 가리키며 물어봐요' },
     { id: 'm95', title: '이름 쓰기 시도', desc: '삐뚤빼뚤하지만 자기 이름과 비슷한 모양을 그려요' },
     { id: 'm96', title: '혼자서 그네 타기', desc: '밀어주지 않아도 발을 굴러 그네를 타요' },
     { id: 'm97', title: '엄마 아빠 안마하기', desc: '고사리손으로 어깨를 조물조물 두드려줘요' },
     { id: 'm98', title: '아플 때 약 잘 먹기', desc: '쓴 약도 주사기/약통으로 꿀꺽 잘 삼켜요' },
     { id: 'm99', title: '첫 상장(칭찬장)', desc: '기관에서 주는 기특한 첫 상장을 받아왔어요' },
-    { id: 'm100', title: '어린이집 첫 등원', desc: '품을 떠나 첫 사회생활을 시작해요! 훌쩍 컸네!' }
+    { id: 'm100', title: '어린이집 첫 등원', desc: '품을 떠나 첫 사회생활을 시작해요 훌쩍 컸네' }
 ];
 
 const TOTAL_MILESTONES = 100; // 최종 기획 목표치
@@ -12712,7 +12711,7 @@ window.updateMilestoneCounter = function(isFromClick = false) {
         if (isFromClick) {
             homeCounterEl.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
             homeCounterEl.style.transform = 'scale(1.3)';
-            homeCounterEl.style.color = '#F59E0B'; // 도장 찍을 땐 주황색으로 반짝!
+            homeCounterEl.style.color = '#F59E0B'; // 도장 찍을 땐 주황색으로 반짝
             setTimeout(() => {
                 homeCounterEl.style.transform = 'scale(1)';
                 homeCounterEl.style.color = '#6D28D9'; // 애니메이션 끝나면 다시 보라색 복구
@@ -12908,7 +12907,7 @@ window.__old_downloadMilestone_unused = function() {
     }
 
     if (achievedIds.length === 0) {
-        return window.showToast("⚠️ 아직 배냇함에 보관된 추억이 없어요! 첫 번째 기적을 체크해주세요.");
+        return window.showToast("⚠️ 아직 배냇함에 보관된 추억이 없어요 첫 번째 기적을 체크해주세요.");
     }
 
     // 🌟 가장 최근에 달성한 기적 추출
@@ -13014,7 +13013,7 @@ window.__old_downloadMilestone_unused = function() {
             document.body.removeChild(link);
             
             exportDiv.remove();
-            window.showToast("💌 앨범 저장 완료! 배냇함의 소중한 추억을 인스타에 간직해보세요.");
+            window.showToast("💌 앨범 저장 완료 배냇함의 소중한 추억을 인스타에 간직해보세요.");
         }).catch(err => {
             console.error("도감 캡처 에러:", err);
             exportDiv.remove();
@@ -13080,7 +13079,7 @@ window.handleSwipeEnd = function(e, el) {
     if (diffX < -50) { 
         el.style.transform = 'translateX(-130px)'; // 버튼 두 개 영역 (65px + 65px)
         window.swipeState.activeEl = el;
-        if(navigator.vibrate) navigator.vibrate(15); // 열릴 때 '툭' 하는 햅틱 손맛!
+        if(navigator.vibrate) navigator.vibrate(15); // 열릴 때 '툭' 하는 햅틱 손맛
     } else {
         el.style.transform = 'translateX(0)'; // 찔끔 밀면 다시 원상복구
         if(window.swipeState.activeEl === el) window.swipeState.activeEl = null;
@@ -13171,7 +13170,7 @@ window.toggleIsSleeping = function(forceState = null) {
         if(controlBox) {
             controlBox.innerHTML = `
                 <button onclick="window.setWakeTimeNow()" style="width:100%; background:#E8F3FF; color:#3182F6; padding:16px; border-radius:14px; font-size:15px; font-weight:900; border:none; cursor:pointer; transition:0.2s; box-shadow:0 2px 8px rgba(49,130,246,0.15);">
-                    ⏰ 방금 깼어요!
+                    ⏰ 방금 깼어요
                 </button>
             `;
         }
@@ -13315,7 +13314,7 @@ window.showSyncCode = function() {
 window.copySyncCode = function(code) {
     if (typeof window.openFamilyInvite === 'function') window.openFamilyInvite('master');
     navigator.clipboard.writeText(code).then(() => {
-        window.showToast("📋 가족 코드가 클립보드에 복사되었습니다!");
+        window.showToast("📋 가족 코드가 클립보드에 복사되었습니다");
     });
 };
 
@@ -13338,9 +13337,9 @@ window.downloadSyncTicket = function() {
                 navigator.share({
                     files: [file],
                     title: '배냇함 가족 티켓',
-                    text: '우리 아기 육아 기록 같이 공유하자 🤍 아래 링크를 눌러줘!'
+                    text: '우리 아기 육아 기록 같이 공유하자 🤍 아래 링크를 눌러줘'
                 }).then(() => {
-                    window.showToast("🎉 티켓 전송 완료! 짝꿍에게 보내보세요 ✈️");
+                    window.showToast("🎉 티켓 전송 완료 짝꿍에게 보내보세요 ✈️");
                 }).catch((error) => {
                     console.log('공유 취소됨', error);
                 });
@@ -13352,7 +13351,7 @@ window.downloadSyncTicket = function() {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                window.showToast("🎉 티켓 저장 완료! 짝꿍에게 보내보세요 ✈️");
+                window.showToast("🎉 티켓 저장 완료 짝꿍에게 보내보세요 ✈️");
             }
         });
     }).catch(err => {
@@ -13380,22 +13379,22 @@ window.quickSaveSenior = async function(actionType) {
         let feedAmount = lastFormula ? parseInt(lastFormula.amount) : 160;
 
         record.type = 'feed'; record.subType = '분유'; record.amount = feedAmount;
-        window.showToast(`🍼 분유(${feedAmount}ml) 먹임이 전송되었어요!`);
+        window.showToast(`🍼 분유(${feedAmount}ml) 먹임이 전송되었어요`);
     } 
     else if (actionType === 'babyfood') {
         let lastFood = records.find(r => r.type === 'feed' && r.subType === '이유식');
         let foodAmount = lastFood ? parseInt(lastFood.amount) : 80;
 
         record.type = 'feed'; record.subType = '이유식'; record.amount = foodAmount;
-        window.showToast(`🥄 이유식(${foodAmount}g) 먹임이 전송되었어요!`);
+        window.showToast(`🥄 이유식(${foodAmount}g) 먹임이 전송되었어요`);
     } 
     else if (actionType === 'pee') {
         record.type = 'diaper'; record.subType = '소변'; record.status = '';
-        window.showToast("💧 소변 기저귀 교체가 전송되었어요!");
+        window.showToast("💧 소변 기저귀 교체가 전송되었어요");
     } 
     else if (actionType === 'poop') {
         record.type = 'diaper'; record.subType = '대변'; record.status = '';
-        window.showToast("💩 응가 기저귀 교체가 전송되었어요!");
+        window.showToast("💩 응가 기저귀 교체가 전송되었어요");
     } 
     else if (actionType === 'sleep_start') {
         localStorage.setItem('tosil_sleep_start', timestamp.toString());
@@ -13430,7 +13429,7 @@ window.quickSaveSenior = async function(actionType) {
             const sd = new Date(record.timestamp);
             record.time = `${String(sd.getHours()).padStart(2,'0')}:${String(sd.getMinutes()).padStart(2,'0')}`;
         }
-        window.showToast(`☀️ 일어났어요! (${duration}분 수면 전송 완료)`); 
+        window.showToast(`☀️ 일어났어요 (${duration}분 수면 전송 완료)`); 
         }  
     const idx = records.findIndex(r => r.id === record.id); 
     if(idx !== -1) records[idx] = record;
@@ -13506,7 +13505,7 @@ window.handleSeniorPhotoUpload = async function(input) {
                     Kakao.Share.sendDefault({
                         objectType: 'feed',
                         content: {
-                            title: '💌 우리 예쁜 아기 사진 도착!',
+                            title: '💌 우리 예쁜 아기 사진 도착',
                             description: '어르신(시터님)이 방금 찍어 보내신 사진이에요 🤍',
                             imageUrl: downloadUrl,
                             link: { mobileWebUrl: 'https://happy-baby0303.github.io/', webUrl: 'https://happy-baby0303.github.io/' },
@@ -13514,7 +13513,7 @@ window.handleSeniorPhotoUpload = async function(input) {
                         buttons: [{ title: '앱 열고 확인하기', link: { mobileWebUrl: 'https://happy-baby0303.github.io/' } }]
                     });
                     
-                    window.showToast("✅ 엄마 아빠에게 사진이 성공적으로 전송되었습니다!");
+                    window.showToast("✅ 엄마 아빠에게 사진이 성공적으로 전송되었습니다");
                 } catch(err) {
                     console.error(err);
                     window.showToast("❌ 인터넷 연결이 불안정하여 전송에 실패했어요.");
@@ -13538,7 +13537,7 @@ window.toggleSeniorRoutine = async function() {
     if (isChecked) {
         btn.innerText = '먹였어요 ✅'; btn.style.background = '#E6F7F2'; btn.style.color = '#00B37A'; btn.style.border = '1px solid #00B37A';
         if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
-        window.showToast("💊 약/케어 먹임이 체크되었습니다! 부모님도 안심하실 거예요.");
+        window.showToast("💊 약/케어 먹임이 체크되었습니다 부모님도 안심하실 거예요.");
     } else {
         btn.innerText = '안 했어요 ⬜'; btn.style.background = '#F2F5F8'; btn.style.color = '#8B95A1'; btn.style.border = '1px solid #E5E8EB';
     }
@@ -13682,7 +13681,7 @@ window.kioskProcessPayment = function(method) {
 window.kioskDirectAdd = function(name, price) {
     if (navigator.vibrate) navigator.vibrate(10);
     window.kioskAddToCart(name, price);
-    window.showToast(`🛒 ${name} 담겼습니다!`);
+    window.showToast(`🛒 ${name} 담겼습니다`);
 };
 
 window.kioskOpenOption = function(name, price, icon) {
@@ -13760,7 +13759,7 @@ window.kioskAddOptionToCart = function() {
 
     window.kioskAddToCart(finalName, finalPrice);
     document.getElementById('kiosk-option-modal').style.display = 'none';
-    window.showToast(`🛒 ${finalName} 담겼습니다!`);
+    window.showToast(`🛒 ${finalName} 담겼습니다`);
 };
 
 window.kioskAddToCart = function(name, price) {
@@ -13792,7 +13791,7 @@ window.kioskUpdateCartUI = function() {
 };
 
 window.kioskCheckoutProcess = function() {
-    if (window.kioskCart.length === 0) return window.showToast('⚠️ 메뉴를 하나라도 선택해 주세요!');
+    if (window.kioskCart.length === 0) return window.showToast('⚠️ 메뉴를 하나라도 선택해 주세요');
     window.kioskNextStep(3);
 };
 
@@ -13947,7 +13946,7 @@ window.toggleEditSeniorMemo = function() {
         
         // 파이어베이스 클라우드 서버로 실시간 발사!
         window.saveParentNoticeToFirebase(newNotice);
-        window.showToast("📌 부모님 전달사항이 저장되었습니다!");
+        window.showToast("📌 부모님 전달사항이 저장되었습니다");
     }
 };
 
@@ -14189,7 +14188,7 @@ window.saveBabyProfile = function(targetId) {
     profiles = profiles.map(p => p.id === targetId ? { ...p, name: newName } : p);
     originalSetItem.call(localStorage, 'tosil_baby_profiles', JSON.stringify(profiles));
 
-    window.showToast("✅ 수정되었습니다!");
+    window.showToast("✅ 수정되었습니다");
     document.getElementById('edit-baby-modal').remove();
     location.reload();
 };
@@ -14203,7 +14202,7 @@ document.addEventListener("visibilitychange", () => {
         const syncCode = localStorage.getItem("family_sync_code");
         if (syncCode && typeof window.initRealtimeSync === 'function') {
             window.initRealtimeSync();
-            console.log("🚀 앱으로 돌아와서 파이어베이스 서버를 다시 연결했습니다!");
+            console.log("🚀 앱으로 돌아와서 파이어베이스 서버를 다시 연결했습니다");
         }
     }
 });
@@ -14309,14 +14308,14 @@ window.closeTrackerSheet = function() {
 // 🤱 모유수유 수면 방식 엔진 (시작 시간만 로컬에 저장)
 // ==========================================
 window.startBreastTimer = function() {
-    if (!window.trackerState.status) return window.showToast('⚠️ 방향(왼쪽/오른쪽/양쪽)을 먼저 선택해주세요!');
+    if (!window.trackerState.status) return window.showToast('⚠️ 방향(왼쪽/오른쪽/양쪽)을 먼저 선택해주세요');
     
     // 파이어베이스 통신 없이 기기 메모장에 시간만 쾅 찍습니다. (용량 소모 0)
     localStorage.setItem('tosil_breast_start', new Date().getTime().toString());
     localStorage.setItem('tosil_breast_dir', window.trackerState.status);
     window.closeTrackerSheet();
     window.updateTrackerDashboard();
-    window.showToast("🤱 수유 시작 시간을 기록했어요!<br>(창을 닫고 다른 앱을 하셔도 됩니다)");
+    window.showToast("🤱 수유 시작 시간을 기록했어요<br>(창을 닫고 다른 앱을 하셔도 됩니다)");
 };
 
 window.stopBreastTimer = function() {
@@ -14345,7 +14344,7 @@ window.stopBreastTimer = function() {
     localStorage.removeItem('tosil_breast_start');
     localStorage.removeItem('tosil_breast_dir'); 
     window.closeTrackerSheet();
-    window.showToast(`✅ 모유 수유(${dir}, ${durationMins}분) 기록이 저장되었습니다!`);
+    window.showToast(`✅ 모유 수유(${dir}, ${durationMins}분) 기록이 저장되었습니다`);
 };
 
 window.cancelBreastTimer = function() {
@@ -14577,7 +14576,7 @@ window.selectPlan = function(planId) {
 // 5. 프리미엄 웨이트리스트(대기자 명단) 신청 함수
 window.applyPremiumWaitlist = function(btn) {
     if(localStorage.getItem('tosil_premium_applied')) {
-        return window.showToast('이미 얼리버드 탑승을 완료하셨어요! 🤍');
+        return window.showToast('이미 얼리버드 탑승을 완료하셨어요 🤍');
     }
 
    // 저장 경로가 곧 권한이다. 캐시된 값이 아니라 '지금 로그인된' UID 를 쓴다.
@@ -14593,7 +14592,7 @@ window.applyPremiumWaitlist = function(btn) {
         const paywall = document.getElementById('premium-paywall-modal');
         if(paywall) paywall.remove();
 
-        return window.showConfirm("혜택을 받으시려면 먼저 로그인해주세요!", function() {
+        return window.showConfirm("혜택을 받으시려면 먼저 로그인해주세요", function() {
             if(typeof window.switchTab === 'function') window.switchTab('settings');
         }, "💬", "로그인 하러가기", "#3182F6");
     }
@@ -14610,7 +14609,7 @@ window.applyPremiumWaitlist = function(btn) {
             appliedAt: new Date().toISOString()
         }, {merge: true}).then(() => {
             localStorage.setItem('tosil_premium_applied', 'true');
-            btn.innerText = "✅ 신청 완료!";
+            btn.innerText = "✅ 신청 완료";
             btn.style.background = "#10B981"; 
             btn.style.color = "#FFFFFF";
             btn.style.boxShadow = "none";
@@ -14717,7 +14716,7 @@ window.renderSettingsTab = function() {
             const vipBanner = container.querySelector('div[style*="linear-gradient(135deg, #1e293b"]');
             if (vipBanner) vipBanner.style.display = 'none';
         }
-        return; // 대표님은 여기서 끝!
+        return; // 대표님은 여기서 끝
     }
     
     // 일반 유저 중 프리미엄(얼리버드) 유저라면 프로필 상단에 황금 배지 달아주기!
@@ -14798,7 +14797,7 @@ window.changeUserRole = function(role) {
         window.showToast("👩‍🍼 엄마 모드로 변경되었습니다.");
     }
 
-    window.applyCaregiverRestrictions(); // 🚨 보안 엔진 즉시 가동!
+    window.applyCaregiverRestrictions(); // 🚨 보안 엔진 즉시 가동
 
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
     if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
@@ -14976,7 +14975,7 @@ window.downloadPediatricianReport = function() {
             reportDiv.remove();
             
             document.getElementById('premium-modal').style.display = 'none';
-            window.showToast("✅ 고화질 A4 종합 리포트가 앨범에 저장되었습니다!");
+            window.showToast("✅ 고화질 A4 종합 리포트가 앨범에 저장되었습니다");
         }).catch(e => {
             console.error(e);
             reportDiv.remove();
@@ -15078,7 +15077,7 @@ window.downloadMonthlyGrowthCard = function() {
             link.click();
             document.body.removeChild(link);
             cardDiv.remove();
-            window.showToast("🎉 인스타용 월간 성장 카드가 저장되었습니다!");
+            window.showToast("🎉 인스타용 월간 성장 카드가 저장되었습니다");
         }).catch(e => {
             cardDiv.remove();
             window.showToast("❌ 카드 생성 실패");
@@ -15234,8 +15233,8 @@ window.downloadPediatricianPDF = function() {
 
     window.showConfirm(
         isIOS
-          ? "리포트가 만들어졌어요!<br><span style='font-size:12px;color:#8B95A1;'>아이폰은 공유창에서 '이미지 저장'을 눌러주세요.</span>"
-          : "📄 갤러리에 저장되었습니다!<br><span style='font-size:12px;color:#8B95A1;'>카톡으로 바로 보내시겠어요?</span>",
+          ? "리포트가 만들어졌어요<br><span style='font-size:12px;color:#8B95A1;'>아이폰은 공유창에서 '이미지 저장'을 눌러주세요.</span>"
+          : "📄 갤러리에 저장되었습니다<br><span style='font-size:12px;color:#8B95A1;'>카톡으로 바로 보내시겠어요?</span>",
         function() {
             if (canShare) navigator.share({ files: [file], title: '소아과 진료 참고 자료' }).catch(()=>{});
         },
@@ -15275,7 +15274,7 @@ window.startNightDuty = async function() {
     window.renderNightDuty();
     window.updateTrackerDashboard && window.updateTrackerDashboard();
 
-    window.showToast("🌙 야간 당번 시작!<br>오늘 밤은 엄마를 푹 재워주세요 🤍");
+    window.showToast("🌙 야간 당번 시작<br>오늘 밤은 엄마를 푹 재워주세요 🤍");
 
     // 아내에게 카톡으로 알리기
     if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
@@ -15340,7 +15339,7 @@ window.endNightDuty = async function() {
                 <div style="font-size:24px; font-weight:900; color:var(--text-m); margin-bottom:6px; letter-spacing:-0.5px;">
                     아내의 통잠<br><span style="color:#7C3AED;">${h}시간 ${m}분</span> 수호 🛡️
                 </div>
-                <div style="font-size:13px; color:var(--text-s); font-weight:600; margin-bottom:24px;">진정한 육아 영웅이십니다!</div>
+                <div style="font-size:13px; color:var(--text-s); font-weight:600; margin-bottom:24px;">진정한 육아 영웅이십니다</div>
 
                 <div style="display:flex; gap:8px; margin-bottom:20px;">
                     <div style="flex:1; background:var(--bg-sub); border-radius:14px; padding:16px 8px;">
@@ -15498,7 +15497,7 @@ window.renderDadCommute = function() {
 
     // 🚨 1. 고열 체크 (가장 시급함)
     if (hasFever) {
-        items.push({ icon:'🚨', text:'오늘 아기가 열이 났어요!', sub:'집에 가는 길에 챔프/해열제가 충분한지 꼭 확인하세요.' });
+        items.push({ icon:'🚨', text:'오늘 아기가 열이 났어요', sub:'집에 가는 길에 챔프/해열제가 충분한지 꼭 확인하세요.' });
     }
     // 💩 2. 응가 폭탄 대기조
     else if (poopCount === 0) {
@@ -15506,7 +15505,7 @@ window.renderDadCommute = function() {
     }
     // 💤 3. 수면 부족 및 식사 불가 체크
     if (todaySleepMins > 0 && todaySleepMins < 90) {
-        items.push({ icon:'👿', text:`낮잠을 ${todaySleepMins}분밖에 안 잤어요`, sub:'아내가 밥도 못 먹었을 수 있습니다. 맛있는 걸 꼭 사가세요!' });
+        items.push({ icon:'👿', text:`낮잠을 ${todaySleepMins}분밖에 안 잤어요`, sub:'아내가 밥도 못 먹었을 수 있습니다. 맛있는 걸 꼭 사가세요' });
     }
     // 🍼 4. 일반적인 노동 강도 체크 (위 조건에 안 걸렸을 때만)
     else if (!hasFever && poopCount > 0) {
@@ -15577,7 +15576,7 @@ window.renderMonthlyCardBanner = function() {
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { 
         if (window.renderDadCommute) window.renderDadCommute(); 
-        if (window.renderMonthlyCardBanner) window.renderMonthlyCardBanner(); // 👈 새롭게 추가됨!
+        if (window.renderMonthlyCardBanner) window.renderMonthlyCardBanner(); // 👈 새롭게 추가됨
     }, 400);
 });
 
@@ -15780,7 +15779,7 @@ window.initNursingMap = async function() {
         minLevel: 7,
         styles: [{
             width: '46px', height: '46px',
-            background: 'rgba(240, 68, 82, 0.95)', // 🚨 수유실 색상(빨강/핑크 계열)으로 변경!
+            background: 'rgba(240, 68, 82, 0.95)', // 🚨 수유실 색상(빨강/핑크 계열)으로 변경
             color: '#fff',
             textAlign: 'center',
             lineHeight: '46px',

@@ -288,7 +288,7 @@
                          그걸 여는 버튼이 어디에도 없어서, 통과·알레르기 재료를 날짜에 적을 길이 없었다. -->
                         <button onclick="openTestSheet()" style="flex: 1; background: #191F28; color: #FFFFFF; border: none; padding: 12px 8px; border-radius: 12px; font-weight: 800; font-size: 13px; white-space: nowrap; cursor: pointer;">🥄 재료 기록</button>
                     </div>
-                    <div style="margin-top: 8px; font-size: 11.0px; font-weight: 600; color: #8B95A1; line-height: 1.6;">식단 기록은 뭘 먹었는지, 재료 기록은 통과·알레르기를 적는 곳이에요.</div>
+                    <div style="margin-top: 8px; font-size: 11.5px; font-weight: 600; color: #8B95A1; line-height: 1.6;">식단은 그날 뭘 먹였는지, 재료는 새 재료의 통과·알레르기를 적는 곳이에요.</div>
                 </div>
                 <div id="cal-record-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
@@ -430,6 +430,8 @@
 
 
     <script src="../html2canvas.min.js"></script>
+    <!-- 🧰 안전망 — 제일 먼저 -->
+    <script src="../shared/safenet.js"></script>
     <script src="../shared/babyswitch.js"></script>
     <script src="data.js"></script>
     <script src="app.js?v=1001"></script>
