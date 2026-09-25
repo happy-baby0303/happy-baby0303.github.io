@@ -64,7 +64,7 @@ const messaging = firebase.messaging();
 // 🚨 여기를 수정했습니다! (중복 알림 방지)
 messaging.onBackgroundMessage((payload) => {
     // 구글 파이어베이스가 알아서 알림을 띄우므로 우렁각시는 조용히 로그만 남깁니다!
-    console.log('[SW] 백그라운드 푸시 수신 성공!');
+    console.log('[SW] 백그라운드 푸시 수신 성공');
 });
 
 // (알림을 눌렀을 때 처리는 맨 위, firebase.messaging() 앞으로 옮겼다)

@@ -219,7 +219,7 @@
         // 도구를 여는 게 아니라 바로 그 화면을 여는 항목도 있다
         var go = it.act ? it.act : "window.switchTool('" + it.tool + "')";
         return '<div onclick="' + go + '" ' +
-            'style="display:flex; align-items:center; gap:10px; padding:11px 2px; cursor:pointer;">' +
+            'style="display:flex; align-items:center; gap:10px; padding:9px 2px; cursor:pointer;">' +
             '<span style="font-size:17px; flex-shrink:0;">' + it.icon + '</span>' +
             '<span style="font-size:11.5px; font-weight:800; color:var(--text-sub); ' +
                 'flex-shrink:0; width:52px;">' + esc(it.label) + '</span>' +
@@ -233,11 +233,16 @@
         var rows = items.map(rowHTML).join(
             '<div style="height:1px; background:var(--border); opacity:0.55;"></div>');
 
+        /* ⚠️ '지금 챙길 것' 이라는 제목 줄이 통째로 한 줄을 먹어서 카드가 82px 이었다.
+              줄 내용이 이미 '언제깠지 · 기한이 지났어요' 라 제목이 없어도 뜻이 통한다.
+              한 건일 때는 제목을 빼고, 여러 건일 때만 붙인다. */
         return '<div id="' + CARD_ID + '" ' +
             'style="background:var(--bg-card); border:1px solid var(--border); ' +
-            'border-radius:18px; padding:14px 16px; margin-bottom:18px;">' +
-            '<div style="font-size:11.5px; font-weight:900; color:var(--text-sub); ' +
-                'letter-spacing:0.3px; margin-bottom:4px;">지금 챙길 것</div>' +
+            'border-radius:16px; padding:6px 14px; margin-bottom:12px;">' +
+            (items.length > 1
+                ? '<div style="font-size:11px; font-weight:900; color:var(--text-sub); ' +
+                      'letter-spacing:0.3px; margin:6px 0 -2px;">지금 챙길 것 ' + items.length + '건</div>'
+                : '') +
             rows +
         '</div>';
     }

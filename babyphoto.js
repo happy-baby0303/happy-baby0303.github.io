@@ -118,11 +118,36 @@
     /* ---------- 시작 ---------- */
 
     function boot() {
+        setTimeout(preloadSiblings, 2500);   // 첫 화면이 다 뜬 뒤에 조용히
         setTimeout(function () {
             window.pullBabyPhotoOnce();
             window.startBabyPhotoSync();
         }, 3000);
     }
+
+    /* ---------- 다른 아이 사진 미리 받아두기 ----------
+       아이를 바꾸면 앱이 통째로 새로고침된다. 그때 사진을 처음부터 다시 받아서
+       회색 칸이 잠깐 보였다 (문의 들어온 것).
+       한가할 때 형제 사진을 미리 받아 브라우저에 넣어둔다. 바꾸면 바로 뜬다.
+       ⚠️ 화면에 붙이지 않는다. 받아두기만 한다. */
+    function preloadSiblings() {
+        var list = [];
+        try { list = JSON.parse(localStorage.getItem("tosil_baby_profiles")) || []; } catch (e) {}
+        if (!list || list.length < 2) return;
+
+        var now = window.currentBabySuffix || "";
+        list.forEach(function (p) {
+            var id = p && p.id ? p.id : "";
+            if (id === now) return;                       // 지금 보고 있는 아이는 이미 떠 있다
+            var url = null;
+            try { url = localStorage.getItem("tosil_baby_photo" + id); } catch (e) {}
+            if (!url || String(url).indexOf("http") !== 0) return;
+            var im = new Image();
+            im.decoding = "async";
+            im.src = url;
+        });
+    }
+    window.preloadBabyPhotos = preloadSiblings;
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();

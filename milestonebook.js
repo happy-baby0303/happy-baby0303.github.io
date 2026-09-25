@@ -83,9 +83,9 @@
 
         } else if (done) {
             // 도장은 찍혔는데 사진이 없는 칸. 디자인을 인스타 감성으로 몽글몽글하게!
-            box.style.cssText += "border:1.5px dashed rgba(255, 75, 108, 0.4); background:rgba(255, 255, 255, 0.8); " +
-                "display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: inset 0 2px 4px rgba(255, 75, 108, 0.05);";
-            box.innerHTML = '<span style="font-size:22px; font-weight:300; color:#FF4B2B; line-height:1; margin-top:-2px;">+</span>';
+            box.style.cssText += "border:1.5px dashed rgba(185,138,46,0.45); background:rgba(255, 255, 255, 0.8); " +
+                "display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: inset 0 2px 4px rgba(185,138,46,0.06);";
+            box.innerHTML = '<span style="font-size:22px; font-weight:300; color:#B98A2E; line-height:1; margin-top:-2px;">+</span>';
             box.onclick = function (e) {
                 e.stopPropagation();
                 if (typeof window.addMilestonePhoto === "function") {

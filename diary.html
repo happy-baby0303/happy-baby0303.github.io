@@ -158,7 +158,7 @@
                 <div id="answer-section">
                     <div id="input-mode">
                         <div class="unlinked-notice" id="unlinked-notice" style="display: none;">
-                            <p>💌 연동 전 작성한 글은 <b>나만의 일기장</b>에 쏙 보관돼요!</p>
+                            <p>💌 연동 전 작성한 글은 <b>나만의 일기장</b>에 쏙 보관돼요</p>
                         </div>
                         <textarea id="my-answer" placeholder="오늘 하루도 고생 많았어요.&#13;&#10;가장 솔직한 마음을 편안하게 남겨주세요..."></textarea>
                         <button class="save-btn" id="btn-submit">기록 남기기</button>
@@ -270,7 +270,7 @@
     <!-- 👩‍👧 온보딩 모달 -->
     <div id="setup-modal" class="modal-overlay" style="display:none; z-index:99999; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); justify-content:center; align-items:center;">
         <div style="background:var(--card-bg); width:100%; max-width:320px; border-radius:24px; padding:32px 24px; text-align:center;">
-            <h2 style="font-size:22px; font-weight:900; margin-bottom:12px; color:var(--text-title);" id="diary-welcome-title">반가워요! 👋</h2>
+            <h2 style="font-size:22px; font-weight:900; margin-bottom:12px; color:var(--text-title);" id="diary-welcome-title">반가워요 👋</h2>
             <p style="margin-bottom:30px; color:var(--text-sub); line-height:1.5; font-weight:600; font-size:15px;">서로의 이야기를 담기 위해<br>나의 역할을 선택해주세요.</p>
             <div style="display:flex; gap:10px;">
                 <button onclick="saveSetup('husband')" style="flex:1; padding:20px 0; background:var(--primary-light); border:1px solid #B1D6FF; border-radius:16px; color:var(--primary); font-size:16px; font-weight:900; cursor:pointer;">👨 아빠</button>
@@ -375,13 +375,13 @@
             let coins = parseInt(localStorage.getItem('tosil_coins')) || 0;
 
             if (!inventory.includes(id)) {
-                if (coins < price) return window.showToast("🪙 코인이 부족해요! 매일 일기를 쓰면 코인이 모여요.");
+                if (coins < price) return window.showToast("🪙 코인이 부족해요 매일 일기를 쓰면 코인이 모여요.");
                 if (confirm(`[${STORE_DB.find(i=>i.id===id).name}] 테마를 ${price}코인에 구매할까요?`)) {
                     coins -= price;
                     inventory.push(id);
                     localStorage.setItem('tosil_coins', coins);
                     localStorage.setItem('tosil_inventory', JSON.stringify(inventory));
-                    window.showToast("🎁 예쁜 새 표지를 획득했어요!");
+                    window.showToast("🎁 예쁜 새 표지를 획득했어요");
                 } else {
                     return;
                 }
@@ -680,7 +680,7 @@
 
     document.getElementById("btn-submit").addEventListener("click", async () => {
         const ans = document.getElementById("my-answer").value.trim();
-        if(!ans) return window.showToast("마음을 한 줄이라도 남겨주세요! 🥺");
+        if(!ans) return window.showToast("마음을 한 줄이라도 남겨주세요 🥺");
 
         const btn = document.getElementById("btn-submit");
         const isEditing = btn.innerText.includes("수정");
@@ -740,9 +740,9 @@
             localStorage.setItem('tosil_coins', coins);
             localStorage.setItem(claimedKey, 'true');
             window.updateCoinUI();
-            window.showToast("🎉 기록 저장 완료! 보상으로 100 코인을 받았습니다! 🪙");
+            window.showToast("🎉 기록 저장 완료 보상으로 100 코인을 받았습니다 🪙");
         } else {
-            window.showToast("🎉 기록이 예쁘게 수정되었습니다!");
+            window.showToast("🎉 기록이 예쁘게 수정되었습니다");
         }
         if (queued) {
             setTimeout(function () { window.showToast("📶 연결되면 짝꿍에게 바로 보낼게요"); }, 2900);

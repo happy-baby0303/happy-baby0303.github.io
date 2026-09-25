@@ -239,8 +239,8 @@
                             if (typeof window.showConfirm === "function") {
                                 window.showConfirm(
                                     isIOS
-                                    ? "엽서가 완성되었어요!<br><span style='font-size:12px;color:#A3958A;'>아이폰은 창이 뜨면 \'이미지 저장\'을 눌러주세요.</span>"
-                                    : "엽서가 완성되었어요!<br><span style='font-size:12px;color:#A3958A;'>가족에게 바로 보낼 수 있어요.</span>",
+                                    ? "엽서가 완성되었어요<br><span style='font-size:12px;color:#A3958A;'>아이폰은 창이 뜨면 \'이미지 저장\'을 눌러주세요.</span>"
+                                    : "엽서가 완성되었어요<br><span style='font-size:12px;color:#A3958A;'>가족에게 바로 보낼 수 있어요.</span>",
                                     function () {
                                         navigator.share({ files: [file], title: babyName() + "의 추억 엽서" }).catch(function () {});
                                     }, "💌", "저장 및 공유하기", "#B98A2E"

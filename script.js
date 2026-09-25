@@ -1338,8 +1338,23 @@ window.saveGoal = function() {
 window.updateLedgerUI = function() {
     const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "", goalAmount: 100000, history: [] };
     
+    /* ⚠️ ledger.total 은 '처음부터 지금까지' 합계라 달을 나눈 적이 없다.
+          그래서 9월에 들어와도 8월에 쓴 10만원이 '이번 달 누적 지출' 로 떴다 (문의 들어온 것).
+          아래 소비 패턴에서 고른 달과 같은 달만 센다. 제목도 그 달로 바뀐다. */
     const moneyTotalEl = document.getElementById('money-total-display');
-    if(moneyTotalEl) window.animateNumber('money-total-display', 0, ledger.total, 800);
+    if (moneyTotalEl) {
+        let shown = ledger.total;
+        if (typeof window.moneyMonthSums === 'function' && typeof window.moneyPickedYM === 'function') {
+            const ym = window.moneyPickedYM();
+            const ms = window.moneyMonthSums(ym);
+            shown = ms.diaper + ms.food + ms.etc;
+            const lab = document.getElementById('money-total-label');
+            if (lab) {
+                lab.innerText = (ym === window.moneyThisYM() ? '이번 달' : window.moneyMonthLabel(ym)) + ' 지출 💸';
+            }
+        }
+        window.animateNumber('money-total-display', 0, shown, 800);
+    }
 
     const goalInput = document.getElementById('v-goal-text');
     if(goalInput && document.activeElement !== goalInput && ledger.goal) goalInput.value = ledger.goal;
@@ -1735,7 +1750,7 @@ function doseStatus(type, atTime) {
             locked: true, kind: kind, rule: rule, until: until, minsLeft: mins,
             reason: kind === 'same'
                 ? `${rule.label}은 ${rule.gap / 60}시간 간격이 필요해요`
-                : '다른 계열이어도 최소 2시간은 띄워야 해요',
+                : '다른 계열이어도 2~3시간은 띄워야 해요 (교차 복용은 의사·약사와 상의 후에)',
             advice: `${hhmmOf(until)}부터 가능 (${Math.floor(mins / 60)}시간 ${mins % 60}분 남음)`
         };
     }
@@ -3163,7 +3178,12 @@ window.loadBabyPhoto = function() {
             imgEl.style.display = 'none';
         };
 
-        imgEl.src = savedPhoto; 
+        /* ⚠️ 같은 주소를 다시 꽂으면 브라우저가 그림을 다시 그린다. 그때 회색 칸이 번쩍인다. */
+        if (imgEl.getAttribute('src') !== savedPhoto) {
+            imgEl.decoding = 'async';
+            try { imgEl.fetchPriority = 'high'; } catch (e) {}
+            imgEl.src = savedPhoto;
+        }
         imgEl.style.display = 'block'; 
     }
 };
@@ -6910,7 +6930,13 @@ window.openEmergencyModal = function(type) {
             </div>
             
             <div class="box-tint-yellow" style="padding: 14px; border-radius: 16px; text-align:center; margin-bottom: 16px; margin-top:16px;">
-                <div style="font-size: 13.5px; font-weight: 800; color: #B45309; line-height: 1.4;">처음 겪는 경련이거나 대처가 불안하다면<br>주저하지 말고 바로 119에 신고하세요</div>
+                <div style="font-size: 13.5px; font-weight: 800; color: #B45309; line-height: 1.55; word-break:keep-all;">
+                    <b>이럴 땐 바로 119</b><br>
+                    · 경련이 <b>5분 넘게</b> 이어질 때<br>
+                    · 멈춘 뒤에도 의식이 안 돌아올 때<br>
+                    · 숨쉬기 힘들어하거나 입술이 파래질 때<br>
+                    · <b>처음 겪는 경련</b>이거나 대처가 불안할 때
+                </div>
             </div>
             
             <a href="tel:119" style="display:block; text-align:center; background:var(--danger); color:#FFF; padding:16px; border-radius:14px; font-size:16px; font-weight:900; text-decoration:none; box-shadow:0 4px 12px rgba(240,68,82,0.2);">🚨 119 즉시 전화걸기</a>
@@ -6924,9 +6950,12 @@ window.openEmergencyModal = function(type) {
             <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">사탕/장난감 삼켜 숨을 쉬지 못할 때 즉시 실시</div>
         `;
         content.innerHTML = `
-            <div style="background:var(--danger); color:#FFF; padding:12px; border-radius:12px; font-weight:900; font-size:14px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(240,68,82,0.3); animation: pulseSOS 1.5s infinite;">
-                📞 119에 신고하고 "스피커폰"을 켜세요
-            </div>
+            <!-- ⚠️ 글씨만 있고 누를 수가 없었다. 급한 사람이 화면을 보며 번호를 누르게 하면 안 된다.
+                 그리고 119는 전화로 방법을 불러준다. 그게 우리 글보다 정확하다. -->
+            <a href="tel:119" style="display:block; text-decoration:none; background:var(--danger); color:#FFF; padding:15px 12px; border-radius:12px; font-weight:900; font-size:15px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(240,68,82,0.3); animation: pulseSOS 1.5s infinite;">
+                📞 먼저 119에 전화하세요 (눌러서 걸기)
+                <div style="font-size:12px; font-weight:700; margin-top:5px; opacity:0.95;">스피커폰을 켜면 전화로 방법을 알려줍니다</div>
+            </a>
             
             <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--danger); margin-bottom: 8px;">
                 <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">1️⃣ 등 두드리기 5회</div>
@@ -6953,9 +6982,10 @@ window.openEmergencyModal = function(type) {
             <div style="font-size: 13.5px; font-weight: 700; color: var(--text-s);">의식과 호흡이 없을 때 즉시 실시</div>
         `;
         content.innerHTML = `
-            <div style="background:var(--primary); color:#FFF; padding:12px; border-radius:12px; font-weight:900; font-size:14px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(49,130,246,0.3); animation: pulseSOS 1.5s infinite;">
-                📞 119에 신고하고 "스피커폰"을 켜세요
-            </div>
+            <a href="tel:119" style="display:block; text-decoration:none; background:var(--danger); color:#FFF; padding:15px 12px; border-radius:12px; font-weight:900; font-size:15px; text-align:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(240,68,82,0.3); animation: pulseSOS 1.5s infinite;">
+                📞 먼저 119에 전화하세요 (눌러서 걸기)
+                <div style="font-size:12px; font-weight:700; margin-top:5px; opacity:0.95;">스피커폰을 켜면 전화로 방법을 알려줍니다</div>
+            </a>
             
             <div class="box-sub" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary); margin-bottom: 8px;">
                 <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">1️⃣ 의식 확인 (발바닥 때리기)</div>
@@ -7510,6 +7540,16 @@ window.nextOnboardingStep = function(step) {
 
 // 🎉 온보딩 완료 및 로딩 마술 발동! (서버 동기화 패치 완료)
 window.finishOnboarding = function(feedingStage) {
+    /* ⚠️ 개인정보 보호법 제22조의2 — 만 14세 미만 아동의 개인정보는 법정대리인 동의가 필요하다.
+          아기 이름·생일·사진·건강 기록이 전부 여기 해당한다. 체크를 안 하면 넘어가지 않는다. */
+    const guardian = document.getElementById('ob-guardian');
+    if (guardian && !guardian.checked) {
+        if (typeof window.showToast === 'function') window.showToast('보호자(법정대리인) 확인에 체크해 주세요');
+        try { guardian.focus(); } catch (e) {}
+        return;
+    }
+    try { localStorage.setItem('tosil_guardian_consent', new Date().toISOString()); } catch (e) {}
+
     // 🚨 다둥이 추가 때는 2단계(생일)부터 시작하므로 ob-name 칸이 비어 있다.
     //    그대로 저장하면 이름이 빈 값이 되고, 새로고침 뒤 온보딩이 또 돈다.
     //    입력칸이 비었으면 이미 저장된 이름을 쓴다.
@@ -7734,7 +7774,7 @@ window.renderBabyInfo = function() {
         });
         
         switchHtml = `
-            <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:4px; scrollbar-width:none;">
+            <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; margin-bottom:0; scrollbar-width:none;">
                 ${btnHtml}
             </div>
         `;
@@ -9184,7 +9224,7 @@ window.renderDadQuests = function() {
             
             ${todayFever ? `
                 <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 13px; font-weight: 800; color: #FECACA; text-align: center; animation: pulseSOS 1.5s infinite;">
-                    현재 아기 체온 ${todayFever.temp}℃! 집에 갈 때 해열제 사갈지 꼭 물어보세요
+                    현재 아기 체온 ${todayFever.temp}℃ 집에 갈 때 해열제 사갈지 꼭 물어보세요
                 </div>
             ` : ''}
 

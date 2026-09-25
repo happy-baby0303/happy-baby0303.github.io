@@ -129,7 +129,7 @@
         }
 
         body.innerHTML =
-            (hasPos ? '' : '<div style="padding:12px; background:#FFF0F1; border-radius:12px; margin-bottom:16px; font-size:12.5px; font-weight:800; color:#F04452; text-align:center;">🚨 위치(GPS) 권한을 허용해야 가장 가까운 곳을 찾을 수 있어요!</div>') +
+            (hasPos ? '' : '<div style="padding:12px; background:#FFF0F1; border-radius:12px; margin-bottom:16px; font-size:12.5px; font-weight:800; color:#F04452; text-align:center;">🚨 위치(GPS) 권한을 허용해야 가장 가까운 곳을 찾을 수 있어요</div>') +
             list.slice(0, 50).map(rowHTML).join("");
     }
 
@@ -158,7 +158,7 @@
             </div>
             
             <div style="font-size:12px; font-weight:600; color:#8B95A1; margin-bottom:16px; background:#F9FAFB; padding:10px 14px; border-radius:10px; word-break:keep-all; line-height:1.4;">
-                <span id="nursing-total">공공데이터 기준</span><br>오래된 정보가 있을 수 있으니 꼭 전화를 먼저 해보세요!
+                <span id="nursing-total">공공데이터 기준</span><br>오래된 정보가 있을 수 있으니 꼭 전화를 먼저 해보세요
             </div>
             
             <div id="nursing-body" style="overflow-y:auto; flex:1; padding-bottom:20px; scrollbar-width:none;">
@@ -270,12 +270,12 @@ window.safeOpenMap = function(mapType, query) {
             <div style="font-size:40px; margin-bottom:12px;">🎒</div>
             <div style="font-size:18px; font-weight:900; color:var(--text-m); margin-bottom:8px;">기저귀 가방은 챙기셨죠?</div>
             <div style="font-size:13px; font-weight:600; color:var(--text-s); margin-bottom:24px; line-height:1.5; word-break:keep-all;">
-                출발 전, 빠진 물건이 없는지<br>3초만 확인하고 여유롭게 출발하세요!
+                출발 전, 빠진 물건이 없는지<br>3초만 확인하고 여유롭게 출발하세요
             </div>
             
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button id="btn-go-navi" style="width:100%; padding:16px; background:#3182F6; color:#FFF; border:none; border-radius:14px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(49,130,246,0.2);">
-                    네, 완벽해요! 내비 켜기 🚗
+                    네, 맞아요 내비 켜기 🚗
                 </button>
                 <button id="btn-go-check" style="width:100%; padding:14px; background:var(--bg-sub); color:#4E5968; border:1px solid var(--border); border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">
                     앗, 외출 체크리스트 열기

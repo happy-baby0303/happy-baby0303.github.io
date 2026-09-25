@@ -268,10 +268,16 @@ function cardHTML() {
             '<div style="display:flex; gap:8px;">' + row("red") + row("blue") + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); line-height:1.6; ' +
                 'margin-top:9px; padding:14px 16px; background:var(--bg-sub); border-radius:12px; word-break:keep-all;">' +
-                '<span style="font-weight:900; color:var(--text-m); font-size:13px;">💡 열이 안 떨어질 때 (교차 복용 팁)</span><br>' +
+                /* ⚠️ '교차 복용 팁' 이라고 쓰고 '최소 2시간은 필수' 라고 단정했다.
+                      식약처는 교차 복용을 '의사의 지시에 따라 2~3시간 간격' 으로 안내한다.
+                      우리가 권하는 방법처럼 말하면 안 된다. 순서를 바꾸고 출처를 밝힌다. */
+                '<span style="font-weight:900; color:var(--text-m); font-size:13px;">💡 열이 안 떨어질 때</span><br>' +
                 '• <b>같은 성분(색깔)의 약</b>은 최소 4~6시간 간격을 두어야 합니다.<br>' +
-                '• <b>다른 성분(색깔)의 약</b>을 교차 복용할 때는 <b>최소 2시간 간격</b>은 필수입니다.<br>' +
-                '<div style="margin-top:8px; color:var(--danger); font-weight:800;">※ 투약 전, 약 상자의 몸무게별 권장 용량을 꼭 확인하세요!</div>' +
+                '• <b>성분이 다른 약을 번갈아 주는 것(교차 복용)은 의사·약사와 상의한 뒤에</b> 하세요. ' +
+                '꼭 써야 한다면 <b>2~3시간</b>을 띄웁니다.<br>' +
+                '• <b>덱시부프로펜(맥시부펜·파랑 챔프)은 이부프로펜과 같은 계열</b>이라 서로 번갈아 주면 안 됩니다.<br>' +
+                '<div style="margin-top:8px; color:var(--danger); font-weight:800;">※ 투약 전, 약 상자의 몸무게별 권장 용량을 꼭 확인하세요</div>' +
+                '<div style="margin-top:6px; font-size:11px; font-weight:700; opacity:0.75;">식품의약품안전처 어린이 해열제 안내(2025.12.)를 따랐습니다</div>' +
             '</div>';
     }
 

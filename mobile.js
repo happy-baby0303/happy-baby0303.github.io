@@ -91,7 +91,7 @@ body { overscroll-behavior-y: contain; }
     body { padding-bottom: 0 !important; }
     .wrapper { padding-bottom: 0 !important; }
     .tab-content.active {
-        padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;   /* 탭 높이만큼만. 78px 은 마지막 카드 밑이 허전했다 */
     }
 
     /* 바텀시트도 마찬가지 */

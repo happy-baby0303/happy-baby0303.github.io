@@ -990,7 +990,7 @@ window.downloadVoiceAudio = async function(key, id) {
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(blobUrl);
             }, 100);
-            window.showToast("💾 아기의 목소리가 다운로드 폴더에 저장되었습니다!");
+            window.showToast("💾 아기의 목소리가 다운로드 폴더에 저장되었습니다");
         }
     } catch (e) {
         console.error("[음성 다운로드 에러]", e);

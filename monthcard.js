@@ -232,8 +232,8 @@
                             if (typeof window.showConfirm === "function") {
                                 window.showConfirm(
                                     isIOS
-                                    ? "이달의 카드가 완성됐어요!<br><span style='font-size:12px;color:#A3958A;'>창이 뜨면 '이미지 저장'을 눌러주세요.</span>"
-                                    : "이달의 카드가 완성됐어요!<br><span style='font-size:12px;color:#A3958A;'>바로 올리거나 보낼 수 있어요.</span>",
+                                    ? "이달의 카드가 완성됐어요<br><span style='font-size:12px;color:#A3958A;'>창이 뜨면 '이미지 저장'을 눌러주세요.</span>"
+                                    : "이달의 카드가 완성됐어요<br><span style='font-size:12px;color:#A3958A;'>바로 올리거나 보낼 수 있어요.</span>",
                                     function () {
                                         navigator.share({ files: [file], title: babyName() + "의 한 달" }).catch(function () {});
                                     }, "📸", "저장 및 공유하기", GOLD
