@@ -142,11 +142,11 @@
         box.style.cssText = 'text-align:center; margin:-8px 0 22px;';
         box.innerHTML =
             '<div onclick="window.openBabyPicker()" style="display:inline-flex; align-items:center; ' +
-                'gap:6px; padding:7px 12px; background:#F2F4F6; border-radius:20px; cursor:pointer; ' +
+                'gap:6px; padding:7px 12px; background:#F6F2EC; border-radius:20px; cursor:pointer; ' +
                 'font-size:12.5px; line-height:1.4;">' +
                 '<span>👶</span>' +
-                '<span style="font-weight:800; color:#191F28;">' + esc(now.name || '아기') + '</span>' +
-                '<span style="font-weight:700; color:#8B95A1;">바꾸기</span>' +
+                '<span style="font-weight:800; color:#4A413C;">' + esc(now.name || '아기') + '</span>' +
+                '<span style="font-weight:700; color:#A3958A;">바꾸기</span>' +
             '</div>';
 
         /* ⚠️ 페이지 맨 위가 아니라 '제목 바로 밑' 이다.
@@ -173,15 +173,15 @@
         wrap.innerHTML =
             '<div style="background: #FFFFFF; width:100%; max-width:480px; ' +
                 'border-radius:24px 24px 0 0; padding:24px 20px calc(28px + env(safe-area-inset-bottom,0px));">' +
-                '<div style="font-size:17px; font-weight:900; color:#191F28; margin-bottom:14px;">누구 걸 볼까요</div>' +
+                '<div style="font-size:17px; font-weight:900; color:#4A413C; margin-bottom:14px;">누구 걸 볼까요</div>' +
                 list.map(function (b) {
                     var on = ((b.id || '') === cur);
                     return '<div onclick="window.switchCuratorBaby(\'' + (b.id || '') + '\')" ' +
                         'style="display:flex; justify-content:space-between; align-items:center; ' +
                         'padding:15px 16px; margin-bottom:8px; border-radius:14px; cursor:pointer; ' +
                         'font-size:15px; font-weight:800; ' +
-                        (on ? 'background:#191F28; color:#FFFFFF;'
-                            : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                        (on ? 'background:#4A413C; color:#FFFFFF;'
+                            : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                         '<span>' + esc(b.name || '아기') + '</span>' +
                         (on ? '<span style="font-size:12.5px; font-weight:700;">보는 중</span>' : '') +
                     '</div>';

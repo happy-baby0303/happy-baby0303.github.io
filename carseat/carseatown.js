@@ -33,7 +33,7 @@
     var HARNESS_DAYS = 60;          // 이만큼 지나면 어깨끈을 한 번 보시라고 한다
     var HEIGHT_DAYS  = 45;          // 키를 다시 재보시라고 하는 주기
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var RED  = "#E32636", GOLD = "#8A6D00", GREEN = "#1F9D6B", PURPLE = "#7F77DD";
 
     function esc(s) {
@@ -179,7 +179,7 @@
                     return '<div onclick="window.pickMySeat(\'' + s.id + '\')" ' +
                         'style="padding:13px 15px; border-radius:13px; cursor:pointer; ' +
                         (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                            : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                            : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                         '<div style="font-size:13.5px; font-weight:800;">' +
                             (on ? "\u2713 " : "") + esc(s.brand) + ' ' + esc(s.name) + '</div>' +
                         '<div style="margin-top:2px; font-size:11.5px; font-weight:700; opacity:0.75;">' +
@@ -192,12 +192,12 @@
                 'margin-bottom:7px;">목록에 없나요</div>' +
             '<input value="' + esc(o.name || "") + '" placeholder="예) 조이 스핀 360" ' +
                 'onchange="window.setSeatField(\'name\', this.value)" ' +
-                'style="width:100%; padding:14px; border-radius:12px; border:1px solid #D1D5DB; ' +
-                'background: #FFFFFF; font-size:14px; font-weight:700; color:#191F28; box-sizing:border-box;">' +
+                'style="width:100%; padding:14px; border-radius:12px; border:1px solid #DCD3C8; ' +
+                'background: #FFFFFF; font-size:14px; font-weight:700; color:#4A413C; box-sizing:border-box;">' +
 
             '<div onclick="window.closeSeatSheet()" style="margin-top:22px; text-align:center; ' +
-                'padding:17px; background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
-                'font-size:15.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
+                'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
+                'font-size:14.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
         '</div>';
     }
 
@@ -228,7 +228,7 @@
                 'padding:15px 16px; margin-bottom:14px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + RED + '; margin-bottom:5px;">' +
                     '\uD83E\uDDE5 겨울이에요 \u00b7 패딩 벗기고 태우세요</div>' +
-                '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+                '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                     'word-break:keep-all;">' +
                     '두꺼운 외투를 입은 채 채우면, 충돌 순간 옷이 납작해지면서 ' +
                     '<b>하네스가 그만큼 헐거워집니다.</b> 벗겨서 태우고 <b>담요를 위에 덮어</b> 주세요. ' +
@@ -238,16 +238,16 @@
         if (m >= 6 && m <= 8) {
             var o = own(), seat = seatById(o.id);
             var q = (seat ? seat.brand + " " : "") + "정품 쿨시트";
-            return '<div style="background:#F0F7FF; border:1px solid #C9E2FF; border-radius:14px; ' +
+            return '<div style="background:#F2F0FC; border:1px solid #DDD9F5; border-radius:14px; ' +
                 'padding:15px 16px; margin-bottom:14px;">' +
-                '<div style="font-size:13.5px; font-weight:900; color:#1B64DA; margin-bottom:5px;">' +
+                '<div style="font-size:13.5px; font-weight:900; color:#6A61CE; margin-bottom:5px;">' +
                     '\u2600\uFE0F 여름이에요 \u00b7 쿨시트는 순정부터</div>' +
-                '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+                '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                     'word-break:keep-all;">' +
                     '두꺼운 패드는 겨울 패딩과 <b>같은 이유로</b> 하네스를 헐겁게 만듭니다. ' +
                     '아래 <b>쿨시트 사기 전에</b> 카드를 먼저 보세요. ' +
                     '<a href="https://www.google.com/search?q=' + encodeURIComponent(q) + '" ' +
-                    'target="_blank" rel="noopener" style="color:#1B64DA; font-weight:800;">' +
+                    'target="_blank" rel="noopener" style="color:#6A61CE; font-weight:800;">' +
                     esc(q) + ' 찾아보기 \u3009</a></div>' +
             '</div>';
         }
@@ -282,7 +282,7 @@
                 'border-radius:14px; padding:15px 16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:#1F6F52;">' +
                     '\u2705 다음 카시트는 안 사셔도 됩니다</div>' +
-                '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '쓰고 계신 게 주니어까지 되는 제품이에요. ' +
                     '헤드레스트와 어깨끈 위치만 그때그때 맞춰주시면 됩니다.</div>' +
@@ -293,13 +293,13 @@
             return x.age && x.age.indexOf("junior") > -1 && x.id !== o.id;
         }).slice(0, 3);
 
-        return '<div style="margin-top:16px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        return '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:15px 16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
                 '\uD83D\uDD1C 다음 카시트' +
                 (when ? ' <span style="font-weight:800; color:' + PURPLE + ';">\u00b7 ' + when + '</span>' : '') +
             '</div>' +
-            '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 (leftCm > 0 ? '키 상한까지 <b>' + leftCm + 'cm</b> 남았어요. ' : '') +
                 '그다음은 <b>주니어 카시트</b>이고, 한 번 사면 대개 <b>만 12세까지</b> 씁니다.' +
@@ -309,7 +309,7 @@
             '<div style="margin-top:11px;">' +
                 picks.map(function (x) {
                     return '<div style="display:flex; justify-content:space-between; align-items:center; ' +
-                        'gap:10px; padding:9px 0; border-bottom:1px solid #F2F4F6;">' +
+                        'gap:10px; padding:9px 0; border-bottom:1px solid #F6F2EC;">' +
                         '<div style="flex:1; min-width:0; font-size:12.5px; font-weight:800; ' +
                             'color:' + DARK + '; word-break:keep-all;">' +
                             esc(x.brand) + ' ' + esc(x.name) + '</div>' +
@@ -359,9 +359,9 @@
         if (!o.carChangedAt) {
             return '<div onclick="window.markCarChanged()" style="margin-top:12px; ' +
                 'display:flex; justify-content:space-between; align-items:center; gap:10px; ' +
-                'padding:13px 15px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+                'padding:13px 15px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
                 'border-radius:13px; cursor:pointer;">' +
-                '<div style="font-size:12.5px; font-weight:800; color:#4E5968;">' +
+                '<div style="font-size:12.5px; font-weight:800; color:#7A6F68;">' +
                     '\uD83D\uDE97 차를 바꾸셨나요?</div>' +
                 '<div style="flex-shrink:0; font-size:12px; font-weight:800; color:' + BLUE + ';">' +
                     '네 \u3009</div>' +
@@ -376,7 +376,7 @@
                 '<div onclick="window.markCarChanged()" style="flex-shrink:0; font-size:16px; ' +
                     'font-weight:300; color:' + GRAY + '; cursor:pointer; line-height:1;">\u00d7</div>' +
             '</div>' +
-            '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
                 (note
                     ? '지금 카시트는 <b>' + note.name + '</b> 방식이에요.<br>' + note.warn
@@ -406,15 +406,15 @@
     function bar(now, max) {
         var pct = Math.max(4, Math.min(100, Math.round(now / max * 100)));
         var near = pct >= 90;
-        return '<div style="height:9px; background:#F2F4F6; border-radius:5px; overflow:hidden;">' +
+        return '<div style="height:9px; background:#F6F2EC; border-radius:5px; overflow:hidden;">' +
             '<div style="width:' + pct + '%; height:100%; border-radius:5px; background:' +
             (near ? RED : PURPLE) + ';"></div></div>';
     }
 
     function row(label, value, sub, color) {
-        return '<div style="padding:14px 0; border-bottom:1px solid #F2F4F6;">' +
+        return '<div style="padding:14px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">' +
-                '<div style="font-size:12.5px; font-weight:800; color:#4E5968;">' + label + '</div>' +
+                '<div style="font-size:12.5px; font-weight:800; color:#7A6F68;">' + label + '</div>' +
                 '<div style="flex-shrink:0; font-size:14px; font-weight:900; color:' +
                     (color || DARK) + ';">' + value + '</div>' +
             '</div>' +
@@ -464,9 +464,9 @@
                     'margin-bottom:14px;">' + esc(seat.bodySpec || "") + '</div>' : '<div style="height:8px;"></div>') +
 
             '<a href="' + manualLink(o) + '" target="_blank" rel="noopener" ' +
-                'style="display:block; text-align:center; padding:12px; background: #F9FAFB; ' +
-                'border:1px solid #E5E8EB; border-radius:12px; font-size:12.5px; font-weight:800; ' +
-                'color:#4E5968; text-decoration:none; margin-bottom:6px;">' +
+                'style="display:block; text-align:center; padding:12px; background: #FBF8F3; ' +
+                'border:1px solid #EDE6DE; border-radius:12px; font-size:12.5px; font-weight:800; ' +
+                'color:#7A6F68; text-decoration:none; margin-bottom:6px;">' +
                 '\uD83D\uDCD6 설명서 찾기 \u3009</a>';
 
         /* ── 키 ── */
@@ -475,10 +475,10 @@
             '<div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">' +
                 '<input type="number" value="' + (h || "") + '" placeholder="78" ' +
                     'onchange="window.setSeatField(\'height\', this.value)" ' +
-                    'style="width:92px; padding:12px; border-radius:11px; border:1px solid #D1D5DB; ' +
-                    'background: #FFFFFF; font-size:15px; font-weight:900; color:#191F28; ' +
+                    'style="width:92px; padding:12px; border-radius:11px; border:1px solid #DCD3C8; ' +
+                    'background: #FFFFFF; font-size:15px; font-weight:900; color:#4A413C; ' +
                     'text-align:center; box-sizing:border-box;">' +
-                '<span style="font-size:13px; font-weight:800; color:#4E5968;">cm</span>' +
+                '<span style="font-size:13px; font-weight:800; color:#7A6F68;">cm</span>' +
                 '<span style="flex:1; text-align:right; font-size:11.5px; font-weight:700; color:' +
                     (hAge !== null && hAge >= HEIGHT_DAYS ? GOLD : GRAY) + ';">' +
                     (hAge === null ? "재보고 적어주세요"
@@ -490,7 +490,7 @@
         if (h && autoMax) {
             var leftCm = autoMax - h;
             out += bar(h, autoMax) +
-                '<div style="margin-top:8px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:8px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.7; word-break:keep-all;">' +
                     '<b>' + h + " / " + autoMax + 'cm</b> \u00b7 ' +
                     (leftCm <= 0
@@ -513,7 +513,7 @@
         }
 
         /* ── 설명서에서 옮겨 적는 칸 ── */
-        out += '<div style="margin-top:18px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        out += '<div style="margin-top:18px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:15px 16px;">' +
             '<div style="font-size:12.5px; font-weight:900; color:' + DARK + ';">' +
                 '\uD83D\uDCD6 설명서에서 옮겨 적기</div>' +
@@ -523,21 +523,21 @@
                 '한 번만 옮겨 적어두시면 다시 설명서를 찾을 일이 없습니다.</div>' +
 
             '<div style="display:flex; align-items:center; gap:8px; margin-bottom:9px;">' +
-                '<span style="flex:1; font-size:12px; font-weight:800; color:#4E5968;">뒤보기 상한 키</span>' +
+                '<span style="flex:1; font-size:12px; font-weight:800; color:#7A6F68;">뒤보기 상한 키</span>' +
                 '<input type="number" value="' + (rear || "") + '" placeholder="87" ' +
                     'onchange="window.setSeatField(\'rearMax\', this.value)" ' +
-                    'style="width:78px; padding:10px; border-radius:10px; border:1px solid #D1D5DB; ' +
+                    'style="width:78px; padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13.5px; font-weight:800; text-align:center; ' +
                     'box-sizing:border-box;">' +
                 '<span style="font-size:12px; font-weight:800; color:' + GRAY + ';">cm</span>' +
             '</div>' +
 
             '<div style="display:flex; align-items:center; gap:8px;">' +
-                '<span style="flex:1; font-size:12px; font-weight:800; color:#4E5968;">만료일 (옆면 스티커)</span>' +
+                '<span style="flex:1; font-size:12px; font-weight:800; color:#7A6F68;">만료일 (옆면 스티커)</span>' +
                 '<input type="month" value="' + esc(o.expireAt || "") + '" ' +
                     'onchange="window.setSeatField(\'expireAt\', this.value)" ' +
-                    'style="padding:10px; border-radius:10px; border:1px solid #D1D5DB; ' +
-                    'background: #FFFFFF; font-size:12.5px; font-weight:800; color:#4E5968; ' +
+                    'style="padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
+                    'background: #FFFFFF; font-size:12.5px; font-weight:800; color:#7A6F68; ' +
                     'box-sizing:border-box;">' +
             '</div>' +
         '</div>';
@@ -578,7 +578,7 @@
                   (hd >= HARNESS_DAYS
                       ? "<b>한 번 보실 때가 됐습니다.</b> 뒤보기는 어깨보다 아래, 앞보기는 어깨 높이나 그 위예요."
                       : "다음에 볼 때는 " + (HARNESS_DAYS - hd) + "일쯤 뒤입니다.")),
-            hd !== null && hd >= HARNESS_DAYS ? GOLD : "#4E5968");
+            hd !== null && hd >= HARNESS_DAYS ? GOLD : "#7A6F68");
 
         // 유효기간
         if (o.expireAt) {
@@ -590,19 +590,19 @@
                 dleft > 0
                     ? "플라스틱이 삭습니다. <b>중고로 넘기실 때도 이 날짜를 알려주세요.</b>"
                     : "<b>만료된 카시트는 쓰지 마시고 중고로 팔지도 마세요.</b>",
-                dleft > 180 ? "#4E5968" : RED);
+                dleft > 180 ? "#7A6F68" : RED);
         }
 
         out += '</div>' + nextSeatHTML(o, autoMax) + carChangeHTML(o) +
             '<div style="display:flex; gap:8px; align-items:center; margin-top:14px;">' +
                 '<div onclick="window.markHarness()" style="flex:1; text-align:center; ' +
-                    'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:13px; ' +
+                    'padding:13px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #DCD3C8; border-radius:13px; ' +
                     'font-size:13.5px; font-weight:900; cursor:pointer;">오늘 어깨끈 맞췄어요</div>' +
                 '<input type="date" value="' + esc(o.harnessAt || "") + '" max="' + today() + '" ' +
                     'onchange="window.markHarness(this.value)" ' +
                     'title="예전에 맞췄으면 그 날짜를 고르세요" ' +
                     'style="flex-shrink:0; width:44px; padding:15px 6px; border-radius:13px; ' +
-                    'border:1px solid #D1D5DB; background: #FFFFFF; color:' + GRAY + '; ' +
+                    'border:1px solid #DCD3C8; background: #FFFFFF; color:' + GRAY + '; ' +
                     'font-size:11px; cursor:pointer;">' +
             '</div>' +
 
@@ -647,25 +647,25 @@
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 12px; font-size:13px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '\u26A0\uFE0F <b>두꺼운 패드는 하네스를 헐겁게 만듭니다.</b> ' +
                 '충돌 순간 그 두께가 눌리면서 끈에 여유가 생겨요. ' +
                 '패딩을 벗기고 태우라는 것과 <b>같은 이유</b>입니다.</div>' +
 
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'word-break:keep-all; margin-bottom:12px;">' +
                 '\u2705 <b>' + (brand ? esc(brand) + ' 순정' : '먼저 순정') + '부터 찾아보세요.</b> ' +
                 '제조사가 만든 건 두께와 버클 구멍 위치를 맞춰서 냅니다.</div>' +
 
             '<a href="https://www.google.com/search?q=' + encodeURIComponent(q) + '" ' +
                 'target="_blank" rel="noopener" style="display:block; text-align:center; padding:13px; ' +
-                'background: #F9FAFB; border:1px solid #E5E8EB; border-radius:12px; ' +
-                'font-size:12.5px; font-weight:800; color:#4E5968; text-decoration:none; ' +
+                'background: #FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
+                'font-size:12.5px; font-weight:800; color:#7A6F68; text-decoration:none; ' +
                 'margin-bottom:14px;">' + esc(q) + ' 찾아보기 \u3009</a>' +
 
             '<div style="font-size:12.5px; font-weight:900; color:' + DARK + '; margin-bottom:7px;">' +
                 '순정이 없어서 다른 걸 사셨다면, 깔고 나서 이 셋을 보세요</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.9; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9; ' +
                 'word-break:keep-all;">' +
                 '\u2460 버클이 <b>딸깍 소리 나게 끝까지</b> 채워지나<br>' +
                 '\u2461 채운 뒤 쇄골에서 하네스가 <b>손가락에 집히나</b> (집히면 헐거운 겁니다)<br>' +
@@ -684,22 +684,22 @@
                 'padding:15px 16px; margin:-16px 0 12px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + RED + '; margin-bottom:6px;">' +
                     '\uD83D\uDEA8 운전 중에는 먹이지 마세요</div>' +
-                '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+                '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                     'word-break:keep-all;">' +
                     '뒤보기라 백미러로도 안 보입니다. ' +
                     '<b>조용해지면 잘 먹는 게 아니라 막힌 걸 수도 있어요.</b><br>' +
                     '배고파서 우는 거면 <b>차를 세우세요.</b> 5분 서는 게 제일 빠른 길입니다.</div>' +
             '</div>' +
 
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'word-break:keep-all; margin-bottom:12px;">' +
                 '\u26A0\uFE0F 급정거하면 <b>딱딱한 건 흉기가 됩니다.</b> ' +
                 '플라스틱 사운드북, 태블릿 거치대는 빼세요. ' +
                 '천이나 말랑한 것만 손에 쥐여주시고요.</div>' +
 
             '<a href="../toy/index.html" style="display:block; text-align:center; padding:13px; ' +
-                'background: #F9FAFB; border:1px solid #E5E8EB; border-radius:12px; ' +
-                'font-size:12.5px; font-weight:800; color:#4E5968; text-decoration:none;">' +
+                'background: #FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
+                'font-size:12.5px; font-weight:800; color:#7A6F68; text-decoration:none;">' +
                 '\uD83E\uDDF8 놀이 탭에 카시트에서 버티는 것들을 모아뒀어요 \u3009</a>' +
         '</div>';
     }
@@ -709,14 +709,14 @@
             /* ⚠️ carseatcrash.js 에도 '사고가 났다면' 카드가 있다 (바꿔야 하나를 다섯 가지로 묻는 것).
                   같은 탭에 같은 제목이 두 번 뜨고 있었다. 여긴 '그 다음에 할 일' 이라 이름을 나눈다. */
             '<div class="matrix-header">\uD83D\uDCC4 사고 뒤에 챙길 것</div>' +
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '\u26A0\uFE0F <b>가벼운 접촉사고라도 카시트는 교체 대상일 수 있습니다.</b> ' +
                 '겉이 멀쩡해도 안쪽 구조가 상해요. 눈에 안 보입니다.<br>' +
                 '바꿔야 하는지는 <b>\uD83D\uDEA8 사고가 났다면</b> 카드에서 다섯 가지로 확인하세요.</div>' +
 
-            '<div style="background: #F9FAFB; border:1px solid #E5E8EB; border-radius:14px; ' +
-                'padding:15px 16px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="background: #FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
+                'padding:15px 16px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:2; word-break:keep-all;">' +
                 '\u25A1 카시트 사진을 찍어두세요 <b>(장착된 그대로)</b><br>' +
                 '\u25A1 사고 접수 번호를 적어두세요<br>' +
@@ -735,11 +735,11 @@
     function washHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83E\uDDFC 토했을 때</div>' +
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.8; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '<b>하네스에 세제를 쓰지 마세요.</b> 세제나 유연제가 닿으면 섬유가 약해집니다. ' +
                 '충돌 때 아이를 붙잡아야 하는 그 끈이에요.</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:2; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:2; ' +
                 'word-break:keep-all;">' +
                 '\u2705 미지근한 물에 적신 천으로 <b>닦기만</b> 하세요<br>' +
                 '\u274C 세탁기 \u00b7 세제 \u00b7 유연제 \u00b7 표백제 \u00b7 건조기<br>' +

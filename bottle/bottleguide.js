@@ -46,14 +46,14 @@
         var st = document.createElement("style");
         st.id = "gd-vars";
         st.textContent =
-            ":root{--gd-blue:#1B64DA;--gd-gold:#8A6D00;--gd-red:#E32636;}" +
+            ":root{--gd-blue:#6A61CE;--gd-gold:#8A6D00;--gd-red:#E32636;}" +
             "body.dark-mode{--gd-blue:#7EB6FF;--gd-gold:#E8C766;--gd-red:#FF8A8A;}";
         (document.head || document.documentElement).appendChild(st);
     })();
 
-    var BLUE = "#3182F6";
-    var GRAY = "#8B95A1";
-    var DARK = "#191F28";
+    var BLUE = "#7F77DD";
+    var GRAY = "#A3958A";
+    var DARK = "#4A413C";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -158,16 +158,16 @@
                 'style="padding:14px 12px; border-radius:14px; cursor:pointer; text-align:center; ' +
                 'font-size:13px; font-weight:800; line-height:1.4; word-break:keep-all; transition:0.15s; ' +
                 (on ? 'background:' + BLUE + '; color:#FFFFFF; border:1px solid ' + BLUE + ';'
-                    : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                    : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:20px; margin-bottom:5px;">' + c.icon + '</div>' + esc(c.label) + '</div>';
         }).join("");
 
         var tip = "";
         for (var i = 0; i < CASES.length; i++) {
             if (CASES[i].id === picked) {
-                tip = '<div style="margin-top:14px; background:#E8F3FF; border:1px solid #C9E2FF; ' +
+                tip = '<div style="margin-top:14px; background:#F0EEFB; border:1px solid #DDD9F5; ' +
                       'border-radius:14px; padding:15px 16px; font-size:13.5px; font-weight:600; ' +
-                      'color:var(--gd-blue,#1B64DA); line-height:1.7; word-break:keep-all;">' +
+                      'color:var(--gd-blue,#6A61CE); line-height:1.7; word-break:keep-all;">' +
                       CASES[i].icon + ' ' + CASES[i].tip + '</div>';
             }
         }
@@ -250,7 +250,7 @@
                 'style="flex:1; text-align:center; padding:11px 6px; border-radius:11px; cursor:pointer; ' +
                 'font-size:12.5px; font-weight:800; ' +
                 (on ? 'background:' + DARK + '; color:#FFFFFF;'
-                    : 'background:#F2F4F6; color:#4E5968;') + '">' + t + '</div>';
+                    : 'background:#F6F2EC; color:#7A6F68;') + '">' + t + '</div>';
         };
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
@@ -265,8 +265,8 @@
                 '<div style="font-size:12px; font-weight:700; color:' + GRAY + '; margin-top:6px;">' + basis + '</div>' +
             '</div>' +
 
-            '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:14px; ' +
-                'padding:15px 16px; font-size:13.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
+                'padding:15px 16px; font-size:13.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.7; word-break:keep-all;">' + line + '</div>' +
 
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -298,7 +298,7 @@
         t.setAttribute("style",
             "position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); " +
             "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
-            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "background:rgba(74, 65, 60,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
             "font-size:13px; font-weight:700; line-height:1.55; text-align:center; word-break:keep-all; " +
             "white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); transition:opacity .25s;");
         t.textContent = String(msg == null ? "" : msg);
@@ -341,10 +341,10 @@
         if (last) {
             var p = String(last).split("-").map(Number);
             var d = Math.floor((Date.now() - new Date(p[0], p[1] - 1, p[2]).getTime()) / 86400000);
-            since = '<div style="background:' + (d >= 60 ? "#FFF2F2" : "#F9FAFB") + '; ' +
-                'border:1px solid ' + (d >= 60 ? "#FCA5A5" : "#E5E8EB") + '; border-radius:12px; ' +
+            since = '<div style="background:' + (d >= 60 ? "#FFF2F2" : "#FBF8F3") + '; ' +
+                'border:1px solid ' + (d >= 60 ? "#FCA5A5" : "#EDE6DE") + '; border-radius:12px; ' +
                 'padding:13px 15px; margin-bottom:14px; font-size:13px; font-weight:800; ' +
-                'color:' + (d >= 60 ? "var(--gd-red,#E32636)" : "#4E5968") + ';">' +
+                'color:' + (d >= 60 ? "var(--gd-red,#E32636)" : "#7A6F68") + ';">' +
                 '마지막 교체 후 <b>' + d + '일</b>' +
                 (d >= 60 ? " — 갈 때가 됐어요" : " 지났어요") + '</div>';
         }
@@ -361,28 +361,28 @@
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:15px 16px; margin-bottom:10px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:var(--gd-gold,#8A6D00); margin-bottom:7px;">⬆️ 한 단계 올릴 때</div>' +
-                '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+                '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '한 번 먹는 데 <b>20분 넘게</b> 걸려요 · 빨다가 지쳐서 잠들어요 · ' +
                 '젖꼭지가 <b>쭈그러들었다</b> 펴져요 · 먹는 중에 화를 내요</div>' +
             '</div>' +
 
-            '<div style="background:#F0F7FF; border:1px solid #C9E2FF; border-radius:14px; ' +
+            '<div style="background:#F2F0FC; border:1px solid #DDD9F5; border-radius:14px; ' +
                 'padding:15px 16px; margin-bottom:10px;">' +
-                '<div style="font-size:13.5px; font-weight:900; color:var(--gd-blue,#1B64DA); margin-bottom:7px;">⬇️ 한 단계 내릴 때</div>' +
-                '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+                '<div style="font-size:13.5px; font-weight:900; color:var(--gd-blue,#6A61CE); margin-bottom:7px;">⬇️ 한 단계 내릴 때</div>' +
+                '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '<b>사레</b>가 자주 들려요 · 입가로 줄줄 흘러요 · ' +
                 '<b>5분도 안 돼</b> 끝나요 · 먹고 나서 자주 게워요</div>' +
             '</div>' +
 
-            '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:14px; ' +
-                'padding:15px 16px; font-size:13px; font-weight:600; color:#4E5968; ' +
+            '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
+                'padding:15px 16px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 '🔁 <b>젖병은 그대로 두고 젖꼭지만</b> 바꾸면 됩니다. 훨씬 싸요.<br>' +
                 '실리콘은 <b>두 달쯤</b> 쓰면 갈아주는 게 좋고, 찢어지거나 끈적이면 바로 바꾸세요. ' +
                 '떨어져 나간 조각을 아기가 삼킬 수 있습니다.</div>' +
 
             '<div onclick="window.logNippleChange()" ' +
-                'style="margin-top:14px; text-align:center; padding:15px; background:' + DARK + '; ' +
+                'style="margin-top:14px; text-align:center; padding:13px; background:#FFFFFF; border:1.5px solid #DCD3C8; ' +
                 'color:#FFFFFF; border-radius:14px; font-size:14px; font-weight:900; cursor:pointer;">' +
                 '오늘 젖꼭지 갈았어요 · 배냇함에 적어두기</div>' +
         '</div>';

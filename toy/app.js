@@ -145,7 +145,7 @@ function togglePlayFavorite(id, btn, event) {
     } else {
         favs.push(id);
         btn.innerHTML = '❤️';
-        window.showToast ? window.showToast('❤️ 놀이를 찜했습니다! 필터에서 모아보세요.') : alert('찜 완료');
+        window.showToast ? window.showToast('❤️ 놀이를 찜했습니다 필터에서 모아보세요.') : alert('찜 완료');
     }
     localStorage.setItem('favPlays', JSON.stringify(favs));
     
@@ -177,11 +177,11 @@ function renderPlays() {
 
     if (filtered.length === 0) {
         container.innerHTML = `
-            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB; margin-top: 16px;">
+            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #DCD3C8; margin-top: 16px;">
                 <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🥲</div>
                 <div class="empty-text">
-                    <b style="font-size:16px; color:#191F28; font-weight:800; display:block; margin-bottom:6px;">앗! 조건에 맞는 놀이가 없어요</b>
-                    <span style="font-size:13px; color:#8B95A1;">다른 놀이 테마나 찜 목록을 확인해 보세요.</span>
+                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">앗 조건에 맞는 놀이가 없어요</b>
+                    <span style="font-size:13px; color:#A3958A;">다른 놀이 테마나 찜 목록을 확인해 보세요.</span>
                 </div>
             </div>`;
         return;
@@ -189,10 +189,10 @@ function renderPlays() {
 
     let html = '';
     filtered.forEach(p => {
-        let badgeColor = '#3182F6', badgeBg = '#E8F3FF', badgeText = '🧸 국민템 뽕뽑기';
+        let badgeColor = '#7F77DD', badgeBg = '#F0EEFB', badgeText = '🧸 국민템 뽕뽑기';
         if (p.category === 'zero') { badgeColor = '#059669'; badgeBg = '#ECFDF5'; badgeText = '🏠 0원 집구석 놀이'; }
         else if (p.category === 'dad') { badgeColor = '#E32636'; badgeBg = '#FFF2F2'; badgeText = '🏋️ 아빠 육체노동'; }
-        else if (p.category === 'lieDown') { badgeColor = '#8B5CF6'; badgeBg = '#F5F3FF'; badgeText = '🛌 합법적 눕육아'; }
+        else if (p.category === 'lieDown') { badgeColor = '#7F77DD'; badgeBg = '#F3F0FC'; badgeText = '🛌 합법적 눕육아'; }
         else if (p.category === 'poop') { badgeColor = '#D97706'; badgeBg = '#FFFBEB'; badgeText = '💩 장운동 쾌변 기원'; }
         else if (p.category === 'sick') { badgeColor = '#EA580C'; badgeBg = '#FFEDD5'; badgeText = '🤒 껌딱지 진정 놀이'; }
 
@@ -203,29 +203,29 @@ function renderPlays() {
         let linkToToyHtml = '';
         if (p.relatedToyId) {
             linkToToyHtml = `
-                <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#F8F9FA; border:1px solid #E5E8EB; padding:14px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
-                    <div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:#4E5968; word-break:keep-all;">🛒 이 놀이에 쓰는 장난감</div>
-                    <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#3182F6; white-space:nowrap; margin-left:10px;">보러 가기 〉</div>
+                <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#FAF7F2; border:1px solid #EDE6DE; padding:14px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
+                    <div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:#7A6F68; word-break:keep-all;">🛒 이 놀이에 쓰는 장난감</div>
+                    <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#7F77DD; white-space:nowrap; margin-left:10px;">보러 가기 〉</div>
                 </div>
             `;
         }
 
         html += `
-        <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 16px;">
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                 <div style="display: inline-block; padding: 6px 10px; border-radius: 8px; background: ${badgeBg}; color: ${badgeColor}; font-size: 12px; font-weight: 800;">${badgeText}</div>
                 <button onclick="togglePlayFavorite('${p.id}', this, event)" style="background:none; border:none; font-size:24px; cursor:pointer; padding:0;">${isFav ? '❤️' : '🤍'}</button>
             </div>
             
-            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #191F28;">${p.title}</h3>
-            <p style="margin: 0 0 16px 0; font-size: 13.5px; font-weight: 600; color: #8B95A1; line-height: 1.4;">${p.desc}</p>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #4A413C;">${p.title}</h3>
+            <p style="margin: 0 0 16px 0; font-size: 13.5px; font-weight: 600; color: #A3958A; line-height: 1.4;">${p.desc}</p>
             
-            <div style="background: #F9FAFB; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #F2F5F8;">
-                <div style="font-size: 13px; color: #4E5968; margin-bottom: 6px;"><b>준비물:</b> ${p.targetItem}</div>
-                <div style="font-size: 13px; color: #4E5968;"><b>체력소모:</b> ${p.energyDrain}</div>
+            <div style="background: #FBF8F3; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #F7F3ED;">
+                <div style="font-size: 13px; color: #7A6F68; margin-bottom: 6px;"><b>준비물:</b> ${p.targetItem}</div>
+                <div style="font-size: 13px; color: #7A6F68;"><b>체력소모:</b> ${p.energyDrain}</div>
             </div>
 
-            <ul style="margin: 0 0 20px 0; padding-left: 20px; font-size: 14.5px; font-weight: 700; color: #191F28; line-height: 1.6;">
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; font-size: 14.5px; font-weight: 700; color: #4A413C; line-height: 1.6;">
                 ${stepsHtml}
             </ul>
 
@@ -237,7 +237,7 @@ function renderPlays() {
             ${linkToToyHtml}
 
             <div style="display: flex; gap: 8px;">
-                <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #191F28; color: #FFF; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap;">
+                <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #4A413C; color: #FFF; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap;">
                     ⏱️ ${p.playTime}분 타이머
                 </button>
                 <button onclick="sharePlayMission('${p.id}')" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #FEE500; color: #191919; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; white-space: nowrap;">
@@ -251,7 +251,7 @@ function renderPlays() {
             <div id="playdone-${p.id}" onclick="window.togglePlayDone && window.togglePlayDone('${p.id}')"
                  style="margin-top: 10px; text-align: center; padding: 13px; border-radius: 12px;
                         font-size: 13.5px; font-weight: 800; cursor: pointer;
-                        background: #FFFFFF; color: #4E5968; border: 1px solid #D1D5DB;">
+                        background: #FFFFFF; color: #7A6F68; border: 1px solid #DCD3C8;">
                 오늘 놀았어요
             </div>
         </div>`;
@@ -278,7 +278,7 @@ function startPlayTimer(playId, minutes) {
         clearInterval(playTimers[playId].id);
         delete playTimers[playId];
         btn.innerHTML = `⏱️ ${minutes}분 버티기 시작`;
-        btn.style.background = '#191F28'; btn.style.color = '#FFF';
+        btn.style.background = '#4A413C'; btn.style.color = '#FFF';
         btn.style.border = 'none'; btn.style.boxShadow = 'none'; btn.style.opacity = '1';
         return;
     }
@@ -286,9 +286,9 @@ function startPlayTimer(playId, minutes) {
     // 🚨 끝나는 시각을 미리 못박아둔다 (화면 잠가도 정확)
     const endAt = Date.now() + minutes * 60 * 1000;
 
-    btn.style.background = '#F0F7FF';
-    btn.style.color = '#3182F6';
-    btn.style.border = '1px solid #3182F6';
+    btn.style.background = '#F2F0FC';
+    btn.style.color = '#7F77DD';
+    btn.style.border = '1px solid #7F77DD';
 
     const tick = () => {
         const liveBtn = document.getElementById(`timer-btn-${playId}`);
@@ -314,12 +314,12 @@ function startPlayTimer(playId, minutes) {
             clearInterval(playTimers[playId].id);
             delete playTimers[playId];
 
-            let successText = '🎉 미션 완료! 엄마 아빠 최고! 💖';
+            let successText = '🎉 오늘 미션 끝 · 엄마 아빠 수고하셨어요 💖';
             if (p) {
-                if (p.category === 'dad')           successText = '🎉 미션 완료! 아빠 체력 진짜 최고! 💪';
-                else if (p.category === 'lieDown')  successText = '🎉 눕육아 성공! 엄마 체력 충전 완료 🔋';
-                else if (p.category === 'poop')     successText = '🎉 미션 완료! 쾌변 기저귀 확인 요망 💩';
-                else if (p.category === 'sick')     successText = '🎉 미션 완료! 아기 컨디션 회복 💖';
+                if (p.category === 'dad')           successText = '🎉 오늘 미션 끝 · 아빠 체력 대단하십니다 💪';
+                else if (p.category === 'lieDown')  successText = '🎉 눕육아 성공 엄마 체력 충전 완료 🔋';
+                else if (p.category === 'poop')     successText = '🎉 미션 완료 쾌변 기저귀 확인 요망 💩';
+                else if (p.category === 'sick')     successText = '🎉 미션 완료 아기 컨디션 회복 💖';
             }
 
             liveBtn.innerHTML = successText;
@@ -345,12 +345,12 @@ function sharePlayMission(playId) {
     const p = playData.find(x => x.id === playId);
     if (!p) return;
 
-    const shareText = `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘!\n\n🎈 놀이명: ${p.title}\n⏱️ 목표 시간: ${p.playTime}분\n👨‍🔧 당신의 역할: ${p.dadRole}\n\n👉 앱에서 확인하기: https://happy-baby0303.github.io/baby-master/toy/index.html`;
+    const shareText = `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘\n\n🎈 놀이명: ${p.title}\n⏱️ 목표 시간: ${p.playTime}분\n👨‍🔧 당신의 역할: ${p.dadRole}\n\n👉 앱에서 확인하기: https://happy-baby0303.github.io/baby-master/toy/index.html`;
 
     // 🚨 클립보드 폴백
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
-            .then(() => alert('내용이 복사되었어요! 붙여넣기 해주세요 🤍'))
+            .then(() => alert('내용이 복사되었어요 붙여넣기 해주세요 🤍'))
             .catch(() => prompt("아래 내용을 복사해 주세요", shareText));
         return;
     }
@@ -375,12 +375,12 @@ function toggleFavView() {
     
     if (isFavViewMode) {
         btn.innerHTML = '🔙 검색 화면으로 돌아가기';
-        btn.style.background = '#F2F4F6'; btn.style.color = '#4E5968'; btn.style.borderColor = '#D1D5DB';
+        btn.style.background = '#F6F2EC'; btn.style.color = '#7A6F68'; btn.style.borderColor = '#DCD3C8';
         renderFavorites();
     } else {
         btn.innerHTML = '❤️ 내가 찜한 장난감 모아보기';
         btn.style.background = '#FFF2F2'; btn.style.color = '#E32636'; btn.style.borderColor = '#FCA5A5';
-        updateToyView(); // ✨ 에러가 나던 renderList(false)를 올바른 함수로 수정!
+        updateToyView(); // ✨ 에러가 나던 renderList(false)를 올바른 함수로 수정
     }
 }
 
@@ -403,9 +403,9 @@ function toggleFavorite(id) {
         if (btn) {
             const isFav = favs.includes(numericId);
             btn.innerHTML = isFav ? '❤️ 찜 해제' : '🤍 찜하기';
-            btn.style.background = isFav ? '#FFF2F2' : '#F2F4F6';
-            btn.style.color = isFav ? '#E32636' : '#4E5968';
-            btn.style.borderColor = isFav ? '#FCA5A5' : '#E5E8EB';
+            btn.style.background = isFav ? '#FFF2F2' : '#F6F2EC';
+            btn.style.color = isFav ? '#E32636' : '#7A6F68';
+            btn.style.borderColor = isFav ? '#FCA5A5' : '#EDE6DE';
         }
     }
 }
@@ -416,11 +416,11 @@ function renderFavorites() {
     
     if (favs.length === 0) {
         resultArea.innerHTML = `
-            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB; margin-top: 16px;">
+            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #DCD3C8; margin-top: 16px;">
                 <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">💔</div>
                 <div class="empty-text">
-                    <b style="font-size:16px; color:#191F28; font-weight:800; display:block; margin-bottom:6px;">아직 찜한 장난감이 없어요!</b>
-                    <span style="font-size:13px; color:#8B95A1;">마음에 드는 장난감에 하트(❤️)를 눌러보세요.</span>
+                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">아직 찜한 장난감이 없어요</b>
+                    <span style="font-size:13px; color:#A3958A;">마음에 드는 장난감에 하트(❤️)를 눌러보세요.</span>
                 </div>
             </div>`;
         return;
@@ -437,16 +437,16 @@ function renderToys(filteredData) {
     
     if (filteredData.length === 0) {
         resultArea.innerHTML = `
-            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #D1D5DB; margin-top: 16px;">
+            <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #DCD3C8; margin-top: 16px;">
                 <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🥲</div>
                 <div class="empty-text">
-                    <b style="font-size:16px; color:#191F28; font-weight:800; display:block; margin-bottom:6px;">해당 상황에 맞는 아이템이 없네요.</b>
-                    <span style="font-size:13px; color:#8B95A1;">아기 월령이나 테마를 조금 바꿔보세요!</span>
+                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">해당 상황에 맞는 아이템이 없네요.</b>
+                    <span style="font-size:13px; color:#A3958A;">아기 월령이나 테마를 조금 바꿔보세요</span>
                 </div>
             </div>`;
         return;
     }
-    resultArea.innerHTML = `<div style="font-weight:800; color:#191F28; margin-bottom:16px;">✨ 시간 확보 추천 라인업 (${filteredData.length}개)</div>` 
+    resultArea.innerHTML = `<div style="font-weight:800; color:#4A413C; margin-bottom:16px;">✨ 시간 확보 추천 라인업 (${filteredData.length}개)</div>` 
                            + filteredData.map(item => generateToyHTML(item, favs)).join('');
 }
 
@@ -456,9 +456,9 @@ function renderToys(filteredData) {
 function generateToyHTML(toy, favs) {
     const isFav = favs ? favs.includes(toy.id) : false;
     const hIcon = isFav ? '❤️ 찜 해제' : '🤍 찜하기';
-    const hBg = isFav ? '#FFF2F2' : '#F2F4F6';
-    const hCol = isFav ? '#E32636' : '#4E5968';
-    const hBor = isFav ? '#FCA5A5' : '#E5E8EB';
+    const hBg = isFav ? '#FFF2F2' : '#F6F2EC';
+    const hCol = isFav ? '#E32636' : '#7A6F68';
+    const hBor = isFav ? '#FCA5A5' : '#EDE6DE';
 
     const partnerCode = "AF9932454"; 
 
@@ -473,7 +473,7 @@ function generateToyHTML(toy, favs) {
 
         batteryHtml = `
             <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
-                <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗! 건전지 잊지 않으셨죠? (${toy.battery})</b>
+                <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗 건전지 잊지 않으셨죠? (${toy.battery})</b>
                 <a href="${actualBatteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
             </div>`;
     }
@@ -483,9 +483,9 @@ function generateToyHTML(toy, favs) {
     if (toy.relatedPlayIds && toy.relatedPlayIds.length > 0) {
         // 첫 번째 관련 놀이 ID로 넘어가도록 세팅
         linkToPlayHtml = `
-            <div onclick="jumpToPlay('${toy.relatedPlayIds[0]}')" style="background:#F0F7FF; border:1px solid #CBE0FF; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
-                <div style="font-size:13px; font-weight:800; color:#1B64DA;">💡 이 장난감 200% 뽕뽑는 놀이법</div>
-                <div style="font-size:13px; font-weight:900; color:#3182F6;">보러가기 〉</div>
+            <div onclick="jumpToPlay('${toy.relatedPlayIds[0]}')" style="background:#F2F0FC; border:1px solid #DDD9F5; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
+                <div style="font-size:13px; font-weight:800; color:#6A61CE;">💡 이 장난감 200% 뽕뽑는 놀이법</div>
+                <div style="font-size:13px; font-weight:900; color:#7F77DD;">보러가기 〉</div>
             </div>
         `;
     }
@@ -497,13 +497,13 @@ function generateToyHTML(toy, favs) {
     const btnText = isFallback ? `🔍 쿠팡에서 '${toy.name}' 최저가 찾기 〉` : `🚀 로켓배송 최저가 바로가기 〉`;
 
     return `
-        <div id="toy-card-${toy.id}" class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F2F5F8;">
+        <div id="toy-card-${toy.id}" class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
                 <div style="display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0;">
                     <div class="toy-img-placeholder" style="flex-shrink: 0; font-size: 32px;">${toy.imgIcon}</div>
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.4;">${toy.name}</div>
-                        <div style="color: #3182F6; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${toy.tags}</div>
+                        <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.4;">${toy.name}</div>
+                        <div style="color: #7F77DD; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${toy.tags}</div>
                     </div>
                 </div>
                 <button id="fav-btn-${toy.id}" onclick="toggleFavorite('${toy.id}')" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
@@ -511,13 +511,13 @@ function generateToyHTML(toy, favs) {
                 </button>
             </div>
 
-            <div style="background: #F9FAFB; padding: 16px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 800; color: #191F28; margin-bottom: 6px;">💡 알아두실 것</div>
-                <div style="font-size: 13.5px; color: #4E5968; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
+            <div style="background: #FBF8F3; padding: 16px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 16px;">
+                <div style="font-size: 13px; font-weight: 800; color: #4A413C; margin-bottom: 6px;">💡 알아두실 것</div>
+                <div style="font-size: 13.5px; color: #7A6F68; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
             </div>
 
-            <div style="background: #F9FAFB; padding: 20px 18px; border-radius: 14px; border: 1px solid #E5E8EB; margin-bottom: 20px;">
-                <div style="font-weight: 900; color: #191F28; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <div style="background: #FBF8F3; padding: 20px 18px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 20px;">
+                <div style="font-weight: 900; color: #4A413C; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                     <span>⏳</span> 시간 확보 리포트
                 </div>
                 <div style="font-size: 14px; color: #059669; font-weight: 800; background: #ECFDF5; display: inline-block; padding: 8px 14px; border-radius: 10px; border: 1px solid #A7F3D0;">
@@ -527,7 +527,7 @@ function generateToyHTML(toy, favs) {
 
             ${linkToPlayHtml}
 
-            <a href="${finalLink}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#191F28; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 12px; text-decoration: none; transition: 0.2s;">
+            <a href="${finalLink}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#4A413C; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 12px; text-decoration: none; transition: 0.2s;">
                 ${btnText}
             </a>
 
@@ -535,7 +535,7 @@ function generateToyHTML(toy, favs) {
                 <span style="font-size:18px;">💬</span> 남편에게 내 '자유시간' 사달라고 톡 보내기
             </button>
 
-            <div style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; word-break: keep-all;">
+            <div style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; word-break: keep-all;">
                 ※ 아이 입에 들어가는 장난감은 <b>[로켓배송]</b> 등 검증된 판매처 구매를 권장합니다.
             </div>
 
@@ -567,7 +567,7 @@ window.jumpToToy = function(toyId) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             // 번쩍! 하이라이트 효과
             targetCard.style.transition = 'box-shadow 0.3s, transform 0.3s';
-            targetCard.style.boxShadow = '0 0 0 3px #3182F6';
+            targetCard.style.boxShadow = '0 0 0 3px #7F77DD';
             targetCard.style.transform = 'scale(1.02)';
             setTimeout(() => { 
                 targetCard.style.boxShadow = '0 4px 16px rgba(0,0,0,0.04)'; 
@@ -593,7 +593,7 @@ window.jumpToPlay = function(playId) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             // 번쩍! 하이라이트 효과
             targetCard.style.transition = 'box-shadow 0.3s, transform 0.3s';
-            targetCard.style.boxShadow = '0 0 0 3px #3182F6';
+            targetCard.style.boxShadow = '0 0 0 3px #7F77DD';
             targetCard.style.transform = 'scale(1.02)';
             setTimeout(() => { 
                 targetCard.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; 
@@ -612,12 +612,12 @@ function shareToHusbandToy(id) {
     const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
     const finalLink = isFallback ? autoSearchLink : toy.coupangLink;
 
-    const shareText = `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘!\n\n🎈 놀이명: ${toy.name}\n⏱️ 목표 시간: 약 ${toy.freeTime}\n\n👉 구매 링크: ${finalLink}`;
+    const shareText = `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘\n\n🎈 놀이명: ${toy.name}\n⏱️ 목표 시간: 약 ${toy.freeTime}\n\n👉 구매 링크: ${finalLink}`;
 
     // 🚨 카카오톡 안 될 때 폴백 (클립보드 복사)
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
-            .then(() => alert('내용이 복사되었어요! 카톡에 붙여넣기 해주세요 🤍'))
+            .then(() => alert('내용이 복사되었어요 카톡에 붙여넣기 해주세요 🤍'))
             .catch(() => prompt("아래 내용을 복사해 주세요", shareText));
         return;
     }
@@ -626,7 +626,7 @@ function shareToHusbandToy(id) {
         objectType: 'feed',
         content: {
             title: `여보 나 오늘 너무 힘들어 😭`,
-            description: `[${toy.name}] 이거 하나만 로켓으로 쏴줘. 나 ${toy.freeTime} 쉴 수 있대!`,
+            description: `[${toy.name}] 이거 하나만 로켓으로 쏴줘. 나 ${toy.freeTime} 쉴 수 있대`,
             imageUrl: 'https://happy-baby0303.github.io/baby-master/toy/og-image.png',
             link: { mobileWebUrl: finalLink, webUrl: finalLink },
         },

@@ -16,7 +16,7 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var GREEN = "#1F9D6B", RED = "#E32636", GOLD = "#8A6D00";
     var ID = "play-week", KEY = "tosil_playweek";
     var DAYS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -180,21 +180,21 @@
               'transform:translateY(100%); transition:transform .28s ease-out;">' +
 
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">' +
-              '<div style="font-size:18.5px; font-weight:900; color:#191F28;">이번 주, 뭐에 집중할까요</div>' +
+              '<div style="font-size:18.5px; font-weight:900; color:#4A413C;">이번 주, 뭐에 집중할까요</div>' +
               '<span onclick="window.closeCuratorModal()" style="font-size:26px; font-weight:300; ' +
-                  'color:#8B95A1; cursor:pointer; line-height:1; padding:0 4px;">&times;</span>' +
+                  'color:#A3958A; cursor:pointer; line-height:1; padding:0 4px;">&times;</span>' +
             '</div>' +
 
-            '<div style="font-size:13.5px; font-weight:600; color:#8B95A1; line-height:1.7; ' +
+            '<div style="font-size:13.5px; font-weight:600; color:#A3958A; line-height:1.7; ' +
                 'margin-bottom:18px; word-break:keep-all;">' + sub + '</div>' +
 
             '<div style="display:flex; flex-direction:column; gap:9px;">' +
               GOALS.map(function (g) {
                   return '<div onclick="window.applyCuratorGoal(\'' + g.id + '\')" ' +
-                      'style="text-align:left; padding:16px 18px; background: #F9FAFB; ' +
-                      'border:1px solid #E5E8EB; border-radius:14px; cursor:pointer;">' +
-                      '<div style="font-size:15px; font-weight:900; color:#191F28;">' + g.t + '</div>' +
-                      '<div style="font-size:12px; font-weight:700; color:#8B95A1; margin-top:3px;">' + g.s + '</div>' +
+                      'style="text-align:left; padding:16px 18px; background: #FBF8F3; ' +
+                      'border:1px solid #EDE6DE; border-radius:14px; cursor:pointer;">' +
+                      '<div style="font-size:15px; font-weight:900; color:#4A413C;">' + g.t + '</div>' +
+                      '<div style="font-size:12px; font-weight:700; color:#A3958A; margin-top:3px;">' + g.s + '</div>' +
                   '</div>';
               }).join("") +
             '</div>' +
@@ -228,9 +228,9 @@
 
         el.innerHTML =
             '<div style="padding:52px 20px; text-align:center;">' +
-              '<div style="width:36px; height:36px; border:3px solid #F2F4F6; border-top-color:#3182F6; ' +
+              '<div style="width:36px; height:36px; border:3px solid #F6F2EC; border-top-color:#7F77DD; ' +
                   'border-radius:50%; animation:pwspin .9s linear infinite; margin:0 auto 14px;"></div>' +
-              '<div style="font-size:14.5px; font-weight:800; color:#191F28;">' + line + '</div>' +
+              '<div style="font-size:14.5px; font-weight:800; color:#4A413C;">' + line + '</div>' +
               '<style>@keyframes pwspin{100%{transform:rotate(360deg)}}</style>' +
             '</div>';
 
@@ -404,7 +404,7 @@
         if (!c) return;
         if (c.style.display === "none") {
             c.style.display = "block";
-            if (b) { b.innerHTML = "접어두기 ∧"; b.style.background = "#F2F4F6"; b.style.color = GRAY; }
+            if (b) { b.innerHTML = "접어두기 ∧"; b.style.background = "#F6F2EC"; b.style.color = GRAY; }
         } else {
             c.style.display = "none";
             if (b) { b.innerHTML = "7일 보기 ∨"; b.style.background = DARK; b.style.color = "#FFFFFF"; }
@@ -437,7 +437,7 @@
             ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
             : kind === "done"
                 ? 'background:#EAF7F1; color:#1F6F52; border:1px solid #A7DFC8;'
-                : 'background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB;';
+                : 'background: #FFFFFF; color:#7A6F68; border:1px solid #DCD3C8;';
         return '<div onclick="event.stopPropagation(); ' + onclick + '" ' +
             'style="flex:1; text-align:center; padding:13px 8px; border-radius:12px; cursor:pointer; ' +
             'font-size:13.5px; font-weight:800; ' + st + '">' + label + '</div>';
@@ -476,7 +476,7 @@
         var why = whyLine(p, isToday);
 
         return (p.desc
-            ? '<div style="margin-top:13px; font-size:13.5px; font-weight:600; color:#4E5968; ' +
+            ? '<div style="margin-top:13px; font-size:13.5px; font-weight:600; color:#7A6F68; ' +
               'line-height:1.7; word-break:keep-all;">' + esc(p.desc) + '</div>' : '') +
 
             (isDad && p.dadRole
@@ -501,21 +501,21 @@
 
             /* 평가는 놀고 난 뒤에만 묻는다 */
             (done
-                ? '<div style="margin-top:12px; background: #F9FAFB; border-radius:12px; padding:13px 14px;">' +
-                  '<div style="font-size:12.5px; font-weight:800; color:#4E5968; margin-bottom:9px;">' +
+                ? '<div style="margin-top:12px; background: #FBF8F3; border-radius:12px; padding:13px 14px;">' +
+                  '<div style="font-size:12.5px; font-weight:800; color:#7A6F68; margin-bottom:9px;">' +
                       esc(nm("가")) + ' 어땠어요?</div>' +
                   '<div style="display:flex; gap:7px;">' +
                     '<div onclick="event.stopPropagation(); window.playWeekLike(\'' + p.id + '\',1)" ' +
                       'style="flex:1; text-align:center; padding:11px; border-radius:10px; cursor:pointer; ' +
                       'font-size:12.5px; font-weight:800; ' +
                       (like === 1 ? 'background:#EAF7F1; color:#1F6F52; border:1.5px solid #A7DFC8;'
-                                  : 'background: #FFFFFF; color:#8B95A1; border:1.5px solid #E5E8EB;') +
+                                  : 'background: #FFFFFF; color:#A3958A; border:1.5px solid #EDE6DE;') +
                       '">좋아했어요</div>' +
                     '<div onclick="event.stopPropagation(); window.playWeekLike(\'' + p.id + '\',-1)" ' +
                       'style="flex:1; text-align:center; padding:11px; border-radius:10px; cursor:pointer; ' +
                       'font-size:12.5px; font-weight:800; ' +
-                      (like === -1 ? 'background:#F2F4F6; color:#4E5968; border:1.5px solid #D1D5DB;'
-                                   : 'background: #FFFFFF; color:#8B95A1; border:1.5px solid #E5E8EB;') +
+                      (like === -1 ? 'background:#F6F2EC; color:#7A6F68; border:1.5px solid #DCD3C8;'
+                                   : 'background: #FFFFFF; color:#A3958A; border:1.5px solid #EDE6DE;') +
                       '">시큰둥했어요</div>' +
                   '</div></div>' : '');
     }
@@ -525,21 +525,21 @@
         var p = d.play, st = splitTitle(p.title);
         var isDad = p.category === "dad";
         var right = isDad ? badge("아빠 차례", "#FFF2F2", RED, "#FCA5A5")
-                  : st.tag ? badge(esc(st.tag), "#F5F3FF", "#7C5CE0")
+                  : st.tag ? badge(esc(st.tag), "#F3F0FC", "#7C5CE0")
                   : (p.relatedToyId && haveToy(p.relatedToyId))
                       ? badge("갖고 계신 걸로", "#EAF7F1", "#1F6F52") : "";
 
-        return '<div style="background:#F9FAFB; border-radius:16px; padding:18px 16px; ' +
-            'border:1px solid #EEF0F2;">' +   /* 카드 안이라 연회색 */
+        return '<div style="background:#FBF8F3; border-radius:16px; padding:18px 16px; ' +
+            'border:1px solid #F2EDE6;">' +   /* 카드 안이라 연회색 */
             '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">' +
-                badge("오늘 \u00B7 " + esc(d.day) + "요일", "#E8F3FF", "#1B64DA") +
+                badge("오늘 \u00B7 " + esc(d.day) + "요일", "#F0EEFB", "#6A61CE") +
                 '<div style="flex-shrink:0;">' + right + '</div>' +
             '</div>' +
-            '<div style="margin-top:13px; font-size:20px; font-weight:900; color:#191F28; ' +
+            '<div style="margin-top:13px; font-size:20px; font-weight:900; color:#4A413C; ' +
                 'letter-spacing:-0.4px; line-height:1.3; word-break:keep-all;">' + esc(st.title) + '</div>' +
             '<div style="margin-top:7px; font-size:12.5px; font-weight:700; color:' + GRAY + '; ' +
                 'line-height:1.6; word-break:keep-all;">' +
-                '<b style="color:#4E5968;">' + (p.playTime ? p.playTime + "분" : "자율") + '</b>' +
+                '<b style="color:#7A6F68;">' + (p.playTime ? p.playTime + "분" : "자율") + '</b>' +
                 ' \u00B7 ' + esc(p.targetItem || "도구 없음") + '</div>' +
             bodyHTML(p, i, true) +
         '</div>';
@@ -551,7 +551,7 @@
     function weekRow(d, i, locked, open, last) {
         var p = d.play, st = splitTitle(p.title);
         var isDad = p.category === "dad";
-        var line = last && !open ? "" : "border-bottom:1px solid #F2F4F6;";
+        var line = last && !open ? "" : "border-bottom:1px solid #F6F2EC;";
 
         if (locked) {
             return '<div style="display:flex; align-items:center; gap:11px; padding:15px 0; ' + line + '">' +
@@ -560,7 +560,7 @@
                 '<div style="flex:1; min-width:0; font-size:13.5px; font-weight:700; color:' + GRAY + '; ' +
                     'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     (CAT_LABEL[p.category] || "놀이") + '</div>' +
-                '<div style="flex-shrink:0; font-size:11.5px; font-weight:800; color:#C4CAD2;">' +
+                '<div style="flex-shrink:0; font-size:11.5px; font-weight:800; color:#D2C8BC;">' +
                     (p.playTime ? p.playTime + "분" : "자율") + '</div>' +
                 '<div style="flex-shrink:0; font-size:11px;">\uD83D\uDD12</div>' +
             '</div>';
@@ -571,7 +571,7 @@
             '<div onclick="window.togglePlayWeekRow(' + i + ')" ' +
                 'style="display:flex; align-items:center; gap:11px; padding:15px 0; cursor:pointer;">' +
                 '<div style="width:22px; flex-shrink:0; font-size:12.5px; font-weight:800; color:' +
-                    (isDad ? RED : "#4E5968") + ';">' + esc(d.day) + '</div>' +
+                    (isDad ? RED : "#7A6F68") + ';">' + esc(d.day) + '</div>' +
                 '<div style="flex:1; min-width:0; font-size:14px; font-weight:800; ' +
                     'white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:' +
                     (done ? GRAY : DARK) + ';' + (done ? ' text-decoration:line-through;' : '') + '">' +
@@ -580,7 +580,7 @@
                          'background:#FFF2F2; padding:3px 7px; border-radius:6px;">아빠</div>' : '') +
                 '<div style="flex-shrink:0; font-size:11.5px; font-weight:800; color:' + GRAY + ';">' +
                     (p.playTime ? p.playTime + "분" : "자율") + '</div>' +
-                '<div style="flex-shrink:0; font-size:10px; color:#C4CAD2;">' + (open ? '\u2227' : '\u2228') + '</div>' +
+                '<div style="flex-shrink:0; font-size:10px; color:#D2C8BC;">' + (open ? '\u2227' : '\u2228') + '</div>' +
             '</div>' +
             (open
                 ? '<div style="padding:0 0 18px;">' +
@@ -618,11 +618,11 @@
         }).length;
         var buyCnt = plan.filter(function (d) { return needsBuy(d.play); }).length;
 
-        return '<div style="background: #F9FAFB; border:1px solid #E5E8EB; border-radius:16px; ' +
+        return '<div style="background: #FBF8F3; border:1px solid #EDE6DE; border-radius:16px; ' +
             'padding:17px 18px; margin-top:14px;">' +
-            '<div style="font-size:13.5px; font-weight:900; color:#191F28; margin-bottom:9px;">' +
+            '<div style="font-size:13.5px; font-weight:900; color:#4A413C; margin-bottom:9px;">' +
                 '이번 주 이렇게 짰어요</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.9;">' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9;">' +
                 (g ? '고르신 목표 \u00B7 <b>' + g.t + '</b><br>' : '') +
                 '몸으로 크게 ' + gross + '번 \u00B7 조용히 ' + quiet + '번 \u00B7 누워서 ' + calm + '번' +
                 (mineCnt ? '<br>갖고 계신 장난감을 쓰는 날 ' + mineCnt + '번' : '') +
@@ -668,7 +668,7 @@
                     'min-width:0; word-break:keep-all;">' +
                     esc(m === null ? "이번 주 놀이" : m + "개월 " + nm("의") + " 이번 주 놀이") + '</div>' +
                 '<div id="play-week-toggle" onclick="window.togglePlayWeekCards()" ' +
-                    'style="flex-shrink:0; font-size:12.5px; font-weight:800; background:#F2F4F6; ' +
+                    'style="flex-shrink:0; font-size:12.5px; font-weight:800; background:#F6F2EC; ' +
                     'color:' + GRAY + '; padding:6px 12px; border-radius:8px; cursor:pointer;">접어두기 \u2227</div>' +
             '</div>' +
 
@@ -685,7 +685,7 @@
 
                 todayCard(plan[ti], ti) +
 
-                '<div style="margin-top:16px; background:#F9FAFB; border:1px solid #EEF0F2; ' +
+                '<div style="margin-top:16px; background:#FBF8F3; border:1px solid #F2EDE6; ' +
                     'border-radius:16px; padding:2px 16px;">' +
                     '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                         'padding:15px 0 4px;">' +
@@ -739,7 +739,7 @@
         if (!host) return;
         var box = document.createElement("div");
         box.innerHTML = html();
-        var banner = host.querySelector("div[style*='background: #F4F8FF']");
+        var banner = host.querySelector("div[style*='background: #F7F5FD']");
         if (banner) host.insertBefore(box.firstChild, banner);
         else host.insertBefore(box.firstChild, host.firstChild);
     }

@@ -34,11 +34,11 @@ const carseatData = [
         id: "cs03", brand: "폴레드", name: "올에이지 360",
         age: ["newborn", "toddler", "junior"], install: ["isofix_tether", "belt"], 
         carSize: ["compact", "sedan", "suv", "carnival"],
-        compactOk: true, // 👈 [추가됨] 소형차 장착 가능!
+        compactOk: true, // 👈 [추가됨] 소형차 장착 가능
         rotation: "yes", safety: ["kc"], price: "low", // 👈 [수정됨] all -> kc
         bodySpec: "📏 신생아~160cm / ⚖️ 체중: ~36kg",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "락킹벨트 (모든 차량 장착)" },
-        desc: "ISOFIX가 없는 구형 차량(안전벨트 결합)에도 장착 가능! 탑테더 방식이라 카니발이나 팰리세이드 3열에도 설치하기 좋습니다.",
+        desc: "ISOFIX가 없는 구형 차량(안전벨트 결합)에도 장착 가능 탑테더 방식이라 카니발이나 팰리세이드 3열에도 설치하기 좋습니다.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGf9ELqdaK", searchKeyword: "폴레드 올에이지 360" 
     },
     {
@@ -93,7 +93,7 @@ const carseatData = [
         bodySpec: "📏 신생아~105cm / ⚖️ 18kg",
         specs: { adacScore: "미참여", reboundStopper: "친환경 밤부 모달 소재" },
         desc: "다이치의 안전성에 감성적인 디자인을 더했습니다. 태열이나 땀이 많은 아기를 위한 통기성 밤부 소재가 돋보입니다.",
-        purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/gbJmzhQHqC", // 👈 완벽한 딥링크!
+        purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/gbJmzhQHqC", // 👈 완벽한 딥링크
         searchKeyword: "다이치 블리바 360"
     },
 

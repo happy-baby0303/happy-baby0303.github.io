@@ -25,7 +25,7 @@
 (function () {
     'use strict';
 
-    var GRAY = "#8B95A1", DARK = "#191F28";
+    var GRAY = "#A3958A", DARK = "#4A413C";
     var KEY = "tosil_food_view", NAV = "food-nav3";
     var MARK = "data-food-tab", ORIG = "data-food-orig";
 
@@ -196,7 +196,7 @@
         nav.id = NAV;
         nav.setAttribute(MARK, "skip");
         nav.style.cssText =
-            "display:flex; gap:6px; background:#F2F4F6; border-radius:14px; " +
+            "display:flex; gap:6px; background:#F6F2EC; border-radius:14px; " +
             "padding:5px; margin:2px 0 16px;";
         c.insertBefore(nav, c.firstChild);
     }

@@ -107,7 +107,7 @@
     /* ---------- 2. 화면 그리는 함수 감싸기 ----------
        한 카드가 죽어도 그 카드만 비고 나머지는 그려지게. -------- */
 
-    var RE = /^(refresh|render|update|paint|draw|mount|tidy|open|close|switch)[A-Z]/;
+    var RE = /^(refresh|repaint|render|update|paint|draw|mount|tidy|open|close|switch)[A-Z]/;
 
     function guard(name) {
         var f = window[name];

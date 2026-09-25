@@ -30,7 +30,7 @@
     var TRY_KEY = "tosil_paci_tried";     // 써보고 안 된 모양
     var SYM_KEY = "tosil_paci_symptom";   // 마지막에 고른 증상
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var HOST = "paci-guide";
 
     function esc(s) {
@@ -195,7 +195,7 @@
                 'style="padding:14px 10px; border-radius:14px; cursor:pointer; text-align:center; ' +
                 'font-size:12.5px; font-weight:800; line-height:1.4; word-break:keep-all; ' +
                 (on ? 'background:' + BLUE + '; color:#FFFFFF; border:1px solid ' + BLUE + ';'
-                    : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                    : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:19px; margin-bottom:5px;">' + s.icon + '</div>' + esc(s.label) + '</div>';
         }).join("");
     }
@@ -215,9 +215,9 @@
                 '\u26A0\uFE0F ' + s.warn + '</div>';
         }
 
-        out += '<div style="background:#E8F3FF; border:1px solid #C9E2FF; border-radius:14px; ' +
+        out += '<div style="background:#F0EEFB; border:1px solid #DDD9F5; border-radius:14px; ' +
             'padding:15px 16px; margin-bottom:14px; font-size:13.5px; font-weight:600; ' +
-            'color:var(--gd-blue,#1B64DA); line-height:1.75; word-break:keep-all;">' +
+            'color:var(--gd-blue,#6A61CE); line-height:1.75; word-break:keep-all;">' +
             esc(s.note.replace(/<\/?b>/g, "")) + '</div>';
 
         var plus = isPlus();
@@ -235,15 +235,15 @@
         show.forEach(function (id, i) {
             var sh = shape(id);
             if (!sh) return;
-            out += '<div style="background: #FFFFFF; border:1px solid #E5E8EB; border-radius:14px; ' +
+            out += '<div style="background: #FFFFFF; border:1px solid #EDE6DE; border-radius:14px; ' +
                 'padding:16px; margin-bottom:9px;">' +
                 '<div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">' +
                     '<span style="flex-shrink:0; width:21px; height:21px; border-radius:7px; ' +
                         'background:' + DARK + '; color:#FFFFFF; font-size:11.5px; font-weight:900; ' +
                         'display:inline-flex; align-items:center; justify-content:center;">' + (i + 1) + '</span>' +
-                    '<span style="font-size:14.5px; font-weight:900; color:#191F28;">' + esc(sh.name) + '</span>' +
+                    '<span style="font-size:14.5px; font-weight:900; color:#4A413C;">' + esc(sh.name) + '</span>' +
                 '</div>' +
-                '<div style="font-size:12.5px; font-weight:700; color:#4E5968; line-height:1.65; ' +
+                '<div style="font-size:12.5px; font-weight:700; color:#7A6F68; line-height:1.65; ' +
                     'word-break:keep-all;">' + esc(sh.look) + '</div>' +
                 '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.65; word-break:keep-all;">' + esc(sh.why) + '</div>' +
@@ -254,7 +254,7 @@
                         'text-decoration:none;">쿠팡에서 찾아보기</a>' +
                     '<div onclick="window.togglePaciTried(\'' + sh.id + '\')" ' +
                         'style="flex:1; text-align:center; padding:11px; background: #FFFFFF; ' +
-                        'color:#4E5968; border:1px solid #D1D5DB; border-radius:11px; ' +
+                        'color:#7A6F68; border:1px solid #DCD3C8; border-radius:11px; ' +
                         'font-size:12.5px; font-weight:800; cursor:pointer;">이건 안 됐어요</div>' +
                 '</div>' +
             '</div>';
@@ -316,7 +316,7 @@
                 'padding:15px 16px; margin-bottom:10px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:var(--gd-red,#E32636); ' +
                     'margin-bottom:7px;">\u274C 이것만은 하지 마세요</div>' +
-                '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.85; ' +
+                '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                     'word-break:keep-all;">' +
                     '\u00b7 <b>끈이나 줄로 목에 걸어두지 마세요.</b> 옷핀 집게형만 쓰시고, 잘 때는 떼세요<br>' +
                     '\u00b7 <b>꿀이나 설탕을 묻히지 마세요.</b> 돌 전 꿀은 절대 안 됩니다<br>' +
@@ -325,8 +325,8 @@
                 '</div>' +
             '</div>' +
 
-            '<div style="background: #F9FAFB; border:1px solid #E5E8EB; border-radius:14px; ' +
-                'padding:15px 16px; font-size:13px; font-weight:600; color:#4E5968; ' +
+            '<div style="background: #FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
+                'padding:15px 16px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
                 '\uD83D\uDD01 <b>모양이 안 맞으면 재질을 바꿔보세요.</b> ' +
                 '실리콘은 단단하고 냄새가 없으며 오래 갑니다. ' +

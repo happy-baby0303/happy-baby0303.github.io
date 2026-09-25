@@ -22,7 +22,7 @@
 
     var KEY = "tosil_bathtoy_washed";
     var ID = "bath-mold";
-    var GRAY = "#8B95A1", DARK = "#191F28", RED = "#C62828", GREEN = "#1F9D6B";
+    var GRAY = "#A3958A", DARK = "#4A413C", RED = "#C62828", GREEN = "#1F9D6B";
 
     /* 물이 안에 고이는 것들. 이름으로 고른다. */
     var WET = /물총|분수|폭포|수도꼭지|버블크랩|물놀이 세트|아쿠아플레이|욕조|목욕 인형|바스볼/;
@@ -89,7 +89,7 @@
                 'letter-spacing:-0.4px; margin-bottom:8px;">' +
                 (over ? "🦠 목욕 장난감 속을 볼 때가 됐어요" : "✅ 목욕 장난감 씻긴 지 " + d + "일") + '</div>' +
 
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 (over
                     ? '물총·분수·오리처럼 <b>안에 구멍이 있는 것</b>은 며칠만 지나도 속이 새까매집니다. ' +
@@ -101,7 +101,7 @@
 
             (over
                 ? '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; padding:13px 14px; margin-top:12px; ' +
-                  'font-size:12px; font-weight:600; color:#4E5968; line-height:1.8;">' +
+                  'font-size:12px; font-weight:600; color:#7A6F68; line-height:1.8;">' +
                   '① 구멍을 <b>손으로 꾹 눌러 물을 다 빼세요</b><br>' +
                   '② 따뜻한 물 1L + 식초 한 큰술에 <b>30분</b> 담가둡니다<br>' +
                   '③ 헹구고 <b>구멍이 아래로 가게</b> 세워서 완전히 말립니다<br>' +

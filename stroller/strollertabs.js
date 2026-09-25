@@ -79,7 +79,7 @@
             if (!btn) return;
             var on = (t.id === c);
             btn.style.background = on ? "#FFFFFF" : "transparent";
-            btn.style.color = on ? "#191F28" : "#8B95A1";
+            btn.style.color = on ? "#4A413C" : "#A3958A";
             btn.style.boxShadow = on ? "0 2px 8px rgba(0,0,0,0.06)" : "none";
         });
         try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
@@ -116,7 +116,7 @@
         if (typeof head.onclick !== "function") {
             var mark = document.createElement("span");
             mark.id = "sf-mark";
-            mark.style.cssText = "margin-left:auto; font-size:13px; font-weight:800; color:#8B95A1;";
+            mark.style.cssText = "margin-left:auto; font-size:13px; font-weight:800; color:#A3958A;";
             try {
                 var disp = window.getComputedStyle ? getComputedStyle(head).display : "";
                 if (String(disp).indexOf("flex") === -1) {
@@ -359,14 +359,14 @@
         var head = document.createElement("div");
         head.style.cssText =
             "display:flex; align-items:center; gap:8px; background: #FFFFFF; " +
-            "border:1px solid #F2F5F8; border-radius:20px; padding:18px 22px; " +
+            "border:1px solid #F7F3ED; border-radius:20px; padding:18px 22px; " +
             "cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
         head.innerHTML =
-            '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
+            '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
                 '\uD83D\uDCD6 알아두면 좋은 것</span>' +
-            '<span class="st-extra-n" style="font-size:12.5px; font-weight:800; color:#8B95A1;">' + targets.length + '</span>' +
+            '<span class="st-extra-n" style="font-size:12.5px; font-weight:800; color:#A3958A;">' + targets.length + '</span>' +
             '<span id="sse-mark" style="margin-left:auto; font-size:13px; font-weight:800; ' +
-                'color:#8B95A1;">펼치기 \u25BE</span>';
+                'color:#A3958A;">펼치기 \u25BE</span>';
 
         var body = document.createElement("div");
         /* 나중에 붙는 카드를 여기로 마저 넣으려면 찾을 수 있어야 한다 */
@@ -494,7 +494,7 @@
         var bar = document.createElement("div");
         bar.id = BAR;
         bar.style.cssText =
-            "display:flex; gap:4px; background: #F2F4F6; border:1px solid #E5E8EB; " +
+            "display:flex; gap:4px; background: #F6F2EC; border:1px solid #EDE6DE; " +
             "border-radius:14px; padding:4px; margin:0 0 20px;";
         bar.innerHTML = TABS.map(function (t) {
             return '<div id="stab-' + t.id + '" onclick="window.switchStrollerTab(\'' + t.id + '\')" ' +

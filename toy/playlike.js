@@ -25,7 +25,7 @@
     'use strict';
 
     var KEY = "tosil_play_likes";
-    var GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B", GOLD = "#8A6D00";
+    var GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B", GOLD = "#8A6D00";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -99,9 +99,9 @@
             return '<span onclick="event.stopPropagation(); window.setPlayLike(\'' + id + '\',' + val + ')" ' +
                 'style="display:inline-flex; align-items:center; justify-content:center; ' +
                 'width:30px; height:30px; border-radius:9px; cursor:pointer; font-size:14px; ' +
-                (on ? 'background:' + (val > 0 ? "#EAF7F1" : "#F2F4F6") + '; ' +
-                      'border:1.5px solid ' + (val > 0 ? "#A7DFC8" : "#D1D5DB") + ';'
-                    : 'background:transparent; border:1.5px solid #E5E8EB; opacity:0.5;') +
+                (on ? 'background:' + (val > 0 ? "#EAF7F1" : "#F6F2EC") + '; ' +
+                      'border:1.5px solid ' + (val > 0 ? "#A7DFC8" : "#DCD3C8") + ';'
+                    : 'background:transparent; border:1.5px solid #EDE6DE; opacity:0.5;') +
                 '">' + icon + '</span>';
         };
         return '<span class="play-like" data-pid="' + id + '" ' +
@@ -122,7 +122,7 @@
     function summaryHTML() {
         var s = scores();
         if (s.count < 3) {
-            return '<div id="play-like-sum" style="background:#F9FAFB; border:1px solid #E5E8EB; ' +
+            return '<div id="play-like-sum" style="background:#FBF8F3; border:1px solid #EDE6DE; ' +
                 'border-radius:14px; padding:14px 16px; margin-top:12px; font-size:12.5px; ' +
                 'font-weight:600; color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '놀고 나서 <b>놀았어요</b>를 누르면 어땠는지 물어봐요. ' +
@@ -144,7 +144,7 @@
             'border-radius:14px; padding:15px 16px; margin-top:12px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:#1F6F52; margin-bottom:5px;">' +
                 '🎯 ' + s.count + '번 눌러주신 걸로 알아낸 것</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.7; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                 'word-break:keep-all;">' + line + '<br>' +
                 '다음 주 처방전에 이런 놀이를 더 넣어드릴게요.</div>' +
         '</div>';

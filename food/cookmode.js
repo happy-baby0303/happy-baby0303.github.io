@@ -5,9 +5,9 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6";
-    var GRAY = "#8B95A1";
-    var DARK = "#191F28";
+    var BLUE = "#7F77DD";
+    var GRAY = "#A3958A";
+    var DARK = "#4A413C";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -77,7 +77,7 @@
 
         var cur = steps[at];
         var bodyText = cleanNum(cur); // 앞의 숫자만 지움
-        var bodyHtml = formatPremiumBadges(bodyText); // 예쁜 뱃지로 변환!
+        var bodyHtml = formatPremiumBadges(bodyText); // 예쁜 뱃지로 변환
         
         var mins = minsOf(cur);
         var last = (at === steps.length - 1);
@@ -86,7 +86,7 @@
             var on = (i === at), done = (i < at);
             return '<div onclick="window.cookJump(' + i + ')" ' +
                 'style="flex:1; height:6px; border-radius:3px; cursor:pointer; transition:0.3s; ' +
-                'background:' + (on ? BLUE : done ? "#C9E2FF" : "#E5E8EB") + ';"></div>';
+                'background:' + (on ? BLUE : done ? "#DDD9F5" : "#EDE6DE") + ';"></div>';
         }).join("");
 
         box.innerHTML =
@@ -96,7 +96,7 @@
                 'letter-spacing:0.5px; margin-bottom:14px;">' +
                 'Step ' + (at + 1) + ' / ' + steps.length + '</div>' +
 
-            '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:20px; ' +
+            '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:20px; ' +
                 'padding:30px 24px; min-height:160px; display:flex; align-items:center; ' +
                 'justify-content:center; margin-bottom:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">' +
                 '<div style="font-size:17px; font-weight:700; color:' + DARK + '; ' +
@@ -113,7 +113,7 @@
             '<div style="display:flex; gap:10px;">' +
                 (at > 0
                     ? '<button onclick="window.cookGo(-1)" style="width:90px; padding:18px 0; ' +
-                      'background:#F2F4F6; color:#4E5968; border:none; border-radius:14px; ' +
+                      'background:#F6F2EC; color:#7A6F68; border:none; border-radius:14px; ' +
                       'font-size:15px; font-weight:800; cursor:pointer;">이전</button>'
                     : '') +
                 (last
@@ -121,7 +121,7 @@
                       'background:#10B981; color:#FFFFFF; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(16,185,129,0.2); ' +
                       'font-size:16px; font-weight:900; cursor:pointer;">요리 완성 🎉</button>'
                     : '<button onclick="window.cookGo(1)" style="flex:1; padding:18px 0; ' +
-                      'background:' + BLUE + '; color:#FFFFFF; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(49,130,246,0.2); ' +
+                      'background:' + BLUE + '; color:#FFFFFF; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(127, 119, 221,0.2); ' +
                       'font-size:16px; font-weight:900; cursor:pointer;">다음 →</button>') +
             '</div>' +
 

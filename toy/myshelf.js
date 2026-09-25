@@ -24,7 +24,7 @@
     'use strict';
 
     var KEY = "tosil_my_toys";
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B";
     var ID = "my-shelf", SHEET = "shelf-sheet";
 
     function esc(s) {
@@ -55,7 +55,7 @@
         t.setAttribute("style",
             "position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); " +
             "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
-            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "background:rgba(74, 65, 60,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
             "font-size:13px; font-weight:700; line-height:1.55; text-align:center; word-break:keep-all; " +
             "white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); transition:opacity .25s;");
         t.textContent = String(msg == null ? "" : msg);
@@ -120,7 +120,7 @@
                         'style="padding:9px 12px; border-radius:11px; cursor:pointer; ' +
                         'font-size:12.5px; font-weight:800; ' +
                         (on ? 'background:' + GREEN + '; color:#FFFFFF; border:1px solid ' + GREEN + ';'
-                            : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                            : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                         (on ? "✓ " : "") + esc(t.name) + '</div>';
                 }).join("") +
                 '</div></div>';
@@ -141,7 +141,7 @@
         '</div>' +
 
         '<div style="position:fixed; left:0; right:0; bottom:0; background:#FFFFFF; ' +
-            'border-top:1px solid #E5E8EB; padding:14px 20px calc(14px + env(safe-area-inset-bottom, 0px));">' +
+            'border-top:1px solid #EDE6DE; padding:14px 20px calc(14px + env(safe-area-inset-bottom, 0px));">' +
             '<div style="max-width:480px; margin:0 auto;">' +
                 '<div onclick="window.closeShelfSheet()" style="text-align:center; padding:17px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
@@ -171,10 +171,10 @@
                     ? '이미 있는 걸로 놀이를 짜고, 목록에는 \'이미 갖고 계세요\' 로 표시해요.'
                     : '갖고 계신 걸 알려주시면 그걸로 놀이를 짜드리고, 두 번 사지 않게 표시해드려요.') + '</div>' +
             '<div onclick="window.openShelfSheet()" style="display:flex; align-items:center; gap:10px; ' +
-                'background:#F9FAFB; border:1px solid #EEF0F2; border-radius:14px; padding:14px 16px; ' +
+                'background:#FBF8F3; border:1px solid #F2EDE6; border-radius:14px; padding:14px 16px; ' +
                 'cursor:pointer;">' +
                 '<div style="flex:1; min-width:0; font-size:13.5px; font-weight:800; ' +
-                    'color:' + (have.length ? '#4E5968' : DARK) + '; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                    'color:' + (have.length ? '#7A6F68' : DARK) + '; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     (have.length
                         ? esc(names.join(" \u00b7 ")) + (have.length > 4 ? " 외 " + (have.length - 4) + "개" : "")
                         : "갖고 계신 장난감 고르기") + '</div>' +

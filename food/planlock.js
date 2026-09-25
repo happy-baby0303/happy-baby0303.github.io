@@ -17,7 +17,7 @@
 (function () {
     'use strict';
 
-    var GRAY = "#8B95A1", DARK = "#191F28", GOLD = "#8A6D00";
+    var GRAY = "#A3958A", DARK = "#4A413C", GOLD = "#8A6D00";
 
     function isPlus() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
@@ -86,40 +86,41 @@
                 '<span style="display:inline-block; padding:4px 9px; border-radius:7px; ' +
                     'background:#FFF9E6; color:#8A6D00; font-size:10.5px; font-weight:900; ' +
                     'letter-spacing:0.4px;">PLUS</span>' +
-                '<div style="margin-top:9px; font-size:19px; font-weight:900; color:#191F28; ' +
+                '<div style="margin-top:9px; font-size:19px; font-weight:900; color:#4A413C; ' +
                     'letter-spacing:-0.4px; line-height:1.35; word-break:keep-all;">' +
                     '일주일 식단, 짜보신 적 있으세요?</div>' +
               '</div>' +
               '<span onclick="window.closeFoodPaywall()" style="flex-shrink:0; font-size:26px; ' +
-                  'font-weight:300; color:#8B95A1; cursor:pointer; line-height:1; padding:0 4px;">&times;</span>' +
+                  'font-weight:300; color:#A3958A; cursor:pointer; line-height:1; padding:0 4px;">&times;</span>' +
             '</div>' +
 
-            '<div style="margin-top:11px; font-size:13.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:11px; font-size:13.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
                 '아직 안 먹여본 재료를 고르고, 알레르기 테스트를 사흘씩 하고, ' +
                 '겹치지 않게 일주일 식단표를 만드는 일.<br>' +
                 '<b>배냇함이 도와드릴게요.</b></div>' +
 
-            '<div style="margin-top:16px; background:#F9FAFB; border:1px solid #E5E8EB; ' +
+            '<div style="margin-top:16px; background:#FBF8F3; border:1px solid #EDE6DE; ' +
                 'border-radius:14px; padding:15px 16px; font-size:12.5px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.9; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.9; word-break:keep-all;">' +
                 '\u00b7 ' + esc(nm("의")) + ' 개월수에 맞춰 <b>일주일치를 한 번에</b><br>' +
                 '\u00b7 새 재료끼리 겹치지 않게 <b>테스트 날짜를 띄워서</b><br>' +
                 '\u00b7 <b>장 볼 목록</b>도 같이 \u2014 마트에서 몇 개 사면 되는지<br>' +
                 '\u00b7 <b>이번 주 영양</b>은 어땠는지 한눈에' +
             '</div>' +
 
-            '<div style="margin-top:14px; font-size:12.5px; font-weight:600; color:#8B95A1; ' +
+            '<div style="margin-top:14px; font-size:12.5px; font-weight:600; color:#A3958A; ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                '<b style="color:#4E5968;">레시피 135종과 알레르기 기록은 계속 무료예요.</b><br>' +
+                '<b style="color:#7A6F68;">레시피 135종과 알레르기 기록은 계속 무료예요.</b><br>' +
                 '뭘 먹일지 고르는 건 원래 열려 있습니다.</div>' +
 
             '<div onclick="window.closeFoodPaywall(); window.goFoodPlus();" ' +
-                'style="margin-top:20px; text-align:center; padding:17px; background:#191F28; ' +
-                'color:#FFFFFF; border-radius:14px; font-size:15.5px; font-weight:900; cursor:pointer;">' +
+                /* PLUS 로 가는 문은 금색으로. 검은 막대가 한 화면에 여러 개 겹치지 않게 */
+                'style="margin-top:20px; text-align:center; padding:14px; background:#B98A2E; ' +
+                'color:#FFFFFF; border-radius:14px; font-size:14.5px; font-weight:900; cursor:pointer;">' +
                 'PLUS 둘러보기</div>' +
             '<div onclick="window.closeFoodPaywall()" style="margin-top:10px; text-align:center; ' +
-                'padding:13px; font-size:13px; font-weight:800; color:#8B95A1; cursor:pointer;">' +
+                'padding:13px; font-size:13px; font-weight:800; color:#A3958A; cursor:pointer;">' +
                 '나중에 볼게요</div>' +
           '</div>' +
         '</div>';

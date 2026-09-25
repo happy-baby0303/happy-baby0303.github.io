@@ -30,9 +30,9 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6";
-    var GRAY = "#8B95A1";
-    var DARK = "#191F28";
+    var BLUE = "#7F77DD";
+    var GRAY = "#A3958A";
+    var DARK = "#4A413C";
     var RED  = "#E32636";
 
     function esc(s) {
@@ -61,7 +61,7 @@
         t.setAttribute("style",
             "position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); " +
             "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
-            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "background:rgba(74, 65, 60,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
             "font-size:13px; font-weight:700; line-height:1.55; text-align:center; word-break:keep-all; " +
             "white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); transition:opacity .25s;");
         t.textContent = String(msg == null ? "" : msg);
@@ -79,7 +79,7 @@
         var st = document.createElement("style");
         st.id = "cg-vars";
         st.textContent =
-            ":root{--cg-blue:#1B64DA;--cg-gold:#8A6D00;--cg-red:#C62828;--cg-green:#1F6F52;}" +
+            ":root{--cg-blue:#6A61CE;--cg-gold:#8A6D00;--cg-red:#C62828;--cg-green:#1F6F52;}" +
             "body.dark-mode{--cg-blue:#7EB6FF;--cg-gold:#E8C766;--cg-red:#FF8A8A;--cg-green:#7FD8B0;}";
         (document.head || document.documentElement).appendChild(st);
     })();
@@ -139,10 +139,10 @@
             '<div class="matrix-header" style="color:var(' + tone + ');">🔄 뒤보기 · 앞보기</div>' +
             '<div style="font-size:15.5px; font-weight:900; color:' + DARK + '; ' +
                 'margin:-14px 0 10px; line-height:1.45; word-break:keep-all;">' + head + '</div>' +
-            '<div style="font-size:13.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:13.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' + body + '</div>' +
-            '<div style="margin-top:14px; background:#F9FAFB; border:1px solid #E5E8EB; border-radius:12px; ' +
-                'padding:14px 15px; font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+            '<div style="margin-top:14px; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
+                'padding:14px 15px; font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '카시트 안전에서 제일 크게 갈리는 게 이 하나입니다. 어떤 제품을 사느냐보다 ' +
                 '<b>얼마나 오래 뒤를 보게 하느냐</b>가 더 많은 걸 좌우해요.</div>' +
         '</div>';
@@ -183,10 +183,10 @@
 
     function checkCard() {
         var rows = CHECK.map(function (c) {
-            return '<div style="padding:14px 0; border-bottom:1px solid #F2F4F6;">' +
+            return '<div style="padding:14px 0; border-bottom:1px solid #F6F2EC;">' +
                 '<div style="font-size:14px; font-weight:900; color:var(' + c.tone + '); margin-bottom:6px;">' +
                     c.icon + ' ' + c.t + '</div>' +
-                '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.75; ' +
+                '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.75; ' +
                     'word-break:keep-all;">' + c.d + '</div>' +
             '</div>';
         }).join("");
@@ -210,26 +210,26 @@
     function adacCard() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">📊 ADAC 점수, 낮을수록 좋습니다</div>' +
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 '독일 자동차협회(ADAC)가 실제로 충돌시켜 매기는 점수예요. ' +
                 '<b>학점처럼 1점대가 제일 좋고 5점대가 제일 나쁩니다.</b> ' +
                 '2.1보다 1.7이 더 좋은 겁니다.</div>' +
 
             '<div style="display:flex; gap:4px; margin-bottom:10px;">' +
-                ['0.5~1.5|매우 좋음|#1F9D6B','1.6~2.5|좋음|#3182F6','2.6~3.5|보통|#E0A72E',
+                ['0.5~1.5|매우 좋음|#1F9D6B','1.6~2.5|좋음|#7F77DD','2.6~3.5|보통|#E0A72E',
                  '3.6~4.5|미흡|#E07B39','4.6~5.5|위험|#E32636'].map(function (s) {
                     var p = s.split("|");
                     return '<div style="flex:1; text-align:center; padding:9px 2px; border-radius:9px; ' +
                         'background:' + p[2] + '18; border:1px solid ' + p[2] + '44;">' +
                         '<div style="font-size:10.5px; font-weight:900; color:' + p[2] + ';">' + p[0] + '</div>' +
-                        '<div style="font-size:10px; font-weight:700; color:#4E5968; margin-top:2px;">' + p[1] + '</div>' +
+                        '<div style="font-size:10px; font-weight:700; color:#7A6F68; margin-top:2px;">' + p[1] + '</div>' +
                     '</div>';
                  }).join("") +
             '</div>' +
 
-            '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:12px; padding:14px 15px; ' +
-                'font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+            '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:14px 15px; ' +
+                'font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '<b>미참여</b>라고 적힌 제품은 ADAC 시험을 안 받았다는 뜻일 뿐, 나쁘다는 뜻이 아닙니다. ' +
                 '국내 브랜드는 대부분 참여하지 않아요. 대신 <b>KC 인증</b>과 <b>i-Size(UN R129)</b> 표시를 보세요.</div>' +
         '</div>';
@@ -306,14 +306,14 @@
                 'style="padding:14px 10px; border-radius:14px; cursor:pointer; text-align:center; ' +
                 'font-size:12.5px; font-weight:800; line-height:1.4; word-break:keep-all; ' +
                 (on ? 'background:' + BLUE + '; color:#FFFFFF; border:1px solid ' + BLUE + ';'
-                    : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                    : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:19px; margin-bottom:5px;">' + c.icon + '</div>' + esc(c.label) + '</div>';
         }).join("");
 
         var tip = "";
         for (var i = 0; i < CASES.length; i++) {
             if (CASES[i].id === picked) {
-                tip = '<div style="margin-top:14px; background:#E8F3FF; border:1px solid #C9E2FF; ' +
+                tip = '<div style="margin-top:14px; background:#F0EEFB; border:1px solid #DDD9F5; ' +
                       'border-radius:14px; padding:15px 16px; font-size:13.5px; font-weight:600; ' +
                       'color:var(--cg-blue); line-height:1.75; word-break:keep-all;">' +
                       CASES[i].icon + ' ' + CASES[i].tip + '</div>';
@@ -343,7 +343,7 @@
                 '<b>사고 이력이 있는 카시트는 겉이 멀쩡해도 쓰면 안 됩니다.</b> ' +
                 '충격을 흡수하면서 안쪽 구조가 이미 한 번 망가졌을 수 있어요. 눈으로는 구분이 안 됩니다.</div>' +
 
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '· 플라스틱은 <b>햇빛과 온도차로 삭습니다.</b> 제조사가 정한 사용 기한(보통 <b>제조일로부터 6~10년</b>)이 있어요. ' +
                 '카시트 아래나 옆에 제조일이 찍혀 있습니다.<br><br>' +
                 '· 설명서와 <b>부품이 다 있는지</b> 보세요. 이너시트나 클립 하나가 없으면 그 자리를 대신할 게 없습니다.<br><br>' +

@@ -24,7 +24,7 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B";
     var CAL = "tosil_food_calendar";
     var ID = "next-food";
 
@@ -169,7 +169,7 @@
                     'border-radius:16px; padding:16px; margin-bottom:14px;">' +
                     '<div style="font-size:14px; font-weight:900; color:#8A6D00; margin-bottom:5px;">' +
                         '⏳ ' + esc(r.last.name) + ' 시작한 지 ' + (d + 1) + '일째</div>' +
-                    '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.7; ' +
+                    '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                         'word-break:keep-all;"><b>' + (3 - d) + '일 더</b> 지켜본 뒤에 다음 재료를 시작하세요. ' +
                         '지금 새 걸 같이 주면 둘 중 뭐가 문제였는지 알 수 없습니다.</div>' +
                 '</div>';
@@ -184,7 +184,7 @@
         }
 
         var x = r.next;
-        return '<div id="' + ID + '" style="background:#FFFFFF; border:1px solid #E5E8EB; ' +
+        return '<div id="' + ID + '" style="background:#FFFFFF; border:1px solid #EDE6DE; ' +
             'border-radius:16px; padding:18px 16px; margin-bottom:14px;">' +
 
             '<div style="font-size:11.5px; font-weight:900; color:' + GRAY + '; ' +
@@ -198,7 +198,7 @@
                     m + '개월이면 괜찮아요</span>' : '') +
             '</div>' +
 
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.7; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                 'word-break:keep-all; margin-bottom:12px;">' + x.why + '<br>' +
                 '<span style="color:' + GRAY + '; font-size:12px;">아침에 소량으로 시작해서 <b>사흘</b> 지켜보세요.</span></div>' +
 

@@ -32,7 +32,7 @@
 
     var ID   = "stroller-trunk";
     var KEY  = "tosil_stroller_car";
-    var GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
+    var GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -156,7 +156,7 @@
                     'style="padding:9px 12px; border-radius:11px; cursor:pointer; ' +
                     'font-size:12.5px; font-weight:800; ' +
                     (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                        : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                        : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                     esc(db[k].name) + '</div>';
             }).join("") +
         '</div>';
@@ -226,7 +226,7 @@
                         '치수는 맞아도 매번 시트를 빼야 합니다.</span>';
             }
 
-            body = '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            body = '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                    'line-height:1.8; word-break:keep-all;">' + body + '</div>' +
                    (r.measured
                         ? '<div style="margin-top:12px; padding:12px 14px; background:#EAF7F1; ' +

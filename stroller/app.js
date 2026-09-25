@@ -59,9 +59,9 @@ function toggleFavorite(id) {
         const btn = document.getElementById(`fav-btn-${id}`);
         if (btn) {
             btn.innerHTML = isFav ? '❤️ 찜 해제' : '🤍 찜하기';
-            btn.style.background = isFav ? '#FFF2F2' : '#F2F4F6';
-            btn.style.color = isFav ? '#E32636' : '#4E5968';
-            btn.style.borderColor = isFav ? '#FCA5A5' : '#E5E8EB';
+            btn.style.background = isFav ? '#FFF2F2' : '#F6F2EC';
+            btn.style.color = isFav ? '#E32636' : '#7A6F68';
+            btn.style.borderColor = isFav ? '#FCA5A5' : '#EDE6DE';
         }
     }
 }
@@ -75,9 +75,9 @@ function toggleFavView() {
 
     if (isFavViewMode) {
         btn.innerHTML = '🔙 5D 매칭 화면으로 돌아가기';
-        btn.style.background = '#F2F4F6';
-        btn.style.color = '#4E5968';
-        btn.style.borderColor = '#D1D5DB';
+        btn.style.background = '#F6F2EC';
+        btn.style.color = '#7A6F68';
+        btn.style.borderColor = '#DCD3C8';
         if(matrixPanel) matrixPanel.style.display = 'none';
         if(filterSection) filterSection.style.display = 'none';
         renderFavorites();
@@ -105,7 +105,7 @@ function renderFavorites() {
     if(otherArea) otherArea.style.display = 'none';
 
     if (favorites.length === 0) {
-        topArea.innerHTML = `<div class="premium-empty-state" style="justify-content:center; padding: 40px;"><div class="empty-icon">💔</div><div class="empty-text" style="text-align:center;"><b>아직 찜한 유모차가 없어요!</b><span>마음에 드는 유모차에 하트(❤️)를 눌러보세요.</span></div></div>`;
+        topArea.innerHTML = `<div class="premium-empty-state" style="justify-content:center; padding: 40px;"><div class="empty-icon">💔</div><div class="empty-text" style="text-align:center;"><b>아직 찜한 유모차가 없어요</b><span>마음에 드는 유모차에 하트(❤️)를 눌러보세요.</span></div></div>`;
         return;
     }
 
@@ -141,15 +141,15 @@ function renderVS() {
     res.innerHTML = `
         <div style="overflow-x: auto; padding-bottom: 8px;">
             <table class="vs-table" style="width: 100%; min-width: 320px; border-collapse: collapse; text-align: center; font-size: 13.5px;">
-                <tr style="background: #F8F9FA; border-bottom: 2px solid #E5E8EB;">
+                <tr style="background: #FAF7F2; border-bottom: 2px solid #EDE6DE;">
                     <th class="vs-label" style="padding:10px; width: 25%;">항목</th>
-                    <th style="color:#3182F6; font-weight:900; padding:10px; width: 37%;">${i1.name}</th>
+                    <th style="color:#7F77DD; font-weight:900; padding:10px; width: 37%;">${i1.name}</th>
                     <th style="color:#6B31F6; font-weight:900; padding:10px; width: 37%;">${i2.name}</th>
                 </tr>
-                <tr style="border-bottom: 1px solid #F2F5F8;"><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#4E5968;">💰 공식가</td><td>${i1.price.toLocaleString()}원</td><td>${i2.price.toLocaleString()}원</td></tr>
-                <tr style="border-bottom: 1px solid #F2F5F8;"><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#4E5968;">💸 추가비용</td><td style="color:#E32636; font-size:12px; font-weight:700;">+${(i1.hiddenTax?.cost || 0).toLocaleString()}원</td><td style="color:#E32636; font-size:12px; font-weight:700;">+${(i2.hiddenTax?.cost || 0).toLocaleString()}원</td></tr>
-                <tr style="border-bottom: 1px solid #F2F5F8;"><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#4E5968;">🪶 무게</td><td>${i1.specs.weight}kg</td><td>${i2.specs.weight}kg</td></tr>
-                <tr><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#4E5968;">👶 2인확장</td><td>${i1.expand.includes('⭕')?'가능':'불가'}</td><td>${i2.expand.includes('⭕')?'가능':'불가'}</td></tr>
+                <tr style="border-bottom: 1px solid #F7F3ED;"><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#7A6F68;">💰 공식가</td><td>${i1.price.toLocaleString()}원</td><td>${i2.price.toLocaleString()}원</td></tr>
+                <tr style="border-bottom: 1px solid #F7F3ED;"><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#7A6F68;">💸 추가비용</td><td style="color:#E32636; font-size:12px; font-weight:700;">+${(i1.hiddenTax?.cost || 0).toLocaleString()}원</td><td style="color:#E32636; font-size:12px; font-weight:700;">+${(i2.hiddenTax?.cost || 0).toLocaleString()}원</td></tr>
+                <tr style="border-bottom: 1px solid #F7F3ED;"><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#7A6F68;">🪶 무게</td><td>${i1.specs.weight}kg</td><td>${i2.specs.weight}kg</td></tr>
+                <tr><td class="vs-label" style="padding:12px 4px; font-weight:800; color:#7A6F68;">👶 2인확장</td><td>${i1.expand.includes('⭕')?'가능':'불가'}</td><td>${i2.expand.includes('⭕')?'가능':'불가'}</td></tr>
             </table>
         </div>
     `;
@@ -163,7 +163,7 @@ function renderAdapterCard(brandName, textData) {
     if(!textData) return '';
     let statusClass = "good"; let icon = "✅"; let badgeText = "잘 맞음";
     if (textData.includes("❌")) { statusClass = "bad"; icon = "🚨"; badgeText = "호환 불가"; }
-    else if (textData.includes("필요") || textData.includes("주의") || textData.includes("필수!")) { statusClass = "warn"; icon = "⚠️"; badgeText = "조건부 호환"; }
+    else if (textData.includes("필요") || textData.includes("주의") || textData.includes("필수")) { statusClass = "warn"; icon = "⚠️"; badgeText = "조건부 호환"; }
     let mainText = textData, subText = "";
     if(textData.includes("(")) { let parts = textData.split("("); mainText = parts[0].trim(); subText = "(" + parts[1]; }
     return `<div class="adapter-card"><div class="adapter-header"><div class="adapter-brand">${brandName}</div><div class="adapter-badge ${statusClass}">${icon} ${badgeText}</div></div><div class="adapter-main-desc">${mainText.replace(/[❌⭕🚨⚠️]/g, '')}</div>${subText ? `<div class="adapter-sub-desc">${subText.replace(/[❌⭕🚨⚠️]/g, '')}</div>` : ''}</div>`;
@@ -187,14 +187,14 @@ function generateCardHtml(item) {
     const favorites = JSON.parse(localStorage.getItem('favStrollers')) || [];
     const isFav = favorites.includes(itemId);
     const heartIcon = isFav ? '❤️ 찜 해제' : '🤍 찜하기';
-    const heartColor = isFav ? '#FFF2F2' : '#F2F4F6';
-    const heartText = isFav ? '#E32636' : '#4E5968';
-    const heartBorder = isFav ? '#FCA5A5' : '#E5E8EB';
+    const heartColor = isFav ? '#FFF2F2' : '#F6F2EC';
+    const heartText = isFav ? '#E32636' : '#7A6F68';
+    const heartBorder = isFav ? '#FCA5A5' : '#EDE6DE';
 
     // 2. 무게 및 크기 시각화
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
-    const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#3182F6');
-    let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#1B64DA; background:#E8F3FF;' : (item.specs.cabin.includes('⚠️') ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
+    const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#7F77DD');
+    let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#6A61CE; background:#F0EEFB;' : (item.specs.cabin.includes('⚠️') ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
 
     const maxStrollerDim = Math.max(...item.foldedDims);
     let targetName = "20인치 기내용"; let targetDim = 55;
@@ -203,7 +203,7 @@ function generateCardHtml(item) {
     const maxGraphHeight = Math.max(maxStrollerDim, targetDim) + 10;
     const strollerHeightPct = (maxStrollerDim / maxGraphHeight) * 100;
     const carrierHeightPct = (targetDim / maxGraphHeight) * 100;
-    let diffDesc = maxStrollerDim > targetDim ? `<div class="size-visual-desc warn">${targetName}보다 <b>${maxStrollerDim - targetDim}cm 더 큼</b></div>` : `<div class="size-visual-desc">${targetName}보다 <b>${targetDim - maxStrollerDim}cm 더 작음!</b></div>`;
+    let diffDesc = maxStrollerDim > targetDim ? `<div class="size-visual-desc warn">${targetName}보다 <b>${maxStrollerDim - targetDim}cm 더 큼</b></div>` : `<div class="size-visual-desc">${targetName}보다 <b>${targetDim - maxStrollerDim}cm 더 작음</b></div>`;
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
     // 3. AI 리포트
@@ -213,15 +213,15 @@ function generateCardHtml(item) {
         if (item.matchRate === 100) {
             reasonLi = `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`;
         } else if (item.matchReasons && item.matchReasons.length > 0) {
-            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px; color: #4E5968;">🚨 <b>${r}</b></li>`).join('');
+            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px; color: #7A6F68;">🚨 <b>${r}</b></li>`).join('');
         }
         let reportTitle = item.matchRate >= 80 ? '🟢 조건에 잘 맞아요' : (item.matchRate >= 50 ? '⚠️ 일부만 맞아요' : '❌ 조건에 안 맞아요 판정');
-        let titleColor = item.matchRate >= 80 ? '#3182F6' : (item.matchRate >= 50 ? '#F59E0B' : '#E32636');
+        let titleColor = item.matchRate >= 80 ? '#7F77DD' : (item.matchRate >= 50 ? '#F59E0B' : '#E32636');
 
         aiReportHtml = `
-            <div style="background:#F9FAFB; border:1px solid #E5E8EB; padding:16px; border-radius:14px; margin-bottom:16px;">
+            <div style="background:#FBF8F3; border:1px solid #EDE6DE; padding:16px; border-radius:14px; margin-bottom:16px;">
                 <h4 style="color:${titleColor}; margin:0 0 10px 0; font-size:14px; font-weight: 800;">${reportTitle}</h4>
-                <ul style="margin:0; padding-left:20px; font-size:13px; color:#4E5968; line-height:1.5; font-weight: 600;">${reasonLi}</ul>
+                <ul style="margin:0; padding-left:20px; font-size:13px; color:#7A6F68; line-height:1.5; font-weight: 600;">${reasonLi}</ul>
             </div>`;
     }
 
@@ -254,9 +254,9 @@ function generateCardHtml(item) {
     if (item.hiddenTax?.cost > 0) {
         taxHtml += `<div class="receipt-row" style="color:#E32636;"><span>+ 필수 추가비용</span><span>+${item.hiddenTax.cost.toLocaleString()}원</span></div><div class="receipt-desc">※ ${item.hiddenTax.items}</div>`;
     } else {
-        taxHtml += `<div class="receipt-desc" style="color:#059669;">※ 추가비용 없음 (옵션질 없음 쾌적!)</div>`;
+        taxHtml += `<div class="receipt-desc" style="color:#059669;">※ 추가비용 없음 (옵션질 없음 쾌적)</div>`;
     }
-    taxHtml += `<div class="receipt-total"><span>💸 최종 체감 결제액</span><span style="color:#3182F6;">${realPrice.toLocaleString()}원</span></div></div>`;
+    taxHtml += `<div class="receipt-total"><span>💸 최종 체감 결제액</span><span style="color:#7F77DD;">${realPrice.toLocaleString()}원</span></div></div>`;
 
     const asClass = item.asInfo?.status === 'good' ? 'as-good' : (item.asInfo?.status === 'warn' ? 'as-warn' : 'as-bad');
     const asTitle = item.asInfo?.status === 'good' ? 'A/S 무난한 편' : (item.asInfo?.status === 'warn' ? 'A/S 체크포인트' : 'A/S 리스크 경고');
@@ -271,14 +271,14 @@ function generateCardHtml(item) {
 
     let purchaseAreaHtml = `
         <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px;">
-            <a href="${coupangSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #191F28; color: #FFF; border: 1px solid #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
+            <a href="${coupangSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #4A413C; color: #FFF; border: 1px solid #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
                 🚀 쿠팡에서 로켓배송 최저가 찾기 〉
             </a>
-            <a href="${naverSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #F2F5F8; color: #4E5968; border: 1px solid #E5E8EB; font-size: 14px; padding: 14px 0; border-radius: 14px; font-weight: 800; text-decoration: none; transition: 0.2s;">
+            <a href="${naverSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #F7F3ED; color: #7A6F68; border: 1px solid #EDE6DE; font-size: 14px; padding: 14px 0; border-radius: 14px; font-weight: 800; text-decoration: none; transition: 0.2s;">
                 🔍 네이버 쇼핑에서 공식몰 검색하기 〉
             </a>
         </div>
-        <div class="coupang-safety-guard" style="font-size: 11.5px; color: #8B95A1; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
+        <div class="coupang-safety-guard" style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
             ※ 고가의 유모차는 쿠팡이 직접 매입하여 교환/환불 처리가 빠른<br>
             <b>[로켓배송]</b> 마크가 있는 상품 위주로 탐색하시길 권장합니다.<br>
             (상품의 A/S 및 교환/환불 규정은 해당 판매처의 정책을 따릅니다)
@@ -291,31 +291,31 @@ function generateCardHtml(item) {
     const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 가방걸이 고리')}&lptag=${partnerCode}`;
 
     const accessoryHtml = `
-        <div style="background: #F9FAFB; padding: 18px; border-radius: 16px; margin-top: 24px; border: 1px solid #E5E8EB;">
+        <div style="background: #FBF8F3; padding: 18px; border-radius: 16px; margin-top: 24px; border: 1px solid #EDE6DE;">
             <!-- 타이틀도 가운데 정렬 및 이모지 변경(🎁) -->
-            <div style="font-size: 13.5px; font-weight: 900; color: #191F28; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <span>🎁</span> 유모차 뽑은 기념! 국민 육아템 3대장
+            <div style="font-size: 13.5px; font-weight: 900; color: #4A413C; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span>🎁</span> 유모차 뽑은 기념 국민 육아템 3대장
             </div>
             
             <!-- 박스들 가운데 정렬 (justify-content: center; 추가) -->
             <div style="display: flex; justify-content: center; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 8px;">
                 <!-- 1. 선풍기 -->
-                <a href="${accFanUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #E5E8EB; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                <a href="${accFanUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">❄️</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #333D4B;">유모차 선풍기</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #3182F6; margin-top: 4px;">로켓배송 〉</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 선풍기</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
                 </a>
                 <!-- 2. 정리함 -->
-                <a href="${accBagUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #E5E8EB; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                <a href="${accBagUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">🧺</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #333D4B;">유모차 정리함</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #3182F6; margin-top: 4px;">로켓배송 〉</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 정리함</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
                 </a>
                 <!-- 3. 고리 -->
-                <a href="${accHookUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #E5E8EB; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                <a href="${accHookUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">🔗</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #333D4B;">가방걸이 고리</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #3182F6; margin-top: 4px;">로켓배송 〉</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">가방걸이 고리</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
                 </a>
             </div>
         </div>
@@ -330,9 +330,9 @@ function generateCardHtml(item) {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
             <div style="flex: 1; min-width: 0;">
                 <div style="margin-bottom: 16px;">
-                    <span style="background:#F2F5F8; color:#4E5968; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.type}</span>
+                    <span style="background:#F7F3ED; color:#7A6F68; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.type}</span>
                 </div>
-                <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#191F28; word-break:keep-all; line-height:1.3;">
+                <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.3;">
                     ${item.name}
                 </div>
             </div>
@@ -350,7 +350,7 @@ function generateCardHtml(item) {
             <!-- 📊 기본스펙 탭 -->
             <div id="content-${cId}-spec" class="tab-content" style="display:block;">
                 <div class="spec-list">
-                    <div class="spec-row"><span class="spec-label">👶 2인 확장성</span><span class="spec-val" style="color:#3182F6;">${item.expand}</span></div>
+                    <div class="spec-row"><span class="spec-label">👶 2인 확장성</span><span class="spec-val" style="color:#7F77DD;">${item.expand}</span></div>
                     <div class="spec-row"><span class="spec-label">본체 실측 무게</span><div style="text-align:right; width:60%;"><div class="spec-val" style="color:${weightColor};">${item.specs.weight}kg</div><div class="meter-container"><div class="meter-fill" data-width="${weightPercent}%" style="width:0%; background:${weightColor};"></div></div></div></div>
                     <div class="spec-row"><span class="spec-label">폴딩 메커니즘</span><span class="spec-val">${item.specs.folding}</span></div>
                     <div class="spec-row"><span class="spec-label">정규 기내반입</span><span style="${cabinStyle} padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800;">${item.specs.cabin}</span></div>
@@ -481,7 +481,7 @@ function renderList(isUserAction = false) {
         }
 
         // 결과 합산
-        if (score === 100) reasons.push('선택하신 모든 라이프스타일 조건에 완벽히 부합합니다!');
+        if (score === 100) reasons.push('고르신 조건에 모두 맞습니다.');
         if (score < 0) score = 0; // 최소 0점 방어
 
         return { ...item, originalIndex: index, matchRate: score, matchReasons: reasons };
@@ -521,7 +521,7 @@ function renderList(isUserAction = false) {
                     <b>조건에 맞는 모델이 없습니다.</b>
                     <span>필터나 선택 사항을 조금 완화해 보세요.</span>
                 </div>
-                <button onclick="resetAll()" style="padding: 12px 24px; background: #3182F6; color: #FFF; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(49, 130, 246, 0.3);">
+                <button onclick="resetAll()" style="padding: 12px 24px; background: #7F77DD; color: #FFF; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221, 0.3);">
                     🔄 필터 및 조건 초기화하기
                 </button>
             </div>`; 
@@ -627,7 +627,7 @@ document.addEventListener('click', function(e) {
 });
 
 function showComingSoon(category) {
-    alert(`💡 ${category} AI 분석 엔진은 현재 딥러닝 학습 중입니다!\n(다음 업데이트를 기대해 주세요)`);
+    alert(`💡 ${category}는 아직 준비 중이에요.\n다음 업데이트에서 찾아뵐게요.`);
 }
 
 // 🚀 카카오 SDK 초기화 (안전 보호막 장착)
@@ -645,13 +645,13 @@ function shareResult() {
         Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-                title: '배냇함 AI 5D 유모차 매칭 🛒',
-                description: '우리 가족 라이프스타일과 트렁크 크기에 딱 맞는 유모차를 AI로 찾아보세요!',
+                title: '배냇함 유모차 매칭 🛒',
+                description: '우리 가족 라이프스타일과 트렁크 크기에 딱 맞는 유모차를 AI로 찾아보세요',
                 imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
                 link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
             },
             buttons: [
-                { title: '🔍 AI 매칭 결과 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }
+                { title: '🔍 매칭 결과 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }
             ],
         });
     } else {

@@ -25,7 +25,7 @@
     var HOST = "toy-gift";
     var LINK = "https://happy-baby0303.github.io/baby-master/toy/index.html";
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var GOLD = "#8A6D00", PURPLE = "#7F77DD";
 
     function esc(s) {
@@ -160,7 +160,7 @@
         if (typeof Kakao === "undefined" || !Kakao.isInitialized()) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text)
-                    .then(function () { alert("목록이 복사됐어요! 붙여넣기 해주세요 🤍"); })
+                    .then(function () { alert("목록이 복사됐어요 붙여넣기 해주세요 🤍"); })
                     .catch(function () { prompt("아래 내용을 복사해 주세요", text); });
             } else prompt("아래 내용을 복사해 주세요", text);
             return;
@@ -197,16 +197,16 @@
 
         if (day) {
             out += '<div style="display:flex; align-items:center; justify-content:space-between; ' +
-                'gap:10px; margin-top:13px; padding:13px 15px; background:#F5F3FF; ' +
-                'border:1px solid #DDD6FE; border-radius:13px;">' +
+                'gap:10px; margin-top:13px; padding:13px 15px; background:#F3F0FC; ' +
+                'border:1px solid #DDD9F5; border-radius:13px;">' +
                 '<div style="min-width:0;">' +
-                    '<div style="font-size:13.5px; font-weight:900; color:#6D28D9;">' +
+                    '<div style="font-size:13.5px; font-weight:900; color:#6A61CE;">' +
                         esc(nm("의")) + ' ' + esc(day.name) + '</div>' +
                     '<div style="margin-top:2px; font-size:11.5px; font-weight:700; color:' + GRAY + ';">' +
                         '그때쯤이면 ' + day.months + '개월 \u00b7 ' +
                         (MSNAME[msOf(day.months)] || "") + ' 시기예요</div>' +
                 '</div>' +
-                '<div style="flex-shrink:0; font-size:16px; font-weight:900; color:#6D28D9;">' +
+                '<div style="flex-shrink:0; font-size:16px; font-weight:900; color:#6A61CE;">' +
                     (day.left === 0 ? "오늘" : "D-" + day.left) + '</div>' +
             '</div>';
         }
@@ -217,10 +217,10 @@
             return out + '</div>';
         }
 
-        out += '<div style="margin-top:14px; background:#F9FAFB; border:1px solid #EEF0F2; border-radius:14px; padding:2px 16px;">' +
+        out += '<div style="margin-top:14px; background:#FBF8F3; border:1px solid #F2EDE6; border-radius:14px; padding:2px 16px;">' +
             show.map(function (t, i) {
                 return '<div style="display:flex; gap:10px; padding:11px 0; ' +
-                    'border-bottom:1px solid #F2F4F6;">' +
+                    'border-bottom:1px solid #F6F2EC;">' +
                     '<div style="flex-shrink:0; width:20px; height:20px; border-radius:6px; ' +
                         'background:' + DARK + '; color:#FFFFFF; font-size:11px; font-weight:900; ' +
                         'display:inline-flex; align-items:center; justify-content:center;">' +

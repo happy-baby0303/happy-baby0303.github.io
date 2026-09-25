@@ -27,7 +27,7 @@
 (function () {
     'use strict';
 
-    var INK = "#191F28", GRAY = "#8B95A1", RED = "#C62828";
+    var INK = "#4A413C", GRAY = "#A3958A", RED = "#C62828";
     var ID = "stroller-used";
 
     /* 살 때 — 눈으로 볼 수 있는 것만 적는다 */
@@ -73,13 +73,13 @@
     function rows(list) {
         return list.map(function (r, i) {
             return '<div style="display:flex; gap:11px; padding:13px 0; ' +
-                (i < list.length - 1 ? 'border-bottom:1px solid #F2F4F6;' : '') + '">' +
+                (i < list.length - 1 ? 'border-bottom:1px solid #F6F2EC;' : '') + '">' +
                 '<div style="width:20px; flex-shrink:0; font-size:12px; font-weight:900; ' +
                     'color:' + GRAY + '; padding-top:2px;">' + (i + 1) + '</div>' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:13.5px; font-weight:900; color:' + INK + '; ' +
                         'margin-bottom:5px; word-break:keep-all;">' + esc(r.t) + '</div>' +
-                    '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                    '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.75; word-break:keep-all;">' + r.d + '</div>' +
                 '</div>' +
             '</div>';
@@ -101,21 +101,21 @@
 
             /* ⚠️ 카시트와 반대라는 걸 먼저 말한다.
                   카시트 카드만 읽은 부모가 유모차도 위험한 줄 안다. */
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'margin:-16px 0 16px; line-height:1.75; word-break:keep-all;">' +
                 '유모차는 <b>중고가 흔한 물건</b>입니다. 1년 쓰고 파는 사람이 많아요.<br>' +
                 '<span style="color:' + RED + '; font-weight:800;">다만 카시트는 다릅니다 — ' +
                 '사고 이력이 있으면 겉이 멀쩡해도 쓰면 안 됩니다.</span>' +
             '</div>' +
 
-            '<div style="display:flex; gap:5px; background:#F2F4F6; border-radius:13px; ' +
+            '<div style="display:flex; gap:5px; background:#F6F2EC; border-radius:13px; ' +
                 'padding:4px; margin-bottom:6px;">' +
                 tab("buy", "살 때 볼 것") + tab("sell", "팔 때 챙길 것") +
             '</div>' +
 
             rows(side === "buy" ? BUY : SELL) +
 
-            '<div style="margin-top:14px; padding-top:13px; border-top:1px dashed #E5E8EB; ' +
+            '<div style="margin-top:14px; padding-top:13px; border-top:1px dashed #EDE6DE; ' +
                 'font-size:11.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
                 'word-break:keep-all;">' +
                 '값은 적지 않았습니다. 모델과 연식마다 달라서, 저희가 숫자를 말하면 ' +

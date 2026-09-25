@@ -36,7 +36,7 @@
     var NIP_KEY  = "tosil_nipple_changed";   // ⚠️ bottleguide.js 와 같은 키. 따로 관리하면 안 된다
 
     var HOST = "bottle-gear", SHEET = "gear-sheet";
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var GREEN = "#1F9D6B", RED = "#E32636";
 
     function esc(s) {
@@ -276,12 +276,12 @@
             /* ⚠️ 웹앱이라 푸시가 없다. 앱을 열어야만 보인다.
                   그래서 '알려드릴게요' 라고 하지 않고, 돌이 가까워지면 눈에 띄게 만든다. */
             var near = (left <= 2);
-            return '<div style="background:' + (near ? "#FFF9E6" : " #F9FAFB") + '; ' +
-                'border:1px solid ' + (near ? "#F5E1A4" : "#E5E8EB") + '; border-radius:14px; ' +
+            return '<div style="background:' + (near ? "#FFF9E6" : " #FBF8F3") + '; ' +
+                'border:1px solid ' + (near ? "#F5E1A4" : "#EDE6DE") + '; border-radius:14px; ' +
                 'padding:16px; margin-top:10px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + (near ? GOLD : DARK) + ';">' +
                     '\uD83E\uDD5B 생우유는 아직이에요 \u00b7 약 ' + left + '개월 남았습니다</div>' +
-                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '돌 무렵은 태어날 때 받아온 철분이 거의 떨어지는 때예요. ' +
                     '생우유에는 철분이 거의 없어서, 돌 전에 주식으로 주면 부족해지기 쉽습니다.' +
@@ -294,7 +294,7 @@
             'padding:16px; margin-top:10px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:#1F6F52;">' +
                 '\uD83E\uDD5B 이제 생우유를 시작하셔도 되는 때예요</div>' +
-            '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 '한 번에 바꾸지 말고 <b>분유에 조금씩 섞어가며</b> 넘어가는 집이 많습니다. ' +
                 '얼마나 어떤 속도로 줄일지는 ' + esc(nm("의")) + ' 몸무게와 먹는 양을 보고 ' +
@@ -366,7 +366,7 @@
                         'style="padding:11px 15px; border-radius:12px; cursor:pointer; ' +
                         'font-size:13px; font-weight:800; ' +
                         (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                            : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                            : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                         (on ? "\u2713 " : "") + m.label + '</div>';
                 }).join("") +
             '</div>' +
@@ -384,14 +384,14 @@
                             'style="padding:9px 12px; border-radius:11px; cursor:pointer; ' +
                             'font-size:12.5px; font-weight:800; ' +
                             (on ? 'background:' + GREEN + '; color:#FFFFFF; border:1px solid ' + GREEN + ';'
-                                : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                                : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                             (on ? "\u2713 " : "") + esc(b.name) + '</div>';
                     }).join("") + '</div></div>';
             }).join("") +
         '</div>' +
 
         '<div style="position:fixed; left:0; right:0; bottom:0; background: #FFFFFF; ' +
-            'border-top:1px solid #E5E8EB; padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));">' +
+            'border-top:1px solid #EDE6DE; padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));">' +
             '<div style="max-width:480px; margin:0 auto;">' +
                 '<div onclick="window.closeGearSheet()" style="text-align:center; padding:17px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
@@ -437,7 +437,7 @@
             '<div class="matrix-header">\uD83C\uDF7C 우리 집 수유 장비</div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                 'margin:-16px 0 16px; gap:10px;">' +
-                '<div style="font-size:13px; font-weight:700; color:#4E5968; min-width:0; ' +
+                '<div style="font-size:13px; font-weight:700; color:#7A6F68; min-width:0; ' +
                     'word-break:keep-all;">' + esc(mt.label) + ' \u00b7 젖병 ' + have.length + '개</div>' +
                 '<div onclick="window.openGearSheet()" style="flex-shrink:0; font-size:12.5px; ' +
                     'font-weight:800; color:' + BLUE + '; cursor:pointer;">고치기</div>' +
@@ -450,7 +450,7 @@
             list.map(function (x) {
                 var v = V[x.v];
                 return '<div style="display:flex; gap:9px; padding:11px 0; ' +
-                    'border-bottom:1px solid #F2F4F6;">' +
+                    'border-bottom:1px solid #F6F2EC;">' +
                     '<div style="flex-shrink:0; font-size:12px; line-height:1.6;">' + v.icon + '</div>' +
                     '<div style="flex:1; min-width:0;">' +
                         '<div style="font-size:13px; font-weight:800; color:' + DARK + '; ' +
@@ -493,11 +493,11 @@
                 '<span style="font-size:11.5px;">예전에 갈았으면 <b>아래 날짜 칸</b>에서 그 날짜를 고르세요.</span></div>' +
 
             show.map(function (r) {
-                var c = r.over ? RED : (r.n === null ? GRAY : "#4E5968");
+                var c = r.over ? RED : (r.n === null ? GRAY : "#7A6F68");
                 /* ⚠️ 이름·날짜를 한 줄에 두고 오른쪽에 단추와 날짜 칸을 같이 넣었더니
                       글자 자리가 100px 밖에 안 남아 세 줄로 접혔다 (문의 들어온 것).
                       위에 글, 아래에 단추 둘을 나란히. 이러면 접히지 않는다. */
-                return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+                return '<div style="padding:13px 0; border-bottom:1px solid #F6F2EC;">' +
                     '<div style="font-size:13.5px; font-weight:900; color:' + DARK + ';">' +
                         esc(r.p.label) +
                         '<span style="font-weight:700; color:' + GRAY + '; font-size:11.5px;"> \u00b7 ' +
@@ -512,14 +512,14 @@
                         '<div onclick="window.logBottlePart(\'' + r.p.id + '\')" ' +
                             'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
                             'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
-                            'color:#4E5968; border:1px solid #D1D5DB;">오늘 갈았어요</div>' +
+                            'color:#7A6F68; border:1px solid #DCD3C8;">오늘 갈았어요</div>' +
                         '<input type="date" title="예전에 갈았으면 그 날짜를 고르세요" ' +
                             'value="' + esc(r.d || "") + '" max="' + today() + '" ' +
                             'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
                             'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
                             'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
-                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#4E5968; ' +
-                            'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:11px; ' +
+                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#7A6F68; ' +
+                            'background:#FFFFFF; border:1px solid #DCD3C8; border-radius:11px; ' +
                             'padding:10px 8px; cursor:pointer;">' +
                     '</div>' +
                 '</div>';
@@ -562,7 +562,7 @@
                     var past = m >= r.at && !now;
                     var left = r.at - m;
                     return '<div style="display:flex; gap:11px; padding:12px 0; ' +
-                        'border-bottom:1px solid #F2F4F6; opacity:' + (past ? "0.45" : "1") + ';">' +
+                        'border-bottom:1px solid #F6F2EC; opacity:' + (past ? "0.45" : "1") + ';">' +
                         '<div style="flex-shrink:0; width:52px; font-size:11.5px; font-weight:900; ' +
                             'color:' + (now ? BLUE : GRAY) + ';">' +
                             (r.at === 0 ? "지금" : r.at + "개월") + '</div>' +

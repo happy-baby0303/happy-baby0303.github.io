@@ -28,7 +28,7 @@
     var GEAR = "tosil_bottle_gear";
     var HOST = "bottle-refuse";
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var GREEN = "#1F9D6B", RED = "#E32636", GOLD = "#8A6D00";
 
     function esc(s) {
@@ -169,7 +169,7 @@
     function warnHTML() {
         return '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
             'padding:15px 16px; margin-bottom:14px; font-size:12.5px; font-weight:600; ' +
-            'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+            'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
             '<b style="color:' + RED + ';">\u26A0\uFE0F 먼저 봐주세요.</b> ' +
             '젖병만 거부하는 게 아니라 <b>젖도 잘 안 먹으려 하거나</b>, ' +
             '<b>소변 횟수가 눈에 띄게 줄었거나</b>, 늘어져 있으면 ' +
@@ -216,8 +216,8 @@
 
         /* 복직 D-day */
         out += '<div style="display:flex; align-items:center; justify-content:space-between; ' +
-            'gap:10px; margin:-16px 0 14px; padding:13px 15px; background: #F9FAFB; ' +
-            'border:1px solid #E5E8EB; border-radius:13px;">' +
+            'gap:10px; margin:-16px 0 14px; padding:13px 15px; background: #FBF8F3; ' +
+            'border:1px solid #EDE6DE; border-radius:13px;">' +
             '<div style="min-width:0;">' +
                 '<div style="font-size:11.5px; font-weight:800; color:' + GRAY + ';">복직일</div>' +
                 '<div style="margin-top:2px; font-size:13.5px; font-weight:900; color:' +
@@ -228,8 +228,8 @@
             '</div>' +
             '<input type="date" value="' + esc(back) + '" ' +
                 'onchange="window.setRefuseBackDate(this.value)" ' +
-                'style="flex-shrink:0; padding:9px 11px; border-radius:10px; border:1px solid #D1D5DB; ' +
-                'background: #FFFFFF; font-size:12.5px; font-weight:700; color:#4E5968;">' +
+                'style="flex-shrink:0; padding:9px 11px; border-radius:10px; border:1px solid #DCD3C8; ' +
+                'background: #FFFFFF; font-size:12.5px; font-weight:700; color:#7A6F68;">' +
         '</div>';
 
         out += warnHTML();
@@ -240,12 +240,12 @@
                 'padding:16px; margin-bottom:12px;">' +
                 '<div style="font-size:14px; font-weight:900; color:#1F6F52;">' +
                     '\u2705 ' + esc(win.t) + ' \u2014 이게 통했어요</div>' +
-                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '며칠은 같은 방법으로 이어가세요. 한 번 됐다고 바로 되진 않고, ' +
                     '<b>대개 사나흘 반복하면 자리를 잡습니다.</b></div>' +
                 '<div onclick="window.stopRefuse()" style="margin-top:11px; text-align:center; ' +
-                    'padding:11px; background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB; ' +
+                    'padding:11px; background: #FFFFFF; color:#7A6F68; border:1px solid #DCD3C8; ' +
                     'border-radius:11px; font-size:12.5px; font-weight:800; cursor:pointer;">' +
                     '이제 잘 물어요 \u00b7 그만 볼게요</div>' +
             '</div>';
@@ -255,29 +255,29 @@
                 'letter-spacing:0.4px; margin-bottom:7px;">' +
                 dayN + '일째 \u00b7 오늘 해볼 것 하나</div>' +
 
-                '<div style="background: #FFFFFF; border:1.5px solid #CBE0FF; border-radius:16px; ' +
-                    'padding:18px; box-shadow:0 3px 14px rgba(49,130,246,0.06);">' +
+                '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; ' +
+                    'padding:18px; box-shadow:0 3px 14px rgba(127, 119, 221,0.06);">' +
                     '<div style="display:flex; align-items:center; gap:8px;">' +
                         '<span style="flex-shrink:0; width:22px; height:22px; border-radius:7px; ' +
                             'background:' + DARK + '; color:#FFFFFF; font-size:11.5px; font-weight:900; ' +
                             'display:inline-flex; align-items:center; justify-content:center;">' +
                             (step + 1) + '</span>' +
-                        '<span style="font-size:15.5px; font-weight:900; color:#191F28;">' +
+                        '<span style="font-size:15.5px; font-weight:900; color:#4A413C;">' +
                             esc(w.t) + '</span>' +
                     '</div>' +
-                    '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#4E5968; ' +
+                    '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.8; word-break:keep-all;">' + w.d + '</div>' +
 
                     (done
                         ? '<div style="margin-top:14px; text-align:center; padding:13px; ' +
-                          'background: #F9FAFB; color:' + GRAY + '; border-radius:12px; ' +
+                          'background: #FBF8F3; color:' + GRAY + '; border-radius:12px; ' +
                           'font-size:12.5px; font-weight:800;">오늘 몫은 하셨어요. 내일 또 뵐게요</div>'
                         : '<div style="display:flex; gap:8px; margin-top:15px;">' +
                           '<div onclick="window.markRefuseWay(true)" style="flex:1; text-align:center; ' +
                               'padding:13px; background:' + DARK + '; color:#FFFFFF; border-radius:12px; ' +
-                              'font-size:13.5px; font-weight:800; cursor:pointer;">물었어요!</div>' +
+                              'font-size:13.5px; font-weight:800; cursor:pointer;">물었어요</div>' +
                           '<div onclick="window.markRefuseWay(false)" style="flex:1; text-align:center; ' +
-                              'padding:13px; background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB; ' +
+                              'padding:13px; background: #FFFFFF; color:#7A6F68; border:1px solid #DCD3C8; ' +
                               'border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer;">' +
                               '안 됐어요</div></div>') +
                 '</div>';
@@ -290,7 +290,7 @@
             out += past.map(function (x) {
                 var r = log[x.id];
                 return '<div style="display:flex; justify-content:space-between; align-items:center; ' +
-                    'gap:10px; padding:9px 0; border-bottom:1px solid #F2F4F6;">' +
+                    'gap:10px; padding:9px 0; border-bottom:1px solid #F6F2EC;">' +
                     '<div style="flex:1; min-width:0; font-size:12.5px; font-weight:700; ' +
                         'color:' + (r.ok ? "#1F6F52" : GRAY) + '; white-space:nowrap; ' +
                         'overflow:hidden; text-overflow:ellipsis;">' +
@@ -317,7 +317,7 @@
                             'margin-bottom:7px;">' +
                             '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
                                 esc(b.brand) + ' ' + esc(b.name) + '</div>' +
-                            '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:#4E5968; ' +
+                            '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:#7A6F68; ' +
                                 'line-height:1.6; word-break:keep-all;">' + esc(b.desc || "") + '</div>' +
                         '</div>';
                     }).join("") +
@@ -336,10 +336,10 @@
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83C\uDF7C 젖병을 안 물어요</div>' +
             warnHTML() +
-            '<div style="background: #FFFFFF; border:1.5px solid #CBE0FF; border-radius:16px; padding:18px;">' +
-                '<div style="font-size:15.5px; font-weight:900; color:#191F28;">' +
+            '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; padding:18px;">' +
+                '<div style="font-size:15.5px; font-weight:900; color:#4A413C;">' +
                     '1. ' + esc(WAYS[0].t) + '</div>' +
-                '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.8; word-break:keep-all;">' + WAYS[0].d + '</div>' +
             '</div>' +
             '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #F5E1A4; ' +

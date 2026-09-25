@@ -34,7 +34,7 @@
     var KEY = "tosil_milk_stock";
     var HOST = "bottle-milk";
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var RED = "#E32636", GOLD = "#8A6D00";
 
     /* 보관 기준 — 보수적인 쪽. 늘리지 마세요. */
@@ -130,7 +130,7 @@
                 '출처마다 조금씩 다릅니다. 여기서는 <b>짧은 쪽</b>으로 적었어요. ' +
                 '짧게 잡아 손해 보는 건 모유 몇 팩이고, 길게 잡아 손해 보는 건 아기니까요.</div>' +
 
-            '<div style="border:1px solid #E5E8EB; border-radius:14px; overflow:hidden;">' +
+            '<div style="border:1px solid #EDE6DE; border-radius:14px; overflow:hidden;">' +
             [["실온", "4시간", "짜두고 바로 안 먹일 거면 냉장으로"],
              ["냉장", "3일", "문쪽 말고 안쪽 깊은 곳에"],
              ["냉동", "3개월", "날짜를 꼭 적고, 오래된 것부터"],
@@ -139,9 +139,9 @@
              ["아기 입이 닿은 것", "1~2시간", "세균이 들어갔습니다"]
             ].map(function (r, i) {
                 return '<div style="display:flex; align-items:center; gap:10px; padding:12px 14px; ' +
-                    (i ? 'border-top:1px solid #F2F4F6;' : '') + '">' +
+                    (i ? 'border-top:1px solid #F6F2EC;' : '') + '">' +
                     '<div style="flex-shrink:0; width:92px; font-size:12.5px; font-weight:800; ' +
-                        'color:#4E5968;">' + r[0] + '</div>' +
+                        'color:#7A6F68;">' + r[0] + '</div>' +
                     '<div style="flex-shrink:0; width:58px; font-size:13.5px; font-weight:900; ' +
                         'color:' + DARK + ';">' + r[1] + '</div>' +
                     '<div style="flex:1; min-width:0; font-size:11.5px; font-weight:600; ' +
@@ -154,7 +154,7 @@
                 'border-radius:14px; padding:15px 16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:' + RED + '; margin-bottom:7px;">' +
                     '\u274C 이것만은 하지 마세요</div>' +
-                '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.85; ' +
+                '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                     'word-break:keep-all;">' +
                     '\u00b7 <b>전자레인지에 데우지 마세요.</b> 고르게 안 데워져서 아기 입을 뎁니다<br>' +
                     '\u00b7 <b>한 번 녹인 건 다시 얼리지 마세요.</b><br>' +
@@ -163,9 +163,9 @@
                 '</div>' +
             '</div>' +
 
-            '<div style="margin-top:10px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+            '<div style="margin-top:10px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
                 'border-radius:14px; padding:15px 16px; font-size:12.5px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.85; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.85; word-break:keep-all;">' +
                 '\uD83D\uDCA1 <b>새로 짠 따뜻한 모유를 냉장·냉동 모유에 바로 붓지 마세요.</b> ' +
                 '먼저 식혀 온도를 맞춘 뒤 합치시고, 합친 것의 기한은 ' +
                 '<b>나중이 아니라 처음 짠 날</b>이 기준입니다.<br>' +
@@ -184,9 +184,9 @@
         var L = leftOf(r), lim = LIMIT[r.place] || LIMIT.fridge;
         var over = (L !== null && L < 0);
         var soon = (L !== null && L >= 0 && L <= (r.place === "freeze" ? 14 : 1));
-        var c = over ? RED : soon ? GOLD : "#4E5968";
+        var c = over ? RED : soon ? GOLD : "#7A6F68";
 
-        return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+        return '<div style="padding:13px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="display:flex; align-items:center; gap:10px;">' +
                 '<div style="flex-shrink:0; width:40px; font-size:11px; font-weight:900; ' +
                     'color:' + GRAY + ';">' + lim.label + '</div>' +
@@ -205,17 +205,17 @@
                     (r.place === "freeze"
                         ? '<div onclick="window.thawMilk(\'' + r.id + '\')" ' +
                           'style="padding:9px 10px; border-radius:10px; cursor:pointer; font-size:11.5px; ' +
-                          'font-weight:800; background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB;">' +
+                          'font-weight:800; background: #FFFFFF; color:#7A6F68; border:1px solid #DCD3C8;">' +
                           '해동</div>'
                         : '') +
                     '<div onclick="window.bumpMilk(\'' + r.id + '\',1)" ' +
                         'style="width:34px; text-align:center; padding:9px 0; border-radius:10px; ' +
                         'cursor:pointer; font-size:13px; font-weight:900; background: #FFFFFF; ' +
-                        'color:#4E5968; border:1px solid #D1D5DB;">+</div>' +
+                        'color:#7A6F68; border:1px solid #DCD3C8;">+</div>' +
                     '<div onclick="window.bumpMilk(\'' + r.id + '\',-1)" ' +
                         'style="width:34px; text-align:center; padding:9px 0; border-radius:10px; ' +
                         'cursor:pointer; font-size:13px; font-weight:900; background: #FFFFFF; ' +
-                        'color:#4E5968; border:1px solid #D1D5DB;">\u2212</div>' +
+                        'color:#7A6F68; border:1px solid #DCD3C8;">\u2212</div>' +
                 '</div>' +
             '</div>' +
         '</div>';
@@ -246,7 +246,7 @@
                 '오래된 것부터 위로 올려드릴게요 \u2014 냉동실 뒤에 밀려서 상하는 팩이 없게요.</div>';
         } else {
             out += '<div style="display:flex; gap:8px; margin:-16px 0 14px;">' +
-                [["냉동", byPlace.freeze, "#F0F7FF", BLUE],
+                [["냉동", byPlace.freeze, "#F2F0FC", BLUE],
                  ["냉장", byPlace.fridge, "#EAF7F1", "#1F6F52"],
                  ["해동", byPlace.thaw, "#FFF9E6", GOLD]
                 ].map(function (x) {
@@ -262,7 +262,7 @@
                     'padding:15px 16px; margin-bottom:12px; font-size:13px; font-weight:800; ' +
                     'color:' + RED + '; line-height:1.7; word-break:keep-all;">' +
                     '\u26A0\uFE0F 오늘까지거나 기한이 지난 게 ' + urgent.length + '건 있어요.<br>' +
-                    '<span style="font-weight:600; color:#4E5968;">' +
+                    '<span style="font-weight:600; color:#7A6F68;">' +
                     '날짜만 세는 것이니 <b>열어서 냄새를 꼭 맡아보세요.</b> ' +
                     '조금이라도 이상하면 아까워도 버리시고요.</span></div>';
             }
@@ -275,10 +275,10 @@
               누르는 느낌(살짝 눌리는 효과)도 같이 준다. */
         out += '<div style="display:flex; gap:8px; margin-top:14px;">' +
             '<div class="milk-btn" onclick="window.addMilk(\'freeze\')" style="flex:1; text-align:center; padding:14px; ' +
-                'background:#F0F7FF; color:#1B64DA; border:1px solid #C9E2FF; border-radius:12px; ' +
+                'background:#F2F0FC; color:#6A61CE; border:1px solid #DDD9F5; border-radius:12px; ' +
                 'font-size:13px; font-weight:800; cursor:pointer;">\u2744\uFE0F 냉동했어요</div>' +
             '<div class="milk-btn" onclick="window.addMilk(\'fridge\')" style="flex:1; text-align:center; padding:14px; ' +
-                'background:#F2F4F6; color:#4E5968; border:1px solid #E5E8EB; border-radius:12px; ' +
+                'background:#F6F2EC; color:#7A6F68; border:1px solid #EDE6DE; border-radius:12px; ' +
                 'font-size:13px; font-weight:800; cursor:pointer;">\uD83E\uDDCA 냉장했어요</div>' +
         '</div>';
 

@@ -27,7 +27,7 @@
     'use strict';
 
     var ID   = "toy-safety";
-    var GRAY = "#8B95A1", DARK = "#191F28", RED = "#C62828", GOLD = "#8A6D00";
+    var GRAY = "#A3958A", DARK = "#4A413C", RED = "#C62828", GOLD = "#8A6D00";
 
     /* 단추형 전지가 들어갈 만한 것 — 이름으로 고른다 */
     var BATT = /사운드|소리|멜로디|라이트|LED|불빛|리모컨|피아노|딸랑|뮤직|오르골|전자|버튼|미러볼|프로젝터|무드등/;
@@ -71,7 +71,7 @@
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + RED + '; ' +
                 'letter-spacing:-0.4px; margin-bottom:8px;">🔋 단추형 전지, 이것만은 알아두세요</div>' +
 
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
                 '사운드북·피아노·리모컨 장난감 안에 동전만 한 전지가 들어 있습니다.<br>' +
                 '삼키면 <b>목에 걸리는 게 아니라 식도가 탑니다.</b> 위산과 만나 전류가 흐르거든요. ' +
@@ -96,7 +96,7 @@
             '</div>' +
 
             '<div onclick="window.toggleToySafety()" ' +
-                'style="margin-top:13px; padding-top:12px; border-top:1px solid #E5E8EB; ' +
+                'style="margin-top:13px; padding-top:12px; border-top:1px solid #EDE6DE; ' +
                 'text-align:center; font-size:12.5px; font-weight:800; color:' + GRAY + '; cursor:pointer;">' +
                 (open ? "접기 ▴" : "미리 막는 법 · KC 마크 · 리콜 확인 ▾") + '</div>' +
 
@@ -124,7 +124,7 @@
                 "완구 리콜은 생각보다 자주 납니다. 모델명으로 찾으면 바로 나와요.<br>" +
                 '<a href="https://www.safetykorea.kr" target="_blank" rel="noopener" ' +
                 'style="display:inline-block; margin-top:9px; padding:11px 16px; border-radius:11px; ' +
-                'background:#F9FAFB; border:1px solid #D1D5DB; color:' + DARK + '; ' +
+                'background:#FBF8F3; border:1px solid #DCD3C8; color:' + DARK + '; ' +
                 'font-size:12.5px; font-weight:900; text-decoration:none;">' +
                 '제품안전정보센터에서 찾아보기 〉</a>' +
                 '<div style="margin-top:7px; font-size:11px; font-weight:600; color:' + GRAY + ';">' +
@@ -137,12 +137,12 @@
     }
 
     function row(icon, t, d, tone) {
-        return '<div style="display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+        return '<div style="display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="font-size:18px; flex-shrink:0; width:24px; text-align:center;">' + icon + '</div>' +
             '<div style="flex:1; min-width:0;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + tone + '; margin-bottom:5px;">' +
                     esc(t) + '</div>' +
-                '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' + d + '</div>' +
             '</div>' +
         '</div>';

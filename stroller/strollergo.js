@@ -39,7 +39,7 @@
 
     var ID   = "stroller-go";
     var KEY  = "tosil_stroller_go";       // 마지막으로 고른 목적지
-    var GRAY = "#8B95A1", DARK = "#191F28";
+    var GRAY = "#A3958A", DARK = "#4A413C";
     var GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
 
     function esc(s) {
@@ -226,7 +226,7 @@
                     'border-radius:12px; cursor:pointer; font-size:12.5px; font-weight:800; ' +
                     'line-height:1.35; word-break:keep-all; box-sizing:border-box; ' +
                     (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                        : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                        : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                     '<span style="flex-shrink:0; width:18px; text-align:center;">' + p.icon + '</span>' +
                     '<span style="flex:1; min-width:0;">' + esc(p.name) + '</span></div>';
             }).join("") +
@@ -236,10 +236,10 @@
     /* ⚠️ 왼쪽 라벨이 78px 을 먹어서 폰에서는 설명이 세 줄로 접혔다.
           라벨을 위로 올리면 설명이 한 줄 폭을 다 쓴다. */
     function rowHTML(r) {
-        return '<div style="padding:12px 0; border-bottom:1px solid #F2F4F6;">' +
+        return '<div style="padding:12px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="font-size:11.5px; font-weight:900; color:' + r.tone + '; ' +
                 'letter-spacing:0.2px; margin-bottom:4px;">' + esc(r.t) + '</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' + r.d + '</div>' +
         '</div>';
     }

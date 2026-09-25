@@ -35,7 +35,7 @@
     'use strict';
 
     var ID   = "stroller-match";
-    var GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
+    var GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -133,7 +133,7 @@
         var head, body, tone, bg, bd;
 
         if (!seat) {
-            tone = GRAY; bg = "#F9FAFB"; bd = "#E5E8EB";
+            tone = GRAY; bg = "#FBF8F3"; bd = "#EDE6DE";
             head = "카시트를 얹을 수 있나요";
             body = "카시트 탭에서 <b>우리 카시트</b>를 골라두시면, " +
                    "이 유모차에 <b>얹히는지</b> 알려드릴게요.<br>" +
@@ -162,7 +162,7 @@
                    "차에서 잠들면 <b>아기를 안아서</b> 옮기셔야 합니다. " +
                    "다음에 한쪽을 바꾸실 때 이 조합을 기억해 두세요.";
         } else {
-            tone = GRAY; bg = "#F9FAFB"; bd = "#E5E8EB";
+            tone = GRAY; bg = "#FBF8F3"; bd = "#EDE6DE";
             head = "이 조합은 저희도 모릅니다";
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "과/와") + " <b>" + esc(st.name) + "</b>의 연결은 " +
                    "저희가 가진 자료에 없어요.<br>" +
@@ -196,7 +196,7 @@
             'border:1px solid ' + bd + '; margin-bottom:14px;">' +
             '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
                 'color:' + tone + ';">🔗 ' + esc(head) + '</div>' +
-            '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' + body + '</div>' +
             (seat
                 ? ''

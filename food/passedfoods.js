@@ -39,7 +39,7 @@
 
     var CAL = "tosil_food_calendar";
     var DONE = "tosil_passed_asked";
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B", RED = "#D32F2F";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B", RED = "#D32F2F";
     var ID = "passed-foods", SHEET = "passed-sheet";
     var DAY = 86400000;
 
@@ -74,7 +74,7 @@
         t.setAttribute("style",
             "position:fixed; left:50%; bottom:calc(100px + env(safe-area-inset-bottom, 0px)); " +
             "transform:translateX(-50%); z-index:100080; width:max-content; max-width:86%; " +
-            "background:rgba(25,31,40,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
+            "background:rgba(74, 65, 60,0.93); color:#FFFFFF; padding:13px 17px; border-radius:14px; " +
             "font-size:13px; font-weight:700; line-height:1.55; text-align:center; " +
             "word-break:keep-all; white-space:pre-line; box-shadow:0 8px 22px rgba(0,0,0,0.18); " +
             "transition:opacity .25s;");
@@ -366,7 +366,7 @@
         return "display:inline-flex; align-items:center; gap:4px; padding:10px 13px; border-radius:11px; " +
             "cursor:pointer; font-size:13px; font-weight:800; " +
             (on ? "background:" + GREEN + "; color:#FFFFFF; border:1px solid " + GREEN + ";"
-                : "background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;");
+                : "background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;");
     }
 
     function group(title, names) {
@@ -387,9 +387,9 @@
         var today = todayKey(), b = birthKey();
         return '<div style="font-size:12px; font-weight:900; color:' + GRAY + '; letter-spacing:1px; margin:2px 0 9px;">' +
                 '이미 등록한 재료 ' + have.length + '가지</div>' +
-            '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:14px; padding:2px 14px; margin-bottom:26px;">' +
+            '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; padding:2px 14px; margin-bottom:26px;">' +
             have.map(function (e, i) {
-                var sep = i ? "border-top:1px solid #EEF0F2;" : "";
+                var sep = i ? "border-top:1px solid #F2EDE6;" : "";
 
                 if (askRemove === e.name) {
                     return '<div style="display:flex; align-items:center; gap:8px; padding:12px 0; ' + sep + '">' +
@@ -398,7 +398,7 @@
                         '<span onclick="window.passedRemove(' + q(e.name) + ')" style="flex-shrink:0; padding:8px 12px; ' +
                             'border-radius:9px; background:' + RED + '; color:#FFFFFF; font-size:12.5px; font-weight:900; cursor:pointer;">빼기</span>' +
                         '<span onclick="window.passedAskRemove(\'\')" style="flex-shrink:0; padding:8px 10px; ' +
-                            'border-radius:9px; background:#FFFFFF; border:1px solid #E5E8EB; color:#4E5968; ' +
+                            'border-radius:9px; background:#FFFFFF; border:1px solid #EDE6DE; color:#7A6F68; ' +
                             'font-size:12.5px; font-weight:800; cursor:pointer;">그대로</span>' +
                     '</div>';
                 }
@@ -440,7 +440,7 @@
             '<div style="font-size:14px; font-weight:900; color:' + DARK + '; margin-bottom:4px; word-break:keep-all;">' +
                 '새로 고른 ' + picked.length + '가지, 언제쯤 먹여보셨어요?</div>' +
             '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; line-height:1.6; margin-bottom:12px; word-break:keep-all;">' +
-                '정확하지 않아도 괜찮아요. <b style="color:#4E5968;">이미 등록한 재료 날짜는 바뀌지 않아요.</b></div>' +
+                '정확하지 않아도 괜찮아요. <b style="color:#7A6F68;">이미 등록한 재료 날짜는 바뀌지 않아요.</b></div>' +
             '<div style="display:flex; flex-wrap:wrap; gap:7px;">' +
                 qs.map(function (x) {
                     return '<span onclick="window.passedSetDay(\'' + x.k + '\')" style="' + chipCss(x.k === pickDay) + '">' +
@@ -453,9 +453,9 @@
                     ' onclick="try{ this.showPicker && this.showPicker(); }catch(e){}"' +
                     ' style="appearance:none; -webkit-appearance:none; font-family:inherit; ' +
                     'padding:9px 12px; border-radius:11px; min-height:40px; cursor:pointer; ' +
-                    'border:1px solid ' + (isQuick ? '#E5E8EB' : GREEN) + '; ' +
-                    'background:' + (isQuick ? '#F9FAFB' : '#EAF7F1') + '; ' +
-                    'color:' + (isQuick ? '#4E5968' : '#1F6F52') + '; font-size:16px; font-weight:800;">' +
+                    'border:1px solid ' + (isQuick ? '#EDE6DE' : GREEN) + '; ' +
+                    'background:' + (isQuick ? '#FBF8F3' : '#EAF7F1') + '; ' +
+                    'color:' + (isQuick ? '#7A6F68' : '#1F6F52') + '; font-size:16px; font-weight:800;">' +
             '</div>' +
         '</div>';
     }
@@ -505,11 +505,11 @@
                 '<input id="passed-custom" type="text" maxlength="60" enterkeyhint="done" ' +
                     'placeholder="예: 아보카도, 귀리" ' +
                     'onkeydown="if(event.key===\'Enter\'){event.preventDefault(); window.passedAddCustom();}" ' +
-                    'style="flex:1; min-width:0; box-sizing:border-box; padding:12px 13px; border:1px solid #E5E8EB; ' +
+                    'style="flex:1; min-width:0; box-sizing:border-box; padding:12px 13px; border:1px solid #EDE6DE; ' +
                     'border-radius:11px; font-size:16px; font-weight:600; color:' + DARK + '; background:#FFFFFF; ' +
                     'outline:none; -webkit-appearance:none;">' +
                 '<span onclick="window.passedAddCustom()" style="flex-shrink:0; display:flex; align-items:center; ' +
-                    'padding:0 16px; border-radius:11px; background:#F2F4F6; color:#4E5968; font-size:13.5px; ' +
+                    'padding:0 16px; border-radius:11px; background:#F6F2EC; color:#7A6F68; font-size:13.5px; ' +
                     'font-weight:900; cursor:pointer;">추가</span>' +
             '</div>' +
 
@@ -517,11 +517,11 @@
         '</div>' +
 
         '<div style="position:fixed; left:0; right:0; bottom:0; background:#FFFFFF; ' +
-            'border-top:1px solid #E5E8EB; padding:14px 20px calc(14px + env(safe-area-inset-bottom, 0px));">' +
+            'border-top:1px solid #EDE6DE; padding:14px 20px calc(14px + env(safe-area-inset-bottom, 0px));">' +
             '<div style="max-width:480px; margin:0 auto;">' +
                 '<div onclick="window.savePassed()" style="text-align:center; padding:17px; ' +
-                    'background:' + (picked.length ? DARK : (have.length ? "#F2F4F6" : "#C9CDD2")) + '; ' +
-                    'color:' + (picked.length ? "#FFFFFF" : (have.length ? "#4E5968" : "#FFFFFF")) + '; ' +
+                    'background:' + (picked.length ? DARK : (have.length ? "#F6F2EC" : "#D2C8BC")) + '; ' +
+                    'color:' + (picked.length ? "#FFFFFF" : (have.length ? "#7A6F68" : "#FFFFFF")) + '; ' +
                     'border-radius:14px; font-size:15px; font-weight:900; cursor:pointer;">' +
                     esc(btnText) + '</div>' +
             '</div>' +
@@ -546,7 +546,7 @@
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:13px; font-weight:900; color:#1F6F52;">' +
                         '먹여본 재료 ' + p.length + '가지</div>' +
-                    '<div style="font-size:11px; font-weight:700; color:#4E5968; margin-top:2px; ' +
+                    '<div style="font-size:11px; font-weight:700; color:#7A6F68; margin-top:2px; ' +
                         'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                         esc(p.slice(0, 6).join(" · ")) + (p.length > 6 ? " 외 " + (p.length - 6) + "가지" : "") + '</div>' +
                 '</div>' +
@@ -558,7 +558,7 @@
             'border-radius:14px; padding:16px; margin:20px 0 14px;">' +
             '<div style="font-size:14px; font-weight:900; color:#8A6D00; margin-bottom:6px;">' +
                 '🥄 지금까지 먹여본 재료가 있나요?</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.7; margin-bottom:12px; word-break:keep-all;">' +
                 '식단표는 <b>아직 안 먹여본 재료</b>부터 짭니다. ' +
                 '이미 소고기를 먹여보셨는데 앱이 모르면, 소고기를 또 "새 테스트"로 띄워요.<br>' +
@@ -618,7 +618,7 @@
                     '<div style="font-size:13.5px; font-weight:900; color:' +
                         (p.length ? "#1F6F52" : DARK) + ';">' +
                         (p.length ? "먹여본 재료 " + p.length + "가지" : "지금까지 먹여본 재료 등록하기") + '</div>' +
-                    '<div style="font-size:11px; font-weight:700; color:#4E5968; margin-top:2px; ' +
+                    '<div style="font-size:11px; font-weight:700; color:#7A6F68; margin-top:2px; ' +
                         'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                         (p.length
                             ? esc(p.slice(0, 6).join(" · ")) + (p.length > 6 ? " 외 " + (p.length - 6) + "가지" : "")
@@ -631,7 +631,7 @@
 
         var css = p.length
             ? "background:#EAF7F1; border:1px solid #A7DFC8;"
-            : "background:#FFFFFF; border:1px solid #E5E8EB;";
+            : "background:#FFFFFF; border:1px solid #EDE6DE;";
 
         if (old) { old.style.cssText = css + " border-radius:14px; padding:13px 15px; margin-bottom:14px; cursor:pointer;"; old.innerHTML = inner; return; }
 

@@ -24,7 +24,7 @@
     var KEY  = "tosil_stroller_own";
     var HOST = "stroller-own";
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var RED  = "#E32636", GOLD = "#8A6D00", GREEN = "#1F9D6B", PURPLE = "#7F77DD";
 
     function esc(s) {
@@ -177,7 +177,7 @@
                         'style="flex:1; text-align:center; padding:13px 8px; border-radius:12px; ' +
                         'cursor:pointer; font-size:12.5px; font-weight:800; ' +
                         (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                            : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                            : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                         (i === 1 ? '첫 번째' : '두 번째 (있으면)') +
                         '<div style="margin-top:3px; font-size:10.5px; font-weight:700; opacity:0.75; ' +
                             'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
@@ -195,7 +195,7 @@
                             'style="display:flex; justify-content:space-between; align-items:center; gap:10px; ' +
                             'padding:12px 14px; margin-bottom:6px; border-radius:12px; cursor:pointer; ' +
                             (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                                : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                                : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                             '<span style="flex:1; min-width:0; font-size:13px; font-weight:800; ' +
                                 'word-break:keep-all;">' + (on ? "\u2713 " : "") + esc(s.name) + '</span>' +
                             '<span style="flex-shrink:0; font-size:12px; font-weight:800; opacity:0.8;">' +
@@ -210,18 +210,18 @@
             '<div style="display:flex; gap:8px;">' +
                 '<input value="' + esc(o.custom || "") + '" placeholder="유모차 이름" ' +
                     'onchange="window.setStrollerField(\'custom\', this.value)" ' +
-                    'style="flex:1; padding:13px; border-radius:12px; border:1px solid #D1D5DB; ' +
+                    'style="flex:1; padding:13px; border-radius:12px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13.5px; font-weight:700; box-sizing:border-box;">' +
                 '<input type="number" value="' + (o.customW || "") + '" placeholder="kg" ' +
                     'onchange="window.setStrollerField(\'customW\', this.value)" ' +
-                    'style="width:76px; padding:13px; border-radius:12px; border:1px solid #D1D5DB; ' +
+                    'style="width:76px; padding:13px; border-radius:12px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13.5px; font-weight:800; text-align:center; ' +
                     'box-sizing:border-box;">' +
             '</div>' +
 
             '<div onclick="window.closeStrollerSheet()" style="margin-top:22px; text-align:center; ' +
-                'padding:17px; background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
-                'font-size:15.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
+                'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
+                'font-size:14.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
         '</div>';
     }
 
@@ -269,27 +269,27 @@
         var rk = weightRank(kg);
         var light = lightestSame(o);
 
-        var out = '<div style="margin-top:16px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        var out = '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + '; margin-bottom:10px;">' +
                 '\uD83E\uDDB4 하루에 드시는 무게</div>' +
 
             '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">' +
-                '<span style="font-size:12.5px; font-weight:800; color:#4E5968;">하루 외출</span>' +
+                '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">하루 외출</span>' +
                 '<input type="number" value="' + trips + '" ' +
                     'onchange="window.setStrollerField(\'trips\', this.value)" ' +
-                    'style="width:60px; padding:10px; border-radius:10px; border:1px solid #D1D5DB; ' +
+                    'style="width:60px; padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">' +
-                '<span style="font-size:12.5px; font-weight:800; color:#4E5968;">번</span>' +
-                '<span style="font-size:12.5px; font-weight:800; color:#4E5968; margin-left:8px;">엘베 없이</span>' +
+                '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">번</span>' +
+                '<span style="font-size:12.5px; font-weight:800; color:#7A6F68; margin-left:8px;">엘베 없이</span>' +
                 '<input type="number" value="' + (floor || "") + '" placeholder="0" ' +
                     'onchange="window.setStrollerField(\'floor\', this.value)" ' +
-                    'style="width:60px; padding:10px; border-radius:10px; border:1px solid #D1D5DB; ' +
+                    'style="width:60px; padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">' +
-                '<span style="font-size:12.5px; font-weight:800; color:#4E5968;">층</span>' +
+                '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">층</span>' +
             '</div>' +
 
-            '<div style="font-size:13px; font-weight:600; color:#4E5968; line-height:1.85; ' +
+            '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                 'word-break:keep-all;">' +
                 '<b style="font-size:15px; color:' + (totalKg >= 60 ? RED : DARK) + ';">' +
                     kg + 'kg \u00d7 ' + lifts + '번 = ' + totalKg + 'kg</b><br>' +
@@ -302,8 +302,8 @@
 
         if (rk) {
             var heavy = rk.rank <= Math.ceil(rk.total * 0.3);
-            out += '<div style="margin-top:12px; padding-top:12px; border-top:1px solid #E5E8EB; ' +
-                'font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+            out += '<div style="margin-top:12px; padding-top:12px; border-top:1px solid #EDE6DE; ' +
+                'font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '50종 중 <b>무거운 쪽에서 ' + rk.rank + '번째</b>예요.' +
                 (heavy && light
                     ? ' 같은 ' + esc(byName(o.name).type) + ' 중에 제일 가벼운 건 ' +
@@ -322,12 +322,12 @@
         }
 
         /* \u26a0\ufe0f 늘 보이면 카드가 무거워진다. 아플 때만 펴보면 되는 내용이다. */
-        out += '<details style="margin-top:13px; background: #FFFFFF; border:1px solid #E5E8EB; ' +
+        out += '<details style="margin-top:13px; background: #FFFFFF; border:1px solid #EDE6DE; ' +
             'border-radius:12px; padding:13px 15px;">' +
-            '<summary style="font-size:12.5px; font-weight:800; color:#4E5968; cursor:pointer; ' +
+            '<summary style="font-size:12.5px; font-weight:800; color:#7A6F68; cursor:pointer; ' +
                 'list-style:none;">\uD83E\uDDB4 손목\u00b7허리가 아프시면</summary>' +
             '<div style="margin-top:10px; font-size:12.5px; font-weight:600; ' +
-            'color:#4E5968; line-height:1.9; word-break:keep-all;">' +
+            'color:#7A6F68; line-height:1.9; word-break:keep-all;">' +
             '\u00b7 접기 전에 <b>아래 바구니 짐부터 빼세요.</b> 그 무게가 그대로 손목에 실립니다<br>' +
             '\u00b7 트렁크에 넣을 땐 <b>무릎을 굽히고 몸에 붙여서.</b> 팔만 뻗으면 허리가 갑니다<br>' +
             '\u00b7 <b>한 손으로 들지 마세요.</b> 손목이 제일 먼저 상합니다<br>' +
@@ -386,7 +386,7 @@
         }
         if (!tips.length) return "";
 
-        return '<div style="margin-top:16px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        return '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
                 '\uD83D\uDEB6 ' + esc(x.name) + ' 로 나가실 때</div>' +
@@ -394,9 +394,9 @@
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '한 대로 다 하시니까, <b>힘들어지는 상황만</b> 미리 짚어드릴게요.</div>' +
             tips.map(function (t) {
-                return '<div style="padding:11px 0; border-bottom:1px solid #F2F4F6;">' +
-                    '<div style="font-size:12.5px; font-weight:900; color:#4E5968;">' + t[0] + '</div>' +
-                    '<div style="margin-top:4px; font-size:12px; font-weight:600; color:#4E5968; ' +
+                return '<div style="padding:11px 0; border-bottom:1px solid #F6F2EC;">' +
+                    '<div style="font-size:12.5px; font-weight:900; color:#7A6F68;">' + t[0] + '</div>' +
+                    '<div style="margin-top:4px; font-size:12px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.75; word-break:keep-all;">' + t[1] + '</div>' +
                 '</div>';
             }).join("") +
@@ -449,7 +449,7 @@
 
         var g = goingOf(o.going);
 
-        var out = '<div style="margin-top:16px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        var out = '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
                 '\uD83D\uDEB6 오늘은 뭘 갖고 나갈까</div>' +
@@ -464,7 +464,7 @@
                     'style="padding:12px 6px; border-radius:12px; cursor:pointer; text-align:center; ' +
                     'font-size:11.5px; font-weight:800; line-height:1.35; word-break:keep-all; ' +
                     (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                        : 'background: #FFFFFF; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                        : 'background: #FFFFFF; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                     '<div style="font-size:17px; margin-bottom:4px;">' + x.icon + '</div>' +
                     esc(x.label) + '</div>';
             }).join("") + '</div>';
@@ -500,14 +500,14 @@
         else if (g.want === "cabin") reason = pick.cabin || "기내 여부는 항공사마다 다릅니다";
         else reason = pick.kg + "kg \u00b7 " + (pick.road || "승차감 정보 없음");
 
-        out += '<div style="margin-top:14px; background: #FFFFFF; border:1.5px solid #CBE0FF; ' +
+        out += '<div style="margin-top:14px; background: #FFFFFF; border:1.5px solid #DDD9F5; ' +
             'border-radius:14px; padding:16px;">' +
             '<div style="font-size:11.5px; font-weight:800; color:' + BLUE + '; margin-bottom:5px;">' +
                 esc(g.icon + " " + g.label) + ' 이면</div>' +
-            '<div style="font-size:16px; font-weight:900; color:#191F28;">' + esc(pick.name) + '</div>' +
+            '<div style="font-size:16px; font-weight:900; color:#4A413C;">' + esc(pick.name) + '</div>' +
             '<div style="margin-top:4px; font-size:12.5px; font-weight:800; color:' + BLUE + ';">' +
                 esc(reason) + '</div>' +
-            '<div style="margin-top:9px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:9px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' + g.why + '</div>';
 
         /* 고른 쪽의 약점도 같이 말한다. 안 그러면 광고가 된다. */
@@ -525,7 +525,7 @@
             weak = "\u26a0\ufe0f 항공사마다 규정이 다릅니다. <b>타시기 전에 꼭 확인</b>하세요.";
 
         if (weak) {
-            out += '<div style="margin-top:10px; padding-top:10px; border-top:1px solid #F2F4F6; ' +
+            out += '<div style="margin-top:10px; padding-top:10px; border-top:1px solid #F6F2EC; ' +
                 'font-size:12px; font-weight:600; color:' + GOLD + '; line-height:1.7; ' +
                 'word-break:keep-all;">' + weak + '</div>';
         }
@@ -561,7 +561,7 @@
                 'border-radius:14px; padding:15px 16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:#1F6F52;">' +
                     '\u2705 두 번째 유모차는 안 사셔도 됩니다</div>' +
-                '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.8; word-break:keep-all;">' +
                     '쓰고 계신 게 ' + kg + 'kg 절충형이라 <b>휴대용만큼 가볍습니다.</b> ' +
                     '두 대 쓰시는 분들 대부분은 디럭스가 무거워서 그런 거예요.</div>' +
@@ -576,7 +576,7 @@
                     'border-radius:14px; padding:15px 16px;">' +
                     '<div style="font-size:13px; font-weight:900; color:' + RED + ';">' +
                         '\u26A0\uFE0F ' + esc(nm("는")) + ' 아직 ' + m + '개월이에요</div>' +
-                    '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                    '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.8; word-break:keep-all;">' +
                         '휴대용은 <b>등받이가 충분히 눕지 않는 것</b>이 많습니다. ' +
                         '목을 못 가누는 시기에는 각도가 서면 고개가 앞으로 꺾여요. ' +
@@ -591,11 +591,11 @@
                    weightOf(x) <= kg - 4 && x.name !== s.name;
         }).sort(function (a, b) { return weightOf(a) - weightOf(b); }).slice(0, 3);
 
-        return '<div style="margin-top:16px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        return '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:15px 16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
                 '\uD83D\uDED2 두 번째 유모차를 생각할 때예요</div>' +
-            '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
                 esc(nm("가")) + ' ' + m + '개월이라 <b>걷다 안기다를 반복</b>합니다. ' +
                 '그때마다 ' + kg + 'kg 을 접었다 폈다 하게 되고요.<br>' +
@@ -604,7 +604,7 @@
                 ? '<div style="margin-top:11px;">' +
                   picks.map(function (x) {
                       return '<div style="display:flex; justify-content:space-between; align-items:center; ' +
-                          'gap:10px; padding:9px 0; border-bottom:1px solid #F2F4F6;">' +
+                          'gap:10px; padding:9px 0; border-bottom:1px solid #F6F2EC;">' +
                           '<div style="flex:1; min-width:0; font-size:12.5px; font-weight:800; ' +
                               'color:' + DARK + '; word-break:keep-all;">' + esc(x.name) + '</div>' +
                           '<div style="flex-shrink:0; font-size:11.5px; font-weight:800; color:' + BLUE + ';">' +
@@ -655,13 +655,13 @@
                 /* ⚠️ 이름·날짜를 한 줄에 두고 오른쪽에 단추와 날짜 칸을 같이 넣었더니
                       글자 자리가 100px 밖에 안 남아 세 줄로 접혔다 (문의 들어온 것).
                       위에 글, 아래에 단추 둘을 나란히. 이러면 접히지 않는다. */
-                return '<div style="padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+                return '<div style="padding:13px 0; border-bottom:1px solid #F6F2EC;">' +
                     '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
                         esc(x.label) +
                         '<span style="font-weight:700; color:' + GRAY + '; font-size:11px;"> \u00b7 ' +
                         (x.days >= 30 ? (x.days / 30) + '달' : x.days + '일') + '마다</span></div>' +
                     '<div style="margin-top:3px; font-size:11.5px; font-weight:800; color:' +
-                        (bad ? GOLD : "#4E5968") + ';">' +
+                        (bad ? GOLD : "#7A6F68") + ';">' +
                         (d === null ? "아직 안 적으셨어요"
                                     : md(c[x.id]) + " \u00b7 " + (d === 0 ? "오늘 봤어요" : d + "일째") +
                                       (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
@@ -671,14 +671,14 @@
                         '<div onclick="window.markStrollerCare(\'' + x.id + '\')" ' +
                             'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
                             'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
-                            'color:#4E5968; border:1px solid #D1D5DB;">오늘 봤어요</div>' +
+                            'color:#7A6F68; border:1px solid #DCD3C8;">오늘 봤어요</div>' +
                         '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
                             'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
                             'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
                             'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
                             'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
-                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#4E5968; ' +
-                            'background:#FFFFFF; border:1px solid #D1D5DB; border-radius:11px; ' +
+                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#7A6F68; ' +
+                            'background:#FFFFFF; border:1px solid #DCD3C8; border-radius:11px; ' +
                             'padding:10px 8px; cursor:pointer;">' +
                     '</div>' +
                 '</div>';
@@ -758,11 +758,11 @@
             '<div class="matrix-header">\u2614 비 오는 날 레인커버</div>' +
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '<b style="color:' + RED + ';">\u26A0\uFE0F 레인커버를 씌운 채로 실내에 들어가지 마세요.</b> ' +
                 '비닐 안쪽은 <b>공기가 잘 안 통하고 온도가 빠르게 올라갑니다.</b> ' +
                 '건물에 들어가거나 비가 그치면 바로 걷어주세요.</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.9; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9; ' +
                 'word-break:keep-all;">' +
                 '\u00b7 <b>통풍구가 있는 것</b>으로 고르세요. 없는 건 아기 얼굴 쪽이 금방 답답해집니다<br>' +
                 '\u00b7 씌운 동안 <b>자주 들여다보세요.</b> 비닐 너머로는 표정이 잘 안 보입니다<br>' +
@@ -776,7 +776,7 @@
         var m = monthsOld();
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83D\uDE34 유모차에서 잠들었을 때</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.85; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '유모차는 <b>잠자리가 아니라 이동 수단</b>입니다. 등받이가 서 있으면 고개가 앞으로 꺾여요. ' +
                 '집에 도착하면 <b>평평한 곳에 눕혀주세요.</b>' +
@@ -785,8 +785,8 @@
                       '개월이에요.</b> 목을 못 가누는 시기라 <b>등받이를 최대한 눕히고</b> 자주 확인해주세요.'
                     : '') +
             '</div>' +
-            '<div style="background: #F9FAFB; border:1px solid #E5E8EB; border-radius:13px; ' +
-                'padding:14px 15px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="background: #FBF8F3; border:1px solid #EDE6DE; border-radius:13px; ' +
+                'padding:14px 15px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.9; word-break:keep-all;">' +
                 '<b>옮기면 깨서 고민이시라면</b><br>' +
                 '\u00b7 도착하기 <b>5분 전에 등받이를 천천히</b> 눕혀두세요. 자세가 이미 바뀌어 있으면 덜 깹니다<br>' +
@@ -926,7 +926,7 @@
 
         out += '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
             'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +
-            'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+            'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
             '<b style="color:' + RED + ';">\u26A0\uFE0F 앉기 싫어해도 벨트는 꼭 채우세요.</b> ' +
             '유모차는 카시트와 달리 <b>앞으로 고꾸라지면 바로 바닥</b>입니다. ' +
             '앉는 건 협상해도 <b>벨트는 협상 대상이 아니에요.</b></div>';
@@ -942,7 +942,7 @@
                 WHY.map(function (x) {
                     return '<div onclick="window.pickStrollerWhy(\'' + x.id + '\')" ' +
                         'style="padding:15px 10px; border-radius:14px; cursor:pointer; text-align:center; ' +
-                        'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB; ' +
+                        'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE; ' +
                         'font-size:12.5px; font-weight:800; line-height:1.45; word-break:keep-all;">' +
                         '<div style="font-size:20px; margin-bottom:6px;">' + x.icon + '</div>' +
                         esc(x.label) + '</div>';
@@ -967,44 +967,44 @@
             '<div onclick="window.resetStrollerWhy()" style="flex-shrink:0; font-size:12px; ' +
                 'font-weight:800; color:' + BLUE + '; cursor:pointer;">다시 고르기</div>' +
         '</div>' +
-        '<div style="background:#E8F3FF; border:1px solid #C9E2FF; border-radius:13px; ' +
+        '<div style="background:#F0EEFB; border:1px solid #DDD9F5; border-radius:13px; ' +
             'padding:14px 15px; margin-bottom:14px; font-size:12.5px; font-weight:600; ' +
-            'color:#1B64DA; line-height:1.75; word-break:keep-all;">' + w.note + '</div>';
+            'color:#6A61CE; line-height:1.75; word-break:keep-all;">' + w.note + '</div>';
 
         if (win) {
             out += '<div style="background:#EAF7F1; border:1px solid #A7DFC8; border-radius:14px; ' +
                 'padding:16px;">' +
                 '<div style="font-size:14px; font-weight:900; color:#1F6F52;">' +
                     '\u2705 ' + esc(win.t) + ' \u2014 이게 통했어요</div>' +
-                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '며칠은 같은 방법으로 이어가세요. 한 번 됐다고 바로 자리잡진 않아요.</div>' +
             '</div>';
         } else if (plus) {
             out += '<div style="font-size:11.5px; font-weight:900; color:' + BLUE + '; ' +
                 'letter-spacing:0.4px; margin-bottom:7px;">오늘 해볼 것 하나</div>' +
-                '<div style="background: #FFFFFF; border:1.5px solid #CBE0FF; border-radius:16px; ' +
-                    'padding:17px; box-shadow:0 3px 14px rgba(49,130,246,0.06);">' +
+                '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; ' +
+                    'padding:17px; box-shadow:0 3px 14px rgba(127, 119, 221,0.06);">' +
                     '<div style="display:flex; align-items:center; gap:8px;">' +
                         '<span style="flex-shrink:0; width:21px; height:21px; border-radius:7px; ' +
                             'background:' + DARK + '; color:#FFFFFF; font-size:11px; font-weight:900; ' +
                             'display:inline-flex; align-items:center; justify-content:center;">' +
                             (step + 1) + '</span>' +
-                        '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
+                        '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
                             esc(cur.t) + '</span>' +
                     '</div>' +
-                    '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#4E5968; ' +
+                    '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.8; word-break:keep-all;">' + cur.d + '</div>' +
                     (done
                         ? '<div style="margin-top:14px; text-align:center; padding:13px; ' +
-                          'background: #F9FAFB; color:' + GRAY + '; border-radius:12px; ' +
+                          'background: #FBF8F3; color:' + GRAY + '; border-radius:12px; ' +
                           'font-size:12.5px; font-weight:800;">오늘 몫은 하셨어요. 내일 또 뵐게요</div>'
                         : '<div style="display:flex; gap:8px; margin-top:15px;">' +
                           '<div onclick="window.markStrollerWay(true)" style="flex:1; text-align:center; ' +
                               'padding:13px; background:' + DARK + '; color:#FFFFFF; border-radius:12px; ' +
-                              'font-size:13.5px; font-weight:800; cursor:pointer;">탔어요!</div>' +
+                              'font-size:13.5px; font-weight:800; cursor:pointer;">탔어요</div>' +
                           '<div onclick="window.markStrollerWay(false)" style="flex:1; text-align:center; ' +
-                              'padding:13px; background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB; ' +
+                              'padding:13px; background: #FFFFFF; color:#7A6F68; border:1px solid #DCD3C8; ' +
                               'border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer;">' +
                               '그대로예요</div></div>') +
                 '</div>';
@@ -1016,10 +1016,10 @@
                     'line-height:1.7; word-break:keep-all;">해보신 것 \u00b7 ' + esc(tried.join(" \u00b7 ")) + '</div>';
             }
         } else {
-            out += '<div style="background: #FFFFFF; border:1.5px solid #CBE0FF; border-radius:16px; ' +
+            out += '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; ' +
                 'padding:17px;">' +
-                '<div style="font-size:15px; font-weight:900; color:#191F28;">1. ' + esc(list[0].t) + '</div>' +
-                '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#4E5968; ' +
+                '<div style="font-size:15px; font-weight:900; color:#4A413C;">1. ' + esc(list[0].t) + '</div>' +
+                '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.8; word-break:keep-all;">' + list[0].d + '</div>' +
             '</div>' +
             '<div style="margin-top:13px; background:#FFF9E6; border:1px solid #F5E1A4; ' +

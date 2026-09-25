@@ -14,7 +14,7 @@
 
     <header class="app-header">
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
-<a href="../index.html" style="display:flex; align-items:center; text-decoration:none; color:#4E5968; font-size:14px; font-weight:600; border:none; background:transparent; cursor:pointer;">
+<a href="../index.html" style="display:flex; align-items:center; text-decoration:none; color:#7A6F68; font-size:14px; font-weight:600; border:none; background:transparent; cursor:pointer;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -38,46 +38,46 @@
         /* ✨ 탭 메뉴 (놀이 처방전 / 장난감 추천) 활성화 디자인 (베이지색 켜짐) */
         .tab-on { 
             background: #FDF9F3 !important; /* 육아메이트 시그니처 베이지 */
-            color: #191F28 !important; 
+            color: #4A413C !important; 
             font-weight: 900 !important; 
             border: 1px solid #E5D5C6 !important; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important; 
         }
         .tab-off { 
             background: transparent !important; 
-            color: #8B95A1 !important; 
+            color: #A3958A !important; 
             font-weight: 600 !important; 
             border: 1px solid transparent !important; 
             box-shadow: none !important;
         }
 
         /* 🚨 엄마아빠 SOS 긴급 처방전 (회색 배경 완벽 제거) */
-        .sos-theme-panel { background: #FFFFFF; border: 1px solid #F2F5F8; border-radius: 20px;
+        .sos-theme-panel { background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 20px;
                            padding: 20px 18px; margin: 0 0 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
         /* 칸 제목은 두 탭 모두 18px 하나로 (놀이 탭의 '지금 몇 분 · 이번 주 놀이' 와 같게) */
         /* ⚠️ 어떤 칸은 회색 배경에 제목만, 어떤 칸은 흰 카드라 한 화면에 두 모양이 섞여 있었다.
               젖병·유모차·카시트는 전부 흰 카드다. 장난감도 같은 모양으로 맞춘다.
               칸 = 흰 카드 / 카드 안의 묶음 = 연회색 / 색 상자는 안내에만. */
-        .bnh-card { background: #FFFFFF; border: 1px solid #F2F5F8; border-radius: 20px;
+        .bnh-card { background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 20px;
                     padding: 20px 18px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
-        .panel-header { font-size: 18px; font-weight: 900; color: #191F28; letter-spacing: -0.4px; margin-bottom: 14px; }
+        .panel-header { font-size: 18px; font-weight: 900; color: #4A413C; letter-spacing: -0.4px; margin-bottom: 14px; }
         
         .theme-scroll-wrapper { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; scrollbar-width: none; -ms-overflow-style: none; }
         .theme-scroll-wrapper::-webkit-scrollbar { display: none; }
         
-        .theme-card { flex-shrink: 0; background: #F9FAFB; border: 1px solid #E5E8EB; border-radius: 16px; padding: 16px; width: 145px; text-align: left; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
-        .theme-card.active { border: 2px solid #3182F6; background: #F0F7FF; box-shadow: 0 4px 12px rgba(49,130,246,0.15); }
+        .theme-card { flex-shrink: 0; background: #FBF8F3; border: 1px solid #EDE6DE; border-radius: 16px; padding: 16px; width: 145px; text-align: left; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
+        .theme-card.active { border: 2px solid #7F77DD; background: #F2F0FC; box-shadow: 0 4px 12px rgba(127, 119, 221,0.15); }
         .theme-emoji { font-size: 30px; margin-bottom: 10px; line-height: 1; }
-        .theme-text { font-size: 13.5px; color: #4E5968; line-height: 1.4; word-break: keep-all; }
-        .theme-text b { color: #191F28; font-weight: 900; }
-        .theme-card.active .theme-text { color: #1B64DA; }
-        .theme-card.active .theme-text b { color: #1B64DA; }
+        .theme-text { font-size: 13.5px; color: #7A6F68; line-height: 1.4; word-break: keep-all; }
+        .theme-text b { color: #4A413C; font-weight: 900; }
+        .theme-card.active .theme-text { color: #6A61CE; }
+        .theme-card.active .theme-text b { color: #6A61CE; }
 
         /* 👶 발달 마일스톤 칩 CSS */
-        .panel-header-dark { font-size: 18px; font-weight: 900; color: #191F28; letter-spacing: -0.4px; margin-bottom: 14px; margin-top: 8px; }
+        .panel-header-dark { font-size: 18px; font-weight: 900; color: #4A413C; letter-spacing: -0.4px; margin-bottom: 14px; margin-top: 8px; }
                /* SOS 처방전 카드(.theme-card)와 같은 흰 칸으로. 상자 속 상자를 만들지 않는다. */
-        .ms-chip { padding: 13px 18px; border-radius: 16px; background: #F9FAFB; color: #4E5968; border: 1px solid #E5E8EB; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .ms-chip.active { background: #191F28; color: #FFFFFF; border: 1px solid #191F28; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .ms-chip { padding: 13px 18px; border-radius: 16px; background: #FBF8F3; color: #7A6F68; border: 1px solid #EDE6DE; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .ms-chip.active { background: #4A413C; color: #FFFFFF; border: 1px solid #4A413C; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         /* ⚠️ 생일을 모르면 나이 배지가 비어서, 제목 옆에 빈 파란 알약이 떴다 (미완성처럼 보이던 것) */
         .dynamic-age-badge:empty { display: none !important; }
     </style>
@@ -88,20 +88,20 @@
         <!-- 타이틀 영역 -->
         <div class="hero-title" style="text-align: center; margin-bottom: 24px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
-                <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #191F28;">
+                <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
                     <span class="gradient-text">놀이 처방전 & 장난감</span>
                 </h2>
-                <span class="dynamic-age-badge" style="background: #E8F3FF; color: #3182F6; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
+                <span class="dynamic-age-badge" style="background: #F0EEFB; color: #7F77DD; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
                 </span>
             </div>
-            <p style="margin: 0; font-size: 13.5px; font-weight: 600; color: #8B95A1;">
+            <p style="margin: 0; font-size: 13.5px; font-weight: 600; color: #A3958A;">
                 장난감 추천은 기본, 당장 시간 때울 '놀이 처방전'까지
             </p>
         </div>
 
        
         <!-- ✨ 투 트랙 서브 탭 -->
-<div class="segment-control" style="display: flex; gap: 8px; margin-bottom: 24px; padding: 4px; background: #F2F4F6; border-radius: 14px;">
+<div class="segment-control" style="display: flex; gap: 8px; margin-bottom: 24px; padding: 4px; background: #F6F2EC; border-radius: 14px;">
     <button id="tab-btn-play" class="tab-on" onclick="switchToyMainTab('play')" style="flex: 1; padding: 12px 0; border-radius: 10px; border: none; font-size: 14px; cursor: pointer; transition: 0.2s;">
         🧸 놀이 처방전
     </button>
@@ -117,8 +117,8 @@
             <!-- 🎈 놀이 모아보기 — 위의 칸들(지금 몇 분 · 이번 주 놀이 · 우리 집 장난감)과 같은 모양.
                  파란 상자였고 '기적의 시간 떼우기' 라고 적혀 있었다 (떼우기 → 때우기, '기적' 은 과장). -->
             <div id="play-list-head" class="bnh-card">
-                <div style="font-size:18px; font-weight:900; color:#191F28; letter-spacing:-0.4px; margin-bottom:6px;">🎈 놀이 모아보기</div>
-                <div style="font-size:12.5px; font-weight:600; color:#8B95A1; line-height:1.7; word-break:keep-all;">집에 있는 장난감이 지겹다면, 일상용품으로 15분을 버텨보세요. 돈 드는 놀이는 없어요.</div>
+                <div style="font-size:18px; font-weight:900; color:#4A413C; letter-spacing:-0.4px; margin-bottom:6px;">🎈 놀이 모아보기</div>
+                <div style="font-size:12.5px; font-weight:600; color:#A3958A; line-height:1.7; word-break:keep-all;">집에 있는 장난감이 지겹다면, 일상용품으로 15분을 버텨보세요. 돈 드는 놀이는 없어요.</div>
             </div>
 
             <!-- 놀이 필터 -->
@@ -126,13 +126,13 @@
           <div style="position: sticky; top: 0; z-index: 10; background: #FAFAFC; padding: 12px 0; margin-bottom: 12px; margin-top: -10px; box-shadow: 0 4px 6px -4px rgba(0,0,0,0.05);">
                 <!-- 👇 여기에 id="play-filter-scroll" 추가됨! -->
                 <div id="play-filter-scroll" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -ms-overflow-style: none; padding-left: 4px;">
-                    <button class="play-filter-btn active" onclick="filterPlays('all', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: none; background: #191F28; color: #FFF; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">전체보기</button>
-                    <button class="play-filter-btn" onclick="filterPlays('lieDown', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; color: #4E5968; font-weight: 800; font-size: 13.5px; cursor: pointer;">🛌 엄마 방전</button>
-                    <button class="play-filter-btn" onclick="filterPlays('poop', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; color: #4E5968; font-weight: 800; font-size: 13.5px; cursor: pointer;">💩 쾌변 기원</button>
-                    <button class="play-filter-btn" onclick="filterPlays('sick', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; color: #4E5968; font-weight: 800; font-size: 13.5px; cursor: pointer;">🤒 아기 진정</button>
-                    <button class="play-filter-btn" onclick="filterPlays('zero', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; color: #4E5968; font-weight: 800; font-size: 13.5px; cursor: pointer;">🏠 0원 놀이</button>
-                    <button class="play-filter-btn" onclick="filterPlays('dad', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; color: #4E5968; font-weight: 800; font-size: 13.5px; cursor: pointer;">🏋️ 아빠 노동</button>
-                    <button class="play-filter-btn" onclick="filterPlays('toy', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #E5E8EB; background: #FFF; color: #4E5968; font-weight: 800; font-size: 13.5px; cursor: pointer;">🧸 국민템 뽕뽑기</button>
+                    <button class="play-filter-btn active" onclick="filterPlays('all', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: none; background: #4A413C; color: #FFF; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">전체보기</button>
+                    <button class="play-filter-btn" onclick="filterPlays('lieDown', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🛌 엄마 방전</button>
+                    <button class="play-filter-btn" onclick="filterPlays('poop', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">💩 쾌변 기원</button>
+                    <button class="play-filter-btn" onclick="filterPlays('sick', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🤒 아기 진정</button>
+                    <button class="play-filter-btn" onclick="filterPlays('zero', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🏠 0원 놀이</button>
+                    <button class="play-filter-btn" onclick="filterPlays('dad', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🏋️ 아빠 노동</button>
+                    <button class="play-filter-btn" onclick="filterPlays('toy', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🧸 국민템 뽕뽑기</button>
 <button class="play-filter-btn" onclick="filterPlays('fav', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #FCA5A5; background: #FFF2F2; color: #E32636; font-weight: 900; font-size: 13.5px; cursor: pointer;">❤️ 찜한 놀이</button>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                 /* 👇 수정됨: 버튼 클래스가 아니라 스크롤 부모의 id로 타겟팅! */
                 #play-filter-scroll::-webkit-scrollbar { display: none; }
                 /* 💡 버튼 누를 때 까만색으로 부드럽게 바뀌게 해주는 마법의 CSS */
-                .play-filter-btn.active { background: #191F28 !important; color: #FFF !important; border: none !important; }
+                .play-filter-btn.active { background: #4A413C !important; color: #FFF !important; border: none !important; }
             </style>
 
             <div id="play-result-area" style="display: flex; flex-direction: column; gap: 20px; padding-bottom: 40px;">
@@ -193,7 +193,7 @@
             <!-- 👶 발달 마일스톤 칩 필터 — 이 칸도 카드 -->
             <div class="bnh-card">
             <div class="panel-header-dark" style="margin-bottom: 4px;">👶 우리 아기 현재 발달 상태는?</div>
-            <div style="font-size: 12.5px; font-weight: 600; color: #8B95A1; line-height: 1.6; margin-bottom: 14px; word-break: keep-all;">개월수에 맞게 미리 골라뒀어요. 바꾸시면 아래 목록도 같이 바뀝니다.</div>
+            <div style="font-size: 12.5px; font-weight: 600; color: #A3958A; line-height: 1.6; margin-bottom: 14px; word-break: keep-all;">개월수에 맞게 미리 골라뒀어요. 바꾸시면 아래 목록도 같이 바뀝니다.</div>
             <div class="chip-group" id="milestone-filters" style="display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
                 <button class="ms-chip active" data-milestone="all" style="flex-shrink: 0; white-space: nowrap;">전체보기</button>
                 <button class="ms-chip" data-milestone="newborn" style="flex-shrink: 0; white-space: nowrap;"> 신생아 생존기</button>
@@ -211,11 +211,11 @@
             <div id="toy-result-area"></div>
             
             <!-- 면책 조항 -->
-            <div style="background: #F8F9FA; border: 1px solid #E5E8EB; border-radius: 12px; padding: 24px 20px; margin-top: 40px; margin-bottom: 20px; color: #8B95A1; font-size: 12.5px; line-height: 1.6; word-break: keep-all;">
-                <div style="font-weight: 700; color: #4E5968; margin-bottom: 4px;">※ 장난감 안전 면책 조항</div>
+            <div style="background: #FAF7F2; border: 1px solid #EDE6DE; border-radius: 12px; padding: 24px 20px; margin-top: 40px; margin-bottom: 20px; color: #A3958A; font-size: 12.5px; line-height: 1.6; word-break: keep-all;">
+                <div style="font-weight: 700; color: #7A6F68; margin-bottom: 4px;">※ 장난감 안전 면책 조항</div>
                 <div style="margin-bottom: 16px;">본 큐레이션은 일반적인 발달 단계를 기준으로 한 참고용입니다. 구매 전 반드시 제조사의 권장 사용 연령과 주의사항(작은 부품 질식 위험 등)을 직접 확인하시기 바랍니다. 보호자의 세심한 관찰이 필요하며, 부주의나 제품 결함으로 인한 사고에 대해 본 서비스는 법적 책임을 지지 않습니다.</div>
 
-                <div style="font-weight: 700; color: #4E5968; margin-bottom: 4px;">※ 쿠팡 파트너스 안내</div>
+                <div style="font-weight: 700; color: #7A6F68; margin-bottom: 4px;">※ 쿠팡 파트너스 안내</div>
                             <div>이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 구매 시 이에 따른 일정액의 수수료를 제공받습니다. 배냇함은 객관적 데이터를 바탕으로 정보를 제공하며, 수수료는 추천 순서에 영향을 주지 않습니다.</div>
             </div>
         </div>
@@ -247,7 +247,7 @@
     <script src="toyorder.js"></script>
 
 <!-- 🚀 우측 하단 위로 가기 버튼 (높이 30px로 정상화 완료!) -->
-    <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #E5E8EB; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #4E5968; justify-content: center; align-items: center; transition: opacity 0.3s;">
+    <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">
         ↑
     </button>
 

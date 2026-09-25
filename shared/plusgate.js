@@ -93,9 +93,13 @@
         /* 탭을 옮기거나 다시 그리면 상자가 새로 생긴다 */
         if (window.MutationObserver) {
             var t = null;
+            /* 화면이 바뀔 때마다 금색 상자를 전부 다시 찾았다. 조금 모았다가 한 번만. */
             new MutationObserver(function () {
                 if (t) return;
-                t = setTimeout(function () { t = null; paint(); }, 250);
+                t = setTimeout(function () {
+                    t = null;
+                    if (!document.hidden) paint();
+                }, 500);
             }).observe(document.body, { childList: true, subtree: true });
         }
     }

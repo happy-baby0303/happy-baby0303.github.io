@@ -29,7 +29,7 @@
 
     var KEY  = "tosil_stroller_limit";
     var ID   = "stroller-limit";
-    var GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
+    var GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B", GOLD = "#8A6D00", RED = "#C62828";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -96,7 +96,7 @@
         if (lim === null) {
             return '<div id="' + ID + '" class="matrix-panel" onclick="window.setStrollerLimit()" ' +
                 'style="display:flex; align-items:center; gap:12px; background:#FFFFFF; ' +
-                'border:1px solid #E5E8EB; border-radius:16px; padding:15px 16px; ' +
+                'border:1px solid #EDE6DE; border-radius:16px; padding:15px 16px; ' +
                 'margin-bottom:14px; cursor:pointer;">' +
                 '<div style="font-size:20px; flex-shrink:0;">⚖️</div>' +
                 '<div style="flex:1; min-width:0;">' +
@@ -107,14 +107,14 @@
                         '설명서에 적힌 숫자 하나만 옮겨 적어주시면, ' +
                         esc(nm("가")) + ' 언제쯤 한도에 닿는지 알려드릴게요</div>' +
                 '</div>' +
-                '<div style="font-size:12px; color:#3182F6; flex-shrink:0;">〉</div>' +
+                '<div style="font-size:12px; color:#7F77DD; flex-shrink:0;">〉</div>' +
             '</div>';
         }
 
         var tone = GREEN, bg = "#EAF7F1", bd = "#A7DFC8", head, body;
 
         if (kg === null) {
-            tone = GRAY; bg = "#F9FAFB"; bd = "#E5E8EB";
+            tone = GRAY; bg = "#FBF8F3"; bd = "#EDE6DE";
             head = "최대 " + lim + "kg 까지";
             body = "본 앱 성장 기록에 몸무게를 적어두시면 " +
                    esc(nm("가")) + " 얼마나 남았는지 같이 보여드릴게요.";
@@ -148,7 +148,7 @@
             'border:1px solid ' + bd + '; border-radius:16px; padding:16px; margin-bottom:14px;">' +
             '<div class="matrix-header" style="font-size:14px; font-weight:900; color:' + tone + '; ' +
                 'margin-bottom:6px;">⚖️ ' + esc(head) + '</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' + body + '</div>' +
             '<div onclick="window.setStrollerLimit()" style="margin-top:11px; font-size:11.5px; ' +
                 'font-weight:800; color:' + GRAY + '; cursor:pointer;">숫자 고치기</div>' +

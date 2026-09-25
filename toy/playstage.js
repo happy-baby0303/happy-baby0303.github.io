@@ -43,7 +43,7 @@
     'use strict';
 
     var ID   = "play-stage";
-    var GRAY = "#8B95A1", DARK = "#191F28", GREEN = "#1F9D6B", GOLD = "#8A6D00", PURPLE = "#6D28D9";
+    var GRAY = "#A3958A", DARK = "#4A413C", GREEN = "#1F9D6B", GOLD = "#8A6D00", PURPLE = "#6A61CE";
 
     /* 도감 id → 발달 단계. 본 앱 MILESTONE_DATA 를 보고 뽑았다.
        ⚠️ 본 앱 도감을 고치면 여기도 같이 봐야 한다. */
@@ -197,7 +197,7 @@
                 /* 한 화면에 검은 막대가 셋이라 무거웠다. 이 칸의 단추는 테두리만. */
                 '<div onclick="location.href=\'../index.html\'" ' +
                     'style="margin-top:12px; text-align:center; padding:13px; background:#FFFFFF; ' +
-                    'color:' + DARK + '; border:1.5px solid #D1D5DB; border-radius:12px; ' +
+                    'color:' + DARK + '; border:1.5px solid #DCD3C8; border-radius:12px; ' +
                     'font-size:13.5px; font-weight:900; cursor:pointer;">' +
                     '배냇함 도감 열기</div>' +
             '</div>';
@@ -224,9 +224,9 @@
         return '<div id="' + ID + '" class="bnh-card">' +
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
                 'word-break:keep-all; margin-bottom:6px;">🎯 ' + esc(nm("")) + ' 기준으로 고르는 중</div>' +
-            '<div style="background:' + (same ? "#F9FAFB" : "#F5F3FF") + '; ' +
-                'border:1px solid ' + (same ? "#E5E8EB" : "#DDD6FE") + '; border-radius:14px; ' +
-                'padding:15px 16px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="background:' + (same ? "#FBF8F3" : "#F3F0FC") + '; ' +
+                'border:1px solid ' + (same ? "#EDE6DE" : "#DDD9F5") + '; border-radius:14px; ' +
+                'padding:15px 16px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' + line + '</div>' +
         '</div>';
     }

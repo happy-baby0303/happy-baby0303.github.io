@@ -27,7 +27,7 @@
     'use strict';
 
     var ID = "toy-idle";
-    var GRAY = "#8B95A1", DARK = "#191F28", BLUE = "#3182F6";
+    var GRAY = "#A3958A", DARK = "#4A413C", BLUE = "#7F77DD";
     var GREEN = "#1F9D6B", GOLD = "#8A6D00", PURPLE = "#7F77DD";
 
     var IDLE_DAYS = 30;      // 이만큼 안 나왔으면 자고 있는 것으로 본다
@@ -238,7 +238,7 @@
         var when = x.days === null ? "아직 한 번도 안 나왔어요"
                                    : prettyDay(x.last) + "이 마지막";
         return '<div style="display:flex; justify-content:space-between; align-items:center; ' +
-            'gap:10px; padding:11px 0; border-bottom:1px solid #F2F4F6;">' +
+            'gap:10px; padding:11px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:' + DARK + '; ' +
                 'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;' +
                 (blur ? ' filter:blur(4px);' : '') + '">' + esc(x.toy.name) + '</div>' +
@@ -291,7 +291,7 @@
             sideLine +
 
             /* 항목은 흰 칸 하나에 모은다 */
-            '<div style="margin-top:13px; background:#F9FAFB; border:1px solid #EEF0F2; border-radius:14px; padding:2px 16px;">' +
+            '<div style="margin-top:13px; background:#FBF8F3; border:1px solid #F2EDE6; border-radius:14px; padding:2px 16px;">' +
                 show.map(function (x) { return row(x, false); }).join("") +
                 (hidden > 0
                     ? list.slice(2, 4).map(function (x) { return row(x, true); }).join("")
@@ -300,7 +300,7 @@
 
             (plus
                 ? '<div onclick="window.planWithIdleToys()" style="margin-top:14px; text-align:center; ' +
-                  'padding:15px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #D1D5DB; ' +
+                  'padding:15px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #DCD3C8; ' +
                   'border-radius:13px; font-size:13.5px; font-weight:900; cursor:pointer;">' +
                   '이걸로 다음 주 처방전 짜기</div>'
 

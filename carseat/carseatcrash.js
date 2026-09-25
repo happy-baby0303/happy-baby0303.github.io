@@ -33,8 +33,8 @@
 
     var RED   = "#D32F2F";
     var GREEN = "#2E7D57";
-    var GRAY  = "#8B95A1";
-    var INK   = "#191F28";
+    var GRAY  = "#A3958A";
+    var INK   = "#4A413C";
 
     var KEY = "tosil_crash_check";
 
@@ -106,15 +106,15 @@
 
         function btn(label, yes) {
             var on = (v === yes);
-            var bg = on ? (yes ? GREEN : RED) : "#F2F4F6";
-            var fg = on ? "#FFFFFF" : "#4E5968";
+            var bg = on ? (yes ? GREEN : RED) : "#F6F2EC";
+            var fg = on ? "#FFFFFF" : "#7A6F68";
             return '<div onclick="window.crashAnswer(\'' + c.id + '\',' + (yes ? 'true' : 'false') + ')" ' +
                 'style="flex:1; text-align:center; padding:11px 0; border-radius:11px; cursor:pointer; ' +
                 'font-size:13.5px; font-weight:800; background:' + bg + '; color:' + fg + '; ' +
                 'transition:0.15s;">' + label + '</div>';
         }
 
-        return '<div style="padding:14px 0; border-bottom:1px solid #F2F4F6;">' +
+        return '<div style="padding:14px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="font-size:14px; font-weight:800; color:' + INK + '; ' +
                 'line-height:1.5; word-break:keep-all; margin-bottom:10px;">' + esc(c.q) + '</div>' +
             '<div style="display:flex; gap:8px;">' + btn("예", true) + btn("아니오", false) + '</div>' +
@@ -130,8 +130,8 @@
         if (!r) return "";
 
         if (r.partial) {
-            return '<div style="margin-top:16px; padding:16px; background:#F9FAFB; ' +
-                'border:1px solid #E5E8EB; border-radius:14px; text-align:center; ' +
+            return '<div style="margin-top:16px; padding:16px; background:#FBF8F3; ' +
+                'border:1px solid #EDE6DE; border-radius:14px; text-align:center; ' +
                 'font-size:13px; font-weight:700; color:' + GRAY + ';">' +
                 r.left + '개만 더 답해주세요</div>';
         }
@@ -192,7 +192,7 @@
                 : '') +
 
             /* ⚠️ 기준의 출처를 밝힌다. 우리가 정한 게 아니다. */
-            '<div style="margin-top:14px; padding-top:14px; border-top:1px dashed #E5E8EB; ' +
+            '<div style="margin-top:14px; padding-top:14px; border-top:1px dashed #EDE6DE; ' +
                 'font-size:11.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
                 'word-break:keep-all;">' +
                 '미국 도로교통안전국(NHTSA)의 \u2018경미한 사고\u2019 기준을 그대로 옮겼습니다. ' +
@@ -213,8 +213,8 @@
             '</div>' +
             '<a href="https://www.safetykorea.kr" target="_blank" rel="noopener" ' +
                 'class="buy-btn official" style="display:flex; justify-content:center; ' +
-                'align-items:center; width:100%; margin-top:0; background:#F9FAFB; color:' + INK + '; ' +
-                'border:1px solid #D1D5DB; font-size:14.5px; padding:16px 0; border-radius:14px; ' +
+                'align-items:center; width:100%; margin-top:0; background:#FBF8F3; color:' + INK + '; ' +
+                'border:1px solid #DCD3C8; font-size:14.5px; padding:16px 0; border-radius:14px; ' +
                 'font-weight:900; text-decoration:none;">' +
                 '제품안전정보센터에서 찾아보기 〉</a>' +
             '<div style="margin-top:10px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +

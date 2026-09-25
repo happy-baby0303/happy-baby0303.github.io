@@ -34,7 +34,7 @@
 
     var ID   = "play-now";
     var KEY  = "tosil_playnow_done";     // 오늘 한 것 { id: ts }
-    var GRAY = "#8B95A1", DARK = "#191F28", BLUE = "#3182F6";
+    var GRAY = "#A3958A", DARK = "#4A413C", BLUE = "#7F77DD";
     var GREEN = "#1F9D6B", GOLD = "#8A6D00";
 
     var MINS = [5, 10, 20];
@@ -192,7 +192,7 @@
                     'style="flex:1; text-align:center; padding:11px 0; border-radius:12px; ' +
                     'cursor:pointer; font-size:13.5px; font-weight:900; ' +
                     (on ? 'background:' + DARK + '; color:#FFFFFF;'
-                        : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                        : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                     m + '분</div>';
             }).join("") +
         '</div>';
@@ -200,7 +200,7 @@
 
     function rowHTML(p, i) {
         return '<div style="display:flex; align-items:center; gap:11px; padding:13px 0; ' +
-            'border-bottom:1px solid #F2F4F6;">' +
+            'border-bottom:1px solid #F6F2EC;">' +
             '<div onclick="window.openPlayNow(\'' + esc(p.id) + '\')" ' +
                 'style="flex:1; min-width:0; cursor:pointer;">' +
                 '<div style="font-size:13.5px; font-weight:800; color:' + DARK + '; ' +
@@ -214,7 +214,7 @@
             '</div>' +
             '<div onclick="window.playNowDone(\'' + esc(p.id) + '\')" ' +
                 'style="flex-shrink:0; padding:9px 13px; border-radius:11px; cursor:pointer; ' +
-                'background:#F2F4F6; color:#4E5968; font-size:12px; font-weight:800;">했어요</div>' +
+                'background:#F6F2EC; color:#7A6F68; font-size:12px; font-weight:800;">했어요</div>' +
         '</div>';
     }
 

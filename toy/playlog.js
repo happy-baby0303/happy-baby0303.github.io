@@ -24,7 +24,7 @@
     'use strict';
 
     var KEY = "tosil_play_log";
-    var GRAY = "#8B95A1", DARK = "#191F28", BLUE = "#3182F6", GREEN = "#1F9D6B", PURPLE = "#7F77DD";
+    var GRAY = "#A3958A", DARK = "#4A413C", BLUE = "#7F77DD", GREEN = "#1F9D6B", PURPLE = "#7F77DD";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -209,11 +209,11 @@
                 '처방전에서 <b>놀았어요</b>를 누르면 여기 쌓입니다</div>' +
 
             (st.days === 0
-                ? '<div style="background:#F9FAFB; border-radius:13px; padding:18px 14px; ' +
+                ? '<div style="background:#FBF8F3; border-radius:13px; padding:18px 14px; ' +
                   'text-align:center; font-size:12.5px; font-weight:700; color:' + GRAY + '; ' +
                   'line-height:1.7;">아직 기록이 없어요.<br>오늘 논 놀이에 <b>놀았어요</b>를 눌러보세요.</div>'
                 : '<div style="display:flex; gap:8px; margin-bottom:12px;">' +
-                    '<div style="flex:1; text-align:center; background:#F0F7FF; border-radius:13px; padding:13px 6px;">' +
+                    '<div style="flex:1; text-align:center; background:#F2F0FC; border-radius:13px; padding:13px 6px;">' +
                         '<div style="font-size:20px; font-weight:900; color:' + BLUE + ';">' + st.days + '</div>' +
                         '<div style="font-size:10.5px; font-weight:800; color:' + GRAY + '; margin-top:2px;">논 날</div></div>' +
                     '<div style="flex:1; text-align:center; background:#F5F4FF; border-radius:13px; padding:13px 6px;">' +
@@ -223,26 +223,26 @@
                         '<div style="font-size:20px; font-weight:900; color:' + GREEN + ';">' + st.dadDays + '</div>' +
                         '<div style="font-size:10.5px; font-weight:800; color:' + GRAY + '; margin-top:2px;">아빠 날</div></div>' +
                   '</div>' +
-                  (topP ? '<div style="background:#F9FAFB; border-radius:12px; padding:12px 14px; ' +
-                        'font-size:12.5px; font-weight:700; color:#4E5968; line-height:1.6;">' +
+                  (topP ? '<div style="background:#FBF8F3; border-radius:12px; padding:12px 14px; ' +
+                        'font-size:12.5px; font-weight:700; color:#7A6F68; line-height:1.6;">' +
                         '🏆 제일 많이 한 놀이 · <b>' + esc(topP.title) + '</b> ' + st.topN + '번</div>' : '')
             ) +
 
-            '<div style="height:1px; background:#F2F4F6; margin:14px 0;"></div>' +
+            '<div style="height:1px; background:#F6F2EC; margin:14px 0;"></div>' +
 
             /* ── 지금 시기 + 도감 진행률 ── */
             '<div style="font-size:12.5px; font-weight:900; color:' + DARK + '; margin-bottom:8px;">' +
                 '🌱 ' + esc(nm("는")) + ' 지금 <span style="color:' + PURPLE + ';">' + s.name + '</span> 시기예요' +
                 (m !== null ? ' <span style="font-weight:700; color:' + GRAY + ';">· ' + m + '개월</span>' : '') + '</div>' +
 
-            '<div style="font-size:12px; font-weight:600; color:#4E5968; line-height:1.7; ' +
+            '<div style="font-size:12px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                 'word-break:keep-all; margin-bottom:8px;">' +
                 '지금 할 수 있는 놀이 <b>' + canNow + '개</b> 중에 <b style="color:' + PURPLE + ';">' +
                 doneNow + '개</b> 해보셨어요' +
                 (nextStage && canNext ? '<br><b>' + nextStage.name + '</b>' + pp(nextStage.name, "이/가") + ' 되면 <b>' + canNext + '개</b>가 더 열려요.' : '') +
             '</div>' +
 
-            '<div style="height:7px; background:#F2F4F6; border-radius:4px; overflow:hidden;">' +
+            '<div style="height:7px; background:#F6F2EC; border-radius:4px; overflow:hidden;">' +
                 '<div style="width:' + pct + '%; height:100%; background:' + PURPLE + '; border-radius:4px;"></div>' +
             '</div>' +
 
@@ -250,17 +250,17 @@
                다른 육아앱은 '이 시기에 좋은 놀이' 까지만 말한다.
                '이 시기가 지나면 다시 못 한다' 는 아무도 안 알려준다. */
             (closeLeft.length
-                ? '<div style="margin-top:14px; background:#F5F3FF; border:1px solid #DDD6FE; ' +
+                ? '<div style="margin-top:14px; background:#F3F0FC; border:1px solid #DDD9F5; ' +
                   'border-radius:13px; padding:14px 15px;">' +
-                  '<div style="font-size:12.5px; font-weight:900; color:#6D28D9; margin-bottom:6px;">' +
+                  '<div style="font-size:12.5px; font-weight:900; color:#6A61CE; margin-bottom:6px;">' +
                       '⏳ ' + cs.next.name + pp(cs.next.name, "을/를") + ' 시작하면 이 놀이들은 끝나요</div>' +
-                  '<div style="font-size:12px; font-weight:600; color:#4E5968; line-height:1.7; ' +
+                  '<div style="font-size:12px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                       'word-break:keep-all;">아직 안 해보신 게 <b>' + closeLeft.length + '개</b> 남았어요. ' +
                       '지금이 아니면 다시 못 하는 놀이예요.</div>' +
                   '<div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">' +
                       closeLeft.slice(0, 4).map(function (p) {
                           return '<div onclick="window.openPlayFromWeek(\'' + p.id + '\')" ' +
-                              'style="font-size:12.5px; font-weight:800; color:#6D28D9; cursor:pointer; ' +
+                              'style="font-size:12.5px; font-weight:800; color:#6A61CE; cursor:pointer; ' +
                               'word-break:keep-all;">· ' + esc(String(p.title).replace(/^\[[^\]]+\]\s*/, '')) +
                               ' <span style="font-weight:700; color:' + GRAY + ';">' + (p.playTime || '') + '분</span></div>';
                       }).join('') +
@@ -274,7 +274,7 @@
                     : '')) +
 
             '<div onclick="window.openBaenaetForPhoto()" style="margin-top:14px; text-align:center; ' +
-                'padding:13px; background:#F2F4F6; color:#4E5968; border-radius:12px; ' +
+                'padding:13px; background:#F6F2EC; color:#7A6F68; border-radius:12px; ' +
                 'font-size:13px; font-weight:800; cursor:pointer;">' +
                 '📷 오늘 논 사진은 배냇함에 남겨두세요</div>' +
         '</div>';
@@ -314,8 +314,8 @@
             var on = window.didPlayToday(id);
             el.textContent = on ? "\u2713 오늘 놀았어요" : "오늘 놀았어요";
             el.style.background = on ? "#EAF7F1" : "#FFFFFF";
-            el.style.color = on ? "#1F6F52" : "#4E5968";
-            el.style.border = "1px solid " + (on ? "#A7DFC8" : "#D1D5DB");
+            el.style.color = on ? "#1F6F52" : "#7A6F68";
+            el.style.border = "1px solid " + (on ? "#A7DFC8" : "#DCD3C8");
         }
     }
 

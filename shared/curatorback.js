@@ -185,9 +185,14 @@
     function boot() {
         if (window.MutationObserver) {
             var t = null;
+            /* 덮은 시트가 생겼는지 보는 검사다. 화면이 바뀔 때마다 0.12초 뒤에 돌았는데,
+               카드가 자주 다시 그려지는 탭에서는 그게 쉼 없이 돌았다. 조금 모았다가 한 번만. */
             new MutationObserver(function () {
                 if (t) return;
-                t = setTimeout(function () { t = null; check(); }, 120);
+                t = setTimeout(function () {
+                    t = null;
+                    if (!document.hidden) check();
+                }, 400);
             }).observe(document.body, {
                 childList: true, subtree: true,
                 attributes: true, attributeFilter: ["style"]

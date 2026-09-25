@@ -41,7 +41,7 @@
 
                         /* 이유식 */
         "맞춤 영양 식단표",
-        "완벽한 7일 식단표",
+        "7일 식단표",
         "몇 개 사면 되나",
         "주간 영양 분석",
         "일주일 식단표 한눈에",
@@ -161,9 +161,14 @@
     function watch() {
         mark();
         try {
+            /* ⚠️ 카드 하나가 다시 그려질 때마다 0.12초 뒤에 전체 제목을 훑었다.
+                  젖병·카시트처럼 카드가 자주 바뀌는 탭에서는 이게 계속 돌아서 화면이 굼떴다.
+                  조금 더 모았다가 한 번만 훑고, 안 보고 있을 땐 쉰다. */
             var mo = new MutationObserver(function () {
                 clearTimeout(window.__plusMarkT);
-                window.__plusMarkT = setTimeout(mark, 120);
+                window.__plusMarkT = setTimeout(function () {
+                    if (!document.hidden) mark();
+                }, 400);
             });
             var host = document.querySelector("main.container") || document.body;
             mo.observe(host, { childList: true, subtree: true });

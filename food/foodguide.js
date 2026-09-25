@@ -26,9 +26,9 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6";
-    var GRAY = "#8B95A1";
-    var DARK = "#191F28";
+    var BLUE = "#7F77DD";
+    var GRAY = "#A3958A";
+    var DARK = "#4A413C";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -41,7 +41,7 @@
         var st = document.createElement("style");
         st.id = "fg-vars";
         st.textContent =
-            ":root{--fg-blue:#1B64DA;--fg-gold:#8A6D00;--fg-red:#C62828;--fg-green:#1F6F52;}" +
+            ":root{--fg-blue:#6A61CE;--fg-gold:#8A6D00;--fg-red:#C62828;--fg-green:#1F6F52;}" +
             "body.dark-mode{--fg-blue:#7EB6FF;--fg-gold:#E8C766;--fg-red:#FF8A8A;--fg-green:#7FD8B0;}";
         (document.head || document.documentElement).appendChild(st);
     })();
@@ -171,14 +171,14 @@
             return '<div onclick="window.setFoodTool(\'' + x.id + '\')" ' +
                 'style="flex:1; text-align:center; padding:12px 4px; border-radius:12px; cursor:pointer; ' +
                 'font-size:12px; font-weight:800; line-height:1.35; ' +
-                (on ? 'background:' + DARK + '; color:#FFFFFF;' : 'background:#F2F4F6; color:#4E5968;') + '">' +
+                (on ? 'background:' + DARK + '; color:#FFFFFF;' : 'background:#F6F2EC; color:#7A6F68;') + '">' +
                 '<div style="font-size:18px; margin-bottom:4px;">' + x.icon + '</div>' + esc(x.name) + '</div>';
         }).join("");
 
         var rows = [1, 2, 3].map(function (n) {
             var b = batch(n);
             return '<div style="flex:1; text-align:center; padding:13px 6px; border-radius:12px; ' +
-                'background:#F9FAFB; border:1px solid #E5E8EB;">' +
+                'background:#FBF8F3; border:1px solid #EDE6DE;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + DARK + ';">' +
                     n + '술 : ' + esc(waterText(n)) + '</div>' +
                 '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; margin-top:4px;">' +
@@ -197,23 +197,23 @@
                     '가루는 밥숟가락으로, 물은 눈금으로 재는 게 편해요</div>' +
             '</div>' +
 
-            '<div style="font-size:12.5px; font-weight:800; color:#4E5968; margin-bottom:7px;">물은 뭘로 재세요?</div>' +
+            '<div style="font-size:12.5px; font-weight:800; color:#7A6F68; margin-bottom:7px;">물은 뭘로 재세요?</div>' +
             '<div style="display:flex; gap:6px; margin-bottom:8px;">' + tools + '</div>' +
             '<div style="font-size:11.5px; font-weight:700; color:var(--fg-blue); margin-bottom:16px;">' +
                 t.icon + ' ' + esc(t.tip) + '</div>' +
 
             '<div style="display:flex; gap:7px; margin-bottom:14px;">' + rows + '</div>' +
 
-            '<div style="background:#E8F3FF; border:1px solid #C9E2FF; border-radius:13px; ' +
+            '<div style="background:#F0EEFB; border:1px solid #DDD9F5; border-radius:13px; ' +
                 'padding:14px 15px; font-size:13px; font-weight:700; color:var(--fg-blue); ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 '⚖️ <b>정확히 안 맞아도 됩니다.</b> 다 끓이고 숟가락으로 떠서 ' +
                 '<b>주르륵 흐르면</b> 초기 미음이 맞아요. 되직하면 물을 조금 더, ' +
                 '너무 묽으면 1~2분 더 끓이면 됩니다.</div>' +
 
-            '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:13px; ' +
+            '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:13px; ' +
                 'padding:14px 15px; margin-top:10px; font-size:12.5px; font-weight:700; ' +
-                'color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '💡 <b>숟가락이 크든 작든 상관없어요.</b> 집집마다 숟가락이 다르니까 ' +
                 '<b>같은 숟가락으로 가루 1 : 물 12</b> — 이 비율만 지키면 10배죽입니다. ' +
                 '물을 열두 번 뜨기 번거로우면 위에서 젖병이나 계량컵을 고르세요.</div>' +
@@ -294,14 +294,14 @@
 
     function basicsBody() {
         return BASICS.map(function (s) {
-            return '<div style="display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+            return '<div style="display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F6F2EC;">' +
                 '<div style="width:24px; height:24px; flex-shrink:0; border-radius:50%; ' +
                     'background:' + (s[0] === "3" ? "var(--fg-gold)" : BLUE) + '; color:#FFFFFF; ' +
                     'display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">' +
                     s[0] + '</div>' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:13.5px; font-weight:900; color:' + DARK + '; margin-bottom:4px;">' + s[1] + '</div>' +
-                    '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.7; word-break:keep-all;">' + s[2] + '</div>' +
+                    '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.7; word-break:keep-all;">' + s[2] + '</div>' +
                 '</div>' +
             '</div>';
         }).join("");
@@ -310,19 +310,19 @@
     function signBody() {
         return '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:12px; padding:14px; margin-bottom:9px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:var(--fg-red); margin-bottom:6px;">두 가지가 같이 오면 바로 119</div>' +
-            '<div style="font-size:12.5px; font-weight:700; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+            '<div style="font-size:12.5px; font-weight:700; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
             '전신 두드러기 · 쌕쌕거림 · 입술이나 눈두덩 붓기 · 반복 구토 · 축 처짐<br>' +
             '먹던 것을 <b>즉시 멈추고</b> 눕히세요. 숨이 차 보이면 앉히고, 토할 것 같으면 옆으로. ' +
             '<b>좋아 보여도 병원에 가야 합니다</b> — 몇 시간 뒤 다시 심해지기도 해요.</div></div>' +
 
         '<div style="background:#FFF9E6; border:1px solid #FDE68A; border-radius:12px; padding:14px; margin-bottom:9px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:var(--fg-gold); margin-bottom:6px;">그 재료를 빼고 진료</div>' +
-            '<div style="font-size:12.5px; font-weight:700; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+            '<div style="font-size:12.5px; font-weight:700; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
             '두드러기 · 평소와 다른 설사 · 피 섞인 변 · 먹고 나서 심하게 보챔</div></div>' +
 
-        '<div style="background:#F9FAFB; border:1px solid #E5E8EB; border-radius:12px; padding:14px;">' +
-            '<div style="font-size:13.5px; font-weight:900; color:#4E5968; margin-bottom:6px;">이건 알레르기가 아닐 수 있어요</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+        '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:14px;">' +
+            '<div style="font-size:13.5px; font-weight:900; color:#7A6F68; margin-bottom:6px;">이건 알레르기가 아닐 수 있어요</div>' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
             '<b>입 주변만</b> 빨개지는 건 산이 닿아서인 경우가 많아요(토마토·딸기·귤). 먹인 뒤 닦아주면 덜합니다.<br>' +
             '변에 <b>재료가 그대로</b> 보이는 것도 흔해요. 아직 소화가 덜 되는 것뿐입니다.<br>' +
             '애매하면 <b>119에 전화해서 물어보셔도 됩니다.</b> 무료고 24시간 해요.</div></div>' +
@@ -390,7 +390,7 @@
             return '<div onclick="window.setFoodTool(\'' + x.id + '\')" ' +
                 'style="flex:1; text-align:center; padding:9px 3px; border-radius:10px; cursor:pointer; ' +
                 'font-size:12px; font-weight:800; ' +
-                (on ? 'background:' + DARK + '; color:#FFFFFF;' : 'background:#F2F4F6; color:#4E5968;') +
+                (on ? 'background:' + DARK + '; color:#FFFFFF;' : 'background:#F6F2EC; color:#7A6F68;') +
                 '">' + x.icon + ' ' + x.name + '</div>';
         }).join("");
 
@@ -398,7 +398,7 @@
             var on = (n === spoons), b = batch(n);
             return '<div onclick="window.setMixSpoons(' + n + ')" ' +
                 'style="flex:1; text-align:center; padding:11px 2px; border-radius:11px; cursor:pointer; ' +
-                (on ? 'background:' + BLUE + '; color:#FFFFFF;' : 'background:#F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                (on ? 'background:' + BLUE + '; color:#FFFFFF;' : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:13.5px; font-weight:900;">' + n + '술</div>' +
                 '<div style="font-size:10px; font-weight:700; opacity:0.75; margin-top:2px;">' +
                     b.meals + '끼</div>' +
@@ -418,10 +418,10 @@
                         'font-weight:800; cursor:pointer;">한 끼 ' + mealSize() + 'g ✎</span></div>' +
             '</div>' +
 
-            '<div style="font-size:11.5px; font-weight:800; color:#4E5968; margin-bottom:6px;">얼마나 만들까요</div>' +
+            '<div style="font-size:11.5px; font-weight:800; color:#7A6F68; margin-bottom:6px;">얼마나 만들까요</div>' +
             '<div style="display:flex; gap:5px; margin-bottom:14px;">' + amtBtns + '</div>' +
 
-            '<div style="font-size:11.5px; font-weight:800; color:#4E5968; margin-bottom:6px;">물은 뭘로 재세요</div>' +
+            '<div style="font-size:11.5px; font-weight:800; color:#7A6F68; margin-bottom:6px;">물은 뭘로 재세요</div>' +
             '<div style="display:flex; gap:5px; margin-bottom:8px;">' + toolBtns + '</div>' +
             '<div style="font-size:11px; font-weight:700; color:' + GRAY + '; margin-bottom:14px;">' +
                 t.icon + ' ' + esc(t.tip) + '</div>' +
@@ -442,7 +442,7 @@
     /* ---------- 사흘 규칙 본문 (기존 카드에서 떼어냄) ---------- */
 
     function ruleBody() {
-        return '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+        return '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
             'line-height:1.75; word-break:keep-all;">' +
             '새 재료는 <b>하나씩, 아침에, 사흘 이상</b> 지켜보고 다음으로 넘어가세요. ' +
             '아침에 주는 건 <b>낮 동안 병원에 갈 수 있어서</b>입니다.<br><br>' +

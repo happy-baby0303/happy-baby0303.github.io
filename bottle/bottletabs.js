@@ -186,15 +186,15 @@
         var head = document.createElement("div");
         head.style.cssText =
             "display:flex; align-items:center; gap:8px; background:#FFFFFF; " +
-            "border:1px solid #F2F5F8; border-radius:20px; padding:16px 20px; " +
+            "border:1px solid #F7F3ED; border-radius:20px; padding:16px 20px; " +
             "cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
         head.innerHTML =
-            '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
+            '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
                 '\uD83D\uDCD6 알아두면 좋은 것</span>' +
-            '<span class="bt-extra-n" style="font-size:12.5px; font-weight:800; color:#8B95A1;">' +
+            '<span class="bt-extra-n" style="font-size:12.5px; font-weight:800; color:#A3958A;">' +
                 targets.length + '</span>' +
             '<span class="bt-extra-mark" style="margin-left:auto; font-size:13px; ' +
-                'font-weight:800; color:#8B95A1;">펼치기 \u25BE</span>';
+                'font-weight:800; color:#A3958A;">펼치기 \u25BE</span>';
 
         var body = document.createElement("div");
         body.className = "bt-extra-body";
@@ -270,7 +270,7 @@
             if (!btn) return;
             var on = (t.id === c);
             btn.style.background = on ? "#FFFFFF" : "transparent";
-            btn.style.color = on ? "#191F28" : "#8B95A1";
+            btn.style.color = on ? "#4A413C" : "#A3958A";
             btn.style.boxShadow = on ? "0 2px 8px rgba(0,0,0,0.06)" : "none";
         });
         /* 옮기고 나면 배지를 다시 붙여준다 */
@@ -367,7 +367,7 @@
         var bar = document.createElement("div");
         bar.id = BAR;
         bar.style.cssText =
-            "display:flex; gap:4px; background: #F2F4F6; border:1px solid #E5E8EB; " +
+            "display:flex; gap:4px; background: #F6F2EC; border:1px solid #EDE6DE; " +
             "border-radius:14px; padding:4px; margin:0 0 20px;";
         bar.innerHTML = TABS.map(function (t) {
             return '<div id="btab-' + t.id + '" onclick="window.switchBottleTab(\'' + t.id + '\')" ' +

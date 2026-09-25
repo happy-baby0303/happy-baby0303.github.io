@@ -25,9 +25,9 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6";
-    var GRAY = "#8B95A1";
-    var DARK = "#191F28";
+    var BLUE = "#7F77DD";
+    var GRAY = "#A3958A";
+    var DARK = "#4A413C";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -40,7 +40,7 @@
         var st = document.createElement("style");
         st.id = "sg-vars";
         st.textContent =
-            ":root{--sg-blue:#1B64DA;--sg-gold:#8A6D00;--sg-red:#C62828;}" +
+            ":root{--sg-blue:#6A61CE;--sg-gold:#8A6D00;--sg-red:#C62828;}" +
             "body.dark-mode{--sg-blue:#7EB6FF;--sg-gold:#E8C766;--sg-red:#FF8A8A;}";
         (document.head || document.documentElement).appendChild(st);
     })();
@@ -100,12 +100,12 @@
     function safetyHTML() {
         var head = RULES[0];
         var rest = RULES.slice(1).map(function (r) {
-            return '<div style="display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F2F4F6;">' +
+            return '<div style="display:flex; gap:11px; padding:13px 0; border-bottom:1px solid #F6F2EC;">' +
                 '<div style="font-size:18px; flex-shrink:0; width:24px; text-align:center;">' + r.icon + '</div>' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:13.5px; font-weight:900; color:var(' + r.tone + '); margin-bottom:5px;">' +
                         esc(r.t) + '</div>' +
-                    '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                    '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.75; word-break:keep-all;">' + r.d + '</div>' +
                 '</div>' +
             '</div>';
@@ -118,13 +118,13 @@
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:15px; font-weight:900; color:var(' + head.tone + '); margin-bottom:6px;">' +
                         esc(head.t) + '</div>' +
-                    '<div style="font-size:13px; font-weight:600; color:#4E5968; ' +
+                    '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.75; word-break:keep-all;">' + head.d + '</div>' +
                 '</div>' +
             '</div>' +
 
             '<div onclick="window.toggleStrollerSafety()" ' +
-                'style="margin-top:14px; padding-top:13px; border-top:1px solid #E5E8EB; ' +
+                'style="margin-top:14px; padding-top:13px; border-top:1px solid #EDE6DE; ' +
                 'text-align:center; font-size:12.5px; font-weight:800; color:' + GRAY + '; cursor:pointer;">' +
                 (open ? "접기 ▴" : "유모차 사고를 막는 나머지 다섯 가지 ▾") + '</div>' +
 
@@ -156,7 +156,7 @@
             'padding:15px 16px; margin-bottom:20px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:var(--sg-gold); margin-bottom:7px;">' +
                 '✈️ 기내반입 표시는 참고용입니다</div>' +
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 '항공사마다 규격과 정책이 다릅니다. 일반 기내 수하물은 보통 <b>세 변 합 115cm</b> 안쪽인데, ' +
                 '유모차는 게이트까지 끌고 가서 부치는 걸 따로 봐주는 곳도 있어요.<br><br>' +
@@ -192,7 +192,7 @@
                   "<b>외출 끝자락에 잠들 때</b> 필요합니다. 가벼운 휴대용 하나가 알맞은 시기예요.";
         }
 
-        return '<div style="background:#E8F3FF; border:1px solid #C9E2FF; border-radius:14px; ' +
+        return '<div style="background:#F0EEFB; border:1px solid #DDD9F5; border-radius:14px; ' +
             'padding:15px 16px; margin-bottom:20px; font-size:13px; font-weight:600; ' +
             'color:var(--sg-blue); line-height:1.75; word-break:keep-all;">👶 ' + txt + '</div>';
     }

@@ -34,7 +34,7 @@
     var KEY  = "tosil_carseat_cry";
     var HOST = "carseat-cry";
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var RED  = "#E32636", GOLD = "#8A6D00", GREEN = "#1F9D6B";
 
     function esc(s) {
@@ -189,7 +189,7 @@
         /* 병원 신호를 먼저. 우는 게 방법 문제가 아닐 수도 있다. */
         out += '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
             'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +
-            'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+            'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
             '<b style="color:' + RED + ';">\u26A0\uFE0F 먼저 봐주세요.</b> ' +
             '차에서만이 아니라 <b>평소에도 눕히면 심하게 울거나</b>, ' +
             '<b>토를 자주 하거나</b>, 우는 소리가 평소와 다르면 방법의 문제가 아닙니다. ' +
@@ -204,7 +204,7 @@
                 CASES.map(function (x) {
                     return '<div onclick="window.pickCryCase(\'' + x.id + '\')" ' +
                         'style="padding:15px 10px; border-radius:14px; cursor:pointer; text-align:center; ' +
-                        'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB; ' +
+                        'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE; ' +
                         'font-size:12.5px; font-weight:800; line-height:1.45; word-break:keep-all;">' +
                         '<div style="font-size:20px; margin-bottom:6px;">' + x.icon + '</div>' +
                         esc(x.label) + '</div>';
@@ -230,44 +230,44 @@
                 '<div onclick="window.resetCry()" style="flex-shrink:0; font-size:12px; ' +
                     'font-weight:800; color:' + BLUE + '; cursor:pointer;">다시 고르기</div>' +
             '</div>' +
-            '<div style="background:#E8F3FF; border:1px solid #C9E2FF; border-radius:13px; ' +
+            '<div style="background:#F0EEFB; border:1px solid #DDD9F5; border-radius:13px; ' +
                 'padding:14px 15px; margin-bottom:14px; font-size:12.5px; font-weight:600; ' +
-                'color:#1B64DA; line-height:1.75; word-break:keep-all;">' + c.note + '</div>';
+                'color:#6A61CE; line-height:1.75; word-break:keep-all;">' + c.note + '</div>';
 
         if (win) {
             out += '<div style="background:#EAF7F1; border:1px solid #A7DFC8; border-radius:14px; ' +
                 'padding:16px;">' +
                 '<div style="font-size:14px; font-weight:900; color:#1F6F52;">' +
                     '\u2705 ' + esc(win.w.t) + ' \u2014 이게 통했어요</div>' +
-                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#4E5968; ' +
+                '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '며칠은 같은 방법으로 이어가세요. 한 번 됐다고 바로 자리잡진 않아요.</div>' +
             '</div>';
         } else if (plus) {
             out += '<div style="font-size:11.5px; font-weight:900; color:' + BLUE + '; ' +
                 'letter-spacing:0.4px; margin-bottom:7px;">오늘 해볼 것 하나</div>' +
-                '<div style="background: #FFFFFF; border:1.5px solid #CBE0FF; border-radius:16px; ' +
-                    'padding:17px; box-shadow:0 3px 14px rgba(49,130,246,0.06);">' +
+                '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; ' +
+                    'padding:17px; box-shadow:0 3px 14px rgba(127, 119, 221,0.06);">' +
                     '<div style="display:flex; align-items:center; gap:8px;">' +
                         '<span style="flex-shrink:0; width:21px; height:21px; border-radius:7px; ' +
                             'background:' + DARK + '; color:#FFFFFF; font-size:11px; font-weight:900; ' +
                             'display:inline-flex; align-items:center; justify-content:center;">' +
                             (step + 1) + '</span>' +
-                        '<span style="font-size:15px; font-weight:900; color:#191F28;">' +
+                        '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
                             esc(w.t) + '</span>' +
                     '</div>' +
-                    '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#4E5968; ' +
+                    '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.8; word-break:keep-all;">' + w.d + '</div>' +
                     (done
                         ? '<div style="margin-top:14px; text-align:center; padding:13px; ' +
-                          'background: #F9FAFB; color:' + GRAY + '; border-radius:12px; ' +
+                          'background: #FBF8F3; color:' + GRAY + '; border-radius:12px; ' +
                           'font-size:12.5px; font-weight:800;">오늘 몫은 하셨어요. 내일 또 뵐게요</div>'
                         : '<div style="display:flex; gap:8px; margin-top:15px;">' +
                           '<div onclick="window.markCryWay(true)" style="flex:1; text-align:center; ' +
                               'padding:13px; background:' + DARK + '; color:#FFFFFF; border-radius:12px; ' +
-                              'font-size:13.5px; font-weight:800; cursor:pointer;">덜 울었어요!</div>' +
+                              'font-size:13.5px; font-weight:800; cursor:pointer;">덜 울었어요</div>' +
                           '<div onclick="window.markCryWay(false)" style="flex:1; text-align:center; ' +
-                              'padding:13px; background: #FFFFFF; color:#4E5968; border:1px solid #D1D5DB; ' +
+                              'padding:13px; background: #FFFFFF; color:#7A6F68; border:1px solid #DCD3C8; ' +
                               'border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer;">' +
                               '그대로예요</div></div>') +
                 '</div>';
@@ -279,10 +279,10 @@
                     'line-height:1.7; word-break:keep-all;">해보신 것 \u00b7 ' + esc(tried.join(" \u00b7 ")) + '</div>';
             }
         } else {
-            out += '<div style="background: #FFFFFF; border:1.5px solid #CBE0FF; border-radius:16px; ' +
+            out += '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; ' +
                 'padding:17px;">' +
-                '<div style="font-size:15px; font-weight:900; color:#191F28;">1. ' + esc(list[0].t) + '</div>' +
-                '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#4E5968; ' +
+                '<div style="font-size:15px; font-weight:900; color:#4A413C;">1. ' + esc(list[0].t) + '</div>' +
+                '<div style="margin-top:9px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.8; word-break:keep-all;">' + list[0].d + '</div>' +
             '</div>' +
             '<div style="margin-top:13px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
@@ -311,12 +311,12 @@
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '<b style="color:' + RED + ';">달리는 중에 풀렸다면 갓길이라도 세우세요.</b> ' +
                 '운전하면서 뒤로 손을 뻗어 채우는 게 <b>더 위험합니다.</b> ' +
                 '한 번 세우는 게 제일 빠른 길이에요.</div>' +
 
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.9; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9; ' +
                 'word-break:keep-all;">' +
                 '<b>\u2460 먼저 헐거운지 보세요.</b><br>' +
                 '팔이 빠지는 건 대개 <b>끈이 느슨해서</b>입니다. ' +
@@ -358,7 +358,7 @@
             '<div style="background:' + (young ? "#FFF2F2" : "#FFF9E6") + '; ' +
                 'border:1px solid ' + (young ? "#FCA5A5" : "#F5E1A4") + '; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.8; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '<b style="color:' + (young ? RED : GOLD) + ';">\u23F1\uFE0F 두 시간마다 한 번은 세우세요.</b> ' +
                 '카시트는 <b>몸이 반쯤 접힌 자세</b>라 오래 있으면 호흡이 얕아질 수 있습니다. ' +
                 '휴게소에서 <b>안아서 눕혀 펴주는</b> 시간이 필요해요.' +
@@ -369,7 +369,7 @@
                     : '') +
             '</div>' +
 
-            '<div style="font-size:12.5px; font-weight:600; color:#4E5968; line-height:1.9; ' +
+            '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9; ' +
                 'word-break:keep-all;">' +
                 '<b>\uD83D\uDE97 출발 전</b><br>' +
                 '\u00b7 겉옷 벗기고 태운 뒤 <b>담요를 위에</b> 덮기<br>' +
@@ -583,7 +583,7 @@
         }
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text)
-                .then(function () { alert("주행 계획을 복사했어요! 운전하실 분께 보내주세요 \uD83E\uDD0D"); })
+                .then(function () { alert("주행 계획을 복사했어요 운전하실 분께 보내주세요 \uD83E\uDD0D"); })
                 .catch(function () { prompt("아래 내용을 복사해 주세요", text); });
         } else prompt("아래 내용을 복사해 주세요", text);
     };
@@ -620,7 +620,7 @@
         if (youngWarn()) {
             out += '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:13px; ' +
                 'padding:13px 15px; margin-bottom:12px; font-size:12.5px; font-weight:600; ' +
-                'color:#4E5968; line-height:1.75; word-break:keep-all;">' +
+                'color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '\u26A0\uFE0F ' + esc(nm("는")) + ' 아직 ' + m + '개월이에요. ' +
                 '<b>더 짧게 잡으시길 권합니다.</b> 어린 아기일수록 이 자세가 힘들고, ' +
                 '가능하면 <b>어른 한 명이 뒷자리에 같이</b> 타주세요.</div>';
@@ -636,33 +636,33 @@
                     'style="flex:1; min-width:64px; text-align:center; padding:11px 6px; ' +
                     'border-radius:11px; cursor:pointer; font-size:12.5px; font-weight:800; ' +
                     (on ? 'background:' + DARK + '; color:#FFFFFF; border:1px solid ' + DARK + ';'
-                        : 'background: #F9FAFB; color:#4E5968; border:1px solid #E5E8EB;') + '">' +
+                        : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                     (g % 60 === 0 ? (g / 60) + '시간' : (g / 60).toFixed(1) + '시간') + '</div>';
             }).join("") + '</div>';
 
         out += '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">' +
             '<input value="' + esc(d.to || "") + '" placeholder="어디로 (예: 부산 할머니 댁)" ' +
                 'onchange="window.setDrive(\'to\', this.value)" ' +
-                'style="flex:1; min-width:150px; padding:12px; border-radius:11px; border:1px solid #D1D5DB; ' +
-                'background: #FFFFFF; font-size:13px; font-weight:700; color:#191F28; box-sizing:border-box;">' +
+                'style="flex:1; min-width:150px; padding:12px; border-radius:11px; border:1px solid #DCD3C8; ' +
+                'background: #FFFFFF; font-size:13px; font-weight:700; color:#4A413C; box-sizing:border-box;">' +
         '</div>' +
         '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">' +
-            '<span style="font-size:12.5px; font-weight:800; color:#4E5968;">출발</span>' +
+            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">출발</span>' +
             '<input type="time" value="' + esc(d.at || "09:00") + '" ' +
                 'onchange="window.setDrive(\'at\', this.value)" ' +
-                'style="padding:11px; border-radius:11px; border:1px solid #D1D5DB; background: #FFFFFF; ' +
-                'font-size:13px; font-weight:800; color:#191F28; box-sizing:border-box;">' +
-            '<span style="font-size:12.5px; font-weight:800; color:#4E5968; margin-left:6px;">걸리는 시간</span>' +
+                'style="padding:11px; border-radius:11px; border:1px solid #DCD3C8; background: #FFFFFF; ' +
+                'font-size:13px; font-weight:800; color:#4A413C; box-sizing:border-box;">' +
+            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68; margin-left:6px;">걸리는 시간</span>' +
             '<input type="number" value="' + (d.h === 0 || d.h ? d.h : "") + '" placeholder="4" ' +
                 'onchange="window.setDrive(\'h\', this.value)" ' +
-                'style="width:62px; padding:11px; border-radius:11px; border:1px solid #D1D5DB; ' +
+                'style="width:62px; padding:11px; border-radius:11px; border:1px solid #DCD3C8; ' +
                 'background: #FFFFFF; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">' +
-            '<span style="font-size:12.5px; font-weight:800; color:#4E5968;">시간</span>' +
+            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">시간</span>' +
             '<input type="number" value="' + (d.m === 0 || d.m ? d.m : "") + '" placeholder="30" ' +
                 'onchange="window.setDrive(\'m\', this.value)" ' +
-                'style="width:62px; padding:11px; border-radius:11px; border:1px solid #D1D5DB; ' +
+                'style="width:62px; padding:11px; border-radius:11px; border:1px solid #DCD3C8; ' +
                 'background: #FFFFFF; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">' +
-            '<span style="font-size:12.5px; font-weight:800; color:#4E5968;">분</span>' +
+            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">분</span>' +
         '</div>';
 
         var p = drivePlan();
@@ -674,19 +674,19 @@
 
         var rowOf = function (mins, big, title, sub, color) {
             return '<div style="display:flex; align-items:flex-start; gap:11px; padding:13px 0; ' +
-                'border-bottom:1px solid #F2F4F6;">' +
+                'border-bottom:1px solid #F6F2EC;">' +
                 '<div style="flex-shrink:0; width:46px; font-size:13.5px; font-weight:900; ' +
                     'color:' + (color || DARK) + '; line-height:1.5;">' + clock(p.sh, p.sm, mins) + '</div>' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:12.5px; font-weight:' + (big ? "900" : "800") + '; ' +
-                        'color:' + (color || "#4E5968") + ';">' + title + '</div>' +
+                        'color:' + (color || "#7A6F68") + ';">' + title + '</div>' +
                     (sub ? '<div style="margin-top:3px; font-size:11.5px; font-weight:700; ' +
                            'color:' + GRAY + '; line-height:1.6; word-break:keep-all;">' + sub + '</div>' : '') +
                 '</div>' +
             '</div>';
         };
 
-        out += '<div style="margin-top:16px; background: #F9FAFB; border:1px solid #E5E8EB; ' +
+        out += '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:6px 16px;">' +
             rowOf(0, true, (d.to ? esc(d.to) + ' 로 출발' : '출발'),
                   '\uD83C\uDF7C 타기 직전에 수유하고 기저귀 새것으로. 겉옷은 벗기고 담요를 위에.') +
@@ -709,7 +709,7 @@
                 '<div style="flex-shrink:0; width:46px; font-size:13.5px; font-weight:900; color:' + DARK + ';">' +
                     clock(p.sh, p.sm, p.total) + '</div>' +
                 '<div style="flex:1; min-width:0;">' +
-                    '<div style="font-size:12.5px; font-weight:900; color:#4E5968;">도착</div>' +
+                    '<div style="font-size:12.5px; font-weight:900; color:#7A6F68;">도착</div>' +
                     '<div style="margin-top:3px; font-size:11.5px; font-weight:700; color:' + GRAY + '; ' +
                         'line-height:1.6;">\uD83D\uDE97 도착하면 <b>바로 카시트에서 꺼내주세요.</b> ' +
                         '잘 때는 평평한 곳에 눕혀야 합니다.</div>' +

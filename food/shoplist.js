@@ -21,7 +21,7 @@
 (function () {
     'use strict';
 
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var ID = "shop-list";
 
     function esc(s) {
@@ -308,7 +308,7 @@
         var got = bought().indexOf(it.name) > -1;
         var q = esc(it.name).replace(/'/g, "");
 
-        return '<div style="padding:12px 0; border-bottom:1px solid #F2F4F6;' +
+        return '<div style="padding:12px 0; border-bottom:1px solid #F6F2EC;' +
             (got ? ' opacity:0.45;' : '') + '">' +
             '<div style="display:flex; align-items:center; gap:10px;">' +
 
@@ -316,7 +316,7 @@
                     'style="flex-shrink:0; width:24px; height:24px; border-radius:8px; cursor:pointer; ' +
                     'display:flex; align-items:center; justify-content:center; font-size:13px; ' +
                     (got ? 'background:#1F9D6B; color:#FFFFFF;'
-                         : 'background:#FFFFFF; border:1.5px solid #D1D5DB; color:transparent;') +
+                         : 'background:#FFFFFF; border:1.5px solid #DCD3C8; color:transparent;') +
                     '">✓</div>' +
 
                 '<div style="flex:1; min-width:0;">' +
@@ -333,7 +333,7 @@
                 (got ? '' :
                 '<div onclick="window.buyOneIng(\'' + q + '\')" ' +
                     'style="flex-shrink:0; width:34px; height:34px; border-radius:10px; ' +
-                    'background:#F2F4F6; color:#4E5968; display:flex; align-items:center; ' +
+                    'background:#F6F2EC; color:#7A6F68; display:flex; align-items:center; ' +
                     'justify-content:center; font-size:13px; font-weight:900; cursor:pointer;">🛒</div>') +
             '</div>' +
         '</div>';
@@ -361,10 +361,10 @@
         });
         if (!rows.length) return "";
 
-        return '<div style="background:#191F28; border-radius:16px; padding:16px 18px; margin-top:16px;">' +
+        return '<div style="background:#4A413C; border-radius:16px; padding:16px 18px; margin-top:16px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-bottom:4px;">' +
                 '🍲 남는 걸로 이런 것도 돼요</div>' +
-            '<div style="font-size:11.5px; font-weight:600; color:#8B95A1; margin-bottom:8px; line-height:1.6;">' +
+            '<div style="font-size:11.5px; font-weight:600; color:#A3958A; margin-bottom:8px; line-height:1.6;">' +
                 '이유식 재료는 늘 남습니다. 버리기 전에 한 번 보세요</div>' +
             rows.join("") +
         '</div>';
@@ -376,7 +376,7 @@
         var plus = isPlus();
         var show = r.buy;
 
-        return '<div id="' + ID + '" style="background:#FFFFFF; border:1px solid #E5E8EB; ' +
+        return '<div id="' + ID + '" style="background:#FFFFFF; border:1px solid #EDE6DE; ' +
             'border-radius:20px; padding:20px; margin-top:16px;">' +
 
             '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">' +
@@ -414,7 +414,7 @@
             })() +
 
             '<div onclick="window.copyShopList()" style="margin-top:16px; text-align:center; ' +
-                'padding:16px; background:' + DARK + '; color:#FFFFFF; border-radius:13px; ' +
+                'padding:13px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #DCD3C8; border-radius:13px; ' +
                 'font-size:14.5px; font-weight:900; cursor:pointer;">📋 목록 복사하기</div>' +
 
             '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
