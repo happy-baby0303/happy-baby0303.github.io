@@ -239,7 +239,7 @@
                        : (v.hard ? v.why : (v.why.split("\n").slice(1).join("\n") || v.why));
 
         return '<div style="flex:1; min-width:0; background:var(--bg-card); border:1px solid var(--border); ' +
-                'border-left:3px solid ' + (type === "red" ? "#F04452" : "#3182F6") + '; ' +
+                'border-left:3px solid ' + (type === "red" ? "#F04452" : "#7F77DD") + '; ' +
                 'border-radius:12px; padding:12px 13px;">' +
             '<div style="font-size:11.5px; font-weight:900; color:var(--text-m); margin-bottom:7px;">' +
                 (type === "red" ? "빨간약" : "파란약") + ' · ' + rule.name + '</div>' +

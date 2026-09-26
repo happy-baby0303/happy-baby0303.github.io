@@ -114,7 +114,7 @@
         .shop-grid { display: flex; flex-direction: column; gap: 12px; }
         .shop-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-sm); }
         .shop-item:active { transform: scale(0.98); }
-        .shop-item.active-theme { border: 2px solid #3182F6; background: #F0F7FF; }
+        .shop-item.active-theme { border: 2px solid #7F77DD; background: #F2F0FC; }
         .shop-item-left { display: flex; align-items: center; gap: 16px; }
         .theme-color-circle { width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); flex-shrink: 0; }
         .shop-item-name { font-size: 15px; font-weight: 900; color: var(--text-title); margin-bottom: 4px; }
@@ -122,7 +122,7 @@
         .shop-item-btn { font-size: 13px; font-weight: 900; padding: 8px 16px; border-radius: 12px; flex-shrink: 0; transition: 0.2s; border: none; cursor: pointer; }
         .btn-buy { background: #191F28; color: #FFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .btn-equip { background: #EBE5DD; color: #4A413C; }
-        .btn-equipped { background: transparent; color: #3182F6; pointer-events: none; }
+        .btn-equipped { background: transparent; color: #7F77DD; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -273,7 +273,7 @@
             <h2 style="font-size:22px; font-weight:900; margin-bottom:12px; color:var(--text-title);" id="diary-welcome-title">반가워요 👋</h2>
             <p style="margin-bottom:30px; color:var(--text-sub); line-height:1.5; font-weight:600; font-size:15px;">서로의 이야기를 담기 위해<br>나의 역할을 선택해주세요.</p>
             <div style="display:flex; gap:10px;">
-                <button onclick="saveSetup('husband')" style="flex:1; padding:20px 0; background:var(--primary-light); border:1px solid #B1D6FF; border-radius:16px; color:var(--primary); font-size:16px; font-weight:900; cursor:pointer;">👨 아빠</button>
+                <button onclick="saveSetup('husband')" style="flex:1; padding:20px 0; background:var(--primary-light); border:1px solid #D5D1F4; border-radius:16px; color:var(--primary); font-size:16px; font-weight:900; cursor:pointer;">👨 아빠</button>
                 <button onclick="saveSetup('wife')" style="flex:1; padding:20px 0; background:var(--mom-light); border:1px solid #FFD1D1; border-radius:16px; color:var(--mom-color); font-size:16px; font-weight:900; cursor:pointer;">👩 엄마</button>
             </div>
         </div>

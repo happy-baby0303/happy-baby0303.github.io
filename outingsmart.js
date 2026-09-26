@@ -37,7 +37,7 @@
     var ROW_ID  = "outing-smart";
     var WX_ID   = "outing-weather";
     var PICK_ID = "outing-pick";
-    var BLUE    = "#3182F6";
+    var BLUE    = "#7F77DD";
     var GOLD    = "#B98A2E";
     var GREEN   = "#2E8B6B";
     var PURPLE  = "#7F77DD";

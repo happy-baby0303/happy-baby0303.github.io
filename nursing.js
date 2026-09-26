@@ -77,7 +77,7 @@
     /* ---------- 목록 렌더링 (초압축 미니멀 디자인) ---------- */
     function rowHTML(p) {
         var distanceHtml = p._d !== undefined 
-            ? '<div style="font-size:16px; font-weight:900; color:#3182F6; margin-bottom:4px;">' + distText(p._d) + '</div>'
+            ? '<div style="font-size:16px; font-weight:900; color:#7F77DD; margin-bottom:4px;">' + distText(p._d) + '</div>'
             : '<div style="font-size:12px; font-weight:700; color:var(--text-s); margin-bottom:4px;">거리미상</div>';
 
         return `
@@ -274,7 +274,7 @@ window.safeOpenMap = function(mapType, query) {
             </div>
             
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <button id="btn-go-navi" style="width:100%; padding:16px; background:#3182F6; color:#FFF; border:none; border-radius:14px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(49,130,246,0.2);">
+                <button id="btn-go-navi" style="width:100%; padding:16px; background:#7F77DD; color:#FFF; border:none; border-radius:14px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(127, 119, 221,0.2);">
                     네, 맞아요 내비 켜기 🚗
                 </button>
                 <button id="btn-go-check" style="width:100%; padding:14px; background:var(--bg-sub); color:#4E5968; border:1px solid var(--border); border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">

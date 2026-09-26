@@ -854,7 +854,7 @@
 
         var tail = '';
         if (total > 0 && total % 100 === 0) {
-            tail = '<div style="font-size:13px; font-weight:800; color:#3182F6; margin-top:10px; background:#E8F3FF; padding:8px 12px; border-radius:10px; display:inline-block;">🎉 와! 저한테 달려온 게 딱 ' + total.toLocaleString() + '번이 된 기념일이에요!</div>';
+            tail = '<div style="font-size:13px; font-weight:800; color:#7F77DD; margin-top:10px; background:#F0EEFB; padding:8px 12px; border-radius:10px; display:inline-block;">🎉 와! 저한테 달려온 게 딱 ' + total.toLocaleString() + '번이 된 기념일이에요!</div>';
         } else if (total >= 50) {
             tail = '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); margin-top:8px;">앱 기록을 시작한 뒤로 모두 ' + total.toLocaleString() + '번 안아줬어요.</div>';
         }
@@ -864,7 +864,7 @@
             '<div style="font-size:11.5px; font-weight:800; color:var(--text-sub); letter-spacing:1px; margin-bottom:12px;">오늘의 우리</div>' +
             '<div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">' +
                 '<span style="font-size:16px; font-weight:700; color:var(--text-m);">' + esc(babyName()) + '에게</span>' +
-                '<span style="font-size:32px; font-weight:900; color:#3182F6; letter-spacing:-1px;">' + today.care + '</span>' +
+                '<span style="font-size:32px; font-weight:900; color:#7F77DD; letter-spacing:-1px;">' + today.care + '</span>' +
                 '<span style="font-size:16px; font-weight:700; color:var(--text-m);">번 달려갔어요</span>' +
             '</div>' +
             '<div style="font-size:13.5px; font-weight:600; color:var(--text-s); line-height:1.5;">' + esc(sub) + '<br><span style="color:var(--text-m); font-weight:800;">' + gradeMsg + '</span></div>' +

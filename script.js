@@ -439,7 +439,7 @@ function switchTool(panelId, el) {
             wInput.value = savedW;
             const label = wInput.parentElement ? wInput.parentElement.previousElementSibling : null;
             if (label && !label.innerText.includes('자동입력')) {
-                label.innerHTML += ' <span style="font-size:11px; color:var(--primary); background:rgba(49,130,246,0.1); padding:2px 6px; border-radius:6px; margin-left:6px;">성장기록 자동입력</span>';
+                label.innerHTML += ' <span style="font-size:11px; color:var(--primary); background:rgba(127, 119, 221,0.1); padding:2px 6px; border-radius:6px; margin-left:6px;">성장기록 자동입력</span>';
             }
         }
     }
@@ -780,7 +780,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
     }
 
     const smartChecklistBtn = `
-        <button onclick="closeFestivalModalForce(); window.openChecklistModal('${suggestedTheme}');" style="width: 100%; padding: 16px 0; background: linear-gradient(135deg, #EBF4FF 0%, #E0F2FE 100%); color: #3182F6; border-radius: 12px; font-weight: 900; font-size: 14.5px; border: 1px solid #B1D6FF; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(49, 130, 246, 0.15);">
+        <button onclick="closeFestivalModalForce(); window.openChecklistModal('${suggestedTheme}');" style="width: 100%; padding: 16px 0; background: linear-gradient(135deg, #F2F0FC 0%, #F2F0FC 100%); color: #7F77DD; border-radius: 12px; font-weight: 900; font-size: 14.5px; border: 1px solid #D5D1F4; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(127, 119, 221, 0.15);">
             🎒 ${themeName} 맞춤 짐싸기 시작
         </button>
     `;
@@ -805,8 +805,8 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
                 </div>
             </div>
 
-            <div style="background: rgba(49, 130, 246, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(49, 130, 246, 0.1);">
-                <div style="font-size: 12.5px; font-weight: 900; color: #3182F6; margin-bottom: 6px;">${isEvent ? '가기 전에 알아두면' : '이 곳은요'}</div>
+            <div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
+                <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 6px;">${isEvent ? '가기 전에 알아두면' : '이 곳은요'}</div>
                 <div style="font-size: 13.5px; font-weight: 600; color: var(--text-m); line-height: 1.4; word-break: keep-all;">"${review || '주말에 아이와 방문하기 좋은 안전한 인프라를 갖추고 있습니다.'}"</div>
             </div>
 
@@ -995,7 +995,7 @@ function drawDonutChart(d, f, e) {
             labels: ['위생용품', '분유/식비', '장난감/기타'], 
             datasets: [{ 
                 data: [d, f, e], 
-                backgroundColor: ['#3182F6', '#10B981', '#FF823A'], 
+                backgroundColor: ['#7F77DD', '#10B981', '#FF823A'], 
                 borderWidth: 0, 
             }] 
         }, 
@@ -1153,8 +1153,8 @@ window.analyzeMoney = function() {
         } else {
             // 90% 미만: 시원한 파란색 게이지 🌊
             statusText.innerText = `${window.moneyMonthLabel(ym)} 예산의 ${budgetPercent}%를 썼어요`;
-            progressBox.style.background = `linear-gradient(90deg, #BFDBFE ${visualPercent}%, #EBF4FF ${visualPercent}%)`;
-            statusText.style.color = '#2563EB';
+            progressBox.style.background = `linear-gradient(90deg, #D5D1F4 ${visualPercent}%, #F2F0FC ${visualPercent}%)`;
+            statusText.style.color = '#6A61CE';
         }
     }
 
@@ -1238,7 +1238,7 @@ window.toggleHistory = function() {
                 html += `
                 <div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#F8F9FA; border-radius:12px; margin-bottom:8px; border:1px solid #E5E8EB;">
                     <span style="font-weight:900; color:#4E5968; font-size:14px;">📅 ${year}년 ${month}월</span>
-                    <span style="font-weight:900; color:#3182F6; font-size:16px;">${history[k].toLocaleString()}원</span>
+                    <span style="font-weight:900; color:#7F77DD; font-size:16px;">${history[k].toLocaleString()}원</span>
                 </div>`; 
             }); 
             html += '</div>';
@@ -1256,7 +1256,7 @@ window.toggleCategoryButtons = function(el) {
         area.style.opacity = '1';
         area.style.transform = 'translateY(0)';
         area.style.pointerEvents = 'auto';
-        el.style.borderBottomColor = '#3182F6';
+        el.style.borderBottomColor = '#7F77DD';
     } else {
         area.style.opacity = '0.3';
         area.style.transform = 'translateY(10px)';
@@ -1393,13 +1393,13 @@ window.updateLedgerUI = function() {
                 const isSave = h.type === 'saving';
                 
                 let bgColor = "#F2F4F6", textColor = "#4E5968";
-                if(isSave) { bgColor = "#F3E8FF"; textColor = "#7C3AED"; }
-                else if(h.catName && h.catName.includes('위생')) { bgColor = "#EBF8FF"; textColor = "#0284C7"; }
+                if(isSave) { bgColor = "#F3E8FF"; textColor = "#6A61CE"; }
+                else if(h.catName && h.catName.includes('위생')) { bgColor = "#F2F0FC"; textColor = "#6A61CE"; }
                 else if(h.catName && h.catName.includes('식비')) { bgColor = "#ECFDF5"; textColor = "#059669"; }
                 else if(h.catName && h.catName.includes('기타')) { bgColor = "#FFF4ED"; textColor = "#E65100"; }
 
                 const badge = `<span style="background:${bgColor}; color:${textColor}; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:900;">${h.catName || (isSave ? '💰 저축' : '💸 지출')}</span>`;
-                const amountColor = isSave ? '#3182F6' : 'var(--text-m)';
+                const amountColor = isSave ? '#7F77DD' : 'var(--text-m)';
 
                 html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#FFF; border-radius:16px; font-size:13.5px; border:1px solid #E5E8EB; margin-bottom:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                             <div style="display:flex; align-items:center; gap:10px;">${badge} <span style="color:var(--text-s); font-size:12px; font-weight:700;">${h.time}</span></div>
@@ -1574,7 +1574,7 @@ function calcHotDeal() {
     // 과거 최저가 기록이 없거나 비정상적일 때
     if (!pastPrice || pastPrice <= 0) {
         verdictEl.innerHTML = `✅ 첫 핫딜 기준가 등록 완료`;
-        verdictEl.style.backgroundColor = "#3182F6"; 
+        verdictEl.style.backgroundColor = "#7F77DD"; 
         commentEl.innerHTML = `이 품목의 첫 체감가는 1${unitName}당 <strong>${unitPrice.toLocaleString()}원</strong>입니다. 이 가격을 내 '역대 최저가'로 안전하게 기억해 둘게요 📝`;
         
         localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
@@ -1595,7 +1595,7 @@ function calcHotDeal() {
             commentEl.innerHTML = `이전에 설정한 최저가(${pastPrice.toLocaleString()}원)보다 <strong>총 ${(Math.abs(diffPast) * count).toLocaleString()}원 손해</strong>입니다. 수량이 급한 게 아니라면 조금 더 기다려보세요 🤔`;
         } else {
             verdictEl.innerHTML = `⚖️ 역대 최저가 방어 성공`;
-            verdictEl.style.backgroundColor = "#3182F6"; 
+            verdictEl.style.backgroundColor = "#7F77DD"; 
             commentEl.innerHTML = `이전에 설정한 가장 저렴한 가격(${pastPrice.toLocaleString()}원)과 정확히 일치하네요 이번에도 스마트하게 잘 사셨습니다. 👍`;
         }
     }
@@ -1820,9 +1820,9 @@ function selectPill(type) {
         redBtn.style.setProperty('border', '1px solid #EF4444', 'important');
     } else if (type === 'blue' && blueBtn) {
         blueBtn.classList.add('active');
-        blueBtn.style.setProperty('background', 'rgba(49, 130, 246, 0.15)', 'important');
-        blueBtn.style.setProperty('color', '#3182F6', 'important');
-        blueBtn.style.setProperty('border', '1px solid #3182F6', 'important');
+        blueBtn.style.setProperty('background', 'rgba(127, 119, 221, 0.15)', 'important');
+        blueBtn.style.setProperty('color', '#7F77DD', 'important');
+        blueBtn.style.setProperty('border', '1px solid #7F77DD', 'important');
     }
     // 잠금 때문에 흐리게 칠해 둔 버튼이어도, 고른 순간엔 또렷하게 (타이머가 다음에 칠할 때까지 기다리지 않는다)
     const picked = (type === 'red') ? redBtn : blueBtn;
@@ -2036,7 +2036,7 @@ window.updateFeverTimer = function(records) {
             const otherTimeCheck = window.doseStatus(otherType);
             if (otherTimeCheck.locked) {
                 return {
-                    html: `<div style="background:#EBF4FF; color:#3182F6; padding:5px 8px; border-radius:8px; font-size:11.5px; font-weight:800; white-space:nowrap; letter-spacing:-0.5px; animation:pulseSOS 1.5s infinite;">💡 교차 복용 가능</div>`,
+                    html: `<div style="background:#F2F0FC; color:#7F77DD; padding:5px 8px; border-radius:8px; font-size:11.5px; font-weight:800; white-space:nowrap; letter-spacing:-0.5px; animation:pulseSOS 1.5s infinite;">💡 다른 계열 가능</div>`,
                     locked: false
                 };
             }
@@ -2165,7 +2165,7 @@ function drawFeverChart(records) {
     const canvas = document.getElementById('feverChart'); if(!canvas || typeof Chart === 'undefined') return; 
     const ctx = canvas.getContext('2d'); if(feverChartObj) feverChartObj.destroy(); 
     const chartData = [...records].reverse(), labels = chartData.map(r => r.time), temps = chartData.map(r => r.temp);
-    feverChartObj = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '체온 변화 (℃)', data: temps, borderColor: '#FF4B2B', backgroundColor: 'rgba(255, 75, 43, 0.1)', borderWidth: 3, pointBackgroundColor: temps.map(t => t >= 38.5 ? '#FF4B2B' : '#3182F6'), pointRadius: 5, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 36.5, max: 40.5 }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+    feverChartObj = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: '체온 변화 (℃)', data: temps, borderColor: '#FF4B2B', backgroundColor: 'rgba(255, 75, 43, 0.1)', borderWidth: 3, pointBackgroundColor: temps.map(t => t >= 38.5 ? '#FF4B2B' : '#7F77DD'), pointRadius: 5, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 36.5, max: 40.5 }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
 }
 
 function downloadFeverReport() {
@@ -2333,7 +2333,7 @@ window.openChecklistModal = function(theme = 'basic') {
     if (theme === 'stay') {
         baseData.push(
             { id: 'c_cold_med', label: '냉장 보관용 처방 시럽약 및 항생제', checked: false },
-            { id: 'c_fever', label: '해열제 2종 (교차복용) 및 체온계', checked: false }
+            { id: 'c_fever', label: '해열제와 체온계', checked: false }
         );
     }
 
@@ -2720,7 +2720,7 @@ window.calcHealthMaster = function() {
         document.getElementById('pct-height').innerHTML = `
             <span style="font-size:18px;">상위 <strong>${rank}%</strong></span>
             <div style="margin-top:10px; width:100%; height:10px; background:#F2F5F8; border-radius:5px; position:relative; overflow:hidden;">
-                <div style="position:absolute; left:0; top:0; height:100%; background:linear-gradient(90deg, #BFDBFE, #3182F6); border-radius:5px; animation: fillGrowthH${rank} 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;"></div>
+                <div style="position:absolute; left:0; top:0; height:100%; background:linear-gradient(90deg, #D5D1F4, #7F77DD); border-radius:5px; animation: fillGrowthH${rank} 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;"></div>
             </div>
             <style>@keyframes fillGrowthH${rank} { from { width: 0%; } to { width: ${100 - rank}%; } }</style>
         `;
@@ -2763,7 +2763,7 @@ if (h && w) {
         kaupDesc = "키에 비해 몸무게 증가가 다소 정체되어 있어요. 수유량이나 이유식 양을 조금 더 늘려주시고, 영유아 검진 시 의사 선생님과 상담해 보세요";
     }
     else if (kaup < 16) { 
-        kaupBadge.innerText = '🌱 날씬한 모델 체형'; kaupBadge.style.background = '#E8F3FF'; kaupBadge.style.color = '#3182F6'; 
+        kaupBadge.innerText = '🌱 날씬한 모델 체형'; kaupBadge.style.background = '#F0EEFB'; kaupBadge.style.color = '#7F77DD'; 
         kaupDesc = "키에 비해 체중이 적게 나가는 날씬한 체형이에요 활동량이 많거나 기초 대사량이 높은 아기일 수 있습니다. 아주 건강하게 잘 자라고 있어요 🏃‍♂️";
     }
     else if (kaup <= 18) { 
@@ -2808,7 +2808,7 @@ kaupDesc = "키와 몸무게 비율이 또래 표준 범위에 들어와 있어�
                 } else if (diffW < 0) {
                     insightMsg += `<div style="margin-top:12px; padding:12px; background:var(--bg-sub); border-radius:12px; font-size:13px; font-weight:800; color:var(--text-s); border:1px dashed var(--border);">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>보다는 <b>${Math.abs(diffW)}kg 작고 아담해요</b> 🐣</div>`;
                 } else {
-                    insightMsg += `<div style="margin-top:12px; padding:12px; background:#EBF4FF; border-radius:12px; font-size:13px; font-weight:800; color:#3182F6; border:1px dashed #B1D6FF;">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>와 몸무게가 똑같아요 판박이네요 👯</div>`;
+                    insightMsg += `<div style="margin-top:12px; padding:12px; background:#F2F0FC; border-radius:12px; font-size:13px; font-weight:800; color:#7F77DD; border:1px dashed #D5D1F4;">🧬 형제 비교: 같은 생후 ${month}개월 때의 <b>${sibling.name}</b>와 몸무게가 똑같아요 판박이네요 👯</div>`;
                 }
             }
         });
@@ -3011,7 +3011,7 @@ function renderGrowthHistory() {
             data: { 
                 labels: labels, 
                 datasets: [
-                    { label: '키(cm)', data: hData, borderColor: '#3182F6', backgroundColor: '#3182F6', yAxisID: 'yHeight', tension: 0.3, spanGaps: true },
+                    { label: '키(cm)', data: hData, borderColor: '#7F77DD', backgroundColor: '#7F77DD', yAxisID: 'yHeight', tension: 0.3, spanGaps: true },
                     { label: '몸무게(kg)', data: wData, borderColor: '#10B981', backgroundColor: '#10B981', yAxisID: 'yWeight', tension: 0.3, spanGaps: true }
                 ] 
             }, 
@@ -3062,7 +3062,7 @@ function renderGrowthHistory() {
                     <div>
                         <div style="font-size:12px; color:var(--text-s); font-weight:800;">${r.date} (생후 ${r.month}개월)</div>
                         <div style="font-size:14px; font-weight:900; color:var(--text-m); margin-top:2px;">
-                            ${r.height > 0 ? `<span style="color:#3182F6;">키 ${r.height}cm</span> ` : ''} 
+                            ${r.height > 0 ? `<span style="color:#7F77DD;">키 ${r.height}cm</span> ` : ''} 
                             ${r.weight > 0 ? `<span style="color:#10B981;">몸무게 ${r.weight}kg</span>` : ''}
                         </div>
                     </div>
@@ -3272,8 +3272,8 @@ function getCubeDDayText(madeDateStr) {
     
     const diffDays = Math.floor((today - madeDate) / (1000 * 60 * 60 * 24));
     
-    let color = "#3182F6"; 
-    let bg = "#EBF4FF";
+    let color = "#7F77DD"; 
+    let bg = "#F2F0FC";
     let text = `보관 ${diffDays}일차`;
     
     if (diffDays === 0) {
@@ -3452,7 +3452,7 @@ function renderCubeQuicks() {
     });
 
     if (isCubeQuickEditMode) {
-        html += `<button onclick="addCubeQuick()" style="flex-shrink:0; padding:8px 14px; background:#E8F3FF; color:#3182F6; border:1px dashed #3182F6; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">+ 새 재료 추가</button>`;
+        html += `<button onclick="addCubeQuick()" style="flex-shrink:0; padding:8px 14px; background:#F0EEFB; color:#7F77DD; border:1px dashed #7F77DD; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer;">+ 새 재료 추가</button>`;
     }
 
     container.innerHTML = html;
@@ -3714,7 +3714,7 @@ function renderBatonTasks() {
             statusHtml = `<span style="background:rgb(255, 240, 241) !important; color:rgb(240, 68, 82) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(255, 227, 227) !important; white-space:nowrap; display:inline-block; flex-shrink:0;">요청중</span>`;
             actionBtn = `<button onclick="acceptBaton('${r.id}')" style="padding:14px; background:rgb(127, 119, 221) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(127,119,221,0.3);">미션접수</button>`;
         } else if (r.status === 'accepted') {
-            statusHtml = `<span style="background:rgb(235, 244, 255) !important; color:rgb(49, 130, 246) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(177, 214, 255) !important; white-space:nowrap; display:inline-block; flex-shrink:0;">처리중</span>`;
+            statusHtml = `<span style="background:rgb(235, 244, 255) !important; color:rgba(127, 119, 221) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(177, 214, 255) !important; white-space:nowrap; display:inline-block; flex-shrink:0;">처리중</span>`;
             actionBtn = `<button onclick="completeBaton('${r.id}')" style="padding:14px; background:rgb(0, 179, 122) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(0,179,122,0.3);">해결완료</button>`;
         }
 
@@ -3869,7 +3869,7 @@ window.addEventListener('load', () => {
             const cb = this.previousElementSibling;
             setTimeout(() => {
                 if (cb && cb.checked) {
-                    this.style.background = 'rgba(49, 130, 246, 0.15)'; this.style.border = '1px solid #3182F6'; this.style.color = '#3182F6';
+                    this.style.background = 'rgba(127, 119, 221, 0.15)'; this.style.border = '1px solid #7F77DD'; this.style.color = '#7F77DD';
                 } else {
                     this.style.background = ''; this.style.border = ''; this.style.color = '';
                 }
@@ -3922,8 +3922,8 @@ window.updateSyncBadge = function() {
 
     if (syncCode) {
         // ✅ [클라우드 방 활성화 상태]
-        badgeBtn.style.background = "#E8F0FE";
-        badgeBtn.style.color = "#1A73E8";
+        badgeBtn.style.background = "#F0EEFB";
+        badgeBtn.style.color = "#6A61CE";
         badgeText.innerText = "안심 보관중"; 
         if(badgeIcon) badgeIcon.innerText = "☁️"; 
         
@@ -4107,7 +4107,7 @@ window.openPediatricianReport = function() {
         records.slice(0, 10).forEach(r => {
             let pillText = '<span style="color:#8B95A1; font-weight:700;">약 미복용</span>';
             if (r.type === 'red') pillText = '<span style="color:#FF4B2B; font-weight:900;">🔴 아세트 (빨강)</span>';
-            else if (r.type === 'blue') pillText = '<span style="color:#3182F6; font-weight:900;">🔵 이부/덱시 (파랑)</span>';
+            else if (r.type === 'blue') pillText = '<span style="color:#7F77DD; font-weight:900;">🔵 이부/덱시 (파랑)</span>';
             
             let tempStyle = r.temp >= 38.0 ? 'color:#E32636; font-weight:900; font-size:16px;' : 'color:var(--text-m); font-weight:800; font-size:15px;';
             
@@ -4159,7 +4159,7 @@ window.openPediatricianReport = function() {
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button onclick="window.downloadPediatricianPDF()" style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #3182F6 0%, #7C3AED 100%); color: #FFF; font-weight: 900; font-size: 15px; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);">
+            <button onclick="window.downloadPediatricianPDF()" style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #7F77DD 0%, #6A61CE 100%); color: #FFF; font-weight: 900; font-size: 15px; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:17px;">📄</span> A4 종합 건강 리포트 발급
                 </div>
@@ -4318,7 +4318,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
     let todayD = new Date();
     let isToday = selectedD.toDateString() === todayD.toDateString();
     let initialDateText = isToday ? '오늘' : String(selectedD.getMonth()+1).padStart(2,'0') + '.' + String(selectedD.getDate()).padStart(2,'0');
-    let initialDateColor = isToday ? '#3182F6' : 'var(--text-m)';
+    let initialDateColor = isToday ? '#7F77DD' : 'var(--text-m)';
 
     // 🚨 [혁신적 UX] 대표님 기획 반영: 날짜+시간 통합 4륜 구동 스와이프 UI (완벽 대칭 패치!)
     const baseTimeInputHtml = `
@@ -4335,7 +4335,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             <div style="display:flex; justify-content:center; align-items:center; height: 140px; position:relative; overflow:hidden; background:var(--bg-sub); border-radius:20px; box-shadow:inset 0 2px 6px rgba(0,0,0,0.02);">
                 
                 <!-- 선택 영역 파란색 하이라이트 박스 -->
-                <div style="position:absolute; top:50%; left:12px; right:12px; height:44px; transform:translateY(-50%); background:rgba(49, 130, 246, 0.08); border-radius:12px; pointer-events:none; border: 1px solid rgba(49, 130, 246, 0.15);"></div>
+                <div style="position:absolute; top:50%; left:12px; right:12px; height:44px; transform:translateY(-50%); background:rgba(127, 119, 221, 0.08); border-radius:12px; pointer-events:none; border: 1px solid rgba(127, 119, 221, 0.15);"></div>
 
                 <!-- 🌟 레이아웃을 정확히 5:5로 쪼개서 한가운데 틈이 생기지 않도록 강제 정렬! -->
                 <div style="display: flex; width: 100%; height: 100%; z-index: 1;">
@@ -4393,12 +4393,12 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             `;
             
             body.innerHTML = activeTimerTopHtml + `
-                <div style="background: #EBF4FF; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid #B1D6FF; margin-bottom: 20px;">
+                <div style="background: #F2F0FC; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid #D5D1F4; margin-bottom: 20px;">
                     <div style="font-size: 50px; margin-bottom: 12px; animation: pulseSOS 1.5s infinite;">🤱</div>
-                    <div style="font-size: 16px; font-weight: 900; color: #1C64F2; margin-bottom: 8px;">모유 수유 기록 중 (${dir})</div>
-                    <div style="font-size: 13px; font-weight: 700; color: #3182F6; margin-bottom: 24px;">수유가 끝나면 아래 버튼을 눌러주세요</div>
+                    <div style="font-size: 16px; font-weight: 900; color: #6A61CE; margin-bottom: 8px;">모유 수유 기록 중 (${dir})</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #7F77DD; margin-bottom: 24px;">수유가 끝나면 아래 버튼을 눌러주세요</div>
                     
-                    <button onclick="window.stopBreastTimer()" style="width: 100%; padding: 16px; background: #3182F6; color: #FFF; border: none; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(49,130,246,0.3);">
+                    <button onclick="window.stopBreastTimer()" style="width: 100%; padding: 16px; background: #7F77DD; color: #FFF; border: none; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.3);">
                         방금 다 먹였어요 (시간 자동계산)
                     </button>
                     <button onclick="window.cancelBreastTimer()" style="width: 100%; margin-top: 10px; padding: 14px; background: transparent; color: #8B95A1; border: none; border-radius: 16px; font-size: 14px; font-weight: 800; cursor: pointer;">
@@ -4603,7 +4603,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
 
             <!-- 총 수면 시간 표시 -->
             <div style="text-align: center; margin-bottom: 24px;">
-                <div id="v-sleep-total-text" style="display:inline-flex; justify-content:center; align-items:center; background:#EBF8FF; color:#3182F6; padding:12px 24px; border-radius:100px; font-size:16px; font-weight:900; letter-spacing:-0.5px; transition:0.3s;">계산 중...</div>
+                <div id="v-sleep-total-text" style="display:inline-flex; justify-content:center; align-items:center; background:#F2F0FC; color:#7F77DD; padding:12px 24px; border-radius:100px; font-size:16px; font-weight:900; letter-spacing:-0.5px; transition:0.3s;">계산 중...</div>
             </div>
 
             ${window.getBabyProfiles().length > 1 ? `
@@ -4913,7 +4913,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 const selDate = new Date(`${yearInput.value}-${m}-${d}`);
                 const isToday = selDate.toDateString() === today.toDateString();
                 textElem.innerText = isToday ? '오늘' : `${m}.${d}`;
-                textElem.style.color = isToday ? '#3182F6' : 'var(--text-m)';
+                textElem.style.color = isToday ? '#7F77DD' : 'var(--text-m)';
             }
         }
     }, 80);
@@ -5411,8 +5411,8 @@ window.drawTrackerStatsChart = function(records) {
                     type: 'line',
                     label: '수면 (시간)',
                     data: sleepData,
-                    borderColor: '#A855F7',
-                    backgroundColor: '#A855F7',
+                    borderColor: '#7F77DD',
+                    backgroundColor: '#7F77DD',
                     yAxisID: 'ySleep',
                     tension: 0.4,
                     borderWidth: 3,
@@ -5422,7 +5422,7 @@ window.drawTrackerStatsChart = function(records) {
                     type: 'bar',
                     label: '분유/유축 (ml)',
                     data: feedData,
-                    backgroundColor: 'rgba(49, 130, 246, 0.8)',
+                    backgroundColor: 'rgba(127, 119, 221, 0.8)',
                     borderRadius: 6,
                     yAxisID: 'yFeed'
                 }
@@ -5532,7 +5532,7 @@ window.updateTrackerDashboard = function() {
 
             let historyHtml = `
                 <div style="background: #F8F9FA; padding: 16px; border-radius: 16px; border: 1px solid #E5E8EB; margin-bottom: 16px;">
-                    <div style="font-size: 13px; font-weight: 900; color: #3182F6; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
+                    <div style="font-size: 13px; font-weight: 900; color: #7F77DD; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
                         <span>✨</span> 우리 아기 일주일 패턴 요약
                     </div>
                     <div style="display: flex; justify-content: space-between; text-align: center; gap: 8px;">
@@ -5605,12 +5605,12 @@ window.updateTrackerDashboard = function() {
                     }
                     else if(r.type === 'sleep') {
                         if (r.amount === 0) {
-                            txt = `<span style="color:#3182F6">${r.subType || '낮잠'} (자는중 💤)</span>`;
+                            txt = `<span style="color:#7F77DD">${r.subType || '낮잠'} (자는중 💤)</span>`;
                         } else {
                             let h = Math.floor(r.amount / 60);
                             let m = r.amount % 60;
                             let durText = h > 0 ? `${h}시간 ${m}분` : `${m}분`;
-                            txt = `${r.subType || '낮잠'} <span style="color:#A855F7;">${durText}</span>`;
+                            txt = `${r.subType || '낮잠'} <span style="color:#7F77DD;">${durText}</span>`;
                             let dEnd = new Date(r.timestamp + (r.amount * 60000));
                             let endStr = `${String(dEnd.getHours()).padStart(2,'0')}:${String(dEnd.getMinutes()).padStart(2,'0')}`;
                             displayTime = `${r.time} ~ ${endStr}`; 
@@ -5627,7 +5627,7 @@ window.updateTrackerDashboard = function() {
                             
                             <!-- 🚨 [수정됨] div를 button으로 교체! (iOS 터치 씹힘 완벽 해결) -->
                             <div style="position:absolute; top:0; right:0; height:100%; display:flex; z-index:1;">
-                                <button type="button" onclick="window.editTrackerRecord('${r.id}')" style="background:#E8F3FF; color:#3182F6; width:65px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:12px; cursor:pointer; border:none; padding:0; outline:none; pointer-events:auto;">
+                                <button type="button" onclick="window.editTrackerRecord('${r.id}')" style="background:#F0EEFB; color:#7F77DD; width:65px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:12px; cursor:pointer; border:none; padding:0; outline:none; pointer-events:auto;">
                                     <span style="font-size:16px; margin-bottom:2px;">✏️</span>수정
                                 </button>
                                 <button type="button" onclick="window.deleteTrackerRecord('${r.id}')" style="background:#FFF0F1; color:#F04452; width:65px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:12px; cursor:pointer; border:none; padding:0; outline:none; pointer-events:auto;">
@@ -5716,7 +5716,7 @@ window.updateTrackerDashboard = function() {
                     <span style="font-size:20px;">⏰</span>
                     <div>
                         <div style="font-size:11px; font-weight:800; color:#8B95A1; margin-bottom:2px;">기상 후 경과 시간</div>
-                        <div style="font-size:15px; font-weight:900; color:#3182F6;">${hours}시간 ${mins}분째 깨어있어요</div>
+                        <div style="font-size:15px; font-weight:900; color:#7F77DD;">${hours}시간 ${mins}분째 깨어있어요</div>
                     </div>
                 </div>
                <div style="font-size:11.5px; font-weight:700; color:#8B95A1; background:var(--bg-sub); padding:6px 10px; border-radius:10px;">깨어 있어요</div>
@@ -5736,7 +5736,7 @@ window.updateTrackerDashboard = function() {
                 <span style="font-size:20px;">${sleepIcon}</span>
                 <div class="sleep-banner-text2" style="font-size:15px; font-weight:900; color:#6C31F6;">${hours}시간 ${mins}분째 꿀잠 중</div>
             </div>
-            <div class="sleep-banner-badge" style="font-size:11.5px; font-weight:700; color:#7C3AED; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿 🤫</div>
+            <div class="sleep-banner-badge" style="font-size:11.5px; font-weight:700; color:#6A61CE; background:rgba(255,255,255,0.6); padding:6px 10px; border-radius:10px;">쉿 🤫</div>
         </div>`;
     }
 
@@ -5938,14 +5938,14 @@ window.updateTrackerDashboard = function() {
     }
 
     // 🚨 [감성 디테일 패치] 값이 0일 때는 연한 회색으로 죽여서 시각적 피로도 감소!
-    let sleepColor = todaySleepMins === 0 ? '#B0B8C1' : '#A855F7';
+    let sleepColor = todaySleepMins === 0 ? '#B0B8C1' : '#7F77DD';
     let diaperColor = todayDiaperCount === 0 ? '#B0B8C1' : '#F04452';
 
     let feedDisp = '';
     if (todayFormulaAmt === 0 && todayBreastMins === 0 && todayFoodAmt === 0) {
         feedDisp = `<div style="font-size:16px; font-weight:900; color:#B0B8C1; text-align:center;">0ml</div>`;
     } else {
-        feedDisp = `<div style="display:flex; flex-direction:column; gap:4px; font-size:12.5px; font-weight:900; line-height:1.2; text-align:left; color:#3182F6;">`;
+        feedDisp = `<div style="display:flex; flex-direction:column; gap:4px; font-size:12.5px; font-weight:900; line-height:1.2; text-align:left; color:#7F77DD;">`;
         if (todayFormulaAmt > 0) feedDisp += `<div><span style="opacity:0.6; font-size:11px; margin-right:4px;">🍼분  유</span>${todayFormulaAmt}ml</div>`;
         if (todayBreastMins > 0) feedDisp += `<div><span style="opacity:0.6; font-size:11px; margin-right:4px;">🤱모  유</span>${todayBreastMins}분</div>`;
         if (todayFoodAmt > 0) feedDisp += `<div><span style="opacity:0.6; font-size:11px; margin-right:4px;">🥄이유식</span>${todayFoodAmt}g</div>`;
@@ -6014,7 +6014,7 @@ window.updateTrackerDashboard = function() {
 
         // 🚨 수유 중이면 홈 화면 트래커에 '수유 중 🤱' 표시!
         if (localStorage.getItem('tosil_breast_start')) {
-            if(feedBtnSub) feedBtnSub.innerHTML = '<span style="color:#3182F6; font-weight: 900; animation: pulseSOS 1.5s infinite;">수유 중 </span>';
+            if(feedBtnSub) feedBtnSub.innerHTML = '<span style="color:#7F77DD; font-weight: 900; animation: pulseSOS 1.5s infinite;">수유 중 </span>';
         } else {
             if(feedBtnSub) feedBtnSub.innerHTML = getRelativeTime(latestFeed);
         }
@@ -6074,7 +6074,7 @@ window.updateNowStatusCard = function() {
         if (window._activeSleepStart) {
             sleepLabelEl.innerText = '😴 자는 중';
             sleepStateEl.innerHTML = fmtMin(Math.floor((Date.now() - window._activeSleepStart) / 60000));
-            sleepStateEl.style.color = '#A855F7';
+            sleepStateEl.style.color = '#7F77DD';
         } else if (window._lastWakeTime) {
             sleepLabelEl.innerText = '⏰ 깬 지';
             sleepStateEl.innerHTML = fmtMin(Math.floor((Date.now() - window._lastWakeTime) / 60000));
@@ -6255,7 +6255,7 @@ window.renderRoutineChecklist = function() {
     const createBtn = (id, label) => {
         const isChecked = routineData[id];
         
-        // 🚨 [근본 해결] #3182F6(파란색) 하드코딩 삭제! 처음부터 var(--primary)로 렌더링!
+        // 🚨 [근본 해결] #7F77DD(파란색) 하드코딩 삭제! 처음부터 var(--primary)로 렌더링!
         const bg = isChecked ? 'var(--primary)' : 'var(--bg-sub)';
         const color = isChecked ? '#FFFFFF' : 'var(--text-s)';
         const border = isChecked ? '1px solid var(--primary)' : '1px solid var(--border)';
@@ -7130,7 +7130,7 @@ window.openReceiptModal = function() {
                 <div style="font-weight: 900; font-size: 24px; letter-spacing: 2px; margin-bottom: 4px;">TOSIL CAFE</div>
                 <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: #444;">BABY CARE ROASTERS</div>
                 <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #666; margin-top: 2px;">HOME SWEET HOME, KOREA</div>
-                <div style="font-size: 10px; font-weight: 800; color: #3182F6; margin-top: 4px; font-family: 'Pretendard', sans-serif; text-transform: none;">📶 WI-FI: LOVE0303*#</div>
+                <div style="font-size: 10px; font-weight: 800; color: #7F77DD; margin-top: 4px; font-family: 'Pretendard', sans-serif; text-transform: none;">📶 WI-FI: LOVE0303*#</div>
             </div>
 
             <div class="rcpt-dash"></div>
@@ -7414,7 +7414,7 @@ window.calcSleepToNow = function() {
     amountInput.value = diffMins;
     
     amountInput.style.transform = 'scale(1.2)';
-    amountInput.style.color = '#3182F6';
+    amountInput.style.color = '#7F77DD';
     setTimeout(() => { 
         amountInput.style.transform = 'scale(1)'; 
         amountInput.style.color = 'var(--text-m)';
@@ -7467,7 +7467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 2-3. 🚨 다둥이 추가 중인 상황! (이름은 방금 지어줘서 있는데 생일이 없음) -> 로그인 무시하고 무조건 2단계(생일 입력) 직행!
         else {
             const greetingName = document.getElementById('ob-greeting-name');
-            if(greetingName) greetingName.innerHTML = `<span style="color:#3182F6;">${savedName}</span>의 생일은<br>언제인가요?`;
+            if(greetingName) greetingName.innerHTML = `<span style="color:#7F77DD;">${savedName}</span>의 생일은<br>언제인가요?`;
             if(step2) step2.style.display = 'flex';
         }
     }
@@ -7518,7 +7518,7 @@ window.nextOnboardingStep = function(step) {
         const name = document.getElementById('ob-name').value.trim();
         if (!name) return alert('우리 아기의 예쁜 이름을 입력해주세요 😊');
         
-        document.getElementById('ob-greeting-name').innerHTML = `<span style="color:#3182F6;">${name}</span>의 생일은<br>언제인가요?`;
+        document.getElementById('ob-greeting-name').innerHTML = `<span style="color:#7F77DD;">${name}</span>의 생일은<br>언제인가요?`;
         document.getElementById('onboarding-step-1').style.display = 'none';
         document.getElementById('onboarding-step-2').style.display = 'flex';
         document.getElementById('onboarding-step-3').style.display = 'none';
@@ -7563,7 +7563,7 @@ window.finishOnboarding = function(feedingStage) {
     const loadingText = document.getElementById('loading-text');
 
     // ⏱️ 0초: 첫 번째 멘트
-    loadingText.innerHTML = `<span style="color:#3182F6">${name}</span>의<br>생일 데이터를 동기화하는 중...`;
+    loadingText.innerHTML = `<span style="color:#7F77DD">${name}</span>의<br>생일 데이터를 동기화하는 중...`;
     
     // ⏱️ 1.2초 뒤: 두 번째 멘트
     setTimeout(() => {
@@ -7975,9 +7975,9 @@ function calcPong(step, btnEl) {
         b.style.color = 'var(--text-m)';
         b.style.border = '1px solid var(--border)';
     });
-    btnEl.style.background = '#F0F7FF';
-    btnEl.style.color = '#3182F6';
-    btnEl.style.border = '1px solid #3182F6';
+    btnEl.style.background = '#F2F0FC';
+    btnEl.style.color = '#7F77DD';
+    btnEl.style.border = '1px solid #7F77DD';
 
     const inputVal = parseInt(document.getElementById('pong-input-val').value);
     
@@ -8116,7 +8116,7 @@ window.renewOpenRecord = function(id) {
         localStorage.setItem('tosil_open_records', JSON.stringify(records));
         window.renderOpenRecords();
         showToast("🔄 오늘 날짜로 새로 갱신되었습니다");
-    }, "🔄", "새로 뜯음", "#3182F6");
+    }, "🔄", "새로 뜯음", "#7F77DD");
 };
 
 // 4. [신규 패치] 기한 만료템 한 번에 지우기 기능
@@ -8208,11 +8208,11 @@ window.renderOpenRecords = function() {
     let html = `<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; margin-bottom:12px; scrollbar-width:none; border-bottom:1px solid var(--border);">`;
     
     const isAllActive = window.currentOpenFilter === 'all';
-    html += `<button onclick="window.setOpenFilter('all')" style="flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:900; cursor:pointer; border:1px solid ${isAllActive ? '#3182F6' : 'var(--border)'}; background:${isAllActive ? '#E8F3FF' : 'var(--bg-card)'}; color:${isAllActive ? '#3182F6' : 'var(--text-s)'}; transition:all 0.2s;">전체 보기</button>`;
+    html += `<button onclick="window.setOpenFilter('all')" style="flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:900; cursor:pointer; border:1px solid ${isAllActive ? '#7F77DD' : 'var(--border)'}; background:${isAllActive ? '#F0EEFB' : 'var(--bg-card)'}; color:${isAllActive ? '#7F77DD' : 'var(--text-s)'}; transition:all 0.2s;">전체 보기</button>`;
     
     Array.from(existingGroups).sort().forEach(group => {
         const isActive = window.currentOpenFilter === group;
-        html += `<button onclick="window.setOpenFilter('${group}')" style="flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; border:1px solid ${isActive ? '#3182F6' : 'var(--border)'}; background:${isActive ? '#E8F3FF' : 'var(--bg-card)'}; color:${isActive ? '#3182F6' : 'var(--text-s)'}; transition:all 0.2s;">${catGroupNames[group]}</button>`;
+        html += `<button onclick="window.setOpenFilter('${group}')" style="flex-shrink:0; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; border:1px solid ${isActive ? '#7F77DD' : 'var(--border)'}; background:${isActive ? '#F0EEFB' : 'var(--bg-card)'}; color:${isActive ? '#7F77DD' : 'var(--text-s)'}; transition:all 0.2s;">${catGroupNames[group]}</button>`;
     });
     html += `</div>`;
 
@@ -8268,7 +8268,7 @@ window.renderOpenRecords = function() {
                 <div style="flex:1; min-width:0; font-size:15px; font-weight:900; color:var(--text-m); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${openEsc(r.name || r.title || r.item || '이름 없는 물건')}</div>
 
                 <div style="display:flex; gap:6px; flex-shrink:0;">
-                    <button onclick="window.renewOpenRecord('${r.id}')" style="background:#E8F3FF; border:1px solid #B1D6FF; border-radius:10px; width:38px; height:38px; color:#3182F6; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="오늘 새로 뜯음">🔄</button>
+                    <button onclick="window.renewOpenRecord('${r.id}')" style="background:#F0EEFB; border:1px solid #D5D1F4; border-radius:10px; width:38px; height:38px; color:#7F77DD; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="오늘 새로 뜯음">🔄</button>
                     <button onclick="window.deleteOpenRecord('${r.id}')" style="background:#F2F5F8; border:none; border-radius:10px; width:38px; height:38px; color:#8B95A1; cursor:pointer; font-size:14px; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="삭제">❌</button>
                 </div>
             </div>
@@ -8330,8 +8330,8 @@ window.updateOpenItemGuide = function() {
             guideEl.style.color = '#D32F2F';
             guideEl.style.background = '#FFF0F1';
         } else {
-            guideEl.style.color = '#3182F6';
-            guideEl.style.background = '#E8F3FF';
+            guideEl.style.color = '#7F77DD';
+            guideEl.style.background = '#F0EEFB';
         }
     }
 };
@@ -8545,10 +8545,10 @@ window.initWeeklyReport = function() {
 
     if (isDad) {
         // 👨 아빠 버전
-        reportBtn.style.background = 'linear-gradient(135deg, #E8F3FF, #D0E6FF)';
-        reportBtn.style.borderColor = '#B1D6FF';
-        if(titleEl) { titleEl.style.color = '#3182F6'; titleEl.innerText = '토닥토닥, 이번 주도 빛났어요 ✨'; }
-        if(descEl) { descEl.style.color = '#1C64F2'; descEl.innerText = '아빠의 다정한 일주일 요약'; }
+        reportBtn.style.background = 'linear-gradient(135deg, #F0EEFB, #E4E0F8)';
+        reportBtn.style.borderColor = '#D5D1F4';
+        if(titleEl) { titleEl.style.color = '#7F77DD'; titleEl.innerText = '토닥토닥, 이번 주도 빛났어요 ✨'; }
+        if(descEl) { descEl.style.color = '#6A61CE'; descEl.innerText = '아빠의 다정한 일주일 요약'; }
         if(iconEl) { iconEl.innerText = '👨‍🍼'; }
     } else {
         // 👩 엄마 버전
@@ -8613,7 +8613,7 @@ window.renderSettingsTab = function() {
                     ${imgTag}
                 </div>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 11.5px; font-weight: 800; color: #3182F6; margin-bottom: 4px; white-space: nowrap; letter-spacing: -0.5px;">카카오 로그인 완료</div>
+                    <div style="font-size: 11.5px; font-weight: 800; color: #7F77DD; margin-bottom: 4px; white-space: nowrap; letter-spacing: -0.5px;">카카오 로그인 완료</div>
                     <div style="font-size: 16px; font-weight: 900; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${savedNickname} <span style="font-size: 13.5px; font-weight: 600; color: var(--text-s);">님</span></div>
                 </div>
                 <button onclick="window.logoutKakao()" style="padding: 8px 14px; border-radius: 8px; background: #F2F5F8; color: #8B95A1; font-size: 12px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; flex-shrink: 0;">
@@ -8647,7 +8647,7 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 16px; font-weight: 900; color: var(--text-m); letter-spacing: -0.3px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <span>☁️</span> 안심 클라우드
                     </div>
-                    <span style="background: rgba(49, 130, 246, 0.1); color: #3182F6; font-size: 11.5px; font-weight: 800; padding: 5px 10px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;">연동 중 ✨</span>
+                    <span style="background: rgba(127, 119, 221, 0.1); color: #7F77DD; font-size: 11.5px; font-weight: 800; padding: 5px 10px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;">연동 중 ✨</span>
                 </div>
                 
                 <!-- 🚨 텍스트 3줄 나오던 것 2줄로 강제 다이어트! -->
@@ -8705,7 +8705,7 @@ window.renderSettingsTab = function() {
             <!-- 💎 VIP 프리미엄 업그레이드 배너 -->
             <div onclick="document.getElementById('vip-modal-overlay').style.display='flex'" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; transition: 0.2s;">
                 <div>
-                    <div style="font-size: 13px; font-weight: 900; color: #38bdf8; margin-bottom: 6px; letter-spacing: 1px;">배냇함 플러스 ✨</div>
+                    <div style="font-size: 13px; font-weight: 900; color: #7F77DD; margin-bottom: 6px; letter-spacing: 1px;">배냇함 플러스 ✨</div>
 <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">단 한 번의 결제로<br>우리 가족 평생 육아 기록실</div>
                 </div>
                 <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px;">
@@ -8725,7 +8725,7 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-right: auto; white-space: nowrap; flex-shrink: 0;">내 역할</div>
                     <div style="display: flex; background: var(--bg-sub); border-radius: 10px; padding: 3px; border: 1px solid var(--border); flex-shrink: 0;">
                         <button onclick="window.changeUserRole('mom')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'mom' ? 'background:var(--bg-card); color:#F04452; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#8B95A1;'}">엄마</button>
-                        <button onclick="window.changeUserRole('dad')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'dad' ? 'background:var(--bg-card); color:#3182F6; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#8B95A1;'}">아빠</button>
+                        <button onclick="window.changeUserRole('dad')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'dad' ? 'background:var(--bg-card); color:#7F77DD; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#8B95A1;'}">아빠</button>
                         <button onclick="window.changeUserRole('senior')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'senior' ? 'background:var(--bg-card); color:#00B37A; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#8B95A1;'}">돌봄 도우미</button>
                     </div>
                 </div>
@@ -8772,7 +8772,7 @@ window.renderSettingsTab = function() {
                 </div>
                 <div onclick="window.handleSecretAdminClick()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; -webkit-tap-highlight-color: transparent;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">현재 버전 (터치)</div>
-                    <div style="font-size: 13.5px; font-weight: 800; color: #3182F6;">v1.0.0 최신</div>
+                    <div style="font-size: 13.5px; font-weight: 800; color: #7F77DD;">v1.0.0 최신</div>
                 </div>
             </div>
 
@@ -8989,12 +8989,12 @@ window.calcSleepToNow = function() {
     // 3. 시각적 효과 (글씨 커졌다가 돌아옴)
     if(hoursInput) {
         hoursInput.style.transform = 'scale(1.2)';
-        hoursInput.style.color = '#A855F7';
+        hoursInput.style.color = '#7F77DD';
         setTimeout(() => { hoursInput.style.transform = 'scale(1)'; hoursInput.style.color = 'var(--text-m)'; }, 300);
     }
     if(minsInput) {
         minsInput.style.transform = 'scale(1.2)';
-        minsInput.style.color = '#A855F7';
+        minsInput.style.color = '#7F77DD';
         setTimeout(() => { minsInput.style.transform = 'scale(1)'; minsInput.style.color = 'var(--text-m)'; }, 300);
     }
 
@@ -9064,9 +9064,9 @@ window.showRoleOnboarding = function() {
                     <div style="font-size:36px; margin-bottom:10px;">👩‍🍼</div>
                     <div style="font-size:16px; font-weight:900; color:#F04452;">엄마</div>
                 </button>
-                <button onclick="window.selectRoleOnboarding('dad')" style="flex:1; padding:24px 10px; background:#EBF4FF; border:2px solid #D3E4FF; border-radius:18px; cursor:pointer; transition:all 0.2s;">
+                <button onclick="window.selectRoleOnboarding('dad')" style="flex:1; padding:24px 10px; background:#F2F0FC; border:2px solid #D3E4FF; border-radius:18px; cursor:pointer; transition:all 0.2s;">
                     <div style="font-size:36px; margin-bottom:10px;">👨‍🍼</div>
-                    <div style="font-size:16px; font-weight:900; color:#3182F6;">아빠</div>
+                    <div style="font-size:16px; font-weight:900; color:#7F77DD;">아빠</div>
                 </button>
             </div>
         </div>
@@ -9646,7 +9646,7 @@ window.highlightUpdatedStat = function(elementId, newValue) {
     el.innerText = newValue;
     // 형광펜 칠하듯 파란색으로 번쩍였다가 원래 색으로 돌아옴
     el.style.transition = "color 0.3s, transform 0.3s";
-    el.style.color = "#3182F6"; 
+    el.style.color = "#7F77DD"; 
     el.style.transform = "scale(1.2)";
     
     setTimeout(() => {
@@ -9826,7 +9826,7 @@ window.initDrumPicker = function(timeStr) {
                 if (oldEl) { oldEl.style.fontSize = '20px'; oldEl.style.fontWeight = '700'; oldEl.style.color = '#B0B8C1'; }
             }
             const newEl = hourContainer.children[hRawIdx + 1];
-            if (newEl) { newEl.style.fontSize = '26px'; newEl.style.fontWeight = '900'; newEl.style.color = '#3182F6'; }
+            if (newEl) { newEl.style.fontSize = '26px'; newEl.style.fontWeight = '900'; newEl.style.color = '#7F77DD'; }
             lastHIdx = hRawIdx;
         }
 
@@ -9837,7 +9837,7 @@ window.initDrumPicker = function(timeStr) {
                 if (oldEl) { oldEl.style.fontSize = '20px'; oldEl.style.fontWeight = '700'; oldEl.style.color = '#B0B8C1'; }
             }
             const newEl = minContainer.children[mRawIdx + 1];
-            if (newEl) { newEl.style.fontSize = '26px'; newEl.style.fontWeight = '900'; newEl.style.color = '#3182F6'; }
+            if (newEl) { newEl.style.fontSize = '26px'; newEl.style.fontWeight = '900'; newEl.style.color = '#7F77DD'; }
             lastMIdx = mRawIdx;
         }
 
@@ -9906,7 +9906,7 @@ function getGrowthDeltaMessage(records) {
 
     if (latest.height && prev.height) {
         const diffH = (latest.height - prev.height).toFixed(1);
-        if (diffH > 0) messages.push(`키 <span style="color:#3182F6;">+${diffH}cm</span> 쑥쑥🦒`);
+        if (diffH > 0) messages.push(`키 <span style="color:#7F77DD;">+${diffH}cm</span> 쑥쑥🦒`);
         else if (diffH < 0) messages.push(`키 <span style="color:#8B95A1;">${diffH}cm</span>`);
     }
 
@@ -10493,7 +10493,7 @@ if(existing) existing.remove();
     // 👑 1. 관리자 모드
     if (isMasterAdmin) {
         menuHtml = `
-            <div style="padding: 0 0 16px 0; font-size: 13px; font-weight: 900; color: #3182F6; text-align: center;">👑 배냇함 대표이사</div>
+            <div style="padding: 0 0 16px 0; font-size: 13px; font-weight: 900; color: #7F77DD; text-align: center;">👑 배냇함 대표이사</div>
             <div onclick="window.editPost('${postId}')" style="padding: 16px 0; font-size: 16px; font-weight: 700; color: #333D4B; border-bottom: 1px solid #F2F4F6; cursor: pointer; display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 20px;">✏️</span> 글 강제 수정하기
             </div>
@@ -10576,7 +10576,7 @@ window.doCommSearch = function() {
         else if (diffMins >= 60) timeStr = `${Math.floor(diffMins/60)}시간 전`;
         else if (diffMins > 0) timeStr = `${diffMins}분 전`;
 
-        let catName = '☕ 일상수다'; let catColor = '#8B5CF6'; let catBg = '#F3E8FF';
+        let catName = '☕ 일상수다'; let catColor = '#7F77DD'; let catBg = '#F3E8FF';
         if (post.category === 'qna') { catName = '💡 육아질문'; catColor = 'var(--brand-primary)'; catBg = 'var(--brand-light)'; }
         else if (post.category === 'market') { catName = '🥕 나눔/중고'; catColor = '#00B37A'; catBg = '#E6F7F2'; }
         else if (post.category === 'hotdeal') { catName = '🛒 핫딜정보'; catColor = '#FF823A'; catBg = '#FFF4ED'; }
@@ -10639,7 +10639,7 @@ window.openMyActivity = function(type) {
         contentArea.style.padding = '20px'; contentArea.style.background = 'var(--bg-main)'; contentArea.style.overflowY = 'auto'; contentArea.style.justifyContent = 'flex-start'; 
         let html = '<div style="width: 100%;">';
         filtered.forEach(post => {
-            let catName = '☕ 일상수다'; let catColor = '#8B5CF6'; let catBg = '#F3E8FF';
+            let catName = '☕ 일상수다'; let catColor = '#7F77DD'; let catBg = '#F3E8FF';
             if (post.category === 'qna') { catName = '💡 육아질문'; catColor = 'var(--brand-primary)'; catBg = 'var(--brand-light)'; }
             else if (post.category === 'market') { catName = '🥕 나눔/중고'; catColor = '#00B37A'; catBg = '#E6F7F2'; }
             
@@ -11054,7 +11054,7 @@ window.applyCommunityWaitlist = function(btn) {
     if(!myKakaoId) {
         return window.showConfirm("알림을 받으시려면 먼저 로그인해주세요", function() {
             window.switchTab('settings');
-        }, "💬", "로그인 하러가기", "#3182F6");
+        }, "💬", "로그인 하러가기", "#7F77DD");
     }
 
      // 로그인 세션이 없으면 보내봐야 규칙이 거부한다. 아예 안 보낸다.
@@ -11062,7 +11062,7 @@ window.applyCommunityWaitlist = function(btn) {
     if (!liveUid) {
         return window.showConfirm("알림을 받으시려면 먼저 로그인해주세요", function() {
             window.switchTab('settings');
-        }, "💬", "로그인 하러가기", "#3182F6");
+        }, "💬", "로그인 하러가기", "#7F77DD");
     }
 
     // 3. 파이어베이스 [waitlist] 폴더에 카카오ID 저장!
@@ -11105,7 +11105,7 @@ window.renderCommunityFeed = function() {
     const isApplied = localStorage.getItem('tosil_waitlist_done');
     const btnStyle = isApplied 
         ? "background: #00B37A; box-shadow: none;" 
-        : "background: #8B5CF6; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);";
+        : "background: #7F77DD; box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);";
     const btnText = isApplied ? "✅ 알림 신청 완료" : "🔔 정식 오픈 알림 받기";
 
     // 🌟 서버가 세어준 진짜 숫자 가져오기! (없으면 0)
@@ -11123,7 +11123,7 @@ window.renderCommunityFeed = function() {
             
             <h2 style="font-size: 22px; font-weight: 900; color: var(--text-title); margin: 0 0 12px 0; letter-spacing: -0.5px; line-height:1.4;">
                 동네 엄빠들의 따뜻한 수다방<br>
-                <span style="color: #8B5CF6;">'맘수다'</span>가 곧 오픈합니다!
+                <span style="color: #7F77DD;">'맘수다'</span>가 곧 오픈합니다!
             </h2>
             
             <p style="font-size: 14.5px; font-weight: 600; color: var(--text-sub); line-height: 1.6; word-break: keep-all; margin: 0 0 32px 0;">
@@ -11135,7 +11135,7 @@ window.renderCommunityFeed = function() {
             <!-- 🚨 가짜 숫자 대신 서버가 세어준 진짜 숫자로 교체! -->
             <div style="background: #F3E8FF; border: 1px solid #D8B4FE; border-radius: 20px; padding: 10px 18px; margin-bottom: 32px; display: inline-flex; align-items: center; gap: 8px;">
                 <span style="font-size: 18px;">🔥</span>
-                <span style="font-size: 13.5px; font-weight: 800; color: #7C3AED;">현재 <span style="font-size: 16px; font-weight: 900;">${totalCount}</span>명의 엄빠가 대기 중!</span>
+                <span style="font-size: 13.5px; font-weight: 800; color: #6A61CE;">현재 <span style="font-size: 16px; font-weight: 900;">${totalCount}</span>명의 엄빠가 대기 중!</span>
             </div>
 
             <!-- 👇 찐 수집 함수 연결 -->
@@ -11552,7 +11552,7 @@ window.openWriteModal = function() {
     if (!localStorage.getItem('kakao_id')) {
         return window.showConfirm("안전하고 클린한 커뮤니티를 위해<br>로그인한 유저만 글을 쓸 수 있어요!<br><span style='font-size:12px; color:#8B95A1; font-weight:600;'>카카오로 3초 만에 시작해볼까요?</span>", function() {
             if (typeof window.switchTab === 'function') window.switchTab('settings');
-        }, "💬", "로그인 하러가기", "#3182F6");
+        }, "💬", "로그인 하러가기", "#7F77DD");
     }
 
     const executeOpenModal = () => {
@@ -11659,7 +11659,7 @@ window.openAdminDashboard = function() {
         <div style="background:#18181B; border-radius:24px 24px 0 0; padding:30px 20px 40px 20px; height:85vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); border-top:1px solid rgba(255,255,255,0.1);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
                 <div>
-                    <div style="font-size:12px; font-weight:800; color:#38BDF8; margin-bottom:4px;">Tosil Admin System</div>
+                    <div style="font-size:12px; font-weight:800; color:#7F77DD; margin-bottom:4px;">Tosil Admin System</div>
                     <div style="font-size:24px; font-weight:900; color:#FFFFFF;">👑 배냇함 관제센터</div>
                 </div>
                 <button onclick="window.closeAdminDashboard()" style="background:rgba(255,255,255,0.1); border:none; width:36px; height:36px; border-radius:50%; color:#FFF; font-size:16px; cursor:pointer;">✕</button>
@@ -11672,7 +11672,7 @@ window.openAdminDashboard = function() {
                 </div>
                 <div style="flex:1; background:rgba(255,255,255,0.1); border-radius:16px; padding:16px; text-align:center;">
                     <div style="font-size:12px; color:#A1A1AA; margin-bottom:6px; font-weight:800;">총 누적 댓글</div>
-                    <div style="font-size:20px; font-weight:900; color:#38BDF8;">${comments.length}건</div>
+                    <div style="font-size:20px; font-weight:900; color:#7F77DD;">${comments.length}건</div>
                 </div>
             </div>
 
@@ -11802,10 +11802,10 @@ window.openNoticeController = function() {
     const mData = window.appNotices?.main || { text: "", isActive: false };
     const cData = window.appNotices?.community || { text: "", isActive: false };
     
-    const mBtnStyle = mData.isActive ? "background:#38BDF8; color:#0F172A;" : "background:#3F3F46; color:#A1A1AA;";
+    const mBtnStyle = mData.isActive ? "background:#7F77DD; color:#0F172A;" : "background:#3F3F46; color:#A1A1AA;";
     const mBtnText = mData.isActive ? "ON (켜짐)" : "OFF (꺼짐)";
     
-    const cBtnStyle = cData.isActive ? "background:#38BDF8; color:#0F172A;" : "background:#3F3F46; color:#A1A1AA;";
+    const cBtnStyle = cData.isActive ? "background:#7F77DD; color:#0F172A;" : "background:#3F3F46; color:#A1A1AA;";
     const cBtnText = cData.isActive ? "ON (켜짐)" : "OFF (꺼짐)";
 
     const controllerHtml = `
@@ -11816,7 +11816,7 @@ window.openNoticeController = function() {
                 
                 <div style="margin-bottom:20px; background:#27272A; padding:16px; border-radius:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <div style="font-size:14px; font-weight:800; color:#38BDF8;">1. 홈 화면 메인 배너</div>
+                        <div style="font-size:14px; font-weight:800; color:#7F77DD;">1. 홈 화면 메인 배너</div>
                         <button id="btn-toggle-main" data-active="${mData.isActive}" onclick="window.toggleAdminSwitch('main')" style="${mBtnStyle} border:none; padding:6px 14px; border-radius:10px; font-weight:900; font-size:12px; cursor:pointer; transition:0.2s; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
                             ${mBtnText}
                         </button>
@@ -11826,7 +11826,7 @@ window.openNoticeController = function() {
 
                 <div style="margin-bottom:24px; background:#27272A; padding:16px; border-radius:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <div style="font-size:14px; font-weight:800; color:#38BDF8;">2. 맘수다 상단 공지</div>
+                        <div style="font-size:14px; font-weight:800; color:#7F77DD;">2. 맘수다 상단 공지</div>
                         <button id="btn-toggle-comm" data-active="${cData.isActive}" onclick="window.toggleAdminSwitch('comm')" style="${cBtnStyle} border:none; padding:6px 14px; border-radius:10px; font-weight:900; font-size:12px; cursor:pointer; transition:0.2s; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
                             ${cBtnText}
                         </button>
@@ -11836,7 +11836,7 @@ window.openNoticeController = function() {
 
                 <div style="display:flex; gap:12px;">
                     <button onclick="window.closeNoticeController()" style="flex:1; padding:14px; background:#3F3F46; color:#E5E8EB; border:none; border-radius:12px; font-weight:800; font-size:15px; cursor:pointer;">닫기</button>
-                    <button onclick="window.saveNoticeToDB()" style="flex:1; padding:14px; background:#38BDF8; color:#0F172A; border:none; border-radius:12px; font-weight:900; font-size:15px; cursor:pointer;">저장 & 라이브 🚀</button>
+                    <button onclick="window.saveNoticeToDB()" style="flex:1; padding:14px; background:#7F77DD; color:#0F172A; border:none; border-radius:12px; font-weight:900; font-size:15px; cursor:pointer;">저장 & 라이브 🚀</button>
                 </div>
             </div>
         </div>
@@ -11862,7 +11862,7 @@ window.toggleAdminSwitch = function(type) {
     } else {
         btn.setAttribute('data-active', 'true');
         btn.innerText = 'ON (켜짐)';
-        btn.style.background = '#38BDF8';
+        btn.style.background = '#7F77DD';
         btn.style.color = '#0F172A';
     }
 };
@@ -11964,7 +11964,7 @@ window.showCommentOptions = async function(commentId, postId) {
     
     if (isMasterAdmin) {
         menuHtml = `
-            <div style="padding: 0 0 16px 0; font-size: 13px; font-weight: 900; color: #3182F6; text-align: center;">👑 배냇함 대표이사</div>
+            <div style="padding: 0 0 16px 0; font-size: 13px; font-weight: 900; color: #7F77DD; text-align: center;">👑 배냇함 대표이사</div>
             <div onclick="window.deleteComment('${commentId}', '${postId}'); document.getElementById('comment-action-sheet').remove();" style="padding: 16px 0; font-size: 16px; font-weight: 700; color: #F04452; border-bottom: 1px solid #F2F4F6; cursor: pointer; display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 20px;">🗑️</span> 댓글 강제 삭제
             </div>
@@ -12098,7 +12098,7 @@ window.addComment = function() {
         return window.showConfirm("따뜻한 소통을 위해<br>로그인 후 댓글을 남겨주세요", function() {
             if (typeof window.closePostDetail === 'function') window.closePostDetail();
             if (typeof window.switchTab === 'function') window.switchTab('settings');
-        }, "💬", "로그인 하러가기", "#3182F6");
+        }, "💬", "로그인 하러가기", "#7F77DD");
     }
 
     const inputField = document.getElementById('newCommentInput');
@@ -12267,7 +12267,7 @@ window.renderComments = function(postId) {
         if (replies.length > 0) {
             // 🚨 인스타 스타일 '답글 N개 보기' 토글 버튼 (찌꺼기 선 삭제, 화살표 추가)
             html += `
-                <div id="reply-toggle-btn-${parent.id}" onclick="window.toggleReplies('${parent.id}')" style="margin-left: 42px; margin-top: 4px; margin-bottom: 12px; font-size: 13px; font-weight: 800; color: #8B5CF6; cursor: pointer; display: inline-block;">
+                <div id="reply-toggle-btn-${parent.id}" onclick="window.toggleReplies('${parent.id}')" style="margin-left: 42px; margin-top: 4px; margin-bottom: 12px; font-size: 13px; font-weight: 800; color: #7F77DD; cursor: pointer; display: inline-block;">
                     답글 ${replies.length}개 보기 ▾
                 </div>
                 
@@ -12303,7 +12303,7 @@ window.toggleReplies = function(parentId) {
             // 안에 들어있는 대댓글 갯수 다시 계산해서 텍스트 복구
             const replyCount = box.querySelectorAll('div[style*="align-items: flex-start"]').length;
             btn.innerText = `답글 ${replyCount}개 보기 ▾`;
-            btn.style.color = '#8B5CF6';
+            btn.style.color = '#7F77DD';
         }
     }
 };
@@ -12348,7 +12348,7 @@ window.renderNotifications = function() {
                     <div style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">💬</div>
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-size: 14.5px; font-weight: 800; color: #191F28; margin-bottom: 4px; line-height: 1.4;">
-                            <span style="color: #3182F6;">${n.senderName}</span>님이 내 게시글에 댓글을 남겼습니다.
+                            <span style="color: #7F77DD;">${n.senderName}</span>님이 내 게시글에 댓글을 남겼습니다.
                         </div>
                         <div style="font-size: 13px; color: #8B95A1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px;">
                             "${n.postTitle}"
@@ -12744,7 +12744,7 @@ window.updateMilestoneCounter = function(isFromClick = false) {
         homeCounterEl.style.display = 'inline-block'; 
         
         // 🚨 [수정됨] 하얀색 찌꺼기 삭제! 배경에 맞는 진한 보라색으로 텍스트 색상 고정
-        homeCounterEl.style.color = '#6D28D9'; 
+        homeCounterEl.style.color = '#6A61CE'; 
         homeCounterEl.style.fontWeight = '900';
         
         // 🚨 도장을 찍었을 때만 쫀득하게 튀어오르는 애니메이션 발동!
@@ -12754,7 +12754,7 @@ window.updateMilestoneCounter = function(isFromClick = false) {
             homeCounterEl.style.color = '#F59E0B'; // 도장 찍을 땐 주황색으로 반짝
             setTimeout(() => {
                 homeCounterEl.style.transform = 'scale(1)';
-                homeCounterEl.style.color = '#6D28D9'; // 애니메이션 끝나면 다시 보라색 복구
+                homeCounterEl.style.color = '#6A61CE'; // 애니메이션 끝나면 다시 보라색 복구
             }, 300);
         }
     }
@@ -13158,8 +13158,8 @@ window.calcSleepRange = function() {
         const m = diffMins % 60;
         
         totalText.innerHTML = `현재 <span style="font-size:20px; margin:0 2px;">${h}</span>시간 <span style="font-size:20px; margin:0 2px;">${m}</span>분째 수면 중 💤`;
-        totalText.style.background = "#EBF8FF";
-        totalText.style.color = "#3182F6";
+        totalText.style.background = "#F2F0FC";
+        totalText.style.color = "#7F77DD";
         amountHidden.value = 0; // 서버에는 0으로 저장되어야 타이머로 인식함
         return;
     }
@@ -13184,8 +13184,8 @@ window.calcSleepRange = function() {
     const m = diffMins % 60;
     
     // 💡 대표님 요청: 보라색 삭제! 파란색 테마로 100% 통일
-    totalText.style.background = "#EBF8FF";
-    totalText.style.color = "#3182F6";
+    totalText.style.background = "#F2F0FC";
+    totalText.style.color = "#7F77DD";
     totalText.innerHTML = `총 <span style="font-size:20px; margin:0 2px;">${h}</span>시간 <span style="font-size:20px; margin:0 2px;">${m}</span>분 수면 💤`;
     
     amountHidden.value = diffMins; 
@@ -13209,7 +13209,7 @@ window.toggleIsSleeping = function(forceState = null) {
         if(endArea) endArea.style.display = 'none'; // 일어난 시간 숨기기
         if(controlBox) {
             controlBox.innerHTML = `
-                <button onclick="window.setWakeTimeNow()" style="width:100%; background:#E8F3FF; color:#3182F6; padding:16px; border-radius:14px; font-size:15px; font-weight:900; border:none; cursor:pointer; transition:0.2s; box-shadow:0 2px 8px rgba(49,130,246,0.15);">
+                <button onclick="window.setWakeTimeNow()" style="width:100%; background:#F0EEFB; color:#7F77DD; padding:16px; border-radius:14px; font-size:15px; font-weight:900; border:none; cursor:pointer; transition:0.2s; box-shadow:0 2px 8px rgba(127, 119, 221,0.15);">
                     ⏰ 방금 깼어요
                 </button>
             `;
@@ -13283,14 +13283,14 @@ window.getDailySummaryHtml = function(dailyRecords) {
 
     let summaryItems = [];
     
-    if (formulaAmt > 0) summaryItems.push(`<span style="color:#3182F6; font-weight:800;">분유 ${formulaAmt}ml</span>`);
+    if (formulaAmt > 0) summaryItems.push(`<span style="color:#7F77DD; font-weight:800;">분유 ${formulaAmt}ml</span>`);
     if (breastMins > 0) summaryItems.push(`<span style="color:#F59E0B; font-weight:800;">모유 ${breastMins}분</span>`);
     if (babyfoodAmt > 0) summaryItems.push(`<span style="color:#10B981; font-weight:800;">이유식 ${babyfoodAmt}g</span>`);
     if (totalSleepMins > 0) {
         let h = Math.floor(totalSleepMins / 60);
         let m = totalSleepMins % 60;
         let sleepText = h > 0 ? `수면 ${h}시간 ${m}분` : `수면 ${m}분`;
-        summaryItems.push(`<span style="color:#A855F7; font-weight:800;">${sleepText}</span>`);
+        summaryItems.push(`<span style="color:#7F77DD; font-weight:800;">${sleepText}</span>`);
     }
     if (pee > 0 || poop > 0) summaryItems.push(`<span style="color:#EF4444; font-weight:800;">기저귀 ${pee+poop}번</span>`);
 
@@ -13320,7 +13320,7 @@ window.showSyncCode = function() {
             <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                 
                 <!-- ✈️ 보딩패스 티켓 본체 (캡처 영역) -->
-                <div id="ticket-capture-area" style="background: linear-gradient(135deg, #3182F6 0%, #1B64DA 100%); border-radius: 24px; padding: 24px; color: #FFF; box-shadow: 0 15px 35px rgba(49,130,246,0.3); position: relative; overflow: hidden; font-family: 'Pretendard', sans-serif;">
+                <div id="ticket-capture-area" style="background: linear-gradient(135deg, #7F77DD 0%, #6A61CE 100%); border-radius: 24px; padding: 24px; color: #FFF; box-shadow: 0 15px 35px rgba(127, 119, 221,0.3); position: relative; overflow: hidden; font-family: 'Pretendard', sans-serif;">
                     <!-- 배경 장식용 원 -->
                     <div style="position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
                     
@@ -13341,7 +13341,7 @@ window.showSyncCode = function() {
                 <!-- 🔘 하단 액션 버튼 -->
                 <div style="display: flex; gap: 8px;">
                     <button onclick="window.copySyncCode('${syncCode}')" style="flex: 1; padding: 14px; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 800; cursor: pointer;">📋 코드 복사</button>
-                    <button onclick="window.downloadSyncTicket()" style="flex: 1.5; padding: 14px; background: #3182F6; color: #FFF; border: none; border-radius: 14px; font-size: 14px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(49,130,246,0.3);">📸 티켓 이미지 저장</button>
+                    <button onclick="window.downloadSyncTicket()" style="flex: 1.5; padding: 14px; background: #7F77DD; color: #FFF; border: none; border-radius: 14px; font-size: 14px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.3);">📸 티켓 이미지 저장</button>
                 </div>
                 <button onclick="document.getElementById('sync-ticket-modal').remove()" style="width: 100%; padding: 10px; background: transparent; color: #8B95A1; border: none; font-size: 13px; font-weight: 700; cursor: pointer;">닫기</button>
             </div>
@@ -13650,7 +13650,7 @@ window.renderKioskBoard = function(category) {
     // 어르신들 헷갈리게 영어 메뉴명(BEVERAGE 등) 섞기
     let tabsHtml = `
         <div style="display:flex; gap:8px; margin-bottom:16px; border-bottom:1px solid #E5E8EB; padding-bottom:12px;">
-            <button onclick="window.renderKioskBoard('cafe')" style="flex:1; padding:10px; border-radius:12px; font-weight:900; font-size:13px; cursor:pointer; transition:0.2s; border:none; ${category === 'cafe' ? 'background:#3182F6; color:#FFF; box-shadow:0 4px 10px rgba(49,130,246,0.3);' : 'background:#F2F5F8; color:#8B95A1;'}">☕ BEVERAGE (음료)</button>
+            <button onclick="window.renderKioskBoard('cafe')" style="flex:1; padding:10px; border-radius:12px; font-weight:900; font-size:13px; cursor:pointer; transition:0.2s; border:none; ${category === 'cafe' ? 'background:#7F77DD; color:#FFF; box-shadow:0 4px 10px rgba(127, 119, 221,0.3);' : 'background:#F2F5F8; color:#8B95A1;'}">☕ BEVERAGE (음료)</button>
             <button onclick="window.renderKioskBoard('burger')" style="flex:1; padding:10px; border-radius:12px; font-weight:900; font-size:13px; cursor:pointer; transition:0.2s; border:none; ${category === 'burger' ? 'background:#F04452; color:#FFF; box-shadow:0 4px 10px rgba(240,68,82,0.3);' : 'background:#F2F5F8; color:#8B95A1;' }">🍔 패스트푸드</button>
             <button onclick="window.renderKioskBoard('food')" style="flex:1; padding:10px; border-radius:12px; font-weight:900; font-size:13px; cursor:pointer; transition:0.2s; border:none; ${category === 'food' ? 'background:#00B37A; color:#FFF; box-shadow:0 4px 10px rgba(0,179,122,0.3);' : 'background:#F2F5F8; color:#8B95A1;' }">🍲 일반식당</button>
         </div>
@@ -13666,7 +13666,7 @@ window.renderKioskBoard = function(category) {
             <div onclick="${action}" style="background:#FFF; border:1px solid #E5E8EB; border-radius:16px; padding:16px; text-align:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.02); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
                 <div style="font-size:36px; margin-bottom:8px;">${item.icon}</div>
                 <div style="font-size:14px; font-weight:900; color:#191F28; margin-bottom:4px; word-break:keep-all;">${item.name}</div>
-                <div style="font-size:13px; font-weight:800; color:#3182F6;">${item.price.toLocaleString()}원</div>
+                <div style="font-size:13px; font-weight:800; color:#7F77DD;">${item.price.toLocaleString()}원</div>
             </div>
         `;
     });
@@ -13702,12 +13702,12 @@ window.kioskProcessPayment = function(method) {
             <div style="font-size: 80px; margin-bottom: 20px; animation: slideUp 0.5s infinite alternate;">💳</div>
             <h2 style="font-size: 26px; font-weight: 900; margin-bottom: 16px; text-align: center; line-height: 1.4;">신용카드를 투입구에<br><span style="color: #F04452;">끝까지</span> 밀어 넣어주세요.</h2>
             <div style="font-size: 16px; font-weight: 700; color: #A1A1AA; margin-bottom: 40px;">(결제가 완료될 때까지 카드를 빼지 마세요)</div>
-            <div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.2); border-top: 5px solid #3182F6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.2); border-top: 5px solid #7F77DD; border-radius: 50%; animation: spin 1s linear infinite;"></div>
         `;
     } else {
         step6.innerHTML = `
             <div style="font-size: 80px; margin-bottom: 20px; animation: pulseSOS 1s infinite;">📱</div>
-            <h2 style="font-size: 26px; font-weight: 900; margin-bottom: 16px; text-align: center; line-height: 1.4;">스캐너에 바코드를<br><span style="color: #3182F6;">가까이</span> 대주세요.</h2>
+            <h2 style="font-size: 26px; font-weight: 900; margin-bottom: 16px; text-align: center; line-height: 1.4;">스캐너에 바코드를<br><span style="color: #7F77DD;">가까이</span> 대주세요.</h2>
             <div style="font-size: 16px; font-weight: 700; color: #A1A1AA; margin-bottom: 40px;">(화면이 밝아야 인식이 잘 됩니다)</div>
             <div style="width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.2); border-top: 5px solid #00B37A; border-radius: 50%; animation: spin 1s linear infinite;"></div>
         `;
@@ -13743,7 +13743,7 @@ window.kioskOpenOption = function(name, price, icon) {
     window.kioskCurrentMenu.temp = 'HOT';
     
     let sizeBtn = document.querySelectorAll('.kiosk-opt-size')[0];
-    sizeBtn.style.border = '2px solid #3182F6'; sizeBtn.style.background = '#EBF4FF'; sizeBtn.style.color = '#3182F6'; sizeBtn.classList.add('selected');
+    sizeBtn.style.border = '2px solid #7F77DD'; sizeBtn.style.background = '#F2F0FC'; sizeBtn.style.color = '#7F77DD'; sizeBtn.classList.add('selected');
     window.kioskCurrentMenu.size = 'R';
 };
 
@@ -13756,7 +13756,7 @@ window.kioskOptSelect = function(btn, type) {
             btn.style.border = '2px solid #E5E8EB'; btn.style.background = '#F2F5F8'; btn.style.color = '#4E5968';
             btn.classList.remove('selected');
         } else {
-            btn.style.border = '2px solid #3182F6'; btn.style.background = '#EBF4FF'; btn.style.color = '#3182F6';
+            btn.style.border = '2px solid #7F77DD'; btn.style.background = '#F2F0FC'; btn.style.color = '#7F77DD';
             btn.classList.add('selected');
         }
         return; 
@@ -13769,7 +13769,7 @@ window.kioskOptSelect = function(btn, type) {
         btn.style.border = '2px solid #F04452'; btn.style.background = '#FFF0F1'; btn.style.color = '#F04452';
         window.kioskCurrentMenu.temp = btn.innerText.includes('ICE') ? 'ICE' : 'HOT';
     } else if (type === 'size') {
-        btn.style.border = '2px solid #3182F6'; btn.style.background = '#EBF4FF'; btn.style.color = '#3182F6';
+        btn.style.border = '2px solid #7F77DD'; btn.style.background = '#F2F0FC'; btn.style.color = '#7F77DD';
         window.kioskCurrentMenu.size = btn.innerText.includes('라지') ? 'L' : 'R';
     }
     btn.classList.add('selected');
@@ -13821,7 +13821,7 @@ window.kioskUpdateCartUI = function() {
     let html = '';
     window.kioskCart.forEach((item, index) => {
         html += `<div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; border-bottom: 1px dashed #E5E8EB; padding-bottom: 8px;">
-                    <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;"><span style="background: #3182F6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 6px;">${index+1}</span>${item.name}</div>
+                    <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;"><span style="background: #7F77DD; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 6px;">${index+1}</span>${item.name}</div>
                     <span style="color: #191F28; font-weight: 900; margin-left:8px; font-size:14px;">${item.price.toLocaleString()}원</span>
                  </div>`;
     });
@@ -13859,7 +13859,7 @@ window.updateSeniorBriefing = function() {
     const getTimeText = (record) => {
         if(!record) return '<span style="color:#B0B8C1; font-weight:700;">기록 없음</span>';
         let diffMins = Math.floor((nowTime - record.timestamp) / 60000);
-        if (diffMins < 1) return '<span style="color:#3182F6; font-weight:800;">방금 전</span>';
+        if (diffMins < 1) return '<span style="color:#7F77DD; font-weight:800;">방금 전</span>';
         if (diffMins < 60) return `${diffMins}분 전`;
         return `<span style="color:#F04452; font-weight:800;">${Math.floor(diffMins/60)}시간 ${diffMins%60}분 전</span>`;
     };
@@ -13882,11 +13882,11 @@ window.updateSeniorBriefing = function() {
     if (isSleeping) {
         let startMins = parseInt(localStorage.getItem('tosil_sleep_start'));
         let diff = Math.floor((nowTime - startMins) / 60000);
-        sleepTxt = `<span style="color:#7C3AED; font-weight:900;">자는 중 (${Math.floor(diff/60)}시간 ${diff%60}분째)</span>`;
+        sleepTxt = `<span style="color:#6A61CE; font-weight:900;">자는 중 (${Math.floor(diff/60)}시간 ${diff%60}분째)</span>`;
     } else if (lastSleep && lastSleep.amount > 0) {
         let wakeTime = lastSleep.timestamp + (lastSleep.amount * 60000);
         let diffMins = Math.floor((nowTime - wakeTime) / 60000);
-        if (diffMins < 1) sleepTxt = `<span style="color:#3182F6; font-weight:800;">방금 깸</span>`;
+        if (diffMins < 1) sleepTxt = `<span style="color:#7F77DD; font-weight:800;">방금 깸</span>`;
         else if (diffMins < 60) sleepTxt = `일어난지 ${diffMins}분`;
         else sleepTxt = `일어난지 <span style="color:#F04452; font-weight:800;">${Math.floor(diffMins/60)}시간 ${diffMins%60}분</span>`;
         
@@ -13901,7 +13901,7 @@ window.updateSeniorBriefing = function() {
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-sub); padding:16px; border-radius:14px; border:1px solid var(--border);">
-                    <div style="font-size:14px; font-weight:800; color:#3182F6;">마지막 맘마</div>
+                    <div style="font-size:14px; font-weight:800; color:#7F77DD;">마지막 맘마</div>
                     <div style="font-size:14px; font-weight:900; color:var(--text-m); text-align:right;">${feedTxt}</div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-sub); padding:16px; border-radius:14px; border:1px solid var(--border);">
@@ -13909,7 +13909,7 @@ window.updateSeniorBriefing = function() {
                     <div style="font-size:14px; font-weight:900; color:var(--text-m); text-align:right;">${diaperTxt}</div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-sub); padding:16px; border-radius:14px; border:1px solid var(--border);">
-                    <div style="font-size:14px; font-weight:800; color:#A855F7;">수면 상태</div>
+                    <div style="font-size:14px; font-weight:800; color:#7F77DD;">수면 상태</div>
                     <div style="font-size:14px; font-weight:900; color:var(--text-m); text-align:right;">${sleepTxt}</div>
                 </div>
             </div>
@@ -13952,12 +13952,12 @@ window.toggleEditSeniorMemo = function() {
         const currentNotice = localStorage.getItem('tosil_parent_notice') || '';
         
         container.innerHTML = `
-            <textarea id="senior-memo-textarea" placeholder="어르신들께 전달할 말씀을 적어주세요..." style="width: 100%; height: 90px; background: var(--bg-sub); border: 2px solid #3182F6; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 800; color: var(--text-m); outline: none; resize: none; box-sizing: border-box; line-height: 1.4; word-break: break-all; overflow-wrap: break-word;">${currentNotice}</textarea>
+            <textarea id="senior-memo-textarea" placeholder="어르신들께 전달할 말씀을 적어주세요..." style="width: 100%; height: 90px; background: var(--bg-sub); border: 2px solid #7F77DD; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 800; color: var(--text-m); outline: none; resize: none; box-sizing: border-box; line-height: 1.4; word-break: break-all; overflow-wrap: break-word;">${currentNotice}</textarea>
         `;
         
         // 버튼을 파란색 '저장' 버튼으로 변경
         btn.innerText = '저장';
-        btn.style.background = '#3182F6';
+        btn.style.background = '#7F77DD';
         btn.style.color = '#FFF';
 
         // 입력창에 자동으로 커서 깜빡이게 포커스 주기
@@ -14082,7 +14082,7 @@ window.openBabyManagementModal = function() {
             <div style="background: #FFFFFF; border: 1px solid #E5E8EB; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                     <span style="font-size: 15px; font-weight: 800; color: #191F28;">${babyName}</span>
-                    ${isCurrent ? '<span style="background: #EBF4FF; color: #3182F6; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px;">현재 보는 중</span>' : ''}
+                    ${isCurrent ? '<span style="background: #F2F0FC; color: #7F77DD; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px;">현재 보는 중</span>' : ''}
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <button onclick="window.editBabyProfile('${p.id}')" style="flex:1; background: #FFFFFF; color: #333D4B; border: 1px solid #E5E8EB; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">정보 수정</button>
@@ -14102,7 +14102,7 @@ window.openBabyManagementModal = function() {
                 <div style="max-height: 300px; overflow-y: auto; margin-bottom: 16px;">${listHtml}</div>
                 
                 <!-- 🚨 이 부분이 변경되었습니다! 버튼을 누르면 모달이 닫히고 VIP 검사 로직(addNewBabyProfile)으로 곧바로 연결됩니다 -->
-                <button onclick="document.getElementById('baby-mgmt-modal').remove(); window.addNewBabyProfile();" style="width: 100%; padding: 16px; background: #3182F6; color: #FFF; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(49,130,246,0.2);">
+                <button onclick="document.getElementById('baby-mgmt-modal').remove(); window.addNewBabyProfile();" style="width: 100%; padding: 16px; background: #7F77DD; color: #FFF; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">
                     <span style="font-size:16px;">➕</span> 새 아기 추가하기
                 </button>
             </div>
@@ -14206,7 +14206,7 @@ window.editBabyProfile = function(targetId) {
                     <!-- 👇 여기에 유아식/일반식 추가됨 -->
                     <option value="유아식/일반식" ${stage === '유아식/일반식' ? 'selected' : ''}>유아식/일반식 </option>
                 </select>
-                <button onclick="window.saveBabyProfile('${targetId}')" style="width:100%; padding:14px; background:#3182F6; color:white; border:none; border-radius:12px; font-weight:900;">저장하기</button>
+                <button onclick="window.saveBabyProfile('${targetId}')" style="width:100%; padding:14px; background:#7F77DD; color:white; border:none; border-radius:12px; font-weight:900;">저장하기</button>
             </div>
         </div>
     `;
@@ -14267,8 +14267,8 @@ window.toggleBreastTimer = function() {
         window.breastIsRunning = false;
         
         btn.innerHTML = '▶ 타이머 이어서 시작';
-        btn.style.background = '#EBF4FF';
-        btn.style.color = '#3182F6';
+        btn.style.background = '#F2F0FC';
+        btn.style.color = '#7F77DD';
         if (navigator.vibrate) navigator.vibrate(10);
         
         // 🚨 핵심: 스톱워치에서 잰 '초'를 '분'으로 반올림해서 입력칸에 꽂아줍니다!
@@ -14328,8 +14328,8 @@ window.closeTrackerSheet = function() {
     
     if (btn) {
         btn.innerHTML = '▶ 타이머 시작';
-        btn.style.background = '#EBF4FF';
-        btn.style.color = '#3182F6';
+        btn.style.background = '#F2F0FC';
+        btn.style.color = '#7F77DD';
     }
     if (input) input.style.display = 'inline-block';
     if (unit) unit.style.display = 'inline-block';
@@ -14482,31 +14482,31 @@ window.showPaywall = function() {
                 <!-- 🌟 프리미엄 핵심 기능 요약 -->
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">배냇함 포토북 — 담긴 걸 한 권으로</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">그날의 목소리 — 소리까지 담기</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">큐레이터 다섯 곳이 전부 열려요</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">소아과 제출용 A4 종합 리포트 발급</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">이달의 배냇함 카드 매달 받기</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">둘째, 셋째까지 — 아기 프로필 3명</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#38BDF8; font-size:16px;">✓</span>
+                        <span style="color:#7F77DD; font-size:16px;">✓</span>
                         <span style="color:#E2E8F0; font-size:14px; font-weight:700;">가계부와 편지는 가려집니다 · 돌봄 도우미 모드</span>
                     </div>
                 </div>
@@ -14534,7 +14534,7 @@ window.showPaywall = function() {
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">1년치 한 번에<span style="font-size: 11px; font-weight: 800; color: #38BDF8; margin-left: 6px;">34% 살다</span></span>
+                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">1년치 한 번에<span style="font-size: 11px; font-weight: 800; color: #7F77DD; margin-left: 6px;">34% 살다</span></span>
                             <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩39,000</span>
                         </div>
 
@@ -14561,7 +14561,7 @@ window.showPaywall = function() {
 
                 <!-- 🚀 최종 액션 버튼 -->
                 <div style="text-align: center;">
-                    <button onclick="window.applyPremiumWaitlist(this)" style="width: 100%; padding: 18px; background: linear-gradient(135deg, #38BDF8 0%, #2563EB 100%); color: #FFF; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'">
+                    <button onclick="window.applyPremiumWaitlist(this)" style="width: 100%; padding: 18px; background: linear-gradient(135deg, #7F77DD 0%, #6A61CE 100%); color: #FFF; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'">
                         열리면 제일 먼저 알려주세요
                     </button>
                     <div style="font-size: 12px; color: #94A3B8; margin-top: 14px; line-height: 1.7;">
@@ -14604,13 +14604,13 @@ window.selectPlan = function(planId) {
     });
     
     // 2. 선택된 카드에 파란색 형광펜 칠하기
-    target.style.borderColor = '#38BDF8';
+    target.style.borderColor = '#7F77DD';
     target.style.background = 'rgba(56,189,248,0.1)';
     target.style.borderWidth = '2px';
     const circle = target.querySelector('.check-circle');
     circle.innerHTML = '✓';
-    circle.style.background = '#38BDF8';
-    circle.style.borderColor = '#38BDF8';
+    circle.style.background = '#7F77DD';
+    circle.style.borderColor = '#7F77DD';
 };
 
 // 5. 프리미엄 웨이트리스트(대기자 명단) 신청 함수
@@ -14634,7 +14634,7 @@ window.applyPremiumWaitlist = function(btn) {
 
         return window.showConfirm("혜택을 받으시려면 먼저 로그인해주세요", function() {
             if(typeof window.switchTab === 'function') window.switchTab('settings');
-        }, "💬", "로그인 하러가기", "#3182F6");
+        }, "💬", "로그인 하러가기", "#7F77DD");
     }
 
   // 서버로 혜택 신청 기록 보내기
@@ -14919,13 +14919,13 @@ window.downloadPediatricianReport = function() {
             
             let pillTag = '';
             if (r.type === 'red') pillTag = '<span style="background:#FFF0F1; color:#F04452; padding:6px 10px; border-radius:6px; font-size:13px; font-weight:800; margin-left:12px;">🔴 아세트아미노펜</span>';
-            if (r.type === 'blue') pillTag = '<span style="background:#EBF4FF; color:#3182F6; padding:6px 10px; border-radius:6px; font-size:13px; font-weight:800; margin-left:12px;">🔵 이부/덱시부프로펜</span>';
+            if (r.type === 'blue') pillTag = '<span style="background:#F2F0FC; color:#7F77DD; padding:6px 10px; border-radius:6px; font-size:13px; font-weight:800; margin-left:12px;">🔵 이부/덱시부프로펜</span>';
             
             const sympTag = r.symptoms && r.symptoms.length > 0 ? `<div style="color:#6B7684; font-size:14px; font-weight:700; margin-top:8px; background:#F2F4F6; display:inline-block; padding:4px 10px; border-radius:8px;">증상: ${r.symptoms.join(', ')}</div>` : '';
 
             timelineHtml += `
                 <div style="border-left:4px solid #E5E8EB; padding:0 0 30px 24px; position:relative;">
-                    <div style="position:absolute; left:-10px; top:0; width:16px; height:16px; border-radius:50%; background:${isFever ? '#E32636' : '#3182F6'}; box-shadow:0 0 0 4px #FFF;"></div>
+                    <div style="position:absolute; left:-10px; top:0; width:16px; height:16px; border-radius:50%; background:${isFever ? '#E32636' : '#7F77DD'}; box-shadow:0 0 0 4px #FFF;"></div>
                     <div style="display:flex; align-items:center; margin-bottom:6px;">
                         <span style="font-size:16px; font-weight:800; color:#8B95A1; width:90px;">${r.time}</span>
                         <span style="font-size:22px; font-weight:900; color:${tempColor};">${r.temp}℃</span>
@@ -14953,7 +14953,7 @@ window.downloadPediatricianReport = function() {
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:40px;">
             <div style="background:#F8F9FA; border:2px solid #E5E8EB; padding:24px; border-radius:20px;">
                 <div style="font-size:14px; color:#8B95A1; font-weight:800; margin-bottom:6px;">환아 정보</div>
-                <div style="font-size:24px; font-weight:900; color:#333D4B; margin-bottom:16px;">${babyName} <span style="font-size:15px; color:#3182F6; margin-left:8px;">${ageText}</span></div>
+                <div style="font-size:24px; font-weight:900; color:#333D4B; margin-bottom:16px;">${babyName} <span style="font-size:15px; color:#7F77DD; margin-left:8px;">${ageText}</span></div>
                 
                 <div style="display:flex; gap: 24px;">
                     <div>
@@ -14968,8 +14968,8 @@ window.downloadPediatricianReport = function() {
                 </div>
             </div>
 
-            <div style="background:#F0F7FF; border:2px solid #B1D6FF; padding:24px; border-radius:20px;">
-                <div style="font-size:14px; color:#3182F6; font-weight:900; margin-bottom:16px;">🩺 최근 24시간 생활 징후 (Vital Signs)</div>
+            <div style="background:#F2F0FC; border:2px solid #D5D1F4; padding:24px; border-radius:20px;">
+                <div style="font-size:14px; color:#7F77DD; font-weight:900; margin-bottom:16px;">🩺 최근 24시간 생활 징후 (Vital Signs)</div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:16px; font-weight:800; color:#191F28;">
                     <span>🍼 총 수유량 (분유/유축)</span>
                     <span>${totalFeed} ml</span>
@@ -15062,12 +15062,12 @@ window.downloadMonthlyGrowthCard = function() {
 
     // 인스타 정사각형 (1080x1080) 가상 도화지 제작
     const cardDiv = document.createElement('div');
-    cardDiv.style.cssText = 'position:fixed; top:-9999px; left:-9999px; width:1080px; height:1080px; background:linear-gradient(135deg, #FFF5F5 0%, #EBF4FF 100%); padding:80px; box-sizing:border-box; font-family:"Pretendard", sans-serif; display:flex; flex-direction:column; justify-content:space-between; z-index:-1;';
+    cardDiv.style.cssText = 'position:fixed; top:-9999px; left:-9999px; width:1080px; height:1080px; background:linear-gradient(135deg, #FFF5F5 0%, #F2F0FC 100%); padding:80px; box-sizing:border-box; font-family:"Pretendard", sans-serif; display:flex; flex-direction:column; justify-content:space-between; z-index:-1;';
 
     cardDiv.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <div style="font-size:20px; font-weight:800; color:#3182F6; letter-spacing:2px; margin-bottom:8px;">MONTHLY REPORT</div>
+                <div style="font-size:20px; font-weight:800; color:#7F77DD; letter-spacing:2px; margin-bottom:8px;">MONTHLY REPORT</div>
                 <div style="font-size:48px; font-weight:900; color:#191F28; letter-spacing:-1px;">우리 아기 ${monthNames[currentMonth]} 기록</div>
             </div>
             <div style="background:#FFF; padding:12px 24px; border-radius:20px; font-size:20px; font-weight:900; color:#191F28; box-shadow:0 8px 20px rgba(0,0,0,0.05);">
@@ -15078,11 +15078,11 @@ window.downloadMonthlyGrowthCard = function() {
         <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:24px;">
             <div style="background:#FFF; padding:36px; border-radius:28px; box-shadow:0 10px 30px rgba(0,0,0,0.04);">
                 <div style="font-size:16px; font-weight:800; color:#8B95A1; margin-bottom:8px;">🍼 총 수유량</div>
-                <div style="font-size:42px; font-weight:900; color:#3182F6;">${totalFeedM.toLocaleString()} <span style="font-size:22px;">ml</span></div>
+                <div style="font-size:42px; font-weight:900; color:#7F77DD;">${totalFeedM.toLocaleString()} <span style="font-size:22px;">ml</span></div>
             </div>
             <div style="background:#FFF; padding:36px; border-radius:28px; box-shadow:0 10px 30px rgba(0,0,0,0.04);">
                 <div style="font-size:16px; font-weight:800; color:#8B95A1; margin-bottom:8px;">💤 일 평균 수면</div>
-                <div style="font-size:42px; font-weight:900; color:#A855F7;">약 ${avgSleepHours} <span style="font-size:22px;">시간</span></div>
+                <div style="font-size:42px; font-weight:900; color:#7F77DD;">약 ${avgSleepHours} <span style="font-size:22px;">시간</span></div>
             </div>
             <div style="background:#FFF; padding:36px; border-radius:28px; box-shadow:0 10px 30px rgba(0,0,0,0.04);">
                 <div style="font-size:16px; font-weight:800; color:#8B95A1; margin-bottom:8px;">🏅 마일스톤 달성</div>
@@ -15095,7 +15095,7 @@ window.downloadMonthlyGrowthCard = function() {
         </div>
 
        ${window.isPremiumUser() ? '' : `
-        <div style="text-align:center; padding:14px; background:rgba(255,255,255,0.6); border:1px dashed #B1D6FF; border-radius:16px; margin-bottom:16px; font-size:13px; font-weight:800; color:#3182F6;">
+        <div style="text-align:center; padding:14px; background:rgba(255,255,255,0.6); border:1px dashed #D5D1F4; border-radius:16px; margin-bottom:16px; font-size:13px; font-weight:800; color:#7F77DD;">
             🔒 체험판으로 생성된 카드입니다 · 배냇함 플러스
         </div>`}
 
@@ -15232,8 +15232,8 @@ window.downloadPediatricianPDF = function() {
 
         <div style="font-size:15px;font-weight:900;margin-bottom:11px;">🍼 최근 7일 생활 패턴</div>
         <div style="display:flex;gap:10px;margin-bottom:30px;">
-            ${[['일평균 수유량',Math.round(feedMl/7)+'ml','#3182F6'],
-               ['일평균 수면',Math.floor(sleepMin/7/60)+'시간 '+Math.round(sleepMin/7%60)+'분','#A855F7'],
+            ${[['일평균 수유량',Math.round(feedMl/7)+'ml','#7F77DD'],
+               ['일평균 수면',Math.floor(sleepMin/7/60)+'시간 '+Math.round(sleepMin/7%60)+'분','#7F77DD'],
                ['일평균 기저귀',(diaper/7).toFixed(1)+'회','#F04452']].map(([k,v,c])=>`
                 <div style="flex:1;background:#F9FAFB;border:1px solid #E5E8EB;border-radius:12px;padding:15px;text-align:center;">
                     <div style="font-size:11px;font-weight:800;color:#8B95A1;margin-bottom:7px;">${k}</div>
@@ -15278,7 +15278,7 @@ window.downloadPediatricianPDF = function() {
         function() {
             if (canShare) navigator.share({ files: [file], title: '소아과 진료 참고 자료' }).catch(()=>{});
         },
-        "📄", "공유하기", "#3182F6"
+        "📄", "공유하기", "#7F77DD"
     );
     box.remove();
 });
@@ -15327,7 +15327,7 @@ window.startNightDuty = async function() {
                         text: `🌙 오늘 밤은 내가 볼게.\n\n푹 자. 새벽에 깨지 마 🤍\n\n- 야간 당번 ${duty.byName}`,
                         link: { mobileWebUrl: 'https://happy-baby0303.github.io/?from=nightduty', webUrl: 'https://happy-baby0303.github.io/?from=nightduty' }
                     });
-                }, "💌", "알리기", "#3182F6"
+                }, "💌", "알리기", "#7F77DD"
             );
         }, 800);
     }
@@ -15373,11 +15373,11 @@ window.endNightDuty = async function() {
         body.innerHTML = `
             <div style="text-align:center; padding:8px 4px;">
                 <div style="font-size:44px; margin-bottom:12px;">🌅</div>
-                <div style="font-size:13px; font-weight:800; color:#3182F6; margin-bottom:6px;">야간 당번 무사 종료</div>
+                <div style="font-size:13px; font-weight:800; color:#7F77DD; margin-bottom:6px;">야간 당번 무사 종료</div>
                 
                 <!-- ✨ 이 부분이 '수고하셨습니다'에서 '통잠 수호'로 바뀝니다! -->
                 <div style="font-size:24px; font-weight:900; color:var(--text-m); margin-bottom:6px; letter-spacing:-0.5px;">
-                    아내의 통잠<br><span style="color:#7C3AED;">${h}시간 ${m}분</span> 수호 🛡️
+                    아내의 통잠<br><span style="color:#6A61CE;">${h}시간 ${m}분</span> 수호 🛡️
                 </div>
                 <div style="font-size:13px; color:var(--text-s); font-weight:600; margin-bottom:24px;">진정한 육아 영웅이십니다</div>
 
@@ -15385,7 +15385,7 @@ window.endNightDuty = async function() {
                     <div style="flex:1; background:var(--bg-sub); border-radius:14px; padding:16px 8px;">
                         <div style="font-size:20px; margin-bottom:6px;">🍼</div>
                         <div style="font-size:11px; font-weight:800; color:var(--text-s); margin-bottom:4px;">대리 수유</div>
-                        <div style="font-size:16px; font-weight:900; color:#3182F6;">${feedCnt}회</div>
+                        <div style="font-size:16px; font-weight:900; color:#7F77DD;">${feedCnt}회</div>
                     </div>
                     <div style="flex:1; background:var(--bg-sub); border-radius:14px; padding:16px 8px;">
                         <div style="font-size:20px; margin-bottom:6px;">💩</div>
@@ -15447,14 +15447,14 @@ window.renderNightDuty = function() {
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span style="font-size:24px;">🌙</span>
                         <div>
-                            <div style="font-size:11.5px; font-weight:800; color:#60A5FA; margin-bottom:3px;">야간 당번 진행 중</div>
+                            <div style="font-size:11.5px; font-weight:800; color:#A79FE8; margin-bottom:3px;">야간 당번 진행 중</div>
                             <div style="font-size:16px; font-weight:900; color:#FFF;">${duty.byName} · ${h}시간 ${m}분째</div>
                         </div>
                     </div>
-                    <span style="background:rgba(96,165,250,0.15); color:#60A5FA; font-size:11px; font-weight:900; padding:6px 10px; border-radius:10px;">ON</span>
+                    <span style="background:rgba(96,165,250,0.15); color:#A79FE8; font-size:11px; font-weight:900; padding:6px 10px; border-radius:10px;">ON</span>
                 </div>
                 ${isMine
-                    ? `<button onclick="window.endNightDuty()" style="width:100%; padding:14px; border-radius:14px; background:#3182F6; color:#FFF; font-weight:900; font-size:14.5px; border:none; cursor:pointer;">☀️ 당번 종료 (근무 보고서 받기)</button>`
+                    ? `<button onclick="window.endNightDuty()" style="width:100%; padding:14px; border-radius:14px; background:#7F77DD; color:#FFF; font-weight:900; font-size:14.5px; border:none; cursor:pointer;">☀️ 당번 종료 (근무 보고서 받기)</button>`
                     : `<div style="text-align:center; padding:12px; background:rgba(255,255,255,0.06); border-radius:12px; font-size:13px; font-weight:700; color:#94A3B8;">오늘 밤은 걱정 말고 푹 주무세요 🤍</div>`}
             </div>`;
         return;
@@ -15468,12 +15468,12 @@ window.renderNightDuty = function() {
                 <div style="display:flex; align-items:center; gap:14px;">
                     <span style="font-size:28px;">🌙</span>
                     <div>
-                        <div style="font-size:11.5px; font-weight:800; color:#60A5FA; margin-bottom:4px;">오늘 밤, 아빠 차례</div>
+                        <div style="font-size:11.5px; font-weight:800; color:#A79FE8; margin-bottom:4px;">오늘 밤, 아빠 차례</div>
                         <div style="font-size:16.5px; font-weight:900; color:#FFF; letter-spacing:-0.5px;">야간 당번 시작하기</div>
                         <div style="font-size:11.5px; font-weight:600; color:#94A3B8; margin-top:4px;">아내를 통잠 재워주세요</div>
                     </div>
                 </div>
-                <span style="background:#3182F6; color:#FFF; font-size:13px; font-weight:900; padding:10px 14px; border-radius:12px; white-space:nowrap;">시작</span>
+                <span style="background:#7F77DD; color:#FFF; font-size:13px; font-weight:900; padding:10px 14px; border-radius:12px; white-space:nowrap;">시작</span>
             </div>`;
         return;
     }

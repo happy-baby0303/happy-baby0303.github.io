@@ -27,7 +27,7 @@
     'use strict';
 
     var POS_KEY = "tosil_hero_pos";       // 사진 세로 위치 (%)
-    var BLUE = "#3182F6", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#8B95A1", DARK = "#191F28";
     var GOLD = "#8A6D00", RED = "#E32636";
 
     function esc(s) {
