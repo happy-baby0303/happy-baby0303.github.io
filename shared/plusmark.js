@@ -92,7 +92,20 @@
 
     var GOLD = "#8A6D00", GOLD_BG = "#FFF9E6", GOLD_BD = "#F5E1A4";
 
+
+    /* 🎁 출시 기념 무료 개방 — 본 앱 plusfree.js 가 남겨둔 날짜를 읽는다.
+          큐레이터는 별도 페이지라 그 파일이 없다. 날짜만 보고 판단한다. */
+    function freeOpen() {
+        try {
+            var until = localStorage.getItem("tosil_free_open_until");
+            if (!until) return false;
+            var t = new Date(until + "T23:59:59");
+            return !isNaN(t.getTime()) && Date.now() <= t.getTime();
+        } catch (e) { return false; }
+    }
+
     function isPlus() {
+        if (freeOpen()) return true;
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
         if (!localStorage.getItem("firebase_uid")) return false;
         return localStorage.getItem("tosil_is_founder") === "true"
@@ -116,13 +129,14 @@
             "margin-left:auto; flex-shrink:0; padding:4px 9px; border-radius:7px; " +
             "font-size:10.5px; font-weight:900; letter-spacing:0.4px; white-space:nowrap; " +
             "background:" + GOLD_BG + "; color:" + GOLD + "; border:1px solid " + GOLD_BD + ";";
-        b.textContent = on ? "PLUS" : "\uD83D\uDD12 PLUS";
+        /* 무료 개방 중에는 어떤 기능이 PLUS 인지는 알려주되, 잠긴 것처럼 보이면 안 된다 */
+        b.textContent = freeOpen() ? "PLUS \u00b7 무료" : (on ? "PLUS" : "\uD83D\uDD12 PLUS");
         return b;
     }
 
     function mark() {
         var heads = document.querySelectorAll(HEAD_SEL);
-        var want = isPlus() ? "PLUS" : "\uD83D\uDD12 PLUS";
+        var want = freeOpen() ? "PLUS \u00b7 무료" : (isPlus() ? "PLUS" : "\uD83D\uDD12 PLUS");
 
         for (var i = 0; i < heads.length; i++) {
             var h = heads[i];

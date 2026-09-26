@@ -28,7 +28,20 @@
 
     var GOLD = "#B98A2E";
 
+
+    /* 🎁 출시 기념 무료 개방 — 본 앱 plusfree.js 가 남겨둔 날짜를 읽는다.
+          큐레이터는 별도 페이지라 그 파일이 없다. 날짜만 보고 판단한다. */
+    function freeOpen() {
+        try {
+            var until = localStorage.getItem("tosil_free_open_until");
+            if (!until) return false;
+            var t = new Date(until + "T23:59:59");
+            return !isNaN(t.getTime()) && Date.now() <= t.getTime();
+        } catch (e) { return false; }
+    }
+
     function isPlus() {
+        if (freeOpen()) return true;
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
         if (!localStorage.getItem("firebase_uid")) return false;
         return localStorage.getItem("tosil_is_founder") === "true"

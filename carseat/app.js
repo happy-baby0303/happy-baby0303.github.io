@@ -134,7 +134,7 @@ function generateReportHTML(item) {
             titleColor = '#E32636'; bgColor = '#FBF8F3'; borderColor = '#EDE6DE'; titleText = '❌ 비추천 판정';
         }
 
-        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 22px; font-weight: 900; color: ${titleColor}; letter-spacing: -0.5px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #A3958A; margin-top: 4px;">AI 매칭</div></div>`;
+        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 22px; font-weight: 900; color: ${titleColor}; letter-spacing: -0.5px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #A3958A; margin-top: 4px;">조건 매칭</div></div>`;
 
         let reasonLi = item.matchRate === 100 
             ? `<li style="margin-bottom:4px;"> ${item.matchReasons[0]}</li>`
@@ -240,7 +240,7 @@ const adacText = item.specs.adacScore.includes('미참여')
 
             <!-- ✨ 필수 꿀팁 (보호매트/거울 주의사항 체크포인트 추가!) -->
             <div style="background: #FFFBEB; padding: 16px; border-radius: 14px; font-size: 13px; color: #B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top: 16px;">
-                <b style="color: #D97706; font-size: 13.5px; display:block; margin-bottom:4px;">💡 AI 카시트 설치 필수 꿀팁:</b>
+                <b style="color: #D97706; font-size: 13.5px; display:block; margin-bottom:4px;">💡 카시트 설치할 때 꼭 볼 것:</b>
                 새 카시트 장착 시 <b>차량 가죽시트 눌림 및 영구 파손</b>이 100% 발생합니다. 카시트 도착 전, 후방거울과 보호매트를 꼭 미리 세팅해 두세요<br>
                 <div style="font-size: 11.5px; color: #B45309; margin-top: 8px; margin-bottom: 4px; padding: 8px; background: #FEF3C7; border-radius: 8px;">
                     ⚠️ <b>구매 시 체크포인트:</b><br>
