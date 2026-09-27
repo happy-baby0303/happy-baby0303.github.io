@@ -298,21 +298,23 @@ function generateCardHtml(item) {
             </div>
             
             <!-- 박스들 가운데 정렬 (justify-content: center; 추가) -->
-            <div style="display: flex; justify-content: center; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 8px;">
+            <!-- ⚠️ 가운데 정렬 + 가로 스크롤을 같이 쓰면, 넘칠 때 끝이 잘리고 스크롤도 안 닿는다.
+                 (플립처럼 좁은 화면에서 세 번째 칸이 반 잘렸다) 세 칸 격자로 고정한다. -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
                 <!-- 1. 선풍기 -->
-                <a href="${accFanUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                <a href="${accFanUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">❄️</div>
                     <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 선풍기</div>
                     <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
                 </a>
                 <!-- 2. 정리함 -->
-                <a href="${accBagUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                <a href="${accBagUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">🧺</div>
                     <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 정리함</div>
                     <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
                 </a>
                 <!-- 3. 고리 -->
-                <a href="${accHookUrl}" target="_blank" style="flex-shrink: 0; width: 105px; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                <a href="${accHookUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">🔗</div>
                     <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">가방걸이 고리</div>
                     <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>

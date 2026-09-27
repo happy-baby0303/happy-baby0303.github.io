@@ -89,14 +89,36 @@
        strollerguide 는 격자만 숨긴다. 패널 위아래 28px + 제목 아래 24px 이
        그대로 남아서, 접어도 빈 상자가 크다. 여백까지 같이 줄인다. -------- */
 
+    /* 예전 판이 잘못 접어둔 것이 남아 있으면 되살린다. 한 번만 돈다. */
+    (function repairOldFold() {
+        try {
+            var stuck = document.querySelectorAll("[data-fold-disp]");
+            for (var i = 0; i < stuck.length; i++) {
+                var d = stuck[i].getAttribute("data-fold-disp");
+                stuck[i].style.display = (d && d !== "auto") ? d : "";
+                stuck[i].removeAttribute("data-fold-disp");
+            }
+        } catch (e) {}
+    })();
+
     function fixFold() {
         var panel = null, host = strollerHost();
         if (!host) return;
-        for (var i = 0; i < host.children.length; i++) {
-            var c = host.children[i];
-            if (String(c.className || "").indexOf("matrix-panel") > -1) { panel = c; break; }
+        /* ⚠️ 두 번 틀렸던 자리다. 기록해 둔다.
+              1) '첫 번째 흰 카드' → 안내 카드가 앞에 끼어들어 엉뚱한 걸 집었다 (접기가 안 달림)
+              2) '격자를 품은 칸'  → 탭 칸 전체가 격자를 품고 있어서 화면을 통째로 접었다
+              둘 다 아니다. '흰 카드이면서 그 안에 조건 격자가 있는 것' 이어야 한다. */
+        var panels = host.querySelectorAll(".matrix-panel");
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].querySelector(".matrix-grid")) { panel = panels[i]; break; }
         }
+        if (!panel && panels.length) panel = panels[0];
         if (!panel || panel.getAttribute("data-slim")) return;
+
+        /* 🔒 안전장치 — 이 검사가 없어서 화면이 통째로 사라졌다.
+              결과 목록·필터 묶음·탭 칸을 품고 있으면 그건 '조건 카드' 가 아니라 '화면' 이다.
+              그런 건 절대 접지 않는다. */
+        if (panel.querySelector(".result-area, .filter-section, [id^='view-']")) return;
 
         var grid = panel.querySelector(".matrix-grid");
         var head = panel.querySelector(".matrix-header");
@@ -128,8 +150,28 @@
             head.appendChild(mark);
             head.style.cursor = "pointer";
 
+            /* ⚠️ 조건 격자만 숨겼더니 '초기화 · 결과 보기' 와 '1:1 라이벌 대조' 가
+                  카드 밖에 그대로 남았다. 그 둘은 격자의 형제라 같이 숨어야 한다.
+                  제목만 남기고 나머지를 전부 접는다.
+                  ⚠️ 원래 숨어 있던 것(라이벌 결과 칸)은 펼칠 때도 숨은 채로 둔다. */
+            var parts = [];
+            for (var q = 0; q < panel.children.length; q++) {
+                if (panel.children[q] !== head) parts.push(panel.children[q]);
+            }
+
             var setFold = function (folded) {
-                grid.style.display = folded ? "none" : "";
+                parts.forEach(function (el) {
+                    if (folded) {
+                        if (!el.getAttribute("data-fold-disp")) {
+                            el.setAttribute("data-fold-disp", el.style.display || "auto");
+                        }
+                        el.style.display = "none";
+                    } else {
+                        var d = el.getAttribute("data-fold-disp");
+                        el.style.display = (d && d !== "auto") ? d : "";
+                        el.removeAttribute("data-fold-disp");
+                    }
+                });
                 mark.textContent = folded ? "펼치기 \u25BE" : "접기 \u25B4";
                 apply(folded);
             };
@@ -216,13 +258,35 @@
             /* ⚠️ 새로 그린 카드를 늘 '그릇 자리'(대개 맨 아래)에 놓고, 그 다음 정렬이 위로 올렸다.
                   그래서 누를 때마다 카드가 아래에서 위로 튀어 올랐다.
                   지난번에 있던 그 자리에 그대로 놓는다. 그러면 움직이지 않는다. */
-            var ref = olds.length ? olds[olds.length - 1].nextSibling : box;
-            olds.forEach(function (old) { if (old.parentNode === pane) pane.removeChild(old); });
-            if (ref && ref.parentNode !== pane) ref = box;
-            fresh.forEach(function (p) {
-                p.setAttribute("data-from", id);
-                pane.insertBefore(p, ref);
+            /* ⚠️ 여기서 세 번 틀렸다. 이번엔 방식을 바꾼다.
+                  꺼냈다가 다시 넣는 한, 어디에 넣을지를 매번 맞혀야 한다.
+                  접기 상자 안에 들어간 카드는 그 자리를 짚을 수도 없다.
+                  그래서 '지우고 새로 넣기' 를 그만두고 '있던 것을 갈아끼우기' 로 간다.
+                  자리를 계산하지 않으니 카드가 움직일 수가 없다. */
+            /* ⚠️ 네 번째 수정이다. 앞의 것이 왜 틀렸는지 적어둔다.
+                  모듈은 카드를 늘 같은 순서로 만든다 (장비 · 갈 때가 된 것 · 로드맵).
+                  그런데 화면에서는 정렬 때문에 순서가 섞여 있다 (PLUS 는 위로, 무료는 아래로).
+                  그 상태에서 '첫 번째 새 카드 ↔ 첫 번째 옛 카드' 로 짝지으면
+                  서로 다른 카드끼리 자리를 맞바꾼다. 그래서 엉뚱한 카드가 위로 올라왔다.
+
+                  이제 카드마다 번호표(data-slot)를 달고 같은 번호끼리만 갈아끼운다.
+                  화면 순서가 어떻든 짝이 틀릴 수 없다. */
+            var bySlot = {};
+            olds.forEach(function (o) {
+                var k = o.getAttribute("data-slot");
+                if (k !== null) bySlot[k] = o;
             });
+
+            fresh.forEach(function (p, i) {
+                p.setAttribute("data-from", id);
+                p.setAttribute("data-slot", String(i));
+                var old = bySlot[String(i)];
+                if (old && old.parentNode) old.parentNode.replaceChild(p, old);
+                else pane.insertBefore(p, box);
+            });
+
+            /* 갈아끼우지 못하고 남은 옛 카드만 치운다 (갈아끼운 것은 이미 빠져 있다) */
+            olds.forEach(function (o) { if (o.parentNode) o.parentNode.removeChild(o); });
             box.style.display = "none";
         });
     }
@@ -251,8 +315,15 @@
             if (box && box.parentNode !== use) use.appendChild(box);
         });
     }
+    /* ⚠️ 정렬이 4초마다 계속 돌아서, 카드를 누를 때마다 자리가 바뀌었다.
+          (젖병 "갈 때가 된 것" 이 눌렀더니 맨 위로 올라가고 화면이 따라 움직였다)
+          처음 6초 동안 자리를 잡고, 그 뒤로는 손대지 않는다. */
+    var ORDER_UNTIL = Date.now() + 6000;
+
 
     function orderPlus() {
+
+        if (Date.now() > ORDER_UNTIL) return;   // 자리 잡은 뒤엔 안 건드린다
             /* ⚠️ 여기서 PLUS_TITLE 로 다시 판단하면 안 된다.
                      plusmark.js 도 자기 목록으로 같은 판단을 하는데,
                      두 목록이 어긋나면 '배지는 붙었는데 정렬은 무료' 가 된다.

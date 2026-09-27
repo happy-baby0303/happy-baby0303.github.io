@@ -594,7 +594,29 @@
     function paint() {
         var host = document.getElementById(HOST);
         if (!host) return;
+        /* ⚠️ 카드를 통째로 다시 그리면 높이가 잠깐 0이 되면서 화면이 위로 튄다.
+              '오늘 봤어요' 를 누를 때마다 스크롤이 날아가서 다시 내려와야 했다. */
+        var _y = window.scrollY || window.pageYOffset || 0;
         host.innerHTML = gearHTML() + partsHTML() + roadHTML();
+        /* ⚠️ 세 번만 되돌렸더니 첫 클릭에서 화면이 튀었다.
+              카드를 꺼내고(flatten) 정렬하고 배지를 붙이는 게 0.5초에 걸쳐 일어나서,
+              마지막 움직임이 되돌리기보다 늦게 왔다.
+              0.8초 동안 지켜보되, 사용자가 직접 스크롤하면 바로 손을 뗀다. */
+        (function () {
+            var n = 0, stop = false;
+            var off = function () { stop = true; };
+            try {
+                window.addEventListener("touchstart", off, { passive: true, once: true });
+                window.addEventListener("wheel", off, { passive: true, once: true });
+            } catch (e) {}
+            var tick = function () {
+                if (stop || n++ > 13) return;
+                if (Math.abs((window.scrollY || 0) - _y) > 8) window.scrollTo(0, _y);
+                setTimeout(tick, 60);
+            };
+            tick();
+        })();
+
     }
     window.refreshBottleGear = paint;
 

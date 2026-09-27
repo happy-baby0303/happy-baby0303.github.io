@@ -93,14 +93,35 @@
             /* ⚠️ 새로 그린 카드를 늘 '그릇 자리'(대개 맨 아래)에 놓고, 그 다음 정렬이 위로 올렸다.
                   그래서 누를 때마다 카드가 아래에서 위로 튀어 올랐다.
                   지난번에 있던 그 자리에 그대로 놓는다. 그러면 움직이지 않는다. */
-            var ref = olds.length ? olds[olds.length - 1].nextSibling : box;
-            olds.forEach(function (old) { if (old.parentNode === pane) pane.removeChild(old); });
-            if (ref && ref.parentNode !== pane) ref = box;
+            /* ⚠️ 여기서 세 번 틀렸다. 이번엔 방식을 바꾼다.
+                  꺼냈다가 다시 넣는 한, 어디에 넣을지를 매번 맞혀야 한다.
+                  접기 상자 안에 들어간 카드는 그 자리를 짚을 수도 없다.
+                  그래서 '지우고 새로 넣기' 를 그만두고 '있던 것을 갈아끼우기' 로 간다.
+                  자리를 계산하지 않으니 카드가 움직일 수가 없다. */
+            /* ⚠️ 네 번째 수정이다. 앞의 것이 왜 틀렸는지 적어둔다.
+                  모듈은 카드를 늘 같은 순서로 만든다 (장비 · 갈 때가 된 것 · 로드맵).
+                  그런데 화면에서는 정렬 때문에 순서가 섞여 있다 (PLUS 는 위로, 무료는 아래로).
+                  그 상태에서 '첫 번째 새 카드 ↔ 첫 번째 옛 카드' 로 짝지으면
+                  서로 다른 카드끼리 자리를 맞바꾼다. 그래서 엉뚱한 카드가 위로 올라왔다.
 
-            fresh.forEach(function (p) {
-                p.setAttribute("data-from", id);
-                pane.insertBefore(p, ref);
+                  이제 카드마다 번호표(data-slot)를 달고 같은 번호끼리만 갈아끼운다.
+                  화면 순서가 어떻든 짝이 틀릴 수 없다. */
+            var bySlot = {};
+            olds.forEach(function (o) {
+                var k = o.getAttribute("data-slot");
+                if (k !== null) bySlot[k] = o;
             });
+
+            fresh.forEach(function (p, i) {
+                p.setAttribute("data-from", id);
+                p.setAttribute("data-slot", String(i));
+                var old = bySlot[String(i)];
+                if (old && old.parentNode) old.parentNode.replaceChild(p, old);
+                else pane.insertBefore(p, box);
+            });
+
+            /* 갈아끼우지 못하고 남은 옛 카드만 치운다 (갈아끼운 것은 이미 빠져 있다) */
+            olds.forEach(function (o) { if (o.parentNode) o.parentNode.removeChild(o); });
             box.style.display = "none";   // 그릇은 남긴다. 모듈이 다시 그릴 자리다
         });
     }
@@ -216,8 +237,15 @@
         if (ref) pane.insertBefore(wrap, ref); else pane.appendChild(wrap);
         targets.forEach(function (el) { body.appendChild(el); });
     }
+    /* ⚠️ 정렬이 4초마다 계속 돌아서, 카드를 누를 때마다 자리가 바뀌었다.
+          (젖병 "갈 때가 된 것" 이 눌렀더니 맨 위로 올라가고 화면이 따라 움직였다)
+          처음 6초 동안 자리를 잡고, 그 뒤로는 손대지 않는다. */
+    var ORDER_UNTIL = Date.now() + 6000;
+
 
     function orderPlus() {
+
+        if (Date.now() > ORDER_UNTIL) return;   // 자리 잡은 뒤엔 안 건드린다
             /* ⚠️ 여기서 PLUS_TITLE 로 다시 판단하면 안 된다.
                      plusmark.js 도 자기 목록으로 같은 판단을 하는데,
                      두 목록이 어긋나면 '배지는 붙었는데 정렬은 무료' 가 된다.
