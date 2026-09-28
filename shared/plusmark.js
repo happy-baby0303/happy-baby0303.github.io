@@ -51,7 +51,7 @@
         "잠자고 있는 장난감",
         "뭐 사줄까 물어보면",
         "지금 몇 분 있으세요",
-        "기준으로",
+        "기준으로 고르는",   // ⚠️ '기준으로' 만 적으면 다른 큐레이터의 아무 제목에나 배지가 붙는다
 
                               /* 카시트
            ⚠️ '하네스를 스스로 풀 때' 와 '장거리·귀성길에 지킬 것' 은 넣지 않는다.
@@ -207,7 +207,7 @@
     });
     else setTimeout(watch, 400);
 
-    window.plusMarkVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
+    window.plusMarkVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 
     window.plusMarkDebug = function () {
         console.log("이 폴더의 plusmark 판:", window.plusMarkVersion);

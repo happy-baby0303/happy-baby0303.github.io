@@ -1,6 +1,6 @@
 /* ============================================================
-   배냇함 — 요리 모드 V2.0 (cookmode.js)
-   (텍스트 삭제 버그 픽스 및 프리미엄 뱃지 렌더링 적용)
+   배냇함 — 따라 만들기 (cookmode.js)
+   한 단계씩 크게 보여주고, 요리하는 동안 화면이 안 꺼지게 한다.
    ============================================================ */
 (function () {
     'use strict';
@@ -45,13 +45,13 @@
         return m ? parseInt(m[1], 10) : null;
     }
 
-    // ✨ 본문 텍스트 안에서 꿀팁 태그를 찾아 예쁜 뱃지 HTML로 바꿔주는 마법의 함수!
+    // '(안전)' 표시를 짧은 '주의' 딱지로 바꾼다 (레시피 카드와 같은 말). 🚨 는 응급 안내에만 쓴다.
     function formatPremiumBadges(text) {
         let formatted = text;
         
         // (안전) 태그 ➔ 빨간 경고 뱃지로 변환
         formatted = formatted.replace(/\(안전\)/g, 
-            `<span style="display:inline-block; background:#FFF0F1; color:#D32F2F; border:1px solid #FECACA; padding:2px 6px; border-radius:6px; font-size:11.5px; font-weight:900; margin-right:4px; transform:translateY(-1px);">🚨 안전필수</span>`
+            `<span style="display:inline-block; background:#FFF0F1; color:#D32F2F; border:1px solid #FECACA; padding:2px 6px; border-radius:6px; font-size:11.5px; font-weight:900; margin-right:4px; transform:translateY(-1px);">주의</span>`
         );
         
         // 💡[초보핵심] 태그 ➔ 노란 꿀팁 뱃지로 변환
@@ -94,7 +94,7 @@
 
             '<div style="text-align:center; font-size:13px; font-weight:900; color:' + BLUE + '; ' +
                 'letter-spacing:0.5px; margin-bottom:14px;">' +
-                'Step ' + (at + 1) + ' / ' + steps.length + '</div>' +
+                (at + 1) + ' / ' + steps.length + ' 단계</div>' +
 
             '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:20px; ' +
                 'padding:30px 24px; min-height:160px; display:flex; align-items:center; ' +
@@ -119,7 +119,7 @@
                 (last
                     ? '<button onclick="closeCookingMode()" style="flex:1; padding:18px 0; ' +
                       'background:#10B981; color:#FFFFFF; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(16,185,129,0.2); ' +
-                      'font-size:16px; font-weight:900; cursor:pointer;">요리 완성 🎉</button>'
+                      'font-size:16px; font-weight:900; cursor:pointer;">다 만들었어요</button>'
                     : '<button onclick="window.cookGo(1)" style="flex:1; padding:18px 0; ' +
                       'background:' + BLUE + '; color:#FFFFFF; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(127, 119, 221,0.2); ' +
                       'font-size:16px; font-weight:900; cursor:pointer;">다음 →</button>') +

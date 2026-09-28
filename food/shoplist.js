@@ -61,7 +61,11 @@
 
     function tidy(name) {
         // "초기용 쌀가루", "중기 쌀가루" 를 하나로 묶는다
-        return name.replace(/^(초기용|중기용|후기용|초기|중기|후기|완료기)\s*/, "").trim();
+        var n = name.replace(/^(초기용|중기용|후기용|초기|중기|후기|완료기)\s*/, "").trim();
+        /* ⚠️ 레시피마다 '소고기 안심' 과 '소고기' 로 달리 적혀 있어서 장보기에 소고기가 두 줄로 잡혔다
+              (30g 한 팩 + 30g 한 팩 → 실제로는 60g 한 팩). 같은 걸 한 이름으로 모은다. */
+        var SAME = { "소고기 안심": "소고기", "소고기안심": "소고기", "한우 안심": "소고기", "한우": "소고기", "비타민": "비타민채" };
+        return SAME[n] || n;
     }
 
     /* ---------- 언제깠지 재고 ---------- */
@@ -167,6 +171,7 @@
         ["바나나",     120, "개"],
         ["토마토",     150, "개"],
         ["비트",       200, "개"],
+        ["비타민채",   100, "봉"],   // 없어서 '30g' 처럼 그램으로만 나왔다
         ["콩나물",     300, "봉"],
         ["렌틸",       500, "봉"],
         ["치즈",         1, "장"],
@@ -207,19 +212,51 @@
        두부 한 모를 사면 255g 이 남는다. 그게 이유식의 진짜 고민이다.
        같은 재료가 들어가는 다른 레시피를 찾아 붙여준다. -------- */
 
-    function leftoverIdeas(name, exclude) {
+    /* ⚠️ 예전엔 이름이 들어간 레시피를 앞에서부터 세 개 집었다.
+          그래서 쌀가루·소고기 추천이 똑같은 셋이었고, 전부 아직 안 먹여본 재료(청경채·애호박…)가 든 것이었다.
+          알레르기 탭은 '새 재료는 하나씩, 사흘씩' 이라고 하는데 여기서 새 재료를 여러 개 권한 셈이다.
+          이제 먹여본 재료로만 된 레시피를 먼저, 새 재료가 들면 '새 재료' 라고 적는다. 줄끼리 겹치지 않게 한다. */
+    function passedNames() {
         var out = [];
         try {
-            var stage = document.getElementById("food-age");
-            var age = stage ? stage.value : null;
-            (babyFoodData || []).forEach(function (r) {
-                if (out.length >= 3) return;
-                if (age && age !== "all" && r.age !== age) return;
-                if (exclude.indexOf(r.name) > -1) return;
-                if (String(r.ingredients).indexOf(name) > -1) out.push(r.name);
+            var db = JSON.parse(localStorage.getItem("tosil_food_calendar")) || {};
+            Object.keys(db).forEach(function (d) {
+                (db[d] || []).forEach(function (r) {
+                    if (r && r.ingredient && r.status !== "fail") out.push(tidy(String(r.ingredient).trim()));
+                });
             });
         } catch (e) {}
         return out;
+    }
+    var BASIC = /^(물|쌀가루|쌀|찹쌀가루|육수|멸치육수|다시마|참기름|들기름|올리브유|버터|분유|모유)$/;
+    function newCount(r, passed) {
+        var n = 0;
+        parseIng(r.ingredients).forEach(function (it) {
+            var nm = tidy(it.name);
+            if (!nm || BASIC.test(nm)) return;
+            var ok = passed.some(function (p) { return p && (nm.indexOf(p) > -1 || p.indexOf(nm) > -1); });
+            if (!ok) n++;
+        });
+        return n;
+    }
+    function leftoverIdeas(name, exclude, shown) {
+        var cand = [];
+        try {
+            var stage = document.getElementById("food-age");
+            var age = stage ? stage.value : null;
+            var passed = passedNames();
+            (babyFoodData || []).forEach(function (r, i) {
+                if (age && age !== "all" && r.age !== age) return;
+                if (exclude.indexOf(r.name) > -1) return;
+                if (String(r.ingredients).indexOf(name) === -1) return;
+                cand.push({ name: r.name, n: newCount(r, passed), seen: (shown || []).indexOf(r.name) > -1, i: i });
+            });
+        } catch (e) {}
+        cand.sort(function (a, b) { return (a.seen - b.seen) || (a.n - b.n) || (a.i - b.i); });
+        return cand.slice(0, 3).map(function (c) {
+            if (shown) shown.push(c.name);
+            return c.n ? c.name + " (새 재료 " + c.n + ")" : c.name;
+        });
     }
 
 
@@ -235,7 +272,7 @@
         });
         if (r.have.length) {
             lines.push("");
-            lines.push("📦 집에 있는 것 — 안 사도 됨");
+            lines.push("📦 집에 있는 것 (안 사도 됨)");
             r.have.forEach(function (it) { lines.push("· " + it.name); });
         }
         var txt = lines.join("\n");
@@ -343,19 +380,19 @@
         var used = [];
         try { (window.currentWeeklyPlan || []).forEach(function (d) { if (d.recipe) used.push(d.recipe.name); }); } catch (e) {}
 
-        var rows = [];
+        var rows = [], shownIdeas = [];
         r.buy.forEach(function (it) {
             if (rows.length >= 3) return;
             var p = packOf(it.name);
             if (!p || !p.unitG || !it.qty) return;
             var left = Math.max(1, Math.ceil(it.qty / p.unitG)) * p.unitG - Math.round(it.qty);
             if (left < p.unitG * 0.4) return;                 // 조금 남는 건 말 안 한다
-            var ideas = leftoverIdeas(it.name, used);
+            var ideas = leftoverIdeas(it.name, used, shownIdeas);
             if (!ideas.length) return;
             rows.push('<div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.12);">' +
                 '<div style="font-size:12.5px; font-weight:900; color:#FFFFFF;">' +
                     esc(it.name) + ' ' + left + 'g 남아요</div>' +
-                '<div style="font-size:11.5px; font-weight:700; color:#B8C4D6; margin-top:3px; ' +
+                '<div style="font-size:11.5px; font-weight:700; color:#DCD3C8; margin-top:3px; ' +
                     'line-height:1.6;">' + esc(ideas.join(" · ")) + '</div>' +
             '</div>');
         });
@@ -384,7 +421,7 @@
             '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-bottom:14px; line-height:1.6;">' +
-                '마트에서 파는 단위로 바꿨어요. 두부 45g 은 살 수가 없으니까요</div>' +
+                '마트에서 파는 단위로 바꿨어요. 두부 45g은 살 수가 없으니까요</div>' +
 
             show.map(function (it) { return row(it, false); }).join("") +
 
@@ -394,7 +431,7 @@
                 ? '<div style="margin-top:16px; background:#EAF7F1; border:1px solid #A7DFC8; ' +
                   'border-radius:14px; padding:14px 16px;">' +
                   '<div style="font-size:12.5px; font-weight:900; color:#1F6F52; margin-bottom:8px;">' +
-                      '📦 언제깠지에 있어요 — 안 사셔도 됩니다</div>' +
+                      '📦 언제깠지에 있어요. 안 사셔도 됩니다</div>' +
                   r.have.map(function (it) {
                       return '<span style="display:inline-block; font-size:11.5px; font-weight:800; ' +
                              'color:#1F6F52; background:#FFFFFF; border-radius:8px; padding:5px 9px; ' +
@@ -419,9 +456,8 @@
 
             '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-top:11px; line-height:1.7; word-break:keep-all;">' +
-                '쿠팡은 밖에서 여러 개를 한 번에 담을 수가 없어요. ' +
-                '재료 옆 🛒 를 누르면 <b>그 재료만 바로</b> 열립니다. ' +
-                '복사해서 쿠팡 검색창에 붙여 넣으셔도 됩니다. 산 건 왼쪽 <b>✓</b> 를 눌러 지우세요.</div>' +
+                                '재료 옆 🛒를 누르면 <b>그 재료만 바로</b> 열립니다. ' +
+                '여러 개는 목록을 복사해 검색창에 붙여 넣으세요. 산 건 왼쪽 네모를 눌러 표시하세요.</div>' +
 
         '</div>';
     }

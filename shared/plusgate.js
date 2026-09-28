@@ -40,13 +40,30 @@
         } catch (e) { return false; }
     }
 
-    function isPlus() {
-        if (freeOpen()) return true;
-        try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
+    function storedPlus() {
         if (!localStorage.getItem("firebase_uid")) return false;
         return localStorage.getItem("tosil_is_founder") === "true"
             || localStorage.getItem("tosil_plan_cache") === "premium"
             || localStorage.getItem("tosil_is_master") === "true";
+    }
+
+    /* ⚠️ 큐레이터에는 window.isPremiumUser 가 없었다 (본 앱 script.js 에만 있다).
+          그래서 모듈들(bottlegear · bottlemilk · carseatown …)은 각자 로그인 플래그만 보고 판단했고,
+          무료 개방 날짜는 이 파일과 plusmark.js 만 알았다. 그 결과 무료 개방 중인 일반 사용자에게
+             · 모듈은 잠긴 맛보기("나머지 3개도 PLUS에서")를 보여주고
+             · 배지는 'PLUS · 무료' 라고 하고
+             · '플러스 보러 가기' 단추는 안 떴다 (이 파일은 이미 PLUS 라고 봐서)
+          세 곳이 서로 다른 말을 했다. 큐레이터에서도 판단을 하나로 쓰게 여기서 만든다.
+          모듈들은 이미 window.isPremiumUser 를 먼저 보게 짜여 있어서 고칠 게 없다.
+          본 앱 안에서 열려 이미 있으면 그걸 그대로 쓴다. */
+    if (typeof window.isPremiumUser !== "function") {
+        window.isPremiumUser = function () { return freeOpen() || storedPlus(); };
+    }
+
+    function isPlus() {
+        if (freeOpen()) return true;
+        try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
+        return storedPlus();
     }
 
     /* 잠긴 안내는 전부 금색 상자(#FFF9E6)에 'PLUS' 라는 글자가 들어 있다.
@@ -120,7 +137,7 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 
-    window.plusGateVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
+    window.plusGateVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.plusGateDebug = function () {

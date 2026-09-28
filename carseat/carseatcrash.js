@@ -39,16 +39,18 @@
     var KEY = "tosil_crash_check";
 
     /* ⭐ NHTSA 경미한 사고 기준. 다섯 개를 전부 만족해야 한다. */
+    /* ⚠️ "에어백이 안 터졌나요? 예/아니오" 는 '예' 가 '안 터졌어요' 라서 거꾸로 누르기 쉽다.
+          잘못 누르면 판정이 뒤집히는 안전 기능이라, 답 단추를 말로 적는다. 왼쪽이 늘 '괜찮은 쪽' 이다. */
     var CHECKS = [
-        { id: "drive",  q: "사고 난 자리에서 차를 몰고 나올 수 있었나요?",
+        { id: "drive",  q: "사고 난 자리에서 차를 몰고 나왔나요?", a: ["몰고 나왔어요", "견인했어요"],
                         no: "견인했다면 가벼운 사고가 아닙니다" },
-        { id: "door",   q: "카시트가 있던 쪽 문이 멀쩡한가요?",
+        { id: "door",   q: "카시트가 있던 쪽 문은요?", a: ["멀쩡해요", "찌그러졌어요"],
                         no: "그쪽 문이 찌그러졌다면 충격이 카시트까지 갑니다" },
-        { id: "injury", q: "차에 탄 사람 모두 다친 데가 없나요?",
+        { id: "injury", q: "차에 탄 사람은요?", a: ["아무도 안 다쳤어요", "다친 사람이 있어요"],
                         no: "누군가 다쳤다면 그만한 충격이 있었다는 뜻입니다" },
-        { id: "airbag", q: "에어백이 안 터졌나요?",
+        { id: "airbag", q: "에어백은요?", a: ["안 터졌어요", "터졌어요"],
                         no: "에어백이 터졌다면 교체 대상입니다" },
-        { id: "damage", q: "카시트에 눈에 보이는 흠이 없나요?",
+        { id: "damage", q: "카시트에 금·눌림·틀어짐이 보이나요?", a: ["안 보여요", "보여요"],
                         no: "금·눌림·틀어짐이 보이면 바로 교체하세요" }
     ];
 
@@ -117,7 +119,7 @@
         return '<div style="padding:14px 0; border-bottom:1px solid #F6F2EC;">' +
             '<div style="font-size:14px; font-weight:800; color:' + INK + '; ' +
                 'line-height:1.5; word-break:keep-all; margin-bottom:10px;">' + esc(c.q) + '</div>' +
-            '<div style="display:flex; gap:8px;">' + btn("예", true) + btn("아니오", false) + '</div>' +
+            '<div style="display:flex; gap:8px;">' + btn(c.a[0], true) + btn(c.a[1], false) + '</div>' +
             (v === false
                 ? '<div style="margin-top:9px; font-size:12.5px; font-weight:700; color:' + RED + '; ' +
                       'line-height:1.6; word-break:keep-all;">' + esc(c.no) + '</div>'
@@ -216,10 +218,10 @@
                 'align-items:center; width:100%; margin-top:0; background:#FBF8F3; color:' + INK + '; ' +
                 'border:1px solid #DCD3C8; font-size:14.5px; padding:16px 0; border-radius:14px; ' +
                 'font-weight:900; text-decoration:none;">' +
-                '제품안전정보센터에서 찾아보기 〉</a>' +
+                '제품안전정보센터에서 찾아보기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; flex-shrink:0;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>' +
             '<div style="margin-top:10px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'text-align:center; line-height:1.6;">' +
-                '국가기술표준원이 운영하는 곳입니다 · 배냇함과 관련 없습니다' +
+                '국가기술표준원이 운영하는 공공 사이트예요 · 광고가 아니에요' +
             '</div>' +
         '</div>';
     }
@@ -251,7 +253,28 @@
 
     window.refreshCrashCard = mount;
 
+    /* '사고 뒤에 챙길 것'(carseatown.js) 이 "사고가 났다면 카드에서 확인하세요" 라고 하는데
+       두 카드 사이에 토했을 때 · 장거리 카드가 끼어 있었다. 바로 앞에 붙인다(리콜은 그 앞). */
+    function placeNear() {
+        var crash = document.getElementById("crash-card");
+        var recall = document.getElementById("recall-card");
+        if (!crash) return;
+        var hs = document.querySelectorAll("#view-carseat-use .matrix-header");
+        for (var i = 0; i < hs.length; i++) {
+            if ((hs[i].textContent || "").indexOf("사고 뒤에") === -1) continue;
+            var after = hs[i].closest(".matrix-panel");
+            if (!after || after.parentNode !== crash.parentNode) return;
+            if (after.previousElementSibling !== crash) after.parentNode.insertBefore(crash, after);
+            if (recall && recall.parentNode === crash.parentNode && crash.previousElementSibling !== recall) {
+                crash.parentNode.insertBefore(recall, crash);
+            }
+            return;
+        }
+    }
+
     function boot() {
+        setTimeout(placeNear, 3000);
+        setTimeout(placeNear, 6500);
         setTimeout(mount, 800);
         setTimeout(mount, 2500);
         /* ⚠️ 카시트 탭이 굼뜨던 가장 큰 이유가 여기였다.

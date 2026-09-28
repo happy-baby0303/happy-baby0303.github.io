@@ -94,6 +94,9 @@
 
     window.addEventListener("error", function (e) {
         if (!e) return;
+        /* 다른 도메인 스크립트(카카오 SDK 등) 오류는 브라우저가 내용을 가려 'Script error.' 만 온다.
+           고칠 수 없는 줄이 문제 기록 30칸을 차지해서 정작 우리 오류가 밀려났다. */
+        if (e.message === "Script error." && !e.filename) return;
         var where = String((e.filename || "")).split("/").pop();
         if (e.lineno) where += ":" + e.lineno;
         push("오류", (e.message || "알 수 없는 오류"), where);

@@ -55,7 +55,11 @@
           미구독자에게 자물쇠부터 보여주면 "다 유료네" 하고 나간다. */
 
     var PLUS_TITLE = /갈 때가 된 것|다음에 준비할 것|젖병을 안 물어요|우리 집 모유 재고|쪽쪽이, 자꾸 뱉나요/;
-    var BOXES = ["bottle-guide", "bottle-gear", "bottle-refuse", "bottle-milk", "paci-guide"];
+    /* ⚠️ bottle-guide(상황 묻기 · 몇 개)는 '고르기' 칸 것이라 여기 넣지 않는다.
+          예전엔 여기 들어 있어서 adopt() 가 '쓰면서' 칸으로 끌고 가 '알아두면 좋은 것' 에 접어버렸다.
+          그 상태에서 상황 칸을 누르면 결과가 숨은 '고르기' 칸에 그려져서 아무 반응이 없는 것처럼 보였다.
+          젖꼭지 단계는 bottle-nipple 로 따로 떼어 여기서 받는다. */
+    var BOXES = ["bottle-gear", "bottle-refuse", "bottle-milk", "paci-guide", "bottle-nipple"];
 
     /* ⚠️ 접을 무료 카드. 카시트와 같은 기준이다 — '안 급한 것' 만.
 
@@ -63,8 +67,7 @@
           모유는 잘못 먹이면 아기가 탈 나고,
           쪽쪽이 안전은 끈·수면 얘기라 급하다.
           접어두면 아무도 안 펴고, 그러면 없는 것과 같다. */
-    var FOLD_KEYS = ["어떤 상황", "몇 개 사면", "젖꼭지, 지금 단계",
-                     "소독", "세척", "젖병 크기"];
+    var FOLD_KEYS = ["소독", "세척", "젖병 크기"];   // 상황 · 몇 개 · 젖꼭지 단계는 이제 접지 않는다
 
     function isPlusUser() {
         try { if (typeof window.isPremiumUser === "function") return !!window.isPremiumUser(); } catch (e) {}
@@ -78,6 +81,17 @@
           꺼내둔 옛 패널은 그대로 남아서 화면에 두 벌이 뜬다.
           그래서 다시 꺼낼 때는 '내가 꺼냈던 것' 을 먼저 치운다.
           data-from 으로 표시해두면 누가 꺼낸 건지 알 수 있다. */
+    /* 카드를 갈아끼울 때 옛 카드의 PLUS 배지를 새 카드 제목으로 옮겨 단다.
+       배지는 plusmark 가 나중에 붙이는 것이라, 새 카드는 한동안 배지 없이 보였다(깜빡임). */
+    function keepBadge(oldEl, freshEl) {
+        try {
+            var b = oldEl.querySelector(".plus-badge");
+            if (!b || !b.parentNode || !b.parentNode.classList || !b.parentNode.classList.contains("matrix-header")) return;
+            var h = freshEl.querySelector(".matrix-header");
+            if (h && !h.querySelector(".plus-badge")) h.appendChild(b);
+        } catch (e) {}
+    }
+
     function flatten() {
         var pane = document.getElementById(PANE.tools);
         if (!pane) return;
@@ -116,7 +130,7 @@
                 p.setAttribute("data-from", id);
                 p.setAttribute("data-slot", String(i));
                 var old = bySlot[String(i)];
-                if (old && old.parentNode) old.parentNode.replaceChild(p, old);
+                if (old && old.parentNode) { keepBadge(old, p); old.parentNode.replaceChild(p, old); }
                 else pane.insertBefore(p, box);
             });
 
@@ -128,12 +142,18 @@
 
     /* 모듈이 다시 그린 직후에 바로 정리한다. 4초를 기다리면 그동안 화면이 깨진다. */
     function hookRefresh() {
-        ["refreshBottleGear", "refreshBottleRefuse", "refreshMilk", "refreshPaci"].forEach(function (n) {
+        ["refreshBottleGear", "refreshBottleRefuse", "refreshMilk", "refreshPaci", "refreshBottleNipple"].forEach(function (n) {
             var f = window[n];
             if (typeof f !== "function" || f.__tabs) return;
             var w = function () {
                 var r = f.apply(this, arguments);
-                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 40);
+                setTimeout(function () {
+                    hookRefresh(); adopt(); flatten();
+                    /* ⚠️ 여기서 배지를 안 붙여서, 갈아끼운 카드가 MutationObserver 차례(20ms 뒤)까지
+                          배지 없이 보였다. '갈 때가 된 것' 젖꼭지 줄을 누르면 배지가 깜빡인 게 이것이다. */
+                    if (window.refreshPlusMark) window.refreshPlusMark();
+                    orderPlus();
+                }, 40);
                 return r;
             };
             w.__tabs = true;
@@ -320,7 +340,7 @@
         }
 
         var pick = [
-            byId("bottle-guide"),                                   // 상황 묻기 · 개수 · 젖꼭지 단계
+            byId("bottle-guide"),                                   // 상황 묻기 · 개수 (젖꼭지 단계는 bottle-nipple 로 따로)
             ownPanel,                                               // 직접 조건 고르기
             (byId("btn-show-fav") || {}).parentNode || null,        // 찜 버튼 줄
             byId("bottle-result-area")                              // 젖병 40종

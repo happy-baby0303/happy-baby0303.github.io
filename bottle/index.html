@@ -32,19 +32,36 @@
             <a href="../food/index.html" class="gnb-item">🥦 이유식</a>
             <a href="../toy/index.html" class="gnb-item">🧸 놀이/장난감</a>
         </nav>
+        <script>
+            /* 지금 탭이 화면 밖이면 가운데로 끌어온다.
+               (이유식·놀이 탭은 오른쪽 끝이라 '🥦 이' 까지만 보이거나 아예 안 보였다)
+               ⚠️ 다섯 큐레이터 index.html 에 똑같이 넣는다. 이미 다 보이면 손대지 않는다. */
+            (function () {
+                try {
+                    var a = document.querySelector('.gnb-menu .gnb-item.active');
+                    var nav = a && a.parentNode;
+                    if (!a || !nav || nav.scrollWidth <= nav.clientWidth) return;
+                    var ar = a.getBoundingClientRect(), nr = nav.getBoundingClientRect();
+                    if (ar.left >= nr.left && ar.right <= nr.right) return;
+                    nav.style.scrollBehavior = 'auto';
+                    nav.scrollLeft += (ar.left - nr.left) - (nav.clientWidth - a.offsetWidth) / 2;
+                    nav.style.scrollBehavior = '';
+                } catch (e) {}
+            })();
+        </script>
     </header>
 
     <main class="container">
         <div class="hero-title" style="text-align: center; margin-bottom: 24px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
                 <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
-                    <span class="gradient-text">젖병·배앓이 솔루션</span>
+                    <span class="gradient-text">젖병 고르기·챙기기</span>
                 </h2>
                 <span id="dynamic-age-badge" style="background: #F0EEFB; color: #7F77DD; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
                 </span>
             </div>
             <p style="margin: 0; font-size: 13.5px; font-weight: 600; color: #A3958A;">
-                우리 아이 입에 꼭 맞는 인생 젖병 찾기
+                우리 아기 입에 맞는 젖병 찾기
             </p>
         </div>
 
@@ -66,20 +83,20 @@
             <div class="matrix-grid">
                 
                 <div class="matrix-item">
-                    <label>👶 우리 아기 월령</label>
+                    <label>아기 월령</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-age">
                             <option value="all">전체 월령</option>
                             <!-- ✂️ 부연설명 삭제! 직관적으로 변경 -->
-                            <option value="newborn">신생아 (0~3개월)</option>
-                            <option value="infant">영아 (4~6개월)</option>
-                            <option value="toddler">유아 (6개월 이상)</option>
+                            <option value="newborn">0~3개월</option>
+                            <option value="infant">4~6개월</option>
+                            <option value="toddler">7개월 이상</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>🛡️ 젖꼭지 거부 성향</label>
+                    <label>젖병 거부</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-rejection">
                             <!-- ✂️ 핵심만 굵게 남기기 -->
@@ -90,61 +107,61 @@
                 </div>
 
                 <div class="matrix-item">
-                    <label>🍼 선호하는 소재</label>
+                    <label>소재</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-material">
-                            <option value="all">전체 (상관없음)</option>
-                            <option value="ppsu">국민 소재 (PPSU)</option>
-                            <option value="glass">플라스틱 제로 (유리)</option>
-                            <option value="silicone">말랑한 촉감 (실리콘)</option>
-                            <option value="pa">투명하고 가벼움 (PA)</option>
-                            <option value="pp">가볍고 저렴함 (PP)</option>
+                            <option value="all">상관없음</option>
+                            <option value="ppsu">PPSU (가볍고 열에 강함)</option>
+                            <option value="glass">유리 (플라스틱 없음)</option>
+                            <option value="silicone">실리콘 (말랑함)</option>
+                            <option value="pa">PA (투명하고 가벼움)</option>
+                            <option value="pp">PP (가볍고 저렴함)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>😭 배앓이 방지력</label>
+                    <label>배앓이 방지 구조</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-anticolic">
-                            <option value="all">일반적인 수준</option>
-                            <option value="yes">배앓이 방지 특화</option>
-                            <option value="super">공기 삼킴을 가장 줄인 구조</option>
+                            <option value="all">상관없음</option>
+                            <option value="yes">있는 것</option>
+                            <option value="super">전용 설계만</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>🔄 젖꼭지 호환</label> <!-- 제목도 짧게! -->
+                    <label>젖꼭지 호환</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-compatible">
-                            <option value="all">상관없음 (전용 가능)</option>
+                            <option value="all">상관없음</option>
                             <option value="yes">모유실감 젖꼭지 호환</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>💰 가격대</label>
+                    <label>가격대</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-price">
                             <option value="all">전체 가격대</option>
-                            <option value="low">1만 원대 (가성비)</option>
-                            <option value="mid">2만 원대 (표준)</option>
-                            <option value="high">3만 원 이상 (고급)</option>
+                            <option value="low">1만 원대</option>
+                            <option value="mid">2만 원대</option>
+                            <option value="high">3만 원 이상</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- 🧼 소독 및 세척 방식 -->
                 <div class="matrix-item">
-                    <label>🧼 소독 및 세척</label> <!-- 제목 다이어트 -->
+                    <label>소독·세척</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-sterilization">
                             <!-- ✂️ 긴 문장을 앱스럽게 단축! -->
-                            <option value="all">상관없음 (열탕 가능)</option>
-                            <option value="uv">UV 소독기 자유롭게</option>
-                            <option value="easy">입구 넓어 세척 편리</option>
+                            <option value="all">상관없음</option>
+                            <option value="uv">UV 소독기를 써요</option>
+                            <option value="easy">씻기 쉬운 것</option>
                         </select>
                     </div>
                 </div>
@@ -153,7 +170,7 @@
                 <div class="matrix-item">
                     <label style="visibility: hidden;">높이맞춤용</label>
                     <button onclick="resetBottleFilters()" style="width: 100%; flex: 1; margin: 0; padding: 0; border-radius: 14px; background: #F7F3ED; color: #7A6F68; border: 1px solid #EDE6DE; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; box-sizing: border-box; display: flex; justify-content: center; align-items: center;">
-                        🔄 필터 한 번에 초기화
+                        조건 지우기
                     </button>
                 </div>
 

@@ -271,7 +271,7 @@
         askRemove = "";
         refreshApp();
         paintSheet();
-        window.foodToast(name + " — " + pretty(day) + "로 고쳤어요");
+        window.foodToast(name + " · " + pretty(day) + "로 고쳤어요");
     };
 
     window.passedRemove = function (name) {

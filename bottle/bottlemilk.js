@@ -69,6 +69,14 @@
         return p.length === 3 ? (Number(p[1]) + "월 " + Number(p[2]) + "일") : k;
     }
 
+    /* 줄머리 점 밑으로 둘째 줄이 들어가게.
+       ('· 문장<br>' 로 이으면 둘째 줄이 맨 앞에서 시작해서 항목 경계가 안 보였다) */
+    function dontList(items) {
+        return items.map(function (t) {
+            return '<div style="display:flex; gap:6px;"><span style="flex-shrink:0;">\u00b7</span><span>' + t + '</span></div>';
+        }).join("");
+    }
+
     function stock() {
         try {
             var a = JSON.parse(localStorage.getItem(KEY));
@@ -123,29 +131,30 @@
 
     function guideHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83E\uDDCA 유축 모유, 언제까지 먹여도 되나요</div>' +
+            '<div class="matrix-header">\u23F3 유축 모유, 언제까지 먹여도 되나요?</div>' +
 
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
-                '출처마다 조금씩 다릅니다. 여기서는 <b>짧은 쪽</b>으로 적었어요. ' +
+                '출처마다 조금씩 달라요. 여기서는 <b>짧은 쪽</b>으로 적었어요. ' +
                 '짧게 잡아 손해 보는 건 모유 몇 팩이고, 길게 잡아 손해 보는 건 아기니까요.</div>' +
 
             '<div style="border:1px solid #EDE6DE; border-radius:14px; overflow:hidden;">' +
             [["실온", "4시간", "짜두고 바로 안 먹일 거면 냉장으로"],
              ["냉장", "3일", "문쪽 말고 안쪽 깊은 곳에"],
              ["냉동", "3개월", "날짜를 꼭 적고, 오래된 것부터"],
-             ["해동한 뒤", "24시간", "냉장에 두고, 다시 얼리면 안 됩니다"],
+             ["해동한 뒤", "24시간", "냉장에 두고, 다시 얼리지 마세요"],
              ["데운 뒤", "2시간", "남으면 버리세요"],
-             ["아기 입이 닿은 것", "1~2시간", "세균이 들어갔습니다"]
+             ["아기 입이 닿은 것", "1시간", "입 속 세균이 섞여 빨리 상해요"]
             ].map(function (r, i) {
-                return '<div style="display:flex; align-items:center; gap:10px; padding:12px 14px; ' +
-                    (i ? 'border-top:1px solid #F6F2EC;' : '') + '">' +
-                    '<div style="flex-shrink:0; width:92px; font-size:12.5px; font-weight:800; ' +
-                        'color:#7A6F68;">' + r[0] + '</div>' +
-                    '<div style="flex-shrink:0; width:58px; font-size:13.5px; font-weight:900; ' +
-                        'color:' + DARK + ';">' + r[1] + '</div>' +
-                    '<div style="flex:1; min-width:0; font-size:11.5px; font-weight:600; ' +
-                        'color:' + GRAY + '; line-height:1.55; word-break:keep-all;">' + r[2] + '</div>' +
+                return '<div style="padding:12px 14px; ' + (i ? 'border-top:1px solid #F6F2EC;' : '') + '">' +
+                    /* ⚠️ 세 칸 표였더니 설명 칸이 좁아 세 줄로 접혔다(첫 칸은 텅 비고).
+                          윗줄에 '어디 · 얼마나', 아랫줄에 설명. */
+                    '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">' +
+                        '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">' + r[0] + '</span>' +
+                        '<span style="flex-shrink:0; font-size:13.5px; font-weight:900; color:' + DARK + ';">' + r[1] + '</span>' +
+                    '</div>' +
+                    '<div style="margin-top:3px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
+                        'line-height:1.55; word-break:keep-all;">' + r[2] + '</div>' +
                 '</div>';
             }).join("") +
             '</div>' +
@@ -156,10 +165,12 @@
                     '\u274C 이것만은 하지 마세요</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                     'word-break:keep-all;">' +
-                    '\u00b7 <b>전자레인지에 데우지 마세요.</b> 고르게 안 데워져서 아기 입을 뎁니다<br>' +
-                    '\u00b7 <b>한 번 녹인 건 다시 얼리지 마세요.</b><br>' +
-                    '\u00b7 <b>해동한 걸 상온에 두지 마세요.</b> 냉장에 넣어두셔야 합니다<br>' +
-                    '\u00b7 뜨거운 물 말고 <b>미지근한 물</b>에 젖병째 담가 돌려가며 녹이세요' +
+                    dontList([
+                        '<b>전자레인지에 데우지 마세요.</b> 고르게 안 데워져서 아기 입을 델 수 있어요',
+                        '<b>한 번 녹인 건 다시 얼리지 마세요.</b>',
+                        '<b>해동한 걸 상온에 두지 마세요.</b> 냉장에 넣어두세요',
+                        '<b>뜨거운 물에 녹이지 마세요.</b> 미지근한 물에 젖병째 담가 돌려가며 녹이세요'
+                    ]) +
                 '</div>' +
             '</div>' +
 
@@ -168,10 +179,10 @@
                 'color:#7A6F68; line-height:1.85; word-break:keep-all;">' +
                 '\uD83D\uDCA1 <b>새로 짠 따뜻한 모유를 냉장·냉동 모유에 바로 붓지 마세요.</b> ' +
                 '먼저 식혀 온도를 맞춘 뒤 합치시고, 합친 것의 기한은 ' +
-                '<b>나중이 아니라 처음 짠 날</b>이 기준입니다.<br>' +
-                '\uD83D\uDCA1 <b>비누 냄새가 나도 상한 게 아닐 수 있습니다.</b> ' +
+                '<b>나중이 아니라 처음 짠 날</b>이 기준이에요.<br>' +
+                '\uD83D\uDCA1 <b>비누 냄새가 나도 상한 게 아닐 수 있어요.</b> ' +
                 '모유 속 효소가 활발해서 그런 경우가 많아요. ' +
-                '다만 <b>시큼하거나 이상하면 아까워도 버리세요.</b> 날짜보다 코가 정확합니다.' +
+                '다만 <b>시큼하거나 이상하면 날짜 안이라도 버리시고</b>, <b>날짜가 지났으면 냄새가 괜찮아도 버리세요.</b>' +
             '</div>' +
         '</div>';
     }
@@ -243,7 +254,7 @@
             out += '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 '유축하실 때마다 눌러두시면 <b>며칠 남았는지 알려드려요.</b> ' +
-                '오래된 것부터 위로 올려드릴게요 \u2014 냉동실 뒤에 밀려서 상하는 팩이 없게요.</div>';
+                '오래된 것부터 위로 올려드릴게요. 냉동실 뒤에 밀려서 상하는 팩이 없게요.</div>';
         } else {
             out += '<div style="display:flex; gap:8px; margin:-16px 0 14px;">' +
                 [["냉동", byPlace.freeze, "#F2F0FC", BLUE],
@@ -271,15 +282,15 @@
         }
 
         /* ⚠️ 한쪽만 검게 칠해져 있어서 '이미 눌러둔 것' 처럼 보였다 (문의 들어온 것).
-              둘 다 누르는 단추다. 같은 모양으로 두고 아이콘으로 구분한다.
+              둘 다 누르는 단추다. 같은 모양으로 두고 글자로 구분한다. (색이 달라 한쪽이 눌린 것처럼 보였다)
               누르는 느낌(살짝 눌리는 효과)도 같이 준다. */
         out += '<div style="display:flex; gap:8px; margin-top:14px;">' +
             '<div class="milk-btn" onclick="window.addMilk(\'freeze\')" style="flex:1; text-align:center; padding:14px; ' +
-                'background:#F2F0FC; color:#6A61CE; border:1px solid #DDD9F5; border-radius:12px; ' +
-                'font-size:13px; font-weight:800; cursor:pointer;">\u2744\uFE0F 냉동했어요</div>' +
+                'background:#FFFFFF; color:#4A413C; border:1px solid #DCD3C8; border-radius:12px; ' +
+                'font-size:13px; font-weight:800; cursor:pointer;">냉동실에 넣었어요</div>' +
             '<div class="milk-btn" onclick="window.addMilk(\'fridge\')" style="flex:1; text-align:center; padding:14px; ' +
-                'background:#F6F2EC; color:#7A6F68; border:1px solid #EDE6DE; border-radius:12px; ' +
-                'font-size:13px; font-weight:800; cursor:pointer;">\uD83E\uDDCA 냉장했어요</div>' +
+                'background:#FFFFFF; color:#4A413C; border:1px solid #DCD3C8; border-radius:12px; ' +
+                'font-size:13px; font-weight:800; cursor:pointer;">냉장실에 넣었어요</div>' +
         '</div>';
 
         if (a.length) {
@@ -333,7 +344,24 @@
         if (!el || !el.parentNode) return paint();
         var box = document.createElement("div");
         box.innerHTML = (isPlus() ? stockHTML() : teaseHTML());
-        if (box.firstChild) el.parentNode.replaceChild(box.firstChild, el);
+        var fresh = box.firstChild;
+        if (!fresh) return;
+        /* ⚠️ 카드를 통째로 바꾸면 PLUS 배지(plusmark 가 나중에 붙이는 것)가 0.4초쯤 사라졌다가 다시 생겼다.
+              누를 때마다 배지가 깜빡인 게 이것이다. 옛 카드의 배지를 새 카드 제목으로 옮겨 단다.
+              탭 정리용 번호표(data-from · data-slot)도 이어받는다. 이게 없으면 나중에 전체를 다시 그릴 때
+              bottletabs 가 이 카드를 못 찾아서 재고 카드가 두 장이 된다. */
+        ["data-from", "data-slot"].forEach(function (a) {
+            var v = el.getAttribute(a);
+            if (v !== null) fresh.setAttribute(a, v);
+        });
+        var badge = el.querySelector(".plus-badge");
+        var head = fresh.querySelector(".matrix-header");
+        if (badge && head && badge.parentNode && badge.parentNode.classList &&
+            badge.parentNode.classList.contains("matrix-header") && !head.querySelector(".plus-badge")) {
+            head.appendChild(badge);
+        }
+        el.parentNode.replaceChild(fresh, el);
+        try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
     }
 
     window.refreshMilk = paint;

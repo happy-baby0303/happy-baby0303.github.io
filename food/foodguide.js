@@ -84,7 +84,7 @@
         return (isFinite(v) && v >= 10 && v <= 400) ? v : defaultMeal();
     }
     window.setMealSize = function () {
-        var v = prompt("한 번에 몇 g 정도 먹나요?\n(모르시면 비워두세요 — 단계 기준으로 잡아드립니다)",
+        var v = prompt("한 번에 몇 g 정도 먹나요?\n(모르시면 비워두세요. 단계 기준으로 잡아드려요)",
                        String(mealSize()));
         if (v === null) return;
         v = parseInt(String(v).replace(/[^0-9]/g, ""), 10);
@@ -152,7 +152,8 @@
         var ml = Math.round(n * SPOON_ML * VOL_RATIO / 10) * 10;
         var g = Math.round(n * SPOON_ML * FLOUR_D);     // 쌀가루 무게
         var y = Math.round((g + ml) * 0.8);             // 끓이면서 줄어드는 몫
-        return { g: g, ml: ml, y: y, meals: Math.max(1, Math.round(y / mealSize())) };
+        /* ⚠️ 반올림이었다. 3술이면 60g 여섯 끼 반인데 7끼로 나와서 마지막 한 끼가 반 공기였다. 다 채운 끼만 센다. */
+        return { g: g, ml: ml, y: y, meals: Math.max(1, Math.floor(y / mealSize())) };
     }
 
     // 도구에 맞춰 물의 양을 말로 바꾼다
@@ -215,7 +216,7 @@
                 'padding:14px 15px; margin-top:10px; font-size:12.5px; font-weight:700; ' +
                 'color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
                 '💡 <b>숟가락이 크든 작든 상관없어요.</b> 집집마다 숟가락이 다르니까 ' +
-                '<b>같은 숟가락으로 가루 1 : 물 12</b> — 이 비율만 지키면 10배죽입니다. ' +
+                '<b>같은 숟가락으로 가루 1 : 물 12</b>. 이 비율만 지키면 돼요. ' +
                 '물을 열두 번 뜨기 번거로우면 위에서 젖병이나 계량컵을 고르세요.</div>' +
 
             '<div style="font-size:12px; font-weight:700; color:' + GRAY + '; ' +
@@ -313,7 +314,7 @@
             '<div style="font-size:12.5px; font-weight:700; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
             '전신 두드러기 · 쌕쌕거림 · 입술이나 눈두덩 붓기 · 반복 구토 · 축 처짐<br>' +
             '먹던 것을 <b>즉시 멈추고</b> 눕히세요. 숨이 차 보이면 앉히고, 토할 것 같으면 옆으로. ' +
-            '<b>좋아 보여도 병원에 가야 합니다</b> — 몇 시간 뒤 다시 심해지기도 해요.</div></div>' +
+            '<b>좋아 보여도 병원에 가야 합니다.</b> 몇 시간 뒤 다시 심해지기도 해요.</div></div>' +
 
         '<div style="background:#FFF9E6; border:1px solid #FDE68A; border-radius:12px; padding:14px; margin-bottom:9px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:var(--fg-gold); margin-bottom:6px;">그 재료를 빼고 진료</div>' +
@@ -431,7 +432,11 @@
                 'line-height:1.7; word-break:keep-all; margin-top:4px;">' +
                 '⚖️ <b>정확히 안 맞아도 됩니다.</b> 다 끓이고 숟가락으로 떠서 ' +
                 '<b>주르륵 흐르면</b> 초기 미음이 맞아요. 되직하면 물을 조금 더, 묽으면 1~2분 더 끓이면 됩니다.<br>' +
-                '숟가락이 크든 작든 상관없어요. <b>같은 숟가락으로 가루 1 : 물 12</b> 만 지키면 됩니다.</div>' +
+                /* ⚠️ '숟가락 크기 상관없어요' 는 물도 같은 숟가락으로 잴 때만 맞다. ml 로 재면 310ml 는 밥숟가락 기준이라
+      티스푼으로 가루를 뜨면 세 배 가까이 묽어진다. 도구에 따라 말을 바꾼다. */
+                (t.id === 'spoon'
+                    ? '숟가락이 크든 작든 상관없어요. <b>같은 숟가락으로 가루 1 : 물 12</b>만 지키면 됩니다.'
+                    : '쌀가루는 <b>밥숟가락으로 깎아서</b> 뜨세요. 숟가락이 더 크거나 작으면 물 양도 달라져요.') + '</div>' +
 
         '</div>';
     }

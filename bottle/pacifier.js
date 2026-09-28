@@ -127,7 +127,7 @@
           note: "물고 있을 힘이 아직 약하거나, 입에 비해 큰 경우가 많습니다. " +
                 "가볍고 작은 것부터 다시 시도해보세요." },
 
-        { id: "gag",   icon: "\uD83D\uDE23", label: "켁켁거리거나 헛구역질해요",
+        { id: "gag",   icon: "\uD83D\uDE23", label: "켁켁거려요",
           order: ["short", "sym", "light"],
           note: "물리는 부분이 길어서 목 안쪽에 닿는 경우가 있습니다. 짧은 것으로 바꿔보세요.",
           warn: "먹을 때도 자주 켁켁거리거나, 얼굴색이 변하거나, 사레가 잦다면 " +
@@ -138,10 +138,11 @@
           note: "입 안에서 방향이 돌아가면 다시 물기 어렵습니다. " +
                 "어느 쪽으로 물려도 되는 모양이 이 문제에 잘 맞습니다." },
 
-        { id: "rash",  icon: "\uD83E\uDE79", label: "입 주변이 빨개지고 짓물러요",
+        { id: "rash",  icon: "\uD83E\uDE79", label: "입 주변이 짓물러요",
           order: ["vent", "light"],
           note: "실드에 침이 고여서 계속 젖어 있는 겁니다. " +
-                "구멍이 크게 뚫린 것으로 바꾸고, 물릴 때마다 입 주변을 마른 수건으로 눌러 닦아주세요." },
+                "구멍이 크게 뚫린 것으로 바꾸고, 물릴 때마다 입 주변을 마른 수건으로 눌러 닦아주세요. " +
+                "라텍스 쪽쪽이를 쓰고 있다면 실리콘으로도 바꿔보세요. 드물게 라텍스에 반응하는 아기가 있어요." },
 
         { id: "confuse", icon: "\uD83E\uDD31", label: "젖 물 때랑 헷갈려해요",
           order: ["round", "flat"],
@@ -149,10 +150,11 @@
           warn: "수유가 아직 자리잡기 전이라면 쪽쪽이를 <b>조금 미루는 것</b>도 방법입니다. " +
                 "젖 먹이는 게 잘 되고 있는지부터 보세요." },
 
-        { id: "never", icon: "\uD83D\uDE45", label: "아예 입에 안 넣어요",
+        { id: "never", icon: "\uD83D\uDE45", label: "아예 안 물어요",
           order: ["round", "flat", "sym"],
           note: "재질 냄새나 단단함이 안 맞는 경우가 있습니다. 모양을 바꿔도 안 되면 " +
-                "<b>재질을 바꿔보세요</b> — 실리콘만 써보셨다면 라텍스(고무)가 훨씬 부드럽습니다.",
+                "<b>재질을 바꿔보세요.</b> 실리콘만 써보셨다면 라텍스(고무)가 훨씬 부드러워요. " +
+                "다만 라텍스는 드물게 알레르기가 있어서, 입 주변이 빨개지면 바로 실리콘으로 돌아가세요.",
           warn: "다만 안 물어도 괜찮습니다. 쪽쪽이는 꼭 써야 하는 물건이 아니에요." }
     ];
 
@@ -193,7 +195,7 @@
             var on = (picked === s.id);
             return '<div onclick="window.pickPaciSymptom(\'' + s.id + '\')" ' +
                 'style="padding:14px 10px; border-radius:14px; cursor:pointer; text-align:center; ' +
-                'font-size:12.5px; font-weight:800; line-height:1.4; word-break:keep-all; ' +
+                'font-size:12.5px; font-weight:800; line-height:1.4; word-break:keep-all; text-wrap:balance; ' +
                 (on ? 'background:' + BLUE + '; color:#FFFFFF; border:1px solid ' + BLUE + ';'
                     : 'background: #FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:19px; margin-bottom:5px;">' + s.icon + '</div>' + esc(s.label) + '</div>';
@@ -284,18 +286,26 @@
 
     function guideHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF6D 쪽쪽이, 자꾸 뱉나요?</div>' +
+            '<div class="matrix-header">\uD83D\uDC76 쪽쪽이, 자꾸 뱉나요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '아기가 쪽쪽이를 싫어하는 게 아니라 <b>모양이 안 맞는 것</b>일 때가 많아요. ' +
                 '겪고 계신 걸 눌러주세요</div>' +
-            '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;">' +
+            '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' +
                 symptomGrid() + '</div>' +
             answerHTML() +
         '</div>';
     }
 
     /* ---------- 안전 · 무료. 절대 잠그지 않는다 ---------- */
+
+    /* 줄머리 점 밑으로 둘째 줄이 들어가게.
+       ('· 문장<br>' 로 이으면 둘째 줄이 맨 앞에서 시작해서 항목 경계가 안 보였다) */
+    function dontList(items) {
+        return items.map(function (t) {
+            return '<div style="display:flex; gap:6px;"><span style="flex-shrink:0;">\u00b7</span><span>' + t + '</span></div>';
+        }).join("");
+    }
 
     function safetyHTML() {
         var d = daysOld(), m = monthsOld();
@@ -309,7 +319,7 @@
                   'padding:15px 16px; margin:-10px 0 14px; font-size:13px; font-weight:600; ' +
                   'color:var(--gd-gold,#8A6D00); line-height:1.75; word-break:keep-all;">' +
                   esc(nm("는")) + ' 아직 생후 ' + d + '일이에요. 수유가 자리잡기 전에 쪽쪽이를 시작하면 ' +
-                  '젖 먹는 게 흔들릴 수 있어서, <b>먹는 게 안정된 뒤</b>에 시작하는 걸 권하는 편입니다.</div>'
+                  '젖 먹는 게 흔들릴 수 있어서, <b>먹는 게 안정된 뒤</b>에 시작하는 걸 권하는 편이에요.</div>'
                 : '') +
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
@@ -318,27 +328,29 @@
                     'margin-bottom:7px;">\u274C 이것만은 하지 마세요</div>' +
                 '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                     'word-break:keep-all;">' +
-                    '\u00b7 <b>끈이나 줄로 목에 걸어두지 마세요.</b> 옷핀 집게형만 쓰시고, 잘 때는 떼세요<br>' +
-                    '\u00b7 <b>꿀이나 설탕을 묻히지 마세요.</b> 돌 전 꿀은 절대 안 됩니다<br>' +
-                    '\u00b7 <b>찢어졌거나 끈적이면 바로 버리세요.</b> 떨어진 조각을 삼킬 수 있습니다<br>' +
-                    '\u00b7 잡아당겨 <b>늘어나면 교체</b>하세요. 대개 한두 달입니다' +
+                    dontList([
+                        '<b>끈이나 줄로 목에 걸어두지 마세요.</b> 옷에 집는 클립형, 줄 짧은 것만 쓰시고, 잘 때는 떼세요',
+                        '<b>꿀이나 설탕을 묻히지 마세요.</b> 돌 전 꿀은 절대 안 돼요',
+                        '<b>찢어졌거나 끈적이면 바로 버리세요.</b> 떨어진 조각을 삼킬 수 있어요',
+                        '<b>늘어난 채로 쓰지 마세요.</b> 잡아당겨 늘어나면 바꿀 때예요. 대개 한두 달이에요'
+                    ]) +
                 '</div>' +
             '</div>' +
 
             '<div style="background: #FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
                 'padding:15px 16px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
-                '\uD83D\uDD01 <b>모양이 안 맞으면 재질을 바꿔보세요.</b> ' +
-                '실리콘은 단단하고 냄새가 없으며 오래 갑니다. ' +
-                '라텍스(고무)는 훨씬 부드럽지만 냄새가 있고 빨리 삭아요.<br>' +
-                '\uD83D\uDC4B <b>끊는 건 서두르지 않아도 됩니다.</b> ' +
+                '\uD83D\uDD01 <b>모양을 바꿔도 안 맞으면 재질을 바꿔보세요.</b> ' +
+                '실리콘은 단단하고 냄새가 없고 오래가요. ' +
+                '라텍스(고무)는 훨씬 부드럽지만 냄새가 있고 빨리 삭아요. 드물게 알레르기가 있어서, 입 주변이 빨개지면 바로 실리콘으로 바꾸세요.<br>' +
+                '\uD83D\uDC4B <b>끊는 건 서두르지 않아도 돼요.</b> ' +
                 '돌 무렵부터 낮에 쓰는 횟수를 줄여가는 게 흔한 방법이고, ' +
                 '오래 쓸수록 치아 자리에 영향을 줄 수 있어 시기는 소아과·치과와 상의하세요.' +
             '</div>' +
 
             '<div style="margin-top:12px; font-size:12px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '쪽쪽이를 안 물어도 괜찮습니다. 꼭 써야 하는 물건이 아니에요.</div>' +
+                '쪽쪽이를 안 물어도 괜찮아요. 꼭 써야 하는 물건이 아니에요.</div>' +
         '</div>';
     }
 

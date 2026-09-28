@@ -13,7 +13,7 @@
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="배냇함 | 내 차에 들어가는 카시트 찾기">
-    <meta property="og:description" content="우리 가족 라이프스타일 분석 내 차 트렁크와 뒷좌석에 딱 맞는 카시트를 1초만에 찾아보세요.">
+    <meta property="og:description" content="우리 차와 아기 개월수에 맞는 카시트를 골라드려요.">
     <meta property="og:image" content="https://happy-baby0303.github.io/baby-master/stroller/og-image.png"> 
     <meta property="og:url" content="https://happy-baby0303.github.io/baby-master/carseat/index.html">
 
@@ -40,12 +40,27 @@
             <div class="pro-badge">	카시트 14종</div>
         </div>
         <nav class="gnb-menu">
-            <a href="../stroller/index.html" class="gnb-item">☀️ 유모차</a>
+            <a href="../stroller/index.html" class="gnb-item">🚼 유모차</a>
             <a href="#" class="gnb-item active">🚘 카시트</a>
             <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
             <a href="../food/index.html" class="gnb-item">🥦 이유식</a>
             <a href="../toy/index.html" class="gnb-item">🧸 놀이/장난감</a>
         </nav>
+        <script>
+            /* 지금 탭이 화면 밖이면 가운데로 끌어온다. 이미 다 보이면 손대지 않는다. (다섯 큐레이터 공통) */
+            (function () {
+                try {
+                    var a = document.querySelector('.gnb-menu .gnb-item.active');
+                    var nav = a && a.parentNode;
+                    if (!a || !nav || nav.scrollWidth <= nav.clientWidth) return;
+                    var ar = a.getBoundingClientRect(), nr = nav.getBoundingClientRect();
+                    if (ar.left >= nr.left && ar.right <= nr.right) return;
+                    nav.style.scrollBehavior = 'auto';
+                    nav.scrollLeft += (ar.left - nr.left) - (nav.clientWidth - a.offsetWidth) / 2;
+                    nav.style.scrollBehavior = '';
+                } catch (e) {}
+            })();
+        </script>
     </header>
 
     <main class="container">
@@ -59,14 +74,14 @@
                 </span>
             </div>
             <p style="margin: 0; font-size: 13.5px; font-weight: 600; color: #A3958A;">
-                디자인보다 중요한 '우리아이 생명'과 '차량 궁합'
+                우리 차와 우리 아기에게 맞는 카시트 찾기
             </p>
         </div>
 
         <div id="auto-sync-banner" style="display: none; align-items: center; background: #F0EEFB; border: 1px solid #7F77DD; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #6A61CE; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(127, 119, 221, 0.1);">
         </div>
 
-        <!-- ✨ 깔끔하게 평탄화된 AI 매트릭스 패널 -->
+        <!-- 직접 조건 고르기 -->
         
         <!-- 🗂️ 탭 막대 — JS 가 만들지 않고 여기 박아둔다.
              그래야 처음부터 제자리에 있어서 화면이 안 튄다. -->
@@ -81,48 +96,48 @@
             <div class="matrix-grid">
                 
                 <div class="matrix-item">
-                    <label>👶 탑승 연령 (가장 중요)</label>
+                    <label>아기 월령</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-age">
                             <option value="all">전체 연령</option>
-                            <option value="newborn">신생아부터 사용 (0~12개월)</option>
-                            <option value="toddler">토들러/회전형 (제품마다 시작 개월이 달라요)</option>
-                            <option value="junior">주니어 (4세~12세)</option>
+                            <option value="newborn">신생아부터 (0~11개월)</option>
+                            <option value="toddler">돌 이후 (1~4세)</option>
+                            <option value="junior">4세 이후 (주니어)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>🚙 우리 집 차량 크기</label>
+                    <label>차 크기</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-car">
-                            <option value="all">차량 상관없음</option>
-                            <option value="compact">소형/준중형 (공간 절약 필요)</option>
-                            <option value="suv">중형/SUV (예: QM6, 싼타페 - 넉넉함)</option>
-                            <option value="carnival">다둥이/카니발 (3열 장착 등)</option>
+                            <option value="all">상관없음</option>
+                            <option value="compact">소형·준중형 (아반떼·K3 등)</option>
+                            <option value="sedan">중형 세단 (쏘나타·K5 등)</option><option value="suv">SUV (싼타페·쏘렌토 등)</option>
+                            <option value="carnival">카니발 같은 승합차</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>🛠️ 장착/고정 방식</label>
+                    <label>장착 방식</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-install">
-                            <option value="all">전체 (가이드 보고 선택해 주세요)</option>
-                            <option value="isofix_leg">ISOFIX + 바닥 지지대 (일반적인 승용/SUV)</option>
-                            <option value="isofix_tether">ISOFIX + 탑테더 (카니발 등 패밀리카)</option>
-                            <option value="belt">안전벨트 고정 (2010년 이전 구형 차량)</option>
+                            <option value="all">상관없음</option>
+                            <option value="isofix_leg">ISOFIX + 지지대(레그)</option>
+                            <option value="isofix_tether">ISOFIX + 탑테더(끈)</option>
+                            <option value="belt">안전벨트 (ISOFIX 없는 차)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="matrix-item">
-                    <label>🛡️ 필수 안전/편의 조건</label>
+                    <label>안전 인증</label>
                     <div class="custom-select-wrapper">
                         <select id="filter-safety">
-                            <option value="all">기본 안전 기준 충족</option>
-                            <option value="isize">유럽 최신 i-Size 인증 필수</option>
-                            <option value="adac">ADAC 테스트를 받은 제품만</option>
+                            <option value="all">상관없음</option>
+                            <option value="isize">i-Size(R129) 인증</option>
+                            <option value="adac">ADAC 시험 받은 것만</option>
                         </select>
                     </div>
                 </div>
@@ -130,14 +145,14 @@
                 <!-- ✨ 가이드 버튼을 밖으로 빼서 널찍하고 예쁘게 배치! -->
                 <div class="matrix-item full-width" style="margin-top: 4px;">
                     <button onclick="openInstallGuide()" style="width: 100%; padding: 14px; background: #FAF7F2; color: #7A6F68; border: 1px solid #EDE6DE; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s;">
-                        🤔 우리 집 차는 어떤 방식일까? (장착 가이드 요약)
+                        우리 차는 어떤 방식일까? (장착 방식 보기)
                     </button>
                 </div>
                 
                 <!-- 초기화 버튼 -->
                 <div class="matrix-item full-width" style="margin-top: 4px;">
                     <button class="btn-reset" onclick="resetFilters()" style="width: 100%;">
-                        🔄 필터 한 번에 초기화
+                        조건 지우기
                     </button>
                 </div>
 
@@ -182,7 +197,7 @@
                 <div style="font-size: 13.5px; color: #7A6F68; line-height: 1.6; margin-bottom: 20px; letter-spacing: -0.3px;">
                     
                                         <div style="background: #FBF8F3; padding: 14px 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #EDE6DE;">
-                        <b style="color: #7A6F68; font-size: 13.5px; display: block; margin-bottom: 6px;">먼저 — 우리 차에 ISOFIX가 있나요?</b>
+                        <b style="color: #7A6F68; font-size: 13.5px; display: block; margin-bottom: 6px;">먼저, 우리 차에 ISOFIX가 있나요?</b>
                         <span style="font-size: 13px;">뒷좌석 등받이와 방석 사이 틈을 손으로 더듬어 보세요. <b>쇠고리 두 개</b>가 잡히면 있는 겁니다. 2010년 이후 차는 대부분 있어요.<br><br>
                         <b>ISOFIX는 '꽂는 규격'일 뿐이라 그것만으로는 부족합니다.</b> 꽂은 뒤 카시트가 뒤로 넘어가지 않게 <b>아래 ①② 중 하나를 반드시 같이</b> 씁니다. 어느 쪽인지는 <b>내 차 설명서</b>가 정합니다.</span>
                     </div>
@@ -207,12 +222,12 @@
                         </div>
                         <div style="display: flex; gap: 6px;">
                             <span>🚨</span> 
-                            <span><b>왜 쓰나요?</b> 바닥 수납함 뚜껑이 부서질 수 있어, 기둥 대신 <b>등받이 뒤쪽으로 끈을 넘겨 묶는 방식</b>을 써야 합니다.</span>
+                            <span><b>왜 쓰나요?</b> 수납함 뚜껑 위에 기둥을 세우면 충돌 때 받쳐주지 못해서, 기둥 대신 <b>등받이 뒤쪽으로 끈을 넘겨 묶는 방식</b>을 써야 합니다.</span>
                         </div>
                     </div>
                     
                     <div style="background: #F6F2EC; padding: 16px; border-radius: 12px; border: 1px solid #EDE6DE;">
-                        <b style="color: #7A6F68; font-size: 14.5px; display: block; margin-bottom: 8px;">ISOFIX가 없다면 — 안전벨트로 고정</b>
+                        <b style="color: #7A6F68; font-size: 14.5px; display: block; margin-bottom: 8px;">ISOFIX가 없다면, 안전벨트로 고정</b>
                         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
                             <span>🚙</span> 
                             <span><b>누가 쓰나요?</b> <b>2010년 이전</b>에 출고된 구형 차량</span>

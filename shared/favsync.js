@@ -110,13 +110,18 @@
           찾은 것 하나를 부르고, 찜 목록 화면도 열려 있으면 같이 다시 그린다. */
     function repaint() {
         var done = false;
-        ["renderBottleList", "renderList", "renderToys", "renderPlays", "runFoodEngine",
+        ["runBottleEngine", "runCarseatEngine", "runStrollerEngine",
+         "renderBottleList", "renderList", "renderToys", "renderPlays", "runFoodEngine",
          "updateToyView", "applyFilters", "filterAndRender", "renderResults", "refreshList"]
         .forEach(function (n) {
             if (done || typeof window[n] !== "function") return;
             try { window[n](); done = true; } catch (e) {}
         });
-        if (typeof window.renderFavorites === "function") {
+        /* ⚠️ 찜 화면이 안 열려 있는데 renderFavorites 를 부르면
+              젖병·카시트 결과 칸이 통째로 찜 목록으로 바뀐다. 찜 화면일 때만 부른다. */
+        var favBtn = document.getElementById("btn-show-fav");
+        var inFavView = !!(favBtn && /돌아가기/.test(favBtn.textContent || ""));
+        if (inFavView && typeof window.renderFavorites === "function") {
             try { window.renderFavorites(); } catch (e) {}
         }
     }
@@ -168,7 +173,7 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 
-    window.favSyncVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
+    window.favSyncVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.favSyncDebug = function () {

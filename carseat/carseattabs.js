@@ -219,6 +219,16 @@
           꺼내둔 옛 패널은 그대로 남아서 화면에 두 벌이 뜬다.
           그래서 다시 꺼낼 때는 '내가 꺼냈던 것' 을 먼저 치운다.
           data-from 으로 표시해두면 누가 꺼낸 건지 알 수 있다. */
+    /* 카드를 갈아끼울 때 옛 카드의 PLUS 배지를 새 카드 제목으로 옮겨 단다 (젖병에서 깜빡이던 것과 같은 원인) */
+    function keepBadge(oldEl, freshEl) {
+        try {
+            var b = oldEl.querySelector(".plus-badge");
+            if (!b || !b.parentNode || !b.parentNode.classList || !b.parentNode.classList.contains("matrix-header")) return;
+            var h = freshEl.querySelector(".matrix-header");
+            if (h && !h.querySelector(".plus-badge")) h.appendChild(b);
+        } catch (e) {}
+    }
+
     function flatten() {
         var pane = document.getElementById(PANE.use);
         if (!pane) return;
@@ -257,7 +267,7 @@
                 p.setAttribute("data-from", id);
                 p.setAttribute("data-slot", String(i));
                 var old = bySlot[String(i)];
-                if (old && old.parentNode) old.parentNode.replaceChild(p, old);
+                if (old && old.parentNode) { keepBadge(old, p); old.parentNode.replaceChild(p, old); }
                 else pane.insertBefore(p, box);
             });
 
@@ -274,7 +284,7 @@
             if (typeof f !== "function" || f.__tabs) return;
             var w = function () {
                 var r = f.apply(this, arguments);
-                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); }, 40);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); if (window.refreshPlusMark) window.refreshPlusMark(); orderPlus(); }, 40);
                 return r;
             };
             w.__tabs = true;

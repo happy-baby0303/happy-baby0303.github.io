@@ -14,14 +14,21 @@
    카시트만 걸린 게 아니라 다섯 개가 다 같은 구조다.
    먼저 걸렸을 뿐이다.
 
-   그래서 맨 위에 하나 더 둔다. 아래 것은 그대로 두고.
-   법적 고지는 두 번 있어도 손해가 없다.
+   그래서 맨 위에 둔다. 아래쪽 고지는 각 index.html 에서 뺐다 (한 화면에 한 번이면 된다).
 
    ⚠️ 문구를 흐리게 하거나 접어두지 않는다.
       그렇게 하면 넣으나 마나다.
 
-   각 큐레이터 폴더(bottle, carseat, stroller, toy, food)에
-   이 파일을 넣고 index.html 에서 app.js 다음에 로드하세요.
+   ⚠️ 그렇다고 경고창처럼 칠하지도 않는다.
+      주황 테두리 + 진한 빨강 굵은 글씨 세 군데라 매 탭 맨 위에 사고 경고가 뜬 것처럼 보였다.
+      지침이 요구하는 건 '쉽게 알아볼 수 있게' 다. 맨 위 · 본문과 같은 크기 · 충분한 대비 · 안 접힘.
+      '제휴' 표시를 앞에 붙여 한눈에 무슨 글인지 보이게 한다.
+
+   ⚠️ '배냇함은 객관적 데이터를 바탕으로' 는 뺐다. 고지에 꼭 필요한 말이 아니고,
+      '객관적' 은 우리가 입증해야 하는 표현이다.
+
+   ../shared/disclosure.js 한 벌을 다섯 큐레이터가 같이 쓴다.
+   index.html 에서 app.js 다음에 로드하세요.
    ============================================================ */
 (function () {
     'use strict';
@@ -39,18 +46,18 @@
         var box = document.createElement("div");
         box.id = ID;
         box.style.cssText =
-            "display:flex; align-items:flex-start; gap:9px; " +
-            "background:#FFF7ED; border:1px solid #FDBA74; border-radius:12px; " +
-            "padding:13px 15px; margin:16px 0 20px; box-sizing:border-box;";
+            "display:flex; align-items:flex-start; gap:8px; " +
+            "background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; " +
+            "padding:12px 14px; margin:16px 0 20px; box-sizing:border-box;";
 
         box.innerHTML =
-            '<span style="font-size:15px; flex-shrink:0; line-height:1.4;">📢</span>' +
-            '<span style="font-size:13px; font-weight:700; color:#9A3412; ' +
-                'line-height:1.65; word-break:keep-all;">' +
-                '이 페이지는 <b>쿠팡 파트너스 활동의 일환</b>으로, 구매가 일어나면 ' +
-                '이에 따른 <b>일정액의 수수료를 제공받습니다.</b> ' +
-                '배냇함은 객관적 데이터를 바탕으로 정보를 제공하며, ' +
-                '<b>수수료는 추천 순서에 영향을 주지 않습니다.</b>' +
+            '<span style="flex-shrink:0; margin-top:2px; padding:2px 7px; border-radius:6px; ' +
+                'background:#7A6F68; color:#FFFFFF; font-size:11px; font-weight:900; line-height:1.5;">제휴</span>' +
+            '<span style="font-size:13px; font-weight:600; color:#7A6F68; ' +
+                'line-height:1.65; word-break:keep-all; text-wrap:pretty;">' +
+                '이 페이지는 <b style="color:#4A413C;">쿠팡 파트너스 활동의 일환</b>으로, 구매가 일어나면 ' +
+                '이에 따른 일정액의 수수료를 제공받습니다. ' +
+                '추천 순서와는 관계없습니다.' +
             '</span>';
 
         host.insertBefore(box, host.firstChild);
@@ -75,7 +82,7 @@
         if (!document.hidden) setTimeout(mount, 300);
     });
 
-    window.disclosureVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
+    window.disclosureVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 
     window.disclosureDebug = function () {
         console.log('이 폴더의 disclosure 판:', window.disclosureVersion);

@@ -163,11 +163,19 @@
         guard();
     }
 
+    /* ⚠️ 닫고 나서 무조건 칸을 다시 쌓았다(arm). 그래서 시트를 뒤로가기로 닫고 나면
+          더 붙잡을 게 없는데도 칸이 하나 남아서, 본 앱으로 나가려면 뒤로가기를 두 번 눌러야 했다.
+          닫은 뒤 아직 붙잡을 게 있는지(시트가 또 있나, 둘째 탭인가) 다시 보고, 있을 때만 쌓는다. */
+    function rearmLater() {
+        armed = false;
+        setTimeout(check, 350);     // 닫히는 동작(애니메이션 · 제거)이 끝난 뒤에 본다
+    }
+
     window.addEventListener("popstate", function () {
         var s = openSheet();
-        if (s) { closeIt(s); armed = false; arm(); return; }
+        if (s) { closeIt(s); rearmLater(); return; }
 
-        if (onSecondTab() && toFirstTab()) { armed = false; arm(); return; }
+        if (onSecondTab() && toFirstTab()) { rearmLater(); return; }
 
         /* 붙잡을 게 없다. 본 앱으로 돌려보낸다. */
         armed = false;
@@ -205,7 +213,7 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 
-    window.curatorBackVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
+    window.curatorBackVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.curatorBackDebug = function () {

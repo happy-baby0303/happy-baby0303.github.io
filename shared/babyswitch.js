@@ -47,6 +47,9 @@
         'tosil_play_log', 'tosil_play_likes', 'tosil_playnow_done', 'tosil_bathtoy_washed',
         'tosil_meal_size', 'tosil_food_yield', 'tosil_shop_bought',
 
+        /* 빨대컵을 쓰는지, 카시트에서 우는 아이에게 뭘 해봤는지는 아이마다 다르다 */
+        'tosil_bottle_cup', 'tosil_carseat_cry',
+
         /* 본 앱(script.js)에도 있는 것들 — 두 목록이 같아야 한다 */
         'tosil_hero_pos', 'tosil_vaccines', 'tosil_vaccines_t', 'tosil_life_ledger',
         'tosil_letters_cloud_v1', 'tosil_letters_pulled_at'
@@ -79,7 +82,11 @@
     Storage.prototype.getItem = function (k) {
         var v = rawGet.call(this, keyOf(k));
         try { if (v && (v[0] === '[' || v[0] === '{')) JSON.parse(v); }
-        catch (e) { rawDel.call(this, keyOf(k)); return null; }   // 깨진 값 자가 치유
+        catch (e) {
+            /* 깨진 값 자가 치유. ⚠️ 그냥 지우면 되살릴 길이 없다. 옆에 한 벌 남기고 지운다. */
+            try { rawSet.call(this, keyOf(k) + '__broken', v); } catch (e2) {}
+            rawDel.call(this, keyOf(k)); return null;
+        }
         return v;
     };
     Storage.prototype.setItem = function (k, v) { rawSet.call(this, keyOf(k), v); };
@@ -197,7 +204,7 @@
     });
     else { setTimeout(mount, 300); setTimeout(mount, 1200); }
 
-    window.babySwitchVersion = '2026-09-23';   // 다섯 폴더가 같은 날짜여야 한다
+    window.babySwitchVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 
     window.babySwitchDebug = function () {
         console.log('이 폴더의 babyswitch 판:', window.babySwitchVersion);

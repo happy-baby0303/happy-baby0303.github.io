@@ -118,18 +118,18 @@
                    "가능하면 <b>24개월, 카시트가 허용하면 그 이상까지</b> 뒤보기로 두세요.";
             tone = "--cg-blue";
         } else if (m < 15) {
-            head = esc(nm("는")) + " 지금 " + m + "개월 \u2014 반드시 뒤보기입니다";
+            head = esc(nm("는")) + " 지금 " + m + "개월, 반드시 뒤보기입니다";
             body = "생후 15개월 전에는 앞을 보게 앉히면 안 됩니다. 목뼈가 아직 머리 무게를 못 버텨서, " +
                    "정면 충돌 때 뒤보기가 아니면 목에 힘이 그대로 갑니다. <b>" + (15 - m) + "개월 더</b> 남았어요.";
             tone = "--cg-red";
         } else if (m < 24) {
-            head = esc(nm("는")) + " 지금 " + m + "개월 \u2014 아직 두시는 게 낫습니다";
+            head = esc(nm("는")) + " 지금 " + m + "개월, 아직 두시는 게 낫습니다";
             body = "돌려도 되는 나이는 지났지만, <b>더 오래 뒤를 볼수록 안전합니다.</b> " +
                    "다리가 접히는 건 문제가 되지 않아요. 아이는 우리보다 훨씬 유연합니다. " +
                    "카시트가 허용하는 키·몸무게까지는 뒤보기로 두시길 권합니다.";
             tone = "--cg-gold";
         } else {
-            head = esc(nm("는")) + " 지금 " + m + "개월 \u2014 돌리셔도 됩니다";
+            head = esc(nm("는")) + " 지금 " + m + "개월, 돌리셔도 됩니다";
             body = "이제 앞보기로 바꾸셔도 괜찮습니다. 다만 카시트에 적힌 <b>키와 몸무게 한계</b>를 넘지 않았는지 확인하세요. " +
                    "나이보다 <b>체격이 기준</b>입니다.";
             tone = "--cg-green";
@@ -175,6 +175,11 @@
           d: "너무 세우면 고개가 앞으로 꺾이면서 <b>숨길이 눌립니다.</b> " +
              "카시트에 표시된 각도선이나 표시창을 꼭 맞추세요.",
           tone: "--cg-red" },
+        /* 카드마다 '보호매트·거울 꼭 미리 세팅하세요(100% 파손)' 상자와 구매 링크가 붙어 있었다.
+           카시트 밑 매트는 고정을 헐겁게 할 수 있고, 단단한 거울은 급정거 때 날아온다. 그래서 반대로 말한다. */
+        { icon: "🪞", t: "매트·거울은 설명서가 허락한 것만",
+          d: "카시트 밑에 까는 매트는 고정을 헐겁게 만들 수 있고, 단단한 거울은 급정거 때 날아올 수 있어요. " +
+             "<b>카시트 설명서에 써도 된다고 나온 것만</b> 쓰세요." },
         { icon: "🪑", t: "흔들리면 다시 다세요",
           d: "카시트 바닥 쪽을 잡고 좌우로 흔들었을 때 <b>2~3cm 넘게 움직이면</b> 헐거운 겁니다. " +
              "ISOFIX는 딸깍 소리가 양쪽 다 나야 하고, 표시창이 초록이어야 합니다.",
@@ -247,15 +252,17 @@
 
         { id: "turn", icon: "🔄", label: "이제 돌려도 되나요",
           set: {},
-          tip: "위의 <b>뒤보기·앞보기</b> 칸을 봐주세요. 나이보다 <b>카시트에 적힌 키·몸무게 한계</b>가 기준입니다. " +
+          /* ⚠️ '위의 뒤보기·앞보기 칸' 이라고 했는데 그 칸은 '쓰면서 챙길 것' 탭에 있다. 위에는 없다. */
+          tip: "<span onclick=\"window.switchCarseatTab && window.switchCarseatTab('use')\" " +
+               "style=\"text-decoration:underline; cursor:pointer;\"><b>쓰면서 챙길 것</b> 탭의 <b>뒤보기·앞보기</b></span> 칸을 봐주세요. 나이보다 <b>카시트에 적힌 키·몸무게 한계</b>가 기준입니다. " +
                "다리가 접히는 건 돌릴 이유가 안 됩니다." },
 
         { id: "carnival", icon: "🚐", label: "카니발·3열에 달아요",
           set: { "filter-car": "carnival", "filter-install": "isofix_tether" },
-          tip: "바닥에 수납함이 있는 차는 <b>기둥(레그)형을 쓰면 뚜껑이 부서질 수 있습니다.</b> " +
+          tip: "바닥에 수납함이 있는 자리는 <b>뚜껑 위에 지지대(레그)를 세우면 충돌 때 받쳐주지 못해요.</b> " +
                "끈으로 묶는 <b>탑테더</b> 방식을 쓰세요. 차 설명서에 탑테더 고리 위치가 나와 있습니다." },
 
-        { id: "old", icon: "💺", label: "구형차라 ISOFIX가 없어요",
+        { id: "old", icon: "💺", label: "ISOFIX가 없어요",
           set: { "filter-install": "belt" },
           tip: "안전벨트로 고정하는 제품을 고르세요. 다만 <b>벨트 고정은 잘못 매기 쉽습니다.</b> " +
                "설명서의 벨트 경로를 그대로 따라가고, 다 매고 나서 흔들어 확인하세요." },
@@ -265,7 +272,7 @@
           tip: "뒤보기 카시트는 앞좌석을 많이 먹습니다. <b>그렇다고 앞보기로 일찍 돌리지는 마세요.</b> " +
                "앞좌석을 조금 당겨 앉는 편이 낫고, 바닥이 얇은 제품을 고르면 도움이 됩니다." },
 
-        { id: "second", icon: "👵", label: "할머니 차에도 필요해요",
+        { id: "second", icon: "👵", label: "할머니 차에도 달아요",
           set: {},
           tip: "가끔 타는 차라도 카시트는 있어야 합니다. 매번 옮겨 달면 <b>오장착 위험이 커져요.</b> " +
                "자주 쓰실 거면 두 번째 카시트를 두는 편이 안전합니다." }
@@ -299,12 +306,25 @@
         }
     };
 
+    /* 아기가 이미 태어났으면 '출산 전이에요' 는 내 얘기가 아니다 (생일이 미래면 그대로 둔다) */
+    function isBorn() {
+        var s = localStorage.getItem("tosil_startDate");
+        if (!s) return false;
+        var p = String(s).split("-").map(Number);
+        if (p.length !== 3 || !p[0]) return false;
+        return new Date(p[0], p[1] - 1, p[2]).getTime() <= Date.now();
+    }
+
     function casesHTML() {
-        var chips = CASES.map(function (c) {
+        var list = CASES.filter(function (c) { return !(c.id === "birth" && isBorn()); });
+        var chips = list.map(function (c, i) {
             var on = (picked === c.id);
+            /* ⚠️ 세 칸이면 '구형차라 / ISOFIX가 / 없어요' 처럼 세 줄로 쪼개졌다. 두 칸, 홀수면 마지막 칸이 한 줄을 다 쓴다. */
+            var wide = (list.length % 2 === 1 && i === list.length - 1);
             return '<div onclick="window.pickCarseatCase(\'' + c.id + '\')" ' +
                 'style="padding:14px 10px; border-radius:14px; cursor:pointer; text-align:center; ' +
-                'font-size:12.5px; font-weight:800; line-height:1.4; word-break:keep-all; ' +
+                'font-size:12.5px; font-weight:800; line-height:1.4; word-break:keep-all; text-wrap:balance; ' +
+                (wide ? 'grid-column:1 / -1; ' : '') +
                 (on ? 'background:' + BLUE + '; color:#FFFFFF; border:1px solid ' + BLUE + ';'
                     : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:19px; margin-bottom:5px;">' + c.icon + '</div>' + esc(c.label) + '</div>';
@@ -325,7 +345,7 @@
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '장착 방식이나 인증 이름은 저희가 볼게요. 지금 상황만 눌러주세요</div>' +
-            '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;">' + chips + '</div>' +
+            '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' + chips + '</div>' +
             tip +
         '</div>';
     }

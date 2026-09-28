@@ -90,33 +90,37 @@
     var CASES = [
         { id: "ready", icon: "🤰", label: "출산 준비 중이에요",
           set: { "filter-age": "newborn" },
-          tip: "지금은 <b>두세 개만</b> 사세요. 어떤 젖꼭지를 물지는 아기가 태어나 봐야 압니다. " +
+          tip: "지금은 <b>두세 개만</b> 사세요. 어떤 젖꼭지를 물지는 아기가 태어나 봐야 알 수 있어요. " +
                "세트로 여섯 개 사두면 안 무는 순간 전부 서랍행이에요." },
 
         { id: "reject", icon: "😤", label: "젖병을 안 물어요",
           set: { "filter-rejection": "super", "filter-compatible": "yes" },
-          tip: "젖병 전체를 바꾸기 전에 <b>젖꼭지만</b> 먼저 바꿔보세요. 훨씬 싸고 성공률도 비슷합니다. " +
-               "배가 아주 고플 때보다 <b>살짝 고플 때</b> 물리는 게 잘 먹힙니다." },
+          /* ⚠️ '성공률도 비슷합니다' 는 근거를 댈 수 없는 말이라 뺐다 */
+          tip: "젖병 전체를 바꾸기 전에 <b>젖꼭지만</b> 먼저 바꿔보세요. 훨씬 싸요. " +
+               "배가 아주 고플 때보다 <b>살짝 고플 때</b> 물리는 게 잘 먹혀요. " +
+               "<span onclick=\"window.switchBottleTab && window.switchBottleTab('tools')\" " +
+               "style=\"text-decoration:underline; cursor:pointer;\">하루에 하나씩 해볼 방법 보기</span>" },
 
         { id: "colic", icon: "😣", label: "먹고 나서 자주 울어요",
           set: { "filter-anticolic": "super" },
-          tip: "공기를 덜 삼키게는 할 수 있어요. 다만 <b>젖병으로 배앓이가 사라지지는 않습니다</b> — " +
-               "생후 3~4개월이면 대개 잦아듭니다. 열이나 구토, 피 섞인 변이 같이 오면 젖병 문제가 아니라 진료가 먼저예요." },
+          tip: "공기를 덜 삼키게는 할 수 있어요. 다만 <b>젖병으로 배앓이가 사라지지는 않아요.</b> " +
+               "생후 3~4개월이면 대개 잦아들어요. 열이나 구토, 피 섞인 변이 같이 오면 젖병 문제가 아니라 진료가 먼저예요." },
 
         { id: "mixed", icon: "🍼", label: "모유랑 같이 쓰려고요",
           set: { "filter-compatible": "yes", "filter-rejection": "super" },
           tip: "젖과 젖병을 오가면 아기가 헷갈릴 수 있어요. <b>모유실감 계열</b>이 무난하고, " +
                "젖병을 늦게 시작할수록 거부가 심해지는 편이라 필요하시면 미루지 마세요." },
 
-        { id: "wash", icon: "🧼", label: "설거지가 너무 힘들어요",
+        { id: "wash", icon: "🧼", label: "설거지가 힘들어요",
           set: { "filter-sterilization": "easy" },
           tip: "고를 때 볼 건 두 가지예요. <b>입구가 넓은가</b>, <b>부품이 몇 개인가</b>. " +
-               "배앓이 방지 젖병일수록 부품이 많아서 손이 더 갑니다. 새벽 수유 때 이게 제일 큽니다." },
+               "배앓이 방지 젖병일수록 부품이 많아서 손이 더 가요. 새벽 수유 때 이게 제일 커요." },
 
-        { id: "uv", icon: "🌡️", label: "소독기(UV)를 써요",
+        /* 🌡️(온도계)는 UV 와 상관이 없다 */
+        { id: "uv", icon: "🔆", label: "UV 소독기를 써요",
           set: { "filter-sterilization": "uv" },
-          tip: "PPSU는 UV를 오래 쬐면 <b>누렇게 변하거나 끈적</b>해질 수 있어요. " +
-               "UV에 제일 자유로운 건 유리입니다. 무겁다는 게 값이고요." }
+          tip: "PPSU는 UV를 오래 쬐면 <b>누렇게 변할 수</b> 있고, 실리콘은 <b>끈적해질 수</b> 있어요. " +
+               "UV에 제일 자유로운 건 유리예요. 무겁다는 게 값이고요." }
     ];
 
     var picked = null;
@@ -129,7 +133,7 @@
         if (picked === id) {                       // 한 번 더 누르면 해제
             picked = null;
             if (typeof window.resetBottleFilters === "function") window.resetBottleFilters();
-            paint();
+            paintGuide();
             return;
         }
 
@@ -142,7 +146,7 @@
         Object.keys(c.set).forEach(function (k) { setSel(k, c.set[k]); });
 
         picked = id;
-        paint();
+        paintGuide();
         run();
 
         var r = document.getElementById("bottle-result-area");
@@ -151,12 +155,28 @@
         }, 150);
     };
 
+    /* 아기가 이미 태어났으면 '출산 준비 중' 은 내 얘기가 아니다.
+       (생일이 미래로 적혀 있으면 아직 준비 중이라 그대로 보여준다) */
+    function isBorn() {
+        var s = localStorage.getItem("tosil_startDate");
+        if (!s) return false;
+        var p = String(s).split("-").map(Number);
+        if (p.length !== 3 || !p[0]) return false;
+        return new Date(p[0], p[1] - 1, p[2]).getTime() <= Date.now();
+    }
+
     function casesHTML() {
-        var chips = CASES.map(function (c) {
+        var list = CASES.filter(function (c) { return !(c.id === "ready" && isBorn()); });
+        var chips = list.map(function (c, i) {
             var on = (picked === c.id);
+            /* ⚠️ 세 칸으로 나누면 한 칸 글자 자리가 80px 남짓이라
+                  '소독기 / (UV)를 / 써요' 처럼 세 줄로 쪼개졌다. 두 칸으로 간다.
+                  개수가 홀수면 마지막 칸이 한 줄을 다 쓴다. */
+            var wide = (list.length % 2 === 1 && i === list.length - 1);
             return '<div onclick="window.pickBottleCase(\'' + c.id + '\')" ' +
                 'style="padding:14px 12px; border-radius:14px; cursor:pointer; text-align:center; ' +
-                'font-size:13px; font-weight:800; line-height:1.4; word-break:keep-all; transition:0.15s; ' +
+                'font-size:13px; font-weight:800; line-height:1.4; word-break:keep-all; text-wrap:balance; transition:0.15s; ' +
+                (wide ? 'grid-column:1 / -1; ' : '') +
                 (on ? 'background:' + BLUE + '; color:#FFFFFF; border:1px solid ' + BLUE + ';'
                     : 'background:#FBF8F3; color:#7A6F68; border:1px solid #EDE6DE;') + '">' +
                 '<div style="font-size:20px; margin-bottom:5px;">' + c.icon + '</div>' + esc(c.label) + '</div>';
@@ -177,7 +197,7 @@
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '스펙은 저희가 볼게요. 지금 겪고 계신 것만 눌러주세요</div>' +
-            '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px;">' + chips + '</div>' +
+            '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' + chips + '</div>' +
             tip +
         '</div>';
     }
@@ -218,7 +238,7 @@
     }
 
     var howMode = "mixed";
-    window.setBottleHow = function (v) { howMode = v; paint(); };
+    window.setBottleHow = function (v) { howMode = v; paintGuide(); };
 
     function howManyHTML() {
         var m = monthsOld();
@@ -234,10 +254,10 @@
             var twice = Math.max(3, Math.ceil(feeds / 2) + 1);  // 두 번 나눠서 소독
             n = twice + "~" + once + "개";
             line = "소독을 <b>하루 한 번</b> 몰아서 하면 수유 횟수만큼(" + once + "개), " +
-                   "<b>두 번 나눠서</b> 하면 " + twice + "개면 돌아갑니다.";
+                   "<b>두 번 나눠서</b> 하면 " + twice + "개면 돌아가요.";
         } else {
             n = "3~4개";
-            line = "젖과 젖병을 같이 쓰면 하루 두세 번쯤 젖병을 씁니다. 여유분 하나를 더 두는 정도예요.";
+            line = "젖과 젖병을 같이 쓰면 하루 두세 번쯤 젖병을 써요. 여유분 하나를 더 두는 정도예요.";
         }
 
         var basis = real
@@ -271,8 +291,8 @@
 
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-top:12px; line-height:1.7; word-break:keep-all;">' +
-                '처음부터 세트로 다 사지 마세요. <b>한 종류를 두 개 사서 물려보고</b> 잘 먹으면 그때 늘리는 게 안전합니다. ' +
-                '젖병은 한 번 안 물면 되팔지도 못해요.</div>' +
+                '처음부터 세트로 다 사지 마세요. <b>한 종류를 두 개 사서 물려보고</b> 잘 먹으면 그때 늘리는 게 안전해요. ' +
+                '아기가 안 물면 그대로 짐이 되고, 한 번 쓴 젖병은 되팔기도 어려워요.</div>' +
         '</div>';
     }
 
@@ -335,6 +355,18 @@
         alert("젖꼭지 교체일을 적어뒀어요.\n배냇함 툴박스 '언제깠지'에서 다음 교체일을 알려드립니다.");
     };
 
+    /* ⚠️ 네 가지를 ' · ' 로 한 줄에 이어 붙였더니 항목이 줄 중간에서 끊겨 읽기 어려웠다. 한 줄에 하나씩. */
+    var NIP_UP = ["한 번 먹는 데 <b>20분 넘게</b> 걸려요", "빨다가 지쳐서 잠들어요",
+                  "젖꼭지가 쭈그러들었다 펴져요", "먹는 중에 화를 내요"];
+    var NIP_DOWN = ["<b>사레</b>가 자주 들려요", "입가로 줄줄 흘러요",
+                    "<b>5분도 안 돼</b> 끝나요", "먹고 나서 자주 게워요"];
+
+    function lines(arr) {
+        return arr.map(function (t) {
+            return '<div style="display:flex; gap:7px;"><span style="flex-shrink:0;">\u00b7</span><span>' + t + '</span></div>';
+        }).join("");
+    }
+
     function nippleHTML() {
         var last = localStorage.getItem(NIPPLE_KEY);
         var since = "";
@@ -346,64 +378,92 @@
                 'padding:13px 15px; margin-bottom:14px; font-size:13px; font-weight:800; ' +
                 'color:' + (d >= 60 ? "var(--gd-red,#E32636)" : "#7A6F68") + ';">' +
                 '마지막 교체 후 <b>' + d + '일</b>' +
-                (d >= 60 ? " — 갈 때가 됐어요" : " 지났어요") + '</div>';
+                (d >= 60 ? " \u00b7 갈 때가 됐어요" : " 지났어요") + '</div>';
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🔧 젖꼭지, 지금 단계 맞나요?</div>' +
+            '<div class="matrix-header">\uD83D\uDCCF 젖꼭지, 지금 단계 맞나요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '개월수로 정하는 게 아니에요. 브랜드마다 이름이 다르고(SS·S·M / 1구멍·2구멍) ' +
-                '같은 개월수라도 아기마다 빠는 힘이 다릅니다. <b>먹는 모습</b>으로 보세요</div>' +
+                '같은 개월수라도 아기마다 빠는 힘이 달라요. <b>먹는 모습</b>으로 보세요.</div>' +
 
             since +
 
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:15px 16px; margin-bottom:10px;">' +
-                '<div style="font-size:13.5px; font-weight:900; color:var(--gd-gold,#8A6D00); margin-bottom:7px;">⬆️ 한 단계 올릴 때</div>' +
+                '<div style="font-size:13.5px; font-weight:900; color:var(--gd-gold,#8A6D00); margin-bottom:7px;">' +
+                    '⬆️ 한 단계 올릴 때 <span style="font-size:12px; font-weight:700;">\u00b7 더 빨리 나오는 젖꼭지로</span></div>' +
                 '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
-                '한 번 먹는 데 <b>20분 넘게</b> 걸려요 · 빨다가 지쳐서 잠들어요 · ' +
-                '젖꼭지가 <b>쭈그러들었다</b> 펴져요 · 먹는 중에 화를 내요</div>' +
+                    lines(NIP_UP) + '</div>' +
             '</div>' +
 
             '<div style="background:#F2F0FC; border:1px solid #DDD9F5; border-radius:14px; ' +
                 'padding:15px 16px; margin-bottom:10px;">' +
-                '<div style="font-size:13.5px; font-weight:900; color:var(--gd-blue,#6A61CE); margin-bottom:7px;">⬇️ 한 단계 내릴 때</div>' +
+                '<div style="font-size:13.5px; font-weight:900; color:var(--gd-blue,#6A61CE); margin-bottom:7px;">' +
+                    '⬇️ 한 단계 내릴 때 <span style="font-size:12px; font-weight:700;">\u00b7 더 천천히 나오는 젖꼭지로</span></div>' +
                 '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
-                '<b>사레</b>가 자주 들려요 · 입가로 줄줄 흘러요 · ' +
-                '<b>5분도 안 돼</b> 끝나요 · 먹고 나서 자주 게워요</div>' +
+                    lines(NIP_DOWN) + '</div>' +
             '</div>' +
 
             '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
                 'padding:15px 16px; font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                '🔁 <b>젖병은 그대로 두고 젖꼭지만</b> 바꾸면 됩니다. 훨씬 싸요.<br>' +
-                '실리콘은 <b>두 달쯤</b> 쓰면 갈아주는 게 좋고, 찢어지거나 끈적이면 바로 바꾸세요. ' +
-                '떨어져 나간 조각을 아기가 삼킬 수 있습니다.</div>' +
+                '🔁 <b>젖병은 그대로 두고 젖꼭지만</b> 바꾸면 돼요. 훨씬 싸요.<br>' +
+                '실리콘 젖꼭지는 <b>두 달쯤</b> 쓰면 갈아주는 게 좋고, 찢어지거나 끈적이면 바로 바꾸세요. ' +
+                '떨어져 나간 조각을 아기가 삼킬 수 있어요.</div>' +
 
-            '<div onclick="window.logNippleChange()" ' +
-                'style="margin-top:14px; text-align:center; padding:13px; background:#FFFFFF; border:1.5px solid #DCD3C8; ' +
-                'color:#FFFFFF; border-radius:14px; font-size:14px; font-weight:900; cursor:pointer;">' +
-                '오늘 젖꼭지 갈았어요 · 배냇함에 적어두기</div>' +
+            /* ⚠️ 여기 있던 '오늘 젖꼭지 갈았어요' 단추는 흰 바탕에 흰 글씨라 빈 칸으로 보였다.
+                  같은 탭 '갈 때가 된 것' 에 날짜까지 고를 수 있는 단추가 이미 있어서 거기로 모은다.
+                  두 군데서 누르게 두면 한쪽 화면이 옛 날짜로 남는다. */
+            '<div style="margin-top:12px; font-size:12px; font-weight:600; color:' + GRAY + '; ' +
+                'line-height:1.7; word-break:keep-all;">' +
+                '갈아 끼운 날은 <b>갈 때가 된 것</b>에 적어두시면 여기에도 같이 떠요.</div>' +
         '</div>';
     }
 
     /* ---------- 자리 잡기 ----------
        index.html 은 한 줄도 안 고친다.
-       기존 필터 패널 바로 앞에 세 칸을 끼워 넣는다. -------- */
+       기존 필터 패널 바로 앞에 두 칸(상황 · 몇 개)을 끼워 넣는다. 젖꼭지 단계는 쓰면서 칸으로. -------- */
 
     var HOST = "bottle-guide";
+    var NIP_HOST = "bottle-nipple";
 
-    function paint() {
+    /* 상황 묻기 · 몇 개 는 '젖병 고르기' 칸, 젖꼭지 단계는 '쓰면서 챙길 것' 칸.
+       한 그릇에 셋을 담았더니 bottletabs 가 그릇째 '쓰면서' 칸으로 옮겨 접어버렸다. 그릇을 둘로 나눈다. */
+    function paintGuide() {
         var host = document.getElementById(HOST);
-        if (!host) return;
-        host.innerHTML = casesHTML() + howManyHTML() + nippleHTML();
+        if (host) host.innerHTML = casesHTML() + howManyHTML();
+    }
+    function paintNipple() {
+        var box = document.getElementById(NIP_HOST);
+        if (box) box.innerHTML = nippleHTML();
+    }
+    function paint() { paintGuide(); paintNipple(); }
+    window.refreshBottleNipple = paintNipple;
+
+    function mountNipple() {
+        if (document.getElementById(NIP_HOST)) return;
+        /* 처음부터 '쓰면서' 칸에 넣는다. 고르기 칸에 붙였다가 옮기면 그 사이 한 번 번쩍 보인다. */
+        var tools = document.getElementById("view-bottle-tools");
+        var guide = document.getElementById(HOST);
+        var box = document.createElement("div");
+        box.id = NIP_HOST;
+        if (tools) {
+            var gear = document.getElementById("bottle-gear");
+            if (gear && gear.parentNode === tools) tools.insertBefore(box, gear.nextSibling);
+            else tools.appendChild(box);
+        } else if (guide && guide.parentNode) {
+            guide.parentNode.insertBefore(box, guide.nextSibling);
+        } else return;
+        paintNipple();
     }
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        if (document.getElementById(HOST)) { mountNipple(); return; }
 
-        var panel = document.querySelector(".matrix-panel");
+        /* '고르기' 칸의 직접 조건 패널을 짚는다. 다른 모듈 카드가 먼저 생겨도 헷갈리지 않게. */
+        var panel = document.querySelector("#view-bottle-pick > .matrix-panel") || document.querySelector(".matrix-panel");
         if (!panel || !panel.parentNode) return;
 
         var box = document.createElement("div");
@@ -434,7 +494,8 @@
             }
         }
 
-        paint();
+        paintGuide();
+        mountNipple();
     }
 
     /* ---------- 시작 ---------- */

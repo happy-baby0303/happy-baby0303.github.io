@@ -186,8 +186,8 @@
             warnHTML() +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:0 0 16px; line-height:1.75; word-break:keep-all;">' +
-                '복직이 다가오는데 ' + esc(nm("가")) + ' 젖병을 거부하시나요. ' +
-                '방법이 <b>아홉 가지</b> 있고 순서가 있습니다. ' +
+                esc(nm("가")) + ' 젖병을 거부하나요? ' +
+                '방법이 <b>아홉 가지</b> 있고 순서가 있어요. ' +
                 '한꺼번에 다 하시면 뭐가 통했는지 모르니까, <b>하루에 하나씩</b> 드릴게요.</div>' +
             '<div onclick="window.startRefuse()" style="text-align:center; padding:16px; ' +
                 'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
@@ -226,10 +226,17 @@
                         : dLeft > 0 ? "D-" + dLeft
                         : dLeft === 0 ? "오늘입니다" : "지났어요") + '</div>' +
             '</div>' +
-            '<input type="date" value="' + esc(back) + '" ' +
-                'onchange="window.setRefuseBackDate(this.value)" ' +
-                'style="flex-shrink:0; padding:9px 11px; border-radius:10px; border:1px solid #DCD3C8; ' +
-                'background: #FFFFFF; font-size:12.5px; font-weight:700; color:#7A6F68;">' +
+            /* ⚠️ 안드로이드 크롬은 비어 있는 날짜 칸을 빈 네모로만 보여준다. 글자를 깔고 투명한 날짜 칸을 덮는다 */
+            '<label style="flex-shrink:0; position:relative; padding:9px 12px; border-radius:10px; ' +
+                'border:1px solid #DCD3C8; background:#FFFFFF; font-size:12.5px; font-weight:800; ' +
+                'color:#7A6F68; cursor:pointer; overflow:hidden;">' +
+                (back ? Number(back.split("-")[1]) + "월 " + Number(back.split("-")[2]) + "일" : "날짜 고르기") +
+                '<input type="date" aria-label="복직일 고르기" value="' + esc(back) + '" ' +
+                    'onchange="window.setRefuseBackDate(this.value)" ' +
+                    'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                    'style="position:absolute; top:0; left:0; width:100%; height:100%; margin:0; padding:0; ' +
+                    'border:0; opacity:0; cursor:pointer; font-size:16px;">' +
+            '</label>' +
         '</div>';
 
         out += warnHTML();
@@ -239,7 +246,7 @@
             out += '<div style="background:#EAF7F1; border:1px solid #A7DFC8; border-radius:14px; ' +
                 'padding:16px; margin-bottom:12px;">' +
                 '<div style="font-size:14px; font-weight:900; color:#1F6F52;">' +
-                    '\u2705 ' + esc(win.t) + ' \u2014 이게 통했어요</div>' +
+                    '\u2705 통한 방법 \u00b7 ' + esc(win.t) + '</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '며칠은 같은 방법으로 이어가세요. 한 번 됐다고 바로 되진 않고, ' +

@@ -1,5 +1,6 @@
 // ==========================================
-// 🩺 배냇함 안심 이유식 AI 엔진 V3.0 (food/app.js)
+// 🩺 배냇함 이유식 큐레이터 (food/app.js)
+// ※ GitHub Pages 라 이 파일은 누구나 열어볼 수 있다. 주석도 화면 문구처럼 쓴다.
 // (메인 글로벌 연동 + 찜 보관함 + 크로스셀링 통합)
 // ==========================================
 
@@ -216,7 +217,12 @@ function checkIngredient() {
     }
 }
 
-// 🌟 공통 카드 렌더링 함수 (대기업 프리미엄 템플릿 완벽 적용 + 녹색 띠 제거)
+// 레시피 카드
+// 조리 순서 한 줄을 화면용으로 다듬는다. '(안전)' 은 짧은 '주의' 표시로 (요리 모드와 같은 말).
+function foodStepHTML(step) {
+    return String(step || '')
+        .replace(/\(안전\)\s*/g, '<b style="color:#B42318;">주의</b> ');
+}
 function generateCardHTML(item) {
     const itemId = item.name;
     const favorites = JSON.parse(localStorage.getItem('favFoods')) || [];
@@ -242,30 +248,28 @@ function generateCardHTML(item) {
                 </div>
             </div>
             
-            <div style="font-size: 13.5px; color: #7A6F68; margin-bottom: 20px; font-weight: 600; line-height: 1.5;">💡 ${item.desc}</div>
+            <div style="font-size: 13.5px; color: #7A6F68; margin-bottom: 20px; font-weight: 600; line-height: 1.5;">${item.desc}</div>
             
             <div style="background: #FBF8F3; padding: 16px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 16px;">
                 <div style="font-size: 13.5px; color: #7A6F68; line-height: 1.6; font-weight: 600;">
-                    <span style="display:block; margin-bottom:6px;"><b>👨‍🍳 입자:</b> ${item.texture}</span>
-                    <span style="color:#7F77DD; display:block;"><b>🛒 필요 재료:</b> ${item.ingredients}</span>
+                    <span style="display:block; margin-bottom:6px;"><b>입자:</b> ${item.texture}</span>
+                    <span style="display:block;"><b>필요 재료:</b> ${item.ingredients}</span>
                 </div>
             </div>
 
-            <!-- ✨ 까만색 묵직한 프리미엄 요리 시작 버튼 -->
             <button onclick="openCookingMode('${item.name}')" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#4A413C; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 16px; transition: 0.2s;">
-                👨‍🍳 스마트 요리 모드 시작 〉
+                따라 만들기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; flex-shrink:0;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </button>
             
             <div class="recipe-box" style="background: #FFF; border: 1px solid #EDE6DE; padding: 16px; border-radius: 14px; margin-bottom:16px;">
                 <div style="font-weight: 800; font-size: 13.5px; color: #4A413C; margin-bottom: 8px;">조리 순서 미리보기</div>
-                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #7A6F68; line-height: 1.6;">
-                    ${item.recipe.map(step => `<li style="margin-bottom:4px;">${step}</li>`).join('')}
+                <ul style="margin: 0; padding-left: 0; list-style: none; font-size: 13px; color: #7A6F68; line-height: 1.6;">
+                    ${item.recipe.map(step => `<li style="margin-bottom:6px;">${foodStepHTML(step)}</li>`).join('')}
                 </ul>
             </div>
 
-            <!-- ✨ 카카오톡 노란색 장보기 공유 버튼 -->
             <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="display:block; width:100%; background:#FEE500; border:none; color:#191919; padding:16px; border-radius:14px; font-weight:900; font-size:15px; text-align:center; transition:0.2s; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);">
-                💬 남편에게 장보기 전송 (쿠팡)
+                여보한테 장볼 거 보내기
             </button>
         </div>
     `;
@@ -445,51 +449,32 @@ try {
     console.warn("카카오 SDK 초기화 지연", e);
 }
 
-// 🛒 남편 아바타 조종기 (상업적 멘트 싹 빼고 자연스러운 아내 말투로 변경!)
+// 장볼 거 보내기
+/* ⚠️ 예전에는 메시지 끝에 쿠팡 파트너스 링크 하나를 몰래 붙이고
+      "아래 링크 눌러서 쿠팡 장바구니에 싹 담아주면 돼" 라고 적었다.
+      그 링크는 이 재료들과 상관없는 링크였고(쿠팡은 여러 개를 밖에서 한 번에 못 담는다),
+      받는 사람은 그게 수수료 링크인 줄 모른다. 공정위 지침상 대가성을 알리지 않은 추천이 된다.
+      재료 목록만 보낸다. */
 function shareToHusband(recipeName, ingredients) {
-    // ✨ 파트너님의 100% 수익 보장 쿠팡 단축 링크 (뒤에서 조용히 일합니다)
-    const partnerLink = "https://link.coupang.com/a/e2f58ZVlhQ"; 
-    
-    const items = ingredients.split(',').map(i => i.trim());
-    let shareText = `여보 오늘 우리 아기 맘마는 [${recipeName}] 해줄 거야 👶❤️\n\n퇴근길에 로켓프레시로 장 좀 봐줘\n\n📋 [오늘의 장바구니]\n`;
+    const items = String(ingredients || '').split(',').map(i => i.trim()).filter(Boolean);
+    let shareText = `여보, 오늘 이유식은 [${recipeName}] 할게요.\n장볼 거 적어서 보내요.\n\n`;
+    items.forEach(item => { shareText += `· ${item}\n`; });
+    shareText += `\n(배냇함 이유식에서 보냄)`;
 
-    // 재료 리스트 추출
-    items.forEach(item => {
-        const cleanName = item.replace(/[0-9]+(g|ml|T|t|개|장|마리|쪽|알|스푼|분|방울).*/g, '').replace(/\(.*\)/g, '').trim();
-        if(cleanName) {
-            shareText += `🛒 ${item}\n`;
-        }
-    });
-
-    // ✨ 완벽하게 자연스러운 아내의 멘트로 수정 (수익 얘기 100% 삭제)
-    shareText += `\n👇 아래 링크 눌러서 쿠팡 장바구니에 싹 담아주면 돼\n👉 ${partnerLink}\n\n고마워 내사랑 조심해서 와 🥰`;
-
-    // 🚨 카카오톡이 안 될 때 클립보드 복사 폴백
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText).then(() => {
-            alert("✅ 남편에게 보낼 장보기 리스트가 복사되었습니다\n카카오톡에 붙여넣기 해주세요.");
-        }).catch(() => prompt("아래 텍스트를 복사해 주세요", shareText));
+            alert("장볼 거 목록을 복사했어요. 카톡에 붙여 넣어 보내세요.");
+        }).catch(() => prompt("아래 내용을 복사해 주세요", shareText));
         return;
     }
 
     Kakao.Share.sendDefault({
         objectType: 'text',
         text: shareText,
-        link: {
-            mobileWebUrl: 'https://happy-baby0303.github.io/',
-            webUrl: 'https://happy-baby0303.github.io/'
-        },
-        buttons: [
-            {
-                title: '장바구니 담으러 가기 👉',
-                link: {
-                    mobileWebUrl: 'https://happy-baby0303.github.io/',
-                    webUrl: 'https://happy-baby0303.github.io/'
-                }
-            }
-        ]
+        link: { mobileWebUrl: 'https://happy-baby0303.github.io/', webUrl: 'https://happy-baby0303.github.io/' },
+        buttons: [{ title: '배냇함에서 보기', link: { mobileWebUrl: 'https://happy-baby0303.github.io/', webUrl: 'https://happy-baby0303.github.io/' } }]
     });
-} // 🚨🚨🚨 바로 이 닫는 괄호 '}' 하나가 빠져서 모든 게 멈췄던 겁니다 🚨🚨🚨
+}
 
 // 🚀 페이지 로드 시 글로벌 동기화 후 엔진 실행
 window.onload = () => { 
@@ -573,7 +558,11 @@ function renderCalendar() {
         if (records[dateStr]) {
             dotsHtml = '<div class="cal-dot-container">';
             records[dateStr].forEach(r => {
-                // ✨ 수정된 로직: 식단 기록은 파란 점! 카운트 안 함!
+                /* ⚠️ '이미 먹여본 재료' 로 한꺼번에 적은 것(past)은 그날 새로 먹인 게 아니다.
+                      같은 날짜로 넷을 적으면 달력엔 '하루에 새 재료 넷' 으로 찍히고, 이번 달 개수에도 들어갔다.
+                      사흘 규칙을 알려주는 앱이 스스로 그 반대를 보여주는 꼴이라 점에서 뺀다. */
+                if (r.past) return;
+                // 식단 기록은 보라 점 (개수에는 안 넣는다)
                 if (r.type === 'meal' || (r.menu && !r.ingredient)) {
                     dotsHtml += `<div class="cal-dot" style="background:#7F77DD;"></div>`;
                 } 
@@ -634,7 +623,7 @@ function renderSelectedDateRecords() {
     if(titleEl) titleEl.innerText = `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일 기록`;
 
     if (dailyRecords.length === 0) {
-        listArea.innerHTML = `<div style="text-align: center; padding: 30px 0; color: #A3958A; font-size: 14px; font-weight: 600; background:#FFF; border-radius:14px; border:1px dashed #DCD3C8;">기록된 내역이 없습니다.</div>`;
+        listArea.innerHTML = `<div style="text-align: center; padding: 30px 0; color: #A3958A; font-size: 14px; font-weight: 600; background:#FFF; border-radius:14px; border:1px dashed #DCD3C8;">아직 기록이 없어요.</div>`;
         return;
     }
 
@@ -1150,7 +1139,7 @@ function renderSelectedDateRecords() {
     if (titleEl) titleEl.innerText = `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일 기록`;
 
     if (dailyRecords.length === 0) {
-        listArea.innerHTML = `<div style="text-align:center; padding:30px 0; color:#A3958A; font-size:14px; font-weight:600; background:#FFF; border-radius:14px; border:1px dashed #DCD3C8;">기록된 내역이 없습니다.</div>`;
+        listArea.innerHTML = `<div style="text-align:center; padding:30px 0; color:#A3958A; font-size:14px; font-weight:600; background:#FFF; border-radius:14px; border:1px dashed #DCD3C8;">아직 기록이 없어요.</div>`;
         return;
     }
 
@@ -1356,7 +1345,7 @@ window.confirmDeduction = function() {
     document.getElementById('ai-deduction-modal').style.display = 'none';
     
     saveMealRecord();
-    setTimeout(() => { alert("🤖 냉장고 큐브 재고가 1개 차감되었습니다"); }, 300);
+    setTimeout(() => { alert("냉장고 큐브 1개를 뺐어요"); }, 300);
 };
 
 // [건너뛰기] 눌렀을 때
@@ -1366,13 +1355,13 @@ window.skipDeduction = function() {
 };
 
 // ==========================================
-// 📸 [마케팅 원기옥] 맘카페 자랑용 식단표 이미지 캡처 엔진
+// 📸 달력 이미지로 저장 (view-calendar 전체를 찍는다)
 // ==========================================
 window.downloadCalendarImage = function() {
     // 1. 찰칵! 소리와 함께 캡처 중이라는 걸 보여줍니다.
     const btn = event.currentTarget;
     const originalText = btn.innerHTML;
-    btn.innerHTML = '⏳ 예쁘게 이미지를 굽는 중...';
+    btn.innerHTML = '이미지 만드는 중…';
     btn.style.background = '#A3958A';
     btn.disabled = true;
 

@@ -33,11 +33,12 @@
 
     var GEAR_KEY = "tosil_bottle_gear";
     var PART_KEY = "tosil_bottle_parts";
+    var CUP_KEY  = "tosil_bottle_cup";      // '빨대컵도 써요' 를 눌렀는지. 소모품 날짜 칸과 섞지 않는다
     var NIP_KEY  = "tosil_nipple_changed";   // ⚠️ bottleguide.js 와 같은 키. 따로 관리하면 안 된다
 
     var HOST = "bottle-gear", SHEET = "gear-sheet";
     var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
-    var GREEN = "#1F9D6B", RED = "#E32636";
+    var GREEN = "#1F9D6B", RED = "#E32636", GOLD = "#8A6D00";   // ⚠️ GOLD 가 없어서 10~11개월 아기 화면에서 이 파일 카드가 통째로 안 떴다
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -138,9 +139,9 @@
     }
 
     var V = {
-        no:      { icon: "\uD83D\uDD34", c: RED,   t: "제조사가 안 된다고 합니다" },
+        no:      { icon: "\uD83D\uDD34", c: RED,   t: "제조사가 안 된다고 해요" },
         care:    { icon: "\uD83D\uDFE1", c: "#8A6D00", t: "되지만 변색·끈적임이 올 수 있어요" },
-        ok:      { icon: "\uD83D\uDFE2", c: GREEN, t: "괜찮습니다" },
+        ok:      { icon: "\uD83D\uDFE2", c: GREEN, t: "괜찮아요" },
         unknown: { icon: "\u26AA", c: GRAY, t: "이 방식은 적혀 있지 않아요. 제조사에 확인하세요" }
     };
 
@@ -248,6 +249,10 @@
         } catch (e) {}
 
         paint();
+        /* 젖꼭지 단계 카드의 '마지막 교체 후 N일' 도 같은 날짜를 본다. 같이 새로 그린다 */
+        if (id === "nipple" && typeof window.refreshBottleNipple === "function") {
+            try { window.refreshBottleNipple(); } catch (e) {}
+        }
     };
 
     /* ==========================================================
@@ -256,7 +261,7 @@
        ---------------------------------------------------------- */
 
     var ROAD = [
-        { at: 0,  label: "젖병 · 젖꼭지",     note: "지금 쓰고 계신 것" },
+        /* '지금 · 젖병·젖꼭지 · 지금 쓰고 계신 것' 줄은 뺐다. 다음에 준비할 게 아니고, 6개월이 넘으면 '지금'이 두 번 떴다 */
         { at: 6,  label: "컵 처음 보여주기",  note: "이유식 시작하면서 같이 쥐어보게 하는 집이 많아요" },
         { at: 9,  label: "빨대컵으로 물",     note: "흘리는 게 당연한 시기입니다. 턱받이가 더 급해요" },
         { at: 12, label: "손잡이 컵 · 젖병 졸업", note: "한 번에 끊지 않고 낮부터 줄여갑니다" }
@@ -280,11 +285,11 @@
                 'border:1px solid ' + (near ? "#F5E1A4" : "#EDE6DE") + '; border-radius:14px; ' +
                 'padding:16px; margin-top:10px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + (near ? GOLD : DARK) + ';">' +
-                    '\uD83E\uDD5B 생우유는 아직이에요 \u00b7 약 ' + left + '개월 남았습니다</div>' +
+                    '\uD83E\uDD5B 생우유는 돌 지나서 \u00b7 약 ' + left + '개월 뒤</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
-                    '돌 무렵은 태어날 때 받아온 철분이 거의 떨어지는 때예요. ' +
-                    '생우유에는 철분이 거의 없어서, 돌 전에 주식으로 주면 부족해지기 쉽습니다.' +
+                    '생우유는 철분이 거의 없고 흡수도 잘 안 돼요. ' +
+                    '돌 전에 주식으로 주면 철분 많은 음식을 덜 먹게 돼서 철분이 모자라기 쉬워요.' +
                     (left <= 1 ? ' <b>이제 곧이에요. 돌 지나면 여기가 바뀝니다.</b>' : '') +
                     '</div>' +
             '</div>';
@@ -355,7 +360,7 @@
             '</div>' +
             '<div style="margin-top:6px; font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '한 번만 알려주시면 됩니다. 안 맞는 조합이 있으면 찾아드릴게요.</div>' +
+                '한 번만 알려주시면 돼요. 안 맞는 조합이 있으면 찾아드릴게요.</div>' +
 
             '<div style="margin-top:22px; font-size:13px; font-weight:900; color:' + DARK + '; ' +
                 'margin-bottom:9px;">소독은 어떻게 하세요</div>' +
@@ -395,7 +400,7 @@
             '<div style="max-width:480px; margin:0 auto;">' +
                 '<div onclick="window.closeGearSheet()" style="text-align:center; padding:17px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
-                    'font-size:15.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
+                    'font-size:15.5px; font-weight:900; cursor:pointer;">다 됐어요</div>' +
             '</div>' +
         '</div>';
     }
@@ -412,7 +417,7 @@
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                     '소독 방식과 쓰시는 젖병만 알려주시면, <b>안 맞는 조합</b>을 찾아드리고 ' +
-                    '<b>갈 때</b>도 알려드립니다. 한 번만 하시면 돼요.</div>' +
+                    '<b>갈 때</b>도 알려드려요. 한 번만 하시면 돼요.</div>' +
                 '<div onclick="window.openGearSheet()" style="text-align:center; padding:16px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
                     'font-size:14.5px; font-weight:900; cursor:pointer;">장비 알려주기</div>' +
@@ -431,7 +436,7 @@
                 ? { bg: "#FFF9E6", bd: "#F5E1A4", c: "#8A6D00",
                     t: mt.label + "에 조심할 젖병이 " + care.length + "개 있어요" }
                 : { bg: "#EAF7F1", bd: "#A7DFC8", c: "#1F6F52",
-                    t: "지금 조합은 괜찮습니다" };
+                    t: "지금 조합은 괜찮아요" };
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83C\uDF7C 우리 집 수유 장비</div>' +
@@ -463,14 +468,44 @@
 
             '<div style="margin-top:13px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '제조사가 밝힌 내용을 ' + esc(SPEC_ASOF) + '으로 정리한 것입니다. ' +
+                '제조사가 밝힌 내용을 ' + esc(SPEC_ASOF) + '으로 정리한 거예요. ' +
                 '제품이 바뀌었을 수 있으니 <b>사기 전에 설명서를 한 번 더 보세요.</b>' +
-                (unk.length ? ' 흰 점으로 표시된 ' + unk.length + '개는 이 방식이 적혀 있지 않은 것입니다.' : '') +
+                (unk.length ? ' 흰 점으로 표시된 ' + unk.length + '개는 이 방식이 적혀 있지 않은 거예요.' : '') +
             '</div>' +
         '</div>';
     }
 
     /* ---------- 갈 때가 된 것 (PLUS) ---------- */
+
+    /* 날짜 칸.
+       ⚠️ 안드로이드 크롬은 비어 있는 날짜 칸에 글자를 하나도 안 보여준다.
+          그래서 '오늘 갈았어요' 옆에 빈 네모만 떠 있었다.
+          글자를 깔아두고, 그 위를 투명한 날짜 칸으로 덮는다. 누르면 달력이 뜬다. */
+    function datePick(onchange, val, label) {
+        return '<label style="flex:1; position:relative; display:flex; align-items:center; ' +
+                'justify-content:center; padding:11px 8px; border-radius:11px; cursor:pointer; ' +
+                'font-size:12.5px; font-weight:800; background:#FFFFFF; color:#7A6F68; ' +
+                'border:1px solid #DCD3C8; overflow:hidden;">' + esc(label) +
+            '<input type="date" aria-label="' + esc(label) + '" value="' + esc(val || "") + '" ' +
+                'max="' + today() + '" onchange="' + onchange + '" ' +
+                'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                'style="position:absolute; top:0; left:0; width:100%; height:100%; margin:0; ' +
+                'padding:0; border:0; opacity:0; cursor:pointer; font-size:16px;">' +
+        '</label>';
+    }
+
+    /* 빨대컵은 9개월 무렵부터다. 6개월 아기 화면에 '빨대컵 패킹' 이 떠 있으면 남의 얘기로 읽힌다.
+       9개월이 넘었거나, 이미 적어둔 게 있거나, '빨대컵도 써요' 를 눌렀을 때만 보여준다. */
+    function cupOn(rows) {
+        var m = monthsOld();
+        if (m === null || m >= 9) return true;
+        if (localStorage.getItem(CUP_KEY) === "1") return true;
+        return rows.some(function (r) { return (r.p.id === "straw" || r.p.id === "gasket") && r.n !== null; });
+    }
+    window.showBottleCupParts = function () {
+        try { localStorage.setItem(CUP_KEY, "1"); } catch (e) {}
+        paint();
+    };
 
     function partsHTML() {
         var plus = isPlus();
@@ -478,10 +513,12 @@
             var d = partDate(p), n = daysSince(d);
             return { p: p, d: d, n: n, over: (n === null ? false : n >= p.days) };
         });
-        var over = rows.filter(function (r) { return r.over; }).length;
-        var none = rows.filter(function (r) { return r.n === null; }).length;
+        var cup = cupOn(rows);
+        var list = cup ? rows : rows.filter(function (r) { return r.p.id !== "straw" && r.p.id !== "gasket"; });
+        var over = list.filter(function (r) { return r.over; }).length;
 
-        var show = plus ? rows : rows.slice(0, 2);
+        var show = plus ? list : list.slice(0, 2);
+        var rest = list.slice(show.length).map(function (r) { return r.p.label; });
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83D\uDD01 갈 때가 된 것</div>' +
@@ -489,8 +526,8 @@
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 (over ? '<b>' + over + '개</b>는 한 번 볼 때가 됐어요. '
                       : '갈아 끼운 날만 눌러두시면 다음에 볼 때가 됐을 때 알려드려요. ') +
-                '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>입니다.<br>' +
-                '<span style="font-size:11.5px;">예전에 갈았으면 <b>아래 날짜 칸</b>에서 그 날짜를 고르세요.</span></div>' +
+                '날짜가 됐다고 꼭 버리라는 건 아니고, <b>눈으로 한 번 보시라는 뜻</b>이에요.<br>' +
+                '<span style="font-size:11.5px;">예전에 갈았으면 <b>다른 날 갈았어요</b>를 눌러 날짜를 고르세요.</span></div>' +
 
             show.map(function (r) {
                 var c = r.over ? RED : (r.n === null ? GRAY : "#7A6F68");
@@ -505,7 +542,7 @@
                     '<div style="margin-top:3px; font-size:12px; font-weight:700; color:' + c + ';">' +
                         (r.n === null ? "아직 안 적으셨어요"
                                       : md(r.d) + " \u00b7 " + (r.n === 0 ? "오늘 갈았어요" : r.n + "일째") +
-                                        (r.over ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
+                                        (r.over ? " \u00b7 볼 때가 됐어요" : "")) + '</div>' +
                     '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                         'line-height:1.65; word-break:keep-all;">' + r.p.why + '</div>' +
                     '<div style="display:flex; gap:7px; margin-top:10px;">' +
@@ -513,32 +550,32 @@
                             'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
                             'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
                             'color:#7A6F68; border:1px solid #DCD3C8;">오늘 갈았어요</div>' +
-                        '<input type="date" title="예전에 갈았으면 그 날짜를 고르세요" ' +
-                            'value="' + esc(r.d || "") + '" max="' + today() + '" ' +
-                            'onchange="window.logBottlePart(\'' + r.p.id + '\', this.value)" ' +
-                            'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
-                            'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
-                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#7A6F68; ' +
-                            'background:#FFFFFF; border:1px solid #DCD3C8; border-radius:11px; ' +
-                            'padding:10px 8px; cursor:pointer;">' +
+                        datePick("window.logBottlePart('" + r.p.id + "', this.value)", r.d, "다른 날 갈았어요") +
                     '</div>' +
                 '</div>';
             }).join("") +
 
+            ((plus && !cup)
+                ? '<div onclick="window.showBottleCupParts()" style="margin-top:12px; text-align:center; ' +
+                  'padding:11px; border-radius:11px; border:1px dashed #DCD3C8; font-size:12.5px; ' +
+                  'font-weight:800; color:#7A6F68; cursor:pointer;">빨대컵도 쓰고 있어요 +</div>'
+                : '') +
+
             (plus
                 ? '<div style="margin-top:13px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                   'line-height:1.7; word-break:keep-all;">' +
-                  '눌러두시면 배냇함 <b>언제깠지</b>에도 같이 적힙니다. ' +
-                  '젖병 본체는 날짜로 세지 않아요 \u2014 <b>뿌옇게 되거나 흠집이 나면</b> 그때 바꾸세요.</div>'
+                  '눌러두시면 배냇함 <b>언제깠지</b>에도 같이 적혀요. ' +
+                  '젖병 본체는 날짜로 세지 않아요. <b>뿌옇게 되거나 흠집이 나면</b> 그때 바꾸세요.</div>'
 
                 : '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
                   'border-radius:14px; padding:16px;">' +
-                  '<div style="font-size:13.5px; font-weight:900; color:#8A6D00;">' +
-                      '나머지 ' + (PARTS.length - show.length) + '개도 PLUS에서 챙겨드려요</div>' +
-                  '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#8A6D00; ' +
+                  '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
+                      '나머지 ' + rest.length + '개도 PLUS에서 챙겨드려요</div>' +
+                  '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                       'line-height:1.75; word-break:keep-all;">' +
-                      '젖병솔 \u00b7 빨대 \u00b7 패킹까지요. ' +
-                      '새는 건 컵이 아니라 대개 패킹인데, 그것만 따로 팝니다.</div></div>') +
+                      esc(rest.join(" \u00b7 ")) + '까지요.' +
+                      (rest.indexOf("빨대컵 패킹") > -1 ? ' 새는 건 컵이 아니라 대개 패킹인데, 그것만 따로 팝니다.' : '') +
+                  '</div></div>') +
         '</div>';
     }
 
