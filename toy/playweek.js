@@ -648,7 +648,7 @@
                     'border-radius:16px; font-size:15.5px; font-weight:800; cursor:pointer; ' +
                     'box-shadow:0 4px 16px rgba(0,0,0,0.15);">\uD83D\uDCC5 이번 주 놀이 짜주세요</div>' +
                 '<div style="margin-top:9px; text-align:center; font-size:12px; font-weight:700; ' +
-                    'color:' + GRAY + '; line-height:1.6;">오늘과 내일은 무료로 보여드려요</div>' +
+                    'color:' + GRAY + '; line-height:1.6;">' + (plus ? '일주일치를 한 번에 짜드려요' : '오늘과 내일은 무료로 보여드려요') + '</div>' +
             '</div>';
         }
 

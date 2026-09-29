@@ -43,7 +43,7 @@
           d: "단종된 모델은 <b>바퀴 하나 못 구해서</b> 통째로 버리게 됩니다. " +
              "브랜드 고객센터에 모델명으로 한 번 물어보세요." },
         { t: "리콜된 모델은 아닌가",
-          d: "모델명으로 제품안전정보센터에서 확인하세요. 아래 카드에 바로 가는 길이 있습니다." },
+          d: "모델명으로 <a href=\"https://www.safetykorea.kr\" target=\"_blank\" rel=\"noopener\" style=\"color:#6A61CE; font-weight:800;\">제품안전정보센터</a>에서 확인하세요. 국가기술표준원이 운영하는 공공 사이트예요." },
         { t: "안전벨트와 차양이 다 있나",
           d: "5점식 벨트, 차양, 아래 바구니. 없으면 따로 사기 어렵고 비쌉니다." }
     ];
@@ -104,7 +104,7 @@
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'margin:-16px 0 16px; line-height:1.75; word-break:keep-all;">' +
                 '유모차는 <b>중고가 흔한 물건</b>입니다. 1년 쓰고 파는 사람이 많아요.<br>' +
-                '<span style="color:' + RED + '; font-weight:800;">다만 카시트는 다릅니다 — ' +
+                '<span style="color:' + RED + '; font-weight:800;">다만 카시트는 다릅니다. ' +
                 '사고 이력이 있으면 겉이 멀쩡해도 쓰면 안 됩니다.</span>' +
             '</div>' +
 

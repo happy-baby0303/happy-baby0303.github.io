@@ -189,15 +189,16 @@ function renderPlays() {
 
     let html = '';
     filtered.forEach(p => {
-        let badgeColor = '#7F77DD', badgeBg = '#F0EEFB', badgeText = '🧸 국민템 뽕뽑기';
-        if (p.category === 'zero') { badgeColor = '#059669'; badgeBg = '#ECFDF5'; badgeText = '🏠 0원 집구석 놀이'; }
-        else if (p.category === 'dad') { badgeColor = '#E32636'; badgeBg = '#FFF2F2'; badgeText = '🏋️ 아빠 육체노동'; }
-        else if (p.category === 'lieDown') { badgeColor = '#7F77DD'; badgeBg = '#F3F0FC'; badgeText = '🛌 합법적 눕육아'; }
-        else if (p.category === 'poop') { badgeColor = '#D97706'; badgeBg = '#FFFBEB'; badgeText = '💩 장운동 쾌변 기원'; }
-        else if (p.category === 'sick') { badgeColor = '#EA580C'; badgeBg = '#FFEDD5'; badgeText = '🤒 껌딱지 진정 놀이'; }
+        let badgeColor = '#7F77DD', badgeBg = '#F0EEFB', badgeText = '🧸 장난감으로';
+        if (p.category === 'zero') { badgeColor = '#059669'; badgeBg = '#ECFDF5'; badgeText = '🏠 집에 있는 걸로'; }
+        else if (p.category === 'dad') { badgeColor = '#E32636'; badgeBg = '#FFF2F2'; badgeText = '🏋️ 몸으로 크게'; }
+        else if (p.category === 'lieDown') { badgeColor = '#7F77DD'; badgeBg = '#F3F0FC'; badgeText = '🛌 누워서 하는'; }
+        else if (p.category === 'poop') { badgeColor = '#D97706'; badgeBg = '#FFFBEB'; badgeText = '💩 배 마사지'; }
+        else if (p.category === 'sick') { badgeColor = '#EA580C'; badgeBg = '#FFEDD5'; badgeText = '🤒 차분한 놀이'; }
 
         const isFav = favs.includes(p.id);
-        const stepsHtml = p.steps.map(step => `<li style="margin-bottom: 8px;">${step}</li>`).join('');
+        /* '(안전)' '(주의)' 는 짧은 '주의' 표시로 (이유식·요리 모드와 같은 말) */
+        const stepsHtml = p.steps.map(step => `<li style="margin-bottom: 8px;">${String(step).replace(/\((안전 필수|안전|주의)\)\s*(⚠️\s*)?/g, '<b style="color:#B42318;">주의</b> ')}</li>`).join('');
 
         // 🔗 1. [크로스셀링] 장난감으로 넘어가는 버튼 생성
         let linkToToyHtml = '';
@@ -205,7 +206,7 @@ function renderPlays() {
             linkToToyHtml = `
                 <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#FAF7F2; border:1px solid #EDE6DE; padding:14px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
                     <div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:#7A6F68; word-break:keep-all;">🛒 이 놀이에 쓰는 장난감</div>
-                    <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#7F77DD; white-space:nowrap; margin-left:10px;">보러 가기 〉</div>
+                    <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#7F77DD; white-space:nowrap; margin-left:10px;">보러 가기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
                 </div>
             `;
         }
@@ -225,7 +226,7 @@ function renderPlays() {
                 <div style="font-size: 13px; color: #7A6F68;"><b>체력소모:</b> ${p.energyDrain}</div>
             </div>
 
-            <ul style="margin: 0 0 20px 0; padding-left: 20px; font-size: 14.5px; font-weight: 700; color: #4A413C; line-height: 1.6;">
+            <ul style="margin: 0 0 20px 0; padding-left: 0; list-style: none; font-size: 14.5px; font-weight: 700; color: #4A413C; line-height: 1.6;">
                 ${stepsHtml}
             </ul>
 
@@ -341,30 +342,38 @@ function startPlayTimer(playId, minutes) {
     tick();   // 즉시 1회 실행해서 00:00 깜빡임 방지
 }
 
+/* ⚠️ "🚨 [긴급 육아 미션 도착] 여보, 오늘 퇴근하고…" + "미션 수락하기 🫡" 였다.
+      놀이 하나 같이 하자는 말에 경보 이모지를 달 이유가 없고, '퇴근하고' 는 집마다 다르다.
+      무엇을 하는지와 맡아줄 일만 적고, 링크를 열면 그 놀이 카드로 간다 (?play=번호). */
 function sharePlayMission(playId) {
     const p = playData.find(x => x.id === playId);
     if (!p) return;
-
-    const shareText = `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘\n\n🎈 놀이명: ${p.title}\n⏱️ 목표 시간: ${p.playTime}분\n👨‍🔧 당신의 역할: ${p.dadRole}\n\n👉 앱에서 확인하기: https://happy-baby0303.github.io/baby-master/toy/index.html`;
-
-    // 🚨 클립보드 폴백
+    const link = 'https://happy-baby0303.github.io/baby-master/toy/index.html?play=' + encodeURIComponent(p.id);
+    const shareText = `오늘 아기랑 이 놀이 같이 해요.\n\n🎈 ${p.title} (${p.playTime}분)` +
+        (p.dadRole ? `\n🙋 맡아줄 것: ${p.dadRole}` : '') + `\n\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
-            .then(() => alert('내용이 복사되었어요 붙여넣기 해주세요 🤍'))
+            .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
             .catch(() => prompt("아래 내용을 복사해 주세요", shareText));
         return;
     }
-
     Kakao.Share.sendDefault({
         objectType: 'text',
         text: shareText,
-        link: {
-            mobileWebUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html',
-            webUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html',
-        },
-        buttons: [{ title: '미션 수락하기 🫡', link: { mobileWebUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html', webUrl: 'https://happy-baby0303.github.io/baby-master/toy/index.html' } }],
+        link: { mobileWebUrl: link, webUrl: link },
+        buttons: [{ title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }],
     });
 }
+
+/* 보낸 링크(?play=번호)를 열면 그 놀이로 데려간다 (장난감 카드의 '이 장난감으로 하는 놀이' 와 같은 길) */
+(function () {
+    var id = new URLSearchParams(location.search).get('play');
+    if (!id) return;
+    setTimeout(function () {
+        try { if (typeof jumpToPlay === 'function') jumpToPlay(id); } catch (e) {}
+        try { var u = new URL(location.href); u.searchParams.delete('play'); history.replaceState(history.state, '', u.toString()); } catch (e) {}
+    }, 1300);
+})();
 
 // ==========================================
 // 🛒 TRACK 2: 육아는 템빨 (장난감 렌더링)
@@ -446,7 +455,7 @@ function renderToys(filteredData) {
             </div>`;
         return;
     }
-    resultArea.innerHTML = `<div style="font-weight:800; color:#4A413C; margin-bottom:16px;">✨ 시간 확보 추천 라인업 (${filteredData.length}개)</div>` 
+    resultArea.innerHTML = `<div style="font-weight:800; color:#4A413C; margin-bottom:16px;">지금 맞는 장난감 ${filteredData.length}개</div>` 
                            + filteredData.map(item => generateToyHTML(item, favs)).join('');
 }
 
@@ -473,19 +482,19 @@ function generateToyHTML(toy, favs) {
 
         batteryHtml = `
             <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
-                <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">⚡ 앗 건전지 잊지 않으셨죠? (${toy.battery})</b>
-                <a href="${actualBatteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">👉 로켓배송 건전지 같이 담기</a>
+                <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">건전지가 따로 필요해요 (${toy.battery})</b>
+                <a href="${actualBatteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">쿠팡에서 건전지 보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
             </div>`;
     }
 
-    // 🔗 2. [크로스셀링] 뽕뽑는 놀이법으로 넘어가는 버튼 생성
+    // 🔗 2. 이 장난감으로 하는 놀이로 넘어가는 단추
     let linkToPlayHtml = '';
     if (toy.relatedPlayIds && toy.relatedPlayIds.length > 0) {
         // 첫 번째 관련 놀이 ID로 넘어가도록 세팅
         linkToPlayHtml = `
             <div onclick="jumpToPlay('${toy.relatedPlayIds[0]}')" style="background:#F2F0FC; border:1px solid #DDD9F5; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
-                <div style="font-size:13px; font-weight:800; color:#6A61CE;">💡 이 장난감 200% 뽕뽑는 놀이법</div>
-                <div style="font-size:13px; font-weight:900; color:#7F77DD;">보러가기 〉</div>
+                <div style="font-size:13px; font-weight:800; color:#6A61CE;">이 장난감으로 하는 놀이</div>
+                <div style="font-size:13px; font-weight:900; color:#7F77DD;">보러 가기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             </div>
         `;
     }
@@ -494,7 +503,7 @@ function generateToyHTML(toy, favs) {
     const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&lptag=${partnerCode}`;
     const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
     const finalLink = isFallback ? autoSearchLink : toy.coupangLink;
-    const btnText = isFallback ? `🔍 쿠팡에서 '${toy.name}' 최저가 찾기 〉` : `🚀 로켓배송 최저가 바로가기 〉`;
+    const btnText = (isFallback ? '쿠팡에서 찾아보기' : '쿠팡에서 보기') + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';   // '최저가' 는 입증할 수 없는 말이라 쓰지 않는다
 
     return `
         <div id="toy-card-${toy.id}" class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
@@ -506,9 +515,13 @@ function generateToyHTML(toy, favs) {
                         <div style="color: #7F77DD; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${toy.tags}</div>
                     </div>
                 </div>
-                <button id="fav-btn-${toy.id}" onclick="toggleFavorite('${toy.id}')" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
+<button id="fav-btn-${toy.id}" onclick="toggleFavorite('${toy.id}')" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
                     ${hIcon}
                 </button>
+            <!-- 보내기: 찜하기 바로 밑, 같은 모양 (유모차와 같은 방식) -->
+            <button onclick="shareToHusbandToy('${toy.id}')" style="background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>보내기</button>
+            </div>
             </div>
 
             <div style="background: #FBF8F3; padding: 16px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 16px;">
@@ -518,10 +531,10 @@ function generateToyHTML(toy, favs) {
 
             <div style="background: #FBF8F3; padding: 20px 18px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 20px;">
                 <div style="font-weight: 900; color: #4A413C; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                    <span>⏳</span> 시간 확보 리포트
+                    <span>⏳</span> 혼자 노는 시간
                 </div>
                 <div style="font-size: 14px; color: #059669; font-weight: 800; background: #ECFDF5; display: inline-block; padding: 8px 14px; border-radius: 10px; border: 1px solid #A7F3D0;">
-                    ✅ 자유시간: 약 ${toy.freeTime} 확보
+                    보통 ${toy.freeTime}쯤 · 아이마다 달라요
                 </div>
             </div>
 
@@ -531,12 +544,8 @@ function generateToyHTML(toy, favs) {
                 ${btnText}
             </a>
 
-            <button onclick="shareToHusbandToy('${toy.id}')" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#FEE500; color:#191919; border:none; padding:16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2); transition:0.2s;">
-                <span style="font-size:18px;">💬</span> 남편에게 내 '자유시간' 사달라고 톡 보내기
-            </button>
-
             <div style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; word-break: keep-all;">
-                ※ 아이 입에 들어가는 장난감은 <b>[로켓배송]</b> 등 검증된 판매처 구매를 권장합니다.
+                ※ 입에 들어가는 장난감은 <b>KC 마크와 사용 연령</b>을 꼭 확인하세요.
             </div>
 
             ${batteryHtml}
@@ -603,36 +612,57 @@ window.jumpToPlay = function(playId) {
     }, 100);
 };
 
+/* ⚠️ 예전 메시지: "🚨 [긴급 육아 미션 도착] 여보, 오늘 퇴근하고…" + "여보 나 오늘 너무 힘들어 😭 이거 하나만 로켓으로 쏴줘"
+      + 쿠팡 파트너스 구매 링크. 받는 사람은 수수료 링크인 줄 모르고, 문구도 앱이 대신 조르는 말이었다.
+      이유식·유모차와 같게, 무엇인지와 배냇함 링크만 보낸다. 링크를 열면 그 장난감 카드로 간다 (?toy=번호). */
 function shareToHusbandToy(id) {
     const toy = toyData.find(t => t.id == id);
-    if(!toy) return;
-
-    const partnerCode = "AF9932454";
-    const autoSearchLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(toy.name)}&lptag=${partnerCode}`;
-    const isFallback = (!toy.coupangLink || toy.coupangLink.trim() === '');
-    const finalLink = isFallback ? autoSearchLink : toy.coupangLink;
-
-    const shareText = `🚨 [긴급 육아 미션 도착]\n\n여보, 오늘 퇴근하고 아기랑 이렇게 놀아줘\n\n🎈 놀이명: ${toy.name}\n⏱️ 목표 시간: 약 ${toy.freeTime}\n\n👉 구매 링크: ${finalLink}`;
-
-    // 🚨 카카오톡 안 될 때 폴백 (클립보드 복사)
+    if (!toy) return;
+    const link = 'https://happy-baby0303.github.io/baby-master/toy/index.html?toy=' + encodeURIComponent(toy.id);
+    const sub = toy.freeTime ? `혼자 노는 시간 보통 ${toy.freeTime}쯤` : '';
+    const shareText = `이 장난감 어때?\n${toy.name}${sub ? '\n' + sub : ''}\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
-            .then(() => alert('내용이 복사되었어요 카톡에 붙여넣기 해주세요 🤍'))
+            .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
             .catch(() => prompt("아래 내용을 복사해 주세요", shareText));
         return;
     }
-
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-            title: `여보 나 오늘 너무 힘들어 😭`,
-            description: `[${toy.name}] 이거 하나만 로켓으로 쏴줘. 나 ${toy.freeTime} 쉴 수 있대`,
+            title: `이 장난감 어때? ${toy.name}`,
+            description: sub,
             imageUrl: 'https://happy-baby0303.github.io/baby-master/toy/og-image.png',
-            link: { mobileWebUrl: finalLink, webUrl: finalLink },
+            link: { mobileWebUrl: link, webUrl: link },
         },
-        buttons: [{ title: `💳 여보 찬스로 바로 결제하기`, link: { mobileWebUrl: finalLink, webUrl: finalLink } }]
+        buttons: [{ title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }],
     });
 }
+
+/* 보낸 링크(?toy=번호)를 열면 장난감 탭의 그 카드로 데려가 잠깐 테두리를 칠한다. 한 번 가면 주소에서 뺀다. */
+(function () {
+    var id = new URLSearchParams(location.search).get('toy');
+    if (!id) return;
+    function go(tries) {
+        try { if (typeof window.switchToyMainTab === 'function' && tries === 8) window.switchToyMainTab('gear'); } catch (e) {}
+        var hit = document.getElementById('toy-card-' + id);
+        if (!hit && tries === 5) {
+            var all = [].slice.call(document.querySelectorAll('#view-toy-gear button, #view-toy-gear [onclick]'))
+                .filter(function (b) { return (b.textContent || '').trim() === '전체보기'; })[0];
+            if (all) all.click();
+        }
+        if (!hit) { if (tries > 0) setTimeout(function () { go(tries - 1); }, 450); return; }
+        setTimeout(function () {
+            var head = document.querySelector('.app-header');
+            var off = (head ? head.getBoundingClientRect().height : 0) + 12;
+            window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+            hit.style.transition = 'box-shadow .3s'; hit.style.boxShadow = '0 0 0 3px #7F77DD';
+            setTimeout(function () { hit.style.boxShadow = ''; }, 2600);
+        }, 150);
+        try { var u = new URL(location.href); u.searchParams.delete('toy'); history.replaceState(history.state, '', u.toString()); } catch (e) {}
+    }
+    setTimeout(function () { go(8); }, 1000);
+})();
 
 // 페이지 열릴 때 탭 기본 상태
 document.addEventListener('DOMContentLoaded', () => {

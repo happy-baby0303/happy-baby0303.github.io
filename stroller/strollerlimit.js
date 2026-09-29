@@ -107,7 +107,7 @@
                         '설명서에 적힌 숫자 하나만 옮겨 적어주시면, ' +
                         esc(nm("가")) + ' 언제쯤 한도에 닿는지 알려드릴게요</div>' +
                 '</div>' +
-                '<div style="font-size:12px; color:#7F77DD; flex-shrink:0;">〉</div>' +
+                '<div style="color:#7F77DD; flex-shrink:0; display:flex;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; flex-shrink:0;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>' +
             '</div>';
         }
 

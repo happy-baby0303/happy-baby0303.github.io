@@ -167,7 +167,7 @@
             '<div style="margin-top:6px; font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
                 '무게를 알아야 <b>손목에 얼마나 실리는지</b> 알려드릴 수 있어요. ' +
-                '두 대 쓰시면 <b>둘 다</b> 알려주세요 \u2014 상황마다 뭘 갖고 나갈지 골라드립니다.</div>' +
+                '두 대 쓰시면 <b>둘 다</b> 알려주세요. 상황마다 뭘 갖고 나갈지 골라드려요.</div>' +
 
             '<div style="display:flex; gap:6px; margin-top:16px;">' +
                 [1, 2].map(function (i) {
@@ -664,7 +664,7 @@
                         (bad ? GOLD : "#7A6F68") + ';">' +
                         (d === null ? "아직 안 적으셨어요"
                                     : md(c[x.id]) + " \u00b7 " + (d === 0 ? "오늘 봤어요" : d + "일째") +
-                                      (bad ? " \u2014 볼 때가 됐어요" : "")) + '</div>' +
+                                      (bad ? " \u00b7 볼 때가 됐어요" : "")) + '</div>' +
                     '<div style="margin-top:4px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                         'line-height:1.65; word-break:keep-all;">' + x.why + '</div>' +
                     '<div style="display:flex; gap:7px; margin-top:10px;">' +
@@ -975,7 +975,7 @@
             out += '<div style="background:#EAF7F1; border:1px solid #A7DFC8; border-radius:14px; ' +
                 'padding:16px;">' +
                 '<div style="font-size:14px; font-weight:900; color:#1F6F52;">' +
-                    '\u2705 ' + esc(win.t) + ' \u2014 이게 통했어요</div>' +
+                    '\u2705 통한 방법 \u00b7 ' + esc(win.t) + '</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '며칠은 같은 방법으로 이어가세요. 한 번 됐다고 바로 자리잡진 않아요.</div>' +

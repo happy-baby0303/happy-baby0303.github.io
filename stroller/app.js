@@ -194,7 +194,7 @@ function generateCardHtml(item) {
     // 2. 무게 및 크기 시각화
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
     const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#7F77DD');
-    let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#6A61CE; background:#F0EEFB;' : (item.specs.cabin.includes('⚠️') ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
+    let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#6A61CE; background:#F0EEFB;' : ((item.specs.cabin.includes('⚠️') || item.specs.cabin.includes('△')) ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
 
     const maxStrollerDim = Math.max(...item.foldedDims);
     let targetName = "20인치 기내용"; let targetDim = 55;
@@ -237,32 +237,32 @@ function generateCardHtml(item) {
         const dims = [...item.foldedDims].sort((a, b) => a - b);
         const minDim = dims[0], midDim = dims[1];
         const ratio = Math.round((getVolume(item.foldedDims) / carData.vol) * 100);
-        if (minDim > carData.limitDepth) ktxAlertHtml = `<div class="ktx-alert-box fail"><div class="ktx-icon">🚨</div><div><b>테트리스 불가</b><br>${carData.name} 허용 깊이 초과. 뒷좌석 폴딩 필수.</div></div>`;
-        else if (midDim > carData.limitHeight) ktxAlertHtml = `<div class="ktx-alert-box warn"><div class="ktx-icon">⚠️</div><div><b>입구 걸림 주의</b><br>${carData.name} 입구 높이 초과. 비틀어 넣어야 함.</div></div>`;
-        else ktxAlertHtml = `<div class="ktx-alert-box pass"><div class="ktx-icon">🟢</div><div><b>${carData.name} 트렁크 프리패스</b><br>적재율 ${ratio}%. 여유 공간 남음.</div></div>`;
+        if (minDim > carData.limitDepth) ktxAlertHtml = `<div class="ktx-alert-box fail"><div class="ktx-icon">⚠️</div><div><b>트렁크에 안 들어가요</b><br>${carData.name} 트렁크 깊이보다 커요. 뒷좌석을 접어야 해요.</div></div>`;
+        else if (midDim > carData.limitHeight) ktxAlertHtml = `<div class="ktx-alert-box warn"><div class="ktx-icon">⚠️</div><div><b>입구에 걸려요</b><br>${carData.name} 입구보다 높아요. 비스듬히 넣어야 해요.</div></div>`;
+        else ktxAlertHtml = `<div class="ktx-alert-box pass"><div class="ktx-icon">🟢</div><div><b>${carData.name} 트렁크에 들어가요</b><br>트렁크의 ${ratio}%를 차지해요.</div></div>`;
     }
 
     let gateHtml = '';
-    if (item.width >= 65) { gateHtml = `<div class="gate-alert fail" style="margin-bottom:12px;">🚨 너비 ${item.width}cm: 일반 개찰구 불가. 휠체어 게이트 필수</div>`; } 
-    else { gateHtml = `<div class="gate-alert pass" style="margin-bottom:12px;">🟢 너비 ${item.width}cm: 일반 개찰구/구형 엘베 프리패스</div>`; }
+    if (item.width >= 65) { gateHtml = `<div class="gate-alert fail" style="margin-bottom:12px;">⚠️ 너비 ${item.width}cm: 일반 개찰구는 못 지나가요. 넓은 게이트를 쓰세요</div>`; } 
+    else { gateHtml = `<div class="gate-alert pass" style="margin-bottom:12px;">너비 ${item.width}cm: 일반 개찰구·좁은 엘리베이터도 지나가요</div>`; }
 
-    const tabsHtml = `<div class="card-tabs"><div id="btn-${cId}-spec" class="tab-btn active" onclick="forceSwitchTab(${cId}, 'spec')">📊 기본스펙</div><div id="btn-${cId}-fact" class="tab-btn" onclick="forceSwitchTab(${cId}, 'fact')">🚨 실전팩트</div><div id="btn-${cId}-sim" class="tab-btn sim-tab-btn" onclick="forceSwitchTab(${cId}, 'sim')">🧬 AI리포트</div></div>`;
+    const tabsHtml = `<div class="card-tabs"><div id="btn-${cId}-spec" class="tab-btn active" onclick="forceSwitchTab(${cId}, 'spec')">기본 스펙</div><div id="btn-${cId}-fact" class="tab-btn" onclick="forceSwitchTab(${cId}, 'fact')">써보면</div><div id="btn-${cId}-sim" class="tab-btn sim-tab-btn" onclick="forceSwitchTab(${cId}, 'sim')">카시트 호환</div></div>`;
 
     // 5. 가격 영수증
     const realPrice = item.price + (item.hiddenTax?.cost || 0);
     let taxHtml = `<div class="receipt-box"><div class="receipt-row"><span>공식 출고가</span><span>${item.price.toLocaleString()}원</span></div>`;
     if (item.hiddenTax?.cost > 0) {
-        taxHtml += `<div class="receipt-row" style="color:#E32636;"><span>+ 필수 추가비용</span><span>+${item.hiddenTax.cost.toLocaleString()}원</span></div><div class="receipt-desc">※ ${item.hiddenTax.items}</div>`;
+        taxHtml += `<div class="receipt-row" style="color:#E32636;"><span>+ 따로 사는 것</span><span>+${item.hiddenTax.cost.toLocaleString()}원</span></div><div class="receipt-desc">※ ${String(item.hiddenTax.items).replace(/\s*필수\s*$/, '')}</div>`;
     } else {
-        taxHtml += `<div class="receipt-desc" style="color:#059669;">※ 추가비용 없음 (옵션질 없음 쾌적)</div>`;
+        taxHtml += `<div class="receipt-desc" style="color:#059669;">※ 따로 살 것 없음</div>`;
     }
-    taxHtml += `<div class="receipt-total"><span>💸 최종 체감 결제액</span><span style="color:#7F77DD;">${realPrice.toLocaleString()}원</span></div></div>`;
+    taxHtml += `<div class="receipt-total"><span>합치면</span><span style="color:#7F77DD;">${realPrice.toLocaleString()}원</span></div></div>`;
 
     const asClass = item.asInfo?.status === 'good' ? 'as-good' : (item.asInfo?.status === 'warn' ? 'as-warn' : 'as-bad');
-    const asTitle = item.asInfo?.status === 'good' ? 'A/S 무난한 편' : (item.asInfo?.status === 'warn' ? 'A/S 체크포인트' : 'A/S 리스크 경고');
-    const asIcon = item.asInfo?.status === 'good' ? '🛡️' : (item.asInfo?.status === 'warn' ? '👀' : '🚨');
+    const asTitle = item.asInfo?.status === 'good' ? 'A/S 무난한 편' : (item.asInfo?.status === 'warn' ? 'A/S 체크포인트' : 'A/S 주의');
+    const asIcon = item.asInfo?.status === 'good' ? '🛡️' : (item.asInfo?.status === 'warn' ? '👀' : '⚠️');
 
-    // 6. 구매버튼 및 방어 멘트
+    // 6. 구매 버튼 ('최저가' 는 입증할 수 없는 말이라 쓰지 않는다)
     const partnerCode = "AF9932454";
     const searchKeyword = `${item.name} 유모차`;
     
@@ -271,30 +271,31 @@ function generateCardHtml(item) {
 
     let purchaseAreaHtml = `
         <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px;">
-            <a href="${coupangSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #4A413C; color: #FFF; border: 1px solid #000; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
-                🚀 쿠팡에서 로켓배송 최저가 찾기 〉
+            <a href="${coupangSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #4A413C; color: #FFF; border: 1px solid #4A413C; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
+                쿠팡에서 가격 보기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; flex-shrink:0;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </a>
             <a href="${naverSearchUrl}" target="_blank" style="display: flex; justify-content: center; align-items: center; width: 100%; background: #F7F3ED; color: #7A6F68; border: 1px solid #EDE6DE; font-size: 14px; padding: 14px 0; border-radius: 14px; font-weight: 800; text-decoration: none; transition: 0.2s;">
-                🔍 네이버 쇼핑에서 공식몰 검색하기 〉
+                네이버 쇼핑에서 찾아보기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; flex-shrink:0;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </a>
         </div>
         <div class="coupang-safety-guard" style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
-            ※ 고가의 유모차는 쿠팡이 직접 매입하여 교환/환불 처리가 빠른<br>
-            <b>[로켓배송]</b> 마크가 있는 상품 위주로 탐색하시길 권장합니다.<br>
-            (상품의 A/S 및 교환/환불 규정은 해당 판매처의 정책을 따릅니다)
+            ※ 해외 직구 유모차는 국내 A/S가 안 될 수 있어요. 정식 수입품인지 확인하세요.
         </div>
     `;
 
-    // ✨ 7. [수익 창출 패치] 유모차 찰떡 필수 악세사리 3대장 (디자인 수정본)
-    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 선풍기')}&lptag=${partnerCode}`;
+    // 7. 같이 많이 사는 것
+    /* ⚠️ 셋째 칸이 '유모차 가방걸이 고리' 였다. 같은 화면 맨 위 안전 카드(strollerguide.js)가
+          '손잡이에 가방을 걸지 마세요 · 뒤로 넘어가는 가장 흔한 원인' 이라고 하는데, 바로 그걸 팔고 있었다.
+          레인커버로 바꾼다. 선풍기는 날개 없는 것으로 찾게 한다 (손가락 끼임). */
+    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 날개없는 선풍기')}&lptag=${partnerCode}`;
     const accBagUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 정리함 이너백')}&lptag=${partnerCode}`;
-    const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 가방걸이 고리')}&lptag=${partnerCode}`;
+    const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 레인커버')}&lptag=${partnerCode}`;
 
     const accessoryHtml = `
         <div style="background: #FBF8F3; padding: 18px; border-radius: 16px; margin-top: 24px; border: 1px solid #EDE6DE;">
             <!-- 타이틀도 가운데 정렬 및 이모지 변경(🎁) -->
             <div style="font-size: 13.5px; font-weight: 900; color: #4A413C; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                <span>🎁</span> 유모차 뽑은 기념 국민 육아템 3대장
+                같이 많이 사는 것
             </div>
             
             <!-- 박스들 가운데 정렬 (justify-content: center; 추가) -->
@@ -304,30 +305,30 @@ function generateCardHtml(item) {
                 <!-- 1. 선풍기 -->
                 <a href="${accFanUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">❄️</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 선풍기</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">날개 없는 선풍기</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
                 </a>
                 <!-- 2. 정리함 -->
                 <a href="${accBagUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">🧺</div>
                     <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 정리함</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
                 </a>
-                <!-- 3. 고리 -->
+                <!-- 3. 레인커버 -->
                 <a href="${accHookUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                     <div style="font-size: 24px; margin-bottom: 6px;">🔗</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">가방걸이 고리</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">로켓배송 〉</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">레인커버</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
                 </a>
             </div>
         </div>
     `;
 
-    const crossSellHtml = `<a href="../carseat/index.html" style="display:block; width:100%; background:#FFFBEB; border:1px solid #FDE68A; color:#B45309; padding:16px; border-radius:14px; font-weight:800; font-size:13.5px; text-align:center; text-decoration:none; transition:0.2s; margin-top:16px;">🚘 이 유모차와 어울리는 [안전 카시트] 알아보기 ➔</a>`;
+    const crossSellHtml = `<a href="../carseat/index.html" style="display:block; width:100%; background:#FFFBEB; border:1px solid #FDE68A; color:#B45309; padding:16px; border-radius:14px; font-weight:800; font-size:13.5px; text-align:center; text-decoration:none; transition:0.2s; margin-top:16px;">카시트도 같이 보기 ›</a>`;
 
     // 8. 최종 렌더링
     return `
-    <div class="stroller-card" id="card-${cId}">
+    <div class="stroller-card" id="card-${cId}" data-name="${String(item.name).replace(/"/g, '&quot;')}">
         
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
             <div style="flex: 1; min-width: 0;">
@@ -342,6 +343,8 @@ function generateCardHtml(item) {
                 <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
                     ${heartIcon}
                 </button>
+                    <!-- 보내기: 찜하기와 같은 모양으로 바로 밑에. 떠 있던 '짝꿍한테 보내기' 를 대신한다 -->
+                    <button onclick="shareStroller(this.closest('.stroller-card').getAttribute('data-name'))" style="margin-top:6px; background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>보내기</button>
             </div>
         </div>
 
@@ -361,23 +364,23 @@ function generateCardHtml(item) {
                 </div>
             </div>
             
-            <!-- 🚨 실전팩트 탭 -->
+            <!-- 써보면 탭 -->
             <div id="content-${cId}-fact" class="tab-content" style="display:none;">
                 <div class="fact-list">
-                    <div class="fact-item"><div class="fact-icon">🛣️</div><div class="fact-info"><div class="fact-title">보도블럭 주행 지수</div><div class="fact-desc">${item.road}</div></div></div>
+                    <div class="fact-item"><div class="fact-icon">🛣️</div><div class="fact-info"><div class="fact-title">보도블럭에서</div><div class="fact-desc">${item.road}</div></div></div>
                     <div class="fact-item"><div class="fact-icon">🧼</div><div class="fact-info"><div class="fact-title">분리 세척 난이도</div><div class="fact-desc">${item.wash}</div></div></div>
-                    <div class="fact-item"><div class="fact-icon">✈️</div><div class="fact-info"><div class="fact-title">인프라 피팅 (항공/카페)</div><div class="fact-desc">${item.flight}</div></div></div>
-                    <div class="fact-item"><div class="fact-icon">🦴</div><div class="fact-info"><div class="fact-title">양육자 관절 타격 지수</div><div class="fact-desc">${item.joint}</div></div></div>
+                    <div class="fact-item"><div class="fact-icon">✈️</div><div class="fact-info"><div class="fact-title">비행기·카페에서</div><div class="fact-desc">${item.flight}</div></div></div>
+                    <div class="fact-item"><div class="fact-icon">🦴</div><div class="fact-info"><div class="fact-title">미는 사람 손목·허리</div><div class="fact-desc">${item.joint}</div></div></div>
                     <div class="fact-item ${asClass}"><div class="fact-icon">${asIcon}</div><div class="fact-info"><div class="fact-title">${asTitle}</div><div class="fact-desc">${item.asInfo?.text || ''}</div></div></div>
                 </div>
                 
                 <div class="insight-box" style="margin-top: 16px;">
-                    <div class="title">💡 단점 & 아쉬운 점 팩트체크</div>
+                    <div class="title">아쉬운 점</div>
                     <div class="text">${item.flaw}</div>
                 </div>
             </div>
             
-            <!-- 🧬 AI리포트 탭 -->
+            <!-- 카시트 호환 탭 -->
             <div id="content-${cId}-sim" class="tab-content" style="display:none;">
                 ${aiReportHtml}
                 ${ktxAlertHtml}
@@ -442,7 +445,7 @@ function renderList(isUserAction = false) {
 
         // 2. 🏡 환경: 계단 없는 빌라면 무게가 깡패
         if (env === 'stairs' && item.specs.weight > 8.5) {
-            score -= 40; reasons.push(`계단 운반에 치명적인 무게 (${item.specs.weight}kg)`);
+            score -= 40; reasons.push(`계단에서 들기 무거운 편 (${item.specs.weight}kg)`);
         } else if (env === 'mall' && item.width >= 60) {
             score -= 15; reasons.push(`실내 주행 시 좁은 길 불편 (너비 ${item.width}cm)`);
         }
@@ -450,9 +453,9 @@ function renderList(isUserAction = false) {
         // 3. 🚗 차/비행기 물리적 한계
         if (car === 'flight') {
             if (item.specs.cabin.includes('❌')) { 
-                score -= 50; reasons.push('기내 반입 불가 (무조건 화물 위탁)'); 
+                score -= 50; reasons.push('기내 반입이 안 돼요 (화물로 부쳐야 해요)'); 
             } else if (item.specs.cabin.includes('⚠️')) { 
-                score -= 15; reasons.push('항공사(LCC) 규정에 따라 기내 반입 거절 위험'); 
+                score -= 15; reasons.push('저가 항공사는 기내 반입을 거절할 수 있어요'); 
             }
         } else if (car !== 'all' && typeof carDB !== 'undefined' && carDB[car]) {
             const cd = carDB[car];
@@ -460,31 +463,31 @@ function renderList(isUserAction = false) {
             
             // 정밀 테트리스 검사
             if (dims[0] > cd.limitDepth) {
-                score -= 50; reasons.push(`${cd.name} 트렁크에 안 들어감 (뒷좌석 폴딩 필수)`);
+                score -= 50; reasons.push(`${cd.name} 트렁크에 안 들어가요 (뒷좌석을 접어야 해요)`);
             } else if (dims[1] > cd.limitHeight) {
-                score -= 20; reasons.push(`${cd.name} 트렁크 입구에 걸림 (비틀어 넣어야 함)`);
+                score -= 20; reasons.push(`${cd.name} 트렁크 입구에 걸려요 (비스듬히 넣어야 해요)`);
             } else if (getVolume(item.foldedDims) / cd.vol > 0.6) {
-                score -= 10; reasons.push(`트렁크의 60% 이상 차지 (짐 실을 공간 부족)`);
+                score -= 10; reasons.push(`트렁크의 60% 넘게 차지해요 (짐 실을 자리가 좁아요)`);
             }
         }
 
         // 4. 👶 아기 성장 / 뼈대
         if (baby === 'newborn' && (item.type === '휴대용' || item.type === '트라이크')) {
-            score -= 30; reasons.push('디럭스/절충형에 비해 신생아 머리 흔들림 위험 노출');
+            score -= 30; reasons.push('신생아에겐 디럭스·절충형보다 덜 눕고 덜 받쳐줘요');
         } else if (baby === 'giant' && item.backrest < 50) {
             score -= 15; reasons.push('우량아에게는 등받이나 시트가 좁게 느껴질 수 있음');
         } else if (baby === 'twins' && !item.expand.includes('⭕') && item.type !== '쌍둥이' && item.type !== '웨건') {
-            score -= 60; reasons.push('쌍둥이/연년생 동반 탑승 절대 불가');
+            score -= 60; reasons.push('두 아이를 같이 태울 수 없어요');
         }
 
         // 5. 🦴 부모 관절
         if (parent === 'joint' && item.specs.weight >= 9.0) {
-            score -= 30; reasons.push(`약해진 손목에 무리가 가는 무게 (${item.specs.weight}kg)`);
+            score -= 30; reasons.push(`손목에 무리가 갈 수 있는 무게 (${item.specs.weight}kg)`);
         }
 
         // 결과 합산
         if (score === 100) reasons.push('고르신 조건에 모두 맞습니다.');
-        if (score < 0) score = 0; // 최소 0점 방어
+        if (score < 0) score = 0;
 
         return { ...item, originalIndex: index, matchRate: score, matchReasons: reasons };
     });
@@ -531,7 +534,7 @@ function renderList(isUserAction = false) {
     }
 
     if (isMatrixActive && processedData.length > 3) {
-        topTitle.style.display = 'flex'; showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `나머지 ${processedData.length - 3}개 분석 결과 보기 ▾`; otherArea.style.display = 'none';
+        topTitle.style.display = 'flex'; showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `나머지 ${processedData.length - 3}개 더 보기 ▾`; otherArea.style.display = 'none';
         topArea.innerHTML = processedData.slice(0, 3).map(generateCardHtml).join('');
         otherArea.innerHTML = processedData.slice(3).map(generateCardHtml).join('');
     } else {
@@ -641,14 +644,73 @@ try {
     console.warn("카카오 SDK 초기화 지연", error);
 }
 
+/* ⚠️ 화면 오른쪽 아래에 떠 있던 '짝꿍한테 보내기' 는 페이지 주소만 보냈다.
+      받는 사람은 49종 목록을 처음부터 다시 훑어야 했고, 단추는 ↑ 단추와 겹쳐 카드 글씨를 가렸다.
+      부부가 실제로 주고받는 말은 "이 유모차 어때?" 다. 그래서 카드마다 '보내기' 를 두고,
+      링크를 열면 지금 조건 그대로 그 유모차 카드로 바로 간다 (?pick=이름).
+      받는 사람이 짝꿍만은 아니라서(조부모·한부모) 단추에는 '보내기' 만 적는다. */
+function shareStroller(name) {
+    const item = (typeof strollerData !== 'undefined' ? strollerData : []).find(s => s.name === name);
+    const url = new URL(window.location.href);
+    url.searchParams.set('pick', name);
+    const link = url.toString();
+    const bits = item ? [item.type,
+                         item.specs && item.specs.weight ? item.specs.weight + 'kg' : '',
+                         Array.isArray(item.foldedDims) ? '접으면 ' + item.foldedDims.join('×') + 'cm' : '',
+                         item.price ? '출고가 ' + item.price.toLocaleString() + '원' : ''].filter(Boolean).join(' · ') : '';
+    if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+        Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+                title: `이 유모차 어때? ${name}`,
+                description: bits,
+                imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
+                link: { mobileWebUrl: link, webUrl: link },
+            },
+            buttons: [{ title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }],
+        });
+        return;
+    }
+    const txt = `이 유모차 어때?\n${name}${bits ? '\n' + bits : ''}\n${link}`;
+    navigator.clipboard.writeText(txt)
+        .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
+        .catch(() => prompt('아래 내용을 복사해 주세요', txt));
+}
+window.shareStroller = shareStroller;
+
+/* 보낸 링크(?pick=이름)를 열면 그 카드로 데려가서 잠깐 테두리를 칠한다. 한 번 가면 주소에서 뺀다. */
+(function () {
+    var pick = new URLSearchParams(location.search).get('pick');
+    if (!pick) return;
+    function go(tries) {
+        var hit = [].slice.call(document.querySelectorAll('.stroller-card'))
+            .filter(function (c) { return c.getAttribute('data-name') === pick; })[0];
+        if (!hit) { if (tries > 0) setTimeout(function () { go(tries - 1); }, 400); return; }
+        var other = document.getElementById('result-other-area');
+        if (other && other.contains(hit) && getComputedStyle(other).display === 'none') {
+            var more = document.getElementById('show-more-btn'); if (more) more.click();
+        }
+        setTimeout(function () {
+            /* 위에 붙어 있는 머리(헤더·탭 막대)만큼 덜 내려가야 카드 이름이 가려지지 않는다 */
+            var head = document.querySelector('.app-header');
+            var off = (head ? head.getBoundingClientRect().height : 0) + 12;
+            window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+            hit.style.transition = 'box-shadow .3s'; hit.style.boxShadow = '0 0 0 3px #7F77DD';
+            setTimeout(function () { hit.style.boxShadow = ''; }, 2600);
+        }, 120);
+        try { var u = new URL(location.href); u.searchParams.delete('pick'); history.replaceState(history.state, '', u.toString()); } catch (e) {}
+    }
+    setTimeout(function () { go(8); }, 900);
+})();
+
 function shareResult() {
     const shareUrl = window.location.href; 
     if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
         Kakao.Share.sendDefault({
             objectType: 'feed',
             content: {
-                title: '배냇함 유모차 매칭 🛒',
-                description: '우리 가족 라이프스타일과 트렁크 크기에 딱 맞는 유모차를 AI로 찾아보세요',
+                title: '배냇함 유모차 고르기',
+                description: '우리 차 트렁크와 생활에 맞는 유모차를 골라보세요',
                 imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
                 link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
             },

@@ -253,10 +253,10 @@
                 ? '<div style="margin-top:14px; background:#F3F0FC; border:1px solid #DDD9F5; ' +
                   'border-radius:13px; padding:14px 15px;">' +
                   '<div style="font-size:12.5px; font-weight:900; color:#6A61CE; margin-bottom:6px;">' +
-                      '⏳ ' + cs.next.name + pp(cs.next.name, "을/를") + ' 시작하면 이 놀이들은 끝나요</div>' +
+                      '⏳ ' + cs.next.name + pp(cs.next.name, "을/를") + ' 시작하기 전에 하기 좋은 놀이</div>' +
                   '<div style="font-size:12px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                       'word-break:keep-all;">아직 안 해보신 게 <b>' + closeLeft.length + '개</b> 남았어요. ' +
-                      '지금이 아니면 다시 못 하는 놀이예요.</div>' +
+                      '크면 금방 시시해하는 놀이라, 지금 해보시면 좋아요.</div>' +
                   '<div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">' +
                       closeLeft.slice(0, 4).map(function (p) {
                           return '<div onclick="window.openPlayFromWeek(\'' + p.id + '\')" ' +

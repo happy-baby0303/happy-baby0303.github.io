@@ -80,10 +80,29 @@
     }
 
     /* 카시트 큐레이터가 적어둔 것. 브랜드만 봐도 충분하다. */
+    function mySeatRaw() {
+        try { return JSON.parse(localStorage.getItem("tosil_carseat_own")) || {}; } catch (e) { return {}; }
+    }
     function mySeatName() {
-        var o = {};
-        try { o = JSON.parse(localStorage.getItem("tosil_carseat_own")) || {}; } catch (e) {}
+        var o = mySeatRaw();
         return o.name || o.title || o.id || "";
+    }
+
+    /* ⚠️ 유모차에 얹히는 건 '바구니형(인펀트) 카시트' 뿐이다.
+          아이스핀 360 · 듀얼픽스 · 브이가드 같은 회전형 · 일체형 · 주니어 카시트는 차에 고정하는 물건이라
+          어떤 어댑터를 사도 유모차에 못 얹는다. 그런데 예전 판정은 브랜드만 보고 '맥시코시 계열' 로 쳐서
+          "어댑터가 있으면 얹힙니다" · "얹힙니다 · 어댑터 없이" 라고 했다. 7~10만원짜리 어댑터를 잘못 사게 만드는,
+          이 카드가 막으려던 바로 그 실수다.
+          카시트 큐레이터 목록 기준 바구니형: cs06 에어보스 인펀트 · cs12 싸이벡스 클라우드 T · cs14 스토케 이지고 모듈러 */
+    var CARRIER_IDS = ["cs06", "cs12", "cs14"];
+    var FIXED_IDS = ["cs01", "cs02", "cs03", "cs04", "cs05", "cs07", "cs08", "cs09", "cs10", "cs11", "cs13"];
+    function seatKind() {
+        var o = mySeatRaw(), id = String(o.id || ""), n = String(o.name || o.title || "");
+        if (CARRIER_IDS.indexOf(id) > -1) return "carrier";
+        if (FIXED_IDS.indexOf(id) > -1) return "fixed";
+        if (/바구니|인펀트|infant|클라우드|cloud|이지고|izi\s*go|페블|pebble|카브리오|cabrio|아이레벨|i-?level|아이스냅|i-?snug|캐리어/i.test(n)) return "carrier";
+        if (/360|회전|올인원|올에이지|주니어|토들러|베르사픽스|듀얼픽스|브이가드|솔루션|코어|프라임|이지캐리|블리바|아이스핀|아크/i.test(n)) return "fixed";
+        return null;
     }
 
     /* ---------- 판정 ----------
@@ -102,6 +121,7 @@
     function verdict(st, seat) {
         var ad = st && st.adapter;
         if (!ad) return null;
+        if (seat && seatKind() === "fixed") return { kind: "fixed" };
 
         var fam = seatFamily(seat);
         if (!fam) return { kind: "unknown", ad: ad };
@@ -138,12 +158,18 @@
             body = "카시트 탭에서 <b>우리 카시트</b>를 골라두시면, " +
                    "이 유모차에 <b>얹히는지</b> 알려드릴게요.<br>" +
                    "차에서 잠든 아기를 안 깨우고 옮길 수 있는지가 여기서 갈립니다.";
+        } else if (v.kind === "fixed") {
+            tone = GRAY; bg = "#FBF8F3"; bd = "#EDE6DE";
+            head = "이 카시트는 안 얹힙니다";   // 배지와 한 줄에 들어가게 짧게 ('얹힙니다' 가 있어야 PLUS 배지가 붙는다)
+            body = "<b>" + esc(seat) + "</b>" + pp(seat, "은/는") + " 차에 고정해서 쓰는 카시트예요. " +
+                   "유모차에 얹는 건 <b>신생아용 바구니 카시트</b>뿐이라, 어떤 어댑터를 사도 연결되지 않아요.<br>" +
+                   "차에서 잠들면 아기를 안아서 옮기셔야 합니다. 어댑터는 사지 마세요.";
         } else if (v.kind === "ok") {
             tone = GREEN; bg = "#EAF7F1"; bd = "#A7DFC8";
             head = "얹힙니다 · 어댑터 없이";
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "을/를") + " <b>" + esc(st.name) + "</b>에 바로 꽂을 수 있어요.<br>" +
                    "<b>차에서 잠들었으면 카시트째 들어 올려</b> 유모차에 얹으세요. " +
-                   "아기를 안 깨우고 옮기는 유일한 방법입니다.<br>" +
+                   "아기를 안 깨우고 옮기는 가장 쉬운 방법이에요.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span>';
         } else if (v.kind === "adapter") {
             tone = GOLD; bg = "#FFF9E6"; bd = "#FDE68A";

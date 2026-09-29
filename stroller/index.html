@@ -45,15 +45,29 @@
             <a href="../food/index.html" class="gnb-item">🥦 이유식</a>
             <a href="../toy/index.html" class="gnb-item">🧸 놀이/장난감</a>
         </nav>
+        <script>
+            /* 지금 탭이 화면 밖이면 가운데로 끌어온다. 이미 다 보이면 손대지 않는다. (다섯 큐레이터 공통) */
+            (function () {
+                try {
+                    var a = document.querySelector('.gnb-menu .gnb-item.active');
+                    var nav = a && a.parentNode;
+                    if (!a || !nav || nav.scrollWidth <= nav.clientWidth) return;
+                    var ar = a.getBoundingClientRect(), nr = nav.getBoundingClientRect();
+                    if (ar.left >= nr.left && ar.right <= nr.right) return;
+                    nav.style.scrollBehavior = 'auto';
+                    nav.scrollLeft += (ar.left - nr.left) - (nav.clientWidth - a.offsetWidth) / 2;
+                    nav.style.scrollBehavior = '';
+                } catch (e) {}
+            })();
+        </script>
     </header>
     
     <!-- ⚠️ "남편한테 보내기" 였다. 이 앱은 아빠도 쓴다.
              바통터치·문답·책장이 전부 부부 둘을 전제로 만들어져 있는데
              여기만 쓰는 사람을 엄마로 못 박아두면 앱이 스스로 앞뒤가 안 맞는다.
              한부모·조부모가 보는 화면이기도 하다. -->
-    <button class="floating-share-btn" onclick="shareResult()">
-        🔗 짝꿍한테 보내기
-    </button>
+    <!-- 떠 있던 '짝꿍한테 보내기' 는 뺐다. ↑ 단추와 겹쳐 카드 글씨를 가렸고, 페이지 주소만 보냈다.
+         이제 제품 카드마다 '보내기' 가 있고, 받은 링크를 열면 그 유모차 카드로 바로 간다 (app.js shareStroller). -->
 
     <main class="container">
         
@@ -98,7 +112,7 @@
                     </div>
                 </div>
                 <div class="matrix-item">
-                    <label>🚗 3D 트렁크 테트리스</label>
+                    <label>🚗 우리 차 트렁크</label>
                     <div class="custom-select-wrapper">
                         <select id="mat-car" onchange="runMatrixEngine(true)">
                             <option value="all">운행 차종 선택</option>
@@ -230,7 +244,7 @@
     <script src="../shared/curatorback.js"></script>
 
 <!-- 🚀 우측 하단 위로 가기 버튼 (공유 버튼과 안 겹치게 bottom: 100px 로 수정 완료!) -->
-    <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 100px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">
+    <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">
         ↑
     </button>
 

@@ -13,8 +13,7 @@
    그러면 다음 주 처방전은 남의 목록이 아니라
    '우리 애가 좋아한 것들' 이 된다. 그건 다른 데서 못 산다.
 
-   그리고 이 기록이 쌓일수록 해지가 어려워진다.
-   락인은 계약이 아니라 쌓인 기록이 만든다.
+   기록이 쌓일수록 처방전이 그 집 아기에게 맞아진다.
 
    ⚠️ 무료 사용자에게도 기록은 남는다. 막지 않는다.
       PLUS 는 그 기록으로 '다음 주를 짜주는 것' 이다.
@@ -31,6 +30,12 @@
         return String(s == null ? "" : s)
             .replace(/&/g, "&amp;").replace(/</g, "&lt;")
             .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+    /* 받침에 맞는 조사. LABEL 이 전부 '놀이' 로 끝나서 '놀이을 좋아해요' 가 찍혔다. */
+    function jo(w, pair) {
+        var s = String(w || ""), c = s.charCodeAt(s.length - 1), p = pair.split("/");
+        var jong = (c >= 0xAC00 && c <= 0xD7A3) && ((c - 0xAC00) % 28 !== 0);
+        return jong ? p[0] : p[1];
     }
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
@@ -136,9 +141,9 @@
             if (!worst || s.byCat[c] < s.byCat[worst]) worst = c;
         });
 
-        var line = esc(nm("는")) + ' <b>' + (LABEL[best] || best) + '</b>을 좋아해요.';
+        var line = esc(nm("는")) + ' <b>' + (LABEL[best] || best) + '</b>' + jo(LABEL[best] || best, "을/를") + ' 좋아해요.';
         if (worst && worst !== best && s.byCat[worst] < 0)
-            line += ' <b>' + (LABEL[worst] || worst) + '</b>은 아직 시큰둥하고요.';
+            line += ' <b>' + (LABEL[worst] || worst) + '</b>' + jo(LABEL[worst] || worst, "은/는") + ' 아직 시큰둥하고요.';
 
         return '<div id="play-like-sum" style="background:#EAF7F1; border:1px solid #A7DFC8; ' +
             'border-radius:14px; padding:15px 16px; margin-top:12px;">' +

@@ -10,7 +10,7 @@
    전부 단추형 전지가 들어간다.
 
    ⚠️ 단추형 전지는 장난감 사고 중 제일 위험하다.
-      삼키면 위산과 만나 전류가 흐르고, 몇 시간 안에 식도가 상한다.
+      식도에 걸리면 침 속에서 전류가 흘러 알칼리 화상이 생긴다. 두 시간이면 구멍이 난다. (위산이 아니다)
       질식이 아니라 화상이다. 그래서 숨은 잘 쉬어진다.
       침을 흘리거나 안 먹으려 하는 정도라 부모가 알아차리기 어렵다.
 
@@ -74,7 +74,7 @@
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
                 '사운드북·피아노·리모컨 장난감 안에 동전만 한 전지가 들어 있습니다.<br>' +
-                '삼키면 <b>목에 걸리는 게 아니라 식도가 탑니다.</b> 위산과 만나 전류가 흐르거든요. ' +
+                '삼키면 <b>식도에 걸린 채로 그 자리를 태웁니다.</b> 침에 닿아 전류가 흐르면서, 두 시간 안에도 구멍이 날 수 있어요. ' +
                 '<b>숨은 잘 쉬어져서</b> 부모가 알아차리기 어렵습니다.' +
                 (list.length
                     ? '<br><br><b>가지고 계신 것 중</b> · ' + esc(names) +
@@ -126,7 +126,7 @@
                 'style="display:inline-block; margin-top:9px; padding:11px 16px; border-radius:11px; ' +
                 'background:#FBF8F3; border:1px solid #DCD3C8; color:' + DARK + '; ' +
                 'font-size:12.5px; font-weight:900; text-decoration:none;">' +
-                '제품안전정보센터에서 찾아보기 〉</a>' +
+                '제품안전정보센터에서 찾아보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>' +
                 '<div style="margin-top:7px; font-size:11px; font-weight:600; color:' + GRAY + ';">' +
                 '국가기술표준원이 운영하는 곳입니다 · 배냇함과 관련 없습니다</div>', GOLD) +
 

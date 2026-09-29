@@ -99,7 +99,7 @@
         var cand = [
             { name: "100일", at: add(99) },
             { name: "200일", at: add(199) },
-            { name: "첫 생일 (돌)", at: add(365) }
+            { name: "첫 생일 (돌)", at: (function () { var d = new Date(b); d.setFullYear(b.getFullYear() + 1); return d; })() }   // 365일 뒤가 아니라 같은 날 (윤년이면 하루 어긋났다)
         ];
         /* 돌 다음부터는 해마다 생일 */
         for (var y = 2; y <= 6; y++) {
@@ -254,7 +254,7 @@
                 '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '목록을 그대로 카톡으로 보내시면 됩니다. ' +
-                    '<b>"아무거나~" 라고 안 하셔도 되고, 같은 게 두 개 안 들어옵니다.</b></div></div>';
+                    '<b>"아무거나~" 대신 목록을 보내면 같은 선물이 겹칠 일이 줄어요.</b></div></div>';
         }
 
         return out + '</div>';

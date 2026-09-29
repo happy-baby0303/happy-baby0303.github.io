@@ -179,7 +179,7 @@
                         ? esc(names.join(" \u00b7 ")) + (have.length > 4 ? " 외 " + (have.length - 4) + "개" : "")
                         : "갖고 계신 장난감 고르기") + '</div>' +
                 '<div style="flex-shrink:0; font-size:12px; font-weight:800; color:' + (have.length ? GREEN : BLUE) + ';">' +
-                    (have.length ? "고치기 \u3009" : "\u3009") + '</div>' +
+                    (have.length ? "고치기 " + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>') + '</div>' +
             '</div>' +
         '</div>';
     }
