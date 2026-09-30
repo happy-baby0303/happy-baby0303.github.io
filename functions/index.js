@@ -6,6 +6,7 @@
  *  - sendFamilyPush   : asia-northeast3 (서울)
  *  - deleteUserAccount: asia-northeast3 (서울)  ← 이번에 제대로 다시 씀
  *  - bedtimeReminder  : asia-northeast3 (서울 / 15분마다)
+ *  - careReminder     : asia-northeast3 (서울 / 5분마다)  ← 수유·기저귀 알림
  * ------------------------------------------------------------------
  */
 
@@ -534,5 +535,124 @@ exports.countWaitlist = onDocumentCreated(
       { waitlist_count: admin.firestore.FieldValue.increment(1) },
       { merge: true }
     );
+  }
+);
+
+/* ==================================================================
+ * 🍼 수유·기저귀 알림 (2세대 / 서울 / 5분마다)
+ * ------------------------------------------------------------------
+ * 앱(carealarm.js)이 reminders/{가족코드} 에 아기별 '다음 알림 시각' 을 적어 둔다.
+ *   care: { main: { feedAt, feedEvery, diaperAt, diaperEvery, babyName }, _2: {...} }
+ *   careNext: 가장 이른 알림 시각
+ * 앱이 닫혀 있어도 그 시각이 지나면 여기서 가족 폰으로 보낸다.
+ * 같은 기록으로는 한 번만 보낸다 (feedPushed / diaperPushed 에 보낸 시각을 남긴다).
+ * 알림 꼬리표(tag)를 앱과 같게 써서, 앱이 이미 띄운 알림 위에 겹쳐 쌓이지 않게 한다.
+ * ⚠️ 6시간 넘게 지난 건 보내지 않는다. 기록을 안 한 것일 수 있다.
+ * ================================================================== */
+async function careFamilyTokens(db, code) {
+  const fam = await db.collection("families").doc(code).get();
+  if (!fam.exists) return { list: [], map: new Map() };
+  const rawM = fam.data().members || {};
+  const members = (Array.isArray(rawM) ? rawM : Object.keys(rawM)).slice(0, 10);
+  if (!members.length) return { list: [], map: new Map() };
+  const users = await db.collection("users").where("firebase_uid", "in", members).get();
+  const map = new Map();
+  users.forEach((u) => {
+    const ud = u.data() || {};
+    const list = Array.isArray(ud.fcm_tokens) ? ud.fcm_tokens.slice() : [];
+    if (ud.fcm_token && !list.includes(ud.fcm_token)) list.push(ud.fcm_token);
+    list.forEach((t) => { if (t) map.set(t, u.id); });
+  });
+  return { list: [...map.keys()], map };
+}
+
+async function careDropDead(db, map, tokens, res) {
+  const dead = [];
+  res.responses.forEach((r, i) => {
+    if (r.success) return;
+    const c = r.error && r.error.code;
+    if (c === "messaging/registration-token-not-registered" || c === "messaging/invalid-registration-token") dead.push(tokens[i]);
+  });
+  await Promise.all(dead.map((t) =>
+    db.collection("users").doc(map.get(t))
+      .update({ fcm_tokens: admin.firestore.FieldValue.arrayRemove(t) })
+      .catch(() => {})
+  ));
+}
+
+exports.careReminder = onSchedule(
+  {
+    schedule: "every 5 minutes",
+    timeZone: "Asia/Seoul",
+    region: "asia-northeast3",
+    maxInstances: 2,
+  },
+  async () => {
+    const db = admin.firestore();
+    const now = Date.now();
+    const LATE_MAX = 6 * 3600 * 1000;
+    const pad = (n) => String(n).padStart(2, "0");
+    const hhmm = (ts) => {
+      const k = new Date(ts + 9 * 3600 * 1000);
+      return pad(k.getUTCHours()) + ":" + pad(k.getUTCMinutes());
+    };
+    const hm = (m) => {
+      const h = Math.floor(m / 60), mm = m % 60;
+      return h ? (h + "시간" + (mm ? " " + mm + "분" : "")) : (mm + "분");
+    };
+
+    const snap = await db.collection("reminders").where("careNext", "<=", now).get();
+    if (snap.empty) return;
+
+    for (const docSnap of snap.docs) {
+      const code = docSnap.id;
+      const d = docSnap.data() || {};
+      const care = d.care || {};
+      const updates = {};
+      const jobs = [];
+      let next = null;
+
+      Object.keys(care).forEach((key) => {
+        const c = care[key] || {};
+        ["feed", "diaper"].forEach((kind) => {
+          const at = Number(c[kind + "At"]) || 0;
+          if (!at || c[kind + "Pushed"] === at) return;          // 없거나 이미 보냄
+          if (at > now) { next = next === null ? at : Math.min(next, at); return; }
+          updates["care." + key + "." + kind + "Pushed"] = at;
+          if (now - at > LATE_MAX) return;                        // 너무 늦었다 — 조용히 넘긴다
+          jobs.push({ kind, at, every: Number(c[kind + "Every"]) || 0, name: c.babyName || d.babyName || "우리 아기" });
+        });
+      });
+
+      try {
+        if (jobs.length) {
+          const tk = await careFamilyTokens(db, code);
+          for (const j of jobs) {
+            if (!tk.list.length) break;
+            const last = j.every ? j.at - j.every * 60000 : 0;
+            const title = j.kind === "feed" ? `🍼 ${j.name} 맘마 시간이에요` : `🧷 ${j.name} 기저귀 확인할 때예요`;
+            const body = j.every
+              ? `${hhmm(last)}에 ${j.kind === "feed" ? "먹고" : "갈고"} ${hm(j.every)}이 지났어요`
+              : (j.kind === "feed" ? "수유 텀이 지났어요" : "기저귀 텀이 지났어요");
+            const res = await admin.messaging().sendEachForMulticast({
+              tokens: tk.list,
+              notification: { title, body },
+              webpush: {
+                notification: { title, body, icon: "/icon-192x192.png", tag: "care-" + j.kind, renotify: true },
+                fcmOptions: { link: APP_URL + "index.html" },
+              },
+              data: { link: "index.html" },
+              android: { priority: "high" },
+              apns: { payload: { aps: { sound: "default" } } },
+            });
+            await careDropDead(db, tk.map, tk.list, res);
+          }
+        }
+        updates.careNext = next;                                   // 다음에 볼 시각 (없으면 null)
+        await docSnap.ref.update(updates);
+      } catch (e) {
+        logger.error("[careReminder] 실패", code, e);
+      }
+    }
   }
 );
