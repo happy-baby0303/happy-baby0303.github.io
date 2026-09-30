@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>💌 배냇함 다이어리</title>
+    <title>💌 우리의 문답</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     
     <script>
@@ -120,7 +120,7 @@
         .shop-item-name { font-size: 15px; font-weight: 900; color: var(--text-title); margin-bottom: 4px; }
         .shop-item-desc { font-size: 12px; font-weight: 600; color: var(--text-sub); }
         .shop-item-btn { font-size: 13px; font-weight: 900; padding: 8px 16px; border-radius: 12px; flex-shrink: 0; transition: 0.2s; border: none; cursor: pointer; }
-        .btn-buy { background: #191F28; color: #FFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-buy { background: #4A413C; color: #FFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .btn-equip { background: #EBE5DD; color: #4A413C; }
         .btn-equipped { background: transparent; color: #7F77DD; pointer-events: none; }
     </style>
@@ -153,7 +153,7 @@
                     <button class="nav-badge" onclick="moveQuestion(1)">❯</button>
                 </div>
 
-                <h1 class="question" id="question-text">질문을 불러오는 중입니다...</h1>
+                <h1 class="question" id="question-text">질문을 불러오는 중…</h1>
                 
                 <div id="answer-section">
                     <div id="input-mode">
@@ -177,7 +177,7 @@
                             <div class="bubble-text" id="view-wife-text"></div>
                         </div>
                         
-                        <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">다음 페이지 작성하기 ❯</button>
+                        <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">다음 장 쓰기 ›</button>
                     </div>
                 </div>
             </main>
@@ -185,13 +185,13 @@
 
         <!-- 📖 서재 (모아보기) 탭 -->
         <div id="view-read" class="view-section">
-            <div class="book-progress-wrap" style="display: flex; justify-content: space-between; align-items: center; background: #F8F9FA; padding: 24px 20px; border-radius: 20px; border: 1px solid #E5E8EB; margin-bottom: 48px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div class="book-progress-wrap" style="display: flex; justify-content: space-between; align-items: center; background: #F8F9FA; padding: 24px 20px; border-radius: 20px; border: 1px solid #EDE6DE; margin-bottom: 48px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
                 <div style="text-align: left;">
                     <div style="font-family: 'Georgia', serif; font-size: 11px; color: #A39D98; letter-spacing: 1.5px; margin-bottom: 6px;">Premium Essay</div>
                     <div style="font-size: 15px; font-weight: 800; color: #3E3A37; line-height: 1.4;">우리의 기록이 모여<br>한 권의 책이 됩니다</div>
                 </div>
-                <button onclick="openPdfPreview()" style="background: #FFFFFF; color: #4E5968; border: 1px solid #D1D6DB; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    미리보기 〉
+                <button onclick="openPdfPreview()" style="background: #FFFFFF; color: #7A6F68; border: 1px solid #D1D6DB; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                    미리보기 ›
                 </button>
             </div>
             <main class="history-list" id="history-container"></main>
@@ -202,7 +202,7 @@
     <div id="store-modal" class="store-modal-overlay" onclick="closeStoreModal(event)">
         <div class="store-modal-content" onclick="event.stopPropagation()">
             <div class="store-header">
-                <div style="font-size: 18px; font-weight: 900; color: var(--text-title);">📚 북 테마 상점</div>
+                <div style="font-size: 18px; font-weight: 900; color: var(--text-title);">📚 표지 고르기</div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div class="coin-badge" style="margin: 0; padding: 8px 12px; background:var(--bg-color); border:none; box-shadow:none; color:var(--text-title);">
                         <span>🪙</span> <span id="modal-coin-count">0</span>
@@ -214,12 +214,12 @@
             <div class="store-preview-area" id="store-preview-area"></div>
 
             <div class="shop-area">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-sub); margin-bottom: 16px;">프리미엄 한정판 표지</div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-sub); margin-bottom: 16px;">코인으로 바꾸는 표지</div>
                 <div class="shop-grid" id="store-grid-container"></div>
                 
                 <!-- 🚨 [방어 문구 추가] -->
                 <div style="margin-top: 24px; font-size: 11px; color: #A39D98; text-align: center; line-height: 1.5; letter-spacing: -0.3px;">
-                    * 기기 해상도 및 실제 양장본 원단의 특성에 따라<br>화면과 실제 인쇄물의 색상에 미세한 차이가 있을 수 있습니다.
+                    * 화면과 실제 종이 색은 조금 다를 수 있어요.
                 </div>
             </div>
         </div>
@@ -229,7 +229,7 @@
     <div id="pdf-preview-modal" class="pdf-modal-overlay">
         <div class="pdf-modal-content">
             <div class="pdf-header">
-                <h2>📖 프리미엄 에세이 미리보기</h2>
+                <h2>📖 책으로 미리보기</h2>
                 <button onclick="closePdfPreview()" style="background:none; border:none; font-size:24px; color:#A39992; cursor:pointer;">✕</button>
             </div>
             <div class="pdf-body" id="pdf-pages-container"></div>
@@ -283,11 +283,11 @@
     
     <script>
         const STORE_DB = [
-            { id: 'theme_beige', name: '크림 화이트 (기본)', desc: '가장 편안하고 클래식한 종이 질감', price: 0, bg: '#FCFBF8', borderLeft: '#EAE5DF', textTitle: '#4A413C', textSub: '#A39992', line: '#EAE5DF' },
-            { id: 'theme_sand', name: '뮤트 샌드', desc: '차분하고 따뜻한 모래빛 감성', price: 500, bg: '#F4F1EB', borderLeft: '#D6CFC4', textTitle: '#4A413C', textSub: '#8A7E78', line: '#D6CFC4' },
-            { id: 'theme_blossom', name: '페일 로즈', desc: '채도를 확 낮춘 차분한 말린 장미빛', price: 800, bg: '#F8F1F1', borderLeft: '#E6D5D5', textTitle: '#5C414A', textSub: '#A89299', line: '#E6D5D5' },
-            { id: 'theme_forest', name: '소프트 세이지', desc: '눈이 편안해지는 은은한 풀잎색', price: 1200, bg: '#F1F4F2', borderLeft: '#C8D4CB', textTitle: '#2C3A32', textSub: '#7B8C81', line: '#C8D4CB' },
-            { id: 'theme_navy', name: '미드나잇 블루', desc: '세련된 무드의 우아한 프리미엄', price: 1500, bg: '#2B2F36', borderLeft: '#3A3F4A', textTitle: '#F0EDE6', textSub: '#8E94A0', line: '#3A3F4A' }
+            { id: 'theme_beige', name: '크림 화이트 (기본)', desc: '기본 종이 색', price: 0, bg: '#FCFBF8', borderLeft: '#EAE5DF', textTitle: '#4A413C', textSub: '#A39992', line: '#EAE5DF' },
+            { id: 'theme_sand', name: '뮤트 샌드', desc: '따뜻한 모래색', price: 500, bg: '#F4F1EB', borderLeft: '#D6CFC4', textTitle: '#4A413C', textSub: '#8A7E78', line: '#D6CFC4' },
+            { id: 'theme_blossom', name: '페일 로즈', desc: '말린 장미색', price: 800, bg: '#F8F1F1', borderLeft: '#E6D5D5', textTitle: '#5C414A', textSub: '#A89299', line: '#E6D5D5' },
+            { id: 'theme_forest', name: '소프트 세이지', desc: '은은한 풀잎색', price: 1200, bg: '#F1F4F2', borderLeft: '#C8D4CB', textTitle: '#2C3A32', textSub: '#7B8C81', line: '#C8D4CB' },
+            { id: 'theme_navy', name: '미드나잇 블루', desc: '짙은 밤하늘색', price: 1500, bg: '#2B2F36', borderLeft: '#3A3F4A', textTitle: '#F0EDE6', textSub: '#8E94A0', line: '#3A3F4A' }
         ];
 
         window.updateCoinUI = function() {
@@ -375,13 +375,13 @@
             let coins = parseInt(localStorage.getItem('tosil_coins')) || 0;
 
             if (!inventory.includes(id)) {
-                if (coins < price) return window.showToast("🪙 코인이 부족해요 매일 일기를 쓰면 코인이 모여요.");
-                if (confirm(`[${STORE_DB.find(i=>i.id===id).name}] 테마를 ${price}코인에 구매할까요?`)) {
+                if (coins < price) return window.showToast("코인이 모자라요. 매일 한 쪽씩 쓰면 모여요.");
+                if (confirm(`[${STORE_DB.find(i=>i.id===id).name}] 표지를 ${price}코인으로 바꿀까요?`)) {
                     coins -= price;
                     inventory.push(id);
                     localStorage.setItem('tosil_coins', coins);
                     localStorage.setItem('tosil_inventory', JSON.stringify(inventory));
-                    window.showToast("🎁 예쁜 새 표지를 획득했어요");
+                    window.showToast("새 표지로 바꿨어요");
                 } else {
                     return;
                 }
@@ -680,7 +680,7 @@
 
     document.getElementById("btn-submit").addEventListener("click", async () => {
         const ans = document.getElementById("my-answer").value.trim();
-        if(!ans) return window.showToast("마음을 한 줄이라도 남겨주세요 🥺");
+        if(!ans) return window.showToast("한 줄만 적어도 괜찮아요");
 
         const btn = document.getElementById("btn-submit");
         const isEditing = btn.innerText.includes("수정");
@@ -740,9 +740,9 @@
             localStorage.setItem('tosil_coins', coins);
             localStorage.setItem(claimedKey, 'true');
             window.updateCoinUI();
-            window.showToast("🎉 기록 저장 완료 보상으로 100 코인을 받았습니다 🪙");
+            window.showToast("기록했어요 · 100코인이 쌓였어요");
         } else {
-            window.showToast("🎉 기록이 예쁘게 수정되었습니다");
+            window.showToast("고쳤어요");
         }
         if (queued) {
             setTimeout(function () { window.showToast("📶 연결되면 짝꿍에게 바로 보낼게요"); }, 2900);
@@ -994,7 +994,7 @@
                 <div class="premium-book-page premium-cover" style="background: ${theme.bg}; border-left-color: ${theme.borderLeft};">
                     <div style="text-align: center; width: 100%;">
                         <div style="font-family: 'Georgia', serif; font-size: 11px; color: ${theme.textSub}; letter-spacing: 2px; line-height: 1.8; margin-bottom: 28px;">
-                            " 너라는 우주가<br>우리에게 쏟아지던 날 "
+                            " 네가 우리에게<br>온 날부터 "
                         </div>
                         <div style="font-size: 24px; font-weight: 900; color: ${theme.textTitle}; letter-spacing: -1px; line-height: 1.4; margin-bottom: 32px;">
                             우리가 처음 만난<br>그 해의 기록
@@ -1063,7 +1063,7 @@
             }
 
             if(!hasRecord) {
-                html += `<div style="text-align:center; color:#8B95A1; padding:40px; font-weight: 700;">아직 둘 다 답한 페이지가 없어요.</div>`;
+                html += `<div style="text-align:center; color:#A3958A; padding:40px; font-weight: 700;">아직 둘 다 답한 페이지가 없어요.</div>`;
             }
 
             container.innerHTML = html;

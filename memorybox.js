@@ -797,7 +797,7 @@
         return '<div id="mb-find" style="margin:30px 0 0;">' +
             '<div style="position:relative;">' +
                 '<input id="mb-q" type="text" enterkeyhint="search" autocomplete="off" ' +
-                    'placeholder="찾아보기 — 첫 목욕, 뒤집기, 웃었다" value="' + esc(mbRawQuery) + '" ' +
+                    'placeholder="찾아보기 · 첫 목욕, 뒤집기, 웃었다" value="' + esc(mbRawQuery) + '" ' +
                     'oninput="window.mbSearch(this.value)" ' +
                     'style="width:100%; box-sizing:border-box; padding:13px 42px 13px 16px; border-radius:14px; ' +
                     'border:1px solid var(--border); background:var(--bg-card); font-size:14px; font-weight:600; ' +

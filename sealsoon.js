@@ -170,7 +170,7 @@
                     '일 전에 ' + (one.who ? esc(one.who) + '가' : '부모님이') + ' 남긴 편지예요</div>' +
             '</div>' +
 
-            '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">〉</div>' +
+            '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">›</div>' +
         '</div>';
     }
 

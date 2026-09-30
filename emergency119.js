@@ -105,6 +105,24 @@
         return "";
     }
 
+    /* 이유식 테스트에서 반응이 있었던 재료.
+       응급실에서 알레르기를 꼭 묻는데, 배냇함엔 따로 적는 칸이 없다.
+       그래도 이유식 달력에 '반응 있음' 으로 남긴 게 있으면 그건 이미 아는 사실이다. 보여준다. */
+    function foodReactions() {
+        var out = [];
+        try {
+            var db = JSON.parse(localStorage.getItem("tosil_food_calendar")) || {};
+            Object.keys(db).sort().reverse().forEach(function (day) {
+                (db[day] || []).forEach(function (r) {
+                    if (!r || r.type !== "test" || r.status !== "fail" || !r.ingredient) return;
+                    var n = String(r.ingredient).trim();
+                    if (n && out.indexOf(n) === -1) out.push(n);
+                });
+            });
+        } catch (e) {}
+        return out;
+    }
+
     function summary() {
         var recs = feverRecords();
         var now = Date.now();
@@ -136,7 +154,7 @@
 
         return {
             last: last, peak: peak, firstHot: firstHot, todayN: todayN,
-            lastPill: lastPill, hot6: hot6.length, symptom: symptom,
+            lastPill: lastPill, hot6: hot6.length, symptom: symptom, reactions: foodReactions(),
             weight: (localStorage.getItem("tosil_latest_weight") || "").trim()
         };
     }
@@ -166,6 +184,7 @@
         }
 
         if (s.symptom) L.push("증상 " + s.symptom);
+        if (s.reactions.length) L.push("이유식에서 반응 있었던 재료 " + s.reactions.join(", "));
 
         return L.join("\n");
     }
@@ -259,6 +278,9 @@
         }
 
         if (s.symptom) body += row("적어둔 증상", s.symptom);
+        if (s.reactions.length) body += row("반응 있었던 음식",
+            s.reactions.slice(0, 4).join(", ") + (s.reactions.length > 4 ? " 외 " + (s.reactions.length - 4) + "개" : ""),
+            "이유식 기록에서", RED);
 
         var youngNote = (a.days !== null && a.days < 91)
             ? '<div style="background:rgba(211,46,46,0.08); border:1px solid rgba(211,46,46,0.28); border-radius:13px; ' +
@@ -308,8 +330,8 @@
 
             '<div style="font-size:11px; font-weight:600; color:var(--text-sub); ' +
                 'line-height:1.7; margin-top:18px; word-break:keep-all;">' +
-                '앱에 적힌 기록만 보여드립니다. 알레르기는 배냇함이 따로 받아두는 곳이 없어서 띄우지 않아요 — ' +
-                '있다면 꼭 직접 말씀해 주세요.</div>' +
+                '앱에 적힌 기록만 보여드려요. 이유식에서 반응이 있었던 재료는 위에 적었어요. ' +
+                '그 밖의 알레르기나 앓고 있는 병은 꼭 직접 말씀해 주세요.</div>' +
 
         '</div>';
 

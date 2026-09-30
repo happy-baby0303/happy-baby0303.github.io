@@ -723,7 +723,7 @@
         };
 
         if (typeof window.showConfirm === "function") {
-            window.showConfirm("이 사진을 배냇함에서 빼낼까요?\n되돌릴 수 없어요.", go, "🧺", "빼내기", "#F04452");
+            window.showConfirm("이 사진을 배냇함에서 빼낼까요?\n되돌릴 수 없어요.", go, "🧺", "빼내기", "#D32F2F");
         } else if (confirm("이 사진을 배냇함에서 빼낼까요?")) { go(); }
     };
 

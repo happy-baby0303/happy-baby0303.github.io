@@ -513,12 +513,26 @@
         catch (e) { console.warn("[편지함] 이 기기에 저장 못 함 (용량) — 가족 보관함 사본은 남습니다", e); }
     }
 
-    // 날짜를 씨앗으로 쓰는 고정 선택. 같은 날은 몇 번을 열어도 같은 편지가 나온다.
+    /* 같은 날은 몇 번을 열어도 같은 문장 (날짜가 씨앗).
+       ⚠️ 예전엔 날마다 제비뽑기라, 문장이 몇 개 안 되는 칸은 며칠 만에 같은 문장이 또 나왔다.
+          이제 칸마다 한 바퀴를 다 돌아야 같은 문장이 다시 나온다 (여는 말 32개면 32일).
+          칸마다 길이가 달라서 문장끼리의 조합은 바퀴마다 달라진다. */
     function seedPick(arr, key) {
         if (!arr || !arr.length) return "";
-        var sum = 0;
-        for (var i = 0; i < key.length; i++) sum = (sum * 31 + key.charCodeAt(i)) % 1000003;
-        return arr[sum % arr.length];
+        var n = arr.length;
+        var hash = function (s) { var x = 0; for (var q = 0; q < s.length; q++) x = (x * 31 + s.charCodeAt(q)) % 1000003; return x; };
+        var m = /^(\d{4})-(\d{2})-(\d{2})(.*)$/.exec(String(key || ""));
+        if (!m) return arr[hash(String(key || "")) % n];
+        var day = Math.floor(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) / 86400000);
+        var round = Math.floor(day / n), pos = day % n;
+        var order = [];
+        for (var i = 0; i < n; i++) order.push(i);
+        var s = (hash(m[4]) % 2147483646) + 1;          // 칸마다 순서는 고정 — 바퀴 경계에서 같은 문장이 붙어 나오지 않게
+        for (var j = n - 1; j > 0; j--) {
+            s = (s * 48271) % 2147483647;
+            var k = s % (j + 1), t = order[j]; order[j] = order[k]; order[k] = t;
+        }
+        return arr[order[pos]];
     }
 
     function dayStats(s0) {

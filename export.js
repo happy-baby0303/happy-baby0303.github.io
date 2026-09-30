@@ -635,7 +635,7 @@
                     '<div style="font-size:15px; font-weight:900; color:var(--text-m);">배냇함 내려받기</div>' +
                     '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px;">사진 · 소리 · 편지를 통째로 보관하세요</div>' +
                 '</div>' +
-                '<div style="font-size:12px; color:var(--text-sub);">〉</div>';
+                '<div style="font-size:12px; color:var(--text-sub);">›</div>';
 
             container.prepend(card);
         };

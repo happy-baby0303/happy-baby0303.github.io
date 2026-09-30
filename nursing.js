@@ -92,7 +92,7 @@
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;">
                 ${distanceHtml}
-                <button data-nursing-go="${esc(p.title)}" style="background: #F2F4F6; color: #4E5968; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='#E5E8EB'" onmouseup="this.style.background='#F2F4F6'">
+                <button data-nursing-go="${esc(p.title)}" style="background: #F6F2EC; color: #7A6F68; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='#EDE6DE'" onmouseup="this.style.background='#F6F2EC'">
                     길찾기 〉
                 </button>
             </div>
@@ -129,7 +129,7 @@
         }
 
         body.innerHTML =
-            (hasPos ? '' : '<div style="padding:12px; background:#FFF0F1; border-radius:12px; margin-bottom:16px; font-size:12.5px; font-weight:800; color:#F04452; text-align:center;">🚨 위치(GPS) 권한을 허용해야 가장 가까운 곳을 찾을 수 있어요</div>') +
+            (hasPos ? '' : '<div style="padding:12px; background:#FFF0F1; border-radius:12px; margin-bottom:16px; font-size:12.5px; font-weight:800; color:#D32F2F; text-align:center;">🚨 위치(GPS) 권한을 허용해야 가장 가까운 곳을 찾을 수 있어요</div>') +
             list.slice(0, 50).map(rowHTML).join("");
     }
 
@@ -147,22 +147,22 @@
 
         wrap.innerHTML = `
         <div style="background:#FFFFFF; width:100%; border-radius:24px 24px 0 0; padding:24px 20px 40px; box-sizing:border-box; transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.1, 1, 0.2, 1); display:flex; flex-direction:column; max-height:85vh;">
-            <div style="width:40px; height:5px; background:#E5E8EB; border-radius:3px; margin:0 auto 20px auto;"></div>
+            <div style="width:40px; height:5px; background:#EDE6DE; border-radius:3px; margin:0 auto 20px auto;"></div>
             
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
                 <div>
-                    <div style="font-size:13px; font-weight:800; color:#F04452; margin-bottom:4px;">🚨 당장 기저귀/수유가 급할 때</div>
-                    <div style="font-size:22px; font-weight:900; color:#191F28; letter-spacing:-0.5px;">${babyName} 주변 수유실</div>
+                    <div style="font-size:13px; font-weight:800; color:#D32F2F; margin-bottom:4px;">가까운 수유실</div>
+                    <div style="font-size:22px; font-weight:900; color:#4A413C; letter-spacing:-0.5px;">${babyName} 주변 수유실</div>
                 </div>
-                <button onclick="document.getElementById('${SHEET_ID}').style.opacity='0'; document.getElementById('${SHEET_ID}').children[0].style.transform='translateY(100%)'; setTimeout(()=>document.getElementById('${SHEET_ID}').remove(), 300); document.body.style.overflow='';" style="background:none; border:none; font-size:24px; color:#8B95A1; cursor:pointer; padding:0;">✕</button>
+                <button onclick="document.getElementById('${SHEET_ID}').style.opacity='0'; document.getElementById('${SHEET_ID}').children[0].style.transform='translateY(100%)'; setTimeout(()=>document.getElementById('${SHEET_ID}').remove(), 300); document.body.style.overflow='';" style="background:none; border:none; font-size:24px; color:#A3958A; cursor:pointer; padding:0;">✕</button>
             </div>
             
-            <div style="font-size:12px; font-weight:600; color:#8B95A1; margin-bottom:16px; background:#F9FAFB; padding:10px 14px; border-radius:10px; word-break:keep-all; line-height:1.4;">
+            <div style="font-size:12px; font-weight:600; color:#A3958A; margin-bottom:16px; background:#FBF8F3; padding:10px 14px; border-radius:10px; word-break:keep-all; line-height:1.4;">
                 <span id="nursing-total">공공데이터 기준</span><br>오래된 정보가 있을 수 있으니 꼭 전화를 먼저 해보세요
             </div>
             
             <div id="nursing-body" style="overflow-y:auto; flex:1; padding-bottom:20px; scrollbar-width:none;">
-                <div style="padding:60px 0; text-align:center; font-size:14px; font-weight:800; color:#8B95A1;">⏳ 가장 가까운 곳을 탐색 중입니다...</div>
+                <div style="padding:60px 0; text-align:center; font-size:14px; font-weight:800; color:#A3958A;">가까운 곳을 찾는 중…</div>
             </div>
         </div>`;
 
@@ -233,7 +233,7 @@
        // 🚨 [수정됨] 글씨가 길어져도 버튼이 가운데로 딸려오지 않고 무조건 우측 끝에 붙도록 Flex 레이아웃 보정!
         el.innerHTML = `
             <div style="flex: 1; min-width: 0; padding-right: 12px;">
-                <div style="font-size: 12px; font-weight: 800; color: #E11D48; margin-bottom: 4px;">🚨 앗, 기저귀 갈 때 됐나요?</div>
+                <div style="font-size: 12px; font-weight: 800; color: #E11D48; margin-bottom: 4px;">급하게 수유실이 필요할 때</div>
                 <div style="font-size: 16px; font-weight: 900; color: #BE123C; letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">${ageText}${babyName} 가까운 수유실 찾기</div>
             </div>
             <div style="flex-shrink: 0; background: #FFFFFF; color: #E11D48; border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 900; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.1); white-space: nowrap;">3초 컷 〉</div>
@@ -277,7 +277,7 @@ window.safeOpenMap = function(mapType, query) {
                 <button id="btn-go-navi" style="width:100%; padding:16px; background:#7F77DD; color:#FFF; border:none; border-radius:14px; font-size:15px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(127, 119, 221,0.2);">
                     네, 맞아요 내비 켜기 🚗
                 </button>
-                <button id="btn-go-check" style="width:100%; padding:14px; background:var(--bg-sub); color:#4E5968; border:1px solid var(--border); border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">
+                <button id="btn-go-check" style="width:100%; padding:14px; background:var(--bg-sub); color:#7A6F68; border:1px solid var(--border); border-radius:14px; font-size:14px; font-weight:800; cursor:pointer;">
                     앗, 외출 체크리스트 열기
                 </button>
             </div>

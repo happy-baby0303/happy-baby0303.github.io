@@ -66,7 +66,7 @@
 
         var box = document.createElement("div");
         box.setAttribute(MARK, "1");
-        // 마진을 좌우로 예쁘게 분배하고 모서리를 살짝 더 둥글게!
+        // 칸 간격과 모서리
         box.style.cssText = "position:relative; width:" + SLOT + "px; height:" + SLOT + "px; " +
             "flex-shrink:0; margin:0 8px 0 auto; border-radius:14px; overflow:hidden; transition: 0.2s;";
 
@@ -82,7 +82,7 @@
             };
 
         } else if (done) {
-            // 도장은 찍혔는데 사진이 없는 칸. 디자인을 인스타 감성으로 몽글몽글하게!
+            // 도장은 찍혔는데 사진이 없는 칸 (누르면 사진을 붙인다)
             box.style.cssText += "border:1.5px dashed rgba(185,138,46,0.45); background:rgba(255, 255, 255, 0.8); " +
                 "display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: inset 0 2px 4px rgba(185,138,46,0.06);";
             box.innerHTML = '<span style="font-size:22px; font-weight:300; color:#B98A2E; line-height:1; margin-top:-2px;">+</span>';

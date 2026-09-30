@@ -63,6 +63,12 @@
         if (typeof window.showToast === "function") window.showToast(m);
     }
 
+    /* 「처음」이 · 「나란히」가 — 받침에 맞춰. 예전엔 전부 '」 이' 였다. */
+    function ig(w) {
+        var s = String(w || ""), c = s.charCodeAt(s.length - 1);
+        return (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0) ? "이" : "가";
+    }
+
     function bookTitle(vol) {
         return TITLES[vol - 1] || (vol + "권");
     }
@@ -139,11 +145,11 @@
             head = "첫 쪽을 기다리는 중이에요";
             sub  = "둘 다 답한 날이 한 쪽이 됩니다";
         } else if (inBook === 0 && full > 0) {
-            head = full + "권 「" + bookTitle(full) + "」 이 방금 꽂혔어요";
+            head = full + "권 「" + bookTitle(full) + "」" + ig(bookTitle(full)) + " 방금 꽂혔어요";
             sub  = "다음 권의 첫 쪽이 기다리고 있어요";
         } else if (left <= 5) {
             head = "이번 권이 " + left + "쪽 남았어요";
-            sub  = "곧 「" + bookTitle(nextVol) + "」 이 꽂힙니다";
+            sub  = "곧 「" + bookTitle(nextVol) + "」" + ig(bookTitle(nextVol)) + " 꽂힙니다";
         } else {
             /* ⚠️ 여기가 제일 오래 보이는 문구인데
                   "「처음」까지 98쪽" 이 먼저 눈에 들어왔다.
@@ -154,7 +160,7 @@
             head = full > 0
                 ? (full + "권 하고 " + inBook + "쪽")
                 : (inBook + "쪽을 썼어요");
-            sub  = "한 쪽씩 「" + bookTitle(nextVol) + "」 이 되어갑니다";
+            sub  = "한 쪽씩 「" + bookTitle(nextVol) + "」" + ig(bookTitle(nextVol)) + " 되어갑니다";
         }
 
         /* 혼자만 쓴 날이 있으면 조용히 알려준다. 재촉이 아니라 안내다. */

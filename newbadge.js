@@ -170,7 +170,7 @@
         var d = document.createElement("span");
         d.className = DOT_ID;
         d.style.cssText = "position:absolute; top:9px; right:10px; width:8px; height:8px; " +
-            "border-radius:50%; background:#F04452; box-shadow:0 0 0 2px var(--bg-card);";
+            "border-radius:50%; background:#D32F2F; box-shadow:0 0 0 2px var(--bg-card);";
         return d;
     }
 

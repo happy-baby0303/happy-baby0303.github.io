@@ -79,7 +79,10 @@
 
     /* 큐레이터는 별도 페이지라 이 파일이 없다. 날짜를 남겨두면 그쪽도 읽는다. */
     try {
-        if (freeOpen()) localStorage.setItem(KEY, UNTIL);
+        /* ⚠️ 늦게 설치한 사람은 MIN_DAYS 만큼 더 열리는데, 큐레이터에는 UNTIL 만 넘겨서
+              본 앱은 열려 있고 큐레이터는 잠기는 날이 생겼다. 이 사람의 실제 종료일을 넘긴다. */
+        var ed = new Date(endAt());
+        if (freeOpen()) localStorage.setItem(KEY, ed.getFullYear() + "-" + String(ed.getMonth() + 1).padStart(2, "0") + "-" + String(ed.getDate()).padStart(2, "0"));
         else localStorage.removeItem(KEY);
     } catch (e) {}
 
@@ -135,32 +138,44 @@
 
     /* ---------- 설정 탭의 'PLUS 안내' 칸 ---------- */
 
+    /* ⚠️ 설정 탭 맨 아래, 'Made with ♥' 푸터 밑에 붙어서 아무도 못 봤다.
+          프로필 · 가족 코드 다음, '앱 설정' 소제목 바로 위에 둔다. 약속은 접어 두고 누르면 펼친다. */
     function cardHTML() {
         var open = freeOpen();
-        return '<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">' +
+        var promise =
+            '<details style="margin-top:12px;">' +
+                '<summary style="font-size:12.5px; font-weight:800; color:var(--text-sub); cursor:pointer; list-style:none;">' +
+                    '유료로 바뀔 때 지킬 것 ›</summary>' +
+                '<div style="margin-top:10px; background:var(--bg-sub); border-radius:12px; padding:13px 15px; ' +
+                    'font-size:12.5px; font-weight:700; color:var(--text-s); line-height:1.9; word-break:keep-all;">' +
+                    '· 바뀌기 <b>30일 전</b>에 앱에서 미리 알려드립니다<br>' +
+                    '· 무료 기간에 담은 <b>사진·소리·편지·기록은 계속 보실 수 있습니다</b><br>' +
+                    '· 무료 기간에 등록한 <b>둘째·셋째 아이도 그대로</b> 쓰실 수 있습니다<br>' +
+                    '· 해열제 간격, 응급 처치 같은 <b>안전 정보는 계속 무료</b>입니다' +
+                '</div>' +
+            '</details>';
+        return '<div style="display:flex; align-items:center; gap:10px;">' +
                 '<span style="font-size:19px;">' + (open ? "🎁" : "✨") + '</span>' +
-                '<span style="font-size:15px; font-weight:900; color:var(--text-m);">PLUS 안내</span>' +
+                '<span style="font-size:15px; font-weight:900; color:var(--text-m);">PLUS</span>' +
                 (open
                     ? '<span style="margin-left:auto; font-size:11px; font-weight:900; color:' + GOLD + '; ' +
                       'background:rgba(185,138,46,0.12); padding:5px 10px; border-radius:9px;">무료 개방 중</span>'
                     : '') +
             '</div>' +
+            '<div style="font-size:13px; font-weight:700; color:var(--text-m); line-height:1.7; word-break:keep-all; margin-top:6px;">' +
+                (open ? '출시 기념으로 <b>' + pretty(UNTIL) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음'
+                      : 'PLUS 기능과 요금은 준비되는 대로 안내드릴게요.') +
+            '</div>' + promise;
+    }
 
-            (open
-                ? '<div style="font-size:13px; font-weight:700; color:var(--text-m); line-height:1.75; ' +
-                      'word-break:keep-all; margin-bottom:12px;">' +
-                      '지금은 <b>출시 기념</b>으로 PLUS 기능이 모두 열려 있어요.<br>' +
-                      pretty(UNTIL) + '까지 (' + daysLeft() + '일 남음)</div>'
-                : '<div style="font-size:13px; font-weight:700; color:var(--text-m); line-height:1.75; ' +
-                      'margin-bottom:12px;">PLUS 기능과 요금은 준비되는 대로 안내드릴게요.</div>') +
-
-            '<div style="background:var(--bg-sub); border-radius:12px; padding:13px 15px; ' +
-                'font-size:12.5px; font-weight:700; color:var(--text-s); line-height:1.9; word-break:keep-all;">' +
-                '<div style="font-weight:900; color:var(--text-m); margin-bottom:5px;">유료로 바뀔 때 지킬 것</div>' +
-                '· 바뀌기 <b>30일 전</b>에 앱에서 미리 알려드립니다<br>' +
-                '· 무료 기간에 담은 <b>사진·소리·편지·기록은 계속 보실 수 있습니다</b><br>' +
-                '· 해열제 간격, 응급 처치 같은 <b>안전 정보는 계속 무료</b>입니다' +
-            '</div>';
+    function findLeaf(root, text) {
+        var all = root.querySelectorAll("div, h1, h2, h3, span, p");
+        for (var i = 0; i < all.length; i++) {
+            var el = all[i];
+            if (el.children.length || (el.closest && el.closest("#" + CARD))) continue;
+            if ((el.textContent || "").trim() === text) return el;
+        }
+        return null;
     }
 
     function mountCard() {
@@ -171,10 +186,16 @@
         if (!old) {
             box.id = CARD;
             box.style.cssText = "background:var(--bg-card); padding:18px 20px; border-radius:16px; " +
-                "border:1px solid var(--border); margin-bottom:12px; box-sizing:border-box; width:100%;";
+                "border:1px solid rgba(185,138,46,0.28); margin-bottom:12px; box-sizing:border-box; width:100%;";
         }
         box.innerHTML = cardHTML();
-        if (!old) host.appendChild(box);
+        var anchor = findLeaf(host, "앱 설정");
+        if (anchor && anchor.parentNode) {
+            if (anchor.previousSibling !== box) anchor.parentNode.insertBefore(box, anchor);
+        } else if (!old) {
+            var shell = host.firstElementChild || host;
+            shell.insertBefore(box, shell.children[1] || null);    // 못 찾으면 맨 위 카드 바로 다음
+        }
     }
     window.refreshPlusFreeCard = mountCard;
 

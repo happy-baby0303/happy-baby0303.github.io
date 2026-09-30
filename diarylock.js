@@ -27,7 +27,7 @@
 
     var NUDGE_KEY = "tosil_diary_nudge";      // 마지막 재촉 날짜
     var PUSH_AT_KEY = "tosil_diary_push_at";  // 마지막 '답 남겼어요' 알림 시각
-    var GOLD = "#D48806", GRAY = "#8B95A1", INK = "#4A413C";
+    var GOLD = "#D48806", GRAY = "#A3958A", INK = "#4A413C";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -92,10 +92,10 @@
                     : '아직 ' + esc(otherWord()) + '가 안 썼어요') + '</div>' +
             (hasText ? '' :
                 '<div onclick="window.nudgeDiary()" style="margin-top:11px; padding:13px; ' +
-                    'background:' + (done ? "#F2F4F6" : "#191F28") + '; ' +
+                    'background:' + (done ? "#F6F2EC" : "#4A413C") + '; ' +
                     'color:' + (done ? GRAY : "#FFFFFF") + '; border-radius:12px; ' +
                     'font-size:13px; font-weight:800; cursor:' + (done ? "default" : "pointer") + ';">' +
-                    (done ? "오늘은 이미 보냈어요" : "\uD83D\uDC8C 오늘 물어봐 줄래요?") + '</div>') +
+                    (done ? "오늘은 이미 알렸어요" : "\uD83D\uDC8C " + esc(otherWord()) + "에게 살짝 알리기") + '</div>') +
         '</div>';
     }
 

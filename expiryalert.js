@@ -100,7 +100,7 @@
             head = "기한이 지난 게 " + s.expired.length + "개 있어요";
             body = esc(names.slice(0, 3).join(", ")) +
                    (names.length > 3 ? " 외 " + (names.length - 3) + "개" : "") +
-                   " — 쓰기 전에 확인해 주세요";
+                   ". 쓰기 전에 확인해 주세요";
         } else {
             var f = s.soon[0];
             head = esc(f.r.name) + (f.left === 0 ? " 오늘까지예요" : " " + f.left + "일 남았어요");

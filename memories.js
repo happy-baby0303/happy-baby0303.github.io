@@ -105,14 +105,14 @@
 
             '<div style="flex:1; min-width:0;">' +
                 '<div style="font-size:10px; font-weight:900; color:' + GOLD + '; letter-spacing:1.6px; margin-bottom:5px;">' +
-                    esc(m.mark.label.toUpperCase ? m.mark.label : m.mark.label) + '</div>' +
+                    esc(m.mark.label) + '</div>' +
                 '<div style="font-size:14.5px; font-weight:800; color:var(--text-m); letter-spacing:-0.3px; ' +
                     'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(caption) + '</div>' +
                 '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:3px;">' +
                     esc(dday(m.key)) + esc(extra) + '</div>' +
             '</div>' +
 
-            '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">〉</div>' +
+            '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">›</div>' +
         '</div>';
     }
 

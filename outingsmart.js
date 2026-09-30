@@ -591,7 +591,11 @@
         var list = candidates();
         if (!list.length) { host.innerHTML = ""; return; }
 
-        var p = list[pickIdx % list.length];
+        /* ⚠️ 거리를 모르면 정렬이 늘 같아서 첫 추천이 매번 같은 곳이었다. 날마다 시작점을 옮긴다.
+              거리를 알면 가까운 다섯 곳 안에서만 돌린다 (먼 곳을 권하지 않게). '다른 곳' 은 그 다음부터. */
+        var day = Math.floor((Date.now() + 9 * 3600000) / 86400000);
+        var span = (distOf(list[0]) !== null) ? Math.min(5, list.length) : list.length;
+        var p = list[((day % span) + pickIdx) % list.length];
         var why = reasonLines(p);
         var nap = napShort();
 

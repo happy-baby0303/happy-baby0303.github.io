@@ -225,7 +225,7 @@
                 'flex-shrink:0; width:52px;">' + esc(it.label) + '</span>' +
             '<span style="flex:1; min-width:0; font-size:13px; font-weight:800; ' +
                 'color:' + it.color + '; line-height:1.45; word-break:keep-all;">' + it.text + '</span>' +
-            '<span style="font-size:11px; color:var(--text-sub); flex-shrink:0;">〉</span>' +
+            '<span style="font-size:11px; color:var(--text-sub); flex-shrink:0;">›</span>' +
         '</div>';
     }
 

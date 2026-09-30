@@ -25,7 +25,7 @@
         }
         /* 아이폰은 글씨가 16px 보다 작은 입력창을 누르면 화면을 확 당겨 확대한다.
            그걸 막겠다고 모든 입력창 글씨를 16px 로 강제했었다 (아래 CSS).
-           그게 형님이 짚은 '생년월일·선택칸 글씨가 잘린다', '숫자와 단위 크기가 안 맞는다' 의 원인이었다.
+           그게 짚었던 '생년월일·선택칸 글씨가 잘린다', '숫자와 단위 크기가 안 맞는다' 의 원인이었다.
              12px 로 설계한 생년월일 칸, 90px 짜리 선택칸 → 16px 이 되며 잘림
              42px 금액 · 22px 체온·몸무게 → 16px 로 작아져 옆의 '원·℃·kg' 보다 작아짐
            아이폰만 viewport 로 확대를 막는다 (아이폰은 이렇게 해도 두 손가락 확대는 된다).
@@ -33,6 +33,7 @@
         var ua = navigator.userAgent || "";
         var isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.indexOf("Mac") > -1 && "ontouchend" in document);
         if (isIOS && c.indexOf("maximum-scale") === -1) c += ", maximum-scale=1";
+        if (isIOS) document.documentElement.classList.add("is-ios");
         m.setAttribute("content", c);
     })();
 
@@ -122,9 +123,11 @@ body { overscroll-behavior-y: contain; }
 
 /* 홈 화면에 설치한 PWA 는 상태바가 화면 위에 그대로 얹힌다.
    env() 를 못 읽는 기기까지 대비해 최소값을 준다. */
+/* ⚠️ 안드로이드(플레이스토어 앱)는 상태바 아래에서 화면이 시작한다. 거기에 44px 을 또 주면
+      모든 전체 화면 창 위에 빈 띠가 생긴다. 상태바가 화면 위에 얹히는 건 아이폰뿐이라 아이폰에만 준다. */
 @media all and (display-mode: standalone) {
-    [style*="position:fixed"][style*="inset:0"],
-    [style*="position: fixed"][style*="inset: 0"] {
+    html.is-ios [style*="position:fixed"][style*="inset:0"],
+    html.is-ios [style*="position: fixed"][style*="inset: 0"] {
         padding-top: max(env(safe-area-inset-top, 0px), 44px) !important;
     }
 }

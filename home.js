@@ -98,7 +98,7 @@
         '<div id="home-memorybox-card" style="background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:20px; margin-bottom:24px; box-shadow:0 12px 24px rgba(0,0,0,0.04);">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">' +
                 '<span style="font-size:15px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🧺 ' + esc(babyName()) + '의 배냇함</span>' +
-                '<span onclick="window.goToMemoryBox && window.goToMemoryBox()" style="font-size:12px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.10); padding:6px 12px; border-radius:12px; cursor:pointer;">전체 보기 〉</span>' +
+                '<span onclick="window.goToMemoryBox && window.goToMemoryBox()" style="font-size:12px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.10); padding:6px 12px; border-radius:12px; cursor:pointer;">전체 보기 ›</span>' +
             '</div>' +
             '<div style="display:flex; gap:8px; margin-bottom:13px;">' + tiles + addTile + '</div>' +
             '<div style="font-size:12.5px; font-weight:700; color:var(--text-sub); letter-spacing:-0.2px;">' + esc(hint) + '</div>' +

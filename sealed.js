@@ -436,7 +436,7 @@
             repaint();
         };
         if (typeof window.showConfirm === "function") {
-            window.showConfirm("이 편지를 지울까요?\n봉인된 채로 사라집니다.", go, "🕯️", "지우기", "#F04452");
+            window.showConfirm("이 편지를 지울까요?\n봉인된 채로 사라집니다.", go, "🕯️", "지우기", "#D32F2F");
         } else if (confirm("이 편지를 지울까요?")) go();
     };
 

@@ -296,7 +296,7 @@
         if (block) block.style.display = on ? "" : "none";
 
         var btn = document.getElementById("info-all-btn");
-        if (btn) btn.textContent = on ? "글 접기 〈" : ("글 전체 보기 " + articles().length + "개 〉");
+        if (btn) btn.textContent = on ? "글 접기 〈" : ("글 전체 보기 " + articles().length + "개 ›");
 
         /* ⚠️ 접는 버튼이 목록 '위' 에만 있으면, 펼친 뒤 아래로 내려간 사람은
               그 버튼을 못 찾는다. 화면 밖으로 올라가 있기 때문이다.
@@ -374,7 +374,7 @@
             var b = document.getElementById("pick-body-" + k);
             var r = document.getElementById("pick-arrow-" + k);
             if (b) b.style.display = "none";
-            if (r) r.textContent = "〉";
+            if (r) r.textContent = "›";
         }
 
         if (!opening) return;
@@ -554,7 +554,7 @@
                 '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:2px; ' +
                     'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(sub) + '</div>' +
             '</div>' +
-            '<div style="font-size:12px; color:var(--text-sub); flex-shrink:0;">〉</div>' +
+            '<div style="font-size:12px; color:var(--text-sub); flex-shrink:0;">›</div>' +
         '</div>';
     }
 
@@ -621,7 +621,7 @@
                     '<div style="font-size:11.5px; font-weight:800; color:' + color + '; margin-top:2px;">' +
                         esc(line) + '</div>' +
                 '</div>' +
-                '<div style="font-size:12px; color:var(--text-sub); flex-shrink:0;">〉</div>' +
+                '<div style="font-size:12px; color:var(--text-sub); flex-shrink:0;">›</div>' +
             '</div>' +
 
             '<div style="font-size:10.5px; font-weight:600; color:var(--text-sub); ' +
@@ -650,7 +650,7 @@
                       esc(a.why) + '</span>'
                     : '') +
                 '<span id="pick-arrow-' + i + '" style="font-size:11px; color:var(--text-sub); ' +
-                    'flex-shrink:0; width:12px; text-align:center;">〉</span>' +
+                    'flex-shrink:0; width:12px; text-align:center;">›</span>' +
             '</div>' +
             '<div id="pick-body-' + i + '" style="display:none; padding:2px 2px 14px;"></div>' +
         '</div>';
@@ -673,7 +673,7 @@
             '<div id="info-all-btn" onclick="window.toggleInfoLibrary()" ' +
                 'style="text-align:center; margin-top:11px; padding-top:11px; ' +
                 'border-top:1px solid var(--border); font-size:11.5px; font-weight:800; ' +
-                'color:var(--text-sub); cursor:pointer;">글 전체 보기 ' + articles().length + '개 〉</div>' +
+                'color:var(--text-sub); cursor:pointer;">글 전체 보기 ' + articles().length + '개 ›</div>' +
         '</div>';
     }
 

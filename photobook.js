@@ -885,7 +885,7 @@
         var pro = (typeof window.isPremium !== "function") || window.isPremium();
         if (!pro) {
             if (typeof window.openPlus === "function") return window.openPlus("book");
-            return toast("프리미엄에서 전체를 뽑을 수 있어요");
+            return toast("PLUS에서 전체를 뽑을 수 있어요");
         }
         window.makeMemoryBook();
     };

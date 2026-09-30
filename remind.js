@@ -244,7 +244,7 @@
                 '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' +
                   (on
                         ? esc(when) + '에 알려드려요' + (mode ? ' · ' + esc(mode) : '') +
-                          '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 〉</span>'
+                          '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>'
                         : '지금은 꺼져 있어요') +
                 '</div>' +
             '</div>' +

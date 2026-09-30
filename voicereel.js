@@ -418,7 +418,7 @@
                 '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:2px;">' +
                     all.length + '개 · 모두 ' + esc(longText(total)) + '  ·  목소리가 언제 변했는지 보여요</div>' +
             '</div>' +
-            '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">〉</div>';
+            '<div style="font-size:12px; color:' + GOLD + '; flex-shrink:0;">›</div>';
 
         var shell = box.firstElementChild || box;
         var head = shell.firstElementChild;

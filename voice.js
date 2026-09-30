@@ -548,7 +548,7 @@
         } else if (state === "recording") {
             body =
                 '<div style="text-align:center; padding:14px 0 6px;">' +
-                    '<div onclick="window.voiceStop()" style="width:88px; height:88px; margin:0 auto; border-radius:50%; background:#F04452; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 22px rgba(240,68,82,0.30);">' +
+                    '<div onclick="window.voiceStop()" style="width:88px; height:88px; margin:0 auto; border-radius:50%; background:#D32F2F; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 22px rgba(240,68,82,0.30);">' +
                         '<span style="width:26px; height:26px; border-radius:5px; background:#FFF; display:block;"></span>' +
                     '</div>' +
                     meter +
@@ -711,7 +711,7 @@
                 okBtn.style.setProperty("transition", "none", "important");
             }
             
-            window.showConfirm("이 목소리를 배냇함에서 빼낼까요?\n되돌릴 수 없어요.", go, "🎙️", "빼내기", "#F04452");
+            window.showConfirm("이 목소리를 배냇함에서 빼낼까요?\n되돌릴 수 없어요.", go, "🎙️", "빼내기", "#D32F2F");
             
             // 색상이 0.001초 만에 즉시 빨간색으로 꽂힌 후, 다시 애니메이션 복구
             setTimeout(function() {

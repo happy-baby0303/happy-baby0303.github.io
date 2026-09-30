@@ -27,7 +27,7 @@
     'use strict';
 
     var POS_KEY = "tosil_hero_pos";       // 사진 세로 위치 (%)
-    var BLUE = "#7F77DD", GRAY = "#8B95A1", DARK = "#191F28";
+    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var GOLD = "#8A6D00", RED = "#E32636";
 
     function esc(s) {
@@ -383,7 +383,7 @@
             show.map(function (x) {
                 return '<div onclick="location.href=\'' + x.href + '\'" ' +
                     'style="display:flex; align-items:center; gap:11px; padding:12px 0; ' +
-                    'border-bottom:1px solid #F2F4F6; cursor:pointer;">' +
+                    'border-bottom:1px solid #F6F2EC; cursor:pointer;">' +
                     '<div style="flex-shrink:0; font-size:17px;">' + x.icon + '</div>' +
                     '<div style="flex:1; min-width:0;">' +
                         '<div style="font-size:13.5px; font-weight:800; color:' +
@@ -426,7 +426,7 @@
     function plusHTML() {
         if (isPlus()) return "";        // 이미 쓰시는 분께는 안 판다
 
-        /* \u26a0\ufe0f #191F28 은 차가운 남색이라 이 앱의 따뜻한 배경과 안 어울린다.
+        /* \u26a0\ufe0f #4A413C 은 차가운 남색이라 이 앱의 따뜻한 배경과 안 어울린다.
               premium.js 가 쓰는 rgba(35,29,24) 와 같은 갈색 계열로 맞춘다. */
         return '<div id="home-plus" style="background:#2A231D; border-radius:20px; ' +
             'padding:20px 18px; margin-bottom:20px;">' +
@@ -459,7 +459,7 @@
                   이제 창구(window.openPlus)를 거친다. 이름을 여기서 짐작하지 않는다. */
             '<div onclick="window.openPlus && window.openPlus(\'curator\')" ' +
                 'style="margin-top:15px; text-align:center; padding:15px; background:#FFFFFF; ' +
-                'color:#191F28; border-radius:13px; font-size:14px; font-weight:900; cursor:pointer;">' +
+                'color:#4A413C; border-radius:13px; font-size:14px; font-weight:900; cursor:pointer;">' +
                 'PLUS 둘러보기</div>' +
         '</div>';
     }

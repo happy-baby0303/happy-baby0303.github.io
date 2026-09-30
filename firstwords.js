@@ -158,7 +158,7 @@
             repaint();
         };
         if (typeof window.showConfirm === "function") {
-            window.showConfirm("이 말을 지울까요?", go, "💬", "지우기", "#F04452");
+            window.showConfirm("이 말을 지울까요?", go, "💬", "지우기", "#D32F2F");
         } else if (confirm("이 말을 지울까요?")) go();
     };
 

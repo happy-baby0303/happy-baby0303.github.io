@@ -228,7 +228,7 @@
         var rule = RULE[type];
         var v = window.feverCheck(type);
         var n = countIn24h(type);
-        var color = v.ok ? "#00B37A" : "#F04452";
+        var color = v.ok ? "#00B37A" : "#D32F2F";
         var head = v.ok ? "지금 줄 수 있어요" : (v.head || "지금은 안 돼요");
 
         /* ⚠️ 막힌 이유를 첫 줄을 뗀 나머지만 보여줬다.
@@ -239,7 +239,7 @@
                        : (v.hard ? v.why : (v.why.split("\n").slice(1).join("\n") || v.why));
 
         return '<div style="flex:1; min-width:0; background:var(--bg-card); border:1px solid var(--border); ' +
-                'border-left:3px solid ' + (type === "red" ? "#F04452" : "#7F77DD") + '; ' +
+                'border-left:3px solid ' + (type === "red" ? "#D32F2F" : "#7F77DD") + '; ' +
                 'border-radius:12px; padding:12px 13px;">' +
             '<div style="font-size:11.5px; font-weight:900; color:var(--text-m); margin-bottom:7px;">' +
                 (type === "red" ? "빨간약" : "파란약") + ' · ' + rule.name + '</div>' +

@@ -308,7 +308,7 @@
                     'margin-top:3px; word-break:keep-all;">표준일정 기준이에요. 병원에 미리 확인해 주세요</div>' +
             '</div>' +
 
-            '<div style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">〉</div>' +
+            '<div style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">›</div>' +
         '</div>';
     }
 
@@ -367,7 +367,7 @@
                     ((mo !== null && mo < 3) ? '생후 3개월 전에는 38도가 넘으면 바로 병원에 가요'
                                              : '열이 나면 해열제 기록에서 먹일 수 있는 시간을 확인하세요') + '</div>' +
             '</div>' +
-            '<div style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">〉</div>' +
+            '<div style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">›</div>' +
         '</div>';
     }
 
@@ -550,7 +550,7 @@
                         ? "다음은 " + esc(v.name) + " · D-" + v.left
                         : esc(v.name) + " 부터 남아 있어요") + '</div>' +
             '</div>' +
-            '<span style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">〉</span>';
+            '<span style="font-size:12px; color:' + PURPLE + '; flex-shrink:0;">›</span>';
 
         box.insertBefore(el, box.firstChild);
     }
