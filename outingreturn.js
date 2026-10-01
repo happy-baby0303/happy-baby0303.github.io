@@ -106,11 +106,11 @@
         try {
             var reg = await navigator.serviceWorker.getRegistration();
             var body = (p.theme === "stay")
-                ? "짐 정리하기 전에 확인해 보세요"
-                : "돌아와서 할 일을 확인해 볼까요";
+                ? "짐 풀기 전에, 돌아와서 챙길 것 한 번 볼까요?"
+                : "돌아와서 챙길 것 한 번 볼까요?";
 
             if (reg) {
-                await reg.showNotification("나들이는 즐거우셨나요?", {
+                await reg.showNotification("🏠 잘 다녀오셨어요?", {
                     body: body,
                     icon: "icon-192x192.png",
                     /* ⚠️ badge 는 상태바에 뜨는 작은 아이콘이다.
@@ -122,7 +122,7 @@
                     tag: "outing-return"
                 });
             } else {
-                new Notification("나들이는 즐거우셨나요?", { body: body, icon: "icon-192x192.png" });
+                new Notification("🏠 잘 다녀오셨어요?", { body: body, icon: "icon-192x192.png" });
             }
             p._pushed = true;
             save(p);
@@ -146,9 +146,9 @@
 
             '<div style="flex:1; min-width:0; cursor:pointer;" onclick="window.openComebackList()">' +
                 '<div style="font-size:14px; font-weight:900; color:#6A61CE; letter-spacing:-0.3px; ' +
-                    'word-break:keep-all; line-height:1.4;">나들이는 즐거우셨나요?</div>' +
+                    'word-break:keep-all; line-height:1.4;">잘 다녀오셨어요?</div>' +
                 '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:3px; ' +
-                    'word-break:keep-all; line-height:1.5;">돌아와서 할 일을 확인해 보세요</div>' +
+                    'word-break:keep-all; line-height:1.5;">돌아와서 챙길 것 한 번 볼까요?</div>' +
             '</div>' +
 
             '<div onclick="window.cancelOuting()" ' +

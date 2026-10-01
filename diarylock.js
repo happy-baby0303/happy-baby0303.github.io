@@ -57,6 +57,10 @@
     function otherWord() {
         return myRole() === "husband" ? "엄마" : "아빠";
     }
+    function meWord() {
+        if (typeof window.myRoleWord === "function") return window.myRoleWord();
+        return myRole() === "husband" ? "아빠" : "엄마";
+    }
     function babyName() {
         return localStorage.getItem("tosil_babyName") || "우리 아기";
     }
@@ -190,8 +194,8 @@
             fn({
                 syncCode: code,
                 excludeToken: localStorage.getItem('fcm_token') || null,
-                title: "\uD83D\uDC8C 오늘의 문답이 기다려요",
-                body: day ? (day + "일차 질문에 한 사람만 답했어요") : "한 사람만 답했어요",
+                title: "\uD83D\uDC8C 오늘 질문, 같이 답해 줄래요?",
+                body: meWord() + "는 벌써 적어 뒀어요. 둘 다 쓰면 서로 보여요",
                 link: "diary.html"
             }).catch(function (e) { console.warn("재촉 실패", e); });
             localStorage.setItem(NUDGE_KEY, today());
@@ -243,10 +247,10 @@
         var title, body;
         if (d.complete) {
             title = "\uD83D\uDC8C " + me + "도 답했어요";
-            body  = day ? (day + "일차 페이지가 완성됐어요 \u00b7 지금 열어보세요") : "오늘 페이지가 완성됐어요";
+            body  = "오늘 페이지가 채워졌어요. 서로 뭐라고 썼는지 볼까요?";
         } else {
-            title = "\uD83D\uDCD6 " + me + "가 오늘의 답을 남겼어요";
-            body  = day ? (day + "일차 \u00b7 내 답을 쓰면 열립니다") : "내 답을 쓰면 열립니다";
+            title = "\uD83D\uDCD6 " + me + "가 오늘 질문에 답했어요";
+            body  = "뭐라고 썼을까요? 내 답을 쓰면 열려요";
         }
 
         try {

@@ -3643,7 +3643,7 @@ async function createBatonTask(text, reward) {
         by: myUid, byRole: myRole
     });
     await saveBatonToFirebase(records);
-    showToast("💌 바통터치 요청이 성공적으로 전달되었습니다"); 
+    showToast("💌 부탁을 보냈어요"); 
 
     // 🌟 [자동 알림 우체부 호출] 아빠한테 진짜 푸시 알림 쏘기!
     const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
@@ -3659,7 +3659,7 @@ async function createBatonTask(text, reward) {
             excludeToken: window.myPushToken(),
             /* \u26a0\ufe0f "[OOO]님이 OOO을 요청합니다" 는 업무 알림 말투다.
                   부부 사이에 쓰는 말이 아니다. 이름을 앞세우지 않는다. */
-            title: "\uD83D\uDC8C " + roleWord + "가 손을 내밀었어요",
+            title: "\uD83D\uDE4F " + roleWord + "가 부탁할 게 있대요",
             body: text,
             // 알림을 누르면 바통터치로 (제목에 '바통' 이 없어서 sw.js 가 짐작을 못 했다)
             link: "index.html?go=toolbox"
@@ -8495,9 +8495,9 @@ async function completeBaton(id) {
     }
 
     if (reward && reward !== "없음") {
-        showToast(`🎉 미션 해결 ${expMsg}\n약속된 보상 [${reward}]을(를) 당당히 요구하세요 👍`);
+        showToast("끝냈어요. 약속한 " + reward + ", 꼭 받으세요");
     } else {
-        showToast(`🎉 미션 해결 완료 ${expMsg}`);
+        showToast("끝냈어요. 고생했어요");
     }
 
     // 경험치 지급 쏴라!
@@ -8511,14 +8511,14 @@ async function completeBaton(id) {
             syncCode: syncCode,
             excludeUid: window.myUid(),
             excludeToken: window.myPushToken(),
-            title: "\u2728 " + window.myRoleWord() + "가 해냈어요",
+            title: "\u2705 " + window.myRoleWord() + "가 부탁한 일을 끝냈어요",
             /* \u26a0\ufe0f 미션 제목을 이어붙이면 안 된다.
                   제목이 "새벽 수유 요청합니다" 같은 문장이라
                   "새벽 수유 요청합니다 \u00b7 끝났습니다" 가 되어 무슨 말인지 알 수 없다.
                   완료 알림은 완료만 말한다. */
             body: reward && reward !== "없음"
-                ? ("부탁하신 일, 끝났어요. 약속한 " + reward + " 잊지 마세요")
-                : "부탁하신 일, 끝났어요",
+                ? ("약속한 " + reward + ", 잊지 않으셨죠?")
+                : "고맙다고 한마디 해 주세요",
             link: "index.html?go=toolbox"
         }).catch(e => console.error("푸시 발송 에러", e));
     }

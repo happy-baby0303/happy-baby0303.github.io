@@ -59,10 +59,32 @@
     function sent() { try { return JSON.parse(localStorage.getItem(SENT_KEY)) || {}; } catch (e) { return {}; } }
     function markSent(k, from) { var s = sent(); s[k] = from; try { localStorage.setItem(SENT_KEY, JSON.stringify(s)); } catch (e) {} }
 
+    /* 알림 문구 — 서버(functions 의 careReminder)와 같은 표를 같은 순서로 쓴다.
+       같은 텀이면 같은 문장이 나와서, 앱과 서버가 둘 다 띄워도 한 줄로 겹친다. */
+    function nick() {
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== "우리 아기" ? "이" : "");
+    }
+    function clock(ts) {
+        var d = new Date(ts);
+        return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
     function words(k, p) {
-        return k === "feed"
-            ? { t: "🍼 수유한 지 " + hm(p.every) + " 됐어요", b: babyName() + " 맘마 시간이에요" }
-            : { t: "🧷 기저귀 확인할 때예요", b: "마지막으로 간 지 " + hm(p.every) + " 됐어요" };
+        var nk = nick(), t = hm(p.every), at = clock(p.from);
+        var FEED = [
+            ["🍼 " + nk + " 배고플 시간이에요", at + "에 먹고 " + t + "이 지났어요"],
+            ["🍼 슬슬 맘마 시간이에요", nk + "가 마지막으로 " + at + "에 먹었어요"],
+            ["🍼 " + nk + " 맘마 챙길 때예요", "먹은 지 " + t + " 됐어요. 천천히 준비해 주세요"]
+        ];
+        var DIAPER = [
+            ["🧷 기저귀 한 번 볼까요?", at + "에 갈고 " + t + "이 지났어요"],
+            ["🧷 " + nk + " 엉덩이 확인할 시간이에요", "마지막으로 " + at + "에 갈았어요"],
+            ["🧷 뽀송한지 한 번 봐 주세요", "기저귀 간 지 " + t + " 됐어요"]
+        ];
+        var list = (k === "feed") ? FEED : DIAPER;
+        var pick = list[Math.floor(p.at / 3600000) % list.length];
+        return { t: pick[0], b: pick[1] };
     }
 
     function notify(k, p) {
