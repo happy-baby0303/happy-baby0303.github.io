@@ -458,8 +458,17 @@ exports.bedtimeReminder = onSchedule(
         if (!tokens.length) continue;
 
         const name = d.babyName || "우리 아기";
-        const title = "육퇴하셨네요 🌙";
-        const body = `오늘 ${name} 사진이 아직 배냇함에 없어요`;
+        /* 날마다 말을 바꾼다. 매일 같은 문장이 오면 사람은 알림을 안 읽기 시작한다. */
+        const nick = pushNick(name);
+        const BED = [
+          ["🌙 오늘도 고생 많았어요", `자는 ${nick} 얼굴, 한 장 남겨둘까요?`],
+          ["🌙 이제 좀 쉬세요", `오늘 ${nick} 사진이 아직 없어요. 하나만 담아 둘까요?`],
+          ["🌙 하루가 끝났어요", `오늘의 ${nick}, 사진 한 장이면 충분해요`],
+          ["🌙 육퇴하셨어요?", `오늘 ${nick} 모습 하나만 배냇함에 넣어 두세요`],
+        ];
+        const pick = BED[Math.floor(Date.now() / 86400000) % BED.length];
+        const title = pick[0];
+        const body = pick[1];
 
         const res = await admin.messaging().sendEachForMulticast({
           tokens,
@@ -549,6 +558,14 @@ exports.countWaitlist = onDocumentCreated(
  * 알림 꼬리표(tag)를 앱과 같게 써서, 앱이 이미 띄운 알림 위에 겹쳐 쌓이지 않게 한다.
  * ⚠️ 6시간 넘게 지난 건 보내지 않는다. 기록을 안 한 것일 수 있다.
  * ================================================================== */
+/* 알림에 쓰는 아기 이름 — 받침이 있으면 '이' 를 붙인다 (하윤 → 하윤이 · 지우 → 지우) */
+function pushNick(name) {
+  const n = String(name || "우리 아기");
+  const c = n.charCodeAt(n.length - 1);
+  const jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+  return n + (jong && n !== "우리 아기" ? "이" : "");
+}
+
 async function careFamilyTokens(db, code) {
   const fam = await db.collection("families").doc(code).get();
   if (!fam.exists) return { list: [], map: new Map() };
@@ -630,10 +647,24 @@ exports.careReminder = onSchedule(
           for (const j of jobs) {
             if (!tk.list.length) break;
             const last = j.every ? j.at - j.every * 60000 : 0;
-            const title = j.kind === "feed" ? `🍼 ${j.name} 맘마 시간이에요` : `🧷 ${j.name} 기저귀 확인할 때예요`;
-            const body = j.every
-              ? `${hhmm(last)}에 ${j.kind === "feed" ? "먹고" : "갈고"} ${hm(j.every)}이 지났어요`
-              : (j.kind === "feed" ? "수유 텀이 지났어요" : "기저귀 텀이 지났어요");
+            /* 알림마다 말을 바꾼다 (같은 텀이면 앱이 띄운 것과 같은 문장이 되게 j.at 으로 고른다) */
+            const nick = pushNick(j.name);
+            const t = j.every ? hm(j.every) : "";
+            const at = j.every ? hhmm(last) : "";
+            const FEED = [
+              [`🍼 ${nick} 배고플 시간이에요`, t ? `${at}에 먹고 ${t}이 지났어요` : "수유 텀이 지났어요"],
+              ["🍼 슬슬 맘마 시간이에요", at ? `${nick}가 마지막으로 ${at}에 먹었어요` : `${nick}가 배고파할 때예요`],
+              [`🍼 ${nick} 맘마 챙길 때예요`, t ? `먹은 지 ${t} 됐어요. 천천히 준비해 주세요` : "천천히 준비해 주세요"],
+            ];
+            const DIAPER = [
+              ["🧷 기저귀 한 번 볼까요?", t ? `${at}에 갈고 ${t}이 지났어요` : "기저귀 텀이 지났어요"],
+              [`🧷 ${nick} 엉덩이 확인할 시간이에요`, at ? `마지막으로 ${at}에 갈았어요` : "기저귀 텀이 지났어요"],
+              ["🧷 뽀송한지 한 번 봐 주세요", t ? `기저귀 간 지 ${t} 됐어요` : "기저귀 텀이 지났어요"],
+            ];
+            const words = j.kind === "feed" ? FEED : DIAPER;
+            const pick = words[Math.floor(j.at / 3600000) % words.length];
+            const title = pick[0];
+            const body = pick[1];
             const res = await admin.messaging().sendEachForMulticast({
               tokens: tk.list,
               notification: { title, body },
