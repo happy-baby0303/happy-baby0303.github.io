@@ -279,6 +279,7 @@
     }
 
     function extOf(mime) {
+        if (/wav/.test(String(mime || ""))) return "wav";
         return (mime && mime.indexOf("mp4") > -1) || (mime && mime.indexOf("aac") > -1) ? "m4a" : "webm";
     }
 
@@ -462,6 +463,44 @@
             }
         }
     }
+
+    /* ---------- 다른 곳에서 만든 소리 담기 (heartbeat.js — 심장 소리 엽서) ----------
+       녹음 시트를 거치지 않고, 이미 만들어진 소리(Blob)를 그대로 배냇함에 담는다.
+       담기는 자리 · 동기화 · 파형은 녹음과 똑같다. extra 로 표시(kind 등)를 덧붙일 수 있다. */
+    window.saveVoiceBlob = async function (key, b, sec, note, extra) {
+        var uid = window.auth && window.auth.currentUser && window.auth.currentUser.uid;
+        if (!uid) { toast("🔐 로그인 후 담을 수 있어요"); return null; }
+        if (!window.storage || !window.uploadString || !window.getDownloadURL || !window.storageRef) {
+            toast("스토리지를 불러오지 못했어요. 새로고침해 주세요"); return null;
+        }
+        var dataUrl = await new Promise(function (res) {
+            var r = new FileReader();
+            r.onload = function () { res(r.result); };
+            r.onerror = function () { res(null); };
+            r.readAsDataURL(b);
+        });
+        if (!dataUrl) { toast("소리를 옮기지 못했어요"); return null; }
+        key = key || todayKey();
+        var id = uid8();
+        var path = "voices/" + uid + "/" + key + "_" + id + "." + extOf(b.type);
+        try {
+            var ref = window.storageRef(window.storage, path);
+            await window.uploadString(ref, dataUrl, "data_url");
+            var url = await window.getDownloadURL(ref);
+            var peaks = null;
+            if (typeof window.peaksFrom === "function") { try { peaks = await window.peaksFrom(b); } catch (e) {} }
+            var v = { id: id, url: url, path: path, ts: Date.now(), by: uid, sec: Math.round(sec || 0), note: note || "", msId: null, peaks: peaks };
+            if (extra && typeof extra === "object") Object.keys(extra).forEach(function (k) { v[k] = extra[k]; });
+            putVoice(key, v);
+            window.syncVoicesToFirebase();
+            repaint();
+            return { key: key, id: id };
+        } catch (e) {
+            console.error("[목소리] 바로 담기 실패", e);
+            toast((e && e.code === "storage/unauthorized") ? "⚠️ 저장 권한에 막혔어요" : "담지 못했어요. 연결을 확인해 주세요");
+            return null;
+        }
+    };
 
     // 대기열이 나중에 성공하면 여기로 돌아온다
     window.acceptQueuedVoice = function (job, url) {

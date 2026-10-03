@@ -22,7 +22,7 @@ window.parseLocalDate = function(str) {
 const BABY_SPECIFIC_KEYS = [
     'tosil_babyName', 'tosil_startDate', 'tosil_feedingStage', 'tosil_baby_photo', 'tosil_baby_photo_quick',
     // 단계 (stage.js) — 기다림 · 임신 중 · 태어남. 둘째만 임신 중일 수 있으니 아기마다 따로
-    'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since',
+    'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since', 'tosil_preg_qa', 'tosil_preg_weeks',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
     'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',

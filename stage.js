@@ -158,7 +158,7 @@
             ".pg-list{font-size:13px;font-weight:600;color:" + SUB2 + ";}" +
             ".pg-list div{display:flex;justify-content:space-between;padding:10px 2px;border-top:1px solid " + LINE + ";}" +
             "@keyframes pgRipple{from{transform:scale(1);opacity:.45}to{transform:scale(1.35);opacity:0}}" +
-            "#stage-sheet input[type=date],#stage-sheet input[type=text]{width:100%;box-sizing:border-box;padding:14px 15px;" +
+            "#stage-sheet input[type=date],#stage-sheet input[type=text],#stage-sheet input[type=time],#stage-sheet input[type=number]{width:100%;box-sizing:border-box;padding:14px 15px;" +
                 "border:1px solid " + LINE + ";border-radius:14px;font-size:16px;font-weight:600;font-family:inherit;color:" + INK2 + ";background:#FFF;}";
         document.head.appendChild(s);
     }
@@ -231,7 +231,7 @@
                 '지금 담은 건 태어난 뒤에도 배냇함 맨 앞에 남아요.' + (n ? ' 지금까지 ' + n + '가지.' : '') + '</div>' +
             '<div style="display:flex;border:1px solid ' + LINE + ';border-radius:14px;background:' + PAPER + ';overflow:hidden;">' +
                 btn(ICO.camera, "사진", "window.addDayPhoto && window.addDayPhoto('" + todayKey() + "')", true) +
-                btn(ICO.mic, "심장 소리", "window.openVoiceSheet && window.openVoiceSheet('" + todayKey() + "')") +
+                btn(ICO.mic, "심장 소리", "window.openHeartSheet ? window.openHeartSheet() : (window.openVoiceSheet && window.openVoiceSheet('" + todayKey() + "'))") +
                 btn(ICO.letter, "편지", "window.openSealSheet && window.openSealSheet()") +
             '</div>' +
         '</div>';
@@ -286,7 +286,7 @@
         if (s === "paused") html = pausedHTML();
         else {
             var w = weeksFromDue(dueDate());
-            html = w ? (heroHTML(w) + todayHTML(w) + planHTML(w) + boxHTML() + alertHTML() + bornBtnHTML())
+            html = w ? (heroHTML(w) + extra("after-hero", w) + todayHTML(w) + extra("after-today", w) + planHTML(w) + boxHTML() + alertHTML() + bornBtnHTML())
                      : '<div class="pg-card"><div class="pg-title">출산 예정일을 알려 주세요</div>' +
                        '<div onclick="window.openDueSheet()" style="padding:15px;border-radius:14px;background:' + PURPLE + ';color:#FFF;text-align:center;font-weight:900;cursor:pointer;">예정일 넣기</div></div>';
         }
@@ -298,6 +298,12 @@
         if (!old || box.previousSibling !== (after ? after.previousSibling : null)) host.insertBefore(box, after);
     }
     window.refreshStageHome = render;
+
+    /* 다른 파일이 홈에 카드를 끼울 수 있게 (tenmonths.js — 열 달의 문답) */
+    function extra(pos, w) {
+        var list = (window.stageCardHooks && window.stageCardHooks[pos]) || [];
+        return list.map(function (fn) { try { return fn(w) || ""; } catch (e) { console.warn("[단계] 카드 실패", e); return ""; } }).join("");
+    }
 
     /* ---------- 가족이 같이 보기 ----------
        growth_가족코드(+아기 꼬리표) / stage 한 문서에 둔다.
@@ -421,7 +427,7 @@
     };
 
     window.openBirthSheet = function () {
-        sheet('<div style="font-size:30px;margin-bottom:10px;">👶</div>' +
+        sheet(
             '<div class="pg-serif" style="font-size:20px;font-weight:700;color:#3B322C;margin-bottom:6px;">축하해요</div>' +
             '<div style="font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:18px;line-height:1.7;word-break:keep-all;">' +
                 '지금부터는 수유·수면 기록과 배냇함이 시작돼요. 임신 중에 담은 것은 \'태어나기 전\' 장에 그대로 남아요.</div>' +
@@ -429,6 +435,13 @@
             '<input type="text" id="stage-bname" value="' + esc(localStorage.getItem("tosil_babyName") || "") + '" placeholder="아기 이름">' +
             '<div style="font-size:12.5px;font-weight:800;color:var(--text-sub);margin:14px 0 6px;">태어난 날</div>' +
             '<input type="date" id="stage-bdate" value="' + todayKey() + '" max="' + todayKey() + '">' +
+            '<div style="display:flex;gap:8px;margin-top:14px;">' +
+                '<div style="flex:1.2;min-width:0;"><div class="pg-meta" style="margin-bottom:6px;">태어난 시각</div><input type="time" id="stage-btime"></div>' +
+                '<div style="flex:1;min-width:0;"><div class="pg-meta" style="margin-bottom:6px;">몸무게 kg</div><input type="number" id="stage-bw" step="0.01" min="0.3" max="7" inputmode="decimal"></div>' +
+                '<div style="flex:1;min-width:0;"><div class="pg-meta" style="margin-bottom:6px;">키 cm</div><input type="number" id="stage-bh" step="0.1" min="20" max="65" inputmode="decimal"></div>' +
+            '</div>' +
+            '<div class="pg-meta" style="margin:14px 0 6px;">출생 카드에 남길 한 줄 (모두 선택)</div>' +
+            '<input type="text" id="stage-bline" maxlength="40" placeholder="예) 와 줘서 고마워">' +
             primary("배냇함 시작하기", "window.saveBirthSheet()"));
     };
     window.saveBirthSheet = function () {
@@ -441,6 +454,10 @@
         }
         var name = ((document.getElementById("stage-bname") || {}).value || "").trim() || babyName();
         var date = (document.getElementById("stage-bdate") || {}).value || todayKey();
+        var btime = (document.getElementById("stage-btime") || {}).value || "";
+        var bw = parseFloat((document.getElementById("stage-bw") || {}).value) || 0;
+        var bh = parseFloat((document.getElementById("stage-bh") || {}).value) || 0;
+        var bline = ((document.getElementById("stage-bline") || {}).value || "").trim();
         try {
             localStorage.setItem("tosil_babyName", name);
             localStorage.setItem("tosil_startDate", date);
@@ -457,7 +474,14 @@
         } catch (e) {}
         closeSheet();
         toast("👶 " + name + ", 반가워");
-        setTimeout(function () { location.reload(); }, 700);
+        /* 출생 카드 (familynews.js) — 가족 단톡방에 보낼 수 있게 만든 뒤 새 화면으로 */
+        var after = function () { location.reload(); };
+        if (typeof window.makeBirthCard === "function") {
+            setTimeout(function () {
+                window.makeBirthCard({ name: name, date: date, time: btime, weight: bw ? Math.round(bw * 100) / 100 : "", height: bh ? Math.round(bh * 10) / 10 : "", line: bline })
+                    .then(after, after);
+            }, 300);
+        } else setTimeout(after, 700);
     };
 
     window.openStopSheet = function () {
@@ -746,6 +770,14 @@
             (s === "pregnant" ? '<div onclick="window.openStopSheet()" style="margin-top:14px;font-size:12px;font-weight:700;color:#B5AAA0;text-align:center;cursor:pointer;">임신을 이어가지 못했어요</div>' : '');
         host.insertBefore(card, host.firstChild);
     }
+
+    /* ---------- 다른 파일(heartbeat.js 등)이 같은 모양을 쓰게 ---------- */
+    window.stageUI = {
+        sheet: sheet, closeSheet: closeSheet, primary: primary, esc: esc,
+        todayKey: todayKey, keyOf: keyOf, fromKey: fromKey, weeksFromDue: weeksFromDue,
+        dueDate: dueDate, babyName: babyName, ICO: ICO,
+        tokens: { PAPER: PAPER, LINE: LINE, INK2: INK2, SUB2: SUB2, MUTE: MUTE, TINT: TINT, SERIF: SERIF, GOLD: GOLD }
+    };
 
     /* ---------- 시작 ---------- */
     function boot() {
