@@ -21,6 +21,8 @@ window.parseLocalDate = function(str) {
 // 1. 아기마다 따로 관리해야 할 데이터 키값만 명시 (나머지 가계부, 냉장고, 커뮤니티는 자동 공용!)
 const BABY_SPECIFIC_KEYS = [
     'tosil_babyName', 'tosil_startDate', 'tosil_feedingStage', 'tosil_baby_photo', 'tosil_baby_photo_quick',
+    // 단계 (stage.js) — 기다림 · 임신 중 · 태어남. 둘째만 임신 중일 수 있으니 아기마다 따로
+    'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
     'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',
@@ -7507,7 +7509,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedDate = localStorage.getItem('tosil_startDate');
     
     // 1. 로그인도 했고, 아기 정보도 다 있으면 프리패스 (메인 화면)
-    if (savedKakaoId && savedName && savedDate) {
+    // 임신 중(stage.js)이면 생일이 아직 없다. 예정일만으로도 온보딩을 끝난 걸로 본다
+    const pregStage = /^(pregnant|paused)$/.test(localStorage.getItem('tosil_stage') || '');
+    if (savedKakaoId && savedName && (savedDate || pregStage)) {
         const overlay = document.getElementById('onboarding-overlay');
         if(overlay) overlay.style.display = 'none';
         

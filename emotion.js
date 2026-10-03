@@ -693,6 +693,7 @@
     }
 
     function saveTodayLetter() {
+        if (window.babyStage && window.babyStage() !== "born") return;   // 태어나기 전 아기에게는 밤 편지를 쓰지 않는다 (stage.js)
         // 편지는 하루가 닫힌 뒤에 쓴다. 아침에 두 번 기록했다고
         // 그날의 편지가 완성될 수는 없다.
         if (typeof window.isWindDownTime === "function" && !window.isWindDownTime()) return;
@@ -715,6 +716,7 @@
 
     // 설치 전에 쌓인 기록으로 지난 편지를 뒤늦게 써둔다
     function backfillLetters() {
+        if (window.babyStage && window.babyStage() !== "born") return;   // 태어나기 전 아기에게는 밤 편지를 쓰지 않는다 (stage.js)
         var records = [];
         try { records = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
         if (!records.length) return;
@@ -744,6 +746,7 @@
 
     // 영수증이 이 함수를 불러서 같은 편지를 인화한다
     window.getTodayLetter = function () {
+        if (window.babyStage && window.babyStage() !== "born") return null;
         var l = loadLetters()[todayKey()];
         if (!l) return "";
         return l.ms ? (l.ms + "\n\n" + l.text) : l.text;
