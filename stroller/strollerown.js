@@ -642,12 +642,12 @@
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">' +
-                '\uD83E\uDDF9 유모차 볼 때가 된 것' +
+                '\uD83D\uDD27 유모차 볼 때가 된 것' +
                 (over ? ' <span style="color:' + GOLD + ';">' + over + '개</span>' : '') + '</div>' +
             '<div style="margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
-                '<b>고장은 늘 브레이크와 바퀴에서</b> 시작합니다.<br>' +
-                '<span style="font-size:11.5px;">예전에 하셨으면 <b>아래 날짜 칸</b>에서 그 날짜를 고르세요.</span></div>' +
+                '본 날만 눌러두시면 다음에 볼 때가 됐을 때 알려드려요. <b>고장은 대부분 브레이크와 바퀴에서</b> 시작해요.<br>' +
+                '<span style="font-size:11.5px;">예전에 봤으면 <b>다른 날 봤어요</b>를 눌러 날짜를 고르세요.</span></div>' +
 
             CARE.map(function (x) {
                 var d = daysSince(c[x.id]);
@@ -672,14 +672,16 @@
                             'style="flex:1; text-align:center; padding:11px 8px; border-radius:11px; ' +
                             'cursor:pointer; font-size:12.5px; font-weight:800; background:#FFFFFF; ' +
                             'color:#7A6F68; border:1px solid #DCD3C8;">오늘 봤어요</div>' +
-                        '<input type="date" title="예전에 하셨으면 그 날짜를 고르세요" ' +
-                            'value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
-                            'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
-                            'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
-                            'style="flex:1; min-width:0; appearance:none; -webkit-appearance:none; ' +
-                            'font-family:inherit; font-size:12.5px; font-weight:800; color:#7A6F68; ' +
-                            'background:#FFFFFF; border:1px solid #DCD3C8; border-radius:11px; ' +
-                            'padding:10px 8px; cursor:pointer;">' +
+                        /* ⚠️ 날짜 칸이 '2026. 09. 27.' 처럼 그대로 보여서 단추인지 몰랐다. 젖병 탭처럼 '다른 날 봤어요' 단추 안에 숨긴다 */
+                        '<label style="flex:1; position:relative; display:flex; align-items:center; justify-content:center; ' +
+                        'padding:11px 8px; border-radius:11px; cursor:pointer; font-size:12.5px; font-weight:800; ' +
+                        'background:#FFFFFF; color:#7A6F68; border:1px solid #DCD3C8; overflow:hidden;">다른 날 봤어요' +
+                        '<input type="date" aria-label="다른 날 봤어요" value="' + esc(c[x.id] || "") + '" max="' + today() + '" ' +
+                        'onchange="window.markStrollerCare(\'' + x.id + '\', this.value)" ' +
+                        'onclick="try{ this.showPicker && this.showPicker(); }catch(e){}" ' +
+                        'style="position:absolute; top:0; left:0; width:100%; height:100%; margin:0; padding:0; ' +
+                        'border:0; opacity:0; cursor:pointer; font-size:16px;">' +
+                        '</label>' +
                     '</div>' +
                 '</div>';
             }).join("") +

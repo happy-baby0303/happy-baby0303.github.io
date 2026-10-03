@@ -409,7 +409,7 @@ const playData = [
     { 
         id: "p31", title: "물소리 ASMR 멍때리기", category: "sick", targetAge: ['newborn', 'tummy', 'flip', 'crawl', 'stand'], 
         targetItem: "화장실 세면대 또는 샤워기", energyDrain: "🔥 (안고 서 있어야 함)", playTime: 10,
-        desc: "예방접종 후 악을 쓰고 울 때 가장 빠르게 진정시키는 마법의 백색소음.",
+        desc: "예방접종 뒤 크게 울 때, 물 흐르는 소리를 들려주면 조금씩 가라앉아요.",
         steps: [
             "1. 통곡하는 아기를 세워서 가슴팍에 단단히 안고 화장실로 들어갑니다.",
             "2. 세면대나 욕조에 물을 틀어 '쏴아아-' 하는 백색소음을 만들어줍니다.",
@@ -500,16 +500,16 @@ const playData = [
         relatedToyId: 20
     },
     { 
-        id: "p38", title: "휴지심 터널 자동차", category: "zero", targetAge: ['crawl', 'stand'], 
-        targetItem: "다 쓴 휴지심, 미니 자동차", energyDrain: "🔥 (소근육/집중력)", playTime: 15,
-        desc: "휴지심 버리지 마세요 자동차나 작은 공이 통과하는 마법의 터널이 됩니다.",
+        id: "p38", title: "택배 상자 터널", category: "zero", targetAge: ['crawl', 'stand'], 
+        targetItem: "택배 상자, 주먹보다 큰 공", energyDrain: "🔥 (소근육/집중력)", playTime: 15,
+        desc: "상자 양쪽을 뚫어 터널을 만들고 큰 공을 굴려 보내요. 휴지심을 통과하는 작은 물건은 삼킬 수 있어 쓰지 않아요.",
         steps: [
-            "1. 다 쓴 두루마리 휴지심이나 키친타올 심을 준비합니다.",
-            "2. 한쪽 끝을 잡고 비스듬히 기울인 뒤, 미니 자동차나 작은 공을 굴려 넣습니다. (안전) 휴지심을 통과할 만큼 작은 건 삼킬 수 있어요. 아기 입에 들어가지 않게 부모가 쥐고 굴려 주세요.",
-            "3. 쏙 빠져나오는 모습을 보여주면 아기가 스스로 물건을 넣으려고 애를 씁니다.",
-            "4. 벽에 테이프로 여러 개를 지그재그로 붙여 길고 거대한 미끄럼틀을 만들 수도 있습니다."
-        ],
-        dadRole: "휴지심 모아두고, 벽에 테이프로 미끄럼틀 설계해주기",
+                "1. 택배 상자 양쪽 날개를 떼어 긴 터널을 만들어요. 테이프 끝은 안쪽으로 접어요",
+                "2. 주먹보다 큰 공을 한쪽에서 굴려 보내요",
+                "3. 반대편에서 \"어디 갔지?\" 하고 기다리면 아기가 기어서 공을 따라와요",
+                "4. 익숙해지면 아기가 직접 공을 넣게 해요"
+            ],
+        dadRole: "택배 상자로 긴 터널 만들어 주기",
         relatedToyId: 46
     },
     { 
@@ -1382,7 +1382,7 @@ const toyData = [
     { 
         id: 39, name: "먼치킨 목욕 크레용/색연필", imgIcon: "🖍️", freeTime: "30분", milestone: "stand", theme: "bath-care", 
         tags: "#욕실벽화 #물로지워짐", battery: "필요 없음", batteryLink: "", 
-        fomo: "욕조 벽면에 마음껏 낙서하게 두세요. 물 뿌리면 스르륵 지워져서 청소도 편하고, 목욕 거부하는 아기 입수시키는 마법의 템입니다.", coupangLink: "https://link.coupang.com/a/gEW25fU19M", relatedPlayIds: ["p12"] 
+        fomo: "욕조 벽면에 마음껏 낙서하게 두세요. 물 뿌리면 스르륵 지워져서 청소도 편하고, 목욕을 싫어하는 아기도 물에 들어가게 도와줘요.", coupangLink: "https://link.coupang.com/a/gEW25fU19M", relatedPlayIds: ["p12"] 
     },
     { 
         id: 40, name: "포포베베 아기 비데", imgIcon: "🛁", freeTime: "엄마 손목 구원", milestone: "newborn", theme: "bath-care", 
@@ -1449,7 +1449,7 @@ const toyData = [
     { id: 76, name: "포그내 맥스플로우라이트 3in1 아기띠", imgIcon: "🎒", freeTime: "외출 시", milestone: "all", theme: "sos-out", tags: "#엄마허리구원 #외출필수", battery: "필요 없음", batteryLink: "", fomo: "장난감이 안 먹힐 때 최후의 보루. 아기띠 매고 둥가둥가 걸으면 안에서 조용히 잠듭니다. 힙시트 분리형이라 오래 씁니다.", coupangLink: "https://link.coupang.com/a/gLDvP8Ba3M", relatedPlayIds: ["p30"] },
     { id: 77, name: "르메이어 차량용 유아 안전 와이드 카시트 후방 거울", imgIcon: "🪞", freeTime: "30분", milestone: "newborn", theme: "sos-out", tags: "#카시트필수 #엄마얼굴", battery: "필요 없음", batteryLink: "", fomo: "뒤보기 카시트에서 불안해하는 아기를 위한 필수템. 거울로 서로 눈을 맞추면 덜 웁니다.", coupangLink: "https://link.coupang.com/a/gLDCeR52bc", relatedPlayIds: ["p30"] },
     { id: 78, name: "맨해튼토이 윈켈 치발기", imgIcon: "🪐", freeTime: "20분", milestone: "newborn", theme: "sos-out", tags: "#유모차필수 #초경량", battery: "필요 없음", batteryLink: "", fomo: "복잡한 튜브 형태라 손에 쥐는 힘이 약한 신생아도 절대 안 놓칩니다. 카시트나 유모차 클립에 매달아두면 최고의 외출 장난감.", coupangLink: "https://link.coupang.com/a/gLDDOvEn4C", relatedPlayIds: ["p21", "p23"] },
-    { id: 79, name: "재스퍼스 워터매직매트 유아 색칠 도안", imgIcon: "🖌️", freeTime: "30분", milestone: "stand", theme: "sos-out", tags: "#물로색칠 #시간순삭", battery: "필요 없음", batteryLink: "", fomo: "물만 채운 펜으로 슥슥 칠하면 색깔이 나오는 마법. 마르면 지워져서 무한 반복 가능하고, 옷에 묻어도 물이라 전혀 타격이 없습니다.", coupangLink: "https://link.coupang.com/a/gLDI7iIbqm", relatedPlayIds: ["p04"] },
+    { id: 79, name: "재스퍼스 워터매직매트 유아 색칠 도안", imgIcon: "🖌️", freeTime: "30분", milestone: "stand", theme: "sos-out", tags: "#물로색칠 #시간순삭", battery: "필요 없음", batteryLink: "", fomo: "물만 채운 펜으로 칠하면 색이 나타나요. 마르면 지워져서 몇 번이고 다시 쓸 수 있고, 옷에 묻어도 물이라 괜찮아요.", coupangLink: "https://link.coupang.com/a/gLDI7iIbqm", relatedPlayIds: ["p04"] },
     { id: 80, name: "핑크퐁 말문트기 펜", imgIcon: "🦈", freeTime: "30분", milestone: "stand", theme: "sos-out", tags: "#콕콕찍기 #어휘폭발", battery: "AAA 2개", batteryLink: "https://link.coupang.com/a/eHwdWJhAhU", fomo: "찍기만 하면 노래와 단어가 나옵니다. 식당이나 친척 집 놀러 갈 때 챙겨가면 조용히 콕콕 찍고 놉니다.", coupangLink: "https://link.coupang.com/a/gLDOOKb7wi", relatedPlayIds: ["p16"] },
 
     { id: 81, name: "하베브릭스 6 in 1 변신큐브", imgIcon: "🧊", freeTime: "25분", milestone: "flip", theme: "sos-shower", tags: "#다면놀이", battery: "AAA 3개", batteryLink: "https://link.coupang.com/a/eHwdWJhAhU", fomo: "면마다 톱니바퀴, 드럼, 핸들 등 다른 장치가 있어서 질릴 틈이 없습니다. 화장실 문 앞에 놔두고 씻으러 가면 한 면씩 돌려가며 놉니다.", coupangLink: "https://link.coupang.com/a/gLDQAm6UBo", relatedPlayIds: ["p01"] },

@@ -208,7 +208,7 @@
                 '<div style="margin-top:3px; font-size:11.5px; font-weight:700; color:' + GRAY + '; ' +
                     'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     p.playTime + '분' +
-                    (p.category === "zero" ? ' · 준비물 없음' : '') +
+                    (p.category === "zero" ? ' · 집에 있는 것으로' : '') +   // '준비물 없음 · 양말 여러 켤레' 는 말이 안 맞았다
                     (p.targetItem ? ' · ' + esc(String(p.targetItem).split(",")[0]) : '') +
                 '</div>' +
             '</div>' +

@@ -223,7 +223,7 @@
 
         return '<div id="' + ID + '" class="bnh-card">' +
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
-                'word-break:keep-all; margin-bottom:6px;">🎯 ' + esc(nm("")) + ' 기준으로 고르는 중</div>' +
+                'word-break:keep-all; margin-bottom:6px;">🎯 ' + esc(nm("")) + ' 맞춤 놀이</div>' +
             '<div style="background:' + (same ? "#FBF8F3" : "#F3F0FC") + '; ' +
                 'border:1px solid ' + (same ? "#EDE6DE" : "#DDD9F5") + '; border-radius:14px; ' +
                 'padding:15px 16px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +

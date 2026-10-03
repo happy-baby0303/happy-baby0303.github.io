@@ -330,23 +330,21 @@ function generateCardHtml(item) {
     return `
     <div class="stroller-card" id="card-${cId}" data-name="${String(item.name).replace(/"/g, '&quot;')}">
         
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
-            <div style="flex: 1; min-width: 0;">
-                <div style="margin-bottom: 16px;">
+        <!-- 위: 종류 칸 왼쪽, 찜하기·보내기 오른쪽에 나란히 / 아래: 이름이 한 줄을 다 쓴다 -->
+            <div style="margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px;">
                     <span style="background:#F7F3ED; color:#7A6F68; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;">${item.type}</span>
+                    <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
+                    ${heartIcon}
+                </button>
+                        <button onclick="shareStroller(this.closest('.stroller-card').getAttribute('data-name'))" style="background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>보내기</button>
+                    </div>
                 </div>
                 <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.3;">
                     ${item.name}
                 </div>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;">
-                <button id="fav-btn-${itemId}" onclick="toggleFavorite('${itemId}')" style="background:${heartColor}; color:${heartText}; border:1px solid ${heartBorder}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; transition:0.2s; white-space:nowrap;">
-                    ${heartIcon}
-                </button>
-                    <!-- 보내기: 찜하기와 같은 모양으로 바로 밑에. 떠 있던 '짝꿍한테 보내기' 를 대신한다 -->
-                    <button onclick="shareStroller(this.closest('.stroller-card').getAttribute('data-name'))" style="margin-top:6px; background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>보내기</button>
-            </div>
-        </div>
 
         ${taxHtml}
         ${tabsHtml}

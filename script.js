@@ -20,7 +20,7 @@ window.parseLocalDate = function(str) {
 
 // 1. 아기마다 따로 관리해야 할 데이터 키값만 명시 (나머지 가계부, 냉장고, 커뮤니티는 자동 공용!)
 const BABY_SPECIFIC_KEYS = [
-    'tosil_babyName', 'tosil_startDate', 'tosil_feedingStage', 'tosil_baby_photo',
+    'tosil_babyName', 'tosil_startDate', 'tosil_feedingStage', 'tosil_baby_photo', 'tosil_baby_photo_quick',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
     'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',
@@ -3131,6 +3131,8 @@ window.uploadPhoto = function(input) {
                         
                         // 무거운 사진 파일 자체가 아니라, 가벼운 서버 인터넷 주소(URL)만 로컬스토리지에 저장!
                         localStorage.setItem('tosil_baby_photo', downloadUrl); 
+                        // 앱을 켤 때 바로 띄울 작은 사진도 이 폰에 같이 둔다
+                        try { if (typeof window.saveQuickBabyPhoto === 'function') window.saveQuickBabyPhoto(downloadUrl, canvas); } catch (e) {}
                         // 짝꿍 폰에도 같은 얼굴이 뜨게 가족방에 주소를 적어둔다
                         if(typeof window.shareBabyPhoto === 'function') window.shareBabyPhoto(downloadUrl);
                         if(typeof window.loadBabyPhoto === 'function') window.loadBabyPhoto(); 
@@ -3152,6 +3154,32 @@ window.uploadPhoto = function(input) {
 // ==========================================
 // 📸 홈 화면 아기 사진 로딩 엔진 (회색 로딩 지연 완벽 차단 🚀)
 // ==========================================
+/* ==========================================
+   ⚡ 아기 사진을 켜자마자 — 작은 사진을 폰에 두고 먼저 띄운다
+   ⚠️ 서버 사진은 앱을 켤 때마다 다시 받아서, 그동안 위쪽이 빈칸이었다.
+      가로 640px 짜리 작은 사진을 이 폰에 같이 두고 그걸 먼저 보여준다.
+      서버 사진이 다 오면 조용히 바꿔 끼운다. 아기마다 따로 둔다.
+   ========================================== */
+window.saveQuickBabyPhoto = function (src, source) {
+    try {
+        const w0 = source.naturalWidth || source.width, h0 = source.naturalHeight || source.height;
+        if (!w0 || !h0) return;
+        const k = Math.min(1, 640 / Math.max(w0, h0));
+        const c = document.createElement('canvas');
+        c.width = Math.round(w0 * k); c.height = Math.round(h0 * k);
+        c.getContext('2d').drawImage(source, 0, 0, c.width, c.height);
+        const data = c.toDataURL('image/jpeg', 0.72);
+        if (data.length > 400000) return;                     // 너무 크면 두지 않는다 (저장 공간)
+        localStorage.setItem('tosil_baby_photo_quick', JSON.stringify({ src: src, data: data }));
+    } catch (e) {}                                            // 사진 서버가 막으면 그냥 넘어간다
+};
+function quickBabyPhoto(src) {
+    try {
+        const q = JSON.parse(localStorage.getItem('tosil_baby_photo_quick') || 'null');
+        return (q && q.src === src && q.data) ? q.data : null;
+    } catch (e) { return null; }
+}
+
 window.loadBabyPhoto = function() {
     const savedPhoto = localStorage.getItem('tosil_baby_photo');
     const imgEl = document.querySelector('.home-hero-img');
@@ -3180,9 +3208,29 @@ window.loadBabyPhoto = function() {
 
         /* ⚠️ 같은 주소를 다시 꽂으면 브라우저가 그림을 다시 그린다. 그때 회색 칸이 번쩍인다. */
         if (imgEl.getAttribute('src') !== savedPhoto) {
-            imgEl.decoding = 'async';
-            try { imgEl.fetchPriority = 'high'; } catch (e) {}
-            imgEl.src = savedPhoto;
+            const quick = quickBabyPhoto(savedPhoto);
+            if (quick) {
+                if (imgEl.getAttribute('data-quick') !== savedPhoto) {
+                    /* ⚡ 폰에 둔 작은 사진을 먼저. 서버 사진이 다 오면 바꿔 끼운다 */
+                    imgEl.setAttribute('data-quick', savedPhoto);
+                    imgEl.src = quick;
+                    const big = new Image();
+                    big.decoding = 'async';
+                    big.onload = function () {
+                        if (localStorage.getItem('tosil_baby_photo') === savedPhoto) imgEl.src = savedPhoto;
+                    };
+                    big.src = savedPhoto;
+                }
+            } else {
+                imgEl.decoding = 'async';
+                try { imgEl.fetchPriority = 'high'; } catch (e) {}
+                imgEl.src = savedPhoto;
+                /* 예전에 올린 사진이라 작은 사진이 아직 없으면 한 번 만들어 둔다 */
+                const probe = new Image();
+                probe.crossOrigin = 'anonymous';
+                probe.onload = function () { window.saveQuickBabyPhoto(savedPhoto, probe); };
+                probe.src = savedPhoto;
+            }
         }
         imgEl.style.display = 'block'; 
     }
