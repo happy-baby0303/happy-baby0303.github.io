@@ -8928,23 +8928,26 @@ window.changeUserRole = function(role) {
     }
 
     localStorage.setItem('user_role', role); 
-    if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab(); 
+    /* ⚠️ 설정을 먼저 다시 그리고 나서 화면 표시(mode-senior)를 바꿨다. 그래서 도우미 화면에서 엄마로 돌아오면
+          '엄마 아빠 번호' 카드가 안 그려지고, 도우미로 갈 때는 남았다. 표시를 먼저 바꾸고 설정은 맨 끝에 그린다. */
     
     document.body.classList.remove('mode-dad', 'mode-senior');
     
     if (role === 'dad') {
         document.body.classList.add('mode-dad');
-        window.showToast("👨‍🍼 아빠 모드로 변경되었습니다.");
+        window.showToast("아빠 화면으로 바꿨어요");
     } else if (role === 'senior') {
         document.body.classList.add('mode-senior');
         // 🚨 워딩 교체: 조부모 -> 돌봄 도우미 안심 모드
-        window.showToast("👵 돌봄 도우미 안심 모드 ON. (가계부/문답 등 사생활 차단)");
+        window.showToast("돌봄 도우미 화면으로 바꿨어요. 가계부 · 문답 같은 건 안 보여요");
         if(typeof window.switchTab === 'function') window.switchTab('home', document.getElementById('nav-home'));
     } else {
-        window.showToast("👩‍🍼 엄마 모드로 변경되었습니다.");
+        window.showToast("엄마 화면으로 바꿨어요");
     }
 
     window.applyCaregiverRestrictions(); // 사생활 차단 엔진 가동
+    if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();   // 표시를 바꾼 뒤에 다시 그린다
+    if(typeof window.renderHomeBatonList === 'function') window.renderHomeBatonList();
 
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
     if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
@@ -9173,41 +9176,41 @@ window.showRoleOnboarding = function() {
     overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);';
 
     overlay.innerHTML = `
-        <div style="background:var(--bg-card, #fff); width:100%; max-width:340px; border-radius:24px; padding:36px 24px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.25); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <div style="font-size:45px; margin-bottom:16px; animation: bounce 2s infinite;">👋</div>
-            <div style="font-size:22px; font-weight:900; color:var(--text-m, #4A413C); margin-bottom:10px;">반가워요, 배냇함님</div>
-            <div style="font-size:14px; font-weight:600; color:var(--text-s, #A3958A); margin-bottom:32px; line-height:1.5;">최적화된 화면을 준비해 드릴게요.<br>어떤 역할을 맡고 계신가요?</div>
-            
-            <div style="display:flex; gap:12px;">
-                <button onclick="window.selectRoleOnboarding('mom')" style="flex:1; padding:24px 10px; background:#FFF0F1; border:2px solid #FFE5E8; border-radius:18px; cursor:pointer; transition:all 0.2s;">
-                    <div style="font-size:36px; margin-bottom:10px;">👩‍🍼</div>
-                    <div style="font-size:16px; font-weight:900; color:#D32F2F;">엄마</div>
+        <div style="background:var(--bg-card, #fff); width:100%; max-width:340px; border-radius:24px; padding:30px 22px 22px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.12); animation: popIn 0.3s ease;">
+            <div class="serif-display" style="font-size:22px; font-weight:700; color:var(--text-m, #4A413C); margin-bottom:8px;">이 폰은 누구 폰인가요?</div>
+            <div style="font-size:13.5px; font-weight:600; color:var(--text-s, #A3958A); margin-bottom:22px; line-height:1.7;">고르신 대로 알림과 화면을 맞출게요.<br>나중에 설정에서 바꿀 수 있어요.</div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="window.selectRoleOnboarding('mom')" style="flex:1; padding:20px 8px; background:var(--bg-sub, #FBF8F3); border:1px solid var(--border, #EDE6DE); border-radius:16px; cursor:pointer; font-family:inherit;">
+                    <div style="font-size:30px; margin-bottom:8px;">👩</div>
+                    <div style="font-size:16px; font-weight:800; color:var(--text-m, #4A413C);">엄마</div>
                 </button>
-                <button onclick="window.selectRoleOnboarding('dad')" style="flex:1; padding:24px 10px; background:#F2F0FC; border:2px solid #DEDAF6; border-radius:18px; cursor:pointer; transition:all 0.2s;">
-                    <div style="font-size:36px; margin-bottom:10px;">👨‍🍼</div>
-                    <div style="font-size:16px; font-weight:900; color:#7F77DD;">아빠</div>
+                <button onclick="window.selectRoleOnboarding('dad')" style="flex:1; padding:20px 8px; background:var(--bg-sub, #FBF8F3); border:1px solid var(--border, #EDE6DE); border-radius:16px; cursor:pointer; font-family:inherit;">
+                    <div style="font-size:30px; margin-bottom:8px;">👨</div>
+                    <div style="font-size:16px; font-weight:800; color:var(--text-m, #4A413C);">아빠</div>
                 </button>
             </div>
+            <div style="font-size:12px; font-weight:600; color:var(--text-sub, #A3958A); margin-top:16px; line-height:1.6;">할머니 · 시터 분은 엄마 아빠가 보낸<br>초대 링크로 들어오면 돼요.</div>
         </div>
         <style>
-            @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-            @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+            @keyframes popIn { 0% { transform: scale(0.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         </style>
     `;
     document.body.appendChild(overlay);
 };
 
 window.selectRoleOnboarding = function(role) {
+    // 서버가 돌봄 도우미로 정한 폰이면 엄마 · 아빠를 고를 수 없다
+    if (localStorage.getItem('tosil_role_locked') === 'viewer') role = 'senior';
     localStorage.setItem('user_role', role);
     const overlay = document.getElementById('role-onboarding-overlay');
     if(overlay) overlay.remove();
     
     if (role === 'dad') {
         document.body.classList.add('mode-dad');
-        window.showToast("👨‍🍼 아빠 모드로 시작합니다");
+        window.showToast("아빠 화면으로 시작할게요");
     } else {
         document.body.classList.remove('mode-dad');
-        window.showToast("👩‍🍼 엄마 모드로 시작합니다");
+        window.showToast("엄마 화면으로 시작할게요");
     }
     
     if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
@@ -14946,37 +14949,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(window.applyCaregiverRestrictions, 300);
 });
 
-// 기존 changeUserRole 함수를 덮어써서 텍스트와 보안 엔진을 동시 적용합니다.
-window.changeUserRole = function(role) {
-    if (role === 'senior' && !window.isPremiumUser()) {
-        if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
-        return window.showPaywall();
-    }
-
-    localStorage.setItem('user_role', role); 
-    if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab(); 
-    
-    document.body.classList.remove('mode-dad', 'mode-senior');
-    
-    if (role === 'dad') {
-        document.body.classList.add('mode-dad');
-        window.showToast("👨‍🍼 아빠 모드로 변경되었습니다.");
-    } else if (role === 'senior') {
-        document.body.classList.add('mode-senior');
-        // 텍스트를 돌봄 도우미로 전문성 있게 변경
-        window.showToast("👵 돌봄 도우미 안심 모드 ON. 사생활 보호가 적용됩니다.");
-        if(typeof window.switchTab === 'function') window.switchTab('home', document.getElementById('nav-home'));
-    } else {
-        window.showToast("👩‍🍼 엄마 모드로 변경되었습니다.");
-    }
-
-    window.applyCaregiverRestrictions(); // 🚨 보안 엔진 즉시 가동
-
-    if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
-    if(typeof window.renderDadQuests === 'function') window.renderDadQuests();
-    if(typeof window.updateDadBriefing === 'function') window.updateDadBriefing();
-    if(typeof window.renderHomeBatonList === 'function') window.renderHomeBatonList();
-};
+/* ⚠️ 여기에 changeUserRole 이 한 번 더 있었다. 뒤에 있는 게 앞의 것을 덮어써서,
+      앞의 것에 있던 '서버가 정한 돌봄 도우미는 역할을 못 바꾼다' 검사가 통째로 사라졌다.
+      그래서 시터가 설정에서 '엄마' 를 누르면 넘어갔다. 하나(위쪽)만 남긴다. */
 
 // ==========================================
 // 🏥 [프리미엄] 의사가 극찬하는 소아과 제출용 A4 종합 리포트 생성기

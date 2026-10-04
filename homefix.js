@@ -588,7 +588,9 @@
             var out = orig.apply(this, arguments);
             try {
                 var host = document.getElementById("tab-settings");
-                var senior = document.body && document.body.classList.contains("mode-senior");
+                var senior = (localStorage.getItem("user_role") === "senior") ||
+                             (document.body && document.body.classList.contains("mode-senior"));
+                if (senior) { var stale = document.getElementById("parent-phone-card"); if (stale) stale.remove(); }   // 도우미 화면엔 번호 고치는 칸을 두지 않는다
                 if (host && !senior && !document.getElementById("parent-phone-card")) {
                     var card = document.createElement("div");
                     card.id = "parent-phone-card";
