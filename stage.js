@@ -34,7 +34,20 @@
         if (q === "1") localStorage.setItem(BETA, "1");
         if (q === "0") localStorage.removeItem(BETA);
     } catch (e) {}
-    function beta() { try { return localStorage.getItem(BETA) === "1"; } catch (e) { return false; } }
+    /* 시험 스위치(이 폰만) 또는 전체 스위치(서버 app_settings/flags.stageLive) 중 하나라도 켜져 있으면 켜진다.
+       전체 스위치는 관리자만 바꿀 수 있고(규칙: app_settings 쓰기는 관리자), 다음에 앱을 열 때부터 반영된다.
+       문제가 생기면 stageLive 를 false 로 바꾸면 모두에게서 다시 숨는다. */
+    function tester() { try { return localStorage.getItem(BETA) === "1"; } catch (e) { return false; } }
+    function beta() { try { return tester() || localStorage.getItem("tosil_stage_live") === "1"; } catch (e) { return false; } }
+    function refreshLive() {
+        if (!window.db || typeof window.getDoc !== "function" || typeof window.doc !== "function") return;
+        try {
+            window.getDoc(window.doc(window.db, "app_settings", "flags")).then(function (s) {
+                var on = s.exists() && (s.data() || {}).stageLive === true;
+                if (on) localStorage.setItem("tosil_stage_live", "1"); else localStorage.removeItem("tosil_stage_live");
+            }).catch(function () {});
+        } catch (e) {}
+    }
 
     var GOLD = "#B98A2E", PURPLE = "#7F77DD", INK = "#4A413C", SUB = "#7A6F68", DAY = 86400000;
 
@@ -109,7 +122,6 @@
         { id: "tdap",    from: 27, to: 36, t: "백일해(Tdap) 예방접종", d: "임신할 때마다 이 시기에 맞는 걸 권해요. 접종은 병원과 상의하세요." },
         { id: "kick",    from: 28, to: 40, t: "태동 살피기", d: "매일 비슷한 시간에 태동을 느껴 보세요. 평소보다 확 줄면 바로 병원에 연락하세요." },
         { id: "late",    from: 32, to: 36, t: "막달 검사", d: "출산 전에 필요한 검사를 한 번 더 해요." },
-        { id: "bag",     from: 34, to: 38, t: "출산 가방 싸기", d: "예정일 몇 주 전에 미리 싸 두면 마음이 편해요." },
         { id: "due",     from: 39, to: 42, t: "예정일 무렵", d: "예정일이 지나면 병원과 다음 계획을 상의해요." }
     ];
     var ALERTS = [
@@ -141,7 +153,8 @@
         s.id = "stage-css";
         s.textContent =
             "body.stage-pregnant #tab-home > :not(#preg-home):not(.stage-keep)," +
-            "body.stage-paused #tab-home > :not(#preg-home):not(.stage-keep) { display: none !important; }" +
+            "body.stage-paused #tab-home > :not(#preg-home):not(.stage-keep)," +
+            "body.stage-prep #tab-home > :not(#preg-home):not(.stage-keep) { display: none !important; }" +
             ".pg-paper{background:" + PAPER + ";border:1px solid " + LINE + ";border-radius:20px;padding:22px 20px;margin-bottom:14px;}" +
             ".pg-serif{font-family:" + SERIF + ";}" +
             ".pg-h{font-family:" + SERIF + ";font-size:17px;font-weight:700;color:" + INK2 + ";letter-spacing:-0.3px;}" +
@@ -186,7 +199,10 @@
         '</div>';
     }
 
-    function planHTML(w) {
+    /* ---------- 챙길 것: [병원] [신청] [준비] 한 장에 ----------
+       병원 일정 · 신청 달력(applycal.js) · 준비 순서(readylist.js) 가 카드 세 장으로 늘어서면 홈이 너무 길다.
+       한 장에 칸 셋으로 묶고, 칸 이름 옆에 '지금 할 것' 개수를 단다. 고른 칸은 기억한다. */
+    function planBody(w) {
         var p = planFor(w.weeks);
         var rows = p.now.concat(p.next).map(function (x) {
             var on = !!p.c[x.id], soon = x.from > w.weeks;
@@ -203,14 +219,36 @@
                         (x.link ? ' <a href="' + x.link + '" target="_blank" rel="noopener" style="color:' + INK2 + ';font-weight:700;">공식 안내 ›</a>' : '') + '</div>') +
                 '</div></div>';
         }).join("");
-        return '<div class="pg-paper" style="padding:10px 20px 16px;">' +
-            '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;">' +
-                '<span class="pg-h">병원 일정</span><span class="pg-meta">' + w.weeks + '주 무렵</span></div>' +
-            (rows || '<div class="pg-meta" style="padding:12px 0;border-top:1px solid ' + LINE + ';">지금 시기에 따로 챙길 검사는 없어요.</div>') +
+        return (rows || '<div class="pg-meta" style="padding:12px 0;border-top:1px solid ' + LINE + ';">지금 시기에 따로 챙길 검사는 없어요.</div>') +
             '<div style="font-size:11px;font-weight:600;color:' + MUTE + ';line-height:1.6;padding-top:10px;border-top:1px solid ' + LINE + ';">' +
-                '흔한 일정이에요. 다니는 병원 안내가 우선이에요 · 질병관리청 국가건강정보포털, 아이사랑</div>' +
-        '</div>';
+                '흔한 일정이에요. 다니는 병원 안내가 우선이에요 · 질병관리청 국가건강정보포털, 아이사랑</div>';
     }
+    function planCount(w) {
+        var p = planFor(w.weeks);
+        return p.now.filter(function (x) { return !p.c[x.id]; }).length;
+    }
+    function planHTML(w) {
+        var tabs = [{ id: "plan", label: "병원", order: 1, body: planBody, count: planCount }]
+            .concat(window.stageTabs || []).sort(function (a, b) { return (a.order || 9) - (b.order || 9); });
+        var cur = localStorage.getItem("tosil_stage_tab") || "plan";
+        if (!tabs.some(function (t) { return t.id === cur; })) cur = "plan";
+        var seg = tabs.map(function (t) {
+            var n = 0; try { n = t.count ? t.count(w) : 0; } catch (e) {}
+            var on = t.id === cur;
+            return '<div onclick="window.__stageTab(\'' + t.id + '\')" style="flex:1;text-align:center;padding:10px 0;border-radius:11px;cursor:pointer;font-size:14px;font-weight:700;' +
+                (on ? 'background:' + PAPER + ';color:' + INK2 + ';box-shadow:0 1px 3px rgba(59,50,44,0.10);' : 'color:' + SUB2 + ';') + '">' + t.label +
+                (n ? '<span style="display:inline-block;min-width:17px;margin-left:5px;padding:1px 5px;border-radius:9px;font-size:11px;line-height:15px;' +
+                    'background:' + (on ? INK2 : '#E6DCCF') + ';color:' + (on ? '#FFFDF9' : INK2) + ';">' + n + '</span>' : '') + '</div>';
+        }).join("");
+        var body = "";
+        tabs.forEach(function (t) { if (t.id === cur) { try { body = t.body(w) || ""; } catch (e) { console.warn("[단계] 칸 실패", e); } } });
+        return '<div class="pg-paper" style="padding:16px 20px 14px;">' +
+            '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
+                '<span class="pg-h">챙길 것</span><span class="pg-meta">' + w.weeks + '주 무렵</span></div>' +
+            '<div style="display:flex;gap:4px;padding:4px;background:' + TINT + ';border-radius:14px;margin:14px 0 4px;">' + seg + '</div>' +
+            body + '</div>';
+    }
+    window.__stageTab = function (id) { try { localStorage.setItem("tosil_stage_tab", id); } catch (e) {} render(); };
 
     function boxHTML() {
         var n = 0;
@@ -272,9 +310,10 @@
         var s = window.babyStage();
         document.body.classList.toggle("stage-pregnant", s === "pregnant");
         document.body.classList.toggle("stage-paused", s === "paused");
+        document.body.classList.toggle("stage-prep", s === "prep");
         var host = document.getElementById("tab-home");
         var old = document.getElementById("preg-home");
-        if (s !== "pregnant" && s !== "paused") { if (old) old.remove(); return; }
+        if (s !== "pregnant" && s !== "paused" && s !== "prep") { if (old) old.remove(); return; }
         if (!host) return;
 
         // 다둥이 전환 칩은 남긴다 (둘째 임신 중 · 첫째 태어남 사이를 오가야 하니까)
@@ -284,9 +323,10 @@
 
         var html;
         if (s === "paused") html = pausedHTML();
+        else if (s === "prep") html = (typeof window.stagePrepHTML === "function") ? window.stagePrepHTML() : "";   // prepstage.js
         else {
             var w = weeksFromDue(dueDate());
-            html = w ? (heroHTML(w) + extra("after-hero", w) + todayHTML(w) + extra("after-today", w) + planHTML(w) + boxHTML() + alertHTML() + bornBtnHTML())
+            html = w ? (heroHTML(w) + extra("after-hero", w) + todayHTML(w) + extra("after-today", w) + planHTML(w) + extra("after-plan", w) + boxHTML() + alertHTML() + bornBtnHTML())
                      : '<div class="pg-card"><div class="pg-title">출산 예정일을 알려 주세요</div>' +
                        '<div onclick="window.openDueSheet()" style="padding:15px;border-radius:14px;background:' + PURPLE + ';color:#FFF;text-align:center;font-weight:900;cursor:pointer;">예정일 넣기</div></div>';
         }
@@ -494,6 +534,33 @@
     };
     window.confirmStop = function () { setStage("paused"); closeSheet(); render(); };
 
+    /* ---------- 임신 · 준비 기록 모두 지우기 (개인정보처리방침의 '기록을 지울 때까지') ----------
+       가족 서버의 growth_/stage 문서를 통째로 비우고, 가족 소식 페이지를 닫고, 이 폰의 기록도 지운다.
+       배냇함에 담은 사진 · 소리 · 편지는 그대로 둔다 (배냇함에서 하나씩 지울 수 있다). */
+    var WIPE_KEYS = ["tosil_preg_log", "tosil_preg_qa", "tosil_preg_weeks", "tosil_apply", "tosil_ready", "tosil_prep",
+                     "tosil_preg_checks", "tosil_due_date", "tosil_preg_since", "tosil_news_id", "tosil_sensitive_consent"];
+    window.openWipeSheet = function () {
+        sheet('<div class="pg-serif" style="font-size:20px;font-weight:700;color:#3B322C;margin-bottom:10px;">임신 · 준비 기록을 모두 지울까요?</div>' +
+            '<div style="font-size:13.5px;font-weight:600;color:var(--text-sub);line-height:1.85;word-break:keep-all;">' +
+                '예정일, 주기, 체온, 증상 · 체중 · 태동, 문답, 신청 체크, 가족 소식 페이지가 지워져요. 남편 폰에서도 지워지고, 되돌릴 수 없어요.<br>' +
+                '배냇함에 담은 사진 · 소리 · 편지는 그대로 남아요.</div>' +
+            primary("모두 지우기", "window.confirmWipe()") +
+            '<div onclick="document.getElementById(\'stage-sheet\').remove()" style="text-align:center;padding:14px;font-size:13.5px;font-weight:800;color:var(--text-sub);cursor:pointer;">취소</div>');
+    };
+    window.confirmWipe = function () {
+        var code = localStorage.getItem("family_sync_code"), nid = localStorage.getItem("tosil_news_id"), at = Date.now();
+        var r = stageRef();
+        if (r && typeof window.setDoc === "function") { try { window.setDoc(r, { stage: "paused", at: at }).catch(function () {}); } catch (e) {} }   // merge 없이 = 통째로 바꿈
+        if (nid && code && window.db && typeof window.setDoc === "function") {
+            try { window.setDoc(window.doc(window.db, "news", nid), { family: code, off: true, updatedAt: at }).catch(function () {}); } catch (e) {}
+        }
+        WIPE_KEYS.forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+        try { localStorage.setItem("tosil_stage", "paused"); localStorage.setItem("tosil_stage_at", String(at)); } catch (e) {}
+        closeSheet(); render();
+        if (typeof window.renderSettingsTab === "function") { try { window.renderSettingsTab(); } catch (e) {} }
+        toast("임신 · 준비 기록을 지웠어요");
+    };
+
     /* ==========================================================
        B-③ 매일 기록 — 증상 · 체중 · 태동
        ⚠️ 판단하지 않는다. 몸무게가 많다/적다, 증상이 괜찮다/위험하다를 앱이 말하지 않는다.
@@ -679,7 +746,7 @@
     /* ---------- 온보딩 첫 질문 ----------
        로그인 뒤 '아기 이름' 칸이 뜨는 순간에 그 위에 덮는다.
        '태어났어요' 를 고르면 덮개만 걷고 원래 온보딩으로 간다. */
-    var asked = false;
+    var asked = false, asked2 = false;
     function stageChooser() {
         var ov = document.createElement("div");
         ov.id = "stage-chooser";
@@ -696,7 +763,7 @@
         ov.innerHTML = '<div style="width:100%;max-width:480px;padding:72px 24px 32px;box-sizing:border-box;">' +
             '<div class="serif-display" style="font-size:25px;font-weight:700;color:' + INK + ';line-height:1.45;margin-bottom:10px;">지금 어디쯤이세요?</div>' +
             '<div style="font-size:13.5px;font-weight:600;color:' + SUB + ';line-height:1.7;margin-bottom:28px;">고르신 때에 맞춰 화면을 준비할게요. 나중에 바꿀 수 있어요.</div>' +
-            opt("", "아기를 기다리고 있어요", "임신을 준비하는 중이에요", "window.chooseStage('prep')", true) +
+            opt("", "아기를 기다리고 있어요", "임신을 준비하는 중이에요", "window.chooseStage('prep')") +
             opt("", "아기가 찾아왔어요", "임신 중이에요", "window.chooseStage('pregnant')") +
             opt("", "아기가 태어났어요", "출산 후 기록을 시작해요", "window.chooseStage('born')") +
         '</div>';
@@ -704,7 +771,11 @@
     }
     window.chooseStage = function (s) {
         var ov = document.getElementById("stage-chooser");
-        if (s === "prep") return toast("준비 단계는 곧 열려요");
+        if (s === "prep") {                                    // prepstage.js 의 첫 시작 창
+            if (ov) ov.remove();
+            if (typeof window.openPrepOnboarding === "function") window.openPrepOnboarding();
+            return;
+        }
         if (s === "born") { setStage("born"); if (ov) ov.remove(); return; }
         if (ov) ov.remove();
         pregnantOnboarding();
@@ -713,18 +784,16 @@
         sheet('<div class="pg-serif" style="font-size:20px;font-weight:700;color:#3B322C;margin-bottom:6px;">축하해요</div>' +
             '<div style="font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:16px;line-height:1.7;">세 가지만 알려 주세요.</div>' +
             '<div style="font-size:12.5px;font-weight:800;color:var(--text-sub);margin-bottom:6px;">태명 (없으면 비워 두세요)</div>' +
-            '<input type="text" id="stage-tname" placeholder="예) 콩콩이">' +
+            '<input type="text" id="stage-tname" placeholder="예) 콩콩이" value="' + esc(localStorage.getItem("tosil_babyName") || "") + '">' +
             '<div style="font-size:12.5px;font-weight:800;color:var(--text-sub);margin:14px 0 6px;">출산 예정일</div>' +
             '<input type="date" id="stage-due">' +
             '<div style="font-size:12px;font-weight:700;color:var(--text-sub);margin:10px 0 6px;">모르면 마지막 생리 시작일로 계산할게요</div>' +
             '<input type="date" id="stage-lmp" max="' + todayKey() + '" onchange="var d=document.getElementById(\'stage-due\'); if(d) d.value=window.__stageTest.dueFromLmp(this.value);">' +
-            '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:12.5px;font-weight:700;color:' + SUB + ';line-height:1.6;">' +
-                '<input type="checkbox" id="stage-consent" style="width:19px;height:19px;flex-shrink:0;accent-color:' + PURPLE + ';">' +
-                '<span>임신·건강 기록은 민감정보예요. 이 기록을 저장하고 가족과 나누는 데 동의해요.</span></label>' +
+            consentHTML("preg") +
             primary("시작하기", "window.savePregnantOnboarding()"));
     }
     window.savePregnantOnboarding = function () {
-        var c = document.getElementById("stage-consent");
+        var c = document.getElementById("sens-consent");
         if (c && !c.checked) return toast("민감정보 동의에 체크해 주세요");
         var due = (document.getElementById("stage-due") || {}).value || "";
         if (!weeksFromDue(due)) return toast("예정일을 다시 확인해 주세요");
@@ -732,20 +801,39 @@
         try {
             localStorage.setItem("tosil_babyName", nm);
             localStorage.setItem("tosil_due_date", due);
-            localStorage.setItem("tosil_sensitive_consent", new Date().toISOString());
-            localStorage.setItem("tosil_guardian_consent", new Date().toISOString());
+            /* 동의 기록은 아래 recordConsent 가 남긴다 */
         } catch (e) {}
         setStage("pregnant");
+        recordConsent("preg");
         closeSheet();
         var ov = document.getElementById("onboarding-overlay"); if (ov) ov.style.display = "none";
         setTimeout(function () { location.reload(); }, 300);
     };
+    /* 아기를 더할 때(둘째 · 셋째): 이름을 받은 뒤 '생일' 칸이 뜨는 순간에 한 번 묻는다 */
+    function watchAddBaby() {
+        if (!beta() || asked2) return;
+        var s2 = document.getElementById("onboarding-step-2"), ov = document.getElementById("onboarding-overlay");
+        if (!s2 || !ov || ov.style.display === "none" || s2.style.display !== "flex") return;
+        if (!(window.currentBabySuffix || "") || localStorage.getItem("tosil_startDate") || stage() !== "born") return;
+        asked2 = true;
+        var opt = function (t, sub, act) {
+            return '<div onclick="' + act + '" style="padding:16px;border-radius:16px;background:#FFF;border:1px solid #EDE6DE;margin-top:10px;cursor:pointer;">' +
+                '<div style="font-size:15.5px;font-weight:800;color:#3B322C;">' + t + '</div><div style="font-size:12.5px;font-weight:600;color:#8A7F76;margin-top:3px;">' + sub + '</div></div>';
+        };
+        sheet('<div class="pg-serif" style="font-size:20px;font-weight:700;color:#3B322C;">' + esc(babyName()) + ', 지금 어디쯤이에요?</div>' +
+            opt("태어났어요", "생일을 넣고 기록을 시작해요", "document.getElementById('stage-sheet').remove()") +
+            opt("아직 배 속에 있어요", "예정일로 주수를 세요", "window.__addAsPregnant()") +
+            (typeof window.openPrepOnboarding === "function" ? opt("기다리고 있어요", "임신을 준비하는 중이에요", "document.getElementById('stage-sheet').remove(); window.openPrepOnboarding()") : ''));
+    }
+    window.__addAsPregnant = function () { closeSheet(); pregnantOnboarding(); };
+
     function watchOnboarding() {
+        watchAddBaby();
         if (!beta() || asked) return;
         var s1 = document.getElementById("onboarding-step-1");
         var ov = document.getElementById("onboarding-overlay");
         if (!s1 || !ov || ov.style.display === "none" || s1.style.display !== "flex") return;
-        if (localStorage.getItem("tosil_babyName")) return;          // 다둥이 추가 · 정보 수정 때는 묻지 않는다
+        if (localStorage.getItem("tosil_babyName")) return;          // 다둥이 추가 · 정보 수정 때는 아래에서 따로 묻는다
         asked = true;
         stageChooser();
     }
@@ -755,32 +843,70 @@
         if (!beta()) return;
         var host = document.getElementById("tab-settings");
         if (!host || document.getElementById("stage-beta-card")) return;
-        var s = stage();
+        var s = stage(), t = tester();
+        if (!t && s === "born") return;                      // 공개 뒤: 임신 · 준비 중인 아기에게만 관리 카드
+        var btn = function (label, act) { return '<div onclick="' + act + '" class="pg-btn" style="flex:1 1 40%;padding:12px;">' + label + '</div>'; };
         var card = document.createElement("div");
         card.id = "stage-beta-card";
-        card.setAttribute("style", "background:var(--bg-card);padding:18px 20px;border-radius:16px;border:1px dashed " + PURPLE + ";margin-bottom:12px;");
-        card.innerHTML = '<div style="font-size:15px;font-weight:900;color:var(--text-m);margin-bottom:4px;">🧪 단계 미리 써보기</div>' +
-            '<div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:12px;">숨김 스위치가 켜진 폰에서만 보여요. 지금: <b>' +
-                ({ born: "태어났어요", pregnant: "임신 중", paused: "기록 멈춤", prep: "준비" }[s] || s) + '</b></div>' +
+        card.setAttribute("style", "background:var(--bg-card);padding:18px 20px;border-radius:16px;border:1px " + (t ? "dashed " + PURPLE : "solid var(--border)") + ";margin-bottom:12px;");
+        card.innerHTML = '<div style="font-size:15px;font-weight:900;color:var(--text-m);margin-bottom:4px;">' + (t ? '🧪 단계 미리 써보기' : '임신 · 준비 기록') + '</div>' +
+            '<div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:12px;">' +
+                (t ? '시험 스위치가 켜진 폰에서만 보여요. ' : '') + '지금: <b>' + ({ born: "태어났어요", pregnant: "임신 중", paused: "기록 멈춤", prep: "준비" }[s] || s) + '</b></div>' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-                '<div onclick="window.setBabyStage(\'pregnant\')" class="pg-btn" style="flex:1 1 40%;padding:12px;">임신 중으로 보기</div>' +
-                '<div onclick="window.setBabyStage(\'born\')" class="pg-btn" style="flex:1 1 40%;padding:12px;">태어남으로 돌아가기</div>' +
-                (s === "pregnant" ? '<div onclick="window.openDueSheet()" class="pg-btn" style="flex:1 1 40%;padding:12px;">예정일 바꾸기</div>' : '') +
+                (t ? btn("준비로 보기", "window.setBabyStage(\'prep\')") + btn("임신 중으로 보기", "window.setBabyStage(\'pregnant\')") + btn("태어남으로 돌아가기", "window.setBabyStage(\'born\')") : '') +
+                (s === "pregnant" ? btn("예정일 바꾸기", "window.openDueSheet()") : '') +
+                (s === "prep" && typeof window.openPrepSetup === "function" ? btn("주기 · 방식 바꾸기", "window.openPrepSetup()") : '') +
             '</div>' +
-            (s === "pregnant" ? '<div onclick="window.openStopSheet()" style="margin-top:14px;font-size:12px;font-weight:700;color:#B5AAA0;text-align:center;cursor:pointer;">임신을 이어가지 못했어요</div>' : '');
+            (s === "pregnant" ? '<div onclick="window.openStopSheet()" style="margin-top:14px;font-size:12px;font-weight:700;color:#B5AAA0;text-align:center;cursor:pointer;">임신을 이어가지 못했어요</div>' : '') +
+            (s !== "born" ? '<div onclick="window.openWipeSheet()" style="margin-top:10px;font-size:12px;font-weight:700;color:#B5AAA0;text-align:center;cursor:pointer;">임신 · 준비 기록 모두 지우기</div>' : '');
         host.insertBefore(card, host.firstChild);
+    }
+
+    /* ---------- 민감정보 별도 동의 (개인정보 보호법 제23조) ----------
+       목적 · 항목 · 보유 기간 · 거부할 권리와 그 불이익, 네 가지를 동의 받을 때 같이 알려야 한다.
+       동의한 사람 · 때 · 문구 판을 가족 서버(growth_ · 도우미에게는 안 보임)에 남겨 둔다. */
+    var CONSENT_VER = "2026-10 v1";
+    var CONSENT_ITEMS = {
+        preg: "출산 예정일과 주수, 증상 · 체중 · 태동 기록, 초음파 사진 · 심장 소리, 열 달의 문답",
+        prep: "생리 시작일과 주기, 기초체온, 배란 테스트 결과, 시술 일정(이식일 · 피검사일), 몸 상태 기록"
+    };
+    function consentHTML(kind) {
+        var row = function (k, v) {
+            return '<div style="display:flex;gap:10px;padding:6px 0;"><span style="width:42px;flex-shrink:0;font-weight:800;color:' + INK2 + ';">' + k + '</span>' +
+                '<span style="flex:1;word-break:keep-all;">' + v + '</span></div>';
+        };
+        return '<div style="margin-top:18px;padding:12px 14px;border:1px solid ' + LINE + ';border-radius:14px;background:#FFFAF1;font-size:12px;font-weight:600;color:' + SUB2 + ';line-height:1.6;">' +
+                '<div style="font-size:12.5px;font-weight:800;color:' + INK2 + ';margin-bottom:4px;">민감정보 수집 · 이용 동의 (필수)</div>' +
+                row("목적", "기록 보관, 엄마 · 아빠 가족 공유, 날짜 계산") +
+                row("항목", CONSENT_ITEMS[kind] || CONSENT_ITEMS.preg) +
+                row("보유", "회원 탈퇴하거나 기록을 지울 때까지") +
+                row("거부", "동의하지 않아도 배냇함의 다른 기능은 그대로 써요. 이 기록만 쓸 수 없어요.") +
+                '<div style="margin-top:6px;">돌봄 도우미에게는 보이지 않아요. <a href="privacy.html#sensitive" target="_blank" rel="noopener" style="color:' + INK2 + ';font-weight:800;">자세히 ›</a></div>' +
+            '</div>' +
+            '<label style="display:flex;gap:10px;align-items:center;margin-top:12px;font-size:13.5px;font-weight:700;color:' + INK2 + ';">' +
+                '<input type="checkbox" id="sens-consent" style="width:20px;height:20px;flex-shrink:0;accent-color:' + INK2 + ';">위 내용에 동의해요</label>';
+    }
+    function recordConsent(kind) {
+        var at = new Date().toISOString();
+        try { localStorage.setItem("tosil_sensitive_consent", at); localStorage.setItem("tosil_guardian_consent", at); } catch (e) {}
+        var uid = window.auth && window.auth.currentUser && window.auth.currentUser.uid, r = stageRef();
+        if (uid && r && typeof window.setDoc === "function") {
+            var c = {}; c[uid] = { kind: kind, at: at, ver: CONSENT_VER };
+            try { window.setDoc(r, { consents: c }, { merge: true }).catch(function () {}); } catch (e) {}
+        }
     }
 
     /* ---------- 다른 파일(heartbeat.js 등)이 같은 모양을 쓰게 ---------- */
     window.stageUI = {
         sheet: sheet, closeSheet: closeSheet, primary: primary, esc: esc,
         todayKey: todayKey, keyOf: keyOf, fromKey: fromKey, weeksFromDue: weeksFromDue,
-        dueDate: dueDate, babyName: babyName, ICO: ICO,
+        dueDate: dueDate, babyName: babyName, ICO: ICO, consentHTML: consentHTML, recordConsent: recordConsent,
         tokens: { PAPER: PAPER, LINE: LINE, INK2: INK2, SUB2: SUB2, MUTE: MUTE, TINT: TINT, SERIF: SERIF, GOLD: GOLD }
     };
 
     /* ---------- 시작 ---------- */
     function boot() {
+        setTimeout(refreshLive, 3500);             // 스위치가 꺼져 있어도 서버 스위치는 확인한다
         if (!beta()) return;                       // 스위치가 꺼져 있으면 아무것도 안 한다
         css();
         render();

@@ -240,7 +240,7 @@
     window.__qaTest = { merge: merge, load: load, entry: entry, Q: Q };
 
     function boot() {
-        try { if (localStorage.getItem("tosil_stage_beta") !== "1") return; } catch (e) { return; }
+        try { if (!(localStorage.getItem("tosil_stage_beta") === "1" || localStorage.getItem("tosil_stage_live") === "1")) return; } catch (e) { return; }
         setTimeout(watch, 3600);
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

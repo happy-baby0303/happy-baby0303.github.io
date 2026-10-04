@@ -54,6 +54,7 @@
               "봉인이 풀렸어요" 는 그날 맨 위에서 봐야 하는 카드다. */
         { find: "home-seal-open",           note: "봉인 편지가 열린 날 (그날만)" },
         { find: "home-vaccine-card",        note: "예방접종 D-7 (일주일 안쪽일 때만)" },
+        { find: "home-apply-cal",           note: "태어난 뒤 신청할 것 (임신 단계에서 넘어온 집, 출생 후 120일까지)" },
         { find: "home-todo",                note: "오늘 챙길 것" },
         { find: "em-letter",                note: "오늘의 편지 한 줄" },
         { find: "now-status-card",          note: "지금 상태 + 기록 버튼" },

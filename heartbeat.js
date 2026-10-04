@@ -164,6 +164,10 @@
             '</div>' +
             '<div class="pg-meta" style="margin:14px 0 6px;">엽서에 남길 한 줄 (선택)</div>' +
             '<input type="text" id="hb-note" maxlength="40" placeholder="예) 처음 들은 날, 둘 다 울었어">' +
+            (typeof window.publishNewsHeart === "function"
+                ? '<label style="display:flex;gap:10px;align-items:center;margin-top:14px;font-size:13px;font-weight:600;color:' + T.SUB2 + ';">' +
+                    '<input type="checkbox" id="hb-news" ' + (window.hasNewsPage && window.hasNewsPage() ? 'checked' : '') + ' style="width:18px;height:18px;accent-color:' + T.INK2 + ';">' +
+                    '가족 소식 페이지에도 올리기 (할머니 · 할아버지가 들을 수 있어요)</label>' : '') +
             u.primary("배냇함에 담고 엽서 만들기", "window.__heartSave()"));
         var s = document.getElementById("stage-sheet");
         if (s) s.onclick = function (e) { if (e.target === s) { stopPlay(); s.remove(); } };
@@ -229,7 +233,13 @@
             if (typeof window.saveVoiceBlob !== "function") throw new Error("saveVoiceBlob 없음");
             var saved = await window.saveVoiceBlob(st.dateKey, wav, Math.round(st.win), st.note || "심장 소리", { kind: "heart" });
             if (!saved) { u.closeSheet(); return; }
+            var toNews = !!(document.getElementById("hb-news") || {}).checked;
             var peaks = (typeof window.peaksFrom === "function") ? await window.peaksFrom(wav) : null;
+            if (toNews && typeof window.publishNewsHeart === "function" && typeof window.getDayVoices === "function") {
+                var v = (window.getDayVoices(st.dateKey) || []).filter(function (x) { return x && x.id === saved.id; })[0];
+                var wk = u.weeksFromDue(u.dueDate(), u.fromKey(st.dateKey));
+                if (v && v.url) window.publishNewsHeart({ id: saved.id, url: v.url, key: st.dateKey, week: wk ? wk.weeks : 0, line: st.note });
+            }
             u.closeSheet();
             toast("💛 심장 소리를 배냇함에 담았어요");
             if (peaks) makeCard(peaks, st.dateKey, st.note, first);

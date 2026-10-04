@@ -60,9 +60,84 @@
     function watch() {
         var r = ref(); if (!r || typeof window.onSnapshot !== "function") return;
         window.onSnapshot(r, function (snap) {
-            if (snap.exists() && merge((snap.data() || {}).weeks) && typeof window.refreshStageHome === "function") window.refreshStageHome();
+            if (!snap.exists()) return;
+            var data = snap.data() || {};
+            if (data.newsId && !newsId()) { try { localStorage.setItem("tosil_news_id", data.newsId); } catch (e) {} }
+            if (merge(data.weeks) && typeof window.refreshStageHome === "function") window.refreshStageHome();
         }, function (e) { console.warn("[가족 소식] 실시간 연동 에러", e); });
     }
+
+    /* ---------- 가족 소식 페이지 (news.html) ----------
+       할머니 · 할아버지는 앱 없이 카톡 링크로 본다. 엄마 아빠가 '보낸' 것만 올라간다.
+       news/{긴 번호} 문서 — 링크를 바꾸면 예전 문서는 비워서 닫는다. */
+    var NEWS_PAGE = APP_LINK + "news.html?n=";
+    function newsId() { return localStorage.getItem("tosil_news_id") || ""; }
+    function makeId() {
+        var a = new Uint8Array(20), c = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789", s = "";
+        (window.crypto || window.msCrypto).getRandomValues(a);
+        for (var i = 0; i < a.length; i++) s += c[a[i] % c.length];
+        return s;
+    }
+    function ensureNewsId() {
+        var id = newsId();
+        if (!id) {
+            id = makeId();
+            try { localStorage.setItem("tosil_news_id", id); } catch (e) {}
+            var r = ref();
+            if (r && typeof window.setDoc === "function") window.setDoc(r, { newsId: id }, { merge: true }).catch(function () {});
+        }
+        return id;
+    }
+    function newsLink() { return NEWS_PAGE + ensureNewsId(); }
+    function publish(patch, id) {
+        var code = localStorage.getItem("family_sync_code");
+        if (!code || !window.db || typeof window.doc !== "function" || typeof window.setDoc !== "function") return Promise.resolve(false);
+        id = id || ensureNewsId();
+        var body = { family: code, name: ui().babyName(), due: localStorage.getItem("tosil_due_date") || "", updatedAt: Date.now(), off: false };
+        Object.keys(patch || {}).forEach(function (k) { body[k] = patch[k]; });
+        return window.setDoc(window.doc(window.db, "news", id), body, { merge: true })
+            .then(function () { return true; }, function (e) { console.warn("[가족 소식] 페이지 올리기 실패", e); return false; });
+    }
+    function weekEntry(rec) { return { url: rec.url, line: rec.line || "", key: rec.key, at: rec.at || Date.now() }; }
+    window.hasNewsPage = function () { return !!newsId(); };
+    window.publishNewsHeart = function (h) {
+        var o = {}; o[h.id] = { url: h.url, key: h.key, week: h.week || 0, line: h.line || "", at: Date.now() };
+        return publish({ hearts: o });
+    };
+
+    window.openNewsLink = function () {
+        var u = ui(), T = u.tokens, link = newsLink();
+        u.sheet('<div class="pg-serif" style="font-size:20px;font-weight:700;color:' + T.INK2 + ';">가족 소식 페이지</div>' +
+            '<div class="pg-meta" style="margin:6px 0 16px;line-height:1.7;word-break:keep-all;">할머니 · 할아버지가 앱 없이 카톡 링크로 볼 수 있어요. ' +
+                '보낸 사진과 한 줄, 심장 소리, 출생 소식만 보여요. 몸 상태나 문답은 절대 안 올라가요.</div>' +
+            '<div style="font-size:13px;font-weight:600;color:' + T.SUB2 + ';background:#FFF;border:1px solid ' + T.LINE + ';border-radius:12px;padding:12px 14px;word-break:break-all;">' + u.esc(link) + '</div>' +
+            '<div style="display:flex;gap:8px;margin-top:12px;">' +
+                '<div onclick="window.__newsCopy()" style="flex:1;text-align:center;padding:14px;border-radius:14px;border:1px solid ' + T.LINE + ';background:' + T.PAPER + ';color:' + T.INK2 + ';font-size:14px;font-weight:700;cursor:pointer;">링크 복사</div>' +
+                '<div onclick="window.__newsShare()" style="flex:1;text-align:center;padding:14px;border-radius:14px;background:' + T.INK2 + ';color:#FFFDF9;font-size:14px;font-weight:700;cursor:pointer;">가족에게 보내기</div>' +
+            '</div>' +
+            '<div onclick="window.__newsRotate()" style="text-align:center;margin-top:18px;font-size:12.5px;font-weight:700;color:' + T.MUTE + ';cursor:pointer;">링크 바꾸기 · 지금 링크는 닫혀요</div>');
+    };
+    window.__newsCopy = function () {
+        var link = newsLink();
+        try { navigator.clipboard.writeText(link).then(function () { toast("링크를 복사했어요"); }, function () { toast(link); }); } catch (e) { toast(link); }
+    };
+    window.__newsShare = function () {
+        var name = ui().babyName(), link = newsLink();
+        var text = name + " 소식을 여기서 볼 수 있어요";
+        if (navigator.share) navigator.share({ title: name + " 소식", text: text, url: link }).catch(function () {});
+        else window.__newsCopy();
+    };
+    window.__newsRotate = function () {
+        if (!confirm("지금 링크를 닫고 새 링크를 만들까요?\n예전 링크로는 더 이상 볼 수 없어요.")) return;
+        var old = newsId(), code = localStorage.getItem("family_sync_code");
+        if (old && code && window.db && typeof window.setDoc === "function") {
+            window.setDoc(window.doc(window.db, "news", old), { family: code, off: true, updatedAt: Date.now() }).catch(function () {});   // 비워서 닫는다
+        }
+        try { localStorage.removeItem("tosil_news_id"); } catch (e) {}
+        var id = ensureNewsId(), all = load(), weeks = {};
+        Object.keys(all).forEach(function (wk) { if (all[wk] && all[wk].sent) weeks[wk] = weekEntry(all[wk]); });
+        publish({ weeks: weeks }, id).then(function () { toast("새 링크를 만들었어요"); window.openNewsLink(); });
+    };
 
     /* ---------- 홈 카드 ---------- */
     function cardHTML(w) {
@@ -91,6 +166,7 @@
                 '<div onclick="window.openWeekSend(' + wk + ')" style="flex:2;text-align:center;padding:14px;border-radius:14px;background:' + T.INK2 + ';color:#FFFDF9;font-size:14.5px;font-weight:700;cursor:pointer;">가족에게 보내기</div>' +
                 '<div onclick="window.takeWeekPhoto()" style="flex:1;text-align:center;padding:14px;border-radius:14px;border:1px solid ' + T.LINE + ';background:' + T.PAPER + ';color:' + T.INK2 + ';font-size:14px;font-weight:700;cursor:pointer;">다시 찍기</div>' +
             '</div>' +
+            '<div onclick="window.openNewsLink()" class="pg-meta" style="margin-top:14px;cursor:pointer;color:' + T.INK2 + ';">할머니 · 할아버지가 앱 없이 보는 페이지 ›</div>' +
         '</div>';
     }
 
@@ -129,12 +205,14 @@
     window.__sendWeek = function (wk) {
         var all = load(), rec = all[wk]; if (!rec) return;
         rec.line = ((document.getElementById("wk-line") || {}).value || "").trim();
-        rec.at = Date.now(); all[wk] = rec; save(all); pushWeek(wk, rec);
+        rec.at = Date.now(); rec.sent = 1; all[wk] = rec; save(all); pushWeek(wk, rec);
+        var pw = {}; pw[wk] = weekEntry(rec);
+        publish({ weeks: pw });                                       // 가족 소식 페이지에도
         ui().closeSheet();
         if (typeof window.refreshStageHome === "function") window.refreshStageHome();
         var name = ui().babyName();
         shareCard(weekCardDOM(wk, rec), name + "_" + wk + "주.png",
-            name + " " + wk + "주 소식", name + " " + wk + "주 소식이에요. 배냇함에서 같이 봐요 " + APP_LINK);
+            name + " " + wk + "주 소식", name + " " + wk + "주 소식이에요. 지난 소식도 여기서 볼 수 있어요 " + newsLink());
     };
 
     /* ---------- 카드 그리기 ---------- */
@@ -192,8 +270,9 @@
     /* ---------- 출생 카드 (stage.js 의 '아기가 태어났어요' 가 부른다) ---------- */
     window.makeBirthCard = function (b) {
         var u = ui(); if (!u) return Promise.resolve();
+        if (newsId()) publish({ name: b.name, born: { name: b.name, date: b.date, time: b.time || "", weight: b.weight || "", height: b.height || "", line: b.line || "" } });
         return shareCard(birthCardDOM(b), b.name + "_출생.png", call(b.name, "가") + " 태어났어요",
-            call(b.name, "가") + " 태어났어요. 배냇함에서 같이 봐요 " + APP_LINK);
+            call(b.name, "가") + " 태어났어요. " + (newsId() ? "소식은 여기서 " + newsLink() : "배냇함에서 같이 봐요 " + APP_LINK));
     };
     function birthCardDOM(b) {
         var u = ui(), T = u.tokens, d = u.fromKey(b.date);
@@ -248,7 +327,7 @@
     window.__famTest = { merge: merge, load: load };
 
     function boot() {
-        try { if (localStorage.getItem("tosil_stage_beta") !== "1") return; } catch (e) { return; }
+        try { if (!(localStorage.getItem("tosil_stage_beta") === "1" || localStorage.getItem("tosil_stage_live") === "1")) return; } catch (e) { return; }
         setTimeout(watch, 3700);
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

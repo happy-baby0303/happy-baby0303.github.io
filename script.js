@@ -22,7 +22,7 @@ window.parseLocalDate = function(str) {
 const BABY_SPECIFIC_KEYS = [
     'tosil_babyName', 'tosil_startDate', 'tosil_feedingStage', 'tosil_baby_photo', 'tosil_baby_photo_quick',
     // 단계 (stage.js) — 기다림 · 임신 중 · 태어남. 둘째만 임신 중일 수 있으니 아기마다 따로
-    'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since', 'tosil_preg_qa', 'tosil_preg_weeks',
+    'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since', 'tosil_preg_qa', 'tosil_preg_weeks', 'tosil_apply', 'tosil_ready', 'tosil_news_id', 'tosil_prep',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
     'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',
@@ -7510,7 +7510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 1. 로그인도 했고, 아기 정보도 다 있으면 프리패스 (메인 화면)
     // 임신 중(stage.js)이면 생일이 아직 없다. 예정일만으로도 온보딩을 끝난 걸로 본다
-    const pregStage = /^(pregnant|paused)$/.test(localStorage.getItem('tosil_stage') || '');
+    const pregStage = /^(pregnant|paused|prep)$/.test(localStorage.getItem('tosil_stage') || '');   // 준비 단계도 생일 없이 통과
     if (savedKakaoId && savedName && (savedDate || pregStage)) {
         const overlay = document.getElementById('onboarding-overlay');
         if(overlay) overlay.style.display = 'none';
@@ -14242,6 +14242,12 @@ window.deleteBabyProfile = function(targetId, babyName) {
             ['info', 'baby_profile'].forEach(function (id) {
                 refs.push(window.doc(window.db, 'settings_' + code + targetId, id));
             });
+            /* 임신 · 준비 기록 (stage.js) 은 growth_ 칸의 'stage' 문서에 있다. 가족 소식 페이지도 닫는다 */
+            refs.push(window.doc(window.db, 'growth_' + code + targetId, 'stage'));
+            try {
+                const nid = Storage.prototype.getItem.call(localStorage, 'tosil_news_id' + targetId);
+                if (nid && window.setDoc) window.setDoc(window.doc(window.db, 'news', nid), { family: code, off: true, updatedAt: Date.now() }).catch(function () {});
+            } catch (e) {}
             for (let y = 2026; y <= new Date().getFullYear(); y++) {
                 refs.push(window.doc(window.db, 'letters_' + code + targetId, 'letters_' + y));
                 refs.push(window.doc(window.db, 'letters_' + code + targetId, 'replies_' + y));
