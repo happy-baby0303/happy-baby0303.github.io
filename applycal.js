@@ -55,7 +55,7 @@
           how: "회사에 신청해요. 하루 2시간을 줄여도 월급은 깎이지 않아요.",
           fact: "임신 32주 이후부터 다시 쓸 수 있어요.",
           link: LAW_LEAVE },
-        { id: "spouse", phase: "both", who: "dad", when: { due: [-50, 120] },
+        { id: "spouse", phase: "both", who: "dad", deadline: true, when: { due: [-50, 120] },
           t: "배우자 출산전후휴가 계획",
           how: "회사에 날짜를 알려요. 20일(근무일 기준)을 세 번까지 나눠, 네 번에 걸쳐 쓸 수 있어요.",
           fact: "출산 예정일 50일 전부터 쓸 수 있고, 출산일부터 120일이 지나면 못 써요. 2026년 9월 18일부터 이렇게 바뀌었어요.",
@@ -65,12 +65,12 @@
           how: "쓰려는 날 30일 전까지 회사에 신청해요. 출산전후휴가가 끝나고 바로 이어 쓰려면 미리 해 두세요.",
           fact: "엄마 아빠가 모두 쓰면 각자 최대 1년 6개월까지 늘어나요. 조건은 공식 안내에서 확인하세요.",
           link: LAW_LEAVE },
-        { id: "birthreg", phase: "born", who: "both", when: { birth: { month: 1 } },
+        { id: "birthreg", phase: "born", who: "both", deadline: true, when: { birth: { month: 1 } },
           t: "출생신고",
           how: "병원에서 받은 출생증명서를 챙겨 주민센터에 가거나, 정부24 '행복출산 원스톱'으로 해요.",
           fact: "출생 후 1개월 안에 해야 해요. 늦으면 과태료가 있어요(최대 5만 원). 정확한 마감일은 주민센터에서 확인하세요.",
           link: GOV },
-        { id: "onestop", phase: "born", who: "both", when: { birth: { days: 60 } },
+        { id: "onestop", phase: "born", who: "both", deadline: true, when: { birth: { days: 60 } },
           t: "부모급여 · 아동수당 · 첫만남이용권",
           how: "출생신고 할 때 '행복출산 원스톱'으로 같이 신청하면 한 번에 끝나요. 복지로에서도 돼요.",
           fact: "부모급여와 아동수당은 출생일을 포함해 60일 안에 신청해야 태어난 달부터 받아요. 첫만남이용권은 출생일부터 2년 안에 신청하면 돼요. " +
@@ -141,10 +141,24 @@
         }, function () {});
     }
     function rec(id) { return load()[id] || {}; }
+
+    /* 서버 알림(stageDaily)에 넘길 '법으로 정해진 마감' — 아직 안 한 것, 60일 안쪽만 */
+    window.applyDeadlines = function () {
+        var D = dates(), t = today0(), out = [];
+        ITEMS.filter(function (x) { return x.deadline; }).forEach(function (it) {
+            var win = windowOf(it, D.due, D.born); if (!win || rec(it.id).done) return;
+            var left = Math.round((win.to - t) / DAY);
+            if (left < 0 || left > 60) return;
+            var d = win.to;
+            out.push({ id: it.id, t: it.t, date: d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") });
+        });
+        return out;
+    };
     function setRec(id, patch) {
         var a = load(), r = a[id] || {};
         Object.keys(patch).forEach(function (k) { r[k] = patch[k]; });
         r.at = Date.now(); a[id] = r; save(a); pushOne(id, r);
+        if (typeof window.stagePushSync === "function") window.stagePushSync();   // 다 했으면 마감 알림도 멈춘다
     }
     function whoOf(it) { return rec(it.id).who || it.who; }
     var WHO = { mom: "엄마", dad: "아빠", both: "같이" };

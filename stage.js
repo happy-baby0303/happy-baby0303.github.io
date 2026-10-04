@@ -77,6 +77,7 @@
             if (s === "pregnant" && !localStorage.getItem("tosil_preg_since")) localStorage.setItem("tosil_preg_since", todayKey());
         } catch (e) {}
         if (typeof pushStage === "function") { pushStage(); quiet(); }
+        syncPush();
     }
     function dueDate() { try { return localStorage.getItem("tosil_due_date") || ""; } catch (e) { return ""; } }
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
@@ -132,6 +133,100 @@
         "심한 두통, 눈앞이 흐려짐, 얼굴·손이 갑자기 부을 때",
         "38도가 넘는 열"
     ];
+    /* ---------- 이번 주 할 것 (의학 설명 없이 · 감수 필요 없는 것만) ----------
+       아기 몸 이야기 대신 '이번 주에 해 볼 만한 것' 을 준다. 대부분 배냇함 기능으로 바로 이어진다.
+       ⚠️ 서버(functions/index.js 의 WEEK_PUSH)에도 같은 글이 있다. 고치면 둘 다 고친다. */
+    var WEEKLY = {
+        4:  ["두 줄을 본 오늘을 편지로 남겨 두세요", "letter", "편지 쓰기"],
+        5:  ["이 소식을 언제, 누구에게 먼저 전할지 둘이 정해 보세요", "", ""],
+        6:  ["병원에서 심장 소리를 녹음해 두면 엽서로 만들 수 있어요", "heart", "심장 소리"],
+        7:  ["태명 후보를 둘이 세 개씩 적어 보세요", "qa", "문답 보기"],
+        8:  ["첫 초음파 사진을 배냇함에 담아 두세요", "photo", "사진 담기"],
+        9:  ["양가 부모님께 소식을 전할 날을 정해 보세요", "news", "소식 페이지"],
+        10: ["이번 주는 둘만의 저녁을 하루 잡아 보세요", "", ""],
+        11: ["진료비 바우처를 신청했는지 확인해 보세요", "apply", "신청 보기"],
+        12: ["첫 배 사진을 찍어 두세요. 같은 자리, 같은 옷이면 모았을 때 예뻐요", "photo", "사진 찍기"],
+        13: ["이번 주 문답에 둘이 같이 답해 보세요", "qa", "문답 쓰기"],
+        14: ["중기에 들어섰어요. 둘이 가 보고 싶던 곳을 하나 정해 보세요", "", ""],
+        15: ["아빠 목소리로 동화 한 편을 녹음해 보세요", "voice", "녹음하기"],
+        16: ["유모차를 직접 밀어 보러 가기 좋은 때예요", "ready", "준비 보기"],
+        17: ["아기 자리를 어디에 둘지 같이 정해 보세요", "", ""],
+        18: ["태동을 처음 느끼면 그날을 편지로 남겨 두세요", "letter", "편지 쓰기"],
+        19: ["산후조리원 상담 날짜를 잡아 보세요", "apply", "신청 보기"],
+        20: ["절반을 왔어요. 반환점 사진을 남겨 두세요", "photo", "사진 찍기"],
+        21: ["아기에게 불러 줄 노래를 하나 정해서 녹음해 보세요", "voice", "녹음하기"],
+        22: ["카시트를 알아보기 좋은 때예요", "ready", "준비 보기"],
+        23: ["부모님께 이번 주 소식을 보내 보세요", "news", "소식 페이지"],
+        24: ["출산 뒤 첫 한 달, 누가 무엇을 맡을지 이야기해 보세요", "", ""],
+        25: ["아기가 스무 살에 열 편지를 한 장 써 보세요", "letter", "편지 쓰기"],
+        26: ["젖병 · 수유용품 목록을 만들어 보세요", "ready", "준비 보기"],
+        27: ["출산전후휴가와 육아휴직 날짜를 둘이 맞춰 보세요", "apply", "신청 보기"],
+        28: ["태동 세기를 시작해 보세요. 아기가 잘 움직이는 시간을 찾아요", "kick", "태동 세기"],
+        29: ["만삭 사진을 찍을 날을 정해 보세요", "", ""],
+        30: ["지금까지 모은 배 사진을 모아 보세요", "collage", "모아 보기"],
+        31: ["아기 옷과 속싸개를 빨아 둘 준비를 해요", "ready", "준비 보기"],
+        32: ["임신기 근로시간 단축을 다시 쓸 수 있는 때예요", "apply", "신청 보기"],
+        33: ["출산 가방 목록을 써 보세요", "ready", "준비 보기"],
+        34: ["병원 가는 길을 한 번 미리 가 보세요", "ready", "준비 보기"],
+        35: ["카시트를 차에 미리 달아 보세요", "ready", "준비 보기"],
+        36: ["출생신고와 부모급여, 출산 뒤 할 일을 미리 봐 두세요", "apply", "신청 보기"],
+        37: ["둘만의 마지막 외식을 해 보세요", "", ""],
+        38: ["아기에게 '곧 만나자'고 목소리를 남겨 보세요", "voice", "녹음하기"],
+        39: ["가족 단톡방에 곧 만난다고 소식을 전해 보세요", "news", "소식 페이지"],
+        40: ["예정일 주간이에요. 이번 주는 쉬는 게 할 일이에요", "", ""],
+        41: ["예정일이 지났어요. 병원과 다음 계획을 상의해요", "", ""]
+    };
+    function weekNote(weeks) { return WEEKLY[Math.min(41, weeks)] || null; }
+    window.__stageWeekAct = function (act) {
+        var w = weeksFromDue(dueDate()), wk = w ? Math.max(1, Math.min(40, w.weeks)) : 1;
+        var go = function (fn) { if (typeof fn === "function") fn(); };
+        var tab = function (id) {
+            window.__stageTab(id);
+            setTimeout(function () {
+                var h = [].slice.call(document.querySelectorAll("#preg-home .pg-h")).filter(function (x) { return x.textContent.indexOf("챙길 것") > -1; })[0];
+                if (h) h.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 80);
+        };
+        ({
+            letter:  function () { go(window.openSealSheet); },
+            heart:   function () { go(window.openHeartSheet); },
+            qa:      function () { if (typeof window.openQA === "function") window.openQA(wk); },
+            photo:   function () { if (typeof window.takeWeekPhoto === "function") window.takeWeekPhoto(); else if (window.addDayPhoto) window.addDayPhoto(todayKey()); },
+            news:    function () { go(window.openNewsLink); },
+            apply:   function () { tab("apply"); },
+            ready:   function () { tab("ready"); },
+            voice:   function () { if (window.openVoiceSheet) window.openVoiceSheet(todayKey()); },
+            kick:    function () { go(window.openKickSheet); },
+            collage: function () { go(window.openWeekCollage); }
+        }[act] || function () {})();
+    };
+
+    /* ---------- 알림 장부 (서버가 매일 아침 9시에 본다) ----------
+       stagepush/{가족코드}.babies[아기] = { stage, due, name, born, deadlines, push }
+       서버(stageDaily)가 주가 바뀐 날 '28주가 됐어요', 마감 3일 전부터 '출생신고 · 3일 남았어요' 를 보낸다.
+       돌봄 도우미 폰으로는 안 보낸다 (서버에서 거른다). 설정의 '임신 알림' 을 끄면 push:false. */
+    var pushTimer = null;
+    function pushOn() { try { return localStorage.getItem("tosil_stage_push") !== "0"; } catch (e) { return true; } }
+    function syncPush() {
+        if (!beta()) return;
+        if (pushTimer) clearTimeout(pushTimer);
+        pushTimer = setTimeout(function () {
+            var code = localStorage.getItem("family_sync_code");
+            if (!code || !window.db || typeof window.doc !== "function" || typeof window.setDoc !== "function") return;
+            var key = window.currentBabySuffix || "_0", s = stage();
+            var dl = []; try { if (typeof window.applyDeadlines === "function") dl = window.applyDeadlines() || []; } catch (e) {}
+            var b = { stage: s, due: dueDate(), name: babyName(), born: localStorage.getItem("tosil_startDate") || "", deadlines: dl, push: pushOn(), at: Date.now() };
+            var body = { family: code, updatedAt: Date.now(), babies: {} }; body.babies[key] = b;
+            try { window.setDoc(window.doc(window.db, "stagepush", code), body, { merge: true }).catch(function (e) { console.warn("[단계] 알림 장부 실패", e); }); } catch (e) {}
+        }, 800);
+    }
+    window.stagePushSync = syncPush;
+    window.toggleStagePush = function () {
+        try { localStorage.setItem("tosil_stage_push", pushOn() ? "0" : "1"); } catch (e) {}
+        syncPush(); toast(pushOn() ? "임신 알림을 켰어요" : "임신 알림을 껐어요");
+        if (typeof window.renderSettingsTab === "function") { try { window.renderSettingsTab(); } catch (e) {} }
+    };
+
     function checks() { try { return JSON.parse(localStorage.getItem("tosil_preg_checks")) || {}; } catch (e) { return {}; } }
     window.togglePregCheck = function (id) {
         var c = checks(); if (c[id]) delete c[id]; else c[id] = todayKey();
@@ -196,6 +291,15 @@
             '<div style="display:flex;justify-content:space-between;margin-top:14px;" class="pg-meta">' +
                 '<span>' + w.tri + ' · 한 점이 한 주</span>' +
                 '<span>' + (w.left > 0 ? '만나기까지 ' + w.left + '일' : (w.left === 0 ? '오늘이 예정일' : '예정일에서 ' + (-w.left) + '일')) + '</span></div>' +
+            (function () {
+                var n = weekNote(w.weeks); if (!n) return '';
+                return '<div style="display:flex;align-items:center;gap:12px;border-top:1px solid ' + LINE + ';margin-top:16px;padding-top:14px;">' +
+                    '<div style="flex:1;min-width:0;"><div style="font-size:11.5px;font-weight:800;color:' + GOLD + ';">이번 주</div>' +
+                        '<div style="font-size:14.5px;font-weight:700;color:' + INK2 + ';line-height:1.55;margin-top:3px;word-break:keep-all;">' + esc(n[0]) + '</div></div>' +
+                    (n[1] ? '<div onclick="window.__stageWeekAct(\'' + n[1] + '\')" style="flex-shrink:0;padding:9px 13px;border-radius:11px;background:' + TINT + ';' +
+                        'color:' + INK2 + ';font-size:13px;font-weight:700;cursor:pointer;">' + n[2] + ' ›</div>' : '') +
+                '</div>';
+            })() +
         '</div>';
     }
 
@@ -461,7 +565,7 @@
         var v = (document.getElementById("stage-due") || {}).value || "";
         if (!weeksFromDue(v)) return toast("날짜를 다시 확인해 주세요");
         try { localStorage.setItem("tosil_due_date", v); } catch (e) {}
-        setStage("pregnant");        // 예정일까지 같이 올라간다
+        setStage("pregnant");                                   // 장부도 같이 (setStage → syncPush)        // 예정일까지 같이 올라간다
         closeSheet(); render();
         toast("예정일을 저장했어요");
     };
@@ -856,6 +960,7 @@
                 (t ? btn("준비로 보기", "window.setBabyStage(\'prep\')") + btn("임신 중으로 보기", "window.setBabyStage(\'pregnant\')") + btn("태어남으로 돌아가기", "window.setBabyStage(\'born\')") : '') +
                 (s === "pregnant" ? btn("예정일 바꾸기", "window.openDueSheet()") : '') +
                 (s === "prep" && typeof window.openPrepSetup === "function" ? btn("주기 · 방식 바꾸기", "window.openPrepSetup()") : '') +
+                (s === "pregnant" || s === "prep" ? btn(pushOn() ? "임신 알림 끄기" : "임신 알림 켜기", "window.toggleStagePush()") : '') +
             '</div>' +
             (s === "pregnant" ? '<div onclick="window.openStopSheet()" style="margin-top:14px;font-size:12px;font-weight:700;color:#B5AAA0;text-align:center;cursor:pointer;">임신을 이어가지 못했어요</div>' : '') +
             (s !== "born" ? '<div onclick="window.openWipeSheet()" style="margin-top:10px;font-size:12px;font-weight:700;color:#B5AAA0;text-align:center;cursor:pointer;">임신 · 준비 기록 모두 지우기</div>' : '');
@@ -911,7 +1016,7 @@
         css();
         render();
         hookBox();
-        setTimeout(function () { watchStage(); quiet(); }, 3500);   // 로그인·파이어베이스가 자리 잡은 뒤
+        setTimeout(function () { watchStage(); quiet(); syncPush(); }, 3500);   // 앱을 열 때마다 장부를 새로 (이름 · 마감이 바뀌었을 수 있다)   // 로그인·파이어베이스가 자리 잡은 뒤
         var origin = window.renderSettingsTab;
         window.renderSettingsTab = function () {
             var out; if (typeof origin === "function") out = origin.apply(this, arguments);
