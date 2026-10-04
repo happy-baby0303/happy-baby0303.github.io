@@ -209,23 +209,23 @@
         } else if (step === 1) {
             shell(ask(1, "📷",
                 "오늘의 " + esc(callName("를")) + "<br>한 장만",
-                "잘 찍을 필요 없어요.<br>지금 자고 있는 얼굴이면 충분합니다.",
+                "잘 찍을 필요 없어요.<br>지금 자고 있는 얼굴이면 충분해요.",
                 "사진 고르기", "window.firstFillPhoto()"));
 
         } else if (step === 2) {
             var g = (typeof window.guideWhat === "function") ? window.guideWhat() : "";
             shell(ask(2, "🎙️",
                 "지금 나는 소리를<br>30초만",
-                (g ? esc(g) + "도 좋고, " : "") + "옹알이도, 숨소리도, 하품도 좋아요.<br>두 달 뒤엔 다른 소리를 냅니다.",
+                (g ? esc(g) + "도 좋고, " : "") + "옹알이도, 숨소리도, 하품도 좋아요.<br>두 달 뒤엔 다른 소리를 내요.",
                 "녹음하기", "window.firstFillVoice()"));
 
         } else if (step === 3) {
             var left = daysToTwenty();
             shell(ask(3, "🕯️",
                 "스무 살 " + name + "에게<br>한 줄만 남겨두기",
-                "지금의 마음은 지금밖에 못 씁니다.<br>" +
-                (left ? '<span style="color:' + GOLD + '; font-weight:800;">' + comma(left) + '일</span> 뒤에 ' + esc(callName("가")) + ' 읽게 됩니다.'
-                      : esc(callName("가")) + " 언젠가 읽게 됩니다."),
+                "지금 마음은 지금만 쓸 수 있어요.<br>" +
+                (left ? '<span style="color:' + GOLD + '; font-weight:800;">' + comma(left) + '일</span> 뒤에 ' + esc(callName("가")) + ' 읽게 돼요.'
+                      : esc(callName("가")) + " 언젠가 읽게 돼요."),
                 "편지 남기기", "window.firstFillSeal()"));
 
         } else {

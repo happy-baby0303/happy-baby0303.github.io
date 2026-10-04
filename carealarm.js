@@ -36,6 +36,7 @@
         var best = null;
         recs().forEach(function (r) {
             if (!r || r.type !== type) return;
+            if (type === "feed" && r.subType === "이유식") return;   // 수유 텀은 모유 · 분유 · 유축으로만 (서버 careReminder 도 이 값을 쓴다)
             var t = Number(r.timestamp);
             if (t && (!best || t > Number(best.timestamp))) best = r;
         });

@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v56';
+const CACHE = 'baenaet-v57';
 
 /* 우리 서버 파일 */
 const ASSETS = [
