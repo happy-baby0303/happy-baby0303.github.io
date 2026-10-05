@@ -5888,10 +5888,11 @@ window.updateTrackerDashboard = function() {
     const hhmm = (ms) => { const d = new Date(ms); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
     const grid = [25, 50, 75].map(p => `<span style="position:absolute; left:${p}%; top:0; bottom:0; width:1px; background-color:rgba(74,65,60,0.08) !important;"></span>`).join('');
     const nowLine = `<span style="position:absolute; left:${nowPct}%; top:-3px; bottom:-3px; width:2px; margin-left:-1px; background-color:#4A413C !important; border-radius:2px; opacity:0.75;"></span>`;
-    const lane = (label, h, inner) => `
-        <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-            <span style="width:34px; flex-shrink:0; font-size:11px; font-weight:700; color:var(--text-sub);">${label}</span>
+    const lane = (label, h, inner, key) => `
+        <div style="display:flex; align-items:center; gap:8px; margin-top:7px;">
+            <span style="width:34px; flex-shrink:0; font-size:11.5px; font-weight:700; color:var(--text-s);">${label}</span>
             <div style="flex:1; position:relative; height:${h}px; background-color:var(--bg-sub) !important; border-radius:8px; -webkit-print-color-adjust:exact; print-color-adjust:exact;">${grid}${inner}${nowLine}</div>
+            <span style="width:62px; flex-shrink:0; text-align:right; font-size:12.5px; font-weight:800; color:var(--text-m);">%%${key}%%</span>
         </div>`;
     const dotKey = (c, ring) => `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; ${ring ? 'border:2px solid ' + c + '; box-sizing:border-box;' : 'background-color:' + c + ' !important;'}"></span>`;
 
@@ -5917,7 +5918,7 @@ window.updateTrackerDashboard = function() {
     let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px 16px 16px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <span style="font-size:14px; font-weight:800; color:var(--text-m);">오늘 하루</span>
-            <span onclick="if(window.openSleepMap) window.openSleepMap()" style="font-size:11.5px; font-weight:700; color:#7F77DD; cursor:pointer;">이번 주 무늬 ›</span>
+            <span onclick="if(window.openSleepMap) window.openSleepMap()" style="font-size:12px; font-weight:700; color:#7F77DD; cursor:pointer;">일주일 잠 보기 ›</span>
         </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; font-size:11px; font-weight:600; color:var(--text-sub); margin-bottom:4px;">
             <span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:#7F77DD !important;"></span>잠</span>
@@ -5926,10 +5927,11 @@ window.updateTrackerDashboard = function() {
             <span style="display:flex; align-items:center; gap:4px;">${dotKey('#5DCAA5')}기저귀</span>
             <span style="display:flex; align-items:center; gap:4px; margin-left:auto;"><span style="display:inline-block; width:2px; height:10px; background-color:#4A413C !important; opacity:0.75;"></span>지금 ${hhmm(nowTime)}</span>
         </div>
-        ${lane('잠', 20, sleepBlocks)}
-        ${lane('맘마', 16, feedDots)}
-        ${lane('기저귀', 16, diaperDots)}
-        <div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:500; color:var(--text-sub); margin-top:6px; padding-left:42px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div>
+        ${lane('잠', 20, sleepBlocks, 'SLEEP')}
+        ${lane('맘마', 16, feedDots, 'FEED')}
+        ${lane('기저귀', 16, diaperDots, 'DIAPER')}
+        <div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:500; color:var(--text-sub); margin-top:6px; padding:0 70px 0 42px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div>
+        %%AMOUNTS%%
         ${timeListHtml}
         ${ribbonCaption}
     </div>`;
@@ -6048,21 +6050,18 @@ window.updateTrackerDashboard = function() {
         feedDisp += `</div>`;
     }
 
-    let statsHtml = `
-    <div style="display:flex; gap:10px; margin-bottom:14px; width:100%;">
-        <div style="flex:1; width:33.3%; background:var(--bg-card); border:1px solid var(--border); padding:16px 4px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div style="font-size:11.5px; color:#A3958A; font-weight:800; margin-bottom:6px;">총 식사량</div>
-            <div style="display:flex; justify-content:center; width:100%;">${feedDisp}</div>
-        </div>
-        <div style="flex:1; width:33.3%; background:var(--bg-card); border:1px solid var(--border); padding:16px 4px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div style="font-size:11.5px; color:#A3958A; font-weight:800; margin-bottom:6px;">총 수면시간</div>
-            <div style="font-size:17px; font-weight:900; color:${sleepColor};">${Math.floor(todaySleepMins/60)}<span style="font-size:12px;">시간</span> ${todaySleepMins%60}<span style="font-size:12px;">분</span></div>
-        </div>
-        <div style="flex:1; width:33.3%; background:var(--bg-card); border:1px solid var(--border); padding:16px 4px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-            <div style="font-size:11.5px; color:#A3958A; font-weight:800; margin-bottom:6px;">기저귀 교체</div>
-            <div style="font-size:17px; font-weight:900; color:${diaperColor};">${todayDiaperCount}회</div>
-        </div>
-    </div>`;
+    /* ⚠️ '오늘 하루' 카드 아래에 같은 숫자를 칸 세 개로 또 보여줬다 (총 식사량 · 수면 · 기저귀). 카드 줄 끝으로 옮기고 칸은 없앴다 */
+    const feedCountToday = todayRecords.filter(r => r.type === 'feed' && r.subType !== '이유식').length;
+    const amountBits = [];
+    if (todayFormulaAmt > 0) amountBits.push(`분유 ${todayFormulaAmt}ml`);
+    if (todayBreastMins > 0) amountBits.push(`모유 ${todayBreastMins}분`);
+    if (todayFoodAmt > 0) amountBits.push(`이유식 ${todayFoodAmt}g`);
+    timelineHtml = timelineHtml
+        .replace('%%SLEEP%%', todaySleepMins ? (Math.floor(todaySleepMins / 60) ? Math.floor(todaySleepMins / 60) + '시간 ' : '') + (todaySleepMins % 60 ? (todaySleepMins % 60) + '분' : '') : '<span style="color:var(--text-sub); font-weight:600;">없음</span>')
+        .replace('%%FEED%%', feedCountToday ? feedCountToday + '번' : '<span style="color:var(--text-sub); font-weight:600;">없음</span>')
+        .replace('%%DIAPER%%', todayDiaperCount ? todayDiaperCount + '번' : '<span style="color:var(--text-sub); font-weight:600;">없음</span>')
+        .replace('%%AMOUNTS%%', amountBits.length ? `<div style="font-size:12px; font-weight:700; color:var(--text-s); margin-top:12px;">오늘 먹은 양 · ${amountBits.join(' · ')}</div>` : '');
+    let statsHtml = '';
 
    container.innerHTML = briefingBarHtml + timelineHtml + statsHtml;
     container.style.display = '';

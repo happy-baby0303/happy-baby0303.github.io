@@ -1303,13 +1303,18 @@ wrap.innerHTML =
                 var len = g[1] - g[0];
                 sum += len;
                 if (len > longest) longest = len;
-                // 잠든 시각 (하루 시작이 4시라 저녁은 13시간째 = 780분 이후)
-                if (g[0] >= 13 * 60) bt = (bt === null) ? g[0] : Math.max(bt, g[0]);
+                // 잠든 시각은 아래에서 따로 고른다
             });
 
             /* 밤에 몇 번 깼나 — 밤 구간(저녁 이후)의 조각 수 - 1.
                8시간을 자도 네 번 깨면 부모는 못 잔 것이다.
                총 시간보다 이 숫자가 삶을 결정한다. */
+            /* ⚠️ 잠든 시각을 '저녁 이후 가장 늦게 시작한 잠' 으로 잡았다. 밤에 깼다 다시 자면(21시~1시, 1시반~6시)
+                  잠드는 시간이 '새벽 1시 반' 이 됐다. → 저녁 6시 이후 시작해 1시간 반 넘게 잔 것 중 가장 이른 것.
+                  (저녁 6시쯤 잠깐 조는 건 빼고, 밤중에 깬 뒤 다시 잔 것도 빼려는 것) */
+            var cands = x.segs.filter(function (g) { return g[0] >= 14 * 60 && (g[1] - g[0]) >= 90; });
+            if (!cands.length) cands = x.segs.filter(function (g) { return g[0] >= 13 * 60; });
+            if (cands.length) bt = cands.reduce(function (a, g) { return g[0] < a[0] ? g : a; })[0];
             var night = x.segs.filter(function (g) { return g[0] >= 13 * 60; });
             if (night.length) wakes.push(Math.max(0, night.length - 1));
 
@@ -1365,15 +1370,18 @@ wrap.innerHTML =
                 var left = Math.min(g[0], 1440) / 1440 * 100;
                 var w = Math.max((Math.min(g[1], 1440) - Math.min(g[0], 1440)) / 1440 * 100, 0.7);
                 if (left + w > 100) w = 100 - left;
-                bars += '<span style="position:absolute; left:' + left + '%; width:' + w + '%; height:100%; background-color:#7F77DD !important; border-radius:3px;"></span>';
+                bars += '<span style="position:absolute; left:' + left + '%; width:' + w + '%; height:100%; background-color:#7F77DD !important; border-radius:5px;"></span>';
             });
         }
         /* 띠는 새벽 4시에서 시작해 다음날 새벽 4시에 끝난다.
            밤(저녁 7시~새벽 4시)에 옅은 음영을 깔아 어디가 밤인지 보이게 한다.
            19시 = 하루 시작에서 15시간째 = 62.5% 지점부터 끝까지. */
-        return '<div style="position:relative; height:' + h + 'px; background:var(--bg-sub); border-radius:5px; overflow:hidden;">' +
-               '<span style="position:absolute; left:62.5%; width:37.5%; height:100%; background-color:rgba(127,119,221,0.12) !important;"></span>' +
-               bars + '</div>';
+        /* ⚠️ 밤 시간을 잠과 같은 보라로 칠해서 '칠해진 게 잠인지 밤인지' 헷갈렸다. '오늘 하루' 카드와 같은 모양으로:
+              밤은 아주 옅은 회색, 6시간마다 가는 선 */
+        var grid = [25, 50, 75].map(function (p) { return '<span style="position:absolute; left:' + p + '%; top:0; bottom:0; width:1px; background-color:rgba(74,65,60,0.08) !important;"></span>'; }).join("");
+        return '<div style="position:relative; height:' + h + 'px; background:var(--bg-sub); border-radius:7px; overflow:hidden;">' +
+               '<span style="position:absolute; left:62.5%; width:37.5%; height:100%; background-color:rgba(74,65,60,0.05) !important;"></span>' +
+               grid + bars + '</div>';
     }
 
     window.openSleepMap = function () {
@@ -1384,12 +1392,15 @@ wrap.innerHTML =
 
         var rows = "";
         days.forEach(function (x) {
-            var d = new Date(x.ts);
+            var d = new Date(x.ts), total = 0;
+            (x.segs || []).forEach(function (g) { total += Math.max(0, g[1] - g[0]); });
             rows +=
-            '<div style="display:flex; align-items:center; gap:10px; margin-bottom:9px;">' +
-                '<div style="width:52px; flex-shrink:0; font-size:11px; font-weight:600; color:' + (x.segs ? "var(--text-s)" : "var(--text-sub)") + ';">' +
+            '<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">' +
+                '<div style="width:46px; flex-shrink:0; font-size:11.5px; font-weight:700; color:' + (x.segs ? "var(--text-s)" : "var(--text-sub)") + ';">' +
                     d.getDate() + '일 ' + WD[d.getDay()] + '</div>' +
-                '<div style="flex:1;">' + miniRibbon(x.segs, 15) + '</div>' +
+                '<div style="flex:1;">' + miniRibbon(x.segs, 18) + '</div>' +
+                '<div style="width:58px; flex-shrink:0; text-align:right; font-size:12px; font-weight:800; color:' + (total ? "var(--text-m)" : "var(--text-sub)") + ';">' +
+                    (total ? dur(total) : '없음') + '</div>' +
             '</div>';
         });
 
@@ -1433,8 +1444,8 @@ wrap.innerHTML =
             '<div style="background:var(--bg-main); padding:22px 0 16px;">' +
                 '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
                     '<div>' +
-                        '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' + esc(name) + '의 잠 무늬</div>' +
-                        '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">이레 동안 쌓인 잠의 결</div>' +
+                        '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' + esc(name) + '의 일주일 잠</div>' +
+                        '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">날마다 언제 잤는지, 하루에 얼마나 잤는지</div>' +
                         '<div style="font-size:11px; font-weight:600; color:var(--text-sub); margin-top:4px; opacity:0.8;">하루를 새벽 ' + SLEEP_DAY_START_H + '시부터 셉니다 · 밤잠이 안 잘리게요</div>' +
                     '</div>' +
                     '<div onclick="window.closeSleepMap()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; padding:2px 8px; line-height:1;">×</div>' +
@@ -1442,22 +1453,25 @@ wrap.innerHTML =
             '</div>' +
 
             '<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:22px 20px; box-shadow:0 4px 14px rgba(0,0,0,0.03);">' +
-                '<div style="font-size:12.5px; font-weight:700; color:var(--text-s); margin-bottom:16px;">날마다</div>' +
+                '<div style="display:flex; align-items:center; gap:12px; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-bottom:14px;">' +
+                    '<span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:#7F77DD !important;"></span>잠</span>' +
+                    '<span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:rgba(74,65,60,0.10) !important;"></span>밤 시간</span>' +
+                    '<span style="margin-left:auto;">하루 합계</span></div>' +
                 rows +
-                '<div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; color:var(--text-sub); margin:8px 0 0 62px;">' +
-                    '<span>새벽4시</span><span>10시</span><span>16시</span><span>22시</span><span>새벽4시</span></div>' +
+                '<div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:500; color:var(--text-sub); margin:8px 68px 0 56px;">' +
+                    '<span>새벽 4시</span><span>오전 10시</span><span>오후 4시</span><span>밤 10시</span><span>새벽 4시</span></div>' +
 
                 '<div style="margin-top:26px; padding-top:22px; border-top:1px dashed var(--border);">' +
                     '<div style="font-size:12.5px; font-weight:700; color:var(--text-s); margin-bottom:6px;">겹쳐보면</div>' +
-                    '<div style="font-size:11.5px; font-weight:500; color:var(--text-sub); margin-bottom:14px;">진해지는 곳이 이 아이의 잠자리예요</div>' +
+                    '<div style="font-size:11.5px; font-weight:500; color:var(--text-sub); margin-bottom:14px;">일주일을 겹쳤을 때 진한 곳이 자주 자는 시간이에요</div>' +
                     '<div style="display:flex; height:34px; border-radius:10px; overflow:hidden; background:var(--bg-sub);">' + band + '</div>' +
                     '<div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; color:var(--text-sub); margin-top:7px;">' +
-                        '<span>새벽4시</span><span>10시</span><span>16시</span><span>22시</span><span>새벽4시</span></div>' +
+                        '<span>새벽 4시</span><span>오전 10시</span><span>오후 4시</span><span>밤 10시</span><span>새벽 4시</span></div>' +
                 '</div>' +
                 summary +
             '</div>' +
 
-            '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:30px; line-height:1.7;">무늬는 재우는 날마다 진해져요<br>아이마다 다른, 지문 같은 거예요</div>' +
+            '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:30px; line-height:1.7;">기록이 쌓일수록 이 아이가 자는 시간이 또렷해져요</div>' +
         '</div>';
         document.body.style.overflow = "hidden";
     };
