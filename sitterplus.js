@@ -205,6 +205,8 @@
     function mountSitterCard() {
         var old = document.getElementById("sitter-shift-card");
         if (!isSitter()) { if (old) old.remove(); return; }
+        /* 할머니 · 할아버지께 '왔어요 · 근무 시간' 은 남 취급이다. 시터 선생님(또는 이름이 없는 도우미)에게만 */
+        if (typeof window.helperIsFamily === "function" && window.helperIsFamily()) { if (old) old.remove(); return; }
 
         var btn = document.querySelector('[onclick*="quickSaveSenior(\'sleep_end\')"]');
         var host = btn;

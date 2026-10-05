@@ -46,7 +46,8 @@
                 document.body.classList.add("mode-senior");
                 if (typeof window.renderSettingsTab === "function") window.renderSettingsTab();
                 if (typeof window.showToast === "function") {
-                    window.showToast("돌봄 도우미 모드로 연결되어 있어요");
+                    var lb = window.helperLabel ? window.helperLabel() : "";
+                    window.showToast(isFamilyLabel(lb) ? lb + " 화면으로 연결됐어요" : "돌봄 화면으로 연결됐어요");
                 }
             }
         } else {
@@ -78,6 +79,8 @@
             // 옛 구조(배열)면 아직 이전 전이다. 건드리지 않는다.
             if (Array.isArray(m)) return null;
 
+            if (checkRemoved(m, uid)) return null;
+            rememberMyLabel(snap.data() || {});
             var role = m[uid] || null;
             applyRole(role);
             return role;
@@ -102,6 +105,8 @@
             if (!snap.exists()) return;
             var m = (snap.data() || {}).members;
             if (!m || Array.isArray(m)) return;
+            if (checkRemoved(m, uid)) return;
+            rememberMyLabel(snap.data() || {});
             applyRole(m[uid] || null);
         }, function (e) {
             console.warn("[역할] 실시간 확인 에러", e);
@@ -213,6 +218,155 @@
         } else { var msg = document.getElementById("pin-msg"); if (msg) msg.textContent = "가족 코드가 달라요"; }
     };
     window.__pinCancel = function () { pending = null; first = ""; close(); };
+
+
+
+    /* ---------- 같은 권한, 다른 이름 (조부모 · 시터) ----------
+       할머니 · 할아버지와 시터 선생님은 권한이 같다(둘 다 viewer). 그런데 화면이 둘을 똑같이
+       '돌봄 도우미' 라고 부르고, 출근 도장('왔어요')까지 찍게 하면 할머니는 남 취급받는 기분이 든다.
+       → 초대할 때 누구인지 고르고(inviteLabel), 가족 문서 labels[uid] 에 이름을 남긴다.
+         이름에 따라 말투와 카드가 달라진다. 권한(보안 규칙)은 그대로다. */
+    var LABELS = ["할머니", "할아버지", "시터 선생님", "가족"];
+    var ICON = { "할머니": "👵", "할아버지": "👴", "시터 선생님": "🧑‍🍼", "가족": "🏠" };   // 시터: 아기를 돌보는 사람
+    function isFamilyLabel(l) { return l === "할머니" || l === "할아버지" || l === "가족"; }
+    window.helperLabel = function () { return localStorage.getItem("tosil_helper_label") || ""; };
+    window.helperIsFamily = function () { return isFamilyLabel(window.helperLabel()); };
+    function rememberMyLabel(fam) {
+        var me = myUid(), l = fam && fam.labels && fam.labels[me];
+        if (l && LABELS.indexOf(l) > -1) { try { localStorage.setItem("tosil_helper_label", l); } catch (e) {} }
+    }
+    window.__rememberMyLabel = rememberMyLabel;
+
+    /* ---------- 우리 가족 (설정) — 누가 들어와 있는지 보고, 돌봄 도우미를 내보낸다 ----------
+       ⚠️ 시터 일이 끝나도 내보낼 방법이 없었다. 그 폰은 계속 기록을 보고 남길 수 있었고,
+          무료는 도우미 한 명이라 새 분을 초대할 수도 없었다.
+       엄마 · 아빠(보호자)는 서로 못 내보낸다. 도우미만 내보낸다 (실수로 짝꿍을 잠그지 않게). */
+    var famCache = null, famAt = 0;
+    function roleName(r) { return r === "viewer" ? "돌봄 도우미" : (r === "member" ? "가족" : "보호자"); }
+    async function loadFamily(force) {
+        var code = syncCode();
+        if (!code || !window.db || typeof window.getDoc !== "function") return null;
+        if (!force && famCache && Date.now() - famAt < 60000) return famCache;
+        try {
+            var s = await window.getDoc(window.doc(window.db, "families", code));
+            famCache = s.exists() ? (s.data() || {}) : null; famAt = Date.now();
+        } catch (e) { famCache = null; }
+        return famCache;
+    }
+    async function paintMembers() {
+        var card = document.getElementById("family-members-card");
+        if (!card) return;
+        var fam = await loadFamily(false), m = fam && fam.members;
+        if (!m || Array.isArray(m)) { card.style.display = "none"; return; }
+        var labels = Object.assign({}, fam.labels || {});
+        /* 방금 초대한 사람(이름표 없는 도우미가 딱 한 명)에게 초대할 때 고른 이름을 붙인다 */
+        var unnamed = Object.keys(m).filter(function (u) { return m[u] === "viewer" && !labels[u]; });
+        if (fam.inviteLabel && unnamed.length === 1 && typeof window.updateDoc === "function") {
+            labels[unnamed[0]] = fam.inviteLabel;
+            try { await window.updateDoc(window.doc(window.db, "families", syncCode()), { labels: labels, inviteLabel: "" }); famCache = null; } catch (e) {}
+        }
+        card.style.display = "";
+        var me = myUid(), ids = Object.keys(m), helpers = 0;
+        var rows = ids.sort(function (a, b) { return (m[a] === "viewer") - (m[b] === "viewer") || (a === me ? -1 : b === me ? 1 : 0); }).map(function (uid) {
+            var r = m[uid], isMe = uid === me, n = r === "viewer" ? ++helpers : 0, lb = r === "viewer" ? (labels[uid] || "") : "";
+            return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border);">' +
+                '<span style="width:34px;height:34px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:' +
+                    (r === "viewer" ? "#F3EFE9" : "#EFEDFB") + ';">' + (r === "viewer" ? (ICON[lb] || "🤝") : "🏠") + '</span>' +
+                '<div style="flex:1;min-width:0;font-size:14.5px;font-weight:700;color:var(--text-m);">' + (lb || roleName(r)) + (!lb && n && helpers > 1 ? ' ' + n : '') +
+                    (r === "viewer" ? ' <span onclick="window.__nameHelper(\'' + uid + '\')" style="font-size:11.5px;font-weight:700;color:var(--text-sub);cursor:pointer;margin-left:4px;">' + (lb ? '바꾸기' : '이름 붙이기') + '</span>' : '') +
+                    (isMe ? ' <span style="font-size:11.5px;font-weight:800;color:#7F77DD;background:#EFEDFB;padding:2px 7px;border-radius:7px;margin-left:4px;">나</span>' : '') + '</div>' +
+                (r === "viewer" && !isMe ? '<span onclick="window.__kickHelper(\'' + uid + '\')" style="font-size:12.5px;font-weight:800;color:var(--text-sub);' +
+                    'border:1px solid var(--border);padding:7px 11px;border-radius:10px;cursor:pointer;">' + (isFamilyLabel(lb) ? '연결 끊기' : '내보내기') + '</span>' : '') +
+            '</div>';
+        }).join("");
+        card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">' +
+                '<span style="font-size:16px;font-weight:900;color:var(--text-m);">우리 가족</span>' +
+                '<span style="font-size:12.5px;font-weight:700;color:var(--text-sub);">' + ids.length + '명</span></div>' + rows +
+            (helpers ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);line-height:1.6;margin-top:10px;word-break:keep-all;">' +
+                '돌봄이 끝나면 연결을 끊어 주세요. 그 폰에서는 더 이상 기록을 보거나 남길 수 없어요. 엄마 아빠 둘만의 기록(가계부 · 문답 · 편지)은 처음부터 보이지 않아요.</div>' : '');
+        card.setAttribute("data-labels", JSON.stringify(labels));
+    }
+    window.__nameHelper = function (uid) {
+        var b = LABELS.map(function (l) {
+            return '<div onclick="window.__setHelperName(\'' + uid + '\',\'' + l + '\')" style="padding:13px;border-radius:13px;border:1px solid var(--border,#EDE6DE);' +
+                'font-size:15px;font-weight:700;color:var(--text-m,#4A413C);cursor:pointer;">' + ICON[l] + ' ' + l + '</div>';
+        }).join("");
+        box('<div style="font-size:18px;font-weight:800;color:var(--text-m,#4A413C);margin-bottom:14px;">누구신가요?</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' + b + '</div>' +
+            '<div onclick="window.__pinCancel()" style="margin-top:14px;font-size:13.5px;font-weight:700;color:var(--text-sub,#8A7F76);cursor:pointer;">취소</div>');
+    };
+    window.__setHelperName = async function (uid, l) {
+        close();
+        var fam = await loadFamily(true); if (!fam || typeof window.updateDoc !== "function") return toast("지금은 바꿀 수 없어요");
+        var labels = Object.assign({}, fam.labels || {}); labels[uid] = l;
+        try { await window.updateDoc(window.doc(window.db, "families", syncCode()), { labels: labels }); famCache = null; paintMembers(); toast(l + "(으)로 바꿨어요"); }
+        catch (e) { toast("바꾸지 못했어요"); }
+    };
+    window.__kickHelper = function (uid) {
+        var card = document.getElementById("family-members-card"), labels = {};
+        try { labels = JSON.parse(card.getAttribute("data-labels") || "{}"); } catch (e) {}
+        var lb = labels[uid] || "", fam = isFamilyLabel(lb);
+        box('<div style="font-size:18px;font-weight:800;color:var(--text-m,#4A413C);">' + (fam ? lb + ' 폰 연결을 끊을까요?' : '돌봄 도우미를 내보낼까요?') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:var(--text-sub,#8A7F76);line-height:1.7;margin-top:8px;word-break:keep-all;">' +
+                '그 폰에서는 바로 더 이상 기록을 보거나 남길 수 없어요. 다시 도와주실 땐 새 초대 링크를 보내면 돼요.</div>' +
+            '<div style="display:flex;gap:8px;margin-top:18px;">' +
+                '<div onclick="window.__pinCancel()" style="flex:1;padding:14px;border-radius:14px;border:1px solid var(--border,#EDE6DE);font-size:14.5px;font-weight:700;color:var(--text-s,#8A7F76);cursor:pointer;">취소</div>' +
+                '<div onclick="window.__kickConfirm(\'' + uid + '\')" style="flex:1.4;padding:14px;border-radius:14px;background:#4A413C;color:#FFF;font-size:14.5px;font-weight:800;cursor:pointer;">' + (fam ? '연결 끊기' : '내보내기') + '</div></div>');
+    };
+    window.__kickConfirm = async function (uid) {
+        close();
+        var code = syncCode(), fam = await loadFamily(true), m = fam && fam.members;
+        if (!code || !m || Array.isArray(m) || m[uid] !== "viewer" || typeof window.updateDoc !== "function") return toast("지금은 내보낼 수 없어요. 연결을 확인해 주세요");
+        var next = {}; Object.keys(m).forEach(function (k) { if (k !== uid) next[k] = m[k]; });
+        try {
+            await window.updateDoc(window.doc(window.db, "families", code), { members: next });   // members 칸만 통째로 바꾼다
+            var nextLabels = Object.assign({}, fam.labels || {}); var was = nextLabels[uid] || ""; delete nextLabels[uid];
+            try { await window.updateDoc(window.doc(window.db, "families", code), { labels: nextLabels }); } catch (e) {}
+            famCache = null; toast(isFamilyLabel(was) ? was + " 폰 연결을 끊었어요" : "돌봄 도우미를 내보냈어요"); paintMembers();
+        } catch (e) { console.warn("[가족] 내보내기 실패", e); toast("내보내지 못했어요. 다시 해 주세요"); }
+    };
+    (function hookMembersCard() {
+        var orig = window.renderSettingsTab;
+        if (typeof orig !== "function" || orig.__members) return;
+        var w = function () {
+            var out = orig.apply(this, arguments);
+            try {
+                var host = document.getElementById("tab-settings");
+                var senior = localStorage.getItem("user_role") === "senior";
+                var old = document.getElementById("family-members-card");
+                if (senior) { if (old) old.remove(); }
+                else if (host && syncCode() && !old) {
+                    var card = document.createElement("div");
+                    card.id = "family-members-card";
+                    card.style.cssText = "background:var(--bg-card); padding:18px 20px 12px; border-radius:16px; border:1px solid var(--border); margin-bottom:12px; box-sizing:border-box; width:100%; display:none;";
+                    var after = document.getElementById("parent-notice-card") || document.getElementById("parent-phone-card");
+                    if (after && after.parentNode === host) host.insertBefore(card, after.nextSibling); else host.appendChild(card);
+                    paintMembers();
+                }
+            } catch (e) {}
+            return out;
+        };
+        w.__members = true;
+        window.renderSettingsTab = w;
+    })();
+
+    /* 내보내진 도우미 폰: 서버 명단에서 빠지면 이 폰에 남은 아기 기록을 지운다 */
+    function removedNotice() {
+        if (document.getElementById("pin-sheet")) return;
+        var lb = window.helperLabel ? window.helperLabel() : "";
+        box('<div style="font-size:18px;font-weight:800;color:var(--text-m,#4A413C);">' + (isFamilyLabel(lb) ? '연결이 끝났어요' : '돌봄 연결이 끝났어요') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;color:var(--text-sub,#8A7F76);line-height:1.7;margin-top:8px;word-break:keep-all;">' +
+                '엄마 아빠가 이 폰의 돌봄 연결을 끝냈어요. 이 폰에 남은 아기 기록은 지울게요. 다시 도와주실 땐 새 초대 링크를 받아 주세요.</div>' +
+            '<div onclick="window.__removedOk()" style="margin-top:18px;padding:14px;border-radius:14px;background:#4A413C;color:#FFF;font-size:14.5px;font-weight:800;cursor:pointer;">확인</div>');
+    }
+    window.__removedOk = function () { try { localStorage.clear(); } catch (e) {} location.reload(); };
+    function checkRemoved(m, uid) {
+        // 도우미로 잠긴 폰만. 엄마 · 아빠 폰은 절대 여기 안 온다 (잠겨 있지 않으니까)
+        if (localStorage.getItem(LOCK) !== "viewer" || !m || Array.isArray(m) || !uid) return false;
+        if (Object.keys(m).length && !(uid in m)) { removedNotice(); return true; }
+        return false;
+    }
+    window.__checkRemoved = checkRemoved;
 
     (function wrapRoleChange() {
         var orig = window.changeUserRole;

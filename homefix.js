@@ -243,8 +243,22 @@
             "color:rgba(255,255,255,0.92); font-size:11.5px; font-weight:700; text-align:center; " +
             "pointer-events:none;";
         card.appendChild(tip);
-        /* 이 사진을 한 번 맞춰본 사람에게는 안 띄운다 */
-        if (savedPos(heroImg()) !== null) tip.style.display = "none";
+        /* 사진이 없을 때: 회색 빈칸만 보이고 누르면 된다는 걸 몰랐다 → 가운데 '사진 넣기'.
+           위치 맞추기 안내는 사진이 있을 때만 (그리고 한 번 맞춰 본 사람에게는 안 띄운다) */
+        var hint = document.createElement("div");
+        hint.id = "hero-empty-hint";
+        hint.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.88); color:#4A413C; ' +
+            'font-size:13.5px; font-weight:800; padding:10px 16px; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,0.08);">📷 아기 사진 넣기</span>';
+        hint.style.cssText = "position:absolute; inset:0; display:none; align-items:center; justify-content:center; pointer-events:none;";
+        card.appendChild(hint);
+        var syncEmpty = function () {
+            var img = heroImg(), src = img ? (img.getAttribute("src") || "") : "";
+            var empty = !img || !src || /^data:image\/gif/.test(src) || img.style.display === "none";
+            hint.style.display = empty ? "flex" : "none";
+            tip.style.display = (empty || savedPos(img) !== null) ? "none" : "";
+        };
+        syncEmpty();
+        try { var hi = heroImg(); if (hi && window.MutationObserver) new MutationObserver(syncEmpty).observe(hi, { attributes: true, attributeFilter: ["src", "style"] }); } catch (e) {}
 
         if (!document.getElementById("hero-drag-css")) {
             var st = document.createElement("style");
@@ -581,6 +595,14 @@
         paintSeniorCalls();
     };
 
+    window.saveParentNoticeFromSettings = function () {
+        var v = String(((document.getElementById("pn-text") || {}).value) || "").trim();
+        try { localStorage.setItem("tosil_parent_notice", v); } catch (e) {}
+        if (typeof window.saveParentNoticeToFirebase === "function") window.saveParentNoticeToFirebase(v);
+        if (typeof window.renderParentNotice === "function") window.renderParentNotice();
+        if (typeof window.showToast === "function") window.showToast(v ? "도우미께 남길 말을 저장했어요" : "남길 말을 비웠어요");
+    };
+
     function hookSettings() {
         var orig = window.renderSettingsTab;
         if (typeof orig !== "function" || orig.__phones) return;
@@ -591,6 +613,7 @@
                 var senior = (localStorage.getItem("user_role") === "senior") ||
                              (document.body && document.body.classList.contains("mode-senior"));
                 if (senior) { var stale = document.getElementById("parent-phone-card"); if (stale) stale.remove(); }   // 도우미 화면엔 번호 고치는 칸을 두지 않는다
+                if (senior) { var staleN = document.getElementById("parent-notice-card"); if (staleN) staleN.remove(); }
                 if (host && !senior && !document.getElementById("parent-phone-card")) {
                     var card = document.createElement("div");
                     card.id = "parent-phone-card";
@@ -600,6 +623,22 @@
                     var after = document.getElementById("push-permission-card");
                     if (after && after.parentNode === host) host.insertBefore(card, after.nextSibling);
                     else host.insertBefore(card, host.firstChild);
+                }
+                /* ⚠️ '엄마 · 아빠가 남긴 말' 을 고치는 칸이 도우미 화면에만 있어서, 엄마 아빠는 도우미 화면으로
+                      들어가야 쓸 수 있었다(그리고 도우미가 고칠 수 있었다). 엄마 아빠 설정으로 옮긴다. */
+                if (host && !senior && !document.getElementById("parent-notice-card")) {
+                    var nc = document.createElement("div");
+                    nc.id = "parent-notice-card";
+                    nc.style.cssText = "background:var(--bg-card); padding:18px 20px; border-radius:16px; border:1px solid var(--border); margin-bottom:12px; box-sizing:border-box; width:100%;";
+                    var cur = String(localStorage.getItem("tosil_parent_notice") || "").replace(/&/g, "&amp;").replace(/</g, "&lt;");
+                    nc.innerHTML = '<div style="font-size:16px; font-weight:900; color:var(--text-m); margin-bottom:4px;">도우미께 남길 말</div>' +
+                        '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); margin-bottom:12px; line-height:1.6;">도우미 화면에 크게 보여요.</div>' +
+                        '<textarea id="pn-text" maxlength="200" placeholder="예) 2시에 이유식 먹여 주세요" style="width:100%; box-sizing:border-box; min-height:80px; padding:13px 14px; ' +
+                            'border:1px solid var(--border); border-radius:12px; font-size:15px; font-family:inherit; color:var(--text-m); background:var(--bg-sub); resize:none;">' + cur + '</textarea>' +
+                        '<div onclick="window.saveParentNoticeFromSettings()" style="margin-top:10px; text-align:center; padding:13px; border-radius:12px; background:#4A413C; color:#FFF; font-size:14.5px; font-weight:800; cursor:pointer;">저장</div>';
+                    var afterN = document.getElementById("parent-phone-card");
+                    if (afterN && afterN.parentNode === host) host.insertBefore(nc, afterN.nextSibling);
+                    else host.appendChild(nc);
                 }
             } catch (e) {}
             return out;

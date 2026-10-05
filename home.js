@@ -100,7 +100,10 @@
                 '<span style="font-size:15px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🧺 ' + esc(babyName()) + '의 배냇함</span>' +
                 '<span onclick="window.goToMemoryBox && window.goToMemoryBox()" style="font-size:12px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.10); padding:6px 12px; border-radius:12px; cursor:pointer;">전체 보기 ›</span>' +
             '</div>' +
-            '<div style="display:flex; gap:8px; margin-bottom:13px;">' + tiles + addTile + '</div>' +
+            /* ⚠️ 사진이 없으면 '담기' 칸 하나가 한 줄을 다 차지해서 정사각형 큰 빈 상자가 됐다. 빈자리를 채워 세 칸을 유지한다 */
+            '<div style="display:flex; gap:8px; margin-bottom:13px;">' + tiles + addTile +
+                new Array(Math.max(0, 3 - shots.length - 1) + 1).join('<div style="flex:1; aspect-ratio:1/1; border-radius:14px; background:var(--bg-sub); opacity:0.55;"></div>') +
+            '</div>' +
             '<div style="font-size:12.5px; font-weight:700; color:var(--text-sub); letter-spacing:-0.2px;">' + esc(hint) + '</div>' +
         '</div>';
     }
@@ -246,14 +249,14 @@
             card = document.createElement("div");
             card.id = "home-postcard-tile";
             card.setAttribute("onclick", "window.openPostcardPicker()");
-            card.style.cssText = "background:linear-gradient(145deg,#FFFDF5 0%,#FBF1DA 100%); border-radius:24px; padding:22px 16px; display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; box-shadow:0 6px 16px rgba(185,138,46,0.08); border:1px solid #FFFCF0;";
+            card.style.cssText = "background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);";   // 네 칸과 같은 모양
             grid.appendChild(card);
         }
         card.innerHTML =
-            '<div style="font-size:32px; margin-bottom:12px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));">💌</div>' +
-            '<div style="font-size:15px; font-weight:900; color:#B08423; margin-bottom:4px; letter-spacing:-0.3px;">추억 엽서</div>' +
-            '<div style="font-size:12.5px; font-weight:800; color:#B08423; opacity:0.75;">' +
-                (n ? n + "장 뽑을 수 있어요" : "사진부터 담아주세요") + '</div>';
+            '<div style="width: 38px; height: 38px; border-radius: 12px; background: #F5F1EA; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;">🖼️</div>' +
+            '<div style="font-size:15px; font-weight:800; color:var(--text-m); margin-bottom:3px; letter-spacing:-0.3px;">추억 엽서</div>' +
+            '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub);">' +
+                (n ? n + "장 만들 수 있어요" : "사진부터 담아 주세요") + '</div>';
 
         // 살아 있는 칸이 홀수면 마지막 하나를 한 줄로 편다
         var alive = [];

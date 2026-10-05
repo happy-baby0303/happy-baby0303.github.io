@@ -222,7 +222,7 @@
         } else if (step === 3) {
             var left = daysToTwenty();
             shell(ask(3, "🕯️",
-                "스무 살 " + name + "에게<br>한 줄만 남겨두기",
+                "스무 살 " + esc(callName("에게")) + "<br>한 줄만 남겨두기",
                 "지금 마음은 지금만 쓸 수 있어요.<br>" +
                 (left ? '<span style="color:' + GOLD + '; font-weight:800;">' + comma(left) + '일</span> 뒤에 ' + esc(callName("가")) + ' 읽게 돼요.'
                       : esc(callName("가")) + " 언젠가 읽게 돼요."),

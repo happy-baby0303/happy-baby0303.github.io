@@ -279,7 +279,7 @@
         if (localStorage.getItem(k)) return;
         try { localStorage.setItem(k, "1"); } catch (e) {}
         if (typeof window.showToast === "function") {
-            window.showToast("🧾 " + babyName() + "의 오늘 하루, 정산 완료 🌙");
+            window.showToast("🧾 " + babyName() + "의 오늘 하루를 영수증으로 만들었어요");
         }
     }
 

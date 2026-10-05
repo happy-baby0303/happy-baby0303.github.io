@@ -46,7 +46,9 @@
               renderBabyInfo 는 사진 카드 바로 위에 꽂는데, 여기서 다시 끌어내린 것이다.
               원래 자리(사진 위)를 목록에 적어 둔다. */
         { find: "baby-profile-switcher",    note: "아기 전환 (다둥이일 때만)" },
-        { find: "baby-dashboard",           note: "아기 사진 (D+)" },
+        { find: "baby-dashboard",note: "아기 사진 (D+)" },
+        { find: "duty-seg-wrap",            note: "아기랑 있어요 / 밖에 있어요 (duty.js)" },
+        { find: "duty-away-card",           note: "내가 나간 뒤로 (밖에 있을 때만)" },
         { find: "senior-status-board",      note: "돌봄 도우미 화면 (그 모드에서만 보임)" },
         { find: "home-e119",                note: "열 — 119에 읽어줄 카드 (열날 때만)" },
         { find: "home-expiry-alert",        note: "기한 지남 (그때만)" },
@@ -58,7 +60,7 @@
         { find: "home-todo",                note: "오늘 챙길 것" },
         { find: "em-letter",                note: "오늘의 편지 한 줄" },
         { find: "now-status-card",          note: "지금 상태 + 기록 버튼" },
-        { find: "tracker-stats-container",  note: "하루의 띠 + 오늘 통계" },
+        { find: "tracker-stats-container",  note: "오늘 하루 + 오늘 통계" },
         { find: "info-month-home",          note: "이번 달 밤중 수유 (통계에 붙어서)" },
         { find: "em-count",                 note: "오늘의 우리" },
         { find: "home-memorybox-card",      note: "배냇함" },

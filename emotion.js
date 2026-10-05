@@ -861,9 +861,10 @@
 
         // 🌟 [추가됨] 방문 횟수에 따른 훈장 수여식
         var gradeMsg = '';
-        if (today.care >= 20) gradeMsg = "오늘 하루 '1분 대기조' 명예 훈장을 드려요.";
-        else if (today.dawn >= 3) gradeMsg = "'새벽의 수호자' 임명장 쾅쾅!";
-        else if (today.care <= 5) gradeMsg = "오늘은 우리 서로 조금 여유로웠네요.";
+        /* ⚠️ '1분 대기조 명예 훈장', '새벽의 수호자 임명장 쾅쾅!' 은 AI 가 쓴 티가 났다 */
+        if (today.care >= 20) gradeMsg = "정말 바쁜 하루였어요. 수고 많았어요.";
+        else if (today.dawn >= 3) gradeMsg = "새벽에 많이 깬 날이에요. 낮에 잠깐이라도 눈 붙여요.";
+        else if (today.care <= 5) gradeMsg = "오늘은 조금 여유로웠네요.";
 
         var sub = '';
         if (today.dawn > 0) sub = '그중 ' + today.dawn + '번은 모두가 잠든 새벽이었고요.';
@@ -880,7 +881,7 @@
         '<div class="hide-on-senior" style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:22px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">' +
             '<div style="font-size:11.5px; font-weight:800; color:var(--text-sub); letter-spacing:1px; margin-bottom:12px;">오늘의 우리</div>' +
             '<div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">' +
-                '<span style="font-size:16px; font-weight:700; color:var(--text-m);">' + esc(babyName()) + '에게</span>' +
+                '<span style="font-size:16px; font-weight:700; color:var(--text-m);">' + esc((typeof window.babyCall === "function") ? window.babyCall("에게") : babyName() + "에게") + '</span>' +
                 '<span style="font-size:32px; font-weight:900; color:#7F77DD; letter-spacing:-1px;">' + today.care + '</span>' +
                 '<span style="font-size:16px; font-weight:700; color:var(--text-m);">번 달려갔어요</span>' +
             '</div>' +

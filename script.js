@@ -6033,8 +6033,9 @@ window.updateTrackerDashboard = function() {
     }
 
     // 🚨 [감성 디테일 패치] 값이 0일 때는 연한 회색으로 죽여서 시각적 피로도 감소!
+    /* 색은 '오늘 하루' 카드의 줄 색과 맞춘다 (잠 보라 · 기저귀 초록). 기저귀 횟수를 빨강(경고색)으로 칠할 이유가 없다 */
     let sleepColor = todaySleepMins === 0 ? '#C4B5A9' : '#7F77DD';
-    let diaperColor = todayDiaperCount === 0 ? '#C4B5A9' : '#D32F2F';
+    let diaperColor = todayDiaperCount === 0 ? '#C4B5A9' : '#2F9E7E';
 
     let feedDisp = '';
     if (todayFormulaAmt === 0 && todayBreastMins === 0 && todayFoodAmt === 0) {
@@ -6055,7 +6056,7 @@ window.updateTrackerDashboard = function() {
         </div>
         <div style="flex:1; width:33.3%; background:var(--bg-card); border:1px solid var(--border); padding:16px 4px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <div style="font-size:11.5px; color:#A3958A; font-weight:800; margin-bottom:6px;">총 수면시간</div>
-            <div style="font-size:17px; font-weight:900; color:${sleepColor};">${Math.floor(todaySleepMins/60)}h ${todaySleepMins%60}m</div>
+            <div style="font-size:17px; font-weight:900; color:${sleepColor};">${Math.floor(todaySleepMins/60)}<span style="font-size:12px;">시간</span> ${todaySleepMins%60}<span style="font-size:12px;">분</span></div>
         </div>
         <div style="flex:1; width:33.3%; background:var(--bg-card); border:1px solid var(--border); padding:16px 4px; border-radius:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:center; align-items:center;">
             <div style="font-size:11.5px; color:#A3958A; font-weight:800; margin-bottom:6px;">기저귀 교체</div>
@@ -6176,11 +6177,13 @@ window.updateNowStatusCard = function() {
     if (sleepLabelEl && sleepStateEl) {
         if (window._activeSleepStart) {
             sleepLabelEl.innerText = '😴 자는 중';
-            sleepStateEl.innerHTML = fmtMin(Math.floor((Date.now() - window._activeSleepStart) / 60000));
+            sleepStateEl.innerHTML = fmtMin(Math.max(0, Math.floor((Date.now() - window._activeSleepStart) / 60000)));
             sleepStateEl.style.color = '#7F77DD';
         } else if (window._lastWakeTime) {
             sleepLabelEl.innerText = '⏰ 깬 지';
-            sleepStateEl.innerHTML = fmtMin(Math.floor((Date.now() - window._lastWakeTime) / 60000));
+            /* ⚠️ 깬 시각을 지금보다 뒤로 적으면 '깬 지 -26분' 이 나왔다 */
+            const awakeMin = Math.floor((Date.now() - window._lastWakeTime) / 60000);
+            sleepStateEl.innerHTML = awakeMin < 1 ? '<span style="font-size:16px; font-weight:900;">방금</span>' : fmtMin(awakeMin);
             sleepStateEl.style.color = 'var(--text-m)';
         } else {
             sleepLabelEl.innerText = '💤 수면';
@@ -6371,7 +6374,7 @@ window.renderRoutineChecklist = function() {
     container.innerHTML = `
         <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-m); letter-spacing: -0.3px;">✅ 데일리 케어 루틴</div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-m); letter-spacing: -0.3px;">매일 챙기기</div>
                 <button class="hide-on-senior" onclick="window.openRoutineSettings()" style="background: var(--bg-sub); color: #A3958A; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer; transition: 0.2s;">⚙️ 편집</button>
             </div>
             <div style="display: flex; gap: 8px; justify-content: center;">
@@ -7788,7 +7791,7 @@ window.closeInviteSheet = function() {
 };
 
 // 🔐 초대창 열기 — 마스터용(배우자)과 뷰어용(시터) 역할을 매개변수로 받습니다.
-window.openFamilyInvite = async function (role = 'master') {
+window.openFamilyInvite = async function (role = 'master', label = '') {
     const code = localStorage.getItem('family_sync_code');
     if (!code || typeof window.setDoc !== 'function' || typeof window.doc !== 'function') return;
 
@@ -7800,6 +7803,7 @@ window.openFamilyInvite = async function (role = 'master') {
         await window.setDoc(window.doc(window.db, 'families', code), {
             inviteOpen: true,
             inviteRole: role, // 🚨 서버에 "이번 초대장은 마스터용(or 뷰어용)이다" 라고 명시
+            inviteLabel: role === 'viewer' ? (label || '') : '',   // 할머니 · 할아버지 · 시터 선생님 · 가족 (rolelock.js 가 들어온 사람에게 붙인다)
             inviteUntil: Date.now() + minutes * 60 * 1000
         }, { merge: true });
     } catch (e) { console.warn('초대창 열기 실패', e); }
@@ -7817,11 +7821,28 @@ window.closeFamilyInvite = async function () {
 };
 
 // 💬 카카오톡 초대장 보내기 (역할 선택)
-window.sendKakaoInvite = function(role = 'master') {
+window.sendKakaoInvite = function(role = 'master', label) {
+    /* 도우미 초대는 먼저 '누구인지' 를 묻는다. 할머니와 시터 선생님은 권한은 같아도 부르는 이름과 말투가 다르다 */
+    if (role === 'viewer' && !label) {
+        const pick = (l, icon, sub) => `<div onclick="document.getElementById('who-sheet').remove(); window.sendKakaoInvite('viewer', '${l}')" style="display:flex; align-items:center; gap:12px; padding:15px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); margin-top:8px; cursor:pointer;">
+                <span style="font-size:24px;">${icon}</span><div style="flex:1; text-align:left;"><div style="font-size:15.5px; font-weight:800; color:var(--text-m);">${l}</div><div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px;">${sub}</div></div></div>`;
+        const w = document.createElement('div');
+        w.id = 'who-sheet';
+        w.style.cssText = 'position:fixed; inset:0; z-index:100005; background:rgba(43,36,30,0.5); display:flex; align-items:flex-end; justify-content:center;';
+        w.onclick = (e) => { if (e.target === w) w.remove(); };
+        w.innerHTML = `<div style="width:100%; max-width:480px; background:var(--bg-card); border-radius:24px 24px 0 0; padding:24px 20px calc(24px + env(safe-area-inset-bottom, 0px)); box-sizing:border-box;">
+            <div style="font-size:18px; font-weight:900; color:var(--text-m);">누구를 초대할까요?</div>
+            <div style="font-size:13px; font-weight:600; color:var(--text-sub); margin:6px 0 8px; line-height:1.6;">고르신 대로 초대장 말과 그분 화면의 이름이 달라져요.</div>
+            ${pick('할머니', '👵', '손주 기록을 같이 보고, 돌봐 주실 때 남겨요')}${pick('할아버지', '👴', '손주 기록을 같이 보고, 돌봐 주실 때 남겨요')}
+            ${pick('시터 선생님', '🧑‍🍼', '돌봄 기록과 근무 시간을 남겨요')}${pick('가족', '🏠', '이모 · 삼촌 같은 다른 가족')}
+        </div>`;
+        document.body.appendChild(w);
+        return;
+    }
     localStorage.setItem('tosil_has_seen_invite', 'true');
     
     // 🔐 초대장을 보내는 순간 10분짜리 합류 창을 '해당 역할'로 엽니다.
-    if (typeof window.openFamilyInvite === 'function') window.openFamilyInvite(role);
+    if (typeof window.openFamilyInvite === 'function') window.openFamilyInvite(role, label);
     const sheet = document.getElementById('invite-bottom-sheet');
     if(sheet) sheet.style.display = 'none';
     
@@ -7829,10 +7850,14 @@ window.sendKakaoInvite = function(role = 'master') {
     if (!syncCode) return alert("🚨 가족 코드가 없습니다");
 
     const inviteUrl = `https://happy-baby0303.github.io/?code=${syncCode}`;
-    const titleText = role === 'master' ? '💌 배냇함 공동양육자 초대장' : '💌 배냇함 안심 돌봄 초대장';
-    const descText = role === 'master' 
-        ? `여보 우리 아기 맞춤형 육아 비서 [배냇함]로 나랑 같이 육아 기록 공유하자 🤍`
-        : `시터님/어르신 우리 아기 기록을 편하게 남길 수 있도록 [배냇함]에 초대합니다 🤍 (사생활 보호 기능 적용)`;
+    const callBaby = (typeof window.babyCall === 'function') ? window.babyCall('') : (localStorage.getItem('tosil_babyName') || '우리 아기');
+    const familyKind = label === '할머니' || label === '할아버지' || label === '가족';
+    const titleText = role === 'master' ? `${callBaby} 기록, 같이 봐요`
+        : (familyKind ? `${label === '가족' ? '' : label + ', '}${callBaby} 기록 같이 봐요` : `${callBaby} 돌봄을 부탁드려요`);
+    const descText = role === 'master'
+        ? `수유 · 잠 · 기저귀를 한 사람이 남기면 다른 사람 폰에도 바로 떠요. 눌러서 들어와 주세요.`
+        : (familyKind ? `맘마 먹고 자는 게 바로바로 보여요. 돌봐 주실 땐 버튼 하나로 남길 수 있어요. (10분 안에 눌러 주세요)`
+                      : `맘마 · 기저귀 · 잠을 버튼 하나로 남길 수 있어요. 눌러서 들어와 주세요. (10분 안에)`);
     
     if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
         Kakao.Share.sendDefault({
@@ -7840,15 +7865,15 @@ window.sendKakaoInvite = function(role = 'master') {
             content: {
                 title: titleText,
                 description: descText,
-                imageUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                imageUrl: 'https://happy-baby0303.github.io/icon-512.png',   // 남의 아이콘(flaticon) 대신 배냇함 아이콘
                 link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl },
             },
-            buttons: [{ title: '초대 수락하고 앱 열기 👉', link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl } }],
+            buttons: [{ title: '들어가기', link: { mobileWebUrl: inviteUrl, webUrl: inviteUrl } }],
         });
     } else {
         const text = `${descText} (초대코드: ${syncCode})`;
         if (navigator.share) {
-            navigator.share({ title: '배냇함 초대장', text: text, url: inviteUrl }).catch(console.error);
+            navigator.share({ title: titleText, text: text, url: inviteUrl }).catch(console.error);
         } else {
             prompt("아래 초대장을 복사해서 카톡으로 보내주세요", text + " " + inviteUrl);
         }
@@ -8845,7 +8870,7 @@ window.renderSettingsTab = function() {
                     <div style="display: flex; background: var(--bg-sub); border-radius: 10px; padding: 3px; border: 1px solid var(--border); flex-shrink: 0;">
                         <button onclick="window.changeUserRole('mom')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'mom' ? 'background:var(--bg-card); color:#D32F2F; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">엄마</button>
                         <button onclick="window.changeUserRole('dad')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'dad' ? 'background:var(--bg-card); color:#7F77DD; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">아빠</button>
-                        <button onclick="window.changeUserRole('senior')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'senior' ? 'background:var(--bg-card); color:#B98A2E; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">돌봄 도우미</button>
+                        <button onclick="window.changeUserRole('senior')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'senior' ? 'background:var(--bg-card); color:#B98A2E; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">돌봄 화면</button>
                     </div>
                 </div>
 
@@ -8935,14 +8960,14 @@ window.changeUserRole = function(role) {
     
     if (role === 'dad') {
         document.body.classList.add('mode-dad');
-        window.showToast("아빠 화면으로 바꿨어요");
+        window.showToast("아빠로 바꿨어요. 알림에 '아빠가' 로 이름이 붙어요");
     } else if (role === 'senior') {
         document.body.classList.add('mode-senior');
         // 🚨 워딩 교체: 조부모 -> 돌봄 도우미 안심 모드
-        window.showToast("돌봄 도우미 화면으로 바꿨어요. 가계부 · 문답 같은 건 안 보여요");
+        window.showToast("돌봄 화면으로 바꿨어요. 돌봄에 필요한 것만 크게 보여요");
         if(typeof window.switchTab === 'function') window.switchTab('home', document.getElementById('nav-home'));
     } else {
-        window.showToast("엄마 화면으로 바꿨어요");
+        window.showToast("엄마로 바꿨어요. 알림에 '엄마가' 로 이름이 붙어요");
     }
 
     window.applyCaregiverRestrictions(); // 사생활 차단 엔진 가동
@@ -9178,7 +9203,7 @@ window.showRoleOnboarding = function() {
     overlay.innerHTML = `
         <div style="background:var(--bg-card, #fff); width:100%; max-width:340px; border-radius:24px; padding:30px 22px 22px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.12); animation: popIn 0.3s ease;">
             <div class="serif-display" style="font-size:22px; font-weight:700; color:var(--text-m, #4A413C); margin-bottom:8px;">이 폰은 누구 폰인가요?</div>
-            <div style="font-size:13.5px; font-weight:600; color:var(--text-s, #A3958A); margin-bottom:22px; line-height:1.7;">고르신 대로 알림과 화면을 맞출게요.<br>나중에 설정에서 바꿀 수 있어요.</div>
+            <div style="font-size:13.5px; font-weight:600; color:var(--text-s, #A3958A); margin-bottom:22px; line-height:1.7;">알림과 문답에 '엄마가 · 아빠가'로 이름이 붙어요.<br>나중에 설정에서 바꿀 수 있어요.</div>
             <div style="display:flex; gap:10px;">
                 <button onclick="window.selectRoleOnboarding('mom')" style="flex:1; padding:20px 8px; background:var(--bg-sub, #FBF8F3); border:1px solid var(--border, #EDE6DE); border-radius:16px; cursor:pointer; font-family:inherit;">
                     <div style="font-size:30px; margin-bottom:8px;">👩</div>
@@ -9207,10 +9232,10 @@ window.selectRoleOnboarding = function(role) {
     
     if (role === 'dad') {
         document.body.classList.add('mode-dad');
-        window.showToast("아빠 화면으로 시작할게요");
+        window.showToast("아빠로 시작할게요");
     } else {
         document.body.classList.remove('mode-dad');
-        window.showToast("엄마 화면으로 시작할게요");
+        window.showToast("엄마로 시작할게요");
     }
     
     if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
@@ -9604,7 +9629,7 @@ window.renderHomeBatonList = function() {
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 34px 20px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); text-align: center;">
                 <div style="font-size: 30px; margin-bottom: 10px;">\u2615</div>
                 <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-bottom: 5px;">지금은 쉬셔도 돼요</div>
-                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s); line-height: 1.7;">부탁이 오면 여기에 뜹니다</div>
+                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s); line-height: 1.7;">부탁이 오면 여기에 떠요</div>
             </div>`;
         return;
     }
@@ -11107,7 +11132,7 @@ window.inviteMamsudaFriend = function() {
             content: {
                 title: '💬 맘수다 커뮤니티 초대장',
                 description: text,
-                imageUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                imageUrl: 'https://happy-baby0303.github.io/icon-512.png',   // 남의 아이콘(flaticon) 대신 배냇함 아이콘
                 link: { mobileWebUrl: url, webUrl: url },
             },
             buttons: [{ title: '맘수다 놀러가기', link: { mobileWebUrl: url, webUrl: url } }]
@@ -12546,7 +12571,7 @@ window.sendNaviToDad = function(placeName, address) {
             title: `🚗 목적지: ${placeName}`,
             description: `여보 아기 짐 챙겨서 바로 출발하자 🤍 길 안내 켜놨어`,
             // 🚨 3. 무조건 뜨는 가볍고 귀여운 자동차 아이콘으로 고정!
-            imageUrl: 'https://cdn-icons-png.flaticon.com/512/3204/3204933.png', 
+            imageUrl: 'https://happy-baby0303.github.io/icon-512.png',   // 남의 아이콘(flaticon) 대신 
             link: { mobileWebUrl: naviUrl, webUrl: naviUrl },
         },
         buttons: [
@@ -13699,9 +13724,9 @@ window.toggleSeniorRoutine = async function() {
     if (isChecked) {
         btn.innerText = '먹였어요 ✅'; btn.style.background = '#FAF4E6'; btn.style.color = '#B98A2E'; btn.style.border = '1px solid #B98A2E';
         if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
-        window.showToast("💊 약/케어 먹임이 체크되었습니다 부모님도 안심하실 거예요.");
+        window.showToast("💊 먹였다고 남겼어요");
     } else {
-        btn.innerText = '안 했어요 ⬜'; btn.style.background = '#F7F3ED'; btn.style.color = '#A3958A'; btn.style.border = '1px solid #EDE6DE';
+        btn.innerText = '먹였으면 눌러 주세요'; btn.style.background = '#F7F3ED'; btn.style.color = '#7A6F68'; btn.style.border = '1px solid #EDE6DE';
     }
     let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
     routineData['senior_care'] = isChecked;
@@ -14062,7 +14087,7 @@ window.renderParentNotice = function() {
         if (savedNotice.trim() !== '') {
             container.innerHTML = `<div id="senior-memo-text" style="font-size: 17px; font-weight: 900; color: #4A413C; line-height: 1.5; word-break: break-all; overflow-wrap: break-word;">${savedNotice.replace(/\n/g, '<br>')}</div>`;
         } else {
-            container.innerHTML = `<div id="senior-memo-text" style="font-size: 17px; font-weight: 900; color: #A3958A; line-height: 1.5; word-break: break-all; overflow-wrap: break-word;">여기에 전달사항을 적어주세요. (예: 2시에 이유식 먹여주세요)</div>`;
+            container.innerHTML = `<div id="senior-memo-text" style="font-size: 17px; font-weight: 900; color: #A3958A; line-height: 1.5; word-break: break-all; overflow-wrap: break-word;">엄마 아빠가 남긴 말이 아직 없어요</div>`;
         }
     }
 };
@@ -14071,6 +14096,8 @@ window.renderParentNotice = function() {
 window.isEditingSeniorMemo = false;
 
 window.toggleEditSeniorMemo = function() {
+    // 도우미 화면에서는 읽기만. 고치는 건 엄마 · 아빠 설정의 '도우미께 남길 말' 에서
+    if (localStorage.getItem('user_role') === 'senior') return window.showToast("엄마 아빠 폰에서 고칠 수 있어요");
     const container = document.getElementById('senior-memo-container');
     const btn = document.getElementById('senior-memo-edit-btn');
     if (!container || !btn) return;
@@ -14115,7 +14142,7 @@ window.toggleEditSeniorMemo = function() {
         
         // 파이어베이스 클라우드 서버로 실시간 발사!
         window.saveParentNoticeToFirebase(newNotice);
-        window.showToast("📌 부모님 전달사항이 저장되었습니다");
+        window.showToast("도우미께 남길 말을 저장했어요");
     }
 };
 
@@ -15619,7 +15646,8 @@ window.renderDadCommute = function() {
     const box = document.getElementById('dad-commute-container');
     if (!box) return;
     const hour = new Date().getHours();
-    if (localStorage.getItem('user_role') !== 'dad' || hour < 16 || hour > 22) {
+    // 예전엔 '아빠 · 오후 4~10시' 에만 떴다. 이제 엄마든 아빠든 '밖에 있어요' 일 때 (duty.js)
+    if (!document.body.classList.contains('state-away') || localStorage.getItem('user_role') === 'senior') {
         box.style.display = 'none'; return;
     }
 
@@ -15645,24 +15673,24 @@ window.renderDadCommute = function() {
 
     // 🚨 1. 고열 체크 (가장 시급함)
     if (hasFever) {
-        items.push({ icon:'🚨', text:'오늘 아기가 열이 났어요', sub:'집에 가는 길에 챔프/해열제가 충분한지 꼭 확인하세요.' });
+        items.push({ icon:'🌡️', text:'오늘 열이 났어요', sub:'들어가기 전에 해열제가 집에 충분한지 확인해 주세요.' });
     }
     // 💩 2. 응가 폭탄 대기조
     else if (poopCount === 0) {
-        items.push({ icon:'💣', text:'오늘 아직 아기 응가가 안 나왔어요', sub:'집에 가자마자 응가 폭탄을 맞을 확률 99% (마음의 준비)' });
+        items.push({ icon:'🧷', text:'오늘 아직 응가가 없어요', sub:'들어가면 기저귀부터 한번 봐 주세요.' });
     }
     // 💤 3. 수면 부족 및 식사 불가 체크
     if (todaySleepMins > 0 && todaySleepMins < 90) {
-        items.push({ icon:'👿', text:`낮잠을 ${todaySleepMins}분밖에 안 잤어요`, sub:'아내가 밥도 못 먹었을 수 있습니다. 맛있는 걸 꼭 사가세요' });
+        items.push({ icon:'💤', text:`낮잠이 ${todaySleepMins}분뿐이었어요`, sub:'집에 있던 사람도 많이 지쳤을 거예요. 저녁부터 챙겨 주세요.' });
     }
     // 🍼 4. 일반적인 노동 강도 체크 (위 조건에 안 걸렸을 때만)
     else if (!hasFever && poopCount > 0) {
         if (todayEvents >= 12) {
-            items.push({ icon:'🛋️', text:'오늘 하루 종일 쉴 틈이 없었어요', sub:'귀가 즉시 아기 안아들기 스킬 발동 요망' });
+            items.push({ icon:'🧺', text:`오늘 기록이 ${todayEvents}개나 돼요`, sub:'들어가면 아기부터 안아 주세요.' });
         } else if (todayEvents >= 8) {
-            items.push({ icon:'☕', text:'육아 강도가 꽤 높은 날이었어요', sub:'현관문 열자마자 "오늘 하루 고생했어" 한마디 필수' });
+            items.push({ icon:'☕', text:'꽤 바쁜 하루였어요', sub:'들어가서 "오늘 고생했어" 한마디 해 주세요.' });
         } else {
-            items.push({ icon:'🌿', text:'오늘은 비교적 평화로웠어요', sub:'가서 아기랑 30분만 텐션 높여서 놀아주세요' });
+            items.push({ icon:'🌿', text:'오늘은 비교적 조용했어요', sub:'들어가서 아기랑 30분 놀아 주세요.' });
         }
     }
 
@@ -15671,7 +15699,7 @@ window.renderDadCommute = function() {
         <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
                 <span style="font-size:20px;">🚇</span>
-                <div style="font-size:15px; font-weight:900; color:var(--text-m);">퇴근길 생존 브리핑</div>
+                <div style="font-size:15px; font-weight:900; color:var(--text-m);">퇴근길에 보는 오늘</div>
             </div>
             ${items.map(i => `
                 <div style="display:flex; align-items:center; gap:12px; padding:12px; background:var(--bg-sub); border-radius:14px; margin-bottom:8px;">

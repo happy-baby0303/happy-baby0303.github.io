@@ -659,7 +659,7 @@
     function pickHTML(res) {
         var head = (res.ctx.months === null)
             ? "지금 챙기면 좋은 글"
-            : res.ctx.months + "개월 " + babyName() + "에게 지금 필요한 것";
+            : res.ctx.months + "개월 " + ((typeof window.babyCall === "function") ? window.babyCall("에게") : babyName() + "에게") + " 지금 필요한 것";
 
         var rows = res.list.map(rowHTML).join(
             '<div style="height:1px; background:var(--border); opacity:0.55;"></div>');
