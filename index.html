@@ -1161,6 +1161,21 @@ body.mode-senior #hero-drag-tip { display: none !important; }
              <input type="file" id="baby-photo-input" accept="image/*" style="display:none" onchange="window.uploadPhoto(this)">
             <div class="home-hero-card" id="baby-dashboard"  onclick="var i=document.getElementById('baby-photo-input'); if(i) i.click();" style="position: relative; border-radius: 28px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: 220px; display: flex; flex-direction: column; cursor:pointer;">
                 <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" class="home-hero-img" alt="아기 사진" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%;" onerror="this.style.display='none'; this.parentNode.style.background='#D1D6DB';">
+                <script>
+                /* ⚡ 켜자마자 아기 사진: 900KB 넘는 script.js 를 다 읽을 때까지 기다리지 않는다.
+                   이 폰에 둔 작은 사진(tosil_baby_photo_quick)을 지금 바로 그린다. 진짜 사진은 script.js 가 바꿔 끼운다. */
+                (function () {
+                    try {
+                        var sfx = localStorage.getItem('tosil_active_baby_suffix') || '';
+                        var q = JSON.parse(localStorage.getItem('tosil_baby_photo_quick' + sfx) || 'null');
+                        var cur = localStorage.getItem('tosil_baby_photo' + sfx);
+                        if (q && q.data && q.src === cur) {
+                            var im = document.currentScript && document.currentScript.previousElementSibling;
+                            if (im && im.classList.contains('home-hero-img')) { im.src = q.data; im.setAttribute('data-quick', cur); im.style.display = ''; }
+                        }
+                    } catch (e) {}
+                })();
+                </script>
 
                 <!-- 윗부분 살짝 어둡게 (글씨 가독성용) -->
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%); pointer-events: none;"></div>
@@ -1442,7 +1457,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         <!-- 🌟 감옥 탈출! (box-main 클래스를 지워서 배경을 투명하게 날렸습니다) -->
         <div style="padding-top:20px; padding-bottom: 4px;">
             <h2 class="app-title" style="font-size: 24px; font-weight: 900; color: #4A413C; margin: 0 0 6px 0; letter-spacing: -0.5px;">🧰 육아 툴박스</h2>
-            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom:24px; letter-spacing: -0.3px;">필요할 때 꺼내 쓰는 비상용 연산 수트입니다.</p>
+            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom:24px; letter-spacing: -0.3px;">필요할 때 바로 꺼내 쓰는 도구들이에요.</p>
 
             
             <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
@@ -3932,8 +3947,8 @@ body { overflow-x: hidden !important; } /* 가로로 튀어나오는 모든 찌�
         
         <div class="sheet-header">
             <!-- 🚨 color 부분을 다크모드 반응형 변수로 교체했습니다! -->
-<h3 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--text-m);">우리아기 첫 도감 🏅</h3>
-            <span id="sheet-counter" style="background: #F0EEFB; color: #6A61CE; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700;">0 / 100 달성</span>
+<h3 style="margin: 0; font-size: 20px; font-weight: 800; color: var(--text-m);">첫 순간 도감</h3>
+            <span id="sheet-counter" style="background: #F6EEDD; color: #8A6A2A; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 800;">0 / 100</span>
         </div>
 
         <!-- 도감 리스트가 JS에 의해 여기에 뿌려집니다 -->

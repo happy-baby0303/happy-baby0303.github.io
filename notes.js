@@ -252,7 +252,7 @@
             '</div>' +
 
             '<div style="text-align:center; font-size:11px; font-weight:600; color:var(--text-sub); margin-top:13px; line-height:1.6;">' +
-                '사진이 없어도 괜찮아요. 한 줄이면 그 날이 남습니다' +
+                '사진이 없어도 괜찮아요. 한 줄이면 그날이 남아요' +
             '</div>' +
         '</div>';
 

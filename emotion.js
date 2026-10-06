@@ -868,13 +868,13 @@
 
         var sub = '';
         if (today.dawn > 0) sub = '그중 ' + today.dawn + '번은 모두가 잠든 새벽이었고요.';
-        else sub = '오늘은 새벽에 한 번도 안 깼네요. 기적 같은 날이에요.';
+        else sub = '새벽에 한 번도 안 깬 날이에요.';
 
         var tail = '';
         if (total > 0 && total % 100 === 0) {
-            tail = '<div style="font-size:13px; font-weight:800; color:#7F77DD; margin-top:10px; background:#F0EEFB; padding:8px 12px; border-radius:10px; display:inline-block;">🎉 와! 저한테 달려온 게 딱 ' + total.toLocaleString() + '번이 된 기념일이에요!</div>';
+            tail = '<div style="font-size:13px; font-weight:800; color:#7F77DD; margin-top:10px; background:#F0EEFB; padding:8px 12px; border-radius:10px; display:inline-block;">기록을 시작한 뒤로 딱 ' + total.toLocaleString() + '번째예요.</div>';
         } else if (total >= 50) {
-            tail = '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); margin-top:8px;">앱 기록을 시작한 뒤로 모두 ' + total.toLocaleString() + '번 안아줬어요.</div>';
+            tail = '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); margin-top:8px;">기록을 시작한 뒤로 모두 ' + total.toLocaleString() + '번 달려갔어요.</div>';
         }
 
         return '' +
@@ -1356,6 +1356,14 @@ wrap.innerHTML =
         var h = Math.floor(abs / 60), m = Math.round(abs % 60);
         return h + "시 " + (m ? m + "분" : "정각");
     }
+    /* '20시 41분 쯤' 대신 '밤 8시 40분쯤' — 10분 단위로 */
+    function bedWords(mins) {
+        var abs = Math.round(((mins + SLEEP_DAY_START_H * 60) % 1440) / 10) * 10 % 1440;
+        var h = Math.floor(abs / 60), m = abs % 60;
+        var period = h < 5 ? "새벽" : (h < 12 ? "오전" : (h < 18 ? "오후" : "밤"));
+        var hh = h % 12; if (hh === 0) hh = 12;
+        return period + " " + hh + "시" + (m ? " " + m + "분" : "") + "쯤";
+    }
     function dur(mins) {
         var h = Math.floor(mins / 60), m = mins % 60;
         return (h ? h + "시간 " : "") + (m ? m + "분" : (h ? "" : "0분"));
@@ -1399,7 +1407,7 @@ wrap.innerHTML =
                 '<div style="width:46px; flex-shrink:0; font-size:11.5px; font-weight:700; color:' + (x.segs ? "var(--text-s)" : "var(--text-sub)") + ';">' +
                     d.getDate() + '일 ' + WD[d.getDay()] + '</div>' +
                 '<div style="flex:1;">' + miniRibbon(x.segs, 18) + '</div>' +
-                '<div style="width:58px; flex-shrink:0; text-align:right; font-size:12px; font-weight:800; color:' + (total ? "var(--text-m)" : "var(--text-sub)") + ';">' +
+                '<div style="width:74px; flex-shrink:0; text-align:right; font-size:12px; font-weight:800; white-space:nowrap; color:' + (total ? "var(--text-m)" : "var(--text-sub)") + ';">' +
                     (total ? dur(total) : '없음') + '</div>' +
             '</div>';
         });
@@ -1417,15 +1425,16 @@ wrap.innerHTML =
                 '아직 ' + st.have + '일치뿐이에요<br>사흘이 모이면 무늬가 보이기 시작해요' +'</div>';
         } else {
             var cells = [];
-            if (st.avgBed !== null) cells.push(["잠드는 시간", hhmm(st.avgBed) + " 쯤"]);
+            if (st.avgBed !== null) cells.push(["잠드는 시간", bedWords(st.avgBed)]);
             if (st.avgTotal) cells.push(["하루 평균 수면", dur(st.avgTotal)]);
             if (st.longest) cells.push(["안 깨고 잔 최장", dur(st.longest)]);
             if (st.avgWakes !== null && st.avgTotal) cells.push(["밤에 깨는 횟수", st.avgWakes + "번"]);
-            summary = '<div style="display:flex; gap:8px; margin-top:22px;">';
+            /* ⚠️ 네 칸을 한 줄에 넣어서 '20시 41 / 분 쯤' 처럼 글자가 깨졌다. 두 줄 두 칸으로 */
+            summary = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:22px;">';
             cells.forEach(function (c) {
-                summary += '<div style="flex:1; background:var(--bg-sub); border-radius:14px; padding:14px 10px; text-align:center;">' +
-                    '<div style="font-size:10.5px; font-weight:600; color:var(--text-sub); margin-bottom:6px;">' + esc(c[0]) + '</div>' +
-                    '<div style="font-size:15px; font-weight:700; color:#6C63D8; letter-spacing:-0.3px;">' + esc(c[1]) + '</div>' +
+                summary += '<div style="background:var(--bg-sub); border-radius:14px; padding:14px 12px; text-align:left;">' +
+                    '<div style="font-size:11.5px; font-weight:600; color:var(--text-sub); margin-bottom:5px;">' + esc(c[0]) + '</div>' +
+                    '<div style="font-size:17px; font-weight:800; color:#6C63D8; letter-spacing:-0.3px; white-space:nowrap;">' + esc(c[1]) + '</div>' +
                 '</div>';
             });
             summary += '</div>';
@@ -1458,14 +1467,16 @@ wrap.innerHTML =
                     '<span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:rgba(74,65,60,0.10) !important;"></span>밤 시간</span>' +
                     '<span style="margin-left:auto;">하루 합계</span></div>' +
                 rows +
-                '<div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:500; color:var(--text-sub); margin:8px 68px 0 56px;">' +
-                    '<span>새벽 4시</span><span>오전 10시</span><span>오후 4시</span><span>밤 10시</span><span>새벽 4시</span></div>' +
+                /* ⚠️ 눈금 다섯 개가 좁은 띠 아래에서 '새벽 4 / 시' 처럼 두 줄로 깨졌다. 세 개만, 한 줄로 */
+                '<div style="position:relative; height:14px; font-size:10.5px; font-weight:500; color:var(--text-sub); white-space:nowrap; margin:8px 84px 0 56px;">' +
+                    '<span style="position:absolute; left:0;">새벽 4시</span><span style="position:absolute; left:50%; transform:translateX(-50%);">오후 4시</span>' +
+                    '<span style="position:absolute; right:0;">새벽 4시</span></div>' +
 
                 '<div style="margin-top:26px; padding-top:22px; border-top:1px dashed var(--border);">' +
                     '<div style="font-size:12.5px; font-weight:700; color:var(--text-s); margin-bottom:6px;">겹쳐보면</div>' +
                     '<div style="font-size:11.5px; font-weight:500; color:var(--text-sub); margin-bottom:14px;">일주일을 겹쳤을 때 진한 곳이 자주 자는 시간이에요</div>' +
                     '<div style="display:flex; height:34px; border-radius:10px; overflow:hidden; background:var(--bg-sub);">' + band + '</div>' +
-                    '<div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; color:var(--text-sub); margin-top:7px;">' +
+                    '<div style="display:flex; justify-content:space-between; font-size:10px; font-weight:500; color:var(--text-sub); white-space:nowrap; margin-top:7px;">' +
                         '<span>새벽 4시</span><span>오전 10시</span><span>오후 4시</span><span>밤 10시</span><span>새벽 4시</span></div>' +
                 '</div>' +
                 summary +

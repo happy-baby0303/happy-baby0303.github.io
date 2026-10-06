@@ -236,12 +236,13 @@
         if (document.getElementById("hero-drag-tip")) return;
         var tip = document.createElement("div");
         tip.id = "hero-drag-tip";
-        tip.innerHTML = "\u2195\uFE0E 사진을 길게 누른 채 움직이면 얼굴 위치를 맞출 수 있어요";
+        /* ⚠️ 사진 아래쪽에 띠로 깔려서 'D+187일 · 하윤의 공간' 글자와 겹쳤다.
+              왼쪽 위 작은 알약으로 옮기고, 세 번 보여 준 뒤에는 띄우지 않는다. */
+        tip.innerHTML = "\u2195\uFE0E 길게 눌러 사진 위치 맞추기";
         tip.style.cssText =
-            "position:absolute; left:0; right:0; bottom:0; padding:9px 14px; " +
-            "background:linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0)); " +
-            "color:rgba(255,255,255,0.92); font-size:11.5px; font-weight:700; text-align:center; " +
-            "pointer-events:none;";
+            "position:absolute; left:14px; top:14px; padding:7px 11px; border-radius:999px; " +
+            "background:rgba(0,0,0,0.36); color:rgba(255,255,255,0.95); font-size:11.5px; font-weight:700; " +
+            "-webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); pointer-events:none;";
         card.appendChild(tip);
         /* 사진이 없을 때: 회색 빈칸만 보이고 누르면 된다는 걸 몰랐다 → 가운데 '사진 넣기'.
            위치 맞추기 안내는 사진이 있을 때만 (그리고 한 번 맞춰 본 사람에게는 안 띄운다) */
@@ -251,11 +252,15 @@
             'font-size:13.5px; font-weight:800; padding:10px 16px; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,0.08);">📷 아기 사진 넣기</span>';
         hint.style.cssText = "position:absolute; inset:0; display:none; align-items:center; justify-content:center; pointer-events:none;";
         card.appendChild(hint);
+        var tipSeen = 0, tipCounted = false;
+        try { tipSeen = Number(localStorage.getItem("tosil_hero_tip_seen")) || 0; } catch (e) {}
         var syncEmpty = function () {
             var img = heroImg(), src = img ? (img.getAttribute("src") || "") : "";
             var empty = !img || !src || /^data:image\/gif/.test(src) || img.style.display === "none";
             hint.style.display = empty ? "flex" : "none";
-            tip.style.display = (empty || savedPos(img) !== null) ? "none" : "";
+            var showTip = !empty && savedPos(img) === null && tipSeen < 3;
+            tip.style.display = showTip ? "" : "none";
+            if (showTip && !tipCounted) { tipCounted = true; try { localStorage.setItem("tosil_hero_tip_seen", String(tipSeen + 1)); } catch (e) {} }
         };
         syncEmpty();
         try { var hi = heroImg(); if (hi && window.MutationObserver) new MutationObserver(syncEmpty).observe(hi, { attributes: true, attributeFilter: ["src", "style"] }); } catch (e) {}

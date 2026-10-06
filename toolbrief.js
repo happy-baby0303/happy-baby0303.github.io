@@ -110,11 +110,12 @@
         });
         if (hot.length < 2 && max < 39.0) return null;
 
-        var days = (now - oldest) > 24 * 3600000 ? "이틀째" : "오늘";
+        var twoDays = (now - oldest) > 24 * 3600000;
 
         return { tool: "fever", icon: "🏥", label: "소아과",
                  act: "window.openPediatricianReport()",
-                 text: max.toFixed(1) + "도까지 올랐어요 · " + days + "예요. 진료 브리핑을 챙겨 가세요",
+                 /* ⚠️ '오늘예요'(틀린 말) · '진료 브리핑'(어려운 말) */
+                 text: (twoDays ? "이틀째 열이 나요. " : "") + max.toFixed(1) + "도까지 올랐어요. 병원에 갈 땐 진료용 요약을 보여 주세요",
                  color: RED, urgent: true };
     }
 

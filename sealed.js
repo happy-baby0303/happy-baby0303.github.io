@@ -508,7 +508,7 @@
 
             '<div style="text-align:center; font-size:11px; font-weight:600; color:var(--text-sub); margin-top:34px; line-height:1.8;">' +
                 '봉인은 잠금장치가 아니라 약속이에요<br>' +
-                (syncCode() ? '가족 연동이 되어 있어 폰을 바꿔도 남습니다' : '가족 연동을 해두면 폰을 바꿔도 남습니다') +
+                (syncCode() ? '가족 연동이 되어 있어 폰을 바꿔도 남아요' : '가족 연동을 해 두면 폰을 바꿔도 남아요') +
             '</div>' +
         '</div>';
 

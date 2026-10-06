@@ -114,14 +114,14 @@
             row("기저귀", s.diapers.length ? s.diapers.length + "번" : "아직", "") +
             (sleepTxt ? row("잠", sleepTxt, "") : "") +
             (bat.length ? '<div onclick="var t=document.getElementById(\'home-dad-baton-list\'); if(t) t.scrollIntoView({behavior:\'smooth\', block:\'center\'});" ' +
-                'style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:12px 14px;border-radius:13px;background:rgba(127,119,221,0.08);cursor:pointer;">' +
-                '<span style="font-size:14px;font-weight:800;color:#5B53B8;">💌 받은 부탁 ' + bat.length + '개' + (firstAsk ? ' · ' + firstAsk.replace(/</g, "&lt;") : '') + '</span>' +
-                '<span style="font-size:13px;font-weight:800;color:#5B53B8;">보기 ›</span></div>' : '') +
+                'style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border-radius:13px;background:rgba(127,119,221,0.08);cursor:pointer;">' +
+                '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:800;color:#5B53B8;">💌 받은 부탁 ' + bat.length + '개' + (firstAsk ? ' · ' + firstAsk.replace(/</g, "&lt;") : '') + '</span>' +
+                '<span style="flex-shrink:0;white-space:nowrap;font-size:13px;font-weight:800;color:#5B53B8;">보기 ›</span></div>' : '') +
             '<div style="display:flex;gap:8px;margin-top:12px;">' +
                 '<div onclick="window.openComingHome()" style="flex:1;text-align:center;padding:14px;border-radius:14px;border:1px solid ' + LINE + ';background:var(--bg-card);' +
-                    'color:' + INK + ';font-size:14.5px;font-weight:800;cursor:pointer;">🏠 곧 들어가요</div>' +
+                    'color:' + INK + ';font-size:14.5px;font-weight:800;cursor:pointer;">곧 들어가요</div>' +
                 '<div onclick="window.takeOverDuty()" style="flex:1;text-align:center;padding:14px;border-radius:14px;background:' + INK + ';color:#FFF;' +
-                    'font-size:14.5px;font-weight:800;cursor:pointer;">🙌 교대할게요</div>' +
+                    'font-size:14.5px;font-weight:800;cursor:pointer;">교대할게요</div>' +
             '</div></div>';
     }
 
