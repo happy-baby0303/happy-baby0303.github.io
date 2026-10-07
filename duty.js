@@ -43,12 +43,15 @@
 
     /* ---------- 상태 바꾸기 ---------- */
     function setWhere(w, quiet) {
+        var was = where();
         try {
             localStorage.setItem("tosil_where", w);
-            if (w === "away") localStorage.setItem("tosil_away_since", String(Date.now()));
+            /* ⚠️ 이미 밖에 있을 때 한 번 더 누르면 '내가 나간 뒤로 · 몇 시부터' 가 지금 시각으로 바뀌었다 */
+            if (w === "away" && was !== "away") localStorage.setItem("tosil_away_since", String(Date.now()));
         } catch (e) {}
         apply();
-        if (!quiet) toast(w === "away" ? "밖에 있어요 화면으로 바꿨어요" : "아기랑 있어요 화면으로 바꿨어요");
+        /* 알림 글(토스트)은 띄우지 않는다. 화면이 바뀌는 것 자체가 알림이다
+           (눌렀는데 글자만 잠깐 떴다 사라진다는 말을 들었다) */
     }
     window.setDutyWhere = function (w) { setWhere(w === "away" ? "away" : "with"); };
 
@@ -74,8 +77,8 @@
     function segHTML() {
         var w = where();
         return '<div class="duty-seg">' +
-            '<div class="' + (w === "with" ? "on" : "") + '" onclick="window.setDutyWhere(\'with\')">🍼 아기랑 있어요</div>' +
-            '<div class="' + (w === "away" ? "on" : "") + '" onclick="window.setDutyWhere(\'away\')">💼 밖에 있어요</div></div>';
+            '<div data-w="with" class="' + (w === "with" ? "on" : "") + '" onclick="window.setDutyWhere(\'with\')">아기랑 있어요</div>' +
+            '<div data-w="away" class="' + (w === "away" ? "on" : "") + '" onclick="window.setDutyWhere(\'away\')">밖에 있어요</div></div>';
     }
 
     function sinceStats(since) {
@@ -152,6 +155,30 @@
     }
     window.refreshDuty = apply;
 
+    /* ---------- 다른 코드가 홈을 다시 그려도 제자리로 ----------
+       '밖에 있어요' 를 눌렀는데 1초쯤 뒤에 원래 화면으로 돌아간다는 말을 들었다.
+       시험 화면에서는 재현되지 않았다. 실제 폰에서만 도는 동기화가 홈을 다시 그리며
+       스위치나 '내가 나간 뒤로' 카드를 지웠을 수 있다. 그래서 홈 덩어리가 바뀔 때마다
+       지금 상태와 화면이 맞는지 보고, 다르면 다시 그린다. (맞으면 아무것도 안 한다) */
+    function healIfNeeded() {
+        if (senior()) return;
+        var w = where(), away = w === "away";
+        var seg = document.getElementById("duty-seg-wrap");
+        var on = seg ? seg.querySelector(".on") : null;
+        var ok = !!(seg && seg.parentNode && on && on.getAttribute("data-w") === w) &&
+                 (!away || !!document.getElementById("duty-away-card")) &&
+                 document.body.classList.contains("state-away") === away;
+        if (!ok) apply();
+    }
+    var healT = null;
+    function scheduleHeal() { if (healT) return; healT = setTimeout(function () { healT = null; healIfNeeded(); }, 80); }
+    function watchHome() {
+        var host = document.getElementById("tab-home");
+        if (!host || !window.MutationObserver) return;
+        new MutationObserver(scheduleHeal).observe(host, { childList: true });
+        new MutationObserver(scheduleHeal).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    }
+
     /* ---------- 알림 ---------- */
     async function push(title, body) {
         var c = code();
@@ -217,12 +244,13 @@
             if (h.by && h.by === myUid()) return;
             if (Date.now() - Number(h.at) > 30 * MIN) return;          // 오래된 신호는 무시
             setWhere("away", true);
-            toast("🙌 " + (h.word || "짝꿍") + "가 교대했어요. 쉬어요");
+            toast((h.word || "짝꿍") + "가 교대했어요. 이제 쉬어요");   // 🙌 는 emoji.js 가 곧바로 지워서 깜빡였다
         }, function () {});
     }
 
     function boot() {
         apply();
+        watchHome();
         setTimeout(apply, 1500);
         setTimeout(watch, 3500);
         setInterval(function () { if (where() === "away" && !document.hidden) apply(); }, 60000);
