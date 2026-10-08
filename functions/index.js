@@ -444,8 +444,9 @@ exports.bedtimeReminder = onSchedule(
 
         const fam = await db.collection("families").doc(code).get();
         if (!fam.exists) continue;
-                const rawM = fam.data().members || {};
-        const members = (Array.isArray(rawM) ? rawM : Object.keys(rawM)).slice(0, 10);
+        const rawM = fam.data().members || {};
+        // 육퇴 알림('오늘 사진 한 장 남겨 두세요')은 엄마 · 아빠 폰으로만. 할머니 · 돌봄 선생님 폰은 뺀다
+        const members = (Array.isArray(rawM) ? rawM : Object.keys(rawM).filter((u) => rawM[u] !== "viewer")).slice(0, 10);
         if (!members.length) continue;
 
         const users = await db
@@ -466,13 +467,15 @@ exports.bedtimeReminder = onSchedule(
         if (!tokens.length) continue;
 
         const name = d.babyName || "우리 아기";
-        /* 날마다 말을 바꾼다. 매일 같은 문장이 오면 사람은 알림을 안 읽기 시작한다. */
+        /* 날마다 말을 바꾼다. 매일 같은 문장이 오면 사람은 알림을 안 읽기 시작한다.
+           ⚠️ '육퇴하셨네요 · 사진이 아직 없어요' 는 숙제 검사처럼 들렸다. 쉬라는 말을 먼저 한다. */
         const nick = pushNick(name);
         const BED = [
-          ["🌙 오늘도 고생 많았어요", `자는 ${nick} 얼굴, 한 장 남겨둘까요?`],
-          ["🌙 이제 좀 쉬세요", `오늘 ${nick} 사진이 아직 없어요. 하나만 담아 둘까요?`],
-          ["🌙 하루가 끝났어요", `오늘의 ${nick}, 사진 한 장이면 충분해요`],
-          ["🌙 육퇴하셨어요?", `오늘 ${nick} 모습 하나만 배냇함에 넣어 두세요`],
+          ["🌙 오늘도 무사히 육퇴", `잠든 ${nick} 얼굴, 오늘 한 장만 남겨 둘까요?`],
+          [`🌙 ${nick} 재우느라 고생 많았어요`, "쉬기 전에 오늘 사진 하나만 골라 두세요"],
+          ["🌙 이제 좀 쉬어요", `오늘 ${nick} 사진이 아직 없어요. 1분이면 담을 수 있어요`],
+          [`🌙 ${nick} 잠들었나요?`, "오늘 찍은 사진 중에 하나만 배냇함에 넣어 두세요"],
+          ["🌙 하루가 끝났어요", `스무 살 ${nick}가 꺼내 볼 오늘이에요. 사진 한 장 남겨 둘까요?`],
         ];
         const pick = BED[Math.floor(Date.now() / 86400000) % BED.length];
         const title = pick[0];
@@ -521,11 +524,18 @@ exports.bedtimeReminder = onSchedule(
           })
         );
 
-        // 3번 연속 무시하면 일주일 쉰다
-        const miss = (Number(d.missStreak) || 0) + 1;
-        const update = { lastSentAt: today, missStreak: miss };
-        if (miss >= 3) {
-          const rest = new Date(kst.getTime() + 7 * 86400000);
+        /* 알림을 계속 흘려보내는 집은 잠깐 쉰다.
+           ⚠️ 예전엔 '보낸 횟수' 만 셌다. 무시했는지는 아무도 알려 주지 않아서
+              사진을 올리든 알림을 눌러 들어오든 3일 오고 7일 끊기는 게 반복됐다.
+              지난 알림 뒤에 사진을 담았거나(lastPhotoAt) 알림을 눌러 들어왔으면(openedAt) 처음부터 센다.
+              다섯 번을 연달아 흘려보냈을 때만 사흘 쉰다. */
+        const answered =
+          (d.lastPhotoAt && d.lastSentAt && d.lastPhotoAt >= d.lastSentAt) ||
+          (Number(d.openedAt) && Number(d.lastSentTs) && Number(d.openedAt) >= Number(d.lastSentTs));
+        const miss = answered ? 1 : (Number(d.missStreak) || 0) + 1;
+        const update = { lastSentAt: today, lastSentTs: Date.now(), missStreak: miss };
+        if (miss >= 5) {
+          const rest = new Date(kst.getTime() + 3 * 86400000);
           update.snoozeUntil =
             rest.getUTCFullYear() + "-" + pad(rest.getUTCMonth() + 1) + "-" + pad(rest.getUTCDate());
           update.missStreak = 0;
@@ -574,11 +584,25 @@ function pushNick(name) {
   return n + (jong && n !== "우리 아기" ? "이" : "");
 }
 
+/* 알림에 쓰는 시각 — '14:30' 대신 '오후 2시 30분' (서울 시각) */
+function kTime(ts) {
+  const k = new Date(Number(ts) + 9 * 3600 * 1000);
+  const h = k.getUTCHours(), m = k.getUTCMinutes();
+  const hh = h % 12 === 0 ? 12 : h % 12;
+  return (h < 12 ? "오전 " : "오후 ") + hh + "시" + (m ? " " + m + "분" : "");
+}
+
+/* 수유 · 기저귀 알림을 받을 폰
+   ⚠️ 할머니 · 돌봄 선생님 폰에도 새벽 3시에 '기저귀 볼 시간' 이 갔다.
+      밤 10시 ~ 아침 7시에는 엄마 · 아빠 폰으로만 보낸다. */
 async function careFamilyTokens(db, code) {
   const fam = await db.collection("families").doc(code).get();
   if (!fam.exists) return { list: [], map: new Map() };
   const rawM = fam.data().members || {};
-  const members = (Array.isArray(rawM) ? rawM : Object.keys(rawM)).slice(0, 10);
+  const kh = new Date(Date.now() + 9 * 3600 * 1000).getUTCHours();
+  const night = kh >= 22 || kh < 7;
+  const members = (Array.isArray(rawM) ? rawM
+    : Object.keys(rawM).filter((u) => !(night && rawM[u] === "viewer"))).slice(0, 10);
   if (!members.length) return { list: [], map: new Map() };
   const users = await db.collection("users").where("firebase_uid", "in", members).get();
   const map = new Map();
@@ -732,10 +756,6 @@ exports.careReminder = onSchedule(
     const now = Date.now();
     const LATE_MAX = 6 * 3600 * 1000;
     const pad = (n) => String(n).padStart(2, "0");
-    const hhmm = (ts) => {
-      const k = new Date(ts + 9 * 3600 * 1000);
-      return pad(k.getUTCHours()) + ":" + pad(k.getUTCMinutes());
-    };
     const hm = (m) => {
       const h = Math.floor(m / 60), mm = m % 60;
       return h ? (h + "시간" + (mm ? " " + mm + "분" : "")) : (mm + "분");
@@ -773,16 +793,17 @@ exports.careReminder = onSchedule(
             /* 알림마다 말을 바꾼다 (같은 텀이면 앱이 띄운 것과 같은 문장이 되게 j.at 으로 고른다) */
             const nick = pushNick(j.name);
             const t = j.every ? hm(j.every) : "";
-            const at = j.every ? hhmm(last) : "";
+            const at = j.every ? kTime(last) : "";
+            /* ⚠️ '14:30에 먹고 3시간이 지났어요' 는 기계가 읽어 주는 말 같았다. 시각은 '오후 2시 30분' 으로 */
             const FEED = [
-              [`🍼 ${nick} 배고플 시간이에요`, t ? `${at}에 먹고 ${t}이 지났어요` : "수유 텀이 지났어요"],
-              ["🍼 슬슬 맘마 시간이에요", at ? `${nick}가 마지막으로 ${at}에 먹었어요` : `${nick}가 배고파할 때예요`],
-              [`🍼 ${nick} 맘마 챙길 때예요`, t ? `먹은 지 ${t} 됐어요. 천천히 준비해 주세요` : "천천히 준비해 주세요"],
+              ["🍼 슬슬 맘마 시간이에요", t ? `${nick}가 ${at}에 먹고 ${t}이 지났어요` : `${nick}가 배고파할 때가 됐어요`],
+              [`🍼 ${nick} 배고플 때가 됐어요`, t ? `마지막 맘마가 ${t} 전이에요. 천천히 준비해 주세요` : "천천히 준비해 주세요"],
+              ["🍼 맘마 준비할 시간", at ? `${at}에 먹었으니 곧 찾을 거예요` : "곧 맘마를 찾을 거예요"],
             ];
             const DIAPER = [
-              ["🧷 기저귀 한 번 볼까요?", t ? `${at}에 갈고 ${t}이 지났어요` : "기저귀 텀이 지났어요"],
-              [`🧷 ${nick} 엉덩이 확인할 시간이에요`, at ? `마지막으로 ${at}에 갈았어요` : "기저귀 텀이 지났어요"],
-              ["🧷 뽀송한지 한 번 봐 주세요", t ? `기저귀 간 지 ${t} 됐어요` : "기저귀 텀이 지났어요"],
+              ["🧷 기저귀 한번 볼까요?", t ? `${at}에 갈고 ${t}이 지났어요` : "기저귀 텀이 지났어요"],
+              [`🧷 ${nick} 엉덩이 뽀송한가요?`, t ? `기저귀 간 지 ${t} 됐어요` : "기저귀 텀이 지났어요"],
+              ["🧷 기저귀 확인할 때예요", at ? `마지막으로 ${at}에 갈았어요` : "기저귀 텀이 지났어요"],
             ];
             const words = j.kind === "feed" ? FEED : DIAPER;
             const pick = words[Math.floor(j.at / 3600000) % words.length];
@@ -810,3 +831,141 @@ exports.careReminder = onSchedule(
     }
   }
 );
+
+/* ==================================================================
+ * 🩺 알림 점검 (앱 설정 → '알림이 안 와요? 점검해 보기')
+ * ------------------------------------------------------------------
+ * "알림이 안 와요" 만으로는 어디가 끊겼는지 알 수 없다.
+ *   폰 허용 → 이 폰 등록(토큰) → 서버 저장 → 가족방 → 알림 장부 → 정기 작업
+ * 서버가 보는 그대로를 돌려주고, 원하면 이 폰으로만 시험 알림을 한 번 보낸다.
+ *   · 이 폰 토큰이 서버에 없으면 그 자리에서 넣어 준다 (규칙에 막혀 앱이 못 넣었을 때도)
+ *   · 예정 시각이 15분 넘게 지났는데 처리가 안 됐으면 '정기 작업이 멈췄다' 고 알려 준다
+ * 가족방 사람이 아니면 그 방 정보는 돌려주지 않는다.
+ * ================================================================== */
+exports.pushCheck = onCall(SEOUL, async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) return { ok: false, error: "로그인이 아직 안 됐어요" };
+
+  const data = request.data || {};
+  const code = typeof data.syncCode === "string" ? data.syncCode.slice(0, 40) : "";
+  const token = typeof data.token === "string" && data.token.length > 20 && data.token.length < 400 ? data.token : "";
+  const db = admin.firestore();
+  const now = Date.now();
+  const out = { ok: true, now };
+
+  try {
+    /* 1. 이 폰 토큰이 서버에 있나 */
+    const mine = await db.collection("users").where("firebase_uid", "==", uid).get();
+    const myTokens = new Set();
+    mine.forEach((u) => {
+      const ud = u.data() || {};
+      (Array.isArray(ud.fcm_tokens) ? ud.fcm_tokens : []).forEach((t) => t && myTokens.add(t));
+      if (ud.fcm_token) myTokens.add(ud.fcm_token);
+    });
+    out.myTokens = myTokens.size;
+    out.tokenKnown = !!(token && myTokens.has(token));
+    if (token && !out.tokenKnown) {
+      const docId = mine.size ? mine.docs[0].id : uid;
+      await db.collection("users").doc(docId).set({
+        firebase_uid: uid,
+        fcm_token: token,
+        fcm_tokens: admin.firestore.FieldValue.arrayUnion(token),
+        token_updated_at: now,
+      }, { merge: true });
+      out.tokenRepaired = true;
+      out.myTokens = myTokens.size + 1;
+    }
+
+    /* 2. 가족방 · 다른 가족 폰 */
+    if (code) {
+      const fam = await db.collection("families").doc(code).get();
+      out.family = fam.exists;
+      if (fam.exists) {
+        const raw = fam.data().members || {};
+        const all = Array.isArray(raw) ? raw : Object.keys(raw);
+        out.member = all.includes(uid);
+        if (out.member) {
+          out.role = Array.isArray(raw) ? "" : String(raw[uid] || "");
+          out.members = all.length;
+          const others = all.filter((u) => u !== uid).slice(0, 10);
+          const seen = new Set();
+          if (others.length) {
+            const os = await db.collection("users").where("firebase_uid", "in", others).get();
+            os.forEach((u) => {
+              const ud = u.data() || {};
+              (Array.isArray(ud.fcm_tokens) ? ud.fcm_tokens : []).forEach((t) => t && seen.add(t));
+              if (ud.fcm_token) seen.add(ud.fcm_token);
+            });
+          }
+          out.otherTokens = seen.size;
+        }
+      }
+    }
+
+    /* 3. 알림 장부 (육퇴 · 수유 · 기저귀) */
+    if (code && out.member) {
+      const rem = await db.collection("reminders").doc(code).get();
+      out.reminders = rem.exists;
+      if (rem.exists) {
+        const r = rem.data() || {};
+        const kst = new Date(now + 9 * 3600 * 1000);
+        const pad = (n) => String(n).padStart(2, "0");
+        const today = kst.getUTCFullYear() + "-" + pad(kst.getUTCMonth() + 1) + "-" + pad(kst.getUTCDate());
+        const nowMin = kst.getUTCHours() * 60 + kst.getUTCMinutes();
+        const bm = /^(\d\d):(\d\d)$/.exec(r.sendBucket || "");
+        const bucketMin = bm ? Number(bm[1]) * 60 + Number(bm[2]) : null;
+        out.bedtime = {
+          enabled: r.enabled === true,
+          bucket: r.sendBucket || "",
+          lastSentAt: r.lastSentAt || "",
+          lastPhotoAt: r.lastPhotoAt || "",
+          snoozeUntil: r.snoozeUntil && r.snoozeUntil > today ? r.snoozeUntil : "",
+        };
+        // 오늘 보낼 시각이 20분 넘게 지났는데 안 보냈다 (사진을 담았거나 쉬는 날이 아닌데) → 정기 작업이 멈춘 것
+        out.bedtime.stuck = !!(out.bedtime.enabled && bucketMin !== null && nowMin > bucketMin + 20 &&
+          r.lastSentAt !== today && r.lastPhotoAt !== today && !out.bedtime.snoozeUntil);
+        const care = r.care || {};
+        out.care = Object.keys(care).slice(0, 5).map((k) => {
+          const c = care[k] || {};
+          return { key: k, feedAt: Number(c.feedAt) || 0, feedPushed: Number(c.feedPushed) || 0,
+                   diaperAt: Number(c.diaperAt) || 0, diaperPushed: Number(c.diaperPushed) || 0 };
+        });
+        out.careStuck = out.care.some((c) => ["feed", "diaper"].some((k) => {
+          const at = c[k + "At"];
+          return at && at < now - 15 * 60000 && at > now - 6 * 3600000 && c[k + "Pushed"] !== at;
+        }));
+      }
+    }
+
+    /* 4. 시험 알림 — 이 폰으로만 */
+    if (data.send && token) {
+      try {
+        const title = "🔔 알림이 잘 와요";
+        const body = "이 알림이 보이면 배냇함 알림은 잘 오고 있어요";
+        await admin.messaging().send({
+          token,
+          notification: { title, body },
+          webpush: {
+            notification: { title, body, icon: "/icon-192x192.png", tag: "push-check" },
+            fcmOptions: { link: APP_URL + "index.html" },
+          },
+          data: { link: "index.html" },
+          android: { priority: "high" },
+        });
+        out.sent = true;
+      } catch (e) {
+        out.sent = false;
+        out.sendError = String(e.code || e.message || e).slice(0, 120);
+        if (e.code === "messaging/registration-token-not-registered" || e.code === "messaging/invalid-registration-token") {
+          const snap = await db.collection("users").where("firebase_uid", "==", uid).get();
+          await Promise.all(snap.docs.map((d) => d.ref.update({ fcm_tokens: admin.firestore.FieldValue.arrayRemove(token) }).catch(() => {})));
+          out.tokenDead = true;
+        }
+      }
+    }
+    return out;
+  } catch (e) {
+    logger.error("[pushCheck] 실패", e);
+    return { ok: false, error: String(e.message || e).slice(0, 160) };
+  }
+});
