@@ -3299,7 +3299,8 @@ window.toggleDarkMode = toggleDarkMode;
 // 🧊 [안심 큐브 냉장고 엔진] (실시간 동기화)
 // ==========================================
 document.addEventListener("DOMContentLoaded", async () => {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const _n = new Date();   // ⚠️ toISOString 은 UTC 라 아침 9시 전엔 어제 날짜가 들어갔다
+    const todayStr = _n.getFullYear() + '-' + String(_n.getMonth() + 1).padStart(2, '0') + '-' + String(_n.getDate()).padStart(2, '0');
     const dateInput = document.getElementById('cube-date');
     if (dateInput) dateInput.value = todayStr;
 
@@ -4608,8 +4609,8 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 if (r.amount === 0) {
                     window.trackerState.isSleeping = true;
                 } else {
-                    const eDate = new Date(r.timestamp + (r.amount * 60000));
-                    sleepEndD = window.getSafeDateStr(sDate.getTime());
+                    const eDate = new Date(r.endTs ? Number(r.endTs) : r.timestamp + (r.amount * 60000));
+                    sleepEndD = window.getSafeDateStr(eDate.getTime());   // ⚠️ 시작 날짜를 넣어서 밤을 넘긴 잠은 고칠 수가 없었다
                     sleepEndT = `${String(eDate.getHours()).padStart(2,'0')}:${String(eDate.getMinutes()).padStart(2,'0')}`;
                 }
             }
@@ -4617,7 +4618,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         else if (activeStartTime) {
             window.trackerState.isSleeping = true;
             const sDate = new Date(parseInt(activeStartTime));
-            sleepStartD = sDate.toISOString().split('T')[0];
+            sleepStartD = window.getSafeDateStr(sDate.getTime());   // ⚠️ toISOString 은 UTC 날짜 — 새벽 0~9시에 재운 잠이 '어제' 로 잡혀 24시간짜리 잠이 됐다
             sleepStartT = `${String(sDate.getHours()).padStart(2,'0')}:${String(sDate.getMinutes()).padStart(2,'0')}`;
             activeSubType = activeSleepType || '낮잠';
         }
@@ -12694,8 +12695,10 @@ window.checkFeedPlateauBreakthrough = function() {
     const nowMin = new Date().getMinutes();
     const currentMinutesToday = nowHour * 60 + nowMin;
 
+    /* ⚠️ 모유(분)와 이유식(g)까지 ml 로 더했다. 이유식 100g 먹은 날이면 '뱃골이 늘었어요 +100ml' 가 떴다.
+          분유 · 유축(ml)만 센다. */
     records.forEach(r => {
-        if (r.type === 'feed' && r.amount) {
+        if (r.type === 'feed' && r.amount && r.subType !== '모유' && r.subType !== '이유식') {
             const rDate = new Date(r.timestamp);
             const rDateStr = window.getSafeDateStr(r.timestamp);
             const rMinutes = rDate.getHours() * 60 + rDate.getMinutes();
@@ -14600,10 +14603,10 @@ window.showPaywall = function() {
         if (total < 10) return '';
         return `
             <div style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.25); border-radius:16px; padding:18px; margin-bottom:24px; text-align:center;">
-                <div style="font-size:11.5px; font-weight:800; color:#D2A340; margin-bottom:8px;">지금까지 쌓아온 소중한 기록</div>
+                <div style="font-size:11.5px; font-weight:800; color:#D2A340; margin-bottom:8px;">지금까지 남긴 기록</div>
                 <div style="font-size:32px; font-weight:900; color:#FFF; margin-bottom:8px;">${total}건</div>
                 <div style="font-size:12.5px; font-weight:700; color:#B3A498; line-height:1.5; word-break:keep-all;">
-    눈 깜짝할 새 자라는 우리 아기의 소중한 1년,<br>PLUS로 모든 순간을 완벽하게 기록하고 소장하세요.
+    이 기록은 PLUS가 아니어도 계속 볼 수 있어요.<br>PLUS에선 이 기록으로 포토북과 소아과 리포트를 만들어요.
 </div>
             </div>`;
     })();
@@ -14620,7 +14623,7 @@ window.showPaywall = function() {
                     <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: linear-gradient(135deg, #FDE047 0%, #B98A2E 100%); border-radius: 20px; font-size: 32px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(245,158,11,0.3);">💎</div>
                     <div style="font-family: 'Georgia', serif; font-size: 12px; font-weight: 800; color: #D2A340; letter-spacing: 4px; margin-bottom: 8px;">배냇함 플러스</div>
                     <div style="font-size: 24px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">
-                        우리 가족을 위한 완벽한<br>프라이빗 육아 기록실
+                        PLUS에서 더 쓸 수 있는 것들
                     </div>
                 </div>
 
@@ -14631,31 +14634,31 @@ window.showPaywall = function() {
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">배냇함 포토북 — 담긴 걸 한 권으로</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">포토북 PDF 만들기</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">그날의 목소리 — 소리까지 담기</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">그날의 목소리 녹음</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">큐레이터 다섯 곳이 전부 열려요</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">큐레이터 다섯 곳 전부 보기</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">소아과 제출용 A4 종합 리포트 발급</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">소아과에 보여 줄 A4 리포트</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">이달의 배냇함 카드 매달 받기</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">매달 오는 이달의 배냇함 카드</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">둘째, 셋째까지 — 아기 프로필 3명</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">아기 프로필 3명까지 (둘째, 셋째)</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">가계부와 편지는 가려집니다 · 돌봄 도우미 모드</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">돌봄 도우미 모드 (가계부와 편지는 안 보여요)</span>
                     </div>
                 </div>
 
@@ -14682,7 +14685,7 @@ window.showPaywall = function() {
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">1년치 한 번에<span style="font-size: 11px; font-weight: 800; color: #7F77DD; margin-left: 6px;">34% 살다</span></span>
+                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">1년치 한 번에<span style="font-size: 11px; font-weight: 800; color: #7F77DD; margin-left: 6px;">34% 저렴</span></span>
                             <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩39,000</span>
                         </div>
 
@@ -15278,15 +15281,37 @@ window.downloadPediatricianPDF = function() {
         ageText = `생후 ${Math.floor(d / 30.44)}개월 (${d}일)`;
     }
 
-    // 최근 7일 수유/수면 집계
-    const weekAgo = Date.now() - 7 * 86400000;
-    let feedMl = 0, sleepMin = 0, diaper = 0;
+    /* 최근 7일 생활 패턴
+       ⚠️ 이유식(g)이 수유량(ml)에 더해졌고, 기록한 날이 사흘뿐이어도 7로 나눴다. 의사 선생님이 보는 숫자가 틀렸다.
+          오늘(아직 안 끝난 날)은 빼고 지난 7일만 본다. 분유 · 유축(ml) / 모유(번) / 이유식(g)을 따로 세고,
+          종류마다 '적은 날' 수로 나눈다. */
+    const day0 = new Date(); day0.setHours(0, 0, 0, 0);
+    const toDay = day0.getTime(), fromDay = toDay - 7 * 86400000;
+    const lifeSum = { milk: 0, breast: 0, food: 0, sleep: 0, diaper: 0 };
+    const lifeDays = { milk: {}, breast: {}, food: {}, sleep: {}, diaper: {}, any: {} };
     trackers.forEach(r => {
-        if (r.timestamp < weekAgo) return;
-        if (r.type === 'feed' && r.subType !== '모유') feedMl += parseInt(r.amount) || 0;
-        if (r.type === 'sleep') sleepMin += parseInt(r.amount) || 0;
-        if (r.type === 'diaper') diaper++;
+        const ts = Number(r.timestamp);
+        if (!ts || ts < fromDay || ts >= toDay) return;
+        const dk = window.getSafeDateStr(ts);
+        const amt = parseInt(r.amount) || 0;
+        lifeDays.any[dk] = 1;
+        if (r.type === 'feed') {
+            const k = r.subType === '모유' ? 'breast' : (r.subType === '이유식' ? 'food' : 'milk');
+            lifeSum[k] += (k === 'breast') ? 1 : amt;
+            lifeDays[k][dk] = 1;
+        } else if (r.type === 'sleep' && amt > 0) { lifeSum.sleep += amt; lifeDays.sleep[dk] = 1; }
+        else if (r.type === 'diaper') { lifeSum.diaper++; lifeDays.diaper[dk] = 1; }
     });
+    const nDays = k => Object.keys(lifeDays[k]).length;
+    const perDay = k => nDays(k) ? lifeSum[k] / nDays(k) : 0;
+    const loggedDays = nDays('any');
+    const sleepAvg = Math.round(perDay('sleep'));
+    const lifeBoxes = [];
+    if (nDays('milk')) lifeBoxes.push(['하루 분유·유축', Math.round(perDay('milk')) + 'ml', '#7F77DD']);
+    if (nDays('breast')) lifeBoxes.push(['하루 모유', perDay('breast').toFixed(1) + '번', '#7F77DD']);
+    if (nDays('food')) lifeBoxes.push(['하루 이유식', Math.round(perDay('food')) + 'g', '#B45309']);
+    lifeBoxes.push(['하루 수면', nDays('sleep') ? Math.floor(sleepAvg / 60) + '시간 ' + (sleepAvg % 60) + '분' : '-', '#7F77DD']);
+    lifeBoxes.push(['하루 기저귀', nDays('diaper') ? perDay('diaper').toFixed(1) + '번' : '-', '#D32F2F']);
 
     // 발열 기록 행
     let feverRows = fevers.length === 0
@@ -15322,7 +15347,7 @@ window.downloadPediatricianPDF = function() {
                 <div style="font-size:27px;font-weight:900;">소아과 진료 참고 자료</div>
             </div>
             <div style="text-align:right;font-size:11px;color:#A3958A;font-weight:700;line-height:1.7;">
-                작성일 ${new Date().toISOString().split('T')[0]}<br>배냇함
+                작성일 ${window.getSafeDateStr(Date.now())}<br>배냇함
             </div>
         </div>
 
@@ -15350,12 +15375,10 @@ window.downloadPediatricianPDF = function() {
             ${growthRows}
         </table>
 
-        <div style="font-size:15px;font-weight:900;margin-bottom:11px;">🍼 최근 7일 생활 패턴</div>
+        <div style="font-size:15px;font-weight:900;margin-bottom:11px;">🍼 최근 7일 생활 패턴 <span style="font-size:11.5px;font-weight:700;color:#A3958A;">${loggedDays === 0 ? '(기록 없음)' : (loggedDays < 7 ? '(기록한 ' + loggedDays + '일 평균)' : '(하루 평균)')}</span></div>
         <div style="display:flex;gap:10px;margin-bottom:30px;">
-            ${[['일평균 수유량',Math.round(feedMl/7)+'ml','#7F77DD'],
-               ['일평균 수면',Math.floor(sleepMin/7/60)+'시간 '+Math.round(sleepMin/7%60)+'분','#7F77DD'],
-               ['일평균 기저귀',(diaper/7).toFixed(1)+'회','#D32F2F']].map(([k,v,c])=>`
-                <div style="flex:1;background:#FBF8F3;border:1px solid #EDE6DE;border-radius:12px;padding:15px;text-align:center;">
+            ${lifeBoxes.map(([k,v,c])=>`
+                <div style="flex:1;min-width:0;background:#FBF8F3;border:1px solid #EDE6DE;border-radius:12px;padding:15px 8px;text-align:center;">
                     <div style="font-size:11px;font-weight:800;color:#A3958A;margin-bottom:7px;">${k}</div>
                     <div style="font-size:17px;font-weight:900;color:${c};">${v}</div>
                 </div>`).join('')}

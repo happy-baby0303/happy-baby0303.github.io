@@ -256,11 +256,15 @@
         dawnRecs.forEach(function (r) {
             var ts = Number(r.timestamp);
             if (r.type === "feed") {
+                // ⚠️ 이유식은 밤중수유가 아니다. 모유는 분(分)이라 'ml' 를 붙이면 안 된다
+                var fk = feedKind(r);
+                if (fk === "food") return;
+                var nf = { ts: ts, amount: Number(r.amount) || 0, unit: fk === "breast" ? "분" : "ml" };
                 if (!ledger.last.nightFeed) {
-                    ledger.last.nightFeed = { ts: ts, amount: Number(r.amount) || 0 }; changed = true;
+                    ledger.last.nightFeed = nf; changed = true;
                 } else if (ts > ledger.last.nightFeed.ts) {
                     ledger.prev.nightFeed = { ts: ledger.last.nightFeed.ts };
-                    ledger.last.nightFeed = { ts: ts, amount: Number(r.amount) || 0 }; changed = true;
+                    ledger.last.nightFeed = nf; changed = true;
                 }
             } else if (r.type === "diaper") {
                 if (!ledger.last.dawnDiaper) {
@@ -535,50 +539,122 @@
         return arr[order[pos]];
     }
 
+    /* ---------- 하루 숫자 ----------
+       ⚠️ 이유식(g)이 '수유(ml)' 에 더해졌다. 편지함에 '수유 1,240ml' 가 찍혔고,
+          이유식을 먹는 날은 거의 매일 '많이 먹은 날' 편지가 갔다.
+          분유 · 유축(ml), 모유(분 · 번), 이유식(g)을 따로 센다. */
+    function feedKind(r) {
+        var sub = String((r && r.subType) || "");
+        if (sub.indexOf("모유") > -1) return "breast";
+        if (sub.indexOf("이유식") > -1 || sub.indexOf("유아식") > -1) return "food";
+        return "milk";                                   // 분유 · 유축 (ml)
+    }
+
+    // 기록은 한 번만 읽는다 (지난 편지를 몰아 쓸 때 하루에 여덟 번씩 읽었다)
+    var recCache = null, recCacheAt = 0;
+    function allRecords() {
+        if (recCache && Date.now() - recCacheAt < 1500) return recCache;
+        try { recCache = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) { recCache = []; }
+        recCacheAt = Date.now();
+        return recCache;
+    }
+    function keyStart(key) {
+        var p = String(key).split("-");
+        return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getTime();
+    }
+    function rdata() {
+        var rd = null;
+        try { if (typeof receiptData !== "undefined" && receiptData) rd = receiptData; } catch (e) {}
+        return rd || window.receiptData || null;
+    }
+
     function dayStats(s0) {
-        var records = [];
-        try { records = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
-        var e0 = s0 + DAY;
-        var st = { milk: 0, breastMins: 0, breastCount: 0, sleepMins: 0, restMins: 0, poop: 0, diaper: 0, care: 0, dawn: 0 };
+        var records = allRecords();
+        var e0 = s0 + DAY, H = 3600000, nightEnd = s0 + DAWN_END * H;
+        var st = { milk: 0, milkCount: 0, breastMins: 0, breastCount: 0, food: 0, foodCount: 0,
+                   sleepMins: 0, restMins: 0, poop: 0, diaper: 0, care: 0, dawn: 0,
+                   wakes: 0, eveWakes: 0, nightFeeds: 0, longestNight: 0, longestNap: 0, naps: 0 };
+        var segs = [], nightRecs = [];
+        var eveStart = s0 - 3 * H;                       // 어젯밤 9시
         records.forEach(function (r) {
             var ts = Number(r && r.timestamp);
             if (!ts) return;
 
             /* ⚠️ 잠을 '시작한 날' 에 셌다. 편지는 재운 직후(육퇴)에 쓰이는데
                   그때 오늘 밤잠은 아직 안 끝났고, 어젯밤 11시간은 어제 몫이었다.
-                  그래서 오늘 편지엔 낮잠만 들어갔고, 어젯밤 잠은 어느 편지에도 안 들어갔다.
-                  낮잠이 3시간이 안 되는 돌 무렵 아기는 매일 '잠이 부족했어' 편지를 받았다.
                   잠은 '깬 날' 에 센다. 오늘 편지 = 어젯밤 잠 + 오늘 낮잠. 겹치지도 빠지지도 않는다. */
             if (r.type === "sleep") {
                 var end = r.endTs ? Number(r.endTs) : (Number(r.amount) ? ts + Number(r.amount) * 60000 : 0);
                 var len = end ? Math.round((end - ts) / 60000) : 0;
                 // 20시간 넘는 건 '끝났다' 를 안 누른 기록이다
                 if (end && len > 0 && len <= 20 * 60) {
-                    /* 화면에 찍는 숫자(sleepMins)는 그날 0시~24시 안에 든 잠 — 홈 '총 수면시간' · 영수증과 같은 셈.
-                       숫자가 화면마다 다르면 부모는 앱을 못 믿는다.
-                       '잘 잤다 / 못 잤다' 문장(restMins)은 깬 날 기준 — 어젯밤 잠 + 오늘 낮잠. */
+                    /* 화면에 찍는 숫자(sleepMins)는 그날 0시~24시 안에 든 잠 — 홈 '오늘 하루' · 영수증과 같은 셈.
+                       '잘 잤다 / 못 잤다' 문장(restMins)은 어젯밤 잠 + 오늘 낮잠.
+                       ⚠️ '깬 날' 로 셌더니 밤 11시에 한 번 깬 날은 저녁 8시 반~11시 잠이 어제 몫으로 넘어가
+                          푹 잔 밤이 '못 잔 날' 이 됐다. 잠의 한가운데가 어제 저녁 6시 ~ 오늘 저녁 6시면 오늘 몫이다. */
                     var inA = Math.max(ts, s0), inB = Math.min(end, e0);
                     if (inB > inA) st.sleepMins += Math.floor((inB - inA) / 60000);
-                    if (end >= s0 && end < e0) st.restMins += len;
+                    var segMid = (ts + end) / 2;
+                    if (segMid >= s0 - 6 * H && segMid < s0 + 18 * H) st.restMins += len;
+                    segs.push([ts, end]);
                 }
+            }
+            // 어젯밤 9시 ~ 오늘 새벽 5시에 남긴 기록 (잠 말고) — 깬 횟수를 셀 재료
+            else if (ts >= eveStart && ts < nightEnd) {
+                nightRecs.push({ t: ts, feed: r.type === "feed" && feedKind(r) !== "food" });
             }
 
             if (ts < s0 || ts >= e0) return;
             st.care++;
-            if (new Date(ts).getHours() < DAWN_END) st.dawn++;
+            if (ts < nightEnd) st.dawn++;
 
             if (r.type === "feed") {
-                // 모유는 amount 에 '분'이, 분유·유축은 'ml' 이 들어간다.
-                // 이걸 더하면 20분 + 120ml = 140 같은 숫자가 나온다.
-                var sub = String(r.subType || "");
-                var amt = Number(r.amount) || 0;
-                if (sub.indexOf("모유") > -1) { st.breastMins += amt; st.breastCount++; }
-                else { st.milk += amt; }
+                var k = feedKind(r), amt = Number(r.amount) || 0;
+                if (k === "breast") { st.breastMins += amt; st.breastCount++; }
+                else if (k === "food") { st.food += amt; st.foodCount++; }
+                else { st.milk += amt; st.milkCount++; }
             } else if (r.type === "diaper") {
                 st.diaper++;
                 if (r.subType && String(r.subType).indexOf("대변") > -1) st.poop++;
             }
-            // 잠은 위에서 '깬 날' 기준으로 셌다
+        });
+
+        /* 밤잠 · 낮잠 · 새벽에 깬 횟수.
+           ⚠️ 새벽 기록(수유 · 기저귀 · 다시 재움)이 셋이면 '새벽 3번' 이 됐다. 한 번 깨서 한 일들이다.
+              45분 안에 붙어 있는 건 한 번 깬 것으로 묶는다. 기록 없이 깼다 다시 재운 것도 센다.
+           ⚠️ 자정 넘어 재운 날, 재우기 전에 먹인 맘마가 '새벽에 깸' 으로 셌다.
+              그날 밤 한 번 잠든 뒤의 기록만 센다. 잠을 안 적는 집은 새벽 1시부터 센다.
+           ⚠️ 밤 11시에 깨서 먹은 날에도 '한 번도 안 깨고 잤다' 가 나갈 수 있었다.
+              새벽(0~5시)에 깬 것(wakes)과 따로 어젯밤 9시~자정에 깬 것(eveWakes)도 센다.
+           ⚠️ 밤잠을 기록 하나(9시~6시 반)로 적고 새벽 2시 수유를 따로 적으면 '한 번에 9시간 반' 이 됐다.
+              잠 기록 안에 깬 기록이 있으면 거기서 끊어 잰다. */
+        segs.sort(function (a, b) { return a[0] - b[0]; });
+        var nightSegs = segs.filter(function (g) { return g[1] > s0 - 4 * H && g[0] < nightEnd; });
+        var events = [];
+        nightRecs.forEach(function (x) {
+            var asleepBefore = nightSegs.some(function (g) { return g[0] < x.t; });
+            if (nightSegs.length ? asleepBefore : x.t >= s0 + H) events.push(x);
+        });
+        segs.forEach(function (g, i) {
+            var len = Math.round((g[1] - g[0]) / 60000);
+            if (g[0] >= s0 + 7 * H && g[0] < s0 + 19 * H && len >= 20) { st.naps++; st.longestNap = Math.max(st.longestNap, len); }
+            var next = segs[i + 1];
+            if (g[1] >= eveStart && g[1] < nightEnd && next && next[0] > g[1] && next[0] - g[1] < 3 * H) events.push({ t: g[1], feed: false });
+        });
+        events.sort(function (a, b) { return a.t - b.t; });
+        var last = -Infinity;
+        events.forEach(function (x) {
+            if (x.t - last > 45 * 60000) { if (x.t >= s0) st.wakes++; else st.eveWakes++; }
+            if (x.feed && x.t >= s0) st.nightFeeds++;
+            last = x.t;
+        });
+        segs.forEach(function (g) {
+            var mid = (g[0] + g[1]) / 2;
+            if (mid < s0 - 4 * H || mid >= s0 + 7 * H) return;          // 어젯밤 8시 ~ 오늘 아침 7시
+            var cuts = [g[0]];
+            events.forEach(function (x) { if (x.t > g[0] && x.t < g[1]) cuts.push(x.t); });
+            cuts.push(g[1]);
+            for (var c = 1; c < cuts.length; c++) st.longestNight = Math.max(st.longestNight, Math.round((cuts[c] - cuts[c - 1]) / 60000));
         });
         return st;
     }
@@ -588,14 +664,94 @@
         return dayStats(d0.getTime());
     }
 
+    /* 지난 7일 평균 — '많이 먹은 날 · 덜 먹은 날 · 못 잔 날' 은 이 아이의 평소와 견준다.
+       ⚠️ 700ml 한 줄 기준은 신생아에겐 늘 '덜 먹은 날', 이유식 섞인 숫자로는 늘 '많이 먹은 날' 이었다. */
+    function baseline(s0) {
+        var a = { milk: [], food: [], feeds: [], breast: [], rest: [] };
+        for (var d = 1; d <= 7; d++) {
+            var b = dayStats(s0 - d * DAY);
+            if (b.care < 2) continue;
+            var feeds = b.milkCount + b.breastCount;
+            if (b.milk > 0) a.milk.push(b.milk);
+            if (b.food > 0) a.food.push(b.food);
+            if (feeds > 0) a.feeds.push(feeds);
+            if (b.breastMins > 0) a.breast.push(b.breastMins);
+            if (b.restMins > 0) a.rest.push(b.restMins);
+        }
+        var avg = function (x) { if (!x.length) return 0; var t = 0; x.forEach(function (v) { t += v; }); return t / x.length; };
+        return { feedDays: a.feeds.length, feeds: avg(a.feeds), milkDays: a.milk.length, milk: avg(a.milk),
+                 foodDays: a.food.length, food: avg(a.food), breastDays: a.breast.length, breast: avg(a.breast),
+                 restDays: a.rest.length, rest: avg(a.rest) };
+    }
+
+    // 먹은 날의 결: much · normal · little · zero
+    function feedLevel(st, b) {
+        var feeds = st.milkCount + st.breastCount;
+        if (!feeds && !st.foodCount) return "zero";
+        if (b.feedDays < 3 && b.foodDays < 3) return "normal";        // 평소를 모르면 많다 · 적다를 말하지 않는다
+        // 평소만큼 적었나 — 숫자가 작은 날이 '덜 먹은 날' 인지 '덜 적은 날' 인지 가른다
+        var logged = b.feeds > 0 ? feeds / b.feeds : 1;
+        var milkUp = b.milkDays >= 3 && st.milk >= b.milk * 1.12 && st.milk - b.milk >= 60;
+        var foodUp = b.foodDays >= 3 && st.food >= b.food * 1.25 && st.food - b.food >= 30;
+        var milkDown = b.milkDays >= 3 && st.milk > 0 && st.milk <= b.milk * 0.75;
+        var breastDown = b.milkDays < 3 && b.breastDays >= 3 && st.breastMins > 0 && st.breastMins <= b.breast * 0.7;
+        if ((milkUp || foodUp) && !milkDown) return "much";
+        if ((milkDown || breastDown) && logged >= 0.75 && !foodUp) return "little";
+        return "normal";
+    }
+
+    // 잔 날의 결: good · bad · (모르면 '')
+    function sleepLevel(st, b) {
+        if (st.restMins <= 0) return "";                               // 잠을 안 적은 날은 말하지 않는다
+        var w = st.wakes + (st.eveWakes || 0);
+        if (w >= 3) return "bad";
+        if (w === 2) return "";        // ⚠️ 두 번 깬 밤에 '깊이 자고 깨어 보니' 가 나갔다. 새벽 문단이 그 밤을 대신 말한다
+        if (b.restDays >= 3) return st.restMins < b.rest * 0.8 ? "bad" : "good";
+        return st.restMins >= 9 * 60 ? "good" : "bad";
+    }
+
+    /* 문장 앞의 [태그] — 그날 기록이 맞을 때만 쓴다 (receiptData.js 맨 위 설명) */
+    function tagOf(line) { var m = /^\[(\w+)\]/.exec(line || ""); return m ? m[1] : ""; }
+    function untag(line) { return String(line || "").replace(/^\[\w+\]/, ""); }
+    function tagFits(tag, st) {
+        if (!tag) return true;
+        if (tag === "nowake") return st.wakes === 0 && !st.eveWakes && st.longestNight >= 360;
+        if (tag === "longnight") return st.longestNight >= 360;
+        if (tag === "nap") return st.naps > 0;
+        if (tag === "longnap") return st.longestNap >= 90;
+        if (tag === "night") return st.wakes + (st.eveWakes || 0) >= 1;
+        if (tag === "nightfeed") return st.nightFeeds >= 1;
+        if (tag === "bottle") return st.milkCount > 0;
+        return false;
+    }
+    function pickFor(pool, key, st) {
+        if (!pool || !pool.length) return "";
+        var ok = pool.filter(function (x) { return tagFits(tagOf(x), st); });
+        if (!ok.length) ok = pool.filter(function (x) { return !tagOf(x); });
+        return untag(seedPick(ok, key));
+    }
+
+    // 이유식을 처음 먹은 날 (기록을 쓴 지 일주일은 넘어야 '처음' 이라고 말한다)
+    function isFirstFoodDay(s0) {
+        var earliest = Infinity, before = false, today = false;
+        allRecords().forEach(function (r) {
+            var ts = Number(r && r.timestamp);
+            if (!ts) return;
+            if (ts < earliest) earliest = ts;
+            if (r.type === "feed" && feedKind(r) === "food") {
+                if (ts < s0) before = true;
+                else if (ts < s0 + DAY) today = true;
+            }
+        });
+        return today && !before && earliest <= s0 - 7 * DAY;
+    }
+
     // 영수증 문장 풀(receiptData)로 그날의 편지를 짓는다. 목소리는 하나뿐이다.
-    function composeLetter(st, key) {
-        // const 선언은 window에 안 붙는다. 전역 이름으로 먼저 찾고, 없으면 window를 본다.
-        var rd = null;
-        try { if (typeof receiptData !== "undefined" && receiptData) rd = receiptData; } catch (e) {}
-        if (!rd) rd = window.receiptData;
+    function composeLetter(st, key, base) {
+        var rd = rdata();
         if (!rd || !rd.intro) return "";
-        var hours = st.restMins / 60;          // 어젯밤 잠 + 오늘 낮잠
+        var s0 = keyStart(key);
+        var b = base || baseline(s0);
         var clean = function (x) { return stripEmoji(String(x || "")); };
 
         // 날짜에서 뽑은 고정 난수. 같은 날은 늘 같은 편지가 나온다.
@@ -605,33 +761,37 @@
             return h / 1000;
         };
 
-        // 문단을 매일 똑같이 쌓으면 한 달이면 눈치챈다.
-        // 있는 날만 넣고, 가끔은 통째로 뺀다.
+        // 문단을 매일 똑같이 쌓으면 한 달이면 눈치챈다. 있는 날만 넣고, 가끔은 통째로 뺀다.
         var paras = [];
 
-        /* ⚠️ 잠을 하나도 안 적은 날도 '잘 못 잤어' 가 나갔다 (0시간 < 3시간).
-              잠을 안 재는 집은 매일 거짓말 편지를 받았다. 모르면 말하지 않는다.
-              기준은 밤잠을 포함한 하루치라 9시간으로 올린다. */
-        var sleepLine = "";
-        if (st.restMins > 0) {
-            sleepLine = (hours >= 9) ? seedPick(rd.sleepGood, key + "b") : seedPick(rd.sleepBad, key + "c");
-        }
+        var sl = sleepLevel(st, b), sleepLine = "";
+        if (sl === "good") sleepLine = pickFor(rd.sleepGood, key + "b", st);
+        else if (sl === "bad") sleepLine = pickFor(rd.sleepBad, key + "c", st);
         paras.push([seedPick(rd.intro, key + "a"), sleepLine]);
 
         // 새벽에 깬 날 — 부모가 제일 힘든 시간을 아기가 알아봐 주는 자리
-        if (st.dawn >= 2 && rd.dawn && rd.dawn.length) {
-            paras.push([seedPick(rd.dawn, key + "n")]);
+        if (st.wakes >= 1 && rd.dawn && rd.dawn.length) {
+            paras.push([pickFor(rd.dawn, key + "n", st)]);
         }
 
         var body = [];
-        var fed = (st.milk >= 700 || st.breastMins >= 120) ? seedPick(rd.feedMuch, key + "d")
-                : ((st.milk > 0 || st.breastMins > 0) ? seedPick(rd.feedLittle, key + "e")
-                                                      : seedPick(rd.feedZero, key + "f"));
-        body.push(fed);
-        // 응가 얘기는 다섯 중 넷만. 매일 나오면 편지가 아니라 보고서다.
-        if (st.poop > 0 || dice("p") < 0.8) {
-            body.push((st.poop > 0) ? seedPick(rd.poopMuch, key + "g") : seedPick(rd.poopZero, key + "h"));
+        var fl = feedLevel(st, b);
+        var pool = fl === "much" ? rd.feedMuch : fl === "little" ? rd.feedLittle : fl === "zero" ? rd.feedZero : (rd.feedNormal || rd.feedMuch);
+        body.push(pickFor(pool, key + ({ much: "d", little: "e", zero: "f" }[fl] || "k"), st));
+
+        var foodLine = "";
+        if (st.foodCount > 0) {
+            var msFood = milestoneTitlesOn(key).some(function (t) { return t.indexOf("이유식") > -1; });   // 도감에 이미 적혔으면 겹치지 않게
+            if (rd.foodFirst && !msFood && isFirstFoodDay(s0)) foodLine = seedPick(rd.foodFirst, key + "ff");
+            // ⚠️ 덜 먹은 날 '입을 꼭 닫고 고개를 돌렸다' 바로 뒤에 '대답 대신 입을 또 벌렸다' 가 붙었다
+            else if (rd.food && fl !== "little" && dice("fd") < 0.7) foodLine = seedPick(rd.food, key + "fo");
         }
+        if (foodLine) body.push(foodLine);
+
+        /* 응가 얘기는 다섯 중 넷만 (이유식 얘기가 들어간 날은 둘 중 하나). 매일 나오면 편지가 아니라 보고서다.
+           ⚠️ 기저귀를 안 적는 집에도 '오늘은 소식이 없었다' 가 매일 갔다. 기저귀를 적은 날만 말한다. */
+        if (st.poop > 0) body.push(seedPick(rd.poopMuch, key + "g"));
+        else if (st.diaper > 0 && dice("p") < (foodLine ? 0.5 : 0.8)) body.push(seedPick(rd.poopZero, key + "h"));
         paras.push(body);
 
         // 열흘에 한 번쯤 오는 말. 매일 나오면 무뎌진다.
@@ -644,6 +804,31 @@
             return g.map(clean).filter(function (x) { return x; }).join(" ");
         }).filter(function (x) { return x; }).join("\n\n");
         return stripEmoji(fill(t));
+    }
+
+    // 편지함에 남기는 그날의 숫자 (v2: 분유 · 유축 / 모유 / 이유식을 나눠 센다)
+    function letterRec(st, text, ms) {
+        return { at: Date.now(), text: text, ms: ms, v: 2,
+                 milk: st.milk, milkCount: st.milkCount, food: st.food, foodCount: st.foodCount,
+                 breastMins: st.breastMins, breastCount: st.breastCount,
+                 sleepMins: st.sleepMins, poop: st.poop, diaper: st.diaper, care: st.care, dawn: st.dawn, wakes: st.wakes };
+    }
+
+    /* 이미 쓴 편지의 숫자를 고친다 (이유식이 수유에 섞여 있던 편지).
+       글은 그대로 둔다 — 이미 읽고 한 줄까지 남긴 편지의 글이 바뀌면 안 된다.
+       그날 기록이 아직 남아 있으면 다시 세고, 없으면 statLine 이 1,500ml 넘는 숫자를 숨긴다. */
+    function upgradeLetters() {
+        var box = loadLetters(), patch = {}, n = 0;
+        Object.keys(box).forEach(function (k) {
+            var l = box[k];
+            if (!l || l.v >= 2 || !/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+            var st = dayStats(keyStart(k));
+            if (st.care < 2) return;
+            ["milk", "milkCount", "food", "foodCount", "breastMins", "breastCount", "sleepMins", "poop", "diaper", "dawn", "wakes"].forEach(function (f) { l[f] = st[f]; });
+            l.v = 2; patch[k] = l; n++;
+        });
+        if (n) { saveLetters(box); cloudPush("letters", patch); }
+        return n;
     }
 
     // 이미 저장된 편지에 남은 이모지를 한 번 걸러낸다
@@ -679,17 +864,25 @@
         return out;
     }
 
+    // 받침이 있으면 a, 없으면 b ('배냇짓을' · '첫 뒤집기를')
+    function josa(word, a, b) {
+        var s = String(word || "").replace(/[^가-힣]+$/g, "");
+        var c = s.charCodeAt(s.length - 1);
+        if (!(c >= 0xAC00 && c <= 0xD7A3)) return b;
+        return (c - 0xAC00) % 28 !== 0 ? a : b;
+    }
+
+    /* ⚠️ '오늘 나 ‘첫 뒤집기’ 처음 해냈다! 나 좀 대단하지?' — 편지의 약속(느낌표 없이, 자기 자랑보다 부모를 본다)과 달랐다.
+          receiptData 의 '처음 해낸 날' 문장 풀을 쓴다. */
     function milestoneLine(key) {
         var t = milestoneTitlesOn(key);
         if (!t.length) return "";
-        if (t.length === 1) {
-            return fill(seedPick([
-                "오늘 나 ‘" + t[0] + "’ 처음 해냈다! {me}가 엄청 좋아했어.",
-                "드디어 ‘" + t[0] + "’ 도장 찍었다. {me}가 사진을 엄청 찍었어.",
-                "오늘 ‘" + t[0] + "’ 해냈다. 나 좀 대단하지?"
-            ], key + "ms"));
-        }
-        return fill("오늘 나 ‘" + t[0] + "’ 포함해서 " + t.length + "가지를 처음 해냈다! {me}가 깜짝 놀랐어.");
+        var rd = rdata();
+        var head = t.length === 1
+            ? "오늘 나는 ‘" + t[0] + "’" + josa(t[0], "을", "를") + " 처음 해냈다. "
+            : "오늘은 처음 해낸 게 " + t.length + "가지나 된다. ‘" + t.slice(0, 3).join("’, ‘") + "’" + (t.length > 3 ? " 말고도 더 있다. " : ". ");
+        var tail = (rd && rd.firstDay && rd.firstDay.length) ? seedPick(rd.firstDay, key + "ms") : "";
+        return stripEmoji(fill(head + tail));
     }
 
     function saveTodayLetter() {
@@ -705,8 +898,9 @@
         var ms = milestoneLine(key);
         var box = loadLetters();
         var cur = box[key];
-        if (cur && cur.text === text && cur.ms === ms && cur.milk === st.milk && cur.sleepMins === st.sleepMins && cur.poop === st.poop) return;
-        box[key] = { at: Date.now(), text: text, ms: ms, milk: st.milk, breastMins: st.breastMins, breastCount: st.breastCount, sleepMins: st.sleepMins, poop: st.poop, care: st.care, dawn: st.dawn };
+        if (cur && cur.v === 2 && cur.text === text && cur.ms === ms && cur.milk === st.milk && cur.food === st.food &&
+            cur.sleepMins === st.sleepMins && cur.poop === st.poop && cur.wakes === st.wakes) return;
+        box[key] = letterRec(st, text, ms);
         /* ⚠️ 400통이 넘으면 오래된 편지부터 지웠다. 평생 보관함에서 첫 해 편지가 지워지는 셈이다.
               지우지 않는다. 대신 가족 보관함(서버)에도 한 벌 둔다. */
         saveLetters(box);
@@ -737,7 +931,7 @@
             if (st.care < 2) return;
             var text = composeLetter(st, key);
             if (!text) return;
-            box[key] = { at: Date.now(), text: text, ms: milestoneLine(key), milk: st.milk, breastMins: st.breastMins, breastCount: st.breastCount, sleepMins: st.sleepMins, poop: st.poop, care: st.care, dawn: st.dawn };
+            box[key] = letterRec(st, text, milestoneLine(key));
             added[key] = box[key];
             touched = true;
         });
@@ -775,54 +969,28 @@
         var today = ledger.days[todayKey()];
         if (!today || today.care < 2) return '';
 
-        /* ⚠️ 여기서 따로 셌는데 두 군데가 틀려 있었다.
-              · 모유(분)와 분유(ml)를 그냥 더했다 → "나 오늘 엄청 잘 먹었지?" 가 엉뚱하게 떴다
-              · 타이머로 잰 잠(endTs)은 안 셌다 → 10시간 잔 날에 "90분밖에 못 잤는데" 가 떴다
-              편지함과 같은 계산(todayStats)을 쓴다. */
-        var tst = todayStats();
-        var milk = tst.milk, sleepMins = tst.sleepMins;
-
-        var lines;
-        if (today.dawn >= 2) {
-            lines = [
-                '새벽에 자꾸 깨워서 미안해. 그래도 {me} 냄새 맡으면 바로 안심돼.',
-                '아까 새벽에 눈 떴는데 {me}가 있어서 다시 잠들었어.',
-                '오늘 밤엔 조금 더 자볼게. 진짜로.'
-            ];
-        } else if (sleepMins > 0 && sleepMins < 240) {
-            lines = [
-                '오늘 나 ' + dur(sleepMins) + '밖에 못 잤는데 계속 안아줘서 고마워.',
-                '잠이 안 왔어. 근데 {me} 품에서는 좀 괜찮았어.',
-                '오늘은 잠이랑 싸웠어. {me}도 같이 싸워줬지.'
-            ];
-        } else if (milk >= 700) {
-            lines = [
-                '오늘 ' + milk + 'ml나 먹었어. 나 쑥쑥 크고 있지?',
-                '많이 먹었더니 배가 볼록해. {me} 덕분이야.',
-                '오늘은 진짜 잘 먹었어. 내일도 부탁해.'
-            ];
-        } else {
-            lines = [
-                '오늘도 옆에 있어줘서 고마워. 내일도 잘 부탁해.',
-                '{me}가 오늘 몇 번이나 나한테 왔는지 나는 다 알아.',
-                '나는 아직 말을 못 하지만, 다 느끼고 있어.'
-            ];
-        }
-
+        /* ⚠️ 편지가 아직 없으면 여기서 따로 지은 문장을 띄웠다.
+              '오늘 1240ml나 먹었어. 나 쑥쑥 크고 있지?' — 이유식까지 더한 숫자에, 편지와 다른 목소리(자기 자랑 · 느낌표)였다.
+              태어나기 전(임신 모드)에도 이 문장은 떴다.
+              홈 카드는 편지함에 들어간 그날 편지의 첫 문장만 보여 준다. 편지가 없으면 카드도 없다. */
         var storedToday = loadLetters()[todayKey()];
-        var text = storedToday && storedToday.text
-            ? firstSentence(storedToday.ms || storedToday.text)
-            : fill(pickStable(lines, 'letter'));
-        
-        // 🌟 [추가됨] 트래커 데이터 기반 P.S. (추신) 엔진
+        if (!storedToday || !storedToday.text) return '';
+        var text = firstSentence(storedToday.ms || storedToday.text);
+
+        /* 추신 — 그날 기록에서 한 줄.
+           ⚠️ '냄새났지 ㅋㅋㅋ 🍑 · 나 오늘 엄청 잘 먹었지? 칭찬해 줘 🍼' 는 편지의 약속(이모지 · 자기 자랑 없이)과 달랐다.
+              숫자는 편지함과 같은 셈(todayStats)을 쓴다. */
+        var tst = todayStats();
         var psLines = [];
-        if (today.diaper >= 5) psLines.push('P.S. 오늘 내 엉덩이 보송하게 지켜줘서 고마워 🍑 냄새났지 ㅋㅋㅋ');
-        if (today.dawn >= 2) psLines.push('P.S. 아까 비몽사몽 안아줄 때, {me} 심장소리 진짜 좋았어 🌙');
-        if (milk >= 800) psLines.push('P.S. 나 오늘 엄청 잘 먹었지? 칭찬해 줘 🍼');
-        
+        // 손글씨 편지라 '1번' 대신 '한 번' 으로 쓴다
+        var times = function (n) { var w = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열']; return (n >= 1 && n <= 10) ? w[n] + ' 번' : n + '번'; };
+        if (tst.wakes >= 1) psLines.push('P.S. 새벽에 ' + times(tst.wakes) + ' 깼다. 깰 때마다 안아 준 품이 있어서 다시 잤다.');
+        if (tst.diaper >= 5) psLines.push('P.S. 오늘 기저귀를 ' + times(tst.diaper) + ' 새로 찼다. 그때마다 엉덩이가 뽀송해졌다.');
+        if (feedLevel(tst, baseline(keyStart(todayKey()))) === 'much') psLines.push('P.S. 오늘은 평소보다 많이 먹었다. 맘마 챙기느라 고생 많았어.');
+
         var psText = '';
         if (psLines.length > 0) {
-            psText = '<div style="margin-top: 14px; font-size: 16px; color: #F04452; font-family: \'Nanum Pen Script\', cursive;">' + fill(pickStable(psLines, 'ps')) + '</div>';
+            psText = '<div style="margin-top:12px; font-size:20px; line-height:1.5; color:var(--text-sub); font-family:\'Nanum Pen Script\', cursive; word-break:keep-all;">' + esc(fill(pickStable(psLines, 'ps'))) + '</div>';
         }
 
         var dday = '';
@@ -832,8 +1000,8 @@
         return '' +
         '<div class="hide-on-senior" style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:24px; margin-bottom:24px; box-shadow:0 8px 24px rgba(0,0,0,0.04); position:relative; overflow:hidden;">' +
             // 편지지 귀퉁이 테이프 포인트
-            '<div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:60px; height:20px; background:rgba(0,0,0,0.05); transform: rotate(-2deg);"></div>' +
-            '<div style="font-size:11px; font-weight:800; color:#B0B8C1; letter-spacing:2px; margin-bottom:16px;">TODAY\'S LETTER</div>' +
+            '<div style="position:absolute; top:-10px; left:50%; width:60px; height:20px; background:rgba(0,0,0,0.05); transform:translateX(-50%) rotate(-2deg);"></div>' +
+            '<div style="font-size:12px; font-weight:800; color:#A3958A; margin-bottom:14px;">오늘의 편지</div>' +
             '<div style="font-family:\'Nanum Pen Script\', cursive; font-size:24px; line-height:1.6; color:var(--text-m); letter-spacing:0.5px; word-break:keep-all;">' + esc(text) + '</div>' +
             psText +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">' +
@@ -916,6 +1084,24 @@
         return days === 0 || active / days >= 0.6;
     }
 
+    /* 마지막 밤중수유의 양 — 분유 · 유축은 ml, 모유는 분.
+       ⚠️ 모유 15분이 '15ml' 로 찍혔다. 단위가 없는 옛 칸은 그 기록을 찾아 보고, 못 찾으면 양을 말하지 않는다. */
+    function nightFeedAmt(nf) {
+        var amt = Number(nf && nf.amount) || 0;
+        if (!amt) return '';
+        var unit = nf.unit;
+        if (!unit) {
+            var hit = null;
+            allRecords().some(function (x) {
+                if (x && x.type === 'feed' && Number(x.timestamp) === Number(nf.ts)) { hit = x; return true; }
+                return false;
+            });
+            if (!hit || feedKind(hit) === 'food') return '';
+            unit = feedKind(hit) === 'breast' ? '분' : 'ml';
+        }
+        return unit === '분' ? ', 모유 ' + amt + '분' : ', ' + amt + 'ml';
+    }
+
     function buildLastMoment(ledger) {
         if (Object.keys(ledger.days).length < MIN_DAYS) return '';
 
@@ -928,8 +1114,7 @@
                 picks.push({
                     id: 'nightFeed',
                     head: callName('가') + ' 밤중수유를 끊은 지 ' + g1 + '일째예요',
-                    body: '마지막 밤중수유는 ' + fmtWhen(ledger.last.nightFeed.ts) +
-                          (ledger.last.nightFeed.amount ? ', ' + ledger.last.nightFeed.amount + 'ml' : '') + '였어요.'
+                    body: '마지막 밤중수유는 ' + fmtWhen(ledger.last.nightFeed.ts) + nightFeedAmt(ledger.last.nightFeed) + '였어요.'
                 });
             }
         }
@@ -977,7 +1162,7 @@
             // 배경 따옴표 워터마크
             '<div style="position:absolute; top: -10px; right: 10px; font-size: 80px; font-family: serif; color: rgba(255,255,255,0.03); line-height: 1;">"</div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; position:relative; z-index:2;">' +
-                '<div style="font-size:11px; font-weight:800; color:#8B95A1; letter-spacing:3px;">MEMORY</div>' +
+                '<div style="font-size:12px; font-weight:800; color:#8B95A1;">지나간 순간</div>' +
                 '<div onclick="window.hideMoment(\'' + pick.id + '\')" style="font-size:12px; font-weight:700; background:rgba(255,255,255,0.1); color:#B0B8C1; cursor:pointer; padding:4px 10px; border-radius:12px; backdrop-filter:blur(4px);">기억할게요</div>' +
             '</div>' +
             '<div class="serif-display" style="font-size:21px; font-weight:900; line-height:1.5; color:#FFFFFF; margin-bottom:12px; font-family: \'Nanum Myeongjo\', serif; font-style: italic; word-break:keep-all; position:relative; z-index:2;">"' + esc(pick.head) + '"</div>' +
@@ -1032,7 +1217,7 @@
         '<div class="hide-on-senior" style="background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:28px 24px; margin-bottom:24px; box-shadow:0 8px 24px rgba(0,0,0,0.04); position:relative; overflow:hidden;">' +
             '<div style="position:absolute; top:0; left:0; width:4px; height:100%; background:#EF9F27;"></div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">' +
-                '<div style="font-size:11px; font-weight:800; color:#8B95A1; letter-spacing:3px;">SIGNAL</div>' +
+                '<div style="font-size:12px; font-weight:800; color:#8B95A1;">다시 시작된 순간</div>' +
                 '<div onclick="window.hideMoment(\'' + pick.id + '\')" style="font-size:12px; font-weight:700; background:var(--bg-sub); color:var(--text-sub); cursor:pointer; padding:4px 10px; border-radius:12px;">알겠어요</div>' +
             '</div>' +
             '<div class="serif-display" style="font-size:21px; font-weight:900; line-height:1.5; color:var(--text-title); margin-bottom:12px; word-break:keep-all;">' + esc(head) + '</div>' +
@@ -1052,15 +1237,19 @@
     }
 
     function statLine(l) {
-        var bits = [];
-        if (l.milk) bits.push("수유 " + l.milk + "ml");
-        if (l.breastMins) bits.push("모유 " + l.breastMins + "분" + (l.breastCount > 1 ? " (" + l.breastCount + "회)" : ""));
+        var bits = [], v2 = Number(l.v) >= 2;
+        var milk = Number(l.milk) || 0;
+        // 옛 편지(v1)는 이유식이 섞였을 수 있다. 기록이 사라져 다시 못 센 날의 큰 숫자는 숨긴다
+        if (milk && (v2 || milk <= 1500)) bits.push("수유 " + milk.toLocaleString() + "ml");
+        if (l.food) bits.push("이유식 " + Number(l.food).toLocaleString() + "g");
+        if (l.breastCount || l.breastMins) bits.push("모유 " + (l.breastCount ? l.breastCount + "번" : "") + (l.breastMins ? (l.breastCount ? " (" + l.breastMins + "분)" : l.breastMins + "분") : ""));
         if (l.sleepMins) {
             var h = Math.floor(l.sleepMins / 60), m = l.sleepMins % 60;
-            bits.push(("수면 " + (h ? h + "시간 " : "") + (m ? m + "분" : "")).trim());
+            bits.push(("잠 " + (h ? h + "시간 " : "") + (m ? m + "분" : "")).trim());
         }
-        if (l.poop) bits.push("응가 " + l.poop + "회");
-        if (l.dawn) bits.push("새벽 " + l.dawn + "번");
+        if (l.poop) bits.push("응가 " + l.poop + "번");
+        // '새벽 3번' 은 새벽 기록 수였다 (수유 · 기저귀 · 재움). 이제 깬 횟수만
+        if (v2 && l.wakes) bits.push("새벽에 " + l.wakes + "번 깸");
         return bits.join("   ·   ");
     }
 
@@ -1105,6 +1294,7 @@
             });
             cloudSync(false);
         }
+        try { upgradeLetters(); } catch (e) {}
         var box = loadLetters();
         var keys = Object.keys(box).sort().reverse();
         var tk = todayKey();
@@ -1189,14 +1379,16 @@
                         '<span style="font-size:12px; font-weight:600; color:var(--text-sub);">' + esc(d.dow) + '</span>' +
                         (isToday ? '<span style="font-size:10.5px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.12); padding:3px 8px; border-radius:8px; margin-left:auto;">오늘</span>' : "") +
                     '</div>' +
-                    '<div style="font-family:\'Nanum Pen Script\', cursive; font-size:22px; line-height:1.7; color:var(--text-m); letter-spacing:0.4px; word-break:keep-all;">' +
-                        '<div style="margin-bottom:14px;">' + esc(me) + '에게,</div>' +
-                        (l.ms ? '<div style="margin-bottom:16px;">' +
+                    /* ⚠️ style.css 의 '* { font-family: Pretendard }' 가 안쪽 칸마다 다시 걸려서
+                          손글씨는 바깥 칸에만 있고 편지 글은 고딕으로 나왔다. 안쪽 칸은 바깥 글꼴을 물려받게 한다. */
+                    '<div style="font-family:\'Nanum Pen Script\', cursive; font-size:24px; line-height:1.6; color:var(--text-m); letter-spacing:0.4px; word-break:keep-all;">' +
+                        '<div style="margin-bottom:14px; font-family:inherit;">' + esc(me) + '에게,</div>' +
+                        (l.ms ? '<div style="margin-bottom:16px; font-family:inherit;">' +
                             '<div style="display:inline-block; font-family:Pretendard, sans-serif; font-size:10.5px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.12); padding:3px 9px; border-radius:8px; letter-spacing:0.5px; margin-bottom:8px;">오늘의 처음</div>' +
-                            '<div style="color:#6C63D8;">' + esc(l.ms) + '</div>' +
+                            '<div style="color:#6C63D8; font-family:inherit;">' + esc(l.ms) + '</div>' +
                         '</div>' : '') +
-                        '<div style="white-space:pre-line;">' + esc(l.text) + '</div>' +
-                        '<div style="text-align:right; margin-top:16px;">— ' + esc(callName('가')) + '</div>' +
+                        '<div style="white-space:pre-line; font-family:inherit;">' + esc(l.text) + '</div>' +
+                        '<div style="text-align:right; margin-top:16px; font-family:inherit;">— ' + esc(callName('가')) + '</div>' +
                     '</div>' +
                     (stats ? '<div style="margin-top:18px; padding-top:14px; border-top:1px dashed var(--border); font-size:11.5px; font-weight:600; color:var(--text-sub);">' + esc(stats) + '</div>' : "") +
                     replyHtml +
@@ -1518,6 +1710,7 @@ wrap.innerHTML =
 
     function render() {
         try {
+            recCache = null;                       // 방금 남긴 기록까지 읽는다
             var ledger = syncLedger();
             saveTodayLetter();
             backfillLetters();
@@ -1587,6 +1780,7 @@ wrap.innerHTML =
     setInterval(render, 60000);
 
     try { cleanStoredLetters(); } catch (e) {}
+    setTimeout(function () { try { upgradeLetters(); } catch (e) {} }, 4000);
     // 로그인이 붙을 시간을 주고 맞춘다 (12시간에 한 번)
     setTimeout(function () { cloudSync(false); }, 7000);
     setTimeout(function () { cloudSync(false); }, 25000);

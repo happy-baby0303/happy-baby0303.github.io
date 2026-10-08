@@ -112,7 +112,7 @@
             '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">' +
                 '<span style="font-size:16px;font-weight:900;color:' + INK + ';">내가 나간 뒤로</span>' +
                 '<span style="font-size:12.5px;font-weight:700;color:' + SUB + ';">' + hhmm(since) + '부터</span></div>' +
-            row("맘마", s.feeds.length ? s.feeds.length + "번" : "아직", lf ? "마지막 " + ago(lf.timestamp) + " · " + (lf.subType || "맘마") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : "ml") : "") : "") +
+            row("맘마", s.feeds.length ? s.feeds.length + "번" : "아직", lf ? "마지막 " + ago(lf.timestamp) + " · " + (lf.subType || "맘마") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : lf.subType === "이유식" ? "g" : "ml") : "") : "") +
             (s.foods.length ? row("이유식", s.foods.length + "번", "") : "") +
             row("기저귀", s.diapers.length ? s.diapers.length + "번" : "아직", "") +
             (sleepTxt ? row("잠", sleepTxt, "") : "") +
