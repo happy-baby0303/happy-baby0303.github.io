@@ -21,6 +21,10 @@
 
     var OFF_KEY    = "tosil_remind_off";
     var SYNCED_KEY = "tosil_remind_synced";
+    var SNOOZE_KEY = "tosil_remind_snooze";    // 서버가 '며칠 쉬는 중' 으로 정한 날 (카드에 보여 준다)
+    /* 육퇴 알림을 눌러 들어왔나 (알림 주소가 ?go=memorybox).
+       ⚠️ 주소는 script.js 가 곧 지운다. 지우기 전, 이 파일이 읽히는 순간에 봐 둔다. */
+    var OPENED_FROM_BED = /[?&]go=memorybox/.test(location.search);
     var MANUAL_KEY = "tosil_bedtime_manual";   // 분 단위 (예: 1230 = 20시 30분)
     var PURPLE     = "#7F77DD";
 
@@ -127,10 +131,16 @@
         }
 
         var payload = { babyName: babyName(), lastPhotoAt: lastPhotoDay(), updatedAt: Date.now() };
+        try { localStorage.setItem(SNOOZE_KEY, (srv && srv.snoozeUntil) || ""); } catch (e) {}
 
         // 켜짐/꺼짐 — 누른 폰만 정한다
         if (what === "toggle" || !srv || typeof srv.enabled !== "boolean") {
             payload.enabled = !isOff();
+            // 다시 켜면 '며칠 쉬기' 도 풀고 처음부터 센다
+            if (what === "toggle" && payload.enabled) {
+                payload.snoozeUntil = null; payload.missStreak = 0;
+                try { localStorage.setItem(SNOOZE_KEY, ""); } catch (e) {}
+            }
         } else {
             localStorage.setItem(OFF_KEY, srv.enabled ? "false" : "true");
         }
@@ -179,11 +189,44 @@
 
     /* ---------- 켜고 끄기 ---------- */
 
+    /* ⚠️ 켜기를 눌러도 이 폰이 알림 허용을 안 했으면 아무것도 안 왔다. 카드는 '켜짐' 이라서 몰랐다.
+          켜는 순간 허용을 묻는다 (사용자가 누른 순간이어야 폰이 물어봐 준다). */
     window.setBedtimeReminder = async function (on) {
+        var allowed = true;
+        if (on && ("Notification" in window) && Notification.permission === "default" && typeof window.requestPushPermission === "function") {
+            allowed = await window.requestPushPermission();
+        }
         localStorage.setItem(OFF_KEY, on ? "false" : "true");
         await window.syncBedtimeReminder(true, "toggle");
-        toast(on ? "🌙 육퇴 시간에 살짝 알려드릴게요" : "알림을 껐어요");
+        if (on && !allowed) toast("알림을 허용해야 이 폰으로 알려드릴 수 있어요");
+        else toast(on ? "🌙 육퇴 시간에 살짝 알려드릴게요" : "알림을 껐어요");
         redrawCard();
+    };
+
+    function snoozedUntil() {
+        var s = localStorage.getItem(SNOOZE_KEY) || "";
+        return s && s > todayKey() ? s : "";
+    }
+
+    // 카드를 눌렀을 때 — 알림이 막혀 있으면 허용부터, 쉬는 중이면 깨우기, 아니면 시각 고르기
+    window.__remindCardTap = async function () {
+        var p = ("Notification" in window) ? Notification.permission : "unsupported";
+        if (!isOff() && p === "default" && typeof window.requestPushPermission === "function") {
+            var ok = await window.requestPushPermission();
+            toast(ok ? "🌙 이제 육퇴 시간에 알려드릴게요" : "알림을 허용해야 이 폰으로 알려드릴 수 있어요");
+            return redrawCard();
+        }
+        if (!isOff() && p === "denied" && typeof window.openPushCheck === "function") return window.openPushCheck();
+        if (!isOff() && snoozedUntil()) {
+            var code = syncCode();
+            if (code && window.db && typeof window.setDoc === "function") {
+                try { await window.setDoc(window.doc(window.db, "reminders", code), { snoozeUntil: null, missStreak: 0 }, { merge: true }); } catch (e) {}
+            }
+            try { localStorage.setItem(SNOOZE_KEY, ""); } catch (e) {}
+            toast("🌙 오늘부터 다시 알려드릴게요");
+            return redrawCard();
+        }
+        window.openBedtimeSheet();
     };
 
     /* ---------- 시각 고르기 시트 ---------- */
@@ -236,17 +279,23 @@
     function cardHTML() {
         var on = !isOff();
         var when = hhmm(bedtimeMinutes());
-         var mode = isLearned() ? "수면 기록 기준" : "";
+        var mode = isLearned() ? "수면 기록 기준" : "";
+        var p = ("Notification" in window) ? Notification.permission : "unsupported";
+        var snooze = snoozedUntil();
+        var WARN = "#C08A2E";
+        var line;
+        if (!on) line = '지금은 꺼져 있어요';
+        // ⚠️ 폰 알림이 막혀 있어도 '오후 8시 30분에 알려드려요' 라고 했다. 막혀 있으면 막혀 있다고 말한다
+        else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">이 폰 알림이 꺼져 있어요 · 눌러서 켜기</span>';
+        else if (snooze) line = '알림을 며칠 흘려보내서 ' + Number(snooze.slice(5, 7)) + '월 ' + Number(snooze.slice(8, 10)) + '일까지 쉬는 중이에요  ' +
+                               '<span style="color:' + PURPLE + '; font-weight:800;">다시 켜기 ›</span>';
+        else line = esc(when) + '에 알려드려요' + (mode ? ' · ' + esc(mode) : '') +
+                    '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>';
 
         return '<div style="font-size:22px;">🌙</div>' +
-            '<div style="flex:1; min-width:0;" onclick="window.openBedtimeSheet()">' +
+            '<div style="flex:1; min-width:0;" onclick="window.__remindCardTap()">' +
                 '<div style="font-size:15px; font-weight:900; color:var(--text-m);">육퇴 알림</div>' +
-                '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' +
-                  (on
-                        ? esc(when) + '에 알려드려요' + (mode ? ' · ' + esc(mode) : '') +
-                          '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>'
-                        : '지금은 꺼져 있어요') +
-                '</div>' +
+                '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' + line + '</div>' +
             '</div>' +
             '<div id="remind-toggle" style="width:46px; height:27px; border-radius:14px; flex-shrink:0; cursor:pointer; ' +
                 'background:' + (on ? PURPLE : "var(--border)") + '; position:relative; transition:0.2s;">' +
@@ -287,8 +336,21 @@
 
     /* ---------- 시작 ---------- */
 
+    /* 육퇴 알림을 눌러 들어왔으면 서버에 '봤어요' 를 남긴다.
+       서버는 이걸 보고 그 알림을 '흘려보낸 것' 으로 세지 않는다 (며칠 쉬기 판단) */
+    async function markOpened(tries) {
+        var code = syncCode();
+        if (!code) return;
+        if (!window.db || typeof window.setDoc !== "function" || !(window.auth && window.auth.currentUser)) {
+            if (tries > 0) setTimeout(function () { markOpened(tries - 1); }, 2000);
+            return;
+        }
+        try { await window.setDoc(window.doc(window.db, "reminders", code), { openedAt: Date.now() }, { merge: true }); } catch (e) {}
+    }
+
     function boot() {
         setTimeout(function () { window.syncBedtimeReminder(false); }, 4000);
+        if (OPENED_FROM_BED) setTimeout(function () { markOpened(10); }, 3000);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

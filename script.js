@@ -1912,7 +1912,13 @@ async function addFeverRecord() {
     const record = { time: timeStr, temp: temp, type: selectedPillType, timestamp: now.getTime(), symptoms: symptoms };
     
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
-    records.unshift(record); if(records.length > 10) records.pop(); 
+    /* ⚠️ 10개만 남기고 지웠다. 열이 이틀 가면 체온만 열 번 넘게 잰다.
+          그러면 아침에 먹인 해열제 기록이 밀려나서 '하루 몇 번' 을 덜 세고,
+          하루 한도를 넘겨도 막지 못했다. 소아과 요약에도 앞부분이 빠졌다.
+          2주 안의 기록은 다 둔다 (많아야 100개). */
+    records.unshift(record);
+    const keepFrom = Date.now() - 14 * 86400000;
+    records = records.filter(function (r, i) { return i === 0 || Number(r.timestamp) >= keepFrom; }).slice(0, 100);
     
     /* ⚠️ 서버가 '받았다' 고 답할 때까지 await 한 뒤에야 이 폰에 저장했다.
           파이어베이스는 연결이 없으면 에러 없이 연결될 때까지 기다린다.
@@ -8828,16 +8834,19 @@ window.renderSettingsTab = function() {
             <!-- 계정 및 프로필 -->
             ${profileHtml}
 
-            <!-- 💎 VIP 프리미엄 업그레이드 배너 -->
-            <div onclick="document.getElementById('vip-modal-overlay').style.display='flex'" style="background: linear-gradient(135deg, #4A403A 0%, #3B322C 100%); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; transition: 0.2s;">
+            <!-- 💎 PLUS 안내 배너
+                 ⚠️ '단 한 번의 결제로 우리 가족 평생 육아 기록실' 이라고 적혀 있었다.
+                    예정 요금은 달마다 / 1년치이고, 지금은 결제를 받지도 않는다. 사실과 다른 말이라 걷어냈다.
+                    누르면 옛 안내창(vip-modal-overlay — '다둥이 무제한' 같은 지금과 다른 말이 적힌)이 떴다. 지금 결제 안내로 잇는다.
+                    무료 개방 중엔 바로 아래 PLUS 칸(plusfree.js)이 같은 이야기를 하므로 숨긴다. -->
+            ${(typeof window.isFreeOpen === 'function' && window.isFreeOpen()) ? '' : `
+            <div onclick="window.showPaywall()" style="background: linear-gradient(135deg, #4A403A 0%, #3B322C 100%); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; transition: 0.2s;">
                 <div>
-                    <div style="font-size: 13px; font-weight: 900; color: #7F77DD; margin-bottom: 6px; letter-spacing: 1px;">배냇함 플러스 ✨</div>
-<div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">단 한 번의 결제로<br>우리 가족 평생 육아 기록실</div>
+                    <div style="font-size: 13px; font-weight: 900; color: #A9A2EA; margin-bottom: 6px;">배냇함 PLUS</div>
+                    <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">포토북, 목소리 녹음,<br>소아과 리포트까지</div>
                 </div>
-                <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 20px;">
-                    ✨
-                </div>
-            </div>
+                <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; font-weight: 700;">›</div>
+            </div>`}
 
             <!-- 가족 연동 섹션 -->
             ${syncHtml}
@@ -8896,9 +8905,11 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">개인정보 처리방침 및 약관</div>
                     <div style="color: #A3958A; font-size: 12px;">›</div>
                 </div>
-                <div onclick="window.handleSecretAdminClick()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; -webkit-tap-highlight-color: transparent;">
-                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">현재 버전 (터치)</div>
-                    <div style="font-size: 13.5px; font-weight: 800; color: #7F77DD;">v1.0.0 최신</div>
+                <!-- ⚠️ '현재 버전 (터치)' · 'v1.0.0 최신' 이었다. (터치) 는 숨은 관리자 문을 두드려 보라는 말이 되고,
+                        '최신' 은 확인도 안 하고 적은 말이다. -->
+                <div onclick="window.handleSecretAdminClick()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: default; -webkit-tap-highlight-color: transparent;">
+                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">앱 버전</div>
+                    <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s);">1.0.0</div>
                 </div>
             </div>
 
@@ -11505,9 +11516,13 @@ window.saveUserInfoToFirebase = async function() {
                     localStorage.setItem('tosil_is_founder', 'true');
                     localStorage.setItem('tosil_founder_until', founderUntil); // 👈 마이페이지 날짜 표시를 위한 캐시 추가
                     
-                    // 유저 기분 좋게 1.5초 뒤에 팝업 띄워주기
-                    setTimeout(() => {
-                        window.showToast(`🎉 축하합니다 선착순 얼리버드 당첨<br>${founderUntil}까지 (1개월) 프리미엄 무료 💎`);
+                    /* ⚠️ '🎉 축하합니다 선착순 얼리버드 당첨 · 2026-11-08까지 (1개월) 프리미엄 무료' 였다.
+                          가입한 사람 모두 받는데 '당첨' 이라고 했고, 무료 개방 중에는 이미 12월까지 다 열려 있어서
+                          '한 달 무료' 가 오히려 줄어든 것처럼 읽혔다. 무료 개방 중엔 말하지 않는다. */
+                    const freeNow = typeof window.isFreeOpen === 'function' && window.isFreeOpen();
+                    const fp = String(founderUntil).split('-');
+                    if (!freeNow && fp.length === 3) setTimeout(() => {
+                        window.showToast(`🎁 처음 오신 선물로 한 달 동안 PLUS를 열어 드려요<br>${Number(fp[1])}월 ${Number(fp[2])}일까지`);
                         if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
                     }, 1500);
                 }
@@ -11765,9 +11780,9 @@ window.handleSecretAdminClick = function() {
         if (MASTER_UIDS.includes(String(myUid).trim())) {
             if (navigator.vibrate) navigator.vibrate([50, 50, 100]); 
             window.openAdminDashboard();
-        } else {
-            window.showToast("👀 개발자 모드는 관리자만 접근할 수 있어요.");
         }
+        /* ⚠️ 관리자가 아니면 '👀 개발자 모드는 관리자만…' 토스트가 떴다.
+              숨은 문이 있다고 알려 주는 말이라 아무 반응도 하지 않는다. */
     }
 };
 
@@ -14621,7 +14636,8 @@ window.showPaywall = function() {
                 <!-- 👑 타이틀 영역 -->
                 <div style="text-align: center; margin-bottom: 24px;">
                     <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: linear-gradient(135deg, #FDE047 0%, #B98A2E 100%); border-radius: 20px; font-size: 32px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(245,158,11,0.3);">💎</div>
-                    <div style="font-family: 'Georgia', serif; font-size: 12px; font-weight: 800; color: #D2A340; letter-spacing: 4px; margin-bottom: 8px;">배냇함 플러스</div>
+                    <!-- ⚠️ 자간 4px 를 벌려 '배 냇 함 플 러 스' 로 보였다. 한글은 자간을 벌리면 흩어져 읽힌다 -->
+                    <div style="font-size: 12.5px; font-weight: 800; color: #D2A340; margin-bottom: 8px;">배냇함 PLUS</div>
                     <div style="font-size: 24px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">
                         PLUS에서 더 쓸 수 있는 것들
                     </div>
@@ -14658,7 +14674,7 @@ window.showPaywall = function() {
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">돌봄 도우미 모드 (가계부와 편지는 안 보여요)</span>
+                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">돌봄 도우미 두 명부터 (한 명은 무료)</span>
                     </div>
                 </div>
 
@@ -14677,7 +14693,7 @@ window.showPaywall = function() {
                          결제가 붙기 전까지는 '예정 가격' 으로만 말한다.
                          숫자는 그대로 보여준다 — 얼마일지 궁금한 건 당연하니까. -->
                     <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; padding: 18px 16px;">
-                        <div style="font-size: 11px; font-weight: 800; color: #64748B; letter-spacing: 2px; margin-bottom: 13px;">예정 가격</div>
+                        <div style="font-size: 11.5px; font-weight: 800; color: #8C8079; margin-bottom: 13px;">예정 가격</div>
 
                         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
                             <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">달마다</span>
@@ -14689,7 +14705,7 @@ window.showPaywall = function() {
                             <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩39,000</span>
                         </div>
 
-                        <div style="font-size: 11.5px; color: #64748B; margin-top: 14px; line-height: 1.65;">
+                        <div style="font-size: 11.5px; color: #8C8079; margin-top: 14px; line-height: 1.65;">
                             아직 확정된 값이 아니고, 지금은 결제를 받지 않습니다.
                         </div>
                     </div>
@@ -14910,19 +14926,24 @@ window.renderSettingsTab = function() {
         return; // 대표님은 여기서 끝
     }
     
-    // 일반 유저 중 프리미엄(얼리버드) 유저라면 프로필 상단에 황금 배지 달아주기!
-    if (window.isPremiumUser()) {
+    /* ⚠️ 무료 개방 중엔 isPremiumUser() 가 모두에게 true 다(plusfree.js).
+          그래서 얼리버드가 아닌 사람까지 날짜 빈 'FOUNDER MEMBER · 얼리버드 패스 · 까지' 를 달고 있었다.
+          진짜 얼리버드이고 날짜가 있을 때만 단다. 무료 개방 중엔 PLUS 칸이 '무료 개방 중' 을 이미 말하므로 달지 않는다. */
+    const freeNow = typeof window.isFreeOpen === 'function' && window.isFreeOpen();
+    const fUntil = String(localStorage.getItem('tosil_founder_until') || '');
+    const fParts = fUntil.split('-');
+    if (!freeNow && localStorage.getItem('tosil_is_founder') === 'true' && fParts.length === 3) {
         const container = document.getElementById('tab-settings');
         const profileBox = container ? container.querySelector('div[style*="padding: 24px 20px 40px"]') : null;
-        
+
         if (profileBox && !document.getElementById('vip-badge-ribbon')) {
             const badgeHtml = `
                 <div id="vip-badge-ribbon" style="background: linear-gradient(135deg, #4A413C 0%, #5A4D44 100%); border-radius: 16px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <div style="font-size: 28px;">💎</div>
                         <div>
-                            <div style="font-size: 11px; font-weight: 800; color: #D2A340; margin-bottom: 2px;">FOUNDER MEMBER</div>
-                            <div style="font-size: 14.5px; font-weight: 900; color: #FFF; letter-spacing: -0.5px;">얼리버드 패스 · ${localStorage.getItem('tosil_founder_until') || ''}까지</div>
+                            <div style="font-size: 11.5px; font-weight: 800; color: #D2A340; margin-bottom: 2px;">얼리버드</div>
+                            <div style="font-size: 14.5px; font-weight: 900; color: #FFF; letter-spacing: -0.5px;">PLUS 무료 · ${Number(fParts[1])}월 ${Number(fParts[2])}일까지</div>
                         </div>
                     </div>
                 </div>

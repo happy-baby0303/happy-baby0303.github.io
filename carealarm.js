@@ -67,21 +67,22 @@
         var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
         return n + (jong && n !== "우리 아기" ? "이" : "");
     }
+    // ⚠️ '14:30에 먹고' 는 기계가 읽어 주는 말 같았다. '오후 2시 30분' 으로 (서버 kTime 과 같은 모양)
     function clock(ts) {
-        var d = new Date(ts);
-        return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        var d = new Date(ts), h = d.getHours(), m = d.getMinutes(), hh = h % 12 === 0 ? 12 : h % 12;
+        return (h < 12 ? "오전 " : "오후 ") + hh + "시" + (m ? " " + m + "분" : "");
     }
     function words(k, p) {
         var nk = nick(), t = hm(p.every), at = clock(p.from);
         var FEED = [
-            ["🍼 " + nk + " 배고플 시간이에요", at + "에 먹고 " + t + "이 지났어요"],
-            ["🍼 슬슬 맘마 시간이에요", nk + "가 마지막으로 " + at + "에 먹었어요"],
-            ["🍼 " + nk + " 맘마 챙길 때예요", "먹은 지 " + t + " 됐어요. 천천히 준비해 주세요"]
+            ["🍼 슬슬 맘마 시간이에요", nk + "가 " + at + "에 먹고 " + t + "이 지났어요"],
+            ["🍼 " + nk + " 배고플 때가 됐어요", "마지막 맘마가 " + t + " 전이에요. 천천히 준비해 주세요"],
+            ["🍼 맘마 준비할 시간", at + "에 먹었으니 곧 찾을 거예요"]
         ];
         var DIAPER = [
-            ["🧷 기저귀 한 번 볼까요?", at + "에 갈고 " + t + "이 지났어요"],
-            ["🧷 " + nk + " 엉덩이 확인할 시간이에요", "마지막으로 " + at + "에 갈았어요"],
-            ["🧷 뽀송한지 한 번 봐 주세요", "기저귀 간 지 " + t + " 됐어요"]
+            ["🧷 기저귀 한번 볼까요?", at + "에 갈고 " + t + "이 지났어요"],
+            ["🧷 " + nk + " 엉덩이 뽀송한가요?", "기저귀 간 지 " + t + " 됐어요"],
+            ["🧷 기저귀 확인할 때예요", "마지막으로 " + at + "에 갈았어요"]
         ];
         var list = (k === "feed") ? FEED : DIAPER;
         var pick = list[Math.floor(p.at / 3600000) % list.length];

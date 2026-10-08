@@ -19,7 +19,9 @@
     'use strict';
 
     // parent-phone-card — 도우미가 걸 번호 (homefix.js). 빠져 있으면 설정 맨 위에 혼자 떠 있었다
-    var CARD_IDS = ["remind-card", "push-permission-card", "parent-phone-card", "export-card"];
+    // care-alarm-card · pushcheck-card — 수유 · 기저귀 알림, 알림 점검 (pushcheck.js)
+    // parent-notice-card — 도우미께 남길 말 (homefix.js). 이것도 빠져 있어서 '설정' 제목보다 위에 떠 있었다
+    var CARD_IDS = ["remind-card", "care-alarm-card", "push-permission-card", "pushcheck-card", "parent-phone-card", "parent-notice-card", "export-card"];
     var GROUP_ID = "bnh-care-group";
     var BODY_ID  = "bnh-care-body";
 

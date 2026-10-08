@@ -3129,6 +3129,24 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
             await window.requestPushPermission();
         };
+
+        /* 🩺 알림 점검(pushcheck.js)이 쓴다 — 권한을 다시 묻지 않고 지금 이 폰의 알림 주소(토큰)만 가져온다 */
+        window.getPushToken = async () => {
+            if (!('Notification' in window)) return { error: 'unsupported' };
+            if (Notification.permission !== 'granted') return { error: 'permission' };
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const token = await getToken(window.messaging, {
+                    vapidKey: 'BNDHmOKzsbHE8M65bZWNpGOZ7ijelfwfSsGvwCYHCrBkXDSh8jw1rq7R5uqNlXpMalZsM8yvqB7aDRS0YPnJKyk',
+                    serviceWorkerRegistration: registration
+                });
+                if (!token) return { error: 'empty' };
+                localStorage.setItem('fcm_token', token);
+                return { token };
+            } catch (e) {
+                return { error: (e && (e.code || e.message)) || String(e) };
+            }
+        };
     } catch (e) {
         console.warn("푸시 알림을 지원하지 않는 브라우저입니다.", e);
     }
@@ -3456,7 +3474,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- ⏸ 앱이 뒤에 있을 때 타이머가 일을 안 하게. setInterval 을 감싸므로 제일 먼저 -->
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
-<script src="script.js?v=20260919"></script>
+<script src="script.js?v=20261009"></script>
     <script src="./stage.js"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js"></script>
@@ -3504,7 +3522,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./export.js"></script>
 <script src="./bedtime.js"></script>
 <script src="./remind.js"></script>
-    <script src="./carealarm.js"></script>      
+    <script src="./carealarm.js"></script>
+    <script src="./pushcheck.js"></script>      
 <script src="./memories.js"></script>    
 <script src="./firstwords.js"></script>  
 <script src="./babytab.js"></script> 
