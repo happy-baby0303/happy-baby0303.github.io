@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.baenaet.app",
-    "sha256_cert_fingerprints": ["C6:78:7A:3C:48:13:49:F2:F6:99:22:F4:97:66:41:14:00:B0:3C:8F:B8:5D:70:66:81:21:E1:29:B4:9E:92:19"]
+    "sha256_cert_fingerprints": [
+      "C6:78:7A:3C:48:13:49:F2:F6:99:22:F4:97:66:41:14:00:B0:3C:8F:B8:5D:70:66:81:21:E1:29:B4:9E:92:19",
+      "7C:A6:72:06:CE:C9:C6:7D:91:B5:55:B4:C9:E6:A8:51:20:FF:6F:50:8D:5A:B6:27:19:FF:76:0E:3B:7C:83:69"
+    ]
   }
 }]
