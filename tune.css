@@ -188,3 +188,14 @@
     transform: scale(0.975);
     transition: transform 0.08s ease !important;
 }
+
+/* 빈칸 안내 글씨 (placeholder)
+   ⚠️ 입력칸 글씨가 굵어서(800~900) 안내 글씨도 굵게 나왔다.
+      '0.0 kg', '38.5 °C', '500,000', '010-1234-5678' 이 이미 적어 둔 값처럼 보였다.
+      안내 글씨는 가늘고 옅게 둔다. 큐레이터 페이지는 이 파일을 안 읽는다. */
+input::placeholder,
+textarea::placeholder {
+    font-weight: 500 !important;
+    color: #C4BAAF !important;
+    opacity: 1;
+}

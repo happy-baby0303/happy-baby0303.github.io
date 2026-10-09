@@ -83,6 +83,19 @@
         return Math.max(0, Math.ceil((endAt() - Date.now()) / 86400000));
     }
 
+    /* ⚠️ 출시 기념 기간이 끝난 뒤에 처음 깐 사람도 MIN_DAYS 동안은 열린다.
+          그런데 화면에는 '출시 기념으로 2027년 1월 10일까지 열려 있어요 · 13일 남음' 처럼
+          이미 지난 날짜와 남은 날이 같이 나왔다. 그 사람에게는 '처음 14일 체험' 으로 말한다. */
+    function promoOver() {
+        var fixed = new Date(until() + "T23:59:59").getTime();
+        return !isNaN(fixed) && Date.now() > fixed;
+    }
+    function lateTrial() { return promoOver() && freeOpen(); }
+    function myEndKey() {
+        var d = new Date(endAt());
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
     function pretty(k) {
         var p = String(k).split("-");
         return p.length === 3 ? (Number(p[0]) + "년 " + Number(p[1]) + "월 " + Number(p[2]) + "일") : k;
@@ -146,11 +159,13 @@
         return '<div style="background:rgba(185,138,46,0.10); border:1px solid rgba(185,138,46,0.30); ' +
             'border-radius:14px; padding:14px 16px; margin-bottom:16px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + '; margin-bottom:4px;">' +
-                '🎁 지금은 출시 기념으로 모두 열려 있어요</div>' +
+                (lateTrial() ? '🎁 처음 ' + MIN_DAYS + '일은 PLUS를 그냥 써 보세요' : '🎁 지금은 출시 기념으로 모두 열려 있어요') + '</div>' +
             '<div style="font-size:12px; font-weight:700; color:' + GOLD + '; line-height:1.7; ' +
                 'word-break:keep-all; opacity:0.92;">' +
-                pretty(until()) + '까지 PLUS 기능을 그냥 쓰실 수 있습니다. ' +
-                '유료로 바뀔 때는 <b>30일 전에 미리</b> 알려드릴게요.</div>' +
+                (lateTrial()
+                    ? pretty(myEndKey()) + '까지 PLUS 기능을 그냥 쓰실 수 있어요. 끝나기 전에 알려 드릴게요.</div>'
+                    : pretty(until()) + '까지 PLUS 기능을 그냥 쓰실 수 있어요. ' +
+                      '유료로 바뀔 때는 <b>30일 전에 미리</b> 알려 드릴게요.</div>') +
         '</div>';
     }
 
@@ -193,11 +208,13 @@
                 '<span style="font-size:15px; font-weight:900; color:var(--text-m);">PLUS</span>' +
                 (open
                     ? '<span style="margin-left:auto; font-size:11px; font-weight:900; color:' + GOLD + '; ' +
-                      'background:rgba(185,138,46,0.12); padding:5px 10px; border-radius:9px;">무료 개방 중</span>'
+                      'background:rgba(185,138,46,0.12); padding:5px 10px; border-radius:9px;">' + (lateTrial() ? '체험 중' : '무료 개방 중') + '</span>'
                     : '') +
             '</div>' +
             '<div style="font-size:13px; font-weight:700; color:var(--text-m); line-height:1.7; word-break:keep-all; margin-top:6px;">' +
-                (open ? '출시 기념으로 <b>' + pretty(until()) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음'
+                (open ? (lateTrial()
+                            ? '처음 ' + MIN_DAYS + '일 체험으로 <b>' + pretty(myEndKey()) + '</b>까지 열려 있어요 · ' + daysLeft() + '일 남음'
+                            : '출시 기념으로 <b>' + pretty(until()) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음')
                       : 'PLUS 기능과 요금은 준비되는 대로 안내드릴게요.') +
             '</div>' + promise;
     }
@@ -257,7 +274,8 @@
             '<span style="font-size:18px; flex-shrink:0; line-height:1.3;">' + (end ? "🎁" : "🙏") + '</span>' +
             '<div style="flex:1; min-width:0;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + '; margin-bottom:3px;">' +
-                    (end ? "PLUS 무료 개방이 " + n + "일 남았어요" : "출시 기념 무료 개방이 끝났어요") + '</div>' +
+                    (end ? (lateTrial() ? "PLUS 체험이 " : "PLUS 무료 개방이 ") + n + "일 남았어요"
+                         : (endAt() > new Date(until() + "T23:59:59").getTime() ? "PLUS 체험이 끝났어요" : "출시 기념 무료 개방이 끝났어요")) + '</div>' +
                 '<div style="font-size:12px; font-weight:700; color:' + GOLD + '; line-height:1.7; ' +
                     'word-break:keep-all; opacity:0.92;">' +
                     (end

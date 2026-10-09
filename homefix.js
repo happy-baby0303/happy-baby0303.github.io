@@ -258,6 +258,9 @@
             var img = heroImg(), src = img ? (img.getAttribute("src") || "") : "";
             var empty = !img || !src || /^data:image\/gif/.test(src) || img.style.display === "none";
             hint.style.display = empty ? "flex" : "none";
+            /* ⚠️ 사진이 없을 때 글씨용 검은 그림자만 남아서 칸 전체가 칙칙한 회색이었다.
+                  처음 깐 사람이 제일 먼저 보는 칸이다. 빈칸일 때는 따뜻한 종이색 + 진한 글씨로 바꾼다. */
+            card.classList.toggle("hero-empty", empty);
             var showTip = !empty && savedPos(img) === null && tipSeen < 3;
             tip.style.display = showTip ? "" : "none";
             if (showTip && !tipCounted) { tipCounted = true; try { localStorage.setItem("tosil_hero_tip_seen", String(tipSeen + 1)); } catch (e) {} }
@@ -272,7 +275,13 @@
                 "#baby-dashboard{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}" +
                 "#baby-dashboard img{-webkit-user-drag:none;}" +
                 "#baby-dashboard.hero-armed{transform:scale(.985);transition:transform .15s ease;" +
-                    "box-shadow:0 0 0 3px rgba(127,119,221,.55) !important;}";
+                    "box-shadow:0 0 0 3px rgba(127,119,221,.55) !important;}" +
+                "#baby-dashboard.hero-empty{background:linear-gradient(160deg,#F7F1E8 0%,#EEE4D7 100%) !important;}" +
+                "#baby-dashboard.hero-empty>div[style*='linear-gradient']{display:none !important;}" +
+                "#baby-dashboard.hero-empty #res-baby-dday{color:#4A413C !important;text-shadow:none !important;}" +
+                "#baby-dashboard.hero-empty #res-baby-name{color:#8A7F76 !important;text-shadow:none !important;}" +
+                "#baby-dashboard.hero-empty #wonderweek-badge{background:rgba(255,255,255,0.8) !important;color:#7A6F68 !important;" +
+                    "border-color:rgba(74,65,60,0.08) !important;}";
             document.head.appendChild(st);
         }
     }

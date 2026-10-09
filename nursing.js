@@ -234,9 +234,9 @@
         el.innerHTML = `
             <div style="flex: 1; min-width: 0; padding-right: 12px;">
                 <div style="font-size: 12px; font-weight: 800; color: #E11D48; margin-bottom: 4px;">급하게 수유실이 필요할 때</div>
-                <div style="font-size: 16px; font-weight: 900; color: #BE123C; letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">${ageText}${babyName} 가까운 수유실 찾기</div>
+                <div style="font-size: 16px; font-weight: 900; color: #BE123C; letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">가까운 수유실 바로 찾기</div>
             </div>
-            <div style="flex-shrink: 0; background: #FFFFFF; color: #E11D48; border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 900; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.1); white-space: nowrap;">3초 컷 〉</div>
+            <div style="flex-shrink: 0; background: #FFFFFF; color: #E11D48; border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 900; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.1); white-space: nowrap;">찾기 〉</div>
         `;
 
         // 🚨 이 눈치 없는 녀석을 맨 위가 아니라 '주말 나들이' 제목 바로 아래에 얌전히 꽂아 넣습니다!

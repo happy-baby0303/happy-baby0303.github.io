@@ -624,7 +624,7 @@
                 hCard.style.opacity = "1";
                 hEditBtn.style.display = (currentRole === "husband") ? "block" : "none";
             } else {
-                hTextEl.innerText = "아빠의 답변을 기다리는 중입니다...";
+                hTextEl.innerText = "아빠의 답을 기다리고 있어요";
                 hCard.style.opacity = "0.5";
                 hEditBtn.style.display = "none";
             }
@@ -639,13 +639,15 @@
                 wCard.style.opacity = "1";
                 wEditBtn.style.display = (currentRole === "wife") ? "block" : "none";
             } else {
-                wTextEl.innerText = "엄마의 답변을 기다리는 중입니다...";
+                wTextEl.innerText = "엄마의 답을 기다리고 있어요";
                 wCard.style.opacity = "0.5";
                 wEditBtn.style.display = "none";
             }
 
             if (hText && wText) {
                 document.getElementById("next-btn").style.display = "block";
+                // 홈 카드의 '서로의 답이 열렸어요' 는 여기서 봤으면 내린다
+                try { localStorage.setItem("tosil_qa_seen_day", String(window.getCurrentDay())); } catch (e) {}
             } else {
                 document.getElementById("next-btn").style.display = "none";
             }
@@ -1103,6 +1105,11 @@
                 document.getElementById('setup-modal').style.display = 'flex';
             } else {
                 window.viewingDay = getFirstUnansweredDay();
+                /* 홈의 '우리의 문답' 카드에서 들어오면 그 질문을 연다 (diary.html?day=12) */
+                try {
+                    const qd = parseInt(new URLSearchParams(location.search).get('day'), 10);
+                    if (qd > 0 && qd <= (window.DIARY_MAX_DAY || 2000)) { window.viewingDay = qd; window.__diaryUserMoved = true; }
+                } catch (e) {}
                 window.initAppUI();
                 setTimeout(window.startSync, 50); 
 

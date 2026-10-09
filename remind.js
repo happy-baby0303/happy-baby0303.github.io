@@ -278,7 +278,7 @@
         if (!on) line = '지금은 꺼져 있어요';
         // ⚠️ 폰 알림이 막혀 있어도 '오후 8시 30분에 알려드려요' 라고 했다. 막혀 있으면 막혀 있다고 말한다
         else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">이 폰 알림이 꺼져 있어요 · 눌러서 켜기</span>';
-        else line = esc(when) + '에 알려드려요' + (mode ? ' · ' + esc(mode) : '') +
+        else line = esc(when) + '에 알려 드려요' + (mode ? ' · ' + esc(mode) : '') +
                     '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>';
 
         return '<div style="font-size:22px;">🌙</div>' +

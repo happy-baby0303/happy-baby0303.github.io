@@ -64,6 +64,7 @@
         { find: "tracker-stats-container",  note: "오늘 하루 + 오늘 통계" },
         { find: "info-month-home",          note: "이번 달 밤중 수유 (통계에 붙어서)" },
         { find: "em-count",                 note: "오늘의 우리" },
+        { find: "home-qa-card",             note: "우리의 문답 — 지금 질문 · 누가 답했는지 (diary.js)" },
         { find: "home-memorybox-card",      note: "배냇함" },
         { find: "home-memory-card",         note: "그날의 오늘" },
         { find: "home-words-card",          note: "첫 단어 사전" },

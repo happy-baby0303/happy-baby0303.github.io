@@ -445,6 +445,19 @@ function switchTool(panelId, el) {
             }
         }
     }
+
+    /* ⚠️ 성장 도구가 아기 생년월일을 이미 알면서 매번 다시 고르게 했다.
+          등록된 생일과 지난번에 고른 성별을 먼저 채워 둔다 (고칠 수는 있다) */
+    if (panelId === 'growth') {
+        try {
+            const bi = document.getElementById('v-birth');
+            const sd = localStorage.getItem('tosil_startDate') || '';
+            if (bi && !bi.value && /^\d{4}-\d{2}-\d{2}$/.test(sd)) { bi.type = 'date'; bi.value = sd; }
+            const gi = document.getElementById('v-gender');
+            const gs = localStorage.getItem('tosil_growth_gender') || '';
+            if (gi && !gi.value && gs && gi.querySelector('option[value="' + gs + '"]')) { gi.value = gs; gi.style.color = 'var(--text-m)'; }
+        } catch (e) {}
+    }
 }
 
 function navigateToPanel(targetPanel) {
@@ -646,7 +659,25 @@ function filterPlaces() {
             return matchesRegion && (currentSubRegion === 'all' || addr.includes(currentSubRegion)) && `${title} ${addr}`.toLowerCase().includes(keyword);
         });
         
-        if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 이번 달에 예정된 행사가 없습니다.</p>`; return; }
+        if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 이번 달에 열리는 행사가 없어요.</p>`; return; }
+
+        /* ⚠️ 행사가 가나다순으로만 나왔고, 카드에 날짜가 없었다. '주말 행사' 인데 언제 하는지 알려면 하나씩 눌러 봐야 했다.
+              지금 하는 행사를 먼저(곧 끝나는 순), 그다음 곧 시작하는 행사(가까운 순). 카드에 기간과 '진행 중 · D-3' 을 붙인다. */
+        const ymd = (v, dflt) => { const s = String(v || '').replace(/[^0-9]/g, ''); return s.length >= 8 ? parseInt(s.substring(0, 8)) : dflt; };
+        const dayOf = (n) => new Date(Math.floor(n / 10000), Math.floor(n / 100) % 100 - 1, n % 100).getTime();
+        const startOf = (p) => ymd(p.eventstartdate || p.datetime, 0), endOf = (p) => ymd(p.eventenddate || p.endDate, 99999999);
+        filteredEvents.sort((a, b) => {
+            const aOn = startOf(a) <= todayNum, bOn = startOf(b) <= todayNum;
+            if (aOn !== bOn) return aOn ? -1 : 1;
+            return aOn ? (endOf(a) - endOf(b)) : (startOf(a) - startOf(b));
+        });
+        const tagOf = (p) => {
+            const s = startOf(p), e = endOf(p);
+            if (s > todayNum) return 'D-' + Math.round((dayOf(s) - dayOf(todayNum)) / 86400000);
+            if (e !== 99999999 && (dayOf(e) - dayOf(todayNum)) / 86400000 <= 2) return '곧 끝나요';
+            return '진행 중';
+        };
+
         const gridEl = document.createElement('div'); gridEl.className = 'festival-grid';
         filteredEvents.forEach(item => {
             const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = String(item.firstimage || '').replace(/^http:\/\//i, 'https://');
@@ -658,7 +689,7 @@ function filterPlaces() {
             
             // 🚨 [중요] 행사 탭에서는 마지막에 true를 보냅니다!
             card.onclick = () => openFestivalModal(title, dateText, addr, item.tel || '정보없음', item.review || '', title, rawImg || '⚙️GRAPHIC', true);
-            card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">🎉 축제</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${shortAddr}</div></div>`;
+            card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">${tagOf(item)}</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${dateText}</div><div class="fest-card-meta" style="margin-top:2px;">${shortAddr}</div></div>`;
             gridEl.appendChild(card);
         }); container.appendChild(gridEl);
         /* ⚠️ 행사 정보와 사진은 한국관광공사(TourAPI) 자료다. 공공누리 제3유형이라
@@ -2660,13 +2691,16 @@ window.calcHealthMaster = function() {
 
     if (wVal) localStorage.setItem('tosil_latest_weight', wVal);
 
-    if(!b) return alert("종합 분석을 위해 아기 생년월일을 입력해 주세요");
-    if(!h && !w) return alert("정확한 진단을 위해 키 또는 몸무게를 하나라도 입력해 주세요");
+    /* ⚠️ '정확한 진단을 위해' — 이 도구는 진단을 하지 않는다. 시스템 alert 창 대신 앱 토스트로 */
+    const say = (m) => (typeof window.showToast === 'function') ? window.showToast(m) : alert(m);
+    if(!b) return say("아기 생년월일을 넣어 주세요");
+    if(!h && !w) return say("키나 몸무게 중 하나는 적어 주세요");
     
     const birthDate = new Date(b);
     const today = new Date();
     const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
-    if (diffDays < 0) return alert("미래의 날짜는 입력할 수 없습니다.");
+    if (diffDays < 0) return say("생년월일이 오늘보다 뒤예요");
+    try { localStorage.setItem('tosil_growth_gender', gender || ''); } catch (e) {}
     
     const week = Math.floor(diffDays / 7);
     const month = Math.floor(diffDays / 30.436875); 
@@ -2685,16 +2719,16 @@ window.calcHealthMaster = function() {
             st.className = 'ww-status-box box-tint-red'; 
             st.removeAttribute('style'); 
             st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px'; 
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🚨 현재 ${curWW.t} 폭풍우 구간</div><strong style="color:var(--text-m);">특성:</strong> <span style="color:var(--text-s);">${curWW.d}</span>.<br><span style="color:var(--text-s); margin-top:4px; display:inline-block;">이유 없는 보챔과 수면퇴행이 올 수 있는 도약기입니다. 아기를 많이 안아주세요</span>`; 
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--danger); margin-bottom:6px;">🌧️ 지금은 ${curWW.t} 도약기예요</div><span style="color:var(--text-s);">${curWW.d}</span>.<br><span style="color:var(--text-s); margin-top:4px; display:inline-block;">이유 없이 보채거나 잠이 흐트러질 수 있는 때예요. 많이 안아 주세요</span>`; 
         } else { 
             st.className = 'ww-status-box box-tint-green'; 
             st.removeAttribute('style');
             st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px';
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 맑음 평온기 유지 중</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '👉 다음 도약기: <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + nxtWW.w + '주차)</strong> 대기 중' : '모든 도약기를 이수 완료했습니다.'}</span>`; 
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 지금은 비교적 편안한 때예요</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '다음 도약기는 <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + nxtWW.w + '주 무렵)</strong>이에요' : '도약기를 모두 지났어요.'}</span>`; 
         }
     }
 
-    let table = `<tr><th style="padding:10px; background:#F6F2EC;">주차</th><th style="padding:10px; background:#F6F2EC;">진단 단계</th><th style="padding:10px; background:#F6F2EC;">특성 지표</th></tr>`;
+    let table = `<tr><th style="padding:10px; background:#F6F2EC;">주차</th><th style="padding:10px; background:#F6F2EC;">도약기</th><th style="padding:10px; background:#F6F2EC;">특성 지표</th></tr>`;
     wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'style="background:#FFF0F1; color:#D32F2F; font-weight:800;"' : ''; table += `<tr ${active}><td style="padding:10px; border-bottom:1px solid #EDE6DE;">${x.w-1}~${x.w+1}주</td><td style="padding:10px; border-bottom:1px solid #EDE6DE;">${x.t}</td><td style="padding:10px; border-bottom:1px solid #EDE6DE; text-align:left;">${x.d}</td></tr>`; });
     document.getElementById('ww-table').innerHTML = table;
 
@@ -2711,12 +2745,15 @@ window.calcHealthMaster = function() {
 
     const sdHeight = std.h * 0.04; 
     const sdWeight = std.w * 0.12;
-    const getDesc = (pct) => {
-        if(pct >= 95) return `매우 큼 (상위 5%)`;
-        if(pct >= 75) return `큰 편 (상위 25%)`;
-        if(pct >= 25) return `평균 범위 (정상)`;
-        if(pct >= 5) return `작은 편 (하위 25%)`;
-        return `매우 작음 (상담 요망)`;
+    /* ⚠️ '평균 범위 (정상)' · '매우 작음 (상담 요망)' — 한 번 잰 값으로 정상을 판정할 수 없다.
+          또래 안에서 어디쯤인지만 말하고, 끝쪽이면 검진 때 물어보라고만 한다. 몸무게는 크다/작다 대신 무겁다/가볍다 */
+    const getDesc = (pct, kind) => {
+        const big = kind === 'w' ? '무거운' : '큰', small = kind === 'w' ? '가벼운' : '작은';
+        if(pct >= 95) return `또래보다 많이 ${big} 편 · 검진 때 물어보세요`;
+        if(pct >= 75) return `${big} 편 (상위 25% 안)`;
+        if(pct >= 25) return `또래 평균 범위`;
+        if(pct >= 5) return `${small} 편 (하위 25% 안)`;
+        return `또래보다 많이 ${small} 편 · 검진 때 물어보세요`;
     };
 
     let pctHeight = null, pctWeight = null;
@@ -2732,7 +2769,7 @@ window.calcHealthMaster = function() {
             </div>
             <style>@keyframes fillGrowthH${rank} { from { width: 0%; } to { width: ${100 - rank}%; } }</style>
         `;
-        document.getElementById('desc-height').innerText = getDesc(pctHeight); 
+        document.getElementById('desc-height').innerText = getDesc(pctHeight, 'h'); 
     } else { 
         document.getElementById('pct-height').innerText = `-`; 
         document.getElementById('desc-height').innerText = `미입력`; 
@@ -2748,7 +2785,7 @@ window.calcHealthMaster = function() {
             </div>
             <style>@keyframes fillGrowthW${rankW} { from { width: 0%; } to { width: ${100 - rankW}%; } }</style>
         `;
-        document.getElementById('desc-weight').innerText = getDesc(pctWeight); 
+        document.getElementById('desc-weight').innerText = getDesc(pctWeight, 'w'); 
     } else { 
         document.getElementById('pct-weight').innerText = `-`; 
         document.getElementById('desc-weight').innerText = `미입력`; 
@@ -2767,30 +2804,32 @@ if (h && w) {
     let kaupDesc = "";
 
     if (kaup < 14) { 
-        kaupBadge.innerText = '⚠️ 체중 미달 우려'; kaupBadge.style.background = '#F6F2EC'; kaupBadge.style.color = '#7A6F68'; 
-        kaupDesc = "키에 비해 몸무게 증가가 다소 정체되어 있어요. 수유량이나 이유식 양을 조금 더 늘려주시고, 영유아 검진 시 의사 선생님과 상담해 보세요";
+        /* ⚠️ '수유량을 늘려 주세요', '날씬한 모델 체형', '아주 건강하게 잘 자라고 있어요' 를 지웠다.
+              키·몸무게 한 번으로 먹는 양을 권하거나 건강하다고 말할 수 없다. 아기 몸에 체형 말도 붙이지 않는다. */
+        kaupBadge.innerText = '키에 비해 가벼운 편'; kaupBadge.style.background = '#F6F2EC'; kaupBadge.style.color = '#7A6F68'; 
+        kaupDesc = "키에 비해 몸무게가 적게 나가는 편이에요. 한 번 잰 값으로는 알 수 없으니, 검진 때 성장 곡선을 같이 봐 달라고 해 주세요.";
     }
     else if (kaup < 16) { 
-        kaupBadge.innerText = '🌱 날씬한 모델 체형'; kaupBadge.style.background = '#F0EEFB'; kaupBadge.style.color = '#7F77DD'; 
-        kaupDesc = "키에 비해 체중이 적게 나가는 날씬한 체형이에요 활동량이 많거나 기초 대사량이 높은 아기일 수 있습니다. 아주 건강하게 잘 자라고 있어요 🏃‍♂️";
+        kaupBadge.innerText = '조금 가벼운 편'; kaupBadge.style.background = '#F0EEFB'; kaupBadge.style.color = '#7F77DD'; 
+        kaupDesc = "키에 비해 조금 가벼운 편이에요. 아이마다 크는 속도가 달라서, 몇 번 재서 곡선으로 보는 게 더 정확해요.";
     }
     else if (kaup <= 18) { 
        kaupBadge.innerText = '⚖️ 표준 범위'; kaupBadge.style.background = '#ECFDF5'; kaupBadge.style.color = '#A07722';
 kaupDesc = "키와 몸무게 비율이 또래 표준 범위에 들어와 있어요. 성장 속도는 아이마다 다르니 걱정되면 소아과에서 확인해 보세요.";
     }
     else if (kaup <= 20) { 
-        kaupBadge.innerText = '💪 귀여운 통통 우량아'; kaupBadge.style.background = '#FFF9E6'; kaupBadge.style.color = '#B78103'; 
-        kaupDesc = "키보다 몸무게가 묵직한 귀여운 통통 우량아예요 아주 잘 먹고 쑥쑥 크고 있네요. 걷고 뛰기 시작하면 젖살은 자연스럽게 빠진답니다 🧸";
+        kaupBadge.innerText = '조금 묵직한 편'; kaupBadge.style.background = '#FFF9E6'; kaupBadge.style.color = '#B78103'; 
+        kaupDesc = "키에 비해 몸무게가 조금 더 나가는 편이에요. 아이마다 크는 속도가 달라서, 몇 번 재서 곡선으로 보는 게 더 정확해요.";
     }
     else { 
-        kaupBadge.innerText = '🚨 소아 비만 주의'; kaupBadge.style.background = '#FFF0F1'; kaupBadge.style.color = '#D32F2F'; 
-        kaupDesc = "키에 비해 체중이 꽤 많이 나가는 편이에요. 소아 비만으로 이어지지 않도록 간식이나 수유 텀을 한 번 점검해 보시는 걸 권장합니다";
+        kaupBadge.innerText = '키에 비해 무거운 편'; kaupBadge.style.background = '#FFF0F1'; kaupBadge.style.color = '#D32F2F'; 
+        kaupDesc = "키에 비해 몸무게가 많이 나가는 편이에요. 한 번 잰 값으로는 알 수 없으니, 검진 때 의사 선생님께 물어보세요.";
     }
 
     // 💡 [입력 후 결과 멘트] 다크모드/라이트모드 완벽 대응 변수 적용
     insightMsg = `
         <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px; text-align: left; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">우리아기 체질량 지수(BMI): <span style="color:var(--text-m); font-size:14px;">${kaup.toFixed(1)}</span></div>
+            <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-bottom:6px;">카우프 지수(키에 비한 몸무게): <span style="color:var(--text-m); font-size:14px;">${kaup.toFixed(1)}</span></div>
             <div style="font-size:14px; font-weight:800; color:var(--text-m); line-height:1.55; word-break:keep-all;">${kaupDesc}</div>
     `;
 
@@ -2830,7 +2869,7 @@ kaupDesc = "키와 몸무게 비율이 또래 표준 범위에 들어와 있어�
     // 💡 [입력 전 안내 멘트] 다크모드 변수 적용 완료
     insightMsg = `
         <div style="background: var(--bg-sub, #F6F2EC); color: var(--text-m, #5A4D44); padding: 16px; border-radius: 12px; font-size: 13.5px; font-weight: 700; line-height: 1.5; word-break: keep-all; text-align: center;">
-            키와 몸무게를 모두 입력하시면 정확한 체형 밸런스(비만도) 진단과 맞춤 조언을 해드립니다 💜
+            키와 몸무게를 둘 다 적으면, 키에 비해 몸무게가 어느 쪽인지도 같이 보여 드려요.
         </div>
     `;
 }
@@ -3756,7 +3795,7 @@ function renderBatonTasks() {
     if (records.length === 0) {
         container.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; min-height: 110px; text-align: center; padding: 20px; background: var(--bg-sub); border-radius: 16px; border: 1px dashed var(--border);">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">현재 대기 중인 SOS 요청이 없습니다.<br>평화로운 공동 육아 중 🤍</div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">지금 기다리는 부탁이 없어요.<br>평화로운 공동 육아 중 🤍</div>
             </div>`;
         return;
     }
@@ -5873,7 +5912,7 @@ window.updateTrackerDashboard = function() {
     if (sleepCount > 0) {
         const lh = Math.floor(longestSleep / 60);
         const lm = longestSleep % 60;
-        const longTxt = lh > 0 ? `${lh}시간 ${lm}분` : `${lm}분`;
+        const longTxt = lh > 0 ? (lm ? `${lh}시간 ${lm}분` : `${lh}시간`) : `${lm}분`;   // '9시간 0분' 이 나왔다
         const clock = (ms) => {
             const d = new Date(ms);
             const h = d.getHours();
@@ -6194,17 +6233,17 @@ window.updateNowStatusCard = function() {
     
     if (sleepLabelEl && sleepStateEl) {
         if (window._activeSleepStart) {
-            sleepLabelEl.innerText = '😴 자는 중';
+            sleepLabelEl.innerText = '자는 중';   // 위 칸에 이미 잠 아이콘이 있다. 글자 앞 이모지는 겹쳐 보였다
             sleepStateEl.innerHTML = fmtMin(Math.max(0, Math.floor((Date.now() - window._activeSleepStart) / 60000)));
             sleepStateEl.style.color = '#7F77DD';
         } else if (window._lastWakeTime) {
-            sleepLabelEl.innerText = '⏰ 깬 지';
+            sleepLabelEl.innerText = '깬 지';
             /* ⚠️ 깬 시각을 지금보다 뒤로 적으면 '깬 지 -26분' 이 나왔다 */
             const awakeMin = Math.floor((Date.now() - window._lastWakeTime) / 60000);
             sleepStateEl.innerHTML = awakeMin < 1 ? '<span style="font-size:16px; font-weight:900;">방금</span>' : fmtMin(awakeMin);
             sleepStateEl.style.color = 'var(--text-m)';
         } else {
-            sleepLabelEl.innerText = '💤 수면';
+            sleepLabelEl.innerText = '수면';
             sleepStateEl.innerHTML = '기록 없음';
             sleepStateEl.style.color = '#A3958A';
         }
@@ -8439,11 +8478,11 @@ window.updateOpenItemGuide = function() {
     const guideEl = document.getElementById('open-item-guide');
     
     const guides = {
-        'formula': '💡 습기에 취약해요 개봉 후 <strong>3주(21일) 이내</strong> 소진을 권장합니다.',
+        'formula': '💡 습기에 약해요. 열고 나서 <strong>3주(21일) 안에</strong> 다 쓰는 게 좋아요.',
         'fever': '💡 처방받은 약은 1주, 시판 병 시럽은 <strong>1달(30일) 권장</strong>',
         'tub_oint': '💡 약국에서 덜어준 둥근 통 연고는 <strong>1달(30일) 이내</strong>',
         'tube_oint': '💡 밀봉된 튜브형 연고(비판텐 등)는 <strong>6개월(180일)</strong>',
-        'eye_drop': '🚨 세균 감염 위험 개봉 후 무조건 <strong>1달(30일) 이내</strong>',
+        'eye_drop': '🚨 세균이 들어가기 쉬워요. 열고 나서 <strong>1달(30일) 안에</strong> 다 써요',
         'cream': '💡 아기 피부에 직접 닿는 화장품은 개봉 후 <strong>6개월 권장</strong>',
         'puree': '💡 침이 닿지 않게 덜어서 냉장 보관 시 <strong>2일 이내</strong>',
         'wipe': '💡 수분이 마르고 세균 번식 위험이 있어 <strong>1달 권장</strong>'
@@ -8882,7 +8921,7 @@ window.renderSettingsTab = function() {
                 <!-- 🚨 gap 추가 & 텍스트 한 줄 고정 (white-space: nowrap) -->
                 <div onclick="window.openPediatricianReport()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; gap: 12px;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏥 소아과 진료용 리포트</div>
-                    <div style="background: #FEE500; color: #4A413C; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; flex-shrink: 0; white-space: nowrap;">PLUS</div>
+                    <div style="background: rgba(185,138,46,0.12); color: #B98A2E; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; flex-shrink: 0; white-space: nowrap;">PLUS</div>
                 </div>
                 <div onclick="window.clearAllData()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer;">
                     <div style="font-size: 14.5px; font-weight: 800; color: #D32F2F;">기록 데이터 초기화</div>
@@ -15086,7 +15125,7 @@ window.downloadPediatricianReport = function() {
         <div style="border-bottom: 4px solid #4A413C; padding-bottom: 24px; margin-bottom: 40px; display:flex; justify-content:space-between; align-items:flex-end;">
             <div>
                 <div style="font-size:36px; font-weight:900; letter-spacing:-1.5px; color:#4A413C;">소아과 진료 브리핑 차트</div>
-                <div style="font-size:16px; font-weight:700; color:#A3958A; margin-top:8px;">배냇함 프리미엄 의료 데이터 추출 시스템</div>
+                <div style="font-size:16px; font-weight:700; color:#A3958A; margin-top:8px;">배냇함 기록으로 만든 진료 참고용 요약</div>
             </div>
             <div style="text-align:right;">
                 <div style="font-size:14px; font-weight:800; color:#7A6F68; margin-bottom:4px;">발급일자</div>

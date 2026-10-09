@@ -97,7 +97,7 @@
         }
     </script>
     <link rel="stylesheet" href="style.css?v=20260921">
-    <link rel="stylesheet" href="tune.css?v=1">
+    <link rel="stylesheet" href="tune.css?v=2">
 
 <style>
     body { margin: 0 !important; padding: 0 !important; }
@@ -1617,10 +1617,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         
         <!-- 🚨 면책 조항 (초압축 2줄 다이어트 완료!) -->
         <div class="disclaimer-box box-tint-red" style="border-radius: 14px; padding: 16px; margin-bottom: 24px;">
-            <p style="color:var(--danger); font-size:13px; font-weight:900; margin-bottom:4px; margin-top:0;">🚨 투약 용량 확인 의무</p>
+            <p style="color:var(--danger); font-size:13px; font-weight:900; margin-bottom:4px; margin-top:0;">🚨 먹일 양은 약 상자에서 확인해요</p>
             <p style="font-size:12px; color:var(--danger); line-height:1.45; opacity: 0.9; word-break: keep-all; margin: 0;">
-                약마다 농도가 달라 앱에서 임의로 용량을 계산하지 않습니다.<br>
-                반드시 <strong>약 상자 뒷면의 [몸무게별 권장표]</strong>를 확인해 주세요.
+                약마다 농도가 달라서 앱은 양을 계산하지 않아요.<br>
+                꼭 <strong>약 상자 뒷면의 몸무게별 권장표</strong>를 보고 먹여 주세요.
             </p>
         </div>
 
@@ -1652,7 +1652,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
     <!-- 🏥 두 번째 카드: 소아과 브리핑 및 기록 -->
     <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-        <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 20px 0; color: #4A413C; letter-spacing: -0.5px;">⏱️ 소아과 브리핑 & 교차복용 차트</h2>
+        <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 20px 0; color: #4A413C; letter-spacing: -0.5px;">⏱️ 해열제 기록 · 진료 브리핑</h2>
 
         <div id="fever-alert" class="box-tint-red" style="display:none; color:var(--danger); padding:12px 16px; border-radius:12px; font-size:13.5px; font-weight:800; margin-bottom:16px; text-align:center; animation: pulseSOS 1.5s infinite;"></div>
         
@@ -1668,7 +1668,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
         <!-- 기록 입력 영역 (연한 회색 박스로 그룹화) -->
         <div style="background: #FBF8F3; border-radius: 16px; padding: 20px; border: 1px solid #F7F3ED; margin-bottom: 24px;">
-            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:12px; color:var(--text-m);">1. 방금 먹인 약 선택 (안전 잠금)</label>
+            <label style="font-size:14px; font-weight:800; display:block; margin-bottom:12px; color:var(--text-m);">1. 방금 먹인 약</label>
             <div class="pill-selector" style="display:flex; gap:10px; margin-bottom:20px;">
                 <button id="btn-pill-red" class="pill-btn" onclick="selectPill('red')" style="flex:1; padding:14px 0; border: 1px solid #F7F3ED; background: #FFFFFF; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; transition:all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">🔴 아세트아미노펜<br><span style="font-size:11px; font-weight:600; color: #A3958A;">(빨강)</span></button>
                 <button id="btn-pill-blue" class="pill-btn" onclick="selectPill('blue')" style="flex:1; padding:14px 0; border: 1px solid #F7F3ED; background: #FFFFFF; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; transition:all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">🔵 이부프로펜<br><span style="font-size:11px; font-weight:600; color: #A3958A;">(파랑)</span></button>
@@ -1722,12 +1722,12 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 <!-- 🏥 첫 번째 카드: 기본 정보 입력 및 차트 확인 -->
                 <div class="box-main" style="border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                     
-                    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 20px 0; color: var(--text-m); letter-spacing: -0.5px;">📈 영유아 종합 성장/건강 마스터</h2>
+                    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 20px 0; color: var(--text-m); letter-spacing: -0.5px;">📈 키·몸무게 성장 기록</h2>
                     
                     <!-- 면책 조항 -->
                     <div class="box-tint-yellow" style="padding: 16px; border-radius: 14px; margin-bottom: 24px;">
-                        <p style="color:#B78103; font-size:13.5px; font-weight:800; margin-bottom:4px;">🚨 의료 정보 면책 조항</p>
-                        <p style="font-size:13px; color:#7A5900; line-height:1.5; margin:0;">질병관리청 표준 성장도표 기반 추정치입니다. 실제 발달 평가는 전문의 검진을 우선하세요.</p>
+                        <p style="color:#B78103; font-size:13.5px; font-weight:800; margin-bottom:4px;">참고용 계산이에요</p>
+                        <p style="font-size:13px; color:#7A5900; line-height:1.5; margin:0;">질병관리청 성장도표로 어림한 값이에요. 발달이 걱정되면 영유아 검진 때 꼭 물어봐 주세요.</p>
                     </div>
             
                     <!-- 📊 누적 성장 곡선 아코디언 -->
@@ -1745,7 +1745,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                     <!-- 입력 폼 -->
                     <div class="box-sub" style="border-radius: 16px; padding: 20px; margin-bottom: 24px;">
                         <div class="box-tint-green" style="font-size:13px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:20px; text-align:center;">
-                            키·몸무게 중 하나만 적어주세요 🤍
+                            키나 몸무게, 하나만 적어도 돼요
                         </div>
                         
   <!-- 🚨 [수정 완료] 글자 잘림 방어 코드는 유지하면서, 보기 좋게 다시 가운데 정렬(center) 적용! -->
@@ -1786,7 +1786,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                     </div> <!-- 🚨 여기가 빠져있던 박스 닫기 태그입니다!! -->
             
                     <button class="btn-main" onclick="calcHealthMaster()" style="width: 100%; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none; background: #B98A2E !important; color: white !important; box-shadow: 0 4px 12px rgba(0, 179, 122, 0.25); cursor: pointer; transition: 0.2s;">
-                        ✨ 100명 중 몇 등? 분석하기
+                        또래 100명 중 어디쯤인지 보기
                     </button>
                 </div>
             
@@ -1883,7 +1883,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 안내 문구 박스 (중복 문구 삭제 완료) -->
 <div style="background: #FFF4ED; padding: 16px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #FFE4D6;">
     <p style="font-size: 13.5px; font-weight: 700; color: #E65100; line-height: 1.5; word-break: keep-all; margin: 0;">
-        "남들이 얼마에 샀는지는 중요하지 않아요 <strong>내가 전에 샀던 가격(나의 최저가)을 배냇함이 기억했다가, 이번 쇼핑이 성공적인 방어였는지 알려드릴게요"</strong>
+        "남들이 얼마에 샀는지는 중요하지 않아요. <strong>내가 전에 샀던 가격(나의 최저가)을 배냇함이 기억했다가, 이번에 잘 산 건지 알려 드릴게요."</strong>
     </p>
 </div>
         
@@ -1930,7 +1930,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         
         <!-- 핫딜 판독 버튼 (디자인 평탄화) -->
         <button class="btn-main" onclick="calcHotDeal()" style="width: 100%; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none; background: #FF823A; color: white; box-shadow: 0 4px 12px rgba(255, 130, 58, 0.25); cursor: pointer; transition: 0.2s;">
-            🔍 정확한 단가 및 핫딜 판독하기
+            🔍 단가 계산하고 핫딜인지 보기
         </button>
         
         <!-- 핫딜 결과창 (처음엔 숨김 처리됨) -->
@@ -1998,8 +1998,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             <!-- 💌 바통터치 패널 시작 -->
             <!-- ========================================== -->
             <div id="panel-baton" class="panel-block" style="display:none; padding: 0 !important; background: transparent !important; margin-top: 24px;">  
-                <!-- 아빠 레벨 & 경험치 바 추가 ▼▼▼ -->
-                <div class="box-main" style="margin-bottom: 24px; border: 2px solid #7F77DD; border-radius: 20px; padding: 20px;">
+                <!-- 아빠 레벨 & 경험치 바 — 숨김
+                     ⚠️ 홈에서 Lv·EXP 를 뺐는데(A안) 바통터치에만 '육아 마스터리 · 신입 육아 요원' 이 남아 있었다.
+                        부탁을 들어준 횟수가 점수가 되면 '누가 더 했나' 로 읽힌다. 요소는 남겨 두고(스크립트가 찾는다) 화면에서만 뺀다. -->
+                <div class="box-main" style="display:none; margin-bottom: 24px; border: 2px solid #7F77DD; border-radius: 20px; padding: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
                         <div>
                             <div style="font-size: 12px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;"> 육아 마스터리</div>
@@ -2025,7 +2027,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
                 <div class="box-main" style="border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;" data-theme-src="">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-                        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px;">🚨 부부 바통 터치 (SOS 심부름)</div>
+                        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px;">🚨 부부 바통터치 (SOS 심부름)</div>
                     </div>
                     
                     <div style="margin-bottom: 16px;">
@@ -2033,7 +2035,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         
                         <!-- 🚨 폰트 강제 적용 (font-family: inherit;) 및 글씨색상 추가! -->
                         <select id="baton-reward" class="box-sub" onchange="var customInput = document.getElementById('baton-reward-custom'); if(this.value === 'custom') { customInput.style.display = 'block'; customInput.focus(); } else { customInput.style.display = 'none'; customInput.value = ''; }" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13.5px; margin-bottom:8px; outline:none; border:1px solid var(--border); font-family: 'Pretendard', sans-serif; color: var(--text-m);">
-                            <option value="없음">선택 안 함 (순수한 사랑으로 해줌 )</option>
+                            <option value="없음">선택 안 함 (순수한 사랑으로 해 줌)</option>
                             <option value="진한 뽀뽀 1회">진한 뽀뽀 1회</option>
                             <option value="게임 2시간 자유이용권">게임 2시간 자유이용권</option>
                             <option value="시원한 맥주 & 안주 세팅">시원한 맥주 & 안주 세팅</option>
@@ -2057,7 +2059,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                     </div>
 
                     <div style="display:flex; gap:8px;">
-                        <input type="text" id="baton-text" placeholder="세부 미션을 입력하세요.." style="flex:1; min-width:0; border:1px solid var(--border); border-radius:12px; padding:14px; font-size:14px; font-weight:800; background:var(--bg-main); color:var(--text-m); outline:none;">
+                        <input type="text" id="baton-text" placeholder="부탁할 내용을 적어 주세요" style="flex:1; min-width:0; border:1px solid var(--border); border-radius:12px; padding:14px; font-size:14px; font-weight:800; background:var(--bg-main); color:var(--text-m); outline:none;">
                         <!-- 🚨 버튼을 보라색(#7F77DD)으로 고정! -->
                         <button onclick="addCustomBaton()" style="background:var(--primary); color:#FFF; border:none; border-radius:12px; padding:0 20px; font-weight:900; font-size:14px; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(127,119,221,0.3);">부탁하기</button>
                     </div>
@@ -2169,7 +2171,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         </select>
                         <!-- 👇 선택할 때마다 바뀌는 스마트 말풍선 추가! -->
                         <div id="open-item-guide" style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #7F77DD; background: #F0EEFB; padding: 12px 14px; border-radius: 12px; word-break: keep-all; line-height: 1.4;">
-                            💡 습기에 취약해요 개봉 후 3주(21일) 이내 소진을 권장합니다.
+                            💡 습기에 약해요. 열고 나서 3주(21일) 안에 다 쓰는 게 좋아요.
                         </div>
                         <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">2. 언제 뜯었나요? (기본: 오늘)</label>
                         <input type="date" id="open-item-date" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); box-sizing: border-box;">
@@ -2203,7 +2205,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             <!-- 🎒 2. 단독 액션 카드: 외출 준비물 체크리스트 -->
             <button class="btn-main checklist-main-btn" onclick="openChecklistModal()" style="width: 100%; background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 18px; padding: 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; justify-content: center; align-items: center; cursor: pointer;">
                 <span style="font-size: 20px; margin-right: 8px;">🎒</span>
-                <span style="font-size: 15.5px; font-weight: 800; color: #4A413C;">3초 컷 외출 준비물 체크리스트 〉</span>
+                <span style="font-size: 15.5px; font-weight: 800; color: #4A413C;">외출 준비물 체크리스트 〉</span>
             </button>
 
             <!-- 🎛️ 3. 통합 컨트롤 패널 (탭 + 검색 + 필터 합체!) -->
@@ -3465,7 +3467,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             }, { merge: true });
 
             localStorage.setItem('tosil_premium_applied', 'true');
-            alert("🎉 얼리버드 신청 완료\n\n승인되면 첫 1개월간 프리미엄 전 기능을 무료로 이용하실 수 있습니다");
+            /* ⚠️ '첫 1개월 프리미엄 무료' 는 지금 계획(출시 기념 2달 무료 → 구독)과 다른 약속이었다 */
+            alert("🎉 신청됐어요\n\nPLUS 결제가 열리면 가장 먼저 알려 드릴게요");
             const modal = document.getElementById('vip-modal-overlay');
             if(modal) modal.style.display = 'none';
         } catch (error) {

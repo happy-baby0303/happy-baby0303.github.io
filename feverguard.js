@@ -235,7 +235,8 @@
               간격 이유는 첫 줄이 제목이라 괜찮았지만, 월령 · 생일 이유는 첫 줄이 '왜' 였다.
               "생후 6개월 미만(현재 3개월)" 이 잘리고 "전문의 상담 전에는…" 만 남았다.
               큰 이유(hard)는 통째로 보여준다. */
-        var sub = v.ok ? ("24시간 안에 " + n + "번 줬어요 (상한 " + rule.maxPerDay + "회)")
+        /* ⚠️ '(상한 5회)' 가 좁은 칸에서 '(상한' / '5회)' 로 갈라졌다. 줄을 나눠 둔다 */
+        var sub = v.ok ? ("24시간 안에 " + n + "번 줬어요\n하루 최대 " + rule.maxPerDay + "번")
                        : (v.hard ? v.why : (v.why.split("\n").slice(1).join("\n") || v.why));
 
         return '<div style="flex:1; min-width:0; background:var(--bg-card); border:1px solid var(--border); ' +
