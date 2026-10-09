@@ -29,7 +29,7 @@
         var w = u.weeksFromDue(u.dueDate());
         return w ? { wk: Math.max(1, Math.min(42, w.weeks)), w: w } : null;
     }
-    /* 받침 있는 이름은 '이' 를 붙인다 — 하윤 → 하윤이를 · 하윤이가 (앱의 babyCall 과 같은 규칙) */
+    /* 받침 있는 이름은 '이' 를 붙인다 — 서준 → 서준이를 · 서준이가 (앱의 babyCall 과 같은 규칙) */
     function call(n, j) {
         var c = n.charCodeAt(n.length - 1), jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
         return n + (jong && n !== "우리 아기" ? "이" : "") + (j || "");

@@ -228,7 +228,7 @@
         for (var i = 0; i < all.length; i++) {
             var t = (all[i].textContent || "").trim();
             if (t === "전문의 가이드라인 기반 알레르기 철벽 방어" && all[i].children.length === 0) {
-                all[i].textContent = "레시피 135종 · 알레르기 기록과 함께";
+                all[i].textContent = "레시피 " + ((typeof babyFoodData !== "undefined" && babyFoodData.length) || 150) + "종 · 알레르기 기록과 함께";
                 all[i].style.fontSize = "12.5px";
                 return;
             }

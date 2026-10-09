@@ -22,7 +22,7 @@
                 홈
             </a>
             <h1 style="font-size: 18px; margin: 0; font-weight: 800;">배냇함 큐레이터</h1>
-            <div class="pro-badge">135종 레시피</div>
+            <div class="pro-badge" id="food-count-badge">레시피</div>
         </div>
         <nav class="gnb-menu">
             <a href="../stroller/index.html" class="gnb-item">🚼 유모차</a>
@@ -199,16 +199,16 @@
                 </div>
             </div>
 <div class="matrix-panel">
-                <div class="matrix-header">🩺 안심 식단 고르기</div>
+                <div class="matrix-header">🥄 안심 식단 고르기</div>
                 <div class="matrix-grid">
                     <div class="matrix-item">
                         <label>👶 아기 월령</label>
                         <div class="custom-select-wrapper">
                             <select id="food-age" onchange="window.__foodUserFiltered=true; runFoodEngine()">
-                                <option value="early">초기 (생후 4~6개월)</option>
-                                <option value="mid">중기 (생후 7~9개월)</option>
-                                <option value="late">후기 (생후 10~11개월)</option>
-                                <option value="done">유아식 및 일반식 반찬 (12개월 이상)</option>
+                                <option value="early">초기 · 4~6개월</option>
+                                <option value="mid">중기 · 7~9개월</option>
+                                <option value="late">후기 · 10~11개월</option>
+                                <option value="done">완료기 · 12개월~</option>
                             </select>
                         </div>
                     </div>
@@ -217,19 +217,19 @@
                         <div class="custom-select-wrapper">
                             <select id="food-goal" onchange="window.__foodUserFiltered=true; runFoodEngine()">
                                 <option value="all">특별한 고민 없음</option>
-                                <option value="iron"> 철분 보충 필수</option>
-                                <option value="poop"> 변비 해결</option>
-                                <option value="weight"> 체중 증가</option>
+                                <option value="iron">철분 챙기기</option>
+                                <option value="poop">응가가 힘들 때</option>
+                                <option value="weight">체중이 걱정될 때</option>
                             </select>
                         </div>
                     </div>
                     <div class="matrix-item full-width">
                         <label>🥕 냉장고 파먹기 (반드시 포함할 재료)</label>
-                        <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기" onkeyup="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #EDE6DE; background: #FBF8F3; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
+                        <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기" oninput="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #EDE6DE; background: #FBF8F3; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
                     </div>
                     <div class="matrix-item full-width">
                         <label>⚠️ 알레르기 차단 (제외할 재료)</label>
-                        <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아" onkeyup="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #EDE6DE; background: #FBF8F3; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
+                        <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아" oninput="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #EDE6DE; background: #FBF8F3; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
                     </div>
                 </div>
             </div>
@@ -263,7 +263,7 @@
             </div>
 <div class="search-box">
                 <label style="display:block; font-size:14px; font-weight:800; color:#4A413C; margin-bottom:12px;">🚦 이 재료, 먹여도 될까요?</label>
-                <input type="text" id="ingredient-search" placeholder="예: 고기, 꿀, 소금, 새우 입력" onkeyup="checkIngredient(event)">
+                <input type="text" id="ingredient-search" placeholder="예: 완두콩, 꿀, 새우, 땅콩" oninput="checkIngredient()" autocomplete="off">
                 <div id="traffic-light-result" style="margin-top: 16px; display:none;"></div>
             </div>
 <div data-html2canvas-ignore="true" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
@@ -286,13 +286,15 @@
                     </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12.5px; font-weight: 800; color: #A3958A; margin-bottom: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; font-size: 12.5px; font-weight: 800; color: #A3958A; margin-bottom: 12px;">
                     <div style="color: #E32636;">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color: #7F77DD;">토</div>
                 </div>
                 
                 <!-- ⚠️ 칸 높이를 aspect-ratio 에만 맡겼더니 기기에 따라 카드 높이가 마지막 줄을 못 따라갔다.
                      (갤럭시 플립에서 27~30 이 카드 밖으로 밀려남) 줄 높이를 격자가 직접 정한다. -->
-                <div id="cal-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(46px, auto); gap: 6px;"></div>
+                <!-- ⚠️ 칸마다 aspect-ratio 1 이라 칸 너비가 높이(46px)보다 작아질 수 없었다. 7칸 × 46px 이 카드보다 넓어서
+                     폭이 좁은 폰(390px)에서는 토요일 줄이 카드 밖으로 삐져나갔다. 너비는 0 까지 줄 수 있게 하고 높이는 격자가 정한다. -->
+                <div id="cal-grid" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: minmax(44px, auto); gap: 4px;"></div>
             </div>
 <div id="cal-detail-area" style="background: #FFF9F9; border: 2px solid #FFE5E5; border-radius: 20px; padding: 20px; margin-bottom: 24px;">
                 <!-- ⚠️ 날짜 글자와 단추 둘을 한 줄에 욱여넣어서, 단추 글씨가 두 줄로 접히고
@@ -452,6 +454,7 @@
     <script src="../shared/safenet.js"></script>
     <script src="../shared/babyswitch.js"></script>
     <script src="data.js"></script>
+    <script>try { document.getElementById('food-count-badge').textContent = babyFoodData.length + '종 레시피'; } catch (e) {}</script>
     <script src="app.js?v=1001"></script>
     <script src="passedfoods.js"></script>
     <script src="../shared/disclosure.js"></script>

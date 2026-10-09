@@ -30,7 +30,7 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
-    /* ⚠️ 가입하고 제일 먼저 보는 화면인데 "하윤를", "하윤가 꺼내 볼" 이 나왔다.
+    /* ⚠️ 가입하고 제일 먼저 보는 화면인데 "서준를", "서준가 꺼내 볼" 이 나왔다.
           받침이 있으면 '이' 를 붙인다 (data.js 의 babyCall). */
     function callName(j) {
         try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}

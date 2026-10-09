@@ -22,7 +22,11 @@
       2. 무료 기간에 만든 기록은 계속 볼 수 있다
       3. 안전에 걸리는 정보는 유료로 바꾸지 않는다
 
-   ⚠️ 날짜 한 줄만 고치면 된다. 아래 UNTIL 을 바꾸세요.
+   ⚠️ 끝나는 날은 서버에서 정한다 (앱을 다시 올리지 않아도 된다).
+      파이어베이스 콘솔 → Firestore → app_settings → flags 문서에
+        plusFreeUntil : "2027-01-10"   (문자열, 출시일 + 2달)
+      을 적으면 다음에 앱을 열 때부터 그 날짜로 바뀐다.
+      적기 전에는 아래 UNTIL_DEFAULT 를 쓴다 (테스트 기간에도 열려 있게 넉넉히).
       기간이 지나면 자동으로 원래 규칙(결제한 사람만 PLUS)으로 돌아간다.
 
    index.html 에서 premium.js 다음에 로드하세요.
@@ -30,17 +34,24 @@
 (function () {
     'use strict';
 
-    /* ---------- 여기만 고치면 된다 ----------
-       출시 예정 2026-10-16 기준으로 60일.
-       심사가 밀려 출시가 늦어지면 이 날짜를 다시 잡으세요.
+    /* ---------- 기본값 ----------
+       서버 값(app_settings/flags.plusFreeUntil)을 아직 못 읽었을 때만 쓴다.
+       출시일이 정해지면 서버에 '출시일 + 2달' 을 적는다 (위 설명).
        ⚠️ 날짜를 못 고치고 지나가도 앱이 알아서 예고하고 닫습니다. 아래 참조. */
-    var UNTIL     = "2026-12-15";    // 이 날까지 모두 열림 (이 날 포함)
+    var UNTIL_DEFAULT = "2027-01-31"; // 서버 값이 없을 때 이 날까지 모두 열림 (이 날 포함)
+    var SRV_KEY   = "tosil_plusfree_until_srv";
     var ON        = true;            // false 로 두면 무료 개방을 끈다
     var MIN_DAYS  = 14;              // 늦게 깐 사람도 최소 이만큼은 써본다
     var NOTICE    = 30;              // 끝나기 며칠 전부터 예고할지 (약속한 값)
     /* --------------------------------------- */
 
     var KEY = "tosil_free_open_until";
+
+    function until() {
+        var v = null;
+        try { v = localStorage.getItem(SRV_KEY); } catch (e) {}
+        return (v && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : UNTIL_DEFAULT;
+    }
     var CARD = "plusfree-card";
     var GOLD = "#B98A2E";
 
@@ -57,7 +68,7 @@
     }
 
     function endAt() {
-        var fixed = new Date(UNTIL + "T23:59:59").getTime();
+        var fixed = new Date(until() + "T23:59:59").getTime();
         var mine  = firstRun() + MIN_DAYS * 86400000;
         return Math.max(isNaN(fixed) ? 0 : fixed, mine);
     }
@@ -78,13 +89,35 @@
     }
 
     /* 큐레이터는 별도 페이지라 이 파일이 없다. 날짜를 남겨두면 그쪽도 읽는다. */
-    try {
+    function shareEnd() { try {
         /* ⚠️ 늦게 설치한 사람은 MIN_DAYS 만큼 더 열리는데, 큐레이터에는 UNTIL 만 넘겨서
               본 앱은 열려 있고 큐레이터는 잠기는 날이 생겼다. 이 사람의 실제 종료일을 넘긴다. */
         var ed = new Date(endAt());
         if (freeOpen()) localStorage.setItem(KEY, ed.getFullYear() + "-" + String(ed.getMonth() + 1).padStart(2, "0") + "-" + String(ed.getDate()).padStart(2, "0"));
         else localStorage.removeItem(KEY);
-    } catch (e) {}
+    } catch (e) {} }
+    shareEnd();
+
+    /* 서버에 적힌 끝나는 날을 읽어 온다 (출시일이 정해지면 콘솔에서 한 번 적는다) */
+    async function pullServerDate(tries) {
+        if (!window.db || typeof window.getDoc !== "function" || typeof window.doc !== "function") {
+            if ((tries || 0) < 10) setTimeout(function () { pullServerDate((tries || 0) + 1); }, 1500);
+            return;
+        }
+        try {
+            var snap = await window.getDoc(window.doc(window.db, "app_settings", "flags"));
+            var v = snap && snap.exists() ? (snap.data() || {}).plusFreeUntil : null;
+            var cur = null; try { cur = localStorage.getItem(SRV_KEY); } catch (e) {}
+            if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) {
+                if (v !== cur) { localStorage.setItem(SRV_KEY, v); changed(); }
+            } else if (cur) { localStorage.removeItem(SRV_KEY); changed(); }
+        } catch (e) { /* 오프라인이면 지난번 값을 그대로 쓴다 */ }
+    }
+    function changed() {
+        shareEnd();
+        try { if (document.getElementById(CARD)) mountCard(); } catch (e) {}
+    }
+    setTimeout(function () { pullServerDate(0); }, 2500);
 
     /* ---------- 무료 기간에는 모두 PLUS ----------
        ⚠️ 진짜 결제 여부는 지우지 않는다. isRealPremium() 으로 남겨둔다.
@@ -116,7 +149,7 @@
                 '🎁 지금은 출시 기념으로 모두 열려 있어요</div>' +
             '<div style="font-size:12px; font-weight:700; color:' + GOLD + '; line-height:1.7; ' +
                 'word-break:keep-all; opacity:0.92;">' +
-                pretty(UNTIL) + '까지 PLUS 기능을 그냥 쓰실 수 있습니다. ' +
+                pretty(until()) + '까지 PLUS 기능을 그냥 쓰실 수 있습니다. ' +
                 '유료로 바뀔 때는 <b>30일 전에 미리</b> 알려드릴게요.</div>' +
         '</div>';
     }
@@ -164,7 +197,7 @@
                     : '') +
             '</div>' +
             '<div style="font-size:13px; font-weight:700; color:var(--text-m); line-height:1.7; word-break:keep-all; margin-top:6px;">' +
-                (open ? '출시 기념으로 <b>' + pretty(UNTIL) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음'
+                (open ? '출시 기념으로 <b>' + pretty(until()) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음'
                       : 'PLUS 기능과 요금은 준비되는 대로 안내드릴게요.') +
             '</div>' + promise;
     }
@@ -317,7 +350,7 @@
     /* ---------- 점검용 ---------- */
     window.freeOpenDebug = function () {
         console.log("무료 개방:", freeOpen() ? "켜짐" : "꺼짐");
-        console.log("종료일:", UNTIL, "· 남은 날:", daysLeft() + "일");
+        console.log("종료일:", until(), "· 남은 날:", daysLeft() + "일", "· 서버 값:", localStorage.getItem(SRV_KEY) || "없음");
         console.log("이 사람이 실제로 결제했나:",
             (typeof window.isRealPremium === "function") ? window.isRealPremium() : "확인 불가");
         console.log("앱이 PLUS 로 보나:", window.isPremiumUser());

@@ -236,7 +236,7 @@
         if (document.getElementById("hero-drag-tip")) return;
         var tip = document.createElement("div");
         tip.id = "hero-drag-tip";
-        /* ⚠️ 사진 아래쪽에 띠로 깔려서 'D+187일 · 하윤의 공간' 글자와 겹쳤다.
+        /* ⚠️ 사진 아래쪽에 띠로 깔려서 'D+187일 · 서준의 공간' 글자와 겹쳤다.
               왼쪽 위 작은 알약으로 옮기고, 세 번 보여 준 뒤에는 띄우지 않는다. */
         tip.innerHTML = "\u2195\uFE0E 길게 눌러 사진 위치 맞추기";
         tip.style.cssText =
@@ -562,13 +562,16 @@
         var input = function (k, label) {
             return '<div style="flex:1; min-width:0;">' +
                 '<div style="font-size:11.5px; font-weight:800; color:var(--text-sub); margin-bottom:6px;">' + label + '</div>' +
-                '<input id="pp-' + k + '" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-1234-5678" ' +
+                '<input id="pp-' + k + '" type="tel" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" ' +
                     'value="' + esc(o[k] ? prettyPhone(o[k]) : "") + '" ' +
                     'style="width:100%; box-sizing:border-box; padding:12px; border-radius:12px; border:1px solid var(--border); ' +
                     'background:var(--bg-sub); font-size:14px; font-weight:700; color:var(--text-m); outline:none;">' +
             '</div>';
         };
-        return '<div style="font-size:15px; font-weight:900; color:var(--text-m);">📞 도우미가 걸 번호</div>' +
+        /* ⚠️ 빈칸 안내 글씨가 굵은 글씨(700)를 그대로 받아서 '010-1234-5678' 이 진짜 저장된 번호처럼 보였다.
+              안내 글씨는 가늘고 옅게, 숫자는 누가 봐도 예시인 0000 으로 둔다. */
+        return '<style>#pp-mom::placeholder,#pp-dad::placeholder{font-weight:500;color:#C4BAAF;opacity:1;}</style>' +
+            '<div style="font-size:15px; font-weight:900; color:var(--text-m);">📞 도우미가 걸 번호</div>' +
             '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin:4px 0 14px; line-height:1.6; word-break:keep-all;">' +
                 '할머니·시터 화면의 \'엄마에게 전화 / 아빠에게 전화\' 가 이 번호로 걸려요. 우리 가족에게만 보여요.</div>' +
             '<div style="display:flex; gap:8px;">' + input("mom", "엄마") + input("dad", "아빠") + '</div>' +

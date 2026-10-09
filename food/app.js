@@ -117,105 +117,239 @@ function renderFavorites() {
 }
 
 
-// 🚦 1. 식재료 신호등 판독기 + 쌍방향 영양학 팩트체크
+// 🚦 1. 이 재료, 먹여도 될까요? (식재료 신호등)
+//   ⚠️ 예전엔 여기 '👩‍⚕️ 영양학 팩트체크 · 주의궁합' 이 붙었다.
+//      "시금치와 두부는 결석을 만들어 절대 피해야 해요" 같은 민간 속설이었고,
+//      반대 방향으로 찾을 때는 다른 재료의 이유를 그대로 붙여서
+//      '소고기 + 두부 → 두부와 해조류는 같이 쓰기 좋은 조합이에요' 처럼 엉뚱한 말이 나왔다.
+//      이제는 확실한 것만: 언제부터 · 어떻게 손질 · 같이 쓰기 좋은 재료 · 이 재료가 들어간 레시피.
+//   ⚠️ '완두콩 넣은 레시피가 안 떠요' 라는 문의 — 재료도 레시피도 없었다. 둘 다 채웠고,
+//      여기서 바로 그 재료가 들어간 레시피로 건너갈 수 있게 했다.
+const FOOD_STAGE = { early: "초기(4~6개월)부터", mid: "중기(7~9개월)부터", late: "후기(10~11개월)부터", done: "돌 지나서" };
+const FOOD_STAGE_SHORT = { early: "초기", mid: "중기", late: "후기", done: "완료기" };
+const FOOD_STAGE_ORDER = { early: 0, mid: 1, late: 2, done: 3 };
+const FOOD_SHOW = { "계란흰자": "달걀", "계란노른자": "달걀노른자" };   // 칩에 보일 이름
+const FOOD_TONE = {
+    red:    { dot: "#D9534F", ink: "#B42318", bg: "#FFF5F3", line: "#F6CFC8", label: "돌 전엔 안 줘요" },
+    yellow: { dot: "#E0A100", ink: "#8A5A00", bg: "#FFF9EC", line: "#F3DFA8", label: "조심해서 시작해요" },
+    green:  { dot: "#3BA776", ink: "#1F7A52", bg: "#F3FAF6", line: "#C9E8D7", label: "편하게 시작해요" }
+};
+
+function foodEsc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+// onclick="..." 안에 넣을 글자
+function foodArg(s) { return foodEsc("'" + String(s == null ? "" : s).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'"); }
+
+// 받침 있으면 '은', 없으면 '는'
+function foodEunNeun(w) {
+    const c = String(w || "").charCodeAt(String(w || "").length - 1);
+    return (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0) ? "은" : "는";
+}
+// 받침 있으면 '이', 없으면 '가'
+function foodIga(w) {
+    const c = String(w || "").charCodeAt(String(w || "").length - 1);
+    return (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0) ? "이" : "가";
+}
+
+/* 검색 — 이름이 딱 맞는 것 > 다른 이름(키워드)이 딱 맞는 것 > 이름으로 시작 > 이름에 들어 있음 > 키워드 일부
+   점수가 같으면 편하게 시작하는 재료(초록)가 먼저 ('고기' → 돼지고기가 아니라 소고기) */
+function foodSearch(query) {
+    const q = String(query || "").replace(/\s+/g, "");
+    if (!q) return [];
+    const scored = [];
+    ingredientDB.forEach((item, idx) => {
+        const name = item.name.replace(/\s+/g, "");
+        const kws = item.keywords || [];
+        let sc = 0;
+        if (name === q) sc = 100;
+        else if (kws.indexOf(q) > -1) sc = 90;
+        else if (name.indexOf(q) === 0) sc = 80;
+        else if (name.indexOf(q) > -1) sc = 60;
+        if (sc < 50) kws.forEach(k => {
+            if (k.indexOf(q) === 0) sc = Math.max(sc, 40);
+            else if (q.length >= 2 && k.indexOf(q) > -1) sc = Math.max(sc, 30);
+        });
+        if (!sc && q.length >= 2 && q.indexOf(name) > -1) sc = 20;   // '소고기안심' → 소고기
+        if (sc) scored.push({ item, sc, idx });
+    });
+    const tone = { green: 0, yellow: 1, red: 2 };
+    scored.sort((a, b) => b.sc - a.sc || (tone[a.item.status] - tone[b.item.status]) || a.idx - b.idx);
+    foodSearch.lastScores = scored.map(x => x.sc);
+    return scored.map(x => x.item);
+}
+
+/* 레시피를 찾을 말 — 이름과, 다른 재료와 헷갈리지 않는 키워드만
+   ('안심' 은 닭안심에도 있고 '콩' 은 완두콩에도 있어서 빼야 한다) */
+let _foodTermsCache = null;
+function foodRecipeTerms(item) {
+    if (!_foodTermsCache) {
+        _foodTermsCache = new Map();
+        const all = [];
+        ingredientDB.forEach(i => { all.push([i, i.name]); (i.keywords || []).forEach(k => all.push([i, k])); });
+        ingredientDB.forEach(i => {
+            const terms = [i.name.replace(/·.*/, "")];
+            (i.keywords || []).forEach(k => {
+                if (k.length < 2) return;
+                const clash = all.some(([o, w]) => o !== i && w !== k && w.indexOf(k) > -1);
+                if (!clash && terms.indexOf(k) < 0) terms.push(k);
+            });
+            _foodTermsCache.set(i.name, terms);
+        });
+    }
+    return _foodTermsCache.get(item.name) || [item.name];
+}
+function foodRecipesWith(item) {
+    const terms = foodRecipeTerms(item);
+    const out = [];
+    babyFoodData.forEach(r => {
+        const text = r.name + " " + r.ingredients;
+        const t = terms.find(w => text.indexOf(w) > -1);
+        if (t) out.push({ r, term: t });
+    });
+    return out;
+}
+
+function foodPairsOf(item) {
+    const out = [];
+    (typeof pairDB !== "undefined" ? pairDB : []).forEach(p => {
+        if (p.a === item.name) out.push({ names: p.with, why: p.why });
+        else if (p.with.indexOf(item.name) > -1) out.push({ names: [p.a], why: p.why });
+    });
+    return out;
+}
+
+function foodNowStage() {
+    const el = document.getElementById('food-age');
+    return (el && el.value) || 'early';
+}
+
+function foodIngredientCard(found) {
+    const tone = FOOD_TONE[found.status] || FOOD_TONE.green;
+    const when = found.fromText || (found.from ? FOOD_STAGE[found.from] : "");
+    const now = foodNowStage();
+    const early = found.status !== "red" && found.from && FOOD_STAGE_ORDER[found.from] > FOOD_STAGE_ORDER[now];
+    let html = `
+        <div style="background:${tone.bg}; border:1px solid ${tone.line}; padding:16px 16px 15px; border-radius:16px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                    <span style="width:11px; height:11px; border-radius:50%; background:${tone.dot}; flex-shrink:0;"></span>
+                    <span style="font-weight:900; font-size:17px; color:#4A413C; word-break:keep-all;">${foodEsc(found.name)}</span>
+                </div>
+                <span style="flex-shrink:0; font-size:12px; font-weight:800; color:${tone.ink}; background:#FFFFFF; border:1px solid ${tone.line}; padding:5px 9px; border-radius:999px;">${foodEsc(found.label || tone.label)}</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 8px;">
+                ${when ? `<span style="font-size:12.5px; font-weight:800; color:#4A413C; background:#FFFFFF; border:1px solid #EDE6DE; padding:4px 9px; border-radius:8px;">${foodEsc(when)}</span>` : ''}
+                ${found.why ? `<span style="font-size:12.5px; font-weight:800; color:${tone.ink}; background:#FFFFFF; border:1px solid ${tone.line}; padding:4px 9px; border-radius:8px;">${foodEsc(found.why)} 주의</span>` : ''}
+            </div>
+            <div style="font-size:14px; color:#6F645D; line-height:1.65; font-weight:600; word-break:keep-all;">${foodEsc(found.desc)}</div>
+            ${early ? `<div style="margin-top:10px; font-size:12.5px; font-weight:700; color:#8A7F76;">지금(${FOOD_STAGE_SHORT[now]})은 조금 이른 재료예요.</div>` : ''}
+        </div>`;
+
+    const pairs = foodPairsOf(found);
+    if (pairs.length) {
+        html += `<div style="margin-top:18px;">
+            <div style="font-size:14.5px; font-weight:900; color:#4A413C; margin-bottom:10px;">같이 쓰기 좋은 재료</div>` +
+            pairs.slice(0, 5).map(p => `
+            <div style="padding:11px 13px; border:1px solid #EDE6DE; background:#FFFFFF; border-radius:12px; margin-bottom:7px;">
+                <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:5px;">
+                    ${p.names.map(n => `<span onclick="foodLookup(${foodArg(n)})" style="cursor:pointer; font-size:13px; font-weight:800; color:#5B53B8; background:#F0EEFB; padding:3px 9px; border-radius:7px;">${foodEsc(FOOD_SHOW[n] || n)}</span>`).join('')}
+                </div>
+                <div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.55; word-break:keep-all;">${foodEsc(p.why)}</div>
+            </div>`).join('') + `</div>`;
+    }
+
+    const list = foodRecipesWith(found);
+    if (list.length && found.status !== "red") {
+        list.sort((a, b) => {
+            const da = Math.abs(FOOD_STAGE_ORDER[a.r.age] - FOOD_STAGE_ORDER[now]) + (FOOD_STAGE_ORDER[a.r.age] > FOOD_STAGE_ORDER[now] ? 0.5 : 0);
+            const db = Math.abs(FOOD_STAGE_ORDER[b.r.age] - FOOD_STAGE_ORDER[now]) + (FOOD_STAGE_ORDER[b.r.age] > FOOD_STAGE_ORDER[now] ? 0.5 : 0);
+            return da - db;
+        });
+        const shown = list.slice(0, 6);
+        html += `<div style="margin-top:18px;">
+            <div style="font-size:14.5px; font-weight:900; color:#4A413C; margin-bottom:10px;">${foodEsc(found.name)}${foodIga(found.name)} 들어간 레시피 <span style="color:#7F77DD;">${list.length}</span></div>` +
+            shown.map(x => `
+            <div onclick="foodGoRecipe(${foodArg(x.r.name)}, ${foodArg(x.term)})" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:12px 13px; border:1px solid #EDE6DE; background:#FFFFFF; border-radius:12px; margin-bottom:7px;">
+                <span style="flex-shrink:0; font-size:11.5px; font-weight:800; color:${x.r.age === now ? '#FFFFFF' : '#7A6F68'}; background:${x.r.age === now ? '#7F77DD' : '#F6F2EC'}; padding:3px 8px; border-radius:6px;">${FOOD_STAGE_SHORT[x.r.age]}</span>
+                <span style="flex:1; min-width:0; font-size:14px; font-weight:800; color:#4A413C; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${foodEsc(x.r.name)}</span>
+                <span style="flex-shrink:0; color:#B5AAA0; font-size:13px; font-weight:800;">›</span>
+            </div>`).join('') +
+            (list.length > shown.length ? `<div onclick="foodGoRecipe('', ${foodArg(list[0].term)})" style="cursor:pointer; text-align:center; font-size:13px; font-weight:800; color:#7F77DD; padding:8px 0 2px;">레시피 탭에서 ${list.length}개 다 보기 ›</div>` : '') +
+            `</div>`;
+    }
+    return html;
+}
+
 function checkIngredient() {
-    const query = document.getElementById('ingredient-search').value.trim().replace(/\s+/g, '');
+    const input = document.getElementById('ingredient-search');
+    const query = (input ? input.value : '').trim();
     const resultArea = document.getElementById('traffic-light-result');
+    if (!resultArea) return;
 
     if (!query) {
         resultArea.style.display = 'none';
+        resultArea.innerHTML = '';
         return;
     }
 
-    // 신호등 DB 검색
-    const found = ingredientDB.find(item => item.name.includes(query) || item.keywords.some(k => k.includes(query)));
-
-    if (found) {
-        resultArea.style.display = 'block';
-        let color, icon, title, bg, border;
-        
-        if (found.status === 'red') { color = '#D32F2F'; bg = '#FFF0F1'; border = '#FECACA'; icon = '🚨'; title = '절대 금지'; }
-        else if (found.status === 'yellow') { color = '#B45309'; bg = '#FEF3C7'; border = '#FDE68A'; icon = '⚠️'; title = '주의 필요'; }
-        else { color = '#059669'; bg = '#ECFDF5'; border = '#A7F3D0'; icon = '🟢'; title = '안심 재료'; }
-
-        // 기본 신호등 결과 UI
-        let html = `
-            <div style="background:${bg}; border:1px solid ${border}; padding:16px; border-radius:12px; margin-bottom:0;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                    <span style="font-size:20px;">${icon}</span>
-                    <span style="font-weight:900; font-size:16px; color:${color};">${found.name} (${title})</span>
-                </div>
-                <div style="font-size:14px; color:#7A6F68; line-height:1.5; font-weight:600;">${found.desc}</div>
-            </div>
-        `;
-
-        // ✨ 핵심: 쌍방향(Reverse) 궁합 탐색 AI 로직 ✨
-        let goodPairs = [];
-        let badPairs = [];
-
-        // 1. 본인이 메인인 경우 (정방향: 예 - '소고기' 검색 시)
-        if (pairingDB[found.name]) {
-            if (pairingDB[found.name].good) goodPairs.push(...pairingDB[found.name].good);
-            if (pairingDB[found.name].bad) badPairs.push(...pairingDB[found.name].bad);
-        }
-
-        // 2. 남의 데이터에 포함된 경우 (역방향: 예 - '청경채' 검색 시 '소고기'를 찾아냄!)
-        for (const [mainIng, data] of Object.entries(pairingDB)) {
-            if (mainIng === found.name) continue; // 정방향에서 이미 찾은 건 패스
-
-            if (data.good) {
-                data.good.forEach(g => {
-                    if (g.item.includes(found.name) && !goodPairs.some(p => p.item.includes(mainIng))) {
-                        goodPairs.push({ item: mainIng, reason: g.reason });
-                    }
-                });
-            }
-            if (data.bad) {
-                data.bad.forEach(b => {
-                    if (b.item.includes(found.name) && !badPairs.some(p => p.item.includes(mainIng))) {
-                        badPairs.push({ item: mainIng, reason: b.reason });
-                    }
-                });
-            }
-        }
-
-        // 궁합 데이터가 하나라도 있으면 렌더링!
-        if (goodPairs.length > 0 || badPairs.length > 0) {
-            html += `<div style="margin-top: 16px; padding-top: 16px; border-top: 1.5px dashed #DCD3C8;">`;
-            html += `<div style="font-size: 14.5px; font-weight: 900; color: #4A413C; margin-bottom: 12px; display:flex; align-items:center; gap:6px;"><span>👩‍⚕️</span> 영양학 팩트체크</div>`;
-            
-            // 좋은 궁합 렌더링
-            goodPairs.forEach(g => {
-                html += `
-                <div style="display:flex; align-items:flex-start; gap:8px; background:#F0FDF4; border:1px solid #BBF7D0; padding:12px; border-radius:10px; margin-bottom:8px;">
-                    <span style="font-size:16px; margin-top:2px;">👍</span>
-                    <div>
-                        <div style="font-size:13.5px; font-weight:800; color:#166534; margin-bottom:4px;">찰떡궁합: ${g.item}</div>
-                        <div style="font-size:13px; font-weight:600; color:#15803D; line-height:1.4;">${g.reason}</div>
-                    </div>
-                </div>`;
-            });
-            
-            // 나쁜 궁합 렌더링
-            badPairs.forEach(b => {
-                html += `
-                <div style="display:flex; align-items:flex-start; gap:8px; background:#FEF2F2; border:1px solid #FECACA; padding:12px; border-radius:10px; margin-bottom:8px;">
-                    <span style="font-size:16px; margin-top:2px;">🙅‍♀️</span>
-                    <div>
-                        <div style="font-size:13.5px; font-weight:800; color:#991B1B; margin-bottom:4px;">주의궁합: ${b.item}</div>
-                        <div style="font-size:13px; font-weight:600; color:#B91C1C; line-height:1.4;">${b.reason}</div>
-                    </div>
-                </div>`;
-            });
-            html += `</div>`;
-        }
-
-        resultArea.innerHTML = html;
-    } else {
-        resultArea.style.display = 'block';
-        resultArea.innerHTML = `<div style="padding:16px; font-size:14px; color:#A3958A; font-weight:600; text-align:center; background:#FAF7F2; border-radius:12px;">검색 결과가 없습니다.<br>다른 단어로 검색해보세요.</div>`;
+    const hits = foodSearch(query);
+    resultArea.style.display = 'block';
+    if (!hits.length) {
+        resultArea.innerHTML = `<div style="padding:16px; font-size:14px; color:#8A7F76; font-weight:600; line-height:1.65; text-align:center; background:#FAF7F2; border:1px solid #EDE6DE; border-radius:14px; word-break:keep-all;">
+            아직 정리하지 않은 재료예요.<br>처음 주는 재료는 아침에 조금만 먹여 보고 사흘 동안 지켜봐 주세요.</div>`;
+        return;
     }
+    let html = foodIngredientCard(hits[0]);
+    // 다른 결과 — 첫 결과가 이름으로 딱 맞으면, 키워드 일부만 겹치는 것('꿀' → 꿀고구마)은 보이지 않는다
+    const sc = foodSearch.lastScores || [];
+    const others = hits.slice(1).filter((h, i) => sc[0] >= 80 ? sc[i + 1] >= 55 : sc[i + 1] >= 30);
+    if (others.length) {
+        html += `<div style="margin-top:14px; display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+            <span style="font-size:12.5px; font-weight:700; color:#A3958A;">다른 결과</span>` +
+            others.slice(0, 5).map(h => `<span onclick="foodLookup(${foodArg(h.name)})" style="cursor:pointer; font-size:12.5px; font-weight:800; color:#4A413C; background:#FFFFFF; border:1px solid #EDE6DE; padding:5px 10px; border-radius:999px;">${foodEsc(h.name)}</span>`).join('') +
+            `</div>`;
+    }
+    resultArea.innerHTML = html;
 }
+
+// 결과 안의 재료 이름을 누르면 그 재료로 다시 찾는다
+window.foodLookup = function (name) {
+    const input = document.getElementById('ingredient-search');
+    if (input) input.value = name;
+    checkIngredient();
+    const box = document.getElementById('traffic-light-result');
+    if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// 레시피를 누르면 레시피 탭으로 — 그 재료가 들어간 것만 보이게 하고, 누른 레시피로 내려간다
+window.foodGoRecipe = function (recipeName, term) {
+    const r = recipeName ? babyFoodData.find(x => x.name === recipeName) : null;
+    if (typeof window.foodTabGo === 'function') window.foodTabGo('recipe');
+    setTimeout(function () {
+        if (typeof isFavViewMode !== 'undefined' && isFavViewMode && typeof toggleFavView === 'function') toggleFavView();
+        const age = document.getElementById('food-age');
+        if (age && r) age.value = r.age;
+        const goal = document.getElementById('food-goal');
+        if (goal) goal.value = 'all';
+        const fridge = document.getElementById('fridge-search');
+        if (fridge) fridge.value = term || '';
+        runFoodEngine();
+        if (!r) return;
+        setTimeout(function () {
+            const cards = document.querySelectorAll('[data-recipe]');
+            let card = null;
+            cards.forEach(function (c) { if (!card && c.getAttribute('data-recipe') === r.name) card = c; });
+            if (!card) return;
+            const more = document.getElementById('food-other-area');
+            if (more && more.contains(card) && more.style.display === 'none' && typeof toggleFoodOthers === 'function') toggleFoodOthers();
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            card.style.transition = 'box-shadow 0.4s';
+            card.style.boxShadow = '0 0 0 3px rgba(127,119,221,0.35)';
+            setTimeout(function () { card.style.boxShadow = ''; }, 1600);
+        }, 350);
+    }, 120);
+};
 
 // 레시피 카드
 // 조리 순서 한 줄을 화면용으로 다듬는다. '(안전)' 은 짧은 '주의' 표시로 (요리 모드와 같은 말).
@@ -233,7 +367,7 @@ function generateCardHTML(item) {
     const heartBorder = isFav ? '#FCA5A5' : '#EDE6DE';
 
     return `
-        <div class="stroller-card" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'}; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
+        <div class="stroller-card" data-recipe="${foodEsc(item.name)}" style="border-top: 4px solid ${isFavViewMode ? '#E32636' : 'transparent'}; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
             
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; gap: 12px;">
                 <div style="flex: 1; min-width: 0;">
@@ -290,7 +424,7 @@ function runFoodEngine() {
     const resultArea = document.getElementById('food-result-area');
 
     if (!age) {
-        resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">🩺</div><div class="empty-text"><b>아기 월령을 선택해주세요.</b></div></div>`;
+        resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">🥄</div><div class="empty-text"><b>아기 월령을 골라 주세요.</b></div></div>`;
         return;
     }
 
@@ -324,7 +458,10 @@ function runFoodEngine() {
                 "감자전분": "감자", "고구마전분": "고구마",
                 "찹쌀가루": "찹쌀", "쌀가루": "쌀",
                 "브로컬리": "브로콜리", "부로콜리": "브로콜리",
-                "단호박": "호박", "애호박": "호박"
+                "단호박": "호박", "애호박": "호박",
+                // ⚠️ 완두콩은 대두가 아니다. 예전엔 '완두' 를 적으면 두부·콩나물 레시피까지 빠졌다
+                "그린피스": "완두콩", "완두": "완두콩",
+                "알배추": "배추", "초당옥수수": "옥수수", "스위트콘": "옥수수"
             };
 
             const allergyDictionary = {
@@ -334,7 +471,7 @@ function runFoodEngine() {
         '밀가루': 'flour', '밀': 'flour', '면': 'flour', '빵': 'flour', '국수': 'flour',
         '파스타': 'flour', '소면': 'flour', '오트밀': 'flour', '귀리': 'flour',
         '콩': 'soy', '대두': 'soy', '두부': 'soy', '된장': 'soy', '간장': 'soy',
-        '두유': 'soy', '순두부': 'soy', '콩나물': 'soy', '렌틸': 'soy', '완두': 'soy',
+        '두유': 'soy', '순두부': 'soy', '콩나물': 'soy', '서리태': 'soy', '검은콩': 'soy',
         '새우': 'shellfish', '게': 'shellfish', '갑각류': 'shellfish', '꽃게': 'shellfish',
         '조개': 'shellfish', '바지락': 'shellfish', '전복': 'shellfish', '굴': 'shellfish',
         '오징어': 'shellfish', '문어': 'shellfish', '낙지': 'shellfish',
@@ -383,7 +520,31 @@ function runFoodEngine() {
 
 
     if (filtered.length === 0) {
-        resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-text"><b>조건에 맞는 레시피가 없습니다.</b><span>냉장고 재료나 필터를 변경해 보세요.</span></div></div>`;
+        /* ⚠️ '완두콩' 을 적었는데 초기라서 하나도 안 나오면, 앱에 완두콩 레시피가 없는 줄 알았다.
+              다른 단계에 있으면 거기로 가는 길을 보여 준다. */
+        let other = null;
+        if (fridgeInput) {
+            const fItems = fridgeInput.split(/[\s,]+/).filter(i => i !== '');
+            const elsewhere = babyFoodData.filter(r => r.age !== age && fItems.every(f => r.name.includes(f) || r.ingredients.includes(f)));
+            if (elsewhere.length) {
+                const order = ['early', 'mid', 'late', 'done'];
+                const stages = order.filter(a => elsewhere.some(r => r.age === a));
+                const firstAge = stages.find(a => order.indexOf(a) > order.indexOf(age)) || stages[0];
+                other = { age: firstAge, n: elsewhere.filter(r => r.age === firstAge).length };
+            }
+        }
+        const STAGE_KO = { early: '초기', mid: '중기', late: '후기', done: '완료기' };
+        let headline = `${STAGE_KO[age]}에 맞는 레시피는 아직 없어요.`;
+        if (other && fridgeInput) {
+            const ing = foodSearch(fridgeInput.split(/[\s,]+/)[0])[0];
+            if (ing && ing.from && FOOD_STAGE_ORDER[ing.from] > FOOD_STAGE_ORDER[age]) {
+                headline = `${ing.name}${foodEunNeun(ing.name)} ${FOOD_STAGE[ing.from].replace(/부터$/, '')}부터 쓰는 재료예요.`;
+            }
+        }
+        resultArea.innerHTML = other
+            ? `<div class="premium-empty-state"><div class="empty-text"><b>${headline}</b><span>${STAGE_KO[other.age]} 레시피에 ${other.n}개 있어요.</span></div>
+               <button onclick="document.getElementById('food-age').value='${other.age}'; runFoodEngine();" style="margin-top:14px; padding:12px 18px; border:none; border-radius:12px; background:#4A413C; color:#FFF; font-size:14px; font-weight:800; cursor:pointer;">${STAGE_KO[other.age]} 레시피 보기</button></div>`
+            : `<div class="premium-empty-state"><div class="empty-text"><b>조건에 맞는 레시피가 없어요.</b><span>냉장고 재료나 필터를 바꿔 보세요.</span></div></div>`;
     } else {
         // ✨ 수정한 부분: 타자 칠 때마다 섞이는 랜덤 로직을 완전히 삭제했습니다! ✨
         // 이제 결과가 고정되어 타자를 쳐도 요동치지 않습니다.
@@ -973,47 +1134,7 @@ function updateCookTimerDisplay() {
     }
 }
 
-// ==========================================
-// 👩‍⚕️ 영양학 팩트체크 궁합 데이터 (의학/영양학 교차 검증 완료)
-// ==========================================
-const pairingDB = {
-    "소고기": {
-        good: [{ item: "브로콜리, 청경채, 파프리카", reason: "비타민C가 소고기의 철분 흡수율을 최대 30%까지 끌어올려요" }],
-        bad: [{ item: "치즈, 우유 (유제품)", reason: "유제품의 칼슘이 철분 흡수를 방해해요. 고기 섭취 후 최소 2시간 간격을 두세요." }, { item: "고구마, 부추", reason: "소화에 필요한 위산 농도가 달라 함께 먹으면 아기 배에 가스가 차고 소화불량을 유발할 수 있어요." }]
-    },
-    "시금치": {
-        good: [{ item: "소고기, 당근, 사과", reason: "사과가 시금치의 풋내를 덜어줘서 같이 쓰기 좋아요." }],
-        bad: [{ item: "두부, 치즈, 멸치", reason: "시금치의 '수산' 성분이 칼슘과 만나면 체내 결석(돌)을 유발할 수 있어 절대 피해야 해요" }]
-    },
-    "당근": {
-        good: [{ item: "사과, 고구마, 현미유", reason: "지용성 비타민A가 풍부해 기름에 살짝 볶으면 체내 흡수율이 60% 이상 훌쩍 뛰어요" }],
-        bad: [{ item: "오이, 무", reason: "생당근의 '아스코르비나아제' 효소가 오이와 무의 비타민C를 파괴해요. (단, 익혀 먹으면 괜찮아요)" }]
-    },
-    "오이": {
-        good: [{ item: "사과, 배, 소고기", reason: "수분이 많고 시원한 맛이라 고기와 잘 어울려요." }],
-        bad: [{ item: "당근, 무", reason: "생으로 같이 먹으면 비타민C가 파괴되니 따로 먹이거나 푹 익혀주세요." }]
-    },
-    "미역": {
-        good: [{ item: "두부", reason: "두부와 미역은 같이 쓰기 좋은 조합이에요." }],
-        bad: [{ item: "파 (대파, 쪽파)", reason: "파의 유황 성분이 미역의 칼슘 흡수를 방해하고, 미끄러운 식감끼리 만나 소화를 방해해요." }]
-    },
-    "두부": {
-        good: [{ item: "미역, 다시마, 소고기", reason: "두부와 해조류는 같이 쓰기 좋은 조합이에요." }],
-        bad: [{ item: "시금치", reason: "수산과 칼슘이 만나 장내 결석을 유발할 수 있어 소아과에서 가장 주의하는 조합이에요." }]
-    },
-    "치즈": {
-        good: [{ item: "감자, 고구마", reason: "고구마·감자에 부족한 단백질과 칼슘을 치즈가 보태줘요." }],
-        bad: [{ item: "소고기, 시금치", reason: "치즈의 빵빵한 칼슘이 필수 영양소인 철분 흡수를 막아버려요. 고기 먹은 직후엔 피하세요." }]
-    },
-    "닭고기": {
-        good: [{ item: "고구마, 단호박, 밤, 대추", reason: "따뜻한 성질의 닭고기와 달콤한 구황작물이 만나 소화를 돕고 기력을 보충해요." }],
-        bad: [{ item: "자두", reason: "함께 먹으면 위장 소화 효소가 엉켜 배탈이 날 수 있어요." }]
-    },
-    "고구마": {
-        good: [{ item: "사과, 배", reason: "사과의 '펙틴' 성분이 고구마로 인한 장내 가스 생성과 방귀를 막아줘요." }],
-        bad: [{ item: "소고기", reason: "소화에 필요한 위산 농도가 달라 함께 섭취 시 속쓰림을 유발할 수 있어요." }]
-    }
-};
+// (같이 쓰기 좋은 재료는 data.js 의 pairDB 로 옮겼다)
 
 // ==========================================
 // 📅 캘린더 기록 엔진 (식단/테스트 완벽 분리형)
@@ -1525,7 +1646,7 @@ function saveEvapCalibration() {
 
     localStorage.setItem('tosil_food_yield', rate.toFixed(3));
     statusEl.style.color = '#7F77DD';
-    statusEl.innerHTML = `🧙‍♀️ 마법의 계량 세팅 완료 우리 집 냄비 회수율은 <b>${Math.round(rate * 100)}%</b>네요.`;
+    statusEl.innerHTML = `우리 집 냄비에 맞췄어요. 끓이고 나면 넣은 양의 <b>${Math.round(rate * 100)}%</b>가 남아요.`;
     
     // 저장 후 즉시 양방향 재계산 돌리기
     calcBabyFoodWater(); 

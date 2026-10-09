@@ -662,7 +662,7 @@
         }
 
         return '<div id="' + ID + '" class="bnh-card">' +
-            /* ⚠️ '6개월 하윤이의 이번 주 놀이' 옆에 PLUS 배지와 접어두기가 같이 서서 제목이 세 줄로 접혔다.
+            /* ⚠️ '6개월 서준이의 이번 주 놀이' 옆에 PLUS 배지와 접어두기가 같이 서서 제목이 세 줄로 접혔다.
                   제목은 짧게, 개월수·이름은 아랫줄로 내리고 접어두기를 그 줄 오른쪽에 둔다. */
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
                 'min-width:0; word-break:keep-all;">\uD83D\uDCC5 이번 주 놀이</div>' +

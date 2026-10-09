@@ -80,8 +80,8 @@
         return (localStorage.getItem('user_role') || 'mom') === 'dad' ? '아빠' : '엄마';
     }
 
-    /* ⚠️ 이름 뒤에 '가' 를 그냥 붙여서 "하윤가 밤중수유를…", 편지 끝 서명 "— 하윤가" 가 나왔다.
-          받침이 있으면 '이' 를 붙인다.  하윤 → 하윤이가 · 지우 → 지우가 */
+    /* ⚠️ 이름 뒤에 '가' 를 그냥 붙여서 "서준가 밤중수유를…", 편지 끝 서명 "— 서준가" 가 나왔다.
+          받침이 있으면 '이' 를 붙인다.  서준 → 서준이가 · 지우 → 지우가 */
     function callName(j) {
         try { if (typeof window.babyCall === 'function') return window.babyCall(j || ''); } catch (e) {}
         var n = babyName(), c = n.charCodeAt(n.length - 1);

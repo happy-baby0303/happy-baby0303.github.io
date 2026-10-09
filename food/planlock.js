@@ -9,13 +9,14 @@
    그런데 잠겨 있지 않으면 아무도 결제할 이유가 없다.
 
    ⚠️ 잠그는 건 '수고' 지 '정보' 가 아니다.
-      레시피 135종 · 알레르기 · 계량은 전부 무료 그대로다.
+      레시피 · 알레르기 · 계량은 전부 무료 그대로다.
       대신 해주는 일곱 날 편성만 PLUS 다.
 
    index.html 에서 app.js 다음에 로드하세요.
    ============================================================ */
 (function () {
     'use strict';
+    function recipeCount() { return (typeof babyFoodData !== 'undefined' && babyFoodData.length) || 150; }
 
     var GRAY = "#A3958A", DARK = "#4A413C", GOLD = "#8A6D00";
 
@@ -111,7 +112,7 @@
 
             '<div style="margin-top:14px; font-size:12.5px; font-weight:600; color:#A3958A; ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                '<b style="color:#7A6F68;">레시피 135종과 알레르기 기록은 계속 무료예요.</b><br>' +
+                '<b style="color:#7A6F68;">레시피 ' + recipeCount() + '종과 알레르기 기록은 계속 무료예요.</b><br>' +
                 '뭘 먹일지 고르는 건 원래 열려 있습니다.</div>' +
 
             '<div onclick="window.closeFoodPaywall(); window.goFoodPlus();" ' +
@@ -178,7 +179,7 @@
                 "border-radius:12px; padding:13px 15px; margin-top:12px; cursor:pointer; " +
                 "font-size:12.5px; font-weight:700; color:#E8C766; line-height:1.7; word-break:keep-all;";
             d.innerHTML = "🔒 <b>일주일치를 대신 짜드리는 건 PLUS예요.</b><br>" +
-                          "레시피 135종과 알레르기 기록은 그대로 무료로 쓰실 수 있습니다.";
+                          "레시피 " + recipeCount() + "종과 알레르기 기록은 그대로 무료로 쓰실 수 있어요.";
             d.onclick = window.showFoodPaywall;
             box.appendChild(d);
         }

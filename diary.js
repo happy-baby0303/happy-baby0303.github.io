@@ -29,7 +29,7 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
-    /* 하윤 + 가 → 하윤이가 · 지우 + 가 → 지우가 */
+    /* 서준 + 가 → 서준이가 · 지우 + 가 → 지우가 */
     function callName(j) {
         try { if (typeof window.babyCall === "function") return window.babyCall(j); } catch (e) {}
         var n = babyName(), c = n.charCodeAt(n.length - 1);
@@ -58,7 +58,7 @@
         var it = list[(day - 1) % list.length];
         if (!it) return null;
         return {
-            // 조사(하윤이가 · 지우가)와 {day} 는 data.js 의 창구가 맞춘다
+            // 조사(서준이가 · 지우가)와 {day} 는 data.js 의 창구가 맞춘다
             text: (typeof window.diaryQuestion === "function")
                 ? window.diaryQuestion(day)
                 : String(it.question || "").replace(/{babyName}/g, babyName()),

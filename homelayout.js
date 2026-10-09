@@ -49,6 +49,7 @@
         { find: "baby-dashboard",note: "아기 사진 (D+)" },
         { find: "duty-seg-wrap",            note: "아기랑 있어요 / 밖에 있어요 (duty.js)" },
         { find: "duty-away-card",           note: "내가 나간 뒤로 (밖에 있을 때만)" },
+        { find: "home-push-ask",            note: "알림 켜기 (폰 알림이 꺼져 있을 때만 · pushcheck.js)" },
         { find: "senior-status-board",      note: "돌봄 도우미 화면 (그 모드에서만 보임)" },
         { find: "home-e119",                note: "열 — 119에 읽어줄 카드 (열날 때만)" },
         { find: "home-expiry-alert",        note: "기한 지남 (그때만)" },

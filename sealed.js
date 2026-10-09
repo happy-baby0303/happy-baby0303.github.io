@@ -34,7 +34,7 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
-    /* ⚠️ "하윤가 열어보게", "하윤는", "하윤를 기다리고" 가 나왔다. 받침이 있으면 '이' 를 붙인다. */
+    /* ⚠️ "서준가 열어보게", "서준는", "서준를 기다리고" 가 나왔다. 받침이 있으면 '이' 를 붙인다. */
     function callName(j) {
         try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
         var n = babyName(), c = n.charCodeAt(n.length - 1);

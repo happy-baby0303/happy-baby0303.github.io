@@ -51,7 +51,7 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
-    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    // 서준 + 가 → 서준이가 (data.js 의 babyCall 과 같은 규칙)
     function callName(j) {
         try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
         var n = localStorage.getItem("tosil_babyName") || "우리 아기", c = n.charCodeAt(n.length - 1);

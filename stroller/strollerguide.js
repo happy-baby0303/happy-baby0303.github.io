@@ -46,7 +46,7 @@
     })();
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
-    // 하윤 + 는 → 하윤이는 (받침이 있으면 '이')
+    // 서준 + 는 → 서준이는 (받침이 있으면 '이')
     function nm(j) {
         try { if (typeof window.babyNm === "function") return window.babyNm(j); } catch (e) {}
         var n = babyName(), c = n.charCodeAt(n.length - 1);

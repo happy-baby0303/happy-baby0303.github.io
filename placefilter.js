@@ -88,7 +88,7 @@
     window.babyMonthsForPlaces = babyMonths;
 
 
-    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    // 서준 + 가 → 서준이가 (data.js 의 babyCall 과 같은 규칙)
     function callName(j) {
         try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
         var n = localStorage.getItem("tosil_babyName") || "우리 아기", c = n.charCodeAt(n.length - 1);
@@ -212,7 +212,7 @@
             'font-size:12px; font-weight:900; white-space:nowrap; ' +
             (ageOn ? 'background:' + GOLD + '; color:#FFF;'
                    : 'background:rgba(185,138,46,0.12); color:' + GOLD + '; border:1px solid rgba(185,138,46,0.3);') +
-            '">👶 ' + m + '개월 ' + esc(callName("가")) + ' 갈 만한</span>';   // "하윤(8개월)가" → "8개월 하윤이가"
+            '">👶 ' + m + '개월 ' + esc(callName("가")) + ' 갈 만한</span>';   // "서준(8개월)가" → "8개월 서준이가"
     }
 
     function paintBar() {

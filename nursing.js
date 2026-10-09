@@ -9,7 +9,7 @@
     var loading = false;
     var myPos = null;
 
-    // 하윤 → 하윤이 (받침이 있으면 '이') · 화면에 넣으니 escape 까지
+    // 서준 → 서준이 (받침이 있으면 '이') · 화면에 넣으니 escape 까지
     function nameCall() {
         var n = localStorage.getItem("tosil_babyName") || "우리 아기";
         try { if (typeof window.babyCall === "function") n = window.babyCall(""); } catch (e) {}

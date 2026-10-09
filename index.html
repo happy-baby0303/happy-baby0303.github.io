@@ -3014,6 +3014,11 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         onMessage(window.messaging, (payload) => {
             const t = payload?.notification?.title || '배냇함';
             const b = payload?.notification?.body || '';
+            /* ⚠️ 앱을 보고 있을 때 수유 시각이 되면 앱이 먼저 화면에 알려 주고(carealarm.js),
+                  몇 분 뒤 서버 알림이 와서 같은 말이 한 번 더 떴다. 10분 안에 같은 제목이면 건너뛴다 */
+            const seen = window.__pushSeen || (window.__pushSeen = {});
+            if (seen[t] && Date.now() - seen[t] < 10 * 60000) return;
+            seen[t] = Date.now();
             if (typeof window.showToast === 'function') window.showToast(`${t}\n${b}`);
             else alert(`${t}\n${b}`);
         });

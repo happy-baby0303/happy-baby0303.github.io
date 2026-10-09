@@ -32,7 +32,7 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리아기"; }
 
-    // 하윤 + 가 → 하윤이가 (data.js 의 babyCall 과 같은 규칙)
+    // 서준 + 가 → 서준이가 (data.js 의 babyCall 과 같은 규칙)
     function callName(j) {
         try { if (typeof window.babyCall === "function") return window.babyCall(j || ""); } catch (e) {}
         var n = babyName(), c = n.charCodeAt(n.length - 1);
@@ -387,7 +387,7 @@
 
             var zip = new JSZip();
             var stamp = todayStr();
-            // ⚠️ "배냇함_하윤_배냇함_20260919" — 앱 이름을 바꾸면서 두 번 들어갔다
+            // ⚠️ "배냇함_서준_배냇함_20260919" — 앱 이름을 바꾸면서 두 번 들어갔다
             var rootName = "배냇함_" + safe(babyName()) + "_" + stamp;
             var root = zip.folder(rootName);
 

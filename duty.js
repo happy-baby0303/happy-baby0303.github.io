@@ -15,6 +15,8 @@
 
    저장: 이 폰 tosil_where = "with" | "away", tosil_away_since = 시각
    동기화: duty_가족코드 / status 문서의 handoff 칸 (교대 신호만)
+           reminders/가족코드 의 away.{내 uid} = 나간 시각 (돌아오면 0)
+           → 서버가 수유 · 기저귀 알림을 '아기 곁에 있는 사람' 폰으로만 보낸다
 
    index.html 에서 script.js · rolelock.js 다음에 로드하세요.
    ============================================================ */
@@ -32,6 +34,8 @@
     function records() { try { return JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) { return []; } }
     function pad(n) { return String(n).padStart(2, "0"); }
     function hhmm(ms) { var d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+    // 알림 글에 쓰는 시각 — '15:40' 대신 '오후 3시 40분'
+    function kclock(ms) { var d = new Date(ms), h = d.getHours(), mi = d.getMinutes(), hh = h % 12 === 0 ? 12 : h % 12; return (h < 12 ? "오전 " : "오후 ") + hh + "시" + (mi ? " " + mi + "분" : ""); }
     function ago(ms) {
         var m = Math.max(0, Math.floor((Date.now() - ms) / MIN));
         if (m < 1) return "방금";
@@ -50,8 +54,24 @@
             if (w === "away" && was !== "away") localStorage.setItem("tosil_away_since", String(Date.now()));
         } catch (e) {}
         apply();
+        if (w !== was) syncAway();
         /* 알림 글(토스트)은 띄우지 않는다. 화면이 바뀌는 것 자체가 알림이다
            (눌렀는데 글자만 잠깐 떴다 사라진다는 말을 들었다) */
+    }
+
+    /* 수유 · 기저귀 알림을 누구 폰으로 보낼지 서버가 알 수 있게 (밖에 있는 사람 폰은 빼고 보낸다) */
+    function syncAway(tries) {
+        var c = code(), uid = myUid();
+        if (!c || senior()) return;
+        if (!uid || !window.db || typeof window.setDoc !== "function" || typeof window.doc !== "function" ||
+            !(window.auth && window.auth.currentUser)) {
+            if ((tries || 0) < 8) setTimeout(function () { syncAway((tries || 0) + 1); }, 2500);
+            return;
+        }
+        var mark = {};
+        mark[uid] = where() === "away" ? (Number(localStorage.getItem("tosil_away_since")) || Date.now()) : 0;
+        window.setDoc(window.doc(window.db, "reminders", c), { away: mark }, { merge: true })
+            .catch(function (e) { console.warn("[교대] 알림 장부에 적기 실패", e); });
     }
     window.setDutyWhere = function (w) { setWhere(w === "away" ? "away" : "with"); };
 
@@ -215,8 +235,8 @@
     };
     window.__comingHome = async function (m) {
         closeSheet();
-        var at = hhmm(Date.now() + m * MIN);
-        var ok = await push("🏠 " + myWord() + "가 곧 들어가요", (m >= 60 ? "1시간" : m + "분") + " 뒤, " + at + "쯤 도착해요");
+        var at = kclock(Date.now() + m * MIN);
+        var ok = await push("🏠 " + myWord() + "가 집에 가는 중이에요", (m >= 60 ? "1시간" : m + "분") + " 뒤, " + at + "쯤 도착해요. 조금만 버텨요");
         toast(ok ? "가족에게 " + at + "쯤 도착한다고 알렸어요" : "지금은 알리지 못했어요. 연결을 확인해 주세요");
     };
 
@@ -226,7 +246,7 @@
         if (c && window.db && typeof window.setDoc === "function") {
             try { await window.setDoc(window.doc(window.db, "duty_" + c, "status"), { handoff: { by: myUid(), word: myWord(), at: Date.now() } }, { merge: true }); } catch (e) {}
         }
-        var ok = await push("🙌 " + myWord() + "가 교대했어요", "이제 " + callBaby("는") + " " + myWord() + "가 볼게요. 쉬어요");
+        var ok = await push("🙌 " + myWord() + "가 교대했어요", "이제 " + callBaby("는") + " " + myWord() + "가 볼게요. 푹 쉬어요");
         toast(ok ? "교대했어요. 가족에게 알렸어요" : "교대했어요");
     };
 
@@ -253,6 +273,7 @@
         watchHome();
         setTimeout(apply, 1500);
         setTimeout(watch, 3500);
+        setTimeout(function () { syncAway(0); }, 4000);   // 이 버전 전에 '밖에 있어요' 로 둔 폰도 서버에 알린다
         setInterval(function () { if (where() === "away" && !document.hidden) apply(); }, 60000);
         document.addEventListener("visibilitychange", function () { if (!document.hidden) apply(); });
     }

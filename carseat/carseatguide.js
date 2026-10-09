@@ -41,7 +41,7 @@
             .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
-    /* 이름 + 조사 — '하윤는 지금 8개월' 이 화면에 찍히고 있었다 */
+    /* 이름 + 조사 — '서준는 지금 8개월' 이 화면에 찍히고 있었다 */
     function nm(j) {
         try { if (typeof window.babyNm === "function") return window.babyNm(j); } catch (e) {}
         var n = localStorage.getItem("tosil_babyName") || "우리 아기";

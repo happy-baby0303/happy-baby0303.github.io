@@ -21,7 +21,7 @@
 
     var OFF_KEY    = "tosil_remind_off";
     var SYNCED_KEY = "tosil_remind_synced";
-    var SNOOZE_KEY = "tosil_remind_snooze";    // 서버가 '며칠 쉬는 중' 으로 정한 날 (카드에 보여 준다)
+    var SNOOZE_KEY = "tosil_remind_snooze";    // (옛 버전이 쓰던 칸 — 비워 둔다)
     /* 육퇴 알림을 눌러 들어왔나 (알림 주소가 ?go=memorybox).
        ⚠️ 주소는 script.js 가 곧 지운다. 지우기 전, 이 파일이 읽히는 순간에 봐 둔다. */
     var OPENED_FROM_BED = /[?&]go=memorybox/.test(location.search);
@@ -115,11 +115,11 @@
           what: "toggle"(켜고 끄기) · "time"(시각을 정하거나 지움) · 없으면 하루 한 번 맞추기 */
     window.syncBedtimeReminder = async function (force, what) {
         var code = syncCode();
-        if (!code) return;
-        if (!window.db || typeof window.setDoc !== "function" || typeof window.doc !== "function") return;
+        if (!code) return { ok: false, code: "no-family" };
+        if (!window.db || typeof window.setDoc !== "function" || typeof window.doc !== "function") return { ok: false, code: "not-ready" };
 
         var today = todayKey();
-        if (!force && localStorage.getItem(SYNCED_KEY) === today) return;
+        if (!force && localStorage.getItem(SYNCED_KEY) === today) return { ok: true, same: true };
 
         var ref = window.doc(window.db, "reminders", code);
         var srv = null;
@@ -130,8 +130,11 @@
             } catch (e) {}
         }
 
-        var payload = { babyName: babyName(), lastPhotoAt: lastPhotoDay(), updatedAt: Date.now() };
-        try { localStorage.setItem(SNOOZE_KEY, (srv && srv.snoozeUntil) || ""); } catch (e) {}
+        /* seenAt — 오늘 이 가족이 앱을 열었다. 서버는 알림 뒤로 아무도 앱을 안 열 때만 '흘려보냈다' 고 센다
+           (다섯 번 연달아 그러면 사흘 쉰다). 누가 앱을 열었으면 쉬던 것도 바로 푼다. */
+        var payload = { babyName: babyName(), lastPhotoAt: lastPhotoDay(), updatedAt: Date.now(), seenAt: Date.now() };
+        if (srv && (srv.snoozeUntil || Number(srv.missStreak))) { payload.snoozeUntil = null; payload.missStreak = 0; }
+        try { localStorage.setItem(SNOOZE_KEY, ""); } catch (e) {}
 
         // 켜짐/꺼짐 — 누른 폰만 정한다
         if (what === "toggle" || !srv || typeof srv.enabled !== "boolean") {
@@ -168,13 +171,16 @@
             if (manual !== null) payload.manual = true;       // 예전 버전에서 이 폰에 정해 둔 것
         }
 
+        var result = { ok: true };
         try {
             await window.setDoc(ref, payload, { merge: true });
             localStorage.setItem(SYNCED_KEY, today);
         } catch (e) {
             console.warn("[육퇴 알림] 시계 등록 실패", e);
+            result = { ok: false, code: (e && (e.code || e.message)) || String(e) };
         }
         redrawCard();
+        return result;
     };
 
     /* ---------- 사진을 담으면 바로 알려준다 ---------- */
@@ -203,12 +209,7 @@
         redrawCard();
     };
 
-    function snoozedUntil() {
-        var s = localStorage.getItem(SNOOZE_KEY) || "";
-        return s && s > todayKey() ? s : "";
-    }
-
-    // 카드를 눌렀을 때 — 알림이 막혀 있으면 허용부터, 쉬는 중이면 깨우기, 아니면 시각 고르기
+    // 카드를 눌렀을 때 — 알림이 막혀 있으면 허용부터, 아니면 시각 고르기
     window.__remindCardTap = async function () {
         var p = ("Notification" in window) ? Notification.permission : "unsupported";
         if (!isOff() && p === "default" && typeof window.requestPushPermission === "function") {
@@ -217,15 +218,6 @@
             return redrawCard();
         }
         if (!isOff() && p === "denied" && typeof window.openPushCheck === "function") return window.openPushCheck();
-        if (!isOff() && snoozedUntil()) {
-            var code = syncCode();
-            if (code && window.db && typeof window.setDoc === "function") {
-                try { await window.setDoc(window.doc(window.db, "reminders", code), { snoozeUntil: null, missStreak: 0 }, { merge: true }); } catch (e) {}
-            }
-            try { localStorage.setItem(SNOOZE_KEY, ""); } catch (e) {}
-            toast("🌙 오늘부터 다시 알려드릴게요");
-            return redrawCard();
-        }
         window.openBedtimeSheet();
     };
 
@@ -260,8 +252,8 @@
                 '<span onclick="document.getElementById(\'bedtime-sheet\').remove()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="font-size:12px; font-weight:600; color:var(--text-sub); line-height:1.7; margin-bottom:18px; word-break:keep-all;">' +
-                               '선택한 시간에 한 번 알려드려요.<br>' +
-                '오늘 사진을 이미 담았으면 알람을 보내지 않아요.</div>' +
+                '정한 시간에 하루 한 번만 알려 드려요.<br>' +
+                '그날 사진을 이미 담았으면 보내지 않아요.</div>' +
             '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px;">' + opts + '</div>' +
              (manual
                 ? '<div onclick="window.setManualBedtime(null); document.getElementById(\'bedtime-sheet\').remove();" ' +
@@ -281,14 +273,11 @@
         var when = hhmm(bedtimeMinutes());
         var mode = isLearned() ? "수면 기록 기준" : "";
         var p = ("Notification" in window) ? Notification.permission : "unsupported";
-        var snooze = snoozedUntil();
-        var WARN = "#C08A2E";
+        var WARN = "#B07A22";
         var line;
         if (!on) line = '지금은 꺼져 있어요';
         // ⚠️ 폰 알림이 막혀 있어도 '오후 8시 30분에 알려드려요' 라고 했다. 막혀 있으면 막혀 있다고 말한다
         else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">이 폰 알림이 꺼져 있어요 · 눌러서 켜기</span>';
-        else if (snooze) line = '알림을 며칠 흘려보내서 ' + Number(snooze.slice(5, 7)) + '월 ' + Number(snooze.slice(8, 10)) + '일까지 쉬는 중이에요  ' +
-                               '<span style="color:' + PURPLE + '; font-weight:800;">다시 켜기 ›</span>';
         else line = esc(when) + '에 알려드려요' + (mode ? ' · ' + esc(mode) : '') +
                     '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>';
 

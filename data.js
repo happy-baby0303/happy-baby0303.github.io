@@ -113,8 +113,8 @@ const questionDB = [
       책을 펼치면 질문 없이 답만 나왔다.
 
    ⚠️ 이름 뒤 조사를 받침에 맞춘다.
-      "{babyName}가" 를 그냥 바꾸면 "하윤가 처음으로…" 가 된다.
-      받침이 있으면 '이' 를 붙인다  →  하윤이가 · 지우가
+      "{babyName}가" 를 그냥 바꾸면 "서준가 처음으로…" 가 된다.
+      받침이 있으면 '이' 를 붙인다  →  서준이가 · 지우가
 
    ⚠️ 100일이 지나면 질문이 처음부터 다시 돈다.
       100번 질문에 "100번째 일기" 가 박혀 있어서
@@ -131,7 +131,7 @@ window.questionDB = questionDB;
         return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
     }
     /* 조사는 받침 없는 꼴로 받는다. 받침 있는 이름엔 '이' 가 앞에 붙는다.
-       babyCall("가") → 하윤이가 / 지우가      babyCall("") → 하윤이 / 지우 */
+       babyCall("가") → 서준이가 / 지우가      babyCall("") → 서준이 / 지우 */
     window.babyCall = window.babyCall || function (josa) {
         try { if (typeof window.babyNm === "function") return window.babyNm(josa || ""); } catch (e) {}
         var n = rawName();

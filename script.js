@@ -6287,7 +6287,7 @@ setInterval(() => {
 // ==========================================
 window.applyTimeBasedGreeting = function(babyName) {
     /* ⚠️ 시간대마다 '활기찬 오후네요 🌤️ · 커피 한 잔의 여유를' 같은 인사로 카드 제목을 바꿨다.
-          AI 가 쓴 티가 났고, '하윤는' 처럼 조사도 틀렸다. 카드가 무엇인지 알려 주는 제목 하나로 둔다. */
+          AI 가 쓴 티가 났고, '서준는' 처럼 조사도 틀렸다. 카드가 무엇인지 알려 주는 제목 하나로 둔다. */
     const el = document.getElementById('ai-time-greeting');
     if (!el) return;
     const call = (typeof window.babyCall === 'function') ? window.babyCall('') : (babyName || '우리 아기');
@@ -15867,8 +15867,8 @@ window.openSettingsTab = function() {
         var p = perm(), on = isOn();
         var sub =
             p === 'unsupported' ? '이 브라우저는 알림을 지원하지 않아요'
-          : p === 'denied'      ? '브라우저에서 막혀 있어요. 눌러서 방법 보기'
-          : on                 ? '바통터치 · 문답 소식이 오면 바로 알려드려요'
+          : p === 'denied'      ? '이 폰에서 알림이 막혀 있어요. 눌러서 켜는 법 보기'
+          : on                 ? '부탁 · 교대 · 문답 소식이 오면 바로 알려 드려요'
                                : '지금은 꺼져 있어요';
 
         return '<div style="font-size:22px;">🔔</div>' +
@@ -15890,8 +15890,11 @@ window.openSettingsTab = function() {
         var p = perm();
 
         if (p === 'unsupported') return window.showToast('이 브라우저는 알림을 지원하지 않아요');
+        /* ⚠️ '주소창 왼쪽 자물쇠 → …' 라고 했는데, 앱(플레이 스토어 앱)에는 주소창이 없다.
+              어디서 열었는지에 맞는 길을 알려 준다 (pushcheck.js) */
         if (p === 'denied') {
-            return window.showToast('주소창 왼쪽 자물쇠 → 알림 → 허용으로 바꿔주세요');
+            if (typeof window.openPushCheck === 'function') return window.openPushCheck();
+            return window.showToast(typeof window.pushDeniedHelp === 'function' ? window.pushDeniedHelp() : '폰 설정 → 애플리케이션 → 배냇함 → 알림을 켜 주세요');
         }
 
         if (isOn()) {
@@ -15900,15 +15903,23 @@ window.openSettingsTab = function() {
             window.showToast('알림을 껐어요');
         } else {
             if (p !== 'granted') {
-                var ok = await window.requestPushPermission();
-                if (!ok) return window.showToast('⚠️ 알림을 켜지 못했어요');
+                var ok = typeof window.askPush === 'function' ? await window.askPush() : await window.requestPushPermission();
+                if (!ok) {
+                    card.innerHTML = inner();
+                    return window.showToast(perm() === 'denied' && typeof window.pushDeniedHelp === 'function' ? window.pushDeniedHelp() : '알림을 켜지 못했어요');
+                }
             }
             localStorage.setItem(OFF_KEY, 'false');
             await tellServer(true);
-            window.showToast('🔔 바통터치 · 문답 소식을 바로 알려드릴게요');
+            window.showToast('🔔 가족 소식을 바로 알려 드릴게요');
         }
         card.innerHTML = inner();
     }
+    // 다른 곳(알림 켜기 · 점검)에서 허용이 바뀌면 이 카드 글도 바로 바뀌게
+    window.redrawPushPermissionCard = function () {
+        var c = document.getElementById('push-permission-card');
+        if (c) c.innerHTML = inner();
+    };
 
     var _origin = window.renderSettingsTab;
     window.renderSettingsTab = function () {

@@ -82,7 +82,7 @@ a { text-decoration: none; color: inherit; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
 /* 캘린더 날짜 박스 */
-.cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; border-radius: 12px; font-size: 14px; font-weight: 800; color: #4A413C; cursor: pointer; transition: 0.2s; position: relative; }
+.cal-day { min-width: 0; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8px; border-radius: 12px; font-size: 14px; font-weight: 800; color: #4A413C; cursor: pointer; transition: 0.2s; position: relative; }
 .cal-day.today { background: #F2F0FC; color: #7F77DD; }
 .cal-day.selected { background: #4A413C; color: #FFF; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: scale(1.05); z-index: 2; }
 .cal-day.empty { cursor: default; }
