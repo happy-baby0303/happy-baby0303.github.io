@@ -29,7 +29,7 @@
      스위치만 켜면 다시 보인다.
 
    index.html <head> 위쪽, safenet.js 바로 다음에 한 줄:
-     <script src="./playlite.js?v=1"></script>
+     <script src="./playlite.js?v=2"></script>
    (화면이 그려지기 전에 켜져야 해서 맨 아래가 아니라 위에 둔다)
    ============================================================ */
 
@@ -135,8 +135,11 @@
     var css =
         HIDE.map(function (s) { return 'html.play-lite ' + s; }).join(',\n') +
         ' { display: none !important; }\n' +
-        // 홈 '챙겨두기' 두 칸 중 해열제가 빠지면 저금통이 한 줄을 다 쓴다
-        'html.play-lite #db-ledger-card { grid-column: 1 / -1; }\n' +
+        // 홈 '챙겨두기' — 해열제 자리는 성장 기록이 채운다. 못 채우면 저금통이 한 줄을 다 쓴다
+        'html.play-lite #db-ledger-card.pl-wide { grid-column: 1 / -1; }\n' +
+        // 툴박스 일곱 칸 — 둘째 줄 세 칸을 가운데로 (오른쪽 끝 빈칸이 구멍처럼 보였다)
+        'html.play-lite .toolbox-grid { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }\n' +
+        'html.play-lite .toolbox-grid > .tool-chip { flex: 0 0 calc((100% - 24px) / 4) !important; box-sizing: border-box !important; }\n' +
         // 기록하기 네 칸 중 약이 빠지면 세 칸
         'html.play-lite .pl-grid3 { grid-template-columns: repeat(3, 1fr) !important; }\n' +
         // 글을 빼고 나면 마지막 글 밑줄이 남는다
@@ -303,6 +306,70 @@
         if (b && b.parentNode && b.parentNode.classList) b.parentNode.classList.add('pl-grid3');
     }
 
+    // 홈 '챙겨두기' — 해열제 자리에 성장 기록 (새 기능이 아니라 툴박스에 있는 걸 꺼내 둔다)
+    var TXT_STYLE = 'position:absolute; top:56%; left:0; width:100%; transform:translateY(-50%); ' +
+                    'display:flex; flex-direction:column; justify-content:center; align-items:center; ' +
+                    'text-align:center; margin:0;';
+    function growthHTML() {
+        var recs = [];
+        try { recs = JSON.parse(lsGet('tosil_growth_records')) || []; } catch (e) {}
+        var last = null;
+        for (var i = 0; i < recs.length; i++) {
+            var r = recs[i];
+            if (!r || !(Number(r.weight) || Number(r.height))) continue;
+            if (!last || String(r.date || '') >= String(last.date || '')) last = r;
+        }
+        if (!last) {
+            return '<div style="font-size:13px; font-weight:800; color:#B3A498;">터치해서<br>키·몸무게를 적어요</div>';
+        }
+        var w = Number(last.weight), h = Number(last.height);
+        var big = w ? (+w.toFixed(1)) + 'kg' : (+h.toFixed(1)) + 'cm';
+        var sub = [];
+        if (w && h) sub.push((+h.toFixed(1)) + 'cm');
+        var d = String(last.date || '').split('-');
+        if (d.length === 3) sub.push(Number(d[1]) + '월 ' + Number(d[2]) + '일');
+        return '<div style="font-size:22px; font-weight:900; color:#4A413C; letter-spacing:-0.5px; margin-bottom:4px;">' + big + '</div>' +
+               '<div style="font-size:12px; font-weight:800; color:var(--text-s); white-space:nowrap;">' + sub.join(' · ') + '</div>';
+    }
+    function growthCard() {
+        var ledger = document.getElementById('db-ledger-card');
+        if (!ledger || !ledger.parentNode) return;
+        var card = document.getElementById('db-growth-card');
+        if (!card) {
+            var fever = ledger.parentNode.querySelector('[onclick*="directGoToolbox(\'fever\')"]');
+            if (!fever) { ledger.classList.add('pl-wide'); return; }
+            // 해열제 카드와 똑같은 모양으로 만든다 (복사해서 글자만 바꾼다)
+            card = fever.cloneNode(true);
+            // ⚠️ theme.js 는 처음 본 style 을 data-theme-src 에 적어 두고 그걸로 다시 칠한다.
+            //    복사하면 해열제 카드의 옛 style 까지 따라와서, 여기서 준 position 이 지워졌다 (글자가 카드 밖으로 나갔다).
+            [card].concat([].slice.call(card.querySelectorAll('[data-theme-src]'))).forEach(function (n) {
+                n.removeAttribute('data-theme-src');
+                n.removeAttribute('data-theme-applied');
+            });
+            card.id = 'db-growth-card';
+            card.setAttribute('onclick', "directGoToolbox('growth')");
+            card.style.position = 'relative';
+            card.style.display = 'block';
+            var head = card.firstElementChild;
+            var spans = head ? head.querySelectorAll('span') : [];
+            if (spans[0]) spans[0].textContent = '📈';
+            if (spans[1]) spans[1].textContent = '성장 기록';
+            var old = card.querySelector('#db-fever-text');
+            var box = document.createElement('div');
+            box.id = 'db-growth-text';
+            box.style.cssText = TXT_STYLE;
+            if (old && old.parentNode) old.parentNode.replaceChild(box, old); else card.appendChild(box);
+            ledger.parentNode.insertBefore(card, ledger);
+        }
+        // ⚠️ 같은 글이면 다시 넣지 않는다. 넣을 때마다 화면이 바뀐 걸로 잡혀서 끝없이 돈다.
+        var t = document.getElementById('db-growth-text');
+        var html = growthHTML();
+        if (t && t.getAttribute('data-k') !== html) {
+            t.innerHTML = html;
+            t.setAttribute('data-k', html);
+        }
+    }
+
     // 언제깠지 — 약국 약 · 안약은 고르는 칸에서 뺀다 (분유 · 연고 · 로션 · 퓨레 · 물티슈는 그대로)
     function trimOpenItems() {
         var sel = document.getElementById('open-item-type');
@@ -437,6 +504,7 @@
         try { hideEmergencyBlock(); } catch (e) {}
         try { hideVaccineBox(); } catch (e) {}
         try { trackerGrid(); } catch (e) {}
+        try { growthCard(); } catch (e) {}
         try { trimOpenItems(); } catch (e) {}
         try { removeArticles(); } catch (e) {}
         try { cleanBrief(); } catch (e) {}
