@@ -927,18 +927,18 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <div style="width: 100%; max-width: 480px; height: 100%; height: 100dvh; background: var(--bg-card, #FFFFFF); box-sizing: border-box; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative;">
         
         <!-- 💡 스텝 0: 맨 처음 카카오 로그인 화면 (최초 등장) -->
-        <div id="onboarding-step-0" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
-            <div style="flex: 1; padding: 24px; padding-top: 80px; overflow-y: auto; box-sizing: border-box; text-align: center;">
-                <div style="font-size: 56px; margin-bottom: 24px;">🐣</div>
+        <div id="onboarding-step-0" style="display: flex; flex-direction: column; height: 100%; overflow: hidden; background: var(--bg-main, #FAF7F2);">
+            <div style="flex: 1; padding: 24px; padding-top: 64px; overflow-y: auto; box-sizing: border-box; text-align: center;">
+                <picture><source srcset="./box.webp" type="image/webp"><img src="./box.png" alt="" width="150" height="117" decoding="async" style="display: block; width: 150px; height: auto; margin: 0 auto 18px;"></picture>
                 <h1 style="font-size: 26px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.4; margin: 0 0 16px 0;">
                     우리 가족 육아 동지,<br>배냇함
                 </h1>
                 <p style="color: var(--text-s, #A3958A); font-size: 15px; font-weight: 600; line-height: 1.5;">
-                    소중한 우리 아기 기록을<br>가족과 함께 안전하게 공유하세요.
+                    수유·기저귀는 같이 적고,<br>아기의 처음은 함께 담아요.
                 </p>
             </div>
             
-            <div style="padding: 16px 24px; padding-bottom: max(32px, env(safe-area-inset-bottom)); background: var(--bg-card, #FFFFFF); box-sizing: border-box;">
+            <div style="padding: 16px 24px; padding-bottom: max(32px, env(safe-area-inset-bottom)); background: var(--bg-main, #FAF7F2); box-sizing: border-box;">
                 <!-- 🚨 여기에 카카오 로그인 함수 연결! -->
                 <button onclick="window.loginWithKakao()" style="width: 100%; padding: 18px; border-radius: 16px; background: #FEE500; color: #4A413C; font-weight: 900; font-size: 16.5px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(254,229,0,0.2);">
                     💬 카카오로 3초 만에 시작하기

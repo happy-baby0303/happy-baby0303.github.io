@@ -115,6 +115,8 @@ const ASSETS = [
     './style.css',
     './tune.css',        /* ⚠️ 빠져 있었다. 없으면 오프라인에서 글자 크기·모서리가 통째로 어긋난다 */
     './icon-512.png',
+    './box.png',
+    './box.webp',
     './icon-192x192.png',
     './icon-maskable-512.png',
     './apple-touch-icon.png',
