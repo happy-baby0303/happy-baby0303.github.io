@@ -3410,9 +3410,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         localStorage.setItem('user_role', 'senior');
                         // 할머니 · 할아버지 · 시터 선생님 — 초대한 엄마 아빠가 고른 이름 (rolelock.js 가 화면 말투를 맞춘다)
                         if (data.inviteLabel) localStorage.setItem('tosil_helper_label', data.inviteLabel);
-                    } else if (!localStorage.getItem('user_role')) {
-                        localStorage.setItem('user_role', 'mom');
                     }
+                    /* ⚠️ 역할이 아직 없는 폰(새 폰 · 새 앱)이면 '엄마'로 정해 버리지 않는다.
+                          아빠가 초대 링크로 들어오면 말없이 '엄마'가 돼서, 아빠가 남긴 기록 알림이 '엄마가 …' 로 갔다.
+                          새로 열릴 때 '이 폰은 누구 폰인가요?'(showRoleOnboarding)가 떠서 본인이 고른다. */
                     // 서버가 정한 역할을 자물쇠로 남긴다. 스스로 못 푼다.
                     if (assignedRole === 'viewer') localStorage.setItem('tosil_role_locked', 'viewer');
                     else localStorage.removeItem('tosil_role_locked');
