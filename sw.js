@@ -192,6 +192,7 @@ const ASSETS = [
     './shared/safenet.js',
     './playlite.js',
     './native.js',
+    './familyhome.js',
     './plusfree.js',
     './toolbrief.js',
     './voice.js',

@@ -37,6 +37,7 @@
       <script src="./playlite.js?v=3"></script>
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
       <script src="./native.js?v=1"></script>
+      <script src="./familyhome.js?v=1"></script>
     <!-- 🎨 색 칠하기는 맨 먼저. 예전엔 본문 맨 끝에서 불려서, 그 전까지 화면이 파랗게 한 번 그려졌다.
          여기서 부르면 본문이 만들어지는 순간부터 보라로 칠해서 파란 장면이 아예 안 생긴다. -->
     <!-- 카카오톡 SDK (이게 있어야 카톡이 뜹니다!) -->
@@ -3319,6 +3320,18 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             }
         }
 
+        // 2.5 이 폰에 가족 코드가 없으면(새 폰 · 새 앱): 내 문서에 적어 둔 원래 가족방으로 돌아간다 (familyhome.js)
+        //     예전엔 여기서 바로 빈 새 방을 만들어서, 기록이 다 날아간 것처럼 보였다
+        if (!currentCode && typeof window.restoreFamilyHome === 'function') {
+            const back = await window.restoreFamilyHome(user, kakaoSub);
+            if (back) {
+                currentCode = back;
+                // 아기 이름·생일을 방에서 받아 왔다. 이름 묻는 화면이 떠 있으면 새로 열어 바로 홈으로 간다
+                const ob = document.getElementById('onboarding-overlay');
+                if (ob && ob.style.display !== 'none') { location.reload(); return; }
+            }
+        }
+
       // 3. 신규 방 생성
         if (!currentCode) {
             const rand = () => Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -3338,6 +3351,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             console.log("✅ 안전한 새 가족 코드가 발급되었습니다:", personalCode);
         }
 
+        // 지금 가족방을 내 문서에 적어 둔다 (새 폰에서도 돌아올 수 있게 · 바뀌었을 때만)
+        if (typeof window.rememberFamilyHome === 'function') window.rememberFamilyHome(user, kakaoSub);
         if (typeof window.initRealtimeSync === 'function') window.initRealtimeSync();
     }); 
 
