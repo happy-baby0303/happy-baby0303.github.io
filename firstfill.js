@@ -190,7 +190,7 @@
         if (step === 0) {
             shell(
                 '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
-                    '<div style="font-size:52px; margin-bottom:26px;">🧺</div>' +
+                    '<img src="./box.webp" alt="" width="132" height="103" style="display:block; width:132px; height:auto; margin:0 auto 22px;">' +
                     '<div class="serif-display" style="font-size:25px; font-weight:700; color:var(--text-title); ' +
                         'letter-spacing:-0.6px; line-height:1.45;">' + name + '의 배냇함을<br>열었어요</div>' +
                     '<div style="font-size:14px; font-weight:600; color:var(--text-sub); line-height:1.9; margin-top:20px; word-break:keep-all;">' +
@@ -258,7 +258,7 @@
 
             shell(
                 '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
-                    '<div style="font-size:52px; margin-bottom:24px;">🧺</div>' +
+                    '<img src="./box.webp" alt="" width="132" height="103" style="display:block; width:132px; height:auto; margin:0 auto 20px;">' +
                     '<div class="serif-display" style="font-size:24px; font-weight:700; color:var(--text-title); ' +
                         'letter-spacing:-0.6px; line-height:1.45;">' +
                         (got.length ? '배냇함에 ' + got.length + '가지가<br>담겼어요' : name + '의 배냇함이<br>준비됐어요') + '</div>' +

@@ -477,7 +477,7 @@
               act: "window.openMilestoneModal && window.openMilestoneModal()" },
             { icon: "📖", label: "포토북", sub: pro ? "한 권으로 내보내기" : null,
               act: "window.exportMemoryBook && window.exportMemoryBook()" },
-            { icon: "🌙", label: "잠 무늬", sub: "이레 동안의 결",
+            { icon: "🌙", label: "잠 무늬", sub: "일주일 동안 잔 모양",
               act: "window.openSleepMap && window.openSleepMap()" }
         ];
 
@@ -951,7 +951,7 @@
 
         var empty = !timeline.length
             ? '<div style="text-align:center; padding:70px 24px;">' +
-                '<div style="font-size:40px; margin-bottom:20px;">🧺</div>' +
+                '<img src="./box.webp" alt="" width="104" height="81" style="display:block; width:104px; height:auto; margin:0 auto 18px; opacity:0.95;">' +
                 '<div class="serif-display" style="font-size:19px; font-weight:700; color:var(--text-m); line-height:1.6; margin-bottom:12px;">아직 배냇함이 비어 있어요</div>' +
                 '<div style="font-size:13px; font-weight:500; color:var(--text-sub); line-height:1.8;">' +
                     '사진 한 장이면 충분해요<br>오늘부터 하나씩 담기기 시작합니다' +

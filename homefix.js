@@ -248,9 +248,11 @@
            위치 맞추기 안내는 사진이 있을 때만 (그리고 한 번 맞춰 본 사람에게는 안 띄운다) */
         var hint = document.createElement("div");
         hint.id = "hero-empty-hint";
-        hint.innerHTML = '<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.88); color:#4A413C; ' +
+        /* 사진이 없을 때 큰 빈칸만 덩그러니 있었다. 시작 화면 · 첫 화면과 같은 상자 그림을 두고, 그 아래에 '사진 넣기' */
+        hint.innerHTML = '<img src="./box.webp" alt="" width="112" height="87" style="width:112px; height:auto; opacity:0.92; margin-bottom:12px;">' +
+            '<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.88); color:#4A413C; ' +
             'font-size:13.5px; font-weight:800; padding:10px 16px; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,0.08);">📷 아기 사진 넣기</span>';
-        hint.style.cssText = "position:absolute; inset:0; display:none; align-items:center; justify-content:center; pointer-events:none;";
+        hint.style.cssText = "position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; padding-bottom:34px; pointer-events:none;";
         card.appendChild(hint);
         var tipSeen = 0, tipCounted = false;
         try { tipSeen = Number(localStorage.getItem("tosil_hero_tip_seen")) || 0; } catch (e) {}

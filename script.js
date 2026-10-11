@@ -8001,7 +8001,7 @@ window.renderBabyInfo = function() {
     if (typeof wwList !== 'undefined') {
         let currentWeek = Math.floor(diffDays / 7); 
         let isWonderWeek = wwList.some(x => currentWeek >= (x.w - 1) && currentWeek <= (x.w + 1));
-        badgeText = isWonderWeek ? "🚀 도약기" : "☀️ 평온기";
+        badgeText = isWonderWeek ? "🚀 원더윅스 도약기" : "☀️ 원더윅스 평온기";
     }
 
     const wwBadgeEl = document.getElementById('wonderweek-badge');

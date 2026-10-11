@@ -199,3 +199,15 @@ textarea::placeholder {
     color: #C4BAAF !important;
     opacity: 1;
 }
+
+
+/* ===== 줄바꿈 다듬기 =====
+   한 단어만 다음 줄로 넘어가는 게 거슬렸다 (예: "…폰으로 알려 / 드려요").
+   keep-all  낱말 중간에서 끊지 않는다 (한국어는 띄어쓰기에서만 줄을 바꾼다)
+   pretty    마지막 줄에 한 단어만 덩그러니 남기지 않는다 (안 되는 브라우저는 그냥 지나간다)
+   break-word 아주 긴 낱말(주소·영어)은 칸을 넘칠 때만 끊는다 */
+body { word-break: keep-all; overflow-wrap: break-word; text-wrap: pretty; }
+/* ===== 화면 맨 아래 회색 번짐 =====
+   숨어 있는 글쓰기 창(#writeModal)이 화면 밑에 내려가 있으면서도 그림자를 위로 뿜어서,
+   모든 화면 맨 아래(하단 메뉴 위)가 회색으로 번져 보였다. 열렸을 때만 그림자를 준다. */
+.write-modal:not(.show) { box-shadow: none !important; }

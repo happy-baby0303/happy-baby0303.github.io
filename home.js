@@ -97,7 +97,7 @@
         return '' +
         '<div id="home-memorybox-card" style="background:var(--bg-card); border:1px solid var(--border); border-radius:24px; padding:20px; margin-bottom:24px; box-shadow:0 12px 24px rgba(0,0,0,0.04);">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">' +
-                '<span style="font-size:15px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🧺 ' + esc(babyName()) + '의 배냇함</span>' +
+                '<span style="font-size:15px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;"><img src="./box.webp" alt="" width="22" height="17" style="width:22px; height:auto; vertical-align:-3px; margin-right:5px;">' + esc(babyName()) + '의 배냇함</span>' +
                 '<span onclick="window.goToMemoryBox && window.goToMemoryBox()" style="font-size:12px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.10); padding:6px 12px; border-radius:12px; cursor:pointer;">전체 보기 ›</span>' +
             '</div>' +
             /* ⚠️ 사진이 없으면 '담기' 칸 하나가 한 줄을 다 차지해서 정사각형 큰 빈 상자가 됐다. 빈자리를 채워 세 칸을 유지한다 */
