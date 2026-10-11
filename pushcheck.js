@@ -65,6 +65,7 @@
     var ua = navigator.userAgent || "";
     var isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.indexOf("Mac") > -1 && "ontouchend" in document);
     function standalone() {
+        if (window.__NATIVE_APP__ === true) return true;   // 크롬 없이 뜨는 앱 껍데기 (native.js)
         return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
                document.referrer.indexOf("android-app://") === 0 || window.navigator.standalone === true;
     }
@@ -407,10 +408,11 @@
             else if (p === "denied") set("perm", "bad", "꺼져 있어요. " + deniedHelp());
             else set("perm", "bad", isIOS ? "홈 화면에 추가한 배냇함 아이콘으로 열어야 알림을 받을 수 있어요." : "이 브라우저는 알림을 받을 수 없어요.");
 
-            /* ② 서비스워커 */
+            /* ② 서비스워커 — 앱 껍데기는 알림을 앱이 직접 받는다 (서비스워커를 거치지 않는다) */
             var reg = null;
             try { reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration() : null; } catch (e) {}
-            if (reg && reg.active) set("sw", "ok", "준비돼 있어요");
+            if (window.__NATIVE_APP__ === true) set("sw", "ok", "앱이 직접 받아요");
+            else if (reg && reg.active) set("sw", "ok", "준비돼 있어요");
             else set("sw", "bad", "알림 받을 준비가 안 됐어요. 앱을 완전히 닫았다가 다시 열어 주세요.");
 
             /* ③ 로그인 */

@@ -11,6 +11,7 @@
    언제 켜지나
      · 플레이 앱으로 열렸을 때
        (첫 화면의 referrer 가 android-app://com.baenaet.app 이다. 한 번 보면 이 폰에 적어 둔다)
+     · 크롬 없이 뜨는 앱 껍데기로 열렸을 때 (웹뷰 이름표에 BaenatApp, 안드로이드)
      · 미리보기: 주소 끝에 ?playlite=1 → 이 탭에서만 라이트로 보인다. ?playlite=0 이면 끈다.
 
    언제 꺼지나 (조직 계정으로 바꾼 뒤)
@@ -29,7 +30,7 @@
      스위치만 켜면 다시 보인다.
 
    index.html <head> 위쪽, safenet.js 바로 다음에 한 줄:
-     <script src="./playlite.js?v=2"></script>
+     <script src="./playlite.js?v=3"></script>
    (화면이 그려지기 전에 켜져야 해서 맨 아래가 아니라 위에 둔다)
    ============================================================ */
 
@@ -58,7 +59,11 @@
         if (q === '0') ssDel(K_PREV);   // 미리보기만 끈다. 플레이 앱 표시는 서버 스위치로만 풀린다.
     } catch (e) {}
 
-    var fromPlay = String(document.referrer || '').indexOf(PKG) === 0;
+    // 크롬 없이 뜨는 우리 앱 껍데기(캐패시터): 웹뷰 이름표에 BaenatApp 이 붙는다. 이것도 플레이 앱이다.
+    // ⚠️ 안드로이드만. 나중에 아이폰 앱(앱스토어)은 따로 정한다.
+    var UA = navigator.userAgent || '';
+    var inShell = /BaenatApp/i.test(UA) && /Android/i.test(UA);
+    var fromPlay = inShell || String(document.referrer || '').indexOf(PKG) === 0;
     if (fromPlay) { lsSet(K_PLAY, '1'); ssSet(K_SESS, '1'); }
 
     // 크롬 탭(브라우저)으로 연 웹은 라이트가 아니다. 같은 폰이라도.
