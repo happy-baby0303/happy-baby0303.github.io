@@ -679,19 +679,33 @@ function filterPlaces() {
         };
 
         const gridEl = document.createElement('div'); gridEl.className = 'festival-grid';
-        filteredEvents.forEach(item => {
+        const makeCard = (item) => {
             const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = String(item.firstimage || '').replace(/^http:\/\//i, 'https://');
             let sd = item.eventstartdate || item.datetime || '', ed = item.eventenddate || '';
             if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
             const dateText = ed ? `${sd} ~ ${ed}` : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
             const card = document.createElement('div'); card.className = 'fest-card';
-            let imgHtml = rawImg ? `<img src="${rawImg}" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:var(--bg-main); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
+            let imgHtml = rawImg ? `<img src="${rawImg}" loading="lazy" decoding="async" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:var(--bg-main); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
             
             // 🚨 [중요] 행사 탭에서는 마지막에 true를 보냅니다!
             card.onclick = () => openFestivalModal(title, dateText, addr, item.tel || '정보없음', item.review || '', title, rawImg || '⚙️GRAPHIC', true);
             card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">${tagOf(item)}</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${dateText}</div><div class="fest-card-meta" style="margin-top:2px;">${shortAddr}</div></div>`;
-            gridEl.appendChild(card);
-        }); container.appendChild(gridEl);
+            return card;
+        };
+        /* ⚠️ '전국 전체' 면 행사가 200개 가까이 한 번에 그려졌다. 사진도 한꺼번에 받아서 느리고 데이터도 많이 썼다.
+              24개씩 보여 주고, 아래 '더 보기' 로 이어서 연다. 사진은 화면에 가까워질 때 받는다(loading=lazy). */
+        const PAGE = 24; let shown = 0;
+        const more = document.createElement('button'); more.type = 'button';
+        more.style.cssText = 'display:block; width:100%; margin:14px 0 4px; padding:14px; border-radius:14px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-s); font-size:13.5px; font-weight:800; cursor:pointer; font-family:inherit;';
+        const showMore = () => {
+            filteredEvents.slice(shown, shown + PAGE).forEach(item => gridEl.appendChild(makeCard(item)));
+            shown = Math.min(filteredEvents.length, shown + PAGE);
+            const left = filteredEvents.length - shown;
+            more.style.display = left > 0 ? 'block' : 'none';
+            more.textContent = '행사 더 보기 (' + left + '개 남음)';
+        };
+        more.onclick = showMore;
+        container.appendChild(gridEl); container.appendChild(more); showMore();
         /* ⚠️ 행사 정보와 사진은 한국관광공사(TourAPI) 자료다. 공공누리 제3유형이라
               '출처 표시' 가 쓰는 조건인데 화면 어디에도 없었다. 목록 맨 아래에 적는다. */
         const credit = document.createElement('div');
@@ -2636,28 +2650,28 @@ function updateMainAISensors(months) {
     const txtToy = document.getElementById('main-txt-toy');
     if(!txtStroller) return;
 
-    if (months <= 6) txtStroller.innerText = "👶 디럭스 (안전한 승차감)";
-    else if (months <= 12) txtStroller.innerText = "🏃 절충형 (혼자 앉는 시기)";
-    else txtStroller.innerText = "⚡ 휴대용 (가벼운 외출용)";
+    if (months <= 6) txtStroller.innerText = "디럭스 (안전한 승차감)";
+    else if (months <= 12) txtStroller.innerText = "절충형 (혼자 앉는 시기)";
+    else txtStroller.innerText = "휴대용 (가벼운 외출용)";
 
-    if (months <= 12) txtCarseat.innerText = "🛡️ 신생아용 (뒤보기 필수)";
-    else txtCarseat.innerText = "🧒 토들러용 (앞보기 전환)";
+    if (months <= 12) txtCarseat.innerText = "신생아용 (뒤보기 필수)";
+    else txtCarseat.innerText = "토들러용 (앞보기 전환)";
 
-    if (months <= 3) txtBottle.innerText = "🍼 신생아 (배앓이 방지)";
-    else if (months <= 5) txtBottle.innerText = "🍼 4~5개월 (젖꼭지 업)";
-    else txtBottle.innerText = "🥛 6개월+ (빨대컵 연습)";
+    if (months <= 3) txtBottle.innerText = "신생아 (배앓이 방지)";
+    else if (months <= 5) txtBottle.innerText = "4~5개월 (젖꼭지 업)";
+    else txtBottle.innerText = "6개월+ (빨대컵 연습)";
 
-    if (months <= 6) txtFood.innerText = "🌾 초기 (쌀미음 스타트)";
-   else if (months <= 9) txtFood.innerText = "🥕 중기 (입자 크기 업)";
-   else if (months <= 14) txtFood.innerText = "🍽️ 완료기 (진밥 적응기)";
-   else txtFood.innerText = "🍚 유아식 (무염/저염 반찬 레시피)";
+    if (months <= 6) txtFood.innerText = "초기 (쌀미음 스타트)";
+   else if (months <= 9) txtFood.innerText = "중기 (입자 크기 업)";
+   else if (months <= 14) txtFood.innerText = "완료기 (진밥 적응기)";
+   else txtFood.innerText = "유아식 (무염/저염 반찬 레시피)";
 
    // 🧸 장난감 센서 (아기 발달 단계 세분화 완벽 적용!)
-    if (months <= 4) txtToy.innerText = "💪 터미타임 (고개 가누기)";
-    else if (months <= 6) txtToy.innerText = "🐛 배밀기 (전신 근육 발달)";
-    else if (months <= 9) txtToy.innerText = "🐾 기어다니기 (활동 반경 확장)";
-    else if (months <= 12) txtToy.innerText = "🏃 걸음마 (잡고 일어서기)";
-    else txtToy.innerText = "🧩 소근육 놀이 (블록·조작북)";
+    if (months <= 4) txtToy.innerText = "터미타임 (고개 가누기)";
+    else if (months <= 6) txtToy.innerText = "배밀기 (전신 근육 발달)";
+    else if (months <= 9) txtToy.innerText = "기어다니기 (활동 반경 확장)";
+    else if (months <= 12) txtToy.innerText = "걸음마 (잡고 일어서기)";
+    else txtToy.innerText = "소근육 놀이 (블록·조작북)";
 }
 
 function setDefaultMainAISensors() {
@@ -12646,11 +12660,11 @@ window.initPremiumBanner = function() {
         dots.forEach((dot, i) => {
             if (i === index) {
                 dot.style.width = '14px';
-                dot.style.background = '#FFFFFF';
+                dot.style.background = 'var(--primary)';
                 dot.style.borderRadius = '4px';
             } else {
                 dot.style.width = '5px';
-                dot.style.background = 'rgba(255,255,255,0.3)';
+                dot.style.background = 'rgba(127,119,221,0.25)';
                 dot.style.borderRadius = '50%';
             }
         });
