@@ -102,10 +102,26 @@
         push("오류", (e.message || "알 수 없는 오류"), where);
     });
 
+    /* 웹 푸시를 못 쓰는 곳(배냇함 앱 · 카톡 안 브라우저 · 아이폰 사파리 탭)에서는
+       파이어베이스가 열 때마다 "여기선 웹 푸시가 안 돼요(messaging/unsupported-browser)" 를 남긴다.
+       고장이 아니다 (앱은 native.js 가 푸시를 직접 받는다).
+       ⚠️ 이걸 적으면 설정 탭에 '문제 기록' 칸이 괜히 떠서, 쓰는 사람은 뭔가 고장 난 줄 안다. */
+    function harmless(msg) {
+        return /messaging\/unsupported-browser/.test(String(msg || ""));
+    }
+
     window.addEventListener("unhandledrejection", function (e) {
         var r = e && e.reason;
+        if (r && (harmless(r.code) || harmless(r.message))) return;
         push("약속", (r && (r.message || r.code || r)) || "처리 못 한 약속", "");
     });
+
+    /* 예전에 이미 적힌 같은 줄도 지운다 (이 줄 하나뿐이었다면 '문제 기록' 칸도 사라진다) */
+    try {
+        var before = load();
+        var kept = before.filter(function (x) { return !(x && harmless(x.msg)); });
+        if (kept.length !== before.length) save(kept);
+    } catch (e) {}
 
     /* ---------- 2. 화면 그리는 함수 감싸기 ----------
        한 카드가 죽어도 그 카드만 비고 나머지는 그려지게. -------- */
