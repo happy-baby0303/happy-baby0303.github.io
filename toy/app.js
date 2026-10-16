@@ -141,11 +141,11 @@ function togglePlayFavorite(id, btn, event) {
     if (favs.includes(id)) {
         favs = favs.filter(f => f !== id);
         btn.innerHTML = '🤍';
-        window.showToast ? window.showToast('🤍 놀이 찜이 해제되었습니다.') : alert('해제됨');
+        window.showToast ? window.showToast('찜을 풀었어요') : alert('해제됨');
     } else {
         favs.push(id);
         btn.innerHTML = '❤️';
-        window.showToast ? window.showToast('❤️ 놀이를 찜했습니다 필터에서 모아보세요.') : alert('찜 완료');
+        window.showToast ? window.showToast('❤️ 찜했어요. 위의 \'찜한 놀이\'에서 모아 볼 수 있어요') : alert('찜 완료');
     }
     localStorage.setItem('favPlays', JSON.stringify(favs));
     

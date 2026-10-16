@@ -579,8 +579,11 @@
         }
 
         // 부부가 나눈 말
+        /* ⚠️ 편지 바로 밑에 붙어 있어서, 문답이 '아기 편지 안에' 들어 있는 것처럼 보였다.
+              하루 카드는 그날 남은 것(편지 · 문답 · 사진 · 소리)을 모으는 곳이다. 칸이 다르다는 걸 점선으로 나눠 보인다. */
         if (typeof window.renderDiaryRow === "function") {
-            inner += window.renderDiaryRow(d.key);
+            var qa = window.renderDiaryRow(d.key);
+            if (qa) inner += '<div style="margin-top:16px; border-top:1px dashed var(--border);">' + qa + '</div>';
         }
 
         /* 부모의 한 줄은 맨 마지막. 하루를 닫는 글이다.

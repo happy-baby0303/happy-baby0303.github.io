@@ -2224,7 +2224,7 @@ function drawFeverChart(records) {
 function downloadFeverReport() {
     const target = document.getElementById('fever-timeline');
     if(!target || !target.innerHTML.trim() || target.innerText.includes("기록이 없습니다")) return alert("캡처할 기록이 없어요");
-    if(typeof html2canvas === 'undefined') return alert("이미지 변환 라이브러리가 준비되지 않았습니다.");
+    if(typeof html2canvas === 'undefined') return alert("그림 만들 준비가 아직 안 됐어요. 잠시 뒤 다시 해 주세요.");
     html2canvas(target, { backgroundColor: '#ffffff', scale: 2, useCORS: true }).then(canvas => {
         const link = document.createElement('a'); link.download = '해열제_기록.png'; link.href = canvas.toDataURL("image/png"); link.click();
         alert("📸 사진으로 저장했어요");
@@ -2742,8 +2742,13 @@ window.calcHealthMaster = function() {
         }
     }
 
-    let table = `<tr><th style="padding:10px; background:#F6F2EC;">주차</th><th style="padding:10px; background:#F6F2EC;">도약기</th><th style="padding:10px; background:#F6F2EC;">특성 지표</th></tr>`;
-    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'style="background:#FFF0F1; color:#D32F2F; font-weight:800;"' : ''; table += `<tr ${active}><td style="padding:10px; border-bottom:1px solid #EDE6DE;">${x.w-1}~${x.w+1}주</td><td style="padding:10px; border-bottom:1px solid #EDE6DE;">${x.t}</td><td style="padding:10px; border-bottom:1px solid #EDE6DE; text-align:left;">${x.d}</td></tr>`; });
+    /* ⚠️ 칸 너비를 글자에 맡겼더니, 좁은 폰(360·384)이나 글자를 크게 해 둔 폰에서 세 번째 칸이 잘렸다.
+          칸 너비를 정해 두고, 긴 말은 칸 안에서 줄을 바꾼다. '원더윅스' 는 머리글(도약기)과 겹쳐서 칸에선 뺀다. */
+    const wwCell = 'padding:10px 6px; border-bottom:1px solid #EDE6DE;';
+    const wwHead = 'padding:10px 2px; background:#F6F2EC; font-size:12px; white-space:nowrap;';
+    let table = `<colgroup><col style="width:25%"><col style="width:18%"><col style="width:57%"></colgroup>` +
+        `<tr><th style="${wwHead}">주차</th><th style="${wwHead}">도약기</th><th style="${wwHead}">특성 지표</th></tr>`;
+    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'style="background:#FFF0F1; color:#D32F2F; font-weight:800;"' : ''; table += `<tr ${active}><td style="${wwCell}">${x.w-1}~<wbr>${x.w+1}주</td><td style="${wwCell}">${String(x.t).replace(/\s*원더윅스/, '')}</td><td style="${wwCell} text-align:left; overflow-wrap:anywhere;">${x.d}</td></tr>`; });
     document.getElementById('ww-table').innerHTML = table;
 
     // 백신
@@ -3006,10 +3011,10 @@ async function saveGrowthRecord() {
         } else if (growthMsg) {
             showToast(`✨ ${growthMsg}`);
         } else {
-            showToast("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다"); 
+            showToast("📈 성장 기록을 차트에 남겼어요"); 
         }
     } else {
-        alert("🎉 우리 아기 성장 기록이 차트에 안전하게 저장되었습니다");
+        alert("📈 성장 기록을 차트에 남겼어요");
     }
     
     // 🚨 방어 4: 차트 그리는 함수가 아직 없거나 에러 날 때 방지
@@ -3038,7 +3043,7 @@ function deleteGrowthRecord(dateStr) {
         records = records.filter(r => r.date !== dateStr);
         localStorage.setItem('tosil_growth_records', JSON.stringify(records));
         renderGrowthHistory();
-        showToast("🗑️ 성장 기록이 삭제되었습니다");
+        showToast("🗑️ 성장 기록을 지웠어요");
     }, "🗑️", "삭제", "#D32F2F");
 }
 window.deleteGrowthRecord = deleteGrowthRecord;
@@ -3197,13 +3202,13 @@ window.uploadPhoto = function(input) {
                         // 짝꿍 폰에도 같은 얼굴이 뜨게 가족방에 주소를 적어둔다
                         if(typeof window.shareBabyPhoto === 'function') window.shareBabyPhoto(downloadUrl);
                         if(typeof window.loadBabyPhoto === 'function') window.loadBabyPhoto(); 
-                        if(typeof window.showToast === 'function') window.showToast("✅ 사진이 안전하게 저장되었습니다");
+                        if(typeof window.showToast === 'function') window.showToast("📷 아기 사진을 넣었어요");
                     } catch(err) {
                         console.error("아기 사진 업로드 실패", err);
-                        alert("사진 업로드 중 통신 지연이 발생했습니다. 인터넷 연결을 확인해주세요.");
+                        alert("사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요.");
                     }
                 } else {
-                    alert("스토리지 모듈을 불러오지 못했습니다. 페이지를 새로고침 해보세요.");
+                    alert("사진을 올릴 준비가 아직 안 됐어요. 앱을 닫았다가 다시 열어 주세요.");
                 }
             }; 
             img.src = e.target.result;
@@ -3428,7 +3433,7 @@ async function addCubeRecord() {
     document.getElementById('cube-name').value = '';
     document.getElementById('cube-qty').value = '';
     renderCubes();
-    showToast("🧊 큐브가 냉장고에 쏙 저장되었습니다."); // 👈 추가
+    showToast("🧊 큐브를 냉장고에 넣었어요"); // 👈 추가
 }
 
 async function useCube(id) {
@@ -3580,7 +3585,7 @@ function deleteCubeQuick(index) {
         quicks.splice(index, 1);
         localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
         renderCubeQuicks();
-        showToast("✂️ 삭제되었습니다.");
+        showToast("🗑️ 지웠어요");
     }, "✂️", "삭제", "#D32F2F");
 }
 window.addCubeRecord = addCubeRecord;
@@ -3791,7 +3796,7 @@ async function cancelBaton(id) {
         let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
         records = records.filter(r => r.id !== id);
         await saveBatonToFirebase(records);
-        showToast("🕊️ 부탁이 취소되었습니다.");
+        showToast("부탁을 취소했어요");
     }, "🤔", "취소", "#A3958A");
 }
 window.createBatonTask = createBatonTask;
@@ -4087,7 +4092,7 @@ window.dismissSmartBanner = function(bannerType) {
     // 오늘 날짜를 기억해서 내일 00시가 되면 다시 뜨게 만듭니다!
     localStorage.setItem('tosil_dismiss_banner_' + bannerType, new Date().toDateString());
     window.updateSmartBanner();
-    window.showToast("오늘 하루 이 알림을 보지 않습니다 🤫");
+    window.showToast("오늘은 이 알림을 다시 띄우지 않을게요");
 };
 
 function updateSmartBanner() {
@@ -5397,7 +5402,7 @@ window.deleteTrackerRecord = function(id) {
             window.updateTrackerDashboard();
         }
         
-        window.showToast("🗑️ 기록이 깔끔하게 삭제되었습니다");
+        window.showToast("🗑️ 기록을 지웠어요");
     }, "🗑️", "삭제", "#D32F2F");
 };
 
@@ -5413,7 +5418,7 @@ window.resetTrackerRecords = function() {
             localStorage.removeItem('tosil_tracker_records');
             window.updateTrackerDashboard();
         }
-        showToast("🧹 트래커 기록이 싹 비워졌습니다");
+        showToast("🧹 기록을 모두 지웠어요");
     }, "⚠️", "전체 삭제", "#D32F2F", "삭제");
 };
 
@@ -6646,7 +6651,7 @@ window.flushOfflineQueue = async function() {
     }
     
     if (isRecovered && typeof window.showToast === 'function') {
-        window.showToast("☁️ 오프라인 때 기록한 데이터가 클라우드에 안전하게 백업되었습니다");
+        window.showToast("☁️ 인터넷이 끊겼을 때 남긴 기록도 올려 두었어요");
     }
 
     // 🚨 업로드가 완전히 끝나고 2초 뒤에 무적 모드 해제! (레이스 컨디션 완벽 차단)
@@ -6896,11 +6901,13 @@ window.saveTrackerRecord = async function() {
     }
 
     if (record.type === 'feed' && record.subType === '이유식') {
-        window.showToast("🥄 냠냠 이유식 기록 완료");
+        window.showToast("🥄 이유식 기록을 남겼어요");
     } else if (record.type === 'med') {
-        window.showToast(`💊 ${record.subType} 투약 기록 완료`);
+        window.showToast(`💊 ${record.subType} 기록을 남겼어요`);
     } else {
-        window.showToast("💾 기록이 안전하게 저장되었습니다");
+        const kindTxt = record.type === 'diaper' ? (record.subType === '소변' ? '💧 기저귀' : '💩 기저귀')
+            : record.type === 'sleep' ? '🌙 잠' : record.type === 'feed' ? (record.subType === '유축' ? '🍼 유축' : '🍼 맘마') : '';
+        window.showToast(kindTxt ? kindTxt + ' 기록을 남겼어요' : '기록을 남겼어요');
     }
 
     if (saveBtn) {
@@ -7368,7 +7375,7 @@ window.downloadReceipt = function() {
     const target = document.getElementById('receipt-content'); 
 
     if (!target) {
-        return alert("저장할 영수증 내용을 찾을 수 없습니다.");
+        return alert("저장할 영수증을 찾지 못했어요.");
     }
     
     // 🚨 1번 원인 방어: 라이브러리가 로드되지 않았을 때
@@ -7398,14 +7405,14 @@ window.downloadReceipt = function() {
         document.body.removeChild(link);
 
         if (typeof window.showToast === 'function') {
-            window.showToast("📸 영수증이 앨범에 쏙 저장되었습니다");
+            window.showToast("📸 영수증을 앨범에 저장했어요");
         } else {
-            alert("📸 영수증이 앨범에 저장되었습니다");
+            alert("📸 영수증을 앨범에 저장했어요");
         }
     }).catch(err => {
         if (btn) btn.style.display = 'block';
         console.error("영수증 캡처 에러:", err);
-        alert("저장 중 오류가 발생했습니다 ㅠㅠ");
+        alert("저장하지 못했어요. 잠시 뒤 다시 해 주세요.");
     });
 };
 
@@ -7527,16 +7534,16 @@ window.resetTrackerRecords = function() {
             localStorage.removeItem('tosil_tracker_records');
             window.updateTrackerDashboard();
         }
-        showToast("🧹 트래커 기록이 싹 비워졌습니다");
+        showToast("🧹 기록을 모두 지웠어요");
     }, "⚠️", "전체 삭제", "#D32F2F", "삭제"); // 👈 끝에 "삭제" 추가
 };
 
 // ⚙️ (설정 탭) 기록 데이터 초기화 버튼
 window.clearAllData = function() {
-    showConfirm("정말 모든 기록 데이터를 초기화할까요?<br>이 작업은 되돌릴 수 없습니다", function() {
+    showConfirm("기록을 모두 지울까요?<br>지우면 되돌릴 수 없어요", function() {
         window.wipeAllRecordsSafely(); // 🚨 무식한 clear() 대신 정밀 타격 엔진 가동
         window.updateTrackerDashboard(); 
-        showToast("🗑️ 데이터가 안전하게 모두 초기화되었습니다.");
+        showToast("🗑️ 기록을 모두 지웠어요");
         setTimeout(() => location.reload(), 1000);
     }, "🚨", "초기화", "#D32F2F");
 };
@@ -7569,7 +7576,7 @@ window.calcSleepToNow = function() {
     const diffMins = Math.floor((now - startObj) / 60000);
     
     if (diffMins < 0) {
-        return window.showToast("⚠️ 시작 시간이 잘못 설정되었습니다.");
+        return window.showToast("시작 시간을 다시 확인해 주세요");
     }
 
     amountInput.value = diffMins;
@@ -7888,7 +7895,7 @@ window.sendKakaoInvite = function(role = 'master', label) {
     if(sheet) sheet.style.display = 'none';
     
     const syncCode = localStorage.getItem('family_sync_code');
-    if (!syncCode) return alert("🚨 가족 코드가 없습니다");
+    if (!syncCode) return alert("가족 코드가 아직 없어요. 로그인한 뒤 다시 해 주세요.");
 
     const inviteUrl = `https://happy-baby0303.github.io/?code=${syncCode}`;
     const callBaby = (typeof window.babyCall === 'function') ? window.babyCall('') : (localStorage.getItem('tosil_babyName') || '우리 아기');
@@ -7921,12 +7928,31 @@ window.sendKakaoInvite = function(role = 'master', label) {
     }
 };
 
+/* 가족방에 엄마 · 아빠가 이미 둘 다 있나 (families/{코드}.members 에서 도우미는 빼고 센다)
+   ⚠️ 초대 링크로 들어온 사람, 새 앱 · 새 폰에서 다시 로그인한 사람에게도 '짝꿍 초대하기' 창이 떴다.
+      '봤다' 도장(tosil_has_seen_invite)은 폰 안에만 있어서, 새 앱에는 없다. */
+window.familyHasPartner = async function () {
+    const code = localStorage.getItem('family_sync_code');
+    if (!code || !window.db || typeof window.getDoc !== 'function' || typeof window.doc !== 'function') return null;
+    try {
+        const snap = await window.getDoc(window.doc(window.db, 'families', code));
+        const m = snap.exists() ? (snap.data() || {}).members : null;
+        if (!m) return false;
+        const ids = Array.isArray(m) ? m : Object.keys(m).filter((u) => m[u] !== 'viewer');
+        return ids.length >= 2;
+    } catch (e) { return null; }   // 모르면 띄우지 않는다 (다음에 다시 본다)
+};
+
 // 🌟 스마트 초대 방아쇠 (트래커 3번 이상 썼을 때만 조용히 등장)
-window.checkAndShowInviteNudge = function() {
+window.checkAndShowInviteNudge = async function() {
     if (localStorage.getItem('tosil_has_seen_invite')) return;
+    if (localStorage.getItem('tosil_role_locked') === 'viewer' || localStorage.getItem('user_role') === 'senior') return;   // 도우미는 짝꿍을 초대하지 않는다
     
     const records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     if (records.length >= 3) {
+        const has = await window.familyHasPartner();
+        if (has === true) { localStorage.setItem('tosil_has_seen_invite', 'true'); return; }
+        if (has !== false) return;
         const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
         const nameEl = document.getElementById('invite-baby-name');
         if(nameEl) nameEl.innerText = babyName;
@@ -8271,7 +8297,7 @@ window.addOpenRecord = function() {
     
     window.currentOpenFilter = 'all'; 
     renderOpenRecords();
-    showToast("✍️ 라벨 스티커가 등록되었습니다");
+    showToast("✍️ 라벨을 붙였어요");
 };
 
 // 2. [기존 유지] 개별 삭제 기능
@@ -8281,7 +8307,7 @@ window.deleteOpenRecord = function(id) {
         records = records.filter(r => r.id !== id);
         localStorage.setItem('tosil_open_records', JSON.stringify(records));
         renderOpenRecords();
-        showToast("🗑️ 삭제되었습니다");
+        showToast("🗑️ 지웠어요");
     }, "🗑️", "삭제", "#D32F2F");
 };
 
@@ -8300,7 +8326,7 @@ window.renewOpenRecord = function(id) {
 
         localStorage.setItem('tosil_open_records', JSON.stringify(records));
         window.renderOpenRecords();
-        showToast("🔄 오늘 날짜로 새로 갱신되었습니다");
+        showToast("🔄 오늘 새로 뜯은 걸로 바꿨어요");
     }, "🔄", "새로 뜯음", "#7F77DD");
 };
 
@@ -9074,7 +9100,7 @@ window.unlinkFamilySync = function() {
                 } catch(e) { console.warn("서버 백업 지우기 에러:", e); }
             }
             
-            window.showToast("💔 가족 연동이 안전하게 해제되었습니다.");
+            window.showToast("가족 연결을 끊었어요");
             
             // 3. 1초 뒤에 앱을 새로고침해서 완전 초기화된 상태로 만듦
             setTimeout(() => {
@@ -9097,11 +9123,11 @@ window.safeUnlinkFamilySync = function() {
         } else {
             // 강제 해제 로직 (Fallback)
             localStorage.removeItem('family_sync_code');
-            alert("가족 연동이 안전하게 해제되었습니다.");
+            alert("가족 연결을 끊었어요.");
             window.renderSettingsTab();
         }
     } else if (answer !== null) {
-        alert("입력한 단어가 일치하지 않아 취소되었습니다.");
+        alert("적은 말이 달라서 취소했어요.");
     }
 };
 
@@ -9858,7 +9884,7 @@ window.exportToExcel = function() {
     const growths = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
 
     if (trackers.length === 0 && fevers.length === 0 && growths.length === 0) {
-        return window.showToast("⚠️ 아직 내보낼 데이터가 없습니다. 먼저 기록을 남겨주세요");
+        return window.showToast("아직 내보낼 기록이 없어요. 먼저 기록을 남겨 주세요");
     }
 
     // 2. 엑셀 파일(CSV) 헤더 만들기
@@ -9921,7 +9947,7 @@ window.exportToExcel = function() {
     link.click();
     document.body.removeChild(link);
 
-    window.showToast("📥 엑셀(CSV) 데이터 다운로드가 완료되었습니다");
+    window.showToast("📥 엑셀 파일로 저장했어요");
 };
 
 // ==========================================
@@ -9955,7 +9981,7 @@ window.copySymptomMemo = function() {
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     let weight = localStorage.getItem('tosil_latest_weight') || '미입력';
     
-    if(records.length === 0) return window.showToast('⚠️ 복사할 진료 기록이 없습니다.');
+    if(records.length === 0) return window.showToast('복사할 진료 기록이 아직 없어요');
     
     let latest = records[0];
     let pillName = latest.type === 'red' ? '아세트아미노펜(빨강)' : '이부프로펜(파랑)';
@@ -9964,7 +9990,7 @@ window.copySymptomMemo = function() {
     let text = `[증상요약]\n- 최근 체온: ${latest.temp}도\n- 복용 약: ${pillName}\n- 몸무게: ${weight}kg\n- 동반 증상: ${symp}`;
     
     navigator.clipboard.writeText(text).then(() => {
-        window.showToast("📋 진료 접수용 메모가 복사되었어요<br>예약 앱이나 문자에 바로 붙여넣기 하세요.");
+        window.showToast("📋 진료 접수용 메모를 복사했어요<br>예약 앱이나 문자에 붙여 넣으세요");
     });
 };
 
@@ -10297,7 +10323,7 @@ if (window.storage && window.uploadString && window.getDownloadURL) {
         window.renderPreviewImages(); 
     } catch(err) {
         console.error("업로드 에러:", err);
-        window.showToast("❌ 사진 첨부에 실패했어요. 잠시 후 다시 시도해주세요.");
+        window.showToast("사진을 붙이지 못했어요. 잠시 뒤 다시 해 주세요.");
     }
                 } else {
                     // 서버 연결 실패 시 오프라인 백업 (기존 로직)
@@ -11041,7 +11067,7 @@ window.changeNickname = function() {
         if (myId) {
             alert(`[관리자 전용] 이 계정의 카카오 고유 ID는 아래와 같습니다.\n\n${myId}\n\n이 숫자를 파이어베이스 admins에 등록하세요.`);
         } else {
-            alert("카카오 로그인 정보가 없습니다.");
+            alert("카카오 로그인이 먼저 필요해요.");
         }
         input.value = ''; // 입력창 초기화
         return; // 닉네임이 실제로 바뀌지 않게 멈춤
@@ -11283,7 +11309,7 @@ window.applyCommunityWaitlist = function(btn) {
             );
         });
     } else {
-        window.showToast("오프라인 상태입니다. 나중에 다시 시도해주세요.");
+        window.showToast("인터넷이 끊겨 있어요. 연결되면 다시 해 주세요.");
     }
 };
 
@@ -11642,7 +11668,7 @@ window.logoutKakao = function() {
         localStorage.removeItem('tosil_is_master');
         localStorage.removeItem('tosil_is_subadmin');
         
-        window.showToast("👋 안전하게 로그아웃 되었습니다.");
+        window.showToast("👋 로그아웃했어요");
         setTimeout(() => location.reload(), 800);
     }, "👋", "로그아웃", "#A3958A");
 };
@@ -11693,10 +11719,10 @@ window.unlinkKakao = function() {
                 localStorage.clear();
             }
             
-            window.showToast("💔 회원 탈퇴가 완료되었습니다. 그동안 감사했습니다");
+            window.showToast("탈퇴했어요. 그동안 함께해 주셔서 고마웠어요");
             setTimeout(() => location.reload(), 1500);
         } else if (answer !== null) {
-            alert("입력한 단어가 일치하지 않아 취소되었습니다.");
+            alert("적은 말이 달라서 취소했어요.");
         }
     }, "🚨", "탈퇴하기", "#D32F2F");
 };
@@ -13150,7 +13176,7 @@ window.__old_downloadMilestone_unused = function() {
     }
 
     if (achievedIds.length === 0) {
-        return window.showToast("⚠️ 아직 배냇함에 보관된 추억이 없어요 첫 번째 기적을 체크해주세요.");
+        return window.showToast("아직 배냇함에 담긴 순간이 없어요. 첫 순간을 먼저 체크해 주세요");
     }
 
     // 🌟 가장 최근에 달성한 기적 추출
@@ -13158,7 +13184,7 @@ window.__old_downloadMilestone_unused = function() {
     const latestItem = MILESTONE_DATA.find(m => m.id === latestId);
     
     if (!latestItem) {
-        return window.showToast("⚠️ 도감 정보를 불러오는 중 오류가 발생했습니다. 체크를 풀고 다시 시도해주세요.");
+        return window.showToast("정보를 불러오지 못했어요. 체크를 풀고 다시 해 주세요.");
     }
 
     /* ⚠️ 여기도 같은 이유로 새벽엔 어제가 나왔다. */
@@ -13256,11 +13282,11 @@ window.__old_downloadMilestone_unused = function() {
             document.body.removeChild(link);
             
             exportDiv.remove();
-            window.showToast("💌 앨범 저장 완료 배냇함의 소중한 추억을 인스타에 간직해보세요.");
+            window.showToast("💌 앨범에 저장했어요");
         }).catch(err => {
             console.error("도감 캡처 에러:", err);
             exportDiv.remove();
-            alert("저장 중 오류가 발생했습니다 ㅠㅠ (메모리 부족일 수 있습니다)");
+            alert("저장하지 못했어요. 폰 저장 공간이 모자랄 수 있어요.");
         });
     }, 500); 
 };
@@ -13557,7 +13583,7 @@ window.showSyncCode = function() {
 window.copySyncCode = function(code) {
     if (typeof window.openFamilyInvite === 'function') window.openFamilyInvite('master');
     navigator.clipboard.writeText(code).then(() => {
-        window.showToast("📋 가족 코드가 클립보드에 복사되었습니다");
+        window.showToast("📋 가족 코드를 복사했어요");
     });
 };
 
@@ -13566,7 +13592,7 @@ window.copySyncCode = function(code) {
 // ==========================================
 window.downloadSyncTicket = function() {
     const target = document.getElementById('ticket-capture-area');
-    if (!target || typeof html2canvas === 'undefined') return alert("저장할 수 없습니다.");
+    if (!target || typeof html2canvas === 'undefined') return alert("지금은 저장할 수 없어요. 잠시 뒤 다시 해 주세요.");
     
     window.showToast("📸 티켓을 예쁘게 굽고 있어요...");
     
@@ -13599,7 +13625,7 @@ window.downloadSyncTicket = function() {
         });
     }).catch(err => {
         console.error("티켓 캡처 에러:", err);
-        alert("이미지 저장 중 오류가 발생했습니다.");
+        alert("그림을 저장하지 못했어요. 잠시 뒤 다시 해 주세요.");
     });
 };
 
@@ -13759,10 +13785,10 @@ window.handleSeniorPhotoUpload = async function(input) {
                     window.showToast("📷 엄마 아빠에게 사진을 보냈어요");
                 } catch(err) {
                     console.error(err);
-                    window.showToast("❌ 인터넷 연결이 불안정하여 전송에 실패했어요.");
+                    window.showToast("인터넷이 불안정해서 보내지 못했어요. 잠시 뒤 다시 해 주세요.");
                 }
             } else {
-                window.showToast("❌ 서버 시스템을 불러오지 못했습니다. 앱을 다시 켜주세요.");
+                window.showToast("연결이 잠깐 끊겼어요. 앱을 닫았다가 다시 열어 주세요.");
             }
         };
         img.src = e.target.result;
@@ -14446,7 +14472,7 @@ window.saveBabyProfile = function(targetId) {
     profiles = profiles.map(p => p.id === targetId ? { ...p, name: newName } : p);
     originalSetItem.call(localStorage, 'tosil_baby_profiles', JSON.stringify(profiles));
 
-    window.showToast("✅ 수정되었습니다");
+    window.showToast("✅ 고쳤어요");
     document.getElementById('edit-baby-modal').remove();
     location.reload();
 };
@@ -14573,7 +14599,7 @@ window.startBreastTimer = function() {
     localStorage.setItem('tosil_breast_dir', window.trackerState.status);
     window.closeTrackerSheet();
     window.updateTrackerDashboard();
-    window.showToast("🤱 수유 시작 시간을 기록했어요<br>(창을 닫고 다른 앱을 하셔도 됩니다)");
+    window.showToast("🤱 수유 시작을 남겼어요<br>창을 닫아도 시간은 계속 재요");
 };
 
 window.stopBreastTimer = function() {
@@ -14611,7 +14637,7 @@ window.cancelBreastTimer = function() {
     localStorage.removeItem('tosil_breast_dir');
     window.closeTrackerSheet();
     window.updateTrackerDashboard();
-    window.showToast("🗑️ 수유 기록이 취소되었습니다.");
+    window.showToast("🗑️ 수유 기록을 취소했어요");
 };
 
 // ==========================================
@@ -14900,7 +14926,7 @@ window.applyPremiumWaitlist = function(btn) {
             );
            });
     } else {
-        window.showToast("오프라인 상태입니다. 나중에 다시 시도해주세요.");
+        window.showToast("인터넷이 끊겨 있어요. 연결되면 다시 해 주세요.");
     }
 }; // <- applyPremiumWaitlist 함수 닫는 괄호
 
@@ -15212,11 +15238,11 @@ window.downloadPediatricianReport = function() {
             reportDiv.remove();
             
             document.getElementById('premium-modal').style.display = 'none';
-            window.showToast("✅ 고화질 A4 종합 리포트가 앨범에 저장되었습니다");
+            window.showToast("✅ 종합 리포트를 앨범에 저장했어요");
         }).catch(e => {
             console.error(e);
             reportDiv.remove();
-            window.showToast("❌ 리포트 생성 중 오류가 발생했습니다.");
+            window.showToast("리포트를 만들지 못했어요. 잠시 뒤 다시 해 주세요.");
         });
     }, 800);
 };
@@ -15314,7 +15340,7 @@ window.downloadMonthlyGrowthCard = function() {
             link.click();
             document.body.removeChild(link);
             cardDiv.remove();
-            window.showToast("🎉 인스타용 월간 성장 카드가 저장되었습니다");
+            window.showToast("🎉 이달의 성장 카드를 저장했어요");
         }).catch(e => {
             cardDiv.remove();
             window.showToast("❌ 카드 생성 실패");
@@ -16176,7 +16202,7 @@ window.initNursingMap = async function() {
 
     } catch(e) {
         console.error("맵 데이터 로드 에러:", e);
-        window.showToast("❌ 수유실 데이터를 찾을 수 없습니다. (nursing.json 필요)");
+        window.showToast("수유실 정보를 불러오지 못했어요. 잠시 뒤 다시 해 주세요.");
     }
 };
 

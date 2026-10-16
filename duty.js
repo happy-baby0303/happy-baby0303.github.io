@@ -108,7 +108,8 @@
         var diapers = R.filter(function (r) { return r.type === "diaper"; });
         var all = records();
         var lastFeed = all.filter(function (r) { return r.type === "feed" && r.subType !== "이유식"; }).sort(function (a, b) { return b.timestamp - a.timestamp; })[0];
-        return { feeds: feeds, foods: foods, diapers: diapers, lastFeed: lastFeed };
+        var lastDiaper = all.filter(function (r) { return r.type === "diaper"; }).sort(function (a, b) { return b.timestamp - a.timestamp; })[0];
+        return { feeds: feeds, foods: foods, diapers: diapers, lastFeed: lastFeed, lastDiaper: lastDiaper };
     }
 
     function awayHTML() {
@@ -123,7 +124,11 @@
                 '<span style="text-align:right;"><span style="font-size:15px;font-weight:800;color:' + INK + ';">' + val + '</span>' +
                     (sub ? '<div style="font-size:12px;font-weight:600;color:' + SUB + ';margin-top:2px;">' + sub + '</div>' : '') + '</span></div>';
         };
-        var lf = s.lastFeed;
+        var lf = s.lastFeed, ld = s.lastDiaper;
+        /* ⚠️ 그냥 '아직' 이라고만 써서 '아직 안 갈았다' 는 건지 헷갈렸다.
+              앱은 남긴 기록만 안다 (먹였는데 안 남겼을 수도 있다). 그래서 '아직 기록 없어요' 라고 쓰고,
+              마지막이 언제였는지를 아래에 붙인다. */
+        var NONE = "아직 기록 없어요";
         /* 받은 부탁 — 아래쪽 바통 카드까지 내려가지 않아도 보이게, 맨 위에서 몇 개인지와 첫 부탁을 */
         var myId = myUid(), bat = [];
         try { bat = (JSON.parse(localStorage.getItem("tosil_baton_records")) || []).filter(function (r) { return (r.status === "requested" || r.status === "accepted") && (!r.by || r.by !== myId); }); } catch (e) {}
@@ -132,9 +137,9 @@
             '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">' +
                 '<span style="font-size:16px;font-weight:900;color:' + INK + ';">내가 나간 뒤로</span>' +
                 '<span style="font-size:12.5px;font-weight:700;color:' + SUB + ';">' + hhmm(since) + '부터</span></div>' +
-            row("맘마", s.feeds.length ? s.feeds.length + "번" : "아직", lf ? "마지막 " + ago(lf.timestamp) + " · " + (lf.subType || "맘마") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : lf.subType === "이유식" ? "g" : "ml") : "") : "") +
+            row("맘마", s.feeds.length ? s.feeds.length + "번" : NONE, lf ? "마지막 " + ago(lf.timestamp) + " · " + (lf.subType || "맘마") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : lf.subType === "이유식" ? "g" : "ml") : "") : "") +
             (s.foods.length ? row("이유식", s.foods.length + "번", "") : "") +
-            row("기저귀", s.diapers.length ? s.diapers.length + "번" : "아직", "") +
+            row("기저귀", s.diapers.length ? s.diapers.length + "번" : NONE, ld ? "마지막 " + ago(ld.timestamp) + " · " + (ld.subType === "소변+대변" ? "소변 · 대변" : (ld.subType || "기저귀")) : "") +
             (sleepTxt ? row("잠", sleepTxt, "") : "") +
             (bat.length ? '<div onclick="var t=document.getElementById(\'home-dad-baton-list\'); if(t) t.scrollIntoView({behavior:\'smooth\', block:\'center\'});" ' +
                 'style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border-radius:13px;background:rgba(127,119,221,0.08);cursor:pointer;">' +

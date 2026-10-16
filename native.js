@@ -193,12 +193,23 @@
         }
         try { localStorage.setItem('firebase_uid', user.uid); } catch (e) {}
         var kid = localStorage.getItem('kakao_id') || user.uid;
+        /* ⚠️ 앱을 깔기 전에 크롬(웹 푸시)으로 알림을 받던 폰은, 서버에 그 크롬 알림 주소가 그대로 남아 있었다.
+              그래서 알림이 앱으로 한 번, 크롬으로 한 번 왔다 (크롬은 '스팸일 수 있음' 이라며 가렸다).
+              이 앱이 새 알림 주소를 처음 적을 때 한 번만, 내 문서의 알림 주소를 이 앱 것 하나로 바꾼다.
+              태블릿 · 컴퓨터를 같이 쓰면 그 기기는 다음에 열 때 자기 주소를 다시 적는다. */
+        var ONLY = 'tosil_native_push_only';
+        var fresh = false;
+        try { fresh = localStorage.getItem(ONLY) !== token; } catch (e) {}
         return window.setDoc(window.doc(window.db, 'users', String(kid)), {
             fcm_token: token,
-            fcm_tokens: window.arrayUnion(token),
+            fcm_tokens: fresh ? [token] : window.arrayUnion(token),
             firebase_uid: user.uid,
+            native_app_at: Date.now(),
             token_updated_at: Date.now()
-        }, { merge: true }).then(function () { return true; });
+        }, { merge: true }).then(function () {
+            try { localStorage.setItem(ONLY, token); } catch (e) {}
+            return true;
+        });
     }
 
     var impl = {

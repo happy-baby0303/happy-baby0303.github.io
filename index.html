@@ -36,7 +36,7 @@
     <!-- 📱 플레이 앱에서만 의료 기능을 숨긴다(웹은 그대로). 화면이 그려지기 전에 켜져야 해서 여기 둔다 -->
       <script src="./playlite.js?v=3"></script>
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
-      <script src="./native.js?v=1"></script>
+      <script src="./native.js?v=2"></script>
       <script src="./familyhome.js?v=1"></script>
     <!-- 🎨 색 칠하기는 맨 먼저. 예전엔 본문 맨 끝에서 불려서, 그 전까지 화면이 파랗게 한 번 그려졌다.
          여기서 부르면 본문이 만들어지는 순간부터 보라로 칠해서 파란 장면이 아예 안 생긴다. -->
@@ -1861,9 +1861,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                                     <span>📅 전체 원더윅스 타임라인</span>
                                     <span class="box-sub" style="font-size:12px; padding:6px 12px; border-radius:10px; font-weight:800;">표 보기 ▾</span>
                                 </summary>
-                                <div style="padding:0 20px 20px 20px; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 16px;">
-                                    <div class="box-main" style="border-radius:12px; overflow:hidden;">
-                                        <table class="ww-table" id="ww-table" style="width:100%; border-collapse:collapse; font-size:13px; text-align:center; color: var(--text-m);"></table>
+                                <!-- ⚠️ 카드 안의 카드 안의 카드였다 (여백이 세 번 겹쳐 표가 화면의 반만 썼다). 좁은 폰에서 세 번째 칸이 잘렸다 -->
+                                <div style="padding:16px 0 0; border-top: 1px solid var(--border); margin-top: 4px;">
+                                    <div style="border:1px solid var(--border); border-radius:12px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                                        <table class="ww-table" id="ww-table" style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:13px; text-align:center; color: var(--text-m);"></table>
                                     </div>
                                 </div>
                             </details>
@@ -3502,7 +3503,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- ⏸ 앱이 뒤에 있을 때 타이머가 일을 안 하게. setInterval 을 감싸므로 제일 먼저 -->
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
-<script src="script.js?v=20261011-2"></script>
+<script src="script.js?v=20261016-1"></script>
     <script src="./stage.js"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js"></script>
@@ -3513,12 +3514,12 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./outingreturn.js"></script>
 <script src="./rolelock.js?v=2"></script>
     <script src="./sitterplus.js"></script>
-    <script src="./duty.js"></script>
+    <script src="./duty.js?v=1"></script>
 <script src="./graveyard.js"></script>
 <script src="playdata.js"></script>
 <script src="receiptData.js"></script>
 <script src="./emotion.js"></script>
-<script src="./memorybox.js"></script>
+<script src="./memorybox.js?v=1"></script>
 <script src="./newbadge.js"></script>
 <script src="./monthcard.js"></script> 
 <script src="./monthgift.js"></script>
@@ -3529,7 +3530,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./outingsmart.js"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
-<script src="./voice.js"></script>
+<script src="./voice.js?v=1"></script>
 <script src="./waveform.js"></script>
 <script src="./voicereel.js"></script> 
 <script src="./milestonebook.js"></script>
@@ -3548,6 +3549,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
  <script src="./homefix.js?v=2"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js?v=2"></script>
+<script src="./sleeppicker.js?v=1"></script>
 <script src="./bedtime.js"></script>
 <script src="./remind.js"></script>
     <script src="./carealarm.js"></script>
