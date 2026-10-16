@@ -8965,20 +8965,19 @@ window.renderSettingsTab = function() {
                 
             </div>
 
-            <!-- 데이터 관리 -->
-            <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">
+            <!-- 데이터 관리
+                 ⚠️ '기록 데이터 초기화' 를 뺐다. 부르는 코드(wipeAllRecordsSafely)가 없어서 눌러도 에러만 났고,
+                    부부가 같이 쓰는 기록이라 한 사람이 지우면 짝꿍 기록까지 지워진다. 다 지우고 나가는 건 '탈퇴하기' 가 한다.
+                    남은 줄(소아과 리포트)은 플레이 앱에서 숨겨지므로, 거기선 이 칸 전체를 숨긴다(pl-hide). -->
+            <div class="pl-hide" style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">
                 데이터 및 기록 관리
             </div>
-            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
+            <div class="pl-hide" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
                 
                 <!-- 🚨 gap 추가 & 텍스트 한 줄 고정 (white-space: nowrap) -->
-                <div onclick="window.openPediatricianReport()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; gap: 12px;">
+                <div onclick="window.openPediatricianReport()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; gap: 12px;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏥 소아과 진료용 리포트</div>
                     <div style="background: rgba(185,138,46,0.12); color: #B98A2E; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; flex-shrink: 0; white-space: nowrap;">PLUS</div>
-                </div>
-                <div onclick="window.clearAllData()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer;">
-                    <div style="font-size: 14.5px; font-weight: 800; color: #D32F2F;">기록 데이터 초기화</div>
-                    <div style="color: #D32F2F; font-size: 12px;">›</div>
                 </div>
             </div>
 
