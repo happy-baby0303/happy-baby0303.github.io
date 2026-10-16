@@ -263,7 +263,7 @@
         var bg, bd, col, txt;
         if (last.status === "fail") {
             bg = "#FFF2F2"; bd = "#FCA5A5"; col = "var(--fg-red)";
-            txt = "⚠️ <b>" + esc(last.name) + "</b> 에서 이상이 있었어요 · 다음 진료 때 꼭 말씀하세요";
+            txt = "⚠️ <b>" + esc(last.name) + "</b>에서 이상이 있었어요 · 다음 진료 때 꼭 말씀하세요";
         } else if (d < 3) {
             bg = "#FFF9E6"; bd = "#FDE68A"; col = "var(--fg-gold)";
             txt = "⏳ <b>" + esc(last.name) + "</b> " + (d + 1) + "일째 · <b>" + (3 - d) + "일 더</b> 지켜본 뒤 새 재료를 주세요";

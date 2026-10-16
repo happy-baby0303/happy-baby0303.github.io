@@ -1272,8 +1272,14 @@ function renderSelectedDateRecords() {
             const planned = !!(r.amount && String(r.amount).indexOf('계획됨') > -1);
             const open = `openMealSheetForUpdate('${selectedDateStr}', ${i}, '${String(r.menu).replace(/'/g, "")}')`;
 
+            /* 토핑 이유식: 재료마다 몇 g 먹었는지 칩으로 (처음 먹인 재료는 '처음') */
+            const isTopping = !planned && Array.isArray(r.parts) && r.parts.length > 0;
+            const safe = (v) => String(v == null ? '' : v).replace(/[<>&"']/g, '');
             const chips = planned
                 ? `<span onclick="${open}" style="background:#FFF7ED; border:1px solid #FDBA74; padding:5px 10px; border-radius:7px; font-size:11.5px; font-weight:800; color:#9A3412; cursor:pointer;">⏳ 아직 안 먹었어요 · 눌러서 기록</span>`
+                : isTopping
+                ? r.parts.map(p => `<span style="background:#F2F0FC; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#5B53B8;">${safe(p.n)} ${parseInt(p.g) || 0}g${p.first ? ' · 처음' : ''}</span>`).join('') +
+                  (r.reaction ? `<span style="background:#F6F2EC; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#7A6F68;">${r.reaction}</span>` : '')
                 : `<span style="background:#F2F0FC; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#7F77DD;">${r.amount || ''}</span>
                    <span style="background:#F6F2EC; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#7A6F68;">${r.reaction || ''}</span>`;
 
@@ -1286,7 +1292,7 @@ function renderSelectedDateRecords() {
                     <div style="flex:1; min-width:0;">
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                             <span style="font-size:12px; color:#A3958A; font-weight:700;">${showTime(r.time)}</span>
-                            <span style="font-weight:900; font-size:15.5px; color:#4A413C; letter-spacing:-0.4px;">${getFoodEmoji(r.menu)} ${r.menu}</span>
+                            <span style="font-weight:900; font-size:15.5px; color:#4A413C; letter-spacing:-0.4px;">${isTopping ? '🍱 토핑 이유식 · ' + (parseInt(r.amount) || 0) + 'g' : getFoodEmoji(r.menu) + ' ' + r.menu}</span>
                         </div>
                         <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">${chips}</div>
                     </div>
@@ -1303,8 +1309,8 @@ function renderSelectedDateRecords() {
                         <span style="font-size:12px; color:#A3958A; font-weight:700;">${showTime(r.time)}</span>
                         <span style="font-weight:900; font-size:15px; color:${isPass ? '#059669' : '#D32F2F'};">${getFoodEmoji(r.ingredient)} ${r.ingredient} 먹여봤어요</span>
                     </div>
-                    <span style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'};">
-                        ${isPass ? '🟢 무사 통과' : '🚨 알레르기 반응'}
+                    <span onclick="window.toggleTestStatus && window.toggleTestStatus('${selectedDateStr}', ${i})" style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'}; cursor:pointer;">
+                        ${isPass ? '🟢 무사 통과' : '🚨 알레르기 반응'} <span style="opacity:.6; font-weight:700;">· 바꾸기</span>
                     </span>
                 </div>
                 <button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:8px; font-size:12px; font-weight:700; color:#A3958A; cursor:pointer; padding:6px 10px;">삭제</button>

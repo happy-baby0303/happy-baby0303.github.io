@@ -5390,9 +5390,10 @@ window.deleteTrackerRecord = function(id) {
     swipeContents.forEach(el => { el.style.transform = 'translateX(0)'; });
     if(window.swipeState) window.swipeState.activeEl = null;
 
-    window.showConfirm("이 기록을 정말 삭제하시겠습니까?", async function() {
+    window.showConfirm("이 기록을 지울까요?", async function() {
         let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
         records = records.filter(r => r.id !== id);
+        try { if (window.Topping) window.Topping.forgetTrk(id); } catch (e) {}   // 토핑 이유식이면 이유식 달력에서도 지운다
         
         if (typeof saveTrackerToFirebase === 'function') {
             await saveTrackerToFirebase(records);
@@ -5712,6 +5713,9 @@ window.updateTrackerDashboard = function() {
                     
                     if(r.type === 'feed') {
                         if (r.subType === '모유') txt = `모유 (${r.status}) ${r.amount}분`;
+                        /* ⚠️ 이유식도 'ml' 로 적혀 있었다 (이유식은 g). 토핑이면 재료마다 g 도 붙인다 */
+                        else if (r.subType === '이유식') txt = `이유식 ${r.amount}g` + (Array.isArray(r.parts) && r.parts.length
+                            ? ` <span style="font-size:12px; font-weight:700; color:var(--text-sub);">${r.parts.map(p => String(p.n).replace(/[<>&"']/g, '') + ' ' + (parseInt(p.g) || 0)).join(' · ')}</span>` : '');
                         else txt = `${r.subType} ${r.amount}ml`;
                     }
                     else if(r.type === 'diaper') {
@@ -6754,6 +6758,12 @@ window.saveTrackerRecord = async function() {
             record.subType = '이유식';
             record.amount = parseInt(foodAmt);
             record.status = ''; 
+            /* 토핑 이유식이면 재료마다 먹은 양을 같이 남긴다 (toppingtrack.js 가 채워 둔다. 죽 이유식은 그대로) */
+            if (Array.isArray(window.__pendingFoodParts) && window.__pendingFoodParts.length) {
+                record.parts = window.__pendingFoodParts;
+                record.style = 'topping';
+            }
+            window.__lastFoodRecord = record;
         } 
         else {
             if(!window.trackerState.subType) {
