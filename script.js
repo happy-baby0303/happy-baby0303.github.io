@@ -42,7 +42,10 @@ const BABY_SPECIFIC_KEYS = [
     // 홈 사진 얼굴 위치(homefix.js)
     'tosil_hero_pos',
     // 예방접종 체크 (vaccine.js) — 쌍둥이면 따로 맞는다
-    'tosil_vaccines', 'tosil_vaccines_t'
+    'tosil_vaccines', 'tosil_vaccines_t',
+    // 이유식 달력 (식단 · 새 재료 · 알레르기). 큐레이터(babyswitch.js)는 이미 아이마다 따로 봤는데 본 앱에만 빠져 있었다.
+    //   그래서 둘째를 고른 채 맘마 기록에서 토핑을 적으면 첫째 달력에 들어가고, 응급 카드는 늘 첫째 알레르기를 보여 줬다
+    'tosil_food_calendar'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')

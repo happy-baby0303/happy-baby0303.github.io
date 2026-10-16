@@ -195,6 +195,7 @@ const ASSETS = [
     './sleeppicker.js',
     './shared/topping.js',
     './toppingtrack.js',
+    './foodcalsync.js',
     './familyhome.js',
     './plusfree.js',
     './toolbrief.js',

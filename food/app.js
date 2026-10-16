@@ -865,7 +865,7 @@ function closeFoodSheet() {
 
 function saveFoodCalendar(status) {
     const ingredient = document.getElementById('food-ing-input').value.trim();
-    if (!ingredient) return alert("급여한 식재료를 입력해주세요 (예: 소고기)");
+    if (!ingredient) return alert("먹인 재료를 적어 주세요 (예: 소고기)");
     
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     if (!records[selectedDateStr]) records[selectedDateStr] = [];
@@ -1062,7 +1062,7 @@ function toggleCookTimer() {
         btn.innerHTML = '▶ 계속';
         btn.style.background = '#7F77DD';
     } else {
-        if (cookTimeRemaining <= 0) return alert('먼저 시간을 세팅해주세요');
+        if (cookTimeRemaining <= 0) return alert('먼저 시간을 정해 주세요');
         
         isTimerRunning = true;
         btn.innerHTML = '⏸ 일시정지';
@@ -1193,7 +1193,7 @@ function saveMealRecord() {
     const amount = document.getElementById('meal-amount-input').value.trim();
     const reaction = document.getElementById('meal-reaction-input').value;
     
-    if (!menu) return alert('메뉴 이름은 꼭 입력해주세요 (예: 소고기 미음)');
+    if (!menu) return alert('메뉴 이름을 적어 주세요 (예: 소고기 미음)');
 
     const finalAmount = amount ? `${amount}ml` : '양 모름';
     const timeStr = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'});
@@ -1224,7 +1224,7 @@ function saveMealRecord() {
 
 function saveTestRecord() {
     const ingredient = document.getElementById('test-ing-input').value.trim();
-    if (!ingredient) return alert('테스트한 식재료를 입력해주세요');
+    if (!ingredient) return alert('처음 먹여 본 재료를 적어 주세요');
 
     saveToCalendarDB({ type: 'test', ingredient, status: currentAllergyStatus });
     closeSheets();
@@ -1319,7 +1319,7 @@ function renderSelectedDateRecords() {
 }
 
 function deleteFoodRecord(dateStr, index) {
-    if (!confirm('이 기록을 삭제하시겠습니까?')) return;
+    if (!confirm('이 기록을 지울까요?')) return;
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     if (records[dateStr]) {
         records[dateStr].splice(index, 1);
@@ -1387,7 +1387,7 @@ window.triggerAutoDeduction = function() {
     const menuName = document.getElementById('meal-menu-input').value.trim();
 
     if (!menuName) {
-        return alert('어떤 메뉴를 먹였는지 입력해주세요');
+        return alert('어떤 메뉴를 먹였는지 적어 주세요');
     }
 
     // ✨ 드디어 찾은 진짜 이름표! 'tosil_cube_records' 로 열어봅니다!
@@ -1519,10 +1519,10 @@ window.downloadCalendarImage = function() {
         btn.style.background = '#4A413C';
         btn.disabled = false;
         
-        setTimeout(() => { alert("📸 갤러리에 식단표가 저장되었습니다"); }, 300);
+        setTimeout(() => { alert("📸 식단표 그림을 저장했어요"); }, 300);
     }).catch(err => {
         console.error("캡처 실패:", err);
-        alert("🚨 앗, 이미지 저장에 실패했어요. 다시 시도해주세요");
+        alert("그림을 저장하지 못했어요. 잠시 뒤 다시 해 주세요");
         btn.innerHTML = originalText;
         btn.style.background = '#4A413C';
         btn.disabled = false;
@@ -1580,7 +1580,7 @@ function calcBabyFoodWater() {
     const weightVal = document.getElementById('food-base-weight').value;
 
     if (!weightVal || parseFloat(weightVal) <= 0) {
-        alert("⚠️ 투입할 베이스 재료의 무게를 숫자로 입력해주세요");
+        alert("넣을 베이스 재료 무게를 숫자로 적어 주세요");
         return;
     }
 
@@ -1669,7 +1669,7 @@ function calcReverseFood() {
     const ratio  = parseFloat(document.getElementById('food-ratio-type').value);
 
     if (!target || target <= 0) {
-        alert("⚠️ 만들고 싶은 총량(g)을 숫자로 입력해주세요");
+        alert("만들 양(g)을 숫자로 적어 주세요");
         return;
     }
 
@@ -1929,7 +1929,7 @@ window.renderAutoPilotUI = function() {
 // 💡 [배냇함 PLUS] 달력 1초 자동 연동 기능 (Killer Feature)
 window.applyPlanToCalendar = function() {
     const plan = window.currentWeeklyPlan;
-    if (!plan || plan.length === 0) return alert("먼저 식단표를 생성해주세요");
+    if (!plan || plan.length === 0) return alert("먼저 식단표를 만들어 주세요");
 
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     let today = new Date();
@@ -1955,7 +1955,7 @@ window.applyPlanToCalendar = function() {
     localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
     renderCalendar(); // 달력 새로고침
     
-    alert("🎉 성공 오늘부터 7일간의 달력에 식단이 자동으로 등록되었습니다.");
+    alert("오늘부터 7일 식단을 달력에 넣었어요.");
     // 달력 위치로 스크롤 부드럽게 이동
     document.getElementById('cal-month-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
