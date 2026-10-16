@@ -339,8 +339,10 @@
                     var card = document.createElement("div");
                     card.id = "family-members-card";
                     card.style.cssText = "background:var(--bg-card); padding:18px 20px 12px; border-radius:16px; border:1px solid var(--border); margin-bottom:12px; box-sizing:border-box; width:100%; display:none;";
-                    var after = document.getElementById("parent-notice-card") || document.getElementById("parent-phone-card");
-                    if (after && after.parentNode === host) host.insertBefore(card, after.nextSibling); else host.appendChild(card);
+                    /* ⚠️ 도우미 카드들이 아직 안 그려진 때가 많아서, 늘 설정 맨 아래(꼬리말 밑)에 붙었다.
+                          가족을 초대하는 '안심 클라우드' 카드 바로 밑이 제자리다. */
+                    var after = document.getElementById("settings-cloud-card") || document.getElementById("parent-notice-card") || document.getElementById("parent-phone-card");
+                    if (after && after.parentNode) after.parentNode.insertBefore(card, after.nextSibling); else host.appendChild(card);
                     paintMembers();
                 }
             } catch (e) {}

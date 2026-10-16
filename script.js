@@ -3809,7 +3809,7 @@ function renderBatonTasks() {
     if (records.length === 0) {
         container.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; min-height: 110px; text-align: center; padding: 20px; background: var(--bg-sub); border-radius: 16px; border: 1px dashed var(--border);">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">지금 기다리는 부탁이 없어요.<br>평화로운 공동 육아 중 🤍</div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">지금 기다리는 부탁이 없어요.<br>평화로운 공동 육아 중이에요.</div>
             </div>`;
         return;
     }
@@ -7429,7 +7429,7 @@ window.checkReceiptVisibility = function() {
                 <div style="font-size: 26px;">🧾</div>
                 <div style="text-align:left;">
                     <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 2px;">오늘의 육아 영수증 발급</div>
-                    <div style="font-size: 11.5px; font-weight: 600; color: var(--text-s);">오늘 하루도 정말 고생 많으셨어요 🤍</div>
+                    <div style="font-size: 11.5px; font-weight: 600; color: var(--text-s);">오늘 하루도 정말 고생 많으셨어요</div>
                 </div>
             </div>
             <div style="color:var(--text-sub); font-size:15px; font-weight:900; padding-right:4px;">›</div>
@@ -8825,7 +8825,7 @@ window.renderSettingsTab = function() {
 
    if (syncCode) {
         syncHtml = `
-            <div class="box-main" style="border-radius: 24px; padding: 24px 20px; margin-bottom: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); box-sizing: border-box; width: 100%;">
+            <div id="settings-cloud-card" class="box-main" style="border-radius: 24px; padding: 24px 20px; margin-bottom: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); box-sizing: border-box; width: 100%;">
                 
                 <!-- 🚨 gap 추가, flex-shrink와 nowrap으로 두 줄 깨짐 완벽 방어! -->
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px;">
@@ -8837,7 +8837,7 @@ window.renderSettingsTab = function() {
                 
                 <!-- 🚨 텍스트 3줄 나오던 것 2줄로 강제 다이어트! -->
                 <div style="font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5; margin-bottom: 20px; word-break: keep-all; letter-spacing: -0.2px;">
-                    소중한 기록을 안전하게 보관 중입니다.<br>가족을 초대해 함께 나누세요 🤍
+                    폰을 바꿔도 기록은 그대로 남아요.<br>가족을 초대하면 같은 기록을 같이 봐요.
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -8976,7 +8976,7 @@ window.renderSettingsTab = function() {
             ` : ''}
             
             <div style="text-align: center; color: var(--text-s); font-size: 11px; font-weight: 700; margin-bottom: 40px;">
-                Made with 🤍 for our baby
+                Made with <span style="color:var(--primary);">♥</span> for our baby
             </div>
         </div>
     `;

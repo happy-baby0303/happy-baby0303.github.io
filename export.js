@@ -596,7 +596,7 @@
         wrap.innerHTML =
         '<div style="width:100%; max-width:480px; background:var(--bg-card); border-radius:26px 26px 0 0; padding:22px 20px calc(30px + env(safe-area-inset-bottom, 0px));">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-                '<span style="font-size:16.5px; font-weight:900; color:var(--text-m); letter-spacing:-0.4px;">🧺 배냇함 내려받기</span>' +
+                '<span style="font-size:16.5px; font-weight:900; color:var(--text-m); letter-spacing:-0.4px;"><img src="./box.webp" alt="" width="22" height="17" style="width:22px; height:auto; vertical-align:-3px; margin-right:5px;">배냇함 내려받기</span>' +
                 '<span onclick="document.getElementById(\'export-sheet\').remove()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); line-height:1.7; margin-bottom:18px; word-break:keep-all;">' +
@@ -630,7 +630,7 @@
             card.style.cssText = "display:flex; align-items:center; gap:14px; background:var(--bg-card); padding:18px 20px; border-radius:16px; border:1px solid var(--border); margin-bottom:16px; box-sizing:border-box; width:100%; cursor:pointer;";
             card.onclick = function () { window.openExportSheet(); };
             card.innerHTML =
-                '<div style="font-size:22px;">🧺</div>' +
+                '<img src="./box.webp" alt="" width="34" height="27" style="width:34px; height:auto; flex-shrink:0;">' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:15px; font-weight:900; color:var(--text-m);">배냇함 내려받기</div>' +
                     '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px;">사진 · 소리 · 편지를 통째로 보관하세요</div>' +
