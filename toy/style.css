@@ -367,6 +367,8 @@ body.dark-mode #food-result-area button[style*="FEE500"] * {
 html, body {
     max-width: 100%;
     overflow-x: hidden;          /* 페이지가 통째로 옆으로 밀리는 걸 막는다 */
+    overflow-x: clip;            /* ⚠️ hidden 이면 body 가 스크롤 상자가 돼서 위쪽 머리(제목 · 큐레이터 탭)가 안 붙어 있었다.
+                                    유모차 · 카시트 · 젖병처럼 붙어 있게. clip 을 모르는 옛 폰은 위의 hidden 을 쓴다 */
 }
 
 .container {

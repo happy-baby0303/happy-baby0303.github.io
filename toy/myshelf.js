@@ -136,7 +136,7 @@
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; margin-bottom:20px; word-break:keep-all;">' +
                 '장난감뿐 아니라 <b>목욕·위생 용품</b>도 있어요. 갖고 계신 걸 눌러주세요.<br>' +
-                '이미 있는 걸로 놀이를 짜드리고, 목록에도 표시해서 <b>두 번 사지 않게</b> 해드립니다.</div>' +
+                '이미 있는 걸로 놀이를 짜드리고, 목록에도 표시해서 <b>두 번 사지 않게</b> 해드려요.</div>' +
             groups +
         '</div>' +
 
@@ -146,7 +146,7 @@
                 '<div onclick="window.closeShelfSheet()" style="text-align:center; padding:17px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
                     'font-size:15.5px; font-weight:900; cursor:pointer;">' +
-                    have.length + '개 골랐어요 · 다 됐습니다</div>' +
+                    have.length + '개 골랐어요 · 다 됐어요</div>' +
             '</div>' +
         '</div>';
     }

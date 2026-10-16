@@ -43,13 +43,13 @@
           잘못 누르면 판정이 뒤집히는 안전 기능이라, 답 단추를 말로 적는다. 왼쪽이 늘 '괜찮은 쪽' 이다. */
     var CHECKS = [
         { id: "drive",  q: "사고 난 자리에서 차를 몰고 나왔나요?", a: ["몰고 나왔어요", "견인했어요"],
-                        no: "견인했다면 가벼운 사고가 아닙니다" },
+                        no: "견인했다면 가벼운 사고가 아니에요" },
         { id: "door",   q: "카시트가 있던 쪽 문은요?", a: ["멀쩡해요", "찌그러졌어요"],
-                        no: "그쪽 문이 찌그러졌다면 충격이 카시트까지 갑니다" },
+                        no: "그쪽 문이 찌그러졌다면 충격이 카시트까지 가요" },
         { id: "injury", q: "차에 탄 사람은요?", a: ["아무도 안 다쳤어요", "다친 사람이 있어요"],
-                        no: "누군가 다쳤다면 그만한 충격이 있었다는 뜻입니다" },
+                        no: "누군가 다쳤다면 그만한 충격이 있었다는 뜻이에요" },
         { id: "airbag", q: "에어백은요?", a: ["안 터졌어요", "터졌어요"],
-                        no: "에어백이 터졌다면 교체 대상입니다" },
+                        no: "에어백이 터졌다면 교체 대상이에요" },
         { id: "damage", q: "카시트에 금·눌림·틀어짐이 보이나요?", a: ["안 보여요", "보여요"],
                         no: "금·눌림·틀어짐이 보이면 바로 교체하세요" }
     ];
@@ -145,16 +145,16 @@
                     'margin-bottom:8px;">새 카시트로 바꾸세요</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + RED + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
-                    '겉이 멀쩡해도 안쪽 뼈대가 상했을 수 있습니다. ' +
-                    '한 번 충격을 받은 카시트는 다음 사고에서 제 힘을 못 냅니다.' +
+                    '겉이 멀쩡해도 안쪽 뼈대가 상했을 수 있어요. ' +
+                    '한 번 충격을 받은 카시트는 다음 사고에서 제 힘을 못 내요.' +
                 '</div>' +
                 /* ⚠️ '받을 수 있다' 고 단정하지 않는다. 약관마다 다르다. */
                 '<div style="margin-top:12px; padding-top:12px; border-top:1px solid #FCA5A5; ' +
                     'font-size:12.5px; font-weight:700; color:#B45309; line-height:1.7; ' +
                     'word-break:keep-all;">' +
-                    '💡 보험으로 교체비를 받을 수 있는 경우가 있습니다. ' +
+                    '💡 보험으로 교체비를 받을 수 있는 경우가 있어요. ' +
                     '사고 접수할 때 <b>카시트도 같이 신고</b>했는지 확인해 보세요. ' +
-                    '(약관과 사고 유형에 따라 다릅니다)' +
+                    '(약관과 사고 유형에 따라 달라요)' +
                 '</div>' +
             '</div>';
         }
@@ -163,12 +163,12 @@
         return '<div style="margin-top:16px; padding:18px; background:#F1F8F4; ' +
             'border:1px solid #BFE0CC; border-radius:14px;">' +
             '<div style="font-size:15px; font-weight:900; color:' + GREEN + '; ' +
-                'margin-bottom:8px;">계속 써도 되는 쪽에 가깝습니다</div>' +
+                'margin-bottom:8px;">계속 써도 되는 쪽에 가까워요</div>' +
             '<div style="font-size:13px; font-weight:600; color:#3C6442; ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                '다섯 가지를 모두 만족했습니다. 다만 이건 <b>겉으로 본 판단</b>이에요.<br>' +
+                '다섯 가지를 모두 만족했어요. 다만 이건 <b>겉으로 본 판단</b>이에요.<br>' +
                 '마음에 걸리면 제조사 고객센터에 모델명과 사고 상황을 말하고 물어보세요. ' +
-                '대부분 무료로 봐줍니다.' +
+                '대부분 무료로 봐줘요.' +
             '</div>' +
         '</div>';
     }
@@ -180,7 +180,7 @@
             '<div class="matrix-header">🚨 사고가 났다면</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.6; word-break:keep-all;">' +
-                '가벼운 접촉사고였어도 카시트는 바꿔야 할 수 있습니다.<br>' +
+                '가벼운 접촉사고였어도 카시트는 바꿔야 할 수 있어요.<br>' +
                 '다섯 가지만 답해주세요' +
             '</div>' +
 
@@ -197,8 +197,8 @@
             '<div style="margin-top:14px; padding-top:14px; border-top:1px dashed #EDE6DE; ' +
                 'font-size:11.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
                 'word-break:keep-all;">' +
-                '미국 도로교통안전국(NHTSA)의 \u2018경미한 사고\u2019 기준을 그대로 옮겼습니다. ' +
-                '제조사가 더 엄격한 기준을 두는 경우가 있으니, 설명서에 적힌 안내가 우선입니다.' +
+                '미국 도로교통안전국(NHTSA)의 \u2018경미한 사고\u2019 기준을 그대로 옮겼어요. ' +
+                '제조사가 더 엄격한 기준을 두는 경우가 있으니, 설명서에 적힌 안내가 우선이에요.' +
             '</div>' +
         '</div>';
     }
@@ -210,7 +210,7 @@
             '<div class="matrix-header">📢 리콜된 제품인지 확인하기</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
-                '카시트도 리콜이 나옵니다. 사고 나서 아는 것보다 지금 한 번 보는 게 낫습니다.<br>' +
+                '카시트도 리콜이 나와요. 사고 나서 아는 것보다 지금 한 번 보는 게 나아요.<br>' +
                 '모델명으로 찾으면 바로 나와요.' +
             '</div>' +
             '<a href="https://www.safetykorea.kr" target="_blank" rel="noopener" ' +

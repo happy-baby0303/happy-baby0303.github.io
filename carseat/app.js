@@ -142,7 +142,7 @@ function generateReportHTML(item) {
         let titleColor, bgColor, borderColor, titleText;
         
         if (item.matchRate === 100) {
-            titleColor = '#7F77DD'; bgColor = '#FBF8F3'; borderColor = '#EDE6DE'; titleText = '고르신 조건에 다 맞아요';
+            titleColor = '#7F77DD'; bgColor = '#FBF8F3'; borderColor = '#EDE6DE'; titleText = window.__seatOnlyAge ? '지금 개월수에 맞아요' : '고르신 조건에 다 맞아요';
         } else if (item.matchRate >= 80) {
             titleColor = '#059669'; bgColor = '#FBF8F3'; borderColor = '#EDE6DE'; titleText = '거의 맞아요';
         } else if (item.matchRate >= 50) {
@@ -151,7 +151,7 @@ function generateReportHTML(item) {
             titleColor = '#E32636'; bgColor = '#FBF8F3'; borderColor = '#EDE6DE'; titleText = '잘 안 맞아요';
         }
 
-        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 22px; font-weight: 900; color: ${titleColor}; letter-spacing: -0.5px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #A3958A; margin-top: 4px;">조건 매칭</div></div>`;
+        scoreHtml = `<div style="text-align: right; line-height: 1.1;"><div style="font-size: 22px; font-weight: 900; color: ${titleColor}; letter-spacing: -0.5px;">${item.matchRate}%</div><div style="font-size: 11px; font-weight: 800; color: #A3958A; margin-top: 4px;">조건에 맞음</div></div>`;
 
         // 다 맞으면 제목이 곧 이유라 목록을 안 붙인다. 안 맞는 이유 앞 🚨 는 응급처럼 보여서 뺐다.
         let reasonLi = item.matchRate === 100
@@ -292,6 +292,7 @@ function runCarseatEngine() {
 
     const resultArea = document.getElementById('carseat-result-area');
     const isFilterActive = (age !== 'all' || carSize !== 'all' || install !== 'all' || safety !== 'all');
+    window.__seatOnlyAge = (age !== 'all' && carSize === 'all' && install === 'all' && safety === 'all');
 
     let processedData = carseatData.map(item => {
         if (!isFilterActive) return { ...item, matchRate: null, matchReasons: [] };
@@ -405,7 +406,7 @@ function shareToHusband(id) {
         content: {
             title: `여보, 이 카시트 어때? ${item.brand} ${item.name}`,
             description: `${csSpecParts(item).join(' · ')}\n배냇함에서 골라봤어.`,
-            imageUrl: 'https://happy-baby0303.github.io/baby-master/carseat/og-image.png',
+            imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
             link: { mobileWebUrl: appUrl, webUrl: appUrl },
         },
         buttons: [

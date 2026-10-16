@@ -122,22 +122,22 @@
         var owned = mine().indexOf(t.id) > -1;
 
         if (L.kind === "always")
-            return { c: GREEN, t: "시기를 안 타는 물건이에요. 오래 씁니다." };
+            return { c: GREEN, t: "시기를 안 타는 물건이에요. 오래 써요." };
 
         if (L.kind === "unknown")
             return { c: GRAY, t: MSNAME[t.milestone] + " 시기에 쓰는 물건이에요." };
 
         if (L.kind === "past")
             return owned
-                ? { c: GRAY, t: "이 시기는 지나갔어요. 정리하거나 물려주기 좋을 때입니다." }
-                : { c: GOLD, t: nm("는") + " 이 시기를 지났어요. 지금 사면 쓸 날이 얼마 없습니다." };
+                ? { c: GRAY, t: "이 시기는 지나갔어요. 정리하거나 물려주기 좋을 때예요." }
+                : { c: GOLD, t: nm("는") + " 이 시기를 지났어요. 지금 사면 쓸 날이 얼마 없어요." };
 
         if (L.kind === "future")
             return { c: GOLD, t: "약 " + L.wait + "개월 뒤부터 쓰는 물건이에요. " +
-                                 "지금 사면 그동안 서랍에 있습니다." };
+                                 "지금 사면 그동안 서랍에 있어요." };
 
         return { c: BLUE, t: L.left
-            ? "지금이 그때예요. 앞으로 약 " + L.left + "개월 씁니다."
+            ? "지금이 그때예요. 앞으로 약 " + L.left + "개월 써요."
             : "지금부터 쭉 쓰는 물건이에요." };
     }
 
@@ -271,7 +271,7 @@
                     '\u2705 사두신 것 ' + have.length + '개, 다 쓰고 계세요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.7; word-break:keep-all;">' +
-                    '한 달 안에 전부 한 번씩은 나왔어요. 이거 쉬운 일 아닙니다.</div>' +
+                    '한 달 안에 전부 한 번씩은 나왔어요. 이거 쉬운 일 아니에요.</div>' +
                 sideLine +
             '</div>';
         }

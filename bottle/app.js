@@ -164,7 +164,7 @@ function generateCardHTML(item, rank) {
         let titleColor, bgColor, borderColor, titleText;
         if (item.matchRate === 100) {
             titleColor = '#7F77DD'; bgColor = '#F2F0FC'; borderColor = '#7F77DD';
-            cardBorderColor = '#7F77DD'; titleText = '고르신 조건에 다 맞아요';
+            cardBorderColor = '#7F77DD'; titleText = window.__bottleOnlyAge ? '지금 개월수에 맞아요' : '고르신 조건에 다 맞아요';
         } else if (item.matchRate >= 80) {
             titleColor = '#059669'; bgColor = '#ECFDF5'; borderColor = '#10B981';
             cardBorderColor = '#10B981'; titleText = '거의 맞아요';
@@ -295,6 +295,7 @@ function runBottleEngine() {
     
     const resultArea = document.getElementById('bottle-result-area');
     const isFilterActive = (age !== 'all' || rejection !== 'all' || material !== 'all' || antiColic !== 'all' || compatible !== 'all' || price !== 'all' || sterilization !== 'all');
+    window.__bottleOnlyAge = (age !== 'all' && rejection === 'all' && material === 'all' && antiColic === 'all' && compatible === 'all' && price === 'all' && sterilization === 'all');
 
     let processedData = bottleData.map(item => {
         if (!isFilterActive) return { ...item, matchRate: null, matchReasons: [] };
@@ -444,7 +445,7 @@ function shareToHusband(id, brand, name) {
         content: {
             title: `여보, 이 젖병 어때? ${brand || ''} ${name || ''}`.trim(),
             description: `배냇함에서 골라봤어. 이걸로 두 개만 사보자 🤍`,
-            imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
+            imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
             link: { mobileWebUrl: appUrl, webUrl: appUrl },
         },
         buttons: [

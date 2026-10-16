@@ -221,7 +221,7 @@
 
             '<div onclick="window.closeStrollerSheet()" style="margin-top:22px; text-align:center; ' +
                 'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
-                'font-size:14.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
+                'font-size:14.5px; font-weight:900; cursor:pointer;">다 됐어요</div>' +
         '</div>';
     }
 
@@ -295,7 +295,7 @@
                     kg + 'kg \u00d7 ' + lifts + '번 = ' + totalKg + 'kg</b><br>' +
                 '접고 펴는 것만요. 트렁크에 넣고 빼는 건 따로고요.' +
                 (floor
-                    ? '<br><br>여기에 <b>' + floor + '층 계단</b>이 더해집니다. ' +
+                    ? '<br><br>여기에 <b>' + floor + '층 계단</b>이 더해져요. ' +
                       '아기까지 안고 오르시면 실제로는 이보다 훨씬 무거워요.'
                     : '') +
             '</div>';
@@ -307,12 +307,12 @@
                 '50종 중 <b>무거운 쪽에서 ' + rk.rank + '번째</b>예요.' +
                 (heavy && light
                     ? ' 같은 ' + esc(byName(o.name).type) + ' 중에 제일 가벼운 건 ' +
-                      '<b>' + esc(light.name) + ' ' + weightOf(light) + 'kg</b> 입니다. ' +
+                      '<b>' + esc(light.name) + ' ' + weightOf(light) + 'kg</b>이에요. ' +
                       '바꾸시면 하루 <b>' +
                       Math.round((kg - weightOf(light)) * lifts * 10) / 10 + 'kg</b> 이 줄어요.'
                     : '') +
                 '<br><span style="color:' + GRAY + ';">무거운 게 나쁜 건 아니에요. ' +
-                '대개 <b>안정감과 맞바꾼 것</b>입니다.</span></div>';
+                '대개 <b>안정감과 맞바꾼 것</b>이에요.</span></div>';
         }
 
         var s = byName(o.name);
@@ -328,10 +328,10 @@
                 'list-style:none;">\uD83E\uDDB4 손목\u00b7허리가 아프시면</summary>' +
             '<div style="margin-top:10px; font-size:12.5px; font-weight:600; ' +
             'color:#7A6F68; line-height:1.9; word-break:keep-all;">' +
-            '\u00b7 접기 전에 <b>아래 바구니 짐부터 빼세요.</b> 그 무게가 그대로 손목에 실립니다<br>' +
-            '\u00b7 트렁크에 넣을 땐 <b>무릎을 굽히고 몸에 붙여서.</b> 팔만 뻗으면 허리가 갑니다<br>' +
-            '\u00b7 <b>한 손으로 들지 마세요.</b> 손목이 제일 먼저 상합니다<br>' +
-            '\u00b7 계단에선 뒷바퀴로 <b>쿵쿵 굴리지 말고</b> 들어 올리세요. 프레임이 상합니다' +
+            '\u00b7 접기 전에 <b>아래 바구니 짐부터 빼세요.</b> 그 무게가 그대로 손목에 실려요<br>' +
+            '\u00b7 트렁크에 넣을 땐 <b>무릎을 굽히고 몸에 붙여서.</b> 팔만 뻗으면 허리가 가요<br>' +
+            '\u00b7 <b>한 손으로 들지 마세요.</b> 손목이 제일 먼저 상해요<br>' +
+            '\u00b7 계단에선 뒷바퀴로 <b>쿵쿵 굴리지 말고</b> 들어 올리세요. 프레임이 상해요' +
         '</div></details>';
 
         return out + '</div>';
@@ -347,17 +347,17 @@
 
     var GOING = [
         { id: "walk",   icon: "\uD83D\uDEB6", label: "동네 산책",
-          want: "comfort", why: "오래 태우고 다니니 <b>승차감과 등받이</b>가 중요합니다" },
+          want: "comfort", why: "오래 태우고 다니니 <b>승차감과 등받이</b>가 중요해요" },
         { id: "mart",   icon: "\uD83D\uDED2", label: "마트 \u00b7 쇼핑",
-          want: "comfort", why: "짐이 늘어납니다. <b>아래 바구니가 큰 쪽</b>이 편해요" },
+          want: "comfort", why: "짐이 늘어나요. <b>아래 바구니가 큰 쪽</b>이 편해요" },
         { id: "metro",  icon: "\uD83D\uDE87", label: "지하철 \u00b7 버스",
-          want: "light",  why: "계단과 개찰구가 있습니다. <b>가벼운 쪽</b>이 손목을 지킵니다" },
+          want: "light",  why: "계단과 개찰구가 있어요. <b>가벼운 쪽</b>이 손목을 지켜요" },
         { id: "car",    icon: "\uD83D\uDE97", label: "차로 이동",
-          want: "small",  why: "트렁크에 넣고 빼야 합니다. <b>접었을 때 작은 쪽</b>이 낫습니다" },
+          want: "small",  why: "트렁크에 넣고 빼야 해요. <b>접었을 때 작은 쪽</b>이 나아요" },
         { id: "eat",    icon: "\uD83C\uDF7D\uFE0F", label: "식당 \u00b7 카페",
-          want: "small",  why: "테이블 옆에 세워둡니다. <b>덜 차지하는 쪽</b>이 눈치가 덜 보여요" },
+          want: "small",  why: "테이블 옆에 세워둬요. <b>덜 차지하는 쪽</b>이 눈치가 덜 보여요" },
         { id: "trip",   icon: "\u2708\uFE0F", label: "여행 \u00b7 비행기",
-          want: "cabin",  why: "기내 반입이 되면 <b>수하물로 안 부쳐도</b> 됩니다" }
+          want: "cabin",  why: "기내 반입이 되면 <b>수하물로 안 부쳐도</b> 돼요" }
     ];
 
     /* 한 대만 쓰실 때 \u2014 그 한 대의 약한 상황을 미리 알려준다.
@@ -366,13 +366,13 @@
         var tips = [];
         if (x.kg >= 10) {
             tips.push(["\uD83D\uDE87 지하철 \u00b7 버스",
-                "\u26a0\ufe0f " + x.kg + "kg 이라 <b>계단과 개찰구가 힘듭니다.</b> " +
+                "\u26a0\ufe0f " + x.kg + "kg이라 <b>계단과 개찰구가 힘들어요.</b> " +
                 "엘리베이터 있는 출구를 미리 찾아두시고, 혼자 들지 마세요."]);
         }
         if (x.cabin.indexOf("\u274c") > -1) {
             tips.push(["\u2708\ufe0f 여행 \u00b7 비행기",
-                "<b>기내 반입이 안 됩니다.</b> 게이트에서 부치는 방식이라 " +
-                "<b>전용 커버</b>를 챙기세요. 그냥 부치면 프레임이 상합니다."]);
+                "<b>기내 반입이 안 돼요.</b> 게이트에서 부치는 방식이라 " +
+                "<b>전용 커버</b>를 챙기세요. 그냥 부치면 프레임이 상해요."]);
         }
         if (x.vol && x.vol > 180) {
             tips.push(["\uD83D\uDE97 차로 이동",
@@ -381,7 +381,7 @@
         }
         if (x.type === "휴대용") {
             tips.push(["\uD83D\uDE34 낮잠 시간",
-                "휴대용은 <b>등받이가 덜 눕는 것</b>이 많습니다. " +
+                "휴대용은 <b>등받이가 덜 눕는 것</b>이 많아요. " +
                 "잘 시간에 나가시면 각도를 최대한 눕히고 자주 확인해주세요."]);
         }
         if (!tips.length) return "";
@@ -402,7 +402,7 @@
             }).join("") +
             '<div style="margin-top:10px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7;">두 대 쓰시면 <b>둘 다 등록</b>해주세요. ' +
-                '상황마다 뭘 갖고 나갈지 골라드립니다.</div>' +
+                '상황마다 뭘 갖고 나갈지 골라드려요.</div>' +
         '</div>';
     }
 
@@ -493,11 +493,11 @@
 
         var reason = "";
         if (g.want === "light") reason = pick.kg + "kg \u00b7 " + other.name + "보다 " +
-            (Math.round((other.kg - pick.kg) * 10) / 10) + "kg 가볍습니다";
+            (Math.round((other.kg - pick.kg) * 10) / 10) + "kg 가벼워요";
         else if (g.want === "small" && pick.vol && other.vol) reason =
             pick.dims.join("\u00d7") + "cm \u00b7 " + other.name + "보다 부피가 " +
-            Math.round((1 - pick.vol / other.vol) * 100) + "% 작습니다";
-        else if (g.want === "cabin") reason = pick.cabin || "기내 여부는 항공사마다 다릅니다";
+            Math.round((1 - pick.vol / other.vol) * 100) + "% 작아요";
+        else if (g.want === "cabin") reason = pick.cabin || "기내 여부는 항공사마다 달라요";
         else reason = pick.kg + "kg \u00b7 " + (pick.road || "승차감 정보 없음");
 
         out += '<div style="margin-top:14px; background: #FFFFFF; border:1.5px solid #DDD9F5; ' +
@@ -514,15 +514,15 @@
         var weak = "";
         if (g.want === "light" && pick.type === "휴대용")
             weak = "다만 휴대용은 <b>등받이가 덜 눕는 것</b>이 많아요. 낮잠 시간이면 " +
-                   esc(other.name) + " 쪽이 낫습니다.";
+                   esc(other.name) + " 쪽이 나아요.";
         else if (g.want === "small" && pick.kg > other.kg)
             weak = "다만 " + esc(other.name) + "보다 <b>" +
-                   (Math.round((pick.kg - other.kg) * 10) / 10) + "kg 무겁습니다.</b> 드는 횟수가 많으면 다시 생각해보세요.";
+                   (Math.round((pick.kg - other.kg) * 10) / 10) + "kg 무거워요.</b> 드는 횟수가 많으면 다시 생각해보세요.";
         else if (g.want === "comfort" && pick.kg > other.kg)
             weak = "다만 <b>" + (Math.round((pick.kg - other.kg) * 10) / 10) +
-                   "kg 더 무겁습니다.</b> 계단이 있으면 " + esc(other.name) + " 쪽이 몸이 편해요.";
+                   "kg 더 무거워요.</b> 계단이 있으면 " + esc(other.name) + " 쪽이 몸이 편해요.";
         else if (g.want === "cabin" && pick.cabin.indexOf("\u26a0") > -1)
-            weak = "\u26a0\ufe0f 항공사마다 규정이 다릅니다. <b>타시기 전에 꼭 확인</b>하세요.";
+            weak = "\u26a0\ufe0f 항공사마다 규정이 달라요. <b>타시기 전에 꼭 확인</b>하세요.";
 
         if (weak) {
             out += '<div style="margin-top:10px; padding-top:10px; border-top:1px solid #F6F2EC; ' +
@@ -560,10 +560,10 @@
             return '<div style="margin-top:16px; background:#EAF7F1; border:1px solid #A7DFC8; ' +
                 'border-radius:14px; padding:15px 16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:#1F6F52;">' +
-                    '\u2705 두 번째 유모차는 안 사셔도 됩니다</div>' +
+                    '\u2705 두 번째 유모차는 안 사셔도 돼요</div>' +
                 '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.8; word-break:keep-all;">' +
-                    '쓰고 계신 게 ' + kg + 'kg 절충형이라 <b>휴대용만큼 가볍습니다.</b> ' +
+                    '쓰고 계신 게 ' + kg + 'kg 절충형이라 <b>휴대용만큼 가벼워요.</b> ' +
                     '두 대 쓰시는 분들 대부분은 디럭스가 무거워서 그런 거예요.</div>' +
             '</div>';
         }
@@ -578,7 +578,7 @@
                         '\u26A0\uFE0F ' + esc(nm("는")) + ' 아직 ' + m + '개월이에요</div>' +
                     '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.8; word-break:keep-all;">' +
-                        '휴대용은 <b>등받이가 충분히 눕지 않는 것</b>이 많습니다. ' +
+                        '휴대용은 <b>등받이가 충분히 눕지 않는 것</b>이 많아요. ' +
                         '목을 못 가누는 시기에는 각도가 서면 고개가 앞으로 꺾여요. ' +
                         '<b>지금 쓰시는 것의 등받이 각도를 설명서에서 확인</b>해보세요.</div>' +
                 '</div>';
@@ -597,9 +597,9 @@
                 '\uD83D\uDED2 두 번째 유모차를 생각할 때예요</div>' +
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
-                esc(nm("가")) + ' ' + m + '개월이라 <b>걷다 안기다를 반복</b>합니다. ' +
-                '그때마다 ' + kg + 'kg 을 접었다 폈다 하게 되고요.<br>' +
-                '<b>서두르실 필요는 없어요.</b> 지금 것으로 버티다가 진짜 힘들 때 사셔도 됩니다.</div>' +
+                esc(nm("가")) + ' ' + m + '개월이라 <b>걷다 안기다를 반복</b>해요. ' +
+                '그때마다 ' + kg + 'kg을 접었다 폈다 하게 되고요.<br>' +
+                '<b>서두르실 필요는 없어요.</b> 지금 것으로 버티다가 진짜 힘들 때 사셔도 돼요.</div>' +
             (picks.length
                 ? '<div style="margin-top:11px;">' +
                   picks.map(function (x) {
@@ -622,9 +622,9 @@
 
     var CARE = [
         { id: "brake", label: "브레이크", days: 30,
-          why: "양쪽이 다 잠기는지. 한쪽만 걸리면 굴러갑니다" },
+          why: "양쪽이 다 잠기는지. 한쪽만 걸리면 굴러가요" },
         { id: "wheel", label: "바퀴", days: 30,
-          why: "머리카락이 감기면 한쪽으로 쏠려 손목에 힘이 더 들어갑니다" },
+          why: "머리카락이 감기면 한쪽으로 쏠려 손목에 힘이 더 들어가요" },
         { id: "seat",  label: "시트 세탁", days: 90,
           why: "분리 방법은 설명서를 보세요" },
         { id: "belt",  label: "안전벨트", days: 60,
@@ -699,11 +699,11 @@
 
         if (!title) {
             return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-                '<div class="matrix-header">\uD83C\uDF7C 우리 유모차</div>' +
+                '<div class="matrix-header">\uD83D\uDEBC 우리 유모차</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.8; word-break:keep-all;">' +
-                    '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상합니다. ' +
-                    '쓰고 계신 걸 알려주시면 <b>하루에 몇 kg 을 드시는지</b> 알려드릴게요.</div>' +
+                    '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상해요. ' +
+                    '쓰고 계신 걸 알려 주시면 <b>하루에 몇 kg을 드시는지</b> 알려 드릴게요.</div>' +
                 '<div onclick="window.openStrollerSheet()" style="text-align:center; padding:16px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
                     'font-size:14.5px; font-weight:900; cursor:pointer;">유모차 알려주기</div>' +
@@ -711,7 +711,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF7C 우리 유모차</div>' +
+            '<div class="matrix-header">\uD83D\uDEBC 우리 유모차</div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                 'gap:10px; margin:-16px 0 4px;">' +
                 '<div style="font-size:14px; font-weight:900; color:' + DARK + '; min-width:0; ' +
@@ -736,17 +736,17 @@
 
     function teaseHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF7C 우리 유모차</div>' +
+            '<div class="matrix-header">\uD83D\uDEBC 우리 유모차</div>' +
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
-                    '하루에 몇 kg 을 드시는지 알려드려요</div>' +
+                    '하루에 몇 kg을 드시는지 알려 드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
-                    '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상합니다. ' +
+                    '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상해요. ' +
                     '쓰시는 유모차만 알려주시면 하루 부담을 숫자로 보여드리고, ' +
                     '<b>가벼운 걸로 바꾸면 얼마나 줄어드는지</b>도 계산해드려요.<br>' +
-                    '브레이크\u00b7바퀴\u00b7시트는 <b>볼 때가 되면</b> 먼저 말씀드립니다.</div>' +
+                    '브레이크\u00b7바퀴\u00b7시트는 <b>볼 때가 되면</b> 먼저 말씀드려요.</div>' +
             '</div>' +
         '</div>';
     }
@@ -762,14 +762,14 @@
                 'padding:15px 16px; margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
                 'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
                 '<b style="color:' + RED + ';">\u26A0\uFE0F 레인커버를 씌운 채로 실내에 들어가지 마세요.</b> ' +
-                '비닐 안쪽은 <b>공기가 잘 안 통하고 온도가 빠르게 올라갑니다.</b> ' +
+                '비닐 안쪽은 <b>공기가 잘 안 통하고 온도가 빠르게 올라가요.</b> ' +
                 '건물에 들어가거나 비가 그치면 바로 걷어주세요.</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9; ' +
                 'word-break:keep-all;">' +
-                '\u00b7 <b>통풍구가 있는 것</b>으로 고르세요. 없는 건 아기 얼굴 쪽이 금방 답답해집니다<br>' +
-                '\u00b7 씌운 동안 <b>자주 들여다보세요.</b> 비닐 너머로는 표정이 잘 안 보입니다<br>' +
+                '\u00b7 <b>통풍구가 있는 것</b>으로 고르세요. 없는 건 아기 얼굴 쪽이 금방 답답해져요<br>' +
+                '\u00b7 씌운 동안 <b>자주 들여다보세요.</b> 비닐 너머로는 표정이 잘 안 보여요<br>' +
                 '\u00b7 차 안이나 지하철에서는 <b>반드시 걷어주세요</b><br>' +
-                '\u00b7 젖은 채로 접어두면 곰팡이가 핍니다. <b>펴서 말린 뒤</b> 접으세요' +
+                '\u00b7 젖은 채로 접어두면 곰팡이가 피어요. <b>펴서 말린 뒤</b> 접으세요' +
             '</div>' +
         '</div>';
     }
@@ -780,7 +780,7 @@
             '<div class="matrix-header">\uD83D\uDE34 유모차에서 잠들었을 때</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
-                '유모차는 <b>잠자리가 아니라 이동 수단</b>입니다. 등받이가 서 있으면 고개가 앞으로 꺾여요. ' +
+                '유모차는 <b>잠자리가 아니라 이동 수단</b>이에요. 등받이가 서 있으면 고개가 앞으로 꺾여요. ' +
                 '집에 도착하면 <b>평평한 곳에 눕혀주세요.</b>' +
                 (m !== null && m < 4
                     ? '<br><br><b style="color:' + RED + ';">' + esc(nm("는")) + ' 아직 ' + m +
@@ -791,10 +791,10 @@
                 'padding:14px 15px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.9; word-break:keep-all;">' +
                 '<b>옮기면 깨서 고민이시라면</b><br>' +
-                '\u00b7 도착하기 <b>5분 전에 등받이를 천천히</b> 눕혀두세요. 자세가 이미 바뀌어 있으면 덜 깹니다<br>' +
+                '\u00b7 도착하기 <b>5분 전에 등받이를 천천히</b> 눕혀두세요. 자세가 이미 바뀌어 있으면 덜 깨요<br>' +
                 '\u00b7 안아 올릴 때 <b>발부터가 아니라 등과 머리를 먼저</b> 받치세요<br>' +
-                '\u00b7 유모차에 덮어두던 <b>같은 천을 그대로</b> 들고 옮기면 냄새가 이어집니다<br>' +
-                '\u00b7 그래도 깨면 그날은 어쩔 수 없어요. <b>매번 되는 방법은 없습니다</b>' +
+                '\u00b7 유모차에 덮어두던 <b>같은 천을 그대로</b> 들고 옮기면 냄새가 이어져요<br>' +
+                '\u00b7 그래도 깨면 그날은 어쩔 수 없어요. <b>매번 되는 방법은 없어요</b>' +
             '</div>' +
         '</div>';
     }
@@ -816,77 +816,77 @@
 
     var WHY = [
         { id: "walk", icon: "\uD83D\uDC63", label: "걷겠다고 내려달래요",
-          note: "돌 무렵부터 시작됩니다. <b>유모차가 싫은 게 아니라 걷고 싶은 것</b>이라, " +
-                "태우려고 애쓰기보다 <b>걷는 시간을 먼저 주는 쪽</b>이 빠릅니다.",
+          note: "돌 무렵부터 시작돼요. <b>유모차가 싫은 게 아니라 걷고 싶은 것</b>이라, " +
+                "태우려고 애쓰기보다 <b>걷는 시간을 먼저 주는 쪽</b>이 빨라요.",
           ways: [
             { t: "가는 길은 걷고, 오는 길은 태우기",
               d: "나갈 때 실컷 걷게 하고 <b>돌아올 때</b> 태우세요. " +
-                 "다리가 지쳐 있으면 순순히 앉습니다. 대신 <b>갈 때는 시간이 두 배</b>로 걸리니 그걸 감안해서 나가세요." },
+                 "다리가 지쳐 있으면 순순히 앉아요. 대신 <b>갈 때는 시간이 두 배</b>로 걸리니 그걸 감안해서 나가세요." },
             { t: "유모차를 '쉬는 자리' 로 만들기",
               d: "걷다가 힘들어할 때 <b>먼저 태우지 말고</b> ‘쉴래?’ 하고 물어보세요. " +
-                 "자기가 선택해서 앉으면 저항이 확 줄어듭니다." },
+                 "자기가 선택해서 앉으면 저항이 확 줄어들어요." },
             { t: "유모차에 짐을 싣게 하기",
               d: "본인 물병이나 인형을 <b>유모차에 태우게</b> 하세요. " +
-                 "‘네가 미는 거야’ 하고 손잡이를 잡게 하면 유모차가 자기 편이 됩니다." },
+                 "‘네가 미는 거야’ 하고 손잡이를 잡게 하면 유모차가 자기 편이 돼요." },
             { t: "안전벨트는 그래도 채우기",
-              d: "\u26a0\ufe0f 앉기 싫어한다고 벨트를 안 채우면 안 됩니다. " +
+              d: "\u26a0\ufe0f 앉기 싫어한다고 벨트를 안 채우면 안 돼요. " +
                  "<b>일어서다 앞으로 고꾸라지는 사고</b>가 이때 제일 많아요. " +
-                 "앉는 걸 협상해도 <b>벨트는 협상 대상이 아닙니다.</b>" }
+                 "앉는 걸 협상해도 <b>벨트는 협상 대상이 아니에요.</b>" }
           ] },
 
         { id: "view", icon: "\uD83D\uDC40", label: "타면 바로 몸을 젖혀요",
-          note: "<b>보이는 게 없어서</b>일 때가 많습니다. 앞을 보는 자리인지, " +
+          note: "<b>보이는 게 없어서</b>일 때가 많아요. 앞을 보는 자리인지, " +
                 "차양이 시야를 다 가리고 있진 않은지 보세요.",
           ways: [
             { t: "차양을 반만 내리기",
-              d: "햇빛 막으려고 끝까지 내리면 <b>아기 눈앞이 캄캄합니다.</b> " +
+              d: "햇빛 막으려고 끝까지 내리면 <b>아기 눈앞이 캄캄해요.</b> " +
                  "반만 내리고, 눈부시면 각도를 트세요." },
             { t: "등받이를 세워보기",
-              d: "누운 자세로는 하늘밖에 안 보입니다. 목을 가누는 시기라면 " +
+              d: "누운 자세로는 하늘밖에 안 보여요. 목을 가누는 시기라면 " +
                  "<b>등받이를 조금 세워서</b> 앞이 보이게 해주세요. " +
                  "각도 범위는 <b>설명서</b>를 보세요." },
             { t: "마주 보는 자리로 바꾸기",
               d: "양대면이 되는 제품이면 <b>미는 사람이 보이는 쪽</b>으로 돌려보세요. " +
-                 "낯가림이 심한 시기엔 이것만으로 조용해지기도 합니다." },
+                 "낯가림이 심한 시기엔 이것만으로 조용해지기도 해요." },
             { t: "손에 쥘 걸 하나",
               d: "<b>유모차에서만 주는 물건</b>을 하나 정해두세요. " +
-                 "매번 같은 걸 주면 ‘이거 타면 저게 나온다’ 가 됩니다." }
+                 "매번 같은 걸 주면 ‘이거 타면 저게 나온다’ 가 돼요." }
           ] },
 
         { id: "hold", icon: "\uD83E\uDD31", label: "안아달라고만 해요",
-          note: "지쳤거나 불안한 겁니다. <b>유모차 문제가 아닐 때</b>가 많아요.",
+          note: "지쳤거나 불안한 거예요. <b>유모차 문제가 아닐 때</b>가 많아요.",
           ways: [
             { t: "먼저 안아주고 나서 태우기",
-              d: "<b>5분만 안아주세요.</b> 채워지고 나면 순순히 앉는 경우가 많습니다. " +
-                 "태우려고 실랑이하는 시간이 더 깁니다." },
+              d: "<b>5분만 안아주세요.</b> 채워지고 나면 순순히 앉는 경우가 많아요. " +
+                 "태우려고 실랑이하는 시간이 더 길어요." },
             { t: "출발 시각을 옮기기",
-              d: "<b>배고프거나 졸린 때</b>는 뭘 해도 안 됩니다. " +
+              d: "<b>배고프거나 졸린 때</b>는 뭘 해도 안 돼요. " +
                  "먹이고 나서, 또는 낮잠 자고 일어난 뒤에 나가보세요." },
             { t: "아기띠를 같이 챙기기",
-              d: "<b>둘 다 갖고 나가는 게</b> 마음이 편합니다. " +
+              d: "<b>둘 다 갖고 나가는 게</b> 마음이 편해요. " +
                  "유모차엔 짐을 싣고 아기는 안고 가다가, 잠들면 유모차에 눕히세요." },
             { t: "그날은 접기",
-              d: "<b>매번 되는 방법은 없습니다.</b> 오늘 안 되면 오늘은 안 되는 날이에요. " +
-                 "실랑이하다 둘 다 지치는 것보다 낫습니다." }
+              d: "<b>매번 되는 방법은 없어요.</b> 오늘 안 되면 오늘은 안 되는 날이에요. " +
+                 "실랑이하다 둘 다 지치는 것보다 나아요." }
           ] },
 
         { id: "belt", icon: "\uD83D\uDD13", label: "벨트를 풀고 일어서요",
-          note: "<b>제일 위험한 상황</b>입니다. 유모차는 카시트와 달리 " +
+          note: "<b>제일 위험한 상황</b>이에요. 유모차는 카시트와 달리 " +
                 "<b>앞으로 고꾸라지면 바로 바닥</b>이에요.",
           ways: [
             { t: "가랑이 끈부터 확인하기",
-              d: "어깨끈만 채우고 <b>다리 사이 끈을 빼먹으면</b> 그대로 미끄러져 내려옵니다. " +
+              d: "어깨끈만 채우고 <b>다리 사이 끈을 빼먹으면</b> 그대로 미끄러져 내려와요. " +
                  "5점식이면 <b>다섯 군데가 다</b> 채워졌는지 보세요." },
             { t: "헐거운지 보기",
-              d: "가슴에서 <b>손가락에 집히면 헐거운 겁니다.</b> " +
+              d: "가슴에서 <b>손가락에 집히면 헐거운 거예요.</b> " +
                  "겉옷을 벗기고 채운 뒤 다시 조여보세요." },
             { t: "일어서면 멈추기",
               d: "일어설 때마다 <b>유모차를 세우고</b> 다시 앉힌 뒤 출발하세요. " +
-                 "몇 번 반복하면 ‘일어서면 안 간다’ 가 됩니다. 며칠 걸립니다." },
+                 "몇 번 반복하면 ‘일어서면 안 간다’ 가 돼요. 며칠 걸려요." },
             { t: "잠금 장치는 사지 마세요",
-              d: "\uD83D\uDED1 버클을 못 풀게 막는 부품이 팔립니다. <b>권하지 않습니다.</b> " +
+              d: "\uD83D\uDED1 버클을 못 풀게 막는 부품이 팔려요. <b>권하지 않아요.</b> " +
                  "넘어졌을 때 빨리 꺼내야 하는데 그게 막고, " +
-                 "제조사가 허가하지 않은 부품을 달면 <b>안전 인증이 깨집니다.</b>" }
+                 "제조사가 허가하지 않은 부품을 달면 <b>안전 인증이 깨져요.</b>" }
           ] }
     ];
 
@@ -930,16 +930,16 @@
             'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +
             'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
             '<b style="color:' + RED + ';">\u26A0\uFE0F 앉기 싫어해도 벨트는 꼭 채우세요.</b> ' +
-            '유모차는 카시트와 달리 <b>앞으로 고꾸라지면 바로 바닥</b>입니다. ' +
+            '유모차는 카시트와 달리 <b>앞으로 고꾸라지면 바로 바닥</b>이에요. ' +
             '앉는 건 협상해도 <b>벨트는 협상 대상이 아니에요.</b></div>';
 
         if (!w) {
             out += '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.75; margin-bottom:14px; word-break:keep-all;">' +
                 (m !== null && m >= 11
-                    ? '<b>돌 무렵부터는 ‘내가 걸을래’ 가 시작됩니다.</b> 유모차가 싫은 게 아니에요.<br>'
+                    ? '<b>돌 무렵부터는 ‘내가 걸을래’ 가 시작돼요.</b> 유모차가 싫은 게 아니에요.<br>'
                     : '') +
-                '어떤 모습인지에 따라 해볼 게 다릅니다. 골라주시면 <b>하나씩</b> 드릴게요.</div>' +
+                '어떤 모습인지에 따라 해볼 게 달라요. 골라주시면 <b>하나씩</b> 드릴게요.</div>' +
                 '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' +
                 WHY.map(function (x) {
                     return '<div onclick="window.pickStrollerWhy(\'' + x.id + '\')" ' +
@@ -1030,7 +1030,7 @@
                     '나머지 ' + (list.length - 1) + '가지는 PLUS에서 하루에 하나씩</div>' +
                 '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
-                    '뭐가 통했고 뭐가 아니었는지 적어두면 <b>안 된 건 다시 안 권합니다.</b></div>' +
+                    '뭐가 통했고 뭐가 아니었는지 적어두면 <b>안 된 건 다시 안 권해요.</b></div>' +
             '</div>';
         }
 

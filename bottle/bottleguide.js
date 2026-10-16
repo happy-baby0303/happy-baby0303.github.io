@@ -196,7 +196,7 @@
             '<div class="matrix-header">🙋 어떤 상황이신가요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
-                '스펙은 저희가 볼게요. 지금 겪고 계신 것만 눌러주세요</div>' +
+                '스펙은 배냇함이 볼게요. 지금 겪고 계신 것만 눌러 주세요</div>' +
             '<div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">' + chips + '</div>' +
             tip +
         '</div>';
@@ -352,7 +352,7 @@
         } catch (e) {}
 
         paint();
-        alert("젖꼭지 교체일을 적어뒀어요.\n배냇함 툴박스 '언제깠지'에서 다음 교체일을 알려드립니다.");
+        alert("젖꼭지 교체일을 적어뒀어요.\n배냇함 툴박스 '언제깠지'에서 다음 교체일을 알려드려요.");
     };
 
     /* ⚠️ 네 가지를 ' · ' 로 한 줄에 이어 붙였더니 항목이 줄 중간에서 끊겨 읽기 어려웠다. 한 줄에 하나씩. */

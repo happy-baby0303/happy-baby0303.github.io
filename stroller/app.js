@@ -74,7 +74,7 @@ function toggleFavView() {
     const filterSection = document.querySelector('.filter-section');
 
     if (isFavViewMode) {
-        btn.innerHTML = '🔙 5D 매칭 화면으로 돌아가기';
+        btn.innerHTML = '← 유모차 목록으로 돌아가기';
         btn.style.background = '#F6F2EC';
         btn.style.color = '#7A6F68';
         btn.style.borderColor = '#DCD3C8';
@@ -105,7 +105,7 @@ function renderFavorites() {
     if(otherArea) otherArea.style.display = 'none';
 
     if (favorites.length === 0) {
-        topArea.innerHTML = `<div class="premium-empty-state" style="justify-content:center; padding: 40px;"><div class="empty-icon">💔</div><div class="empty-text" style="text-align:center;"><b>아직 찜한 유모차가 없어요</b><span>마음에 드는 유모차에 하트(❤️)를 눌러보세요.</span></div></div>`;
+        topArea.innerHTML = `<div class="premium-empty-state" style="justify-content:center; padding: 40px;"><div class="empty-icon">🤍</div><div class="empty-text" style="text-align:center;"><b>아직 찜한 유모차가 없어요</b><span>마음에 드는 유모차에서 찜하기를 눌러 보세요.</span></div></div>`;
         return;
     }
 
@@ -172,10 +172,17 @@ function renderAdapterCard(brandName, textData) {
 function toggleOthers() {
     const otherArea = document.getElementById('result-other-area');
     const btn = document.getElementById('show-more-btn');
+    // 조건 없이 볼 때는 나머지를 눌렀을 때 처음 그린다 (50종을 한 번에 그리면 느린 폰에서 버벅였다)
+    if (!otherArea.innerHTML && window.__strollerRest && window.__strollerRest.length) {
+        otherArea.innerHTML = window.__strollerRest.map(generateCardHtml).join('');
+        setTimeout(() => { otherArea.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);
+    }
+    const n = otherArea.querySelectorAll('.stroller-card').length;
     if (otherArea.style.display === 'none') {
-        otherArea.style.display = 'flex'; btn.innerText = '나머지 결과 접기 ▴';
+        otherArea.style.display = 'flex'; btn.innerText = '접기 ▴';
     } else {
-        otherArea.style.display = 'none'; btn.innerText = '나머지 결과 보기 ▾';
+        otherArea.style.display = 'none'; btn.innerText = window.__strollerRest ? `유모차 ${n}개 더 보기 ▾` : `나머지 ${n}개 더 보기 ▾`;
+        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
@@ -207,15 +214,15 @@ function generateCardHtml(item) {
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
     // 3. AI 리포트
-    let aiReportHtml = `<div class="premium-empty-state"><div class="empty-icon">💡</div><div class="empty-text"><b>매칭 결과 대기 중</b><span>가족 상황을 선택하시면 분석서가 출력됩니다.</span></div></div>`;
+    let aiReportHtml = '';
     if (!isFavViewMode && item.matchRate !== null) {
         let reasonLi = '';
         if (item.matchRate === 100) {
-            reasonLi = `<li style="margin-bottom:4px;">✨ ${item.matchReasons[0]}</li>`;
+            reasonLi = `<li style="margin-bottom:4px;">${item.matchReasons[0]}</li>`;
         } else if (item.matchReasons && item.matchReasons.length > 0) {
-            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px; color: #7A6F68;">🚨 <b>${r}</b></li>`).join('');
+            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px; color: #7A6F68;"><b>${r}</b></li>`).join('');
         }
-        let reportTitle = item.matchRate >= 80 ? '🟢 조건에 잘 맞아요' : (item.matchRate >= 50 ? '⚠️ 일부만 맞아요' : '❌ 조건에 안 맞아요 판정');
+        let reportTitle = item.matchRate >= 80 ? '조건에 잘 맞아요' : (item.matchRate >= 50 ? '일부만 맞아요' : '조건에 안 맞아요');
         let titleColor = item.matchRate >= 80 ? '#7F77DD' : (item.matchRate >= 50 ? '#F59E0B' : '#E32636');
 
         aiReportHtml = `
@@ -230,8 +237,8 @@ function generateCardHtml(item) {
     const car = document.getElementById('mat-car') ? document.getElementById('mat-car').value : 'all';
     if (car === 'flight') {
         const minDim = Math.min(...item.foldedDims);
-        if (minDim <= 25) ktxAlertHtml = `<div class="ktx-alert-box pass"><div class="ktx-icon">🚄</div><div><b>KTX/LCC 좌석 발밑 보관 ⭕</b><br>두께 ${minDim}cm로 앞좌석 발밑에 쏙 들어갑니다.</div></div>`;
-        else ktxAlertHtml = `<div class="ktx-alert-box fail"><div class="ktx-icon">🚨</div><div><b>KTX/LCC 좌석 보관 불가 ❌</b><br>두께 ${minDim}cm. 짐칸 보관 필수.</div></div>`;
+        if (minDim <= 25) ktxAlertHtml = `<div class="ktx-alert-box pass"><div class="ktx-icon">🚄</div><div><b>KTX·저가 항공 좌석 발밑에 들어가요</b><br>두께 ${minDim}cm라 앞좌석 발밑에 들어가요.</div></div>`;
+        else ktxAlertHtml = `<div class="ktx-alert-box fail"><div class="ktx-icon">🚨</div><div><b>좌석 발밑에는 안 들어가요</b><br>두께 ${minDim}cm라 짐칸에 둬야 해요.</div></div>`;
     } else if (car && car !== 'all' && typeof carDB !== 'undefined' && carDB[car]) {
         const carData = carDB[car];
         const dims = [...item.foldedDims].sort((a, b) => a - b);
@@ -353,7 +360,7 @@ function generateCardHtml(item) {
             <!-- 📊 기본스펙 탭 -->
             <div id="content-${cId}-spec" class="tab-content" style="display:block;">
                 <div class="spec-list">
-                    <div class="spec-row"><span class="spec-label">👶 2인 확장성</span><span class="spec-val" style="color:#7F77DD;">${item.expand}</span></div>
+                    <div class="spec-row"><span class="spec-label">👶 2인 확장성</span><span class="spec-val" style="color:${String(item.expand || '').indexOf('가능') === 0 ? '#1F9D6B' : '#A3958A'};">${String(item.expand || '').replace(/\s*[⭕❌]\s*/g, ' ').replace(/\s+/g, ' ').trim()}</span></div>
                     <div class="spec-row"><span class="spec-label">본체 실측 무게</span><div style="text-align:right; width:60%;"><div class="spec-val" style="color:${weightColor};">${item.specs.weight}kg</div><div class="meter-container"><div class="meter-fill" data-width="${weightPercent}%" style="width:0%; background:${weightColor};"></div></div></div></div>
                     <div class="spec-row"><span class="spec-label">폴딩 메커니즘</span><span class="spec-val">${item.specs.folding}</span></div>
                     <div class="spec-row"><span class="spec-label">정규 기내반입</span><span style="${cabinStyle} padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800;">${item.specs.cabin}</span></div>
@@ -484,7 +491,7 @@ function renderList(isUserAction = false) {
         }
 
         // 결과 합산
-        if (score === 100) reasons.push('고르신 조건에 모두 맞습니다.');
+        if (score === 100) reasons.push('고르신 조건에 다 맞아요');
         if (score < 0) score = 0;
 
         return { ...item, originalIndex: index, matchRate: score, matchReasons: reasons };
@@ -521,7 +528,7 @@ function renderList(isUserAction = false) {
         topArea.innerHTML = `
             <div class="premium-empty-state" style="justify-content:center; padding: 40px;">
                 <div class="empty-text" style="text-align:center; margin-bottom: 20px;">
-                    <b>조건에 맞는 모델이 없습니다.</b>
+                    <b>조건에 맞는 모델이 없어요.</b>
                     <span>필터나 선택 사항을 조금 완화해 보세요.</span>
                 </div>
                 <button onclick="resetAll()" style="padding: 12px 24px; background: #7F77DD; color: #FFF; border: none; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221, 0.3);">
@@ -531,10 +538,16 @@ function renderList(isUserAction = false) {
         otherArea.innerHTML = ''; topTitle.style.display = 'none'; showMoreBtn.style.display = 'none'; return; 
     }
 
+    window.__strollerRest = null;
     if (isMatrixActive && processedData.length > 3) {
         topTitle.style.display = 'flex'; showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `나머지 ${processedData.length - 3}개 더 보기 ▾`; otherArea.style.display = 'none';
         topArea.innerHTML = processedData.slice(0, 3).map(generateCardHtml).join('');
         otherArea.innerHTML = processedData.slice(3).map(generateCardHtml).join('');
+    } else if (processedData.length > 5) {
+        topTitle.style.display = 'none'; otherArea.style.display = 'none'; otherArea.innerHTML = '';
+        topArea.innerHTML = processedData.slice(0, 5).map(generateCardHtml).join('');
+        window.__strollerRest = processedData.slice(5);
+        showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `유모차 ${processedData.length - 5}개 더 보기 ▾`;
     } else {
         topTitle.style.display = 'none'; showMoreBtn.style.display = 'none'; otherArea.innerHTML = '';
         topArea.innerHTML = processedData.map(generateCardHtml).join('');
@@ -662,7 +675,7 @@ function shareStroller(name) {
             content: {
                 title: `이 유모차 어때? ${name}`,
                 description: bits,
-                imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
+                imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
                 link: { mobileWebUrl: link, webUrl: link },
             },
             buttons: [{ title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }],
@@ -683,6 +696,11 @@ window.shareStroller = shareStroller;
     function go(tries) {
         var hit = [].slice.call(document.querySelectorAll('.stroller-card'))
             .filter(function (c) { return c.getAttribute('data-name') === pick; })[0];
+        if (!hit && window.__strollerRest && window.__strollerRest.some(function (x) { return x.name === pick; })) {
+            var mb = document.getElementById('show-more-btn'), oa = document.getElementById('result-other-area');
+            if (mb && oa && !oa.innerHTML) mb.click();
+            hit = [].slice.call(document.querySelectorAll('.stroller-card')).filter(function (c) { return c.getAttribute('data-name') === pick; })[0];
+        }
         if (!hit) { if (tries > 0) setTimeout(function () { go(tries - 1); }, 400); return; }
         var other = document.getElementById('result-other-area');
         if (other && other.contains(hit) && getComputedStyle(other).display === 'none') {
@@ -709,11 +727,11 @@ function shareResult() {
             content: {
                 title: '배냇함 유모차 고르기',
                 description: '우리 차 트렁크와 생활에 맞는 유모차를 골라보세요',
-                imageUrl: 'https://happy-baby0303.github.io/baby-master/stroller/og-image.png',
+                imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
                 link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
             },
             buttons: [
-                { title: '🔍 매칭 결과 확인하기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }
+                { title: '배냇함에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }
             ],
         });
     } else {

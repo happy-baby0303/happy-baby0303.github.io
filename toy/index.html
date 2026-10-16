@@ -2,12 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <script src="../shared/curatorlite.js?v=b7"></script>
+    <script src="../native.js?v=2"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 놀이와 장난감</title>
     <!-- ⚠️ 폰트는 style.css 의 @import 가 아니라 여기서. 본 앱과 같은 v1.3.8 로 고정. -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=b7">
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 </head>
 <body>
@@ -133,12 +135,12 @@
                  파란 상자였고 '기적의 시간 떼우기' 라고 적혀 있었다 (떼우기 → 때우기, '기적' 은 과장). -->
             <div id="play-list-head" class="bnh-card">
                 <div style="font-size:18px; font-weight:900; color:#4A413C; letter-spacing:-0.4px; margin-bottom:6px;">🎈 놀이 모아보기</div>
-                <div style="font-size:12.5px; font-weight:600; color:#A3958A; line-height:1.7; word-break:keep-all;">집에 있는 장난감이 지겹다면, 일상용품으로 15분을 버텨보세요. 돈 드는 놀이는 없어요.</div>
+                <div style="font-size:12.5px; font-weight:600; color:#A3958A; line-height:1.7; word-break:keep-all;">대부분 집에 있는 물건으로 해요. 장난감이 필요한 놀이엔 🧸 표시가 붙어 있어요.</div>
             </div>
 
             <!-- 놀이 필터 -->
           <!-- 놀이 필터 -->
-          <div style="position: sticky; top: 0; z-index: 10; background: #FAFAFC; padding: 12px 0; margin-bottom: 12px; margin-top: -10px; box-shadow: 0 4px 6px -4px rgba(0,0,0,0.05);">
+          <div id="play-filter-bar" style="position: sticky; top: 0; z-index: 10; background: #F6F2EC; padding: 12px 0; margin-bottom: 12px; margin-top: -10px; box-shadow: 0 4px 6px -4px rgba(0,0,0,0.05);">
                 <!-- 👇 여기에 id="play-filter-scroll" 추가됨! -->
                 <div id="play-filter-scroll" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -ms-overflow-style: none; padding-left: 4px;">
                     <button class="play-filter-btn active" onclick="filterPlays('all', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: none; background: #4A413C; color: #FFF; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">전체보기</button>
@@ -208,7 +210,7 @@
             <!-- 👶 발달 마일스톤 칩 필터 — 이 칸도 카드 -->
             <div class="bnh-card">
             <div class="panel-header-dark" style="margin-bottom: 4px;">👶 우리 아기 현재 발달 상태는?</div>
-            <div style="font-size: 12.5px; font-weight: 600; color: #A3958A; line-height: 1.6; margin-bottom: 14px; word-break: keep-all;">개월수에 맞게 미리 골라뒀어요. 바꾸시면 아래 목록도 같이 바뀝니다.</div>
+            <div style="font-size: 12.5px; font-weight: 600; color: #A3958A; line-height: 1.6; margin-bottom: 14px; word-break: keep-all;">개월수에 맞게 미리 골라뒀어요. 바꾸시면 아래 목록도 같이 바뀌어요.</div>
             <div class="chip-group" id="milestone-filters" style="display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none;">
                 <button class="ms-chip active" data-milestone="all" style="flex-shrink: 0; white-space: nowrap;">전체보기</button>
                 <button class="ms-chip" data-milestone="newborn" style="flex-shrink: 0; white-space: nowrap;"> 신생아 생존기</button>
@@ -231,30 +233,30 @@
                 <div style="margin-bottom: 16px;">본 큐레이션은 일반적인 발달 단계를 기준으로 한 참고용입니다. 구매 전 반드시 제조사의 권장 사용 연령과 주의사항(작은 부품 질식 위험 등)을 직접 확인하시기 바랍니다. 보호자의 세심한 관찰이 필요하며, 부주의나 제품 결함으로 인한 사고에 대해 본 서비스는 법적 책임을 지지 않습니다.</div>
 
                 <div style="font-weight: 700; color: #7A6F68; margin-bottom: 4px;">※ 쿠팡 파트너스 안내</div>
-                            <div>이 포스팅(서비스)은 쿠팡 파트너스 활동의 일환으로, 구매 시 이에 따른 일정액의 수수료를 제공받습니다.</div>
+                            <div>이 페이지는 쿠팡 파트너스 활동의 일환으로, 구매 시 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </div>
         </div>
     </div> <!-- // container 끝 -->
  
     <!-- 🧰 안전망 — 제일 먼저 -->
-    <script src="../shared/safenet.js"></script>
+    <script src="../shared/safenet.js?v=b7"></script>
      <script src="../shared/babyswitch.js"></script>
-    <script src="data.js"></script>
-    <script src="app.js?v=1002"></script>
+    <script src="data.js?v=b7"></script>
+    <script src="app.js?v=b7"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="myshelf.js"></script>
-    <script src="playweek.js"></script>
-    <script src="playlike.js"></script>
+    <script src="myshelf.js?v=b7"></script>
+    <script src="playweek.js?v=b7"></script>
+    <script src="playlike.js?v=b7"></script>
     <!-- ⏱️ 지금 몇 분 있으세요 — PLUS -->
-    <script src="playnow.js"></script>
+    <script src="playnow.js?v=b7"></script>
     <!-- 🎯 개월수 말고 도감 도장으로 단계 판단 — PLUS -->
-    <script src="playstage.js"></script>
-    <script src="playlog.js"></script>
-    <script src="bathmold.js"></script>
+    <script src="playstage.js?v=b7"></script>
+    <script src="playlog.js?v=b7"></script>
+    <script src="bathmold.js?v=b7"></script>
     <!-- 🔋 단추형 전지 · KC · 리콜 — 안전이라 무료 -->
-    <script src="toysafety.js"></script>
-    <script src="toylife.js"></script>
-    <script src="../shared/plusmark.js"></script>
+    <script src="toysafety.js?v=b7"></script>
+    <script src="toylife.js?v=b7"></script>
+    <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <script src="../shared/curatorback.js"></script>

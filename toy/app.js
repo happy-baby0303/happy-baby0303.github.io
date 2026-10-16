@@ -93,8 +93,13 @@ function applyGlobalBabyProfile() {
 }
 
 // ✨ 테마 + 발달단계 교집합 통합 필터링 함수
+window.moreToys = function () { window.__toyShow = (window.__toyShow || 8) + 8; updateToyView(); };
+
 function updateToyView() {
     if (isFavViewMode) return;
+    // 발달 단계 · 테마를 바꾸면 처음 8개부터
+    const key = currentToyTheme + '|' + globalMilestone;
+    if (window.__toyKey !== key) { window.__toyKey = key; window.__toyShow = 8; }
 
     const filteredData = toyData.filter(t => {
         const themeMatch = currentToyTheme === 'all' || t.theme === currentToyTheme;
@@ -126,6 +131,8 @@ function switchToyMainTab(tabId) {
         btnPlay.classList.add('tab-off');   btnPlay.classList.remove('tab-on');
         viewPlay.style.display = 'none';
         viewGear.style.display = 'block';
+        const row = document.getElementById('milestone-filters'), on = row && row.querySelector('.ms-chip.active');
+        if (row && on) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - (row.clientWidth - on.offsetWidth) / 2);
     }
 }
 
@@ -157,54 +164,87 @@ function filterPlays(category, btnEl) {
     document.querySelectorAll('.play-filter-btn').forEach(btn => btn.classList.remove('active'));
     btnEl.classList.add('active');
     currentPlayCategory = category;
+    window.__playShow = PLAY_STEP;
     renderPlays();
     document.getElementById('view-toy-play').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+/* ---------- 놀이 목록 ----------
+   ⚠️ 놀이 예순 개가 순서 · 아빠 역할 · 단추까지 다 펼쳐져 있어서 이 탭이 5만 px 였다.
+      카드에는 제목 · 한 줄 설명 · 시간 · 준비물만 두고, '어떻게 놀아요' 를 누르면 펼친다.
+      처음엔 10개, '더 보기' 로 10개씩 더 그린다. */
+var PLAY_STEP = 10;
+window.__playShow = window.__playShow || PLAY_STEP;
+window.__playOpen = window.__playOpen || {};
+
+/* '보내기' 받는 사람: 엄마가 쓰면 아빠에게, 아빠가 쓰면 엄마에게, 할머니 · 시터는 엄마 아빠에게 */
+function playShareTo() {
+    const role = localStorage.getItem('user_role') || '';
+    return role === 'dad' ? '엄마' : role === 'senior' ? '엄마 아빠' : '아빠';
+}
+
+window.togglePlayCard = function (id) {
+    window.__playOpen[id] = !window.__playOpen[id];
+    const more = document.getElementById('play-more-' + id);
+    const btn = document.getElementById('play-open-' + id);
+    if (more) more.style.display = window.__playOpen[id] ? 'block' : 'none';
+    if (btn) btn.textContent = window.__playOpen[id] ? '접기 ▴' : '어떻게 놀아요 ▾';
+};
+
+window.morePlays = function () {
+    window.__playShow = (window.__playShow || PLAY_STEP) + PLAY_STEP;
+    renderPlays();
+};
+
 function renderPlays() {
     const container = document.getElementById('play-result-area');
     const favs = JSON.parse(localStorage.getItem('favPlays')) || [];
-    
+
     const filtered = playData.filter(p => {
         // 🚨 리뷰어님 피드백 반영: 찜 필터일 땐 찜한 것만! 아닐 땐 월령(globalMilestone) 필터 무조건 적용!
         const ageMatch = globalMilestone === 'all' || (p.targetAge && p.targetAge.includes(globalMilestone));
-        
+
         if (currentPlayCategory === 'fav') return favs.includes(p.id);
-        
+
         const catMatch = currentPlayCategory === 'all' || p.category === currentPlayCategory;
         return catMatch && ageMatch;
     });
+    window.__playList = filtered;
 
     if (filtered.length === 0) {
         container.innerHTML = `
             <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #DCD3C8; margin-top: 16px;">
                 <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🥲</div>
                 <div class="empty-text">
-                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">앗 조건에 맞는 놀이가 없어요</b>
+                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">조건에 맞는 놀이가 없어요</b>
                     <span style="font-size:13px; color:#A3958A;">다른 놀이 테마나 찜 목록을 확인해 보세요.</span>
                 </div>
             </div>`;
         return;
     }
 
+    const shareTo = playShareTo();
+    const show = Math.min(window.__playShow || PLAY_STEP, filtered.length);
     let html = '';
-    filtered.forEach(p => {
+    filtered.slice(0, show).forEach(p => {
         let badgeColor = '#7F77DD', badgeBg = '#F0EEFB', badgeText = '🧸 장난감으로';
         if (p.category === 'zero') { badgeColor = '#059669'; badgeBg = '#ECFDF5'; badgeText = '🏠 집에 있는 걸로'; }
         else if (p.category === 'dad') { badgeColor = '#E32636'; badgeBg = '#FFF2F2'; badgeText = '🏋️ 몸으로 크게'; }
         else if (p.category === 'lieDown') { badgeColor = '#7F77DD'; badgeBg = '#F3F0FC'; badgeText = '🛌 누워서 하는'; }
         else if (p.category === 'poop') { badgeColor = '#D97706'; badgeBg = '#FFFBEB'; badgeText = '💩 배 마사지'; }
         else if (p.category === 'sick') { badgeColor = '#EA580C'; badgeBg = '#FFEDD5'; badgeText = '🤒 차분한 놀이'; }
+        else if (p.category === 'bath-care') { badgeColor = '#2563EB'; badgeBg = '#EFF6FF'; badgeText = '🛁 목욕하면서'; }
 
         const isFav = favs.includes(p.id);
+        const open = !!window.__playOpen[p.id];
         /* '(안전)' '(주의)' 는 짧은 '주의' 표시로 (이유식·요리 모드와 같은 말) */
         const stepsHtml = p.steps.map(step => `<li style="margin-bottom: 8px;">${String(step).replace(/\((안전 필수|안전|주의)\)\s*(⚠️\s*)?/g, '<b style="color:#B42318;">주의</b> ')}</li>`).join('');
 
-        // 🔗 1. [크로스셀링] 장난감으로 넘어가는 버튼 생성
+        // 🔗 [크로스셀링] 장난감으로 넘어가는 버튼
         let linkToToyHtml = '';
         if (p.relatedToyId) {
             linkToToyHtml = `
-                <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#FAF7F2; border:1px solid #EDE6DE; padding:14px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
+                <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#FAF7F2; border:1px solid #EDE6DE; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
                     <div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:#7A6F68; word-break:keep-all;">🛒 이 놀이에 쓰는 장난감</div>
                     <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#7F77DD; white-space:nowrap; margin-left:10px;">보러 가기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
                 </div>
@@ -212,51 +252,60 @@ function renderPlays() {
         }
 
         html += `
-        <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div id="play-card-${p.id}" style="background: #FFFFFF; border-radius: 20px; padding: 22px 22px 18px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
                 <div style="display: inline-block; padding: 6px 10px; border-radius: 8px; background: ${badgeBg}; color: ${badgeColor}; font-size: 12px; font-weight: 800;">${badgeText}</div>
                 <button onclick="togglePlayFavorite('${p.id}', this, event)" style="background:none; border:none; font-size:24px; cursor:pointer; padding:0;">${isFav ? '❤️' : '🤍'}</button>
             </div>
-            
-            <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #4A413C;">${p.title}</h3>
-            <p style="margin: 0 0 16px 0; font-size: 13.5px; font-weight: 600; color: #A3958A; line-height: 1.4;">${p.desc}</p>
-            
-            <div style="background: #FBF8F3; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #F7F3ED;">
-                <div style="font-size: 13px; color: #7A6F68; margin-bottom: 6px;"><b>준비물:</b> ${p.targetItem}</div>
-                <div style="font-size: 13px; color: #7A6F68;"><b>체력소모:</b> ${p.energyDrain}</div>
-            </div>
 
-            <ul style="margin: 0 0 20px 0; padding-left: 0; list-style: none; font-size: 14.5px; font-weight: 700; color: #4A413C; line-height: 1.6;">
-                ${stepsHtml}
-            </ul>
+            <h3 style="margin: 0 0 6px 0; font-size: 17.5px; font-weight: 900; color: #4A413C; word-break: keep-all;">${p.title}</h3>
+            <p style="margin: 0 0 10px 0; font-size: 13.5px; font-weight: 600; color: #A3958A; line-height: 1.5; word-break: keep-all;">${p.desc}</p>
+            <div style="font-size: 12.5px; font-weight: 700; color: #7A6F68; line-height: 1.6; word-break: keep-all;">⏱️ ${p.playTime}분 · ${p.targetItem}</div>
 
-            <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 14px; border-radius: 12px; margin-bottom: 20px;">
-                <div style="font-size: 12px; font-weight: 900; color: #D97706; margin-bottom: 4px;">👨‍🔧 아빠의 역할</div>
-                <div style="font-size: 13px; font-weight: 700; color: #B45309;">${p.dadRole}</div>
-            </div>
+            <div id="play-more-${p.id}" style="display: ${open ? 'block' : 'none'}; margin-top: 14px;">
+                <div style="background: #FBF8F3; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; border: 1px solid #F7F3ED; font-size: 13px; color: #7A6F68;"><b>체력 소모</b> ${p.energyDrain}</div>
 
-            ${linkToToyHtml}
+                <ul style="margin: 0 0 16px 0; padding-left: 0; list-style: none; font-size: 14.5px; font-weight: 700; color: #4A413C; line-height: 1.6;">
+                    ${stepsHtml}
+                </ul>
 
-            <div style="display: flex; gap: 8px;">
-                <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #4A413C; color: #FFF; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap;">
-                    ⏱️ ${p.playTime}분 타이머
-                </button>
-                <button onclick="sharePlayMission('${p.id}')" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #FEE500; color: #191919; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; white-space: nowrap;">
-                    💬 아빠에게
-                </button>
+                <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 14px; border-radius: 12px; margin-bottom: 16px;">
+                    <div style="font-size: 12px; font-weight: 900; color: #D97706; margin-bottom: 4px;">👨‍🔧 아빠의 역할</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #B45309;">${p.dadRole}</div>
+                </div>
+
+                ${linkToToyHtml}
+
+                <div style="display: flex; gap: 8px;">
+                    <button id="timer-btn-${p.id}" onclick="startPlayTimer('${p.id}', ${p.playTime})" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #4A413C; color: #FFF; font-weight: 800; font-size: 13.5px; border: none; cursor: pointer; transition: 0.2s; white-space: nowrap;">
+                        ⏱️ ${p.playTime}분 타이머
+                    </button>
+                    <button onclick="sharePlayMission('${p.id}')" style="flex: 1; padding: 14px 8px; border-radius: 12px; background: #FFFFFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; border: 1px solid #EDE6DE; cursor: pointer; white-space: nowrap;">
+                        ${shareTo}에게 보내기
+                    </button>
+                </div>
             </div>
 
             <!-- ⚠️ 기록은 무료여야 한다. 이게 없으면 무료 사용자는
                  '이번 달 놀이 기록' 과 도감을 영영 못 채운다.
                  그러면 사라지는 놀이도, 취향 학습도 통째로 멈춘다. -->
-            <div id="playdone-${p.id}" onclick="window.togglePlayDone && window.togglePlayDone('${p.id}')"
-                 style="margin-top: 10px; text-align: center; padding: 13px; border-radius: 12px;
-                        font-size: 13.5px; font-weight: 800; cursor: pointer;
-                        background: #FFFFFF; color: #7A6F68; border: 1px solid #DCD3C8;">
-                오늘 놀았어요
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+                <div id="play-open-${p.id}" onclick="togglePlayCard('${p.id}')"
+                     style="flex: 1; text-align: center; padding: 13px 6px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; background: #F6F2EC; color: #4A413C;">
+                    ${open ? '접기 ▴' : '어떻게 놀아요 ▾'}
+                </div>
+                <div id="playdone-${p.id}" onclick="window.togglePlayDone && window.togglePlayDone('${p.id}')"
+                     style="flex: 1; text-align: center; padding: 13px 6px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; background: #FFFFFF; color: #7A6F68; border: 1px solid #DCD3C8;">
+                    오늘 놀았어요
+                </div>
             </div>
         </div>`;
     });
+
+    const left = filtered.length - show;
+    if (left > 0) {
+        html += `<button onclick="morePlays()" style="display:block; width:100%; padding:16px; margin:4px 0 24px; background:#FFFFFF; border:1px solid #DCD3C8; border-radius:14px; font-size:14px; font-weight:800; color:#7A6F68; cursor:pointer;">놀이 ${Math.min(left, PLAY_STEP)}개 더 보기 <span style="color:#A3958A; font-weight:700;">· 남은 ${left}개</span></button>`;
+    }
 
     // 🚨 버튼들을 덮어쓰기 직전에 좀비 타이머들 싹 정리!
     if (typeof playTimers !== 'undefined') {
@@ -264,8 +313,25 @@ function renderPlays() {
         playTimers = {};
     }
 
-    container.innerHTML = html; 
+    container.innerHTML = html;
 }
+
+/* 장난감 카드 · 이번 주 놀이 · 보낸 링크에서 그 놀이로 갈 때: 거기까지 그리고, 펼치고, 데려간다 */
+window.revealPlay = function (playId) {
+    const list = window.__playList || [];
+    const at = list.findIndex(p => String(p.id) === String(playId));
+    window.__playOpen[playId] = true;
+    if (at >= (window.__playShow || PLAY_STEP)) window.__playShow = at + 1;
+    renderPlays();
+    setTimeout(() => {
+        const card = document.getElementById('play-card-' + playId);
+        if (!card) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        card.style.transition = 'box-shadow 0.3s';
+        card.style.boxShadow = '0 0 0 3px #7F77DD';
+        setTimeout(() => { card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; }, 1600);
+    }, 120);
+};
 
 let playTimers = {};
 
@@ -317,7 +383,7 @@ function startPlayTimer(playId, minutes) {
 
             let successText = '🎉 오늘 미션 끝 · 엄마 아빠 수고하셨어요 💖';
             if (p) {
-                if (p.category === 'dad')           successText = '🎉 오늘 미션 끝 · 아빠 체력 대단하십니다 💪';
+                if (p.category === 'dad')           successText = '🎉 오늘 미션 끝 · 아빠 체력 대단하세요 💪';
                 else if (p.category === 'lieDown')  successText = '🎉 눕육아 성공 엄마 체력 충전 완료 🔋';
                 else if (p.category === 'poop')     successText = '🎉 미션 완료 쾌변 기저귀 확인 요망 💩';
                 else if (p.category === 'sick')     successText = '🎉 미션 완료 아기 컨디션 회복 💖';
@@ -348,9 +414,10 @@ function startPlayTimer(playId, minutes) {
 function sharePlayMission(playId) {
     const p = playData.find(x => x.id === playId);
     if (!p) return;
-    const link = 'https://happy-baby0303.github.io/baby-master/toy/index.html?play=' + encodeURIComponent(p.id);
+    const link = 'https://happy-baby0303.github.io/toy/index.html?play=' + encodeURIComponent(p.id);
+    const toDad = playShareTo() === '아빠';
     const shareText = `오늘 아기랑 이 놀이 같이 해요.\n\n🎈 ${p.title} (${p.playTime}분)` +
-        (p.dadRole ? `\n🙋 맡아줄 것: ${p.dadRole}` : '') + `\n\n${link}`;
+        (toDad && p.dadRole ? `\n🙋 맡아줄 것: ${p.dadRole}` : '') + `\n\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
             .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
@@ -449,14 +516,18 @@ function renderToys(filteredData) {
             <div class="premium-empty-state" style="padding:40px; text-align:center; background:#FFF; border-radius:16px; border:1px dashed #DCD3C8; margin-top: 16px;">
                 <div class="empty-icon" style="font-size:40px; margin-bottom:12px;">🥲</div>
                 <div class="empty-text">
-                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">해당 상황에 맞는 아이템이 없네요.</b>
-                    <span style="font-size:13px; color:#A3958A;">아기 월령이나 테마를 조금 바꿔보세요</span>
+                    <b style="font-size:16px; color:#4A413C; font-weight:800; display:block; margin-bottom:6px;">이 상황에 맞는 장난감이 없어요</b>
+                    <span style="font-size:13px; color:#A3958A;">발달 단계나 테마를 바꿔 보세요</span>
                 </div>
             </div>`;
         return;
     }
+    window.__toyList = filteredData;
+    const show = Math.min(window.__toyShow || 8, filteredData.length);
+    const left = filteredData.length - show;
     resultArea.innerHTML = `<div style="font-weight:800; color:#4A413C; margin-bottom:16px;">지금 맞는 장난감 ${filteredData.length}개</div>` 
-                           + filteredData.map(item => generateToyHTML(item, favs)).join('');
+                           + filteredData.slice(0, show).map(item => generateToyHTML(item, favs)).join('')
+                           + (left > 0 ? `<button onclick="moreToys()" style="display:block; width:100%; padding:16px; margin:4px 0 24px; background:#FFFFFF; border:1px solid #DCD3C8; border-radius:14px; font-size:14px; font-weight:800; color:#7A6F68; cursor:pointer;">장난감 ${Math.min(left, 8)}개 더 보기 <span style="color:#A3958A; font-weight:700;">· 남은 ${left}개</span></button>` : '');
 }
 
 // ==========================================
@@ -568,7 +639,9 @@ window.jumpToToy = function(toyId) {
     document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
     document.querySelector('.ms-chip[data-milestone="all"]').classList.add('active');
     
-    // 3. 렌더링 후 해당 장난감 카드로 부드럽게 스크롤
+    // 3. 그 장난감까지 그린 뒤 부드럽게 스크롤 (목록은 8개씩만 그린다)
+    window.__toyKey = 'all|all';
+    window.__toyShow = Math.max(8, toyData.findIndex(t => String(t.id) === String(toyId)) + 1);
     updateToyView();
     setTimeout(() => {
         const targetCard = document.getElementById(`toy-card-${toyId}`);
@@ -592,24 +665,10 @@ window.jumpToPlay = function(playId) {
     switchToyMainTab('play');
     
     // 2. 필터를 강제로 "전체보기"로 풀어서 무조건 보이게 만듦
-    filterPlays('all', document.querySelector('.play-filter-btn.active') || document.querySelector('.play-filter-btn'));
+    filterPlays('all', document.querySelector('.play-filter-btn'));
     
-    // 3. 렌더링 후 해당 놀이의 타이머 버튼(또는 카드)으로 부드럽게 스크롤
-    setTimeout(() => {
-        const targetBtn = document.getElementById(`timer-btn-${playId}`);
-        if(targetBtn) {
-            const targetCard = targetBtn.closest('div[style*="background: #FFFFFF"]');
-            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // 번쩍! 하이라이트 효과
-            targetCard.style.transition = 'box-shadow 0.3s, transform 0.3s';
-            targetCard.style.boxShadow = '0 0 0 3px #7F77DD';
-            targetCard.style.transform = 'scale(1.02)';
-            setTimeout(() => { 
-                targetCard.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; 
-                targetCard.style.transform = 'scale(1)'; 
-            }, 800);
-        }
-    }, 100);
+    // 3. 그 놀이까지 그리고 펼쳐서 데려간다 (목록은 10개씩만 그린다)
+    setTimeout(() => window.revealPlay(playId), 60);
 };
 
 /* ⚠️ 예전 메시지: "🚨 [긴급 육아 미션 도착] 여보, 오늘 퇴근하고…" + "여보 나 오늘 너무 힘들어 😭 이거 하나만 로켓으로 쏴줘"
@@ -618,7 +677,7 @@ window.jumpToPlay = function(playId) {
 function shareToHusbandToy(id) {
     const toy = toyData.find(t => t.id == id);
     if (!toy) return;
-    const link = 'https://happy-baby0303.github.io/baby-master/toy/index.html?toy=' + encodeURIComponent(toy.id);
+    const link = 'https://happy-baby0303.github.io/toy/index.html?toy=' + encodeURIComponent(toy.id);
     const sub = toy.freeTime ? `혼자 노는 시간 보통 ${toy.freeTime}쯤` : '';
     const shareText = `이 장난감 어때?\n${toy.name}${sub ? '\n' + sub : ''}\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
@@ -632,7 +691,7 @@ function shareToHusbandToy(id) {
         content: {
             title: `이 장난감 어때? ${toy.name}`,
             description: sub,
-            imageUrl: 'https://happy-baby0303.github.io/baby-master/toy/og-image.png',
+            imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
             link: { mobileWebUrl: link, webUrl: link },
         },
         buttons: [{ title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }],
@@ -644,6 +703,11 @@ function shareToHusbandToy(id) {
     var id = new URLSearchParams(location.search).get('toy');
     if (!id) return;
     function go(tries) {
+        if (tries === 8 && typeof window.jumpToToy === 'function') {
+            try { window.jumpToToy(id); } catch (e) {}
+            try { var u0 = new URL(location.href); u0.searchParams.delete('toy'); history.replaceState(history.state, '', u0.toString()); } catch (e) {}
+            return;
+        }
         try { if (typeof window.switchToyMainTab === 'function' && tries === 8) window.switchToyMainTab('gear'); } catch (e) {}
         var hit = document.getElementById('toy-card-' + id);
         if (!hit && tries === 5) {
@@ -666,6 +730,11 @@ function shareToHusbandToy(id) {
 
 // 페이지 열릴 때 탭 기본 상태
 document.addEventListener('DOMContentLoaded', () => {
+    /* 놀이 필터 줄은 화면 위에 붙어 있어야 하는데, 위쪽 머리(제목 · 큐레이터 탭) 밑에 깔려서 안 보였다.
+       머리 높이만큼 내려서 붙인다 (아이폰 노치 높이가 달라서 숫자로 박지 않는다). */
+    const bar = document.getElementById('play-filter-bar'), head = document.querySelector('.app-header');
+    const fit = () => { if (bar && head) bar.style.top = head.getBoundingClientRect().height + 'px'; };
+    fit(); window.addEventListener('resize', fit); setTimeout(fit, 800);
     const btnPlay = document.getElementById('tab-btn-play');
     const btnGear = document.getElementById('tab-btn-gear');
     if (btnPlay) btnPlay.classList.add('tab-on');

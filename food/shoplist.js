@@ -47,6 +47,13 @@
         String(str || "").split(",").forEach(function (part) {
             var t = part.replace(/\([^)]*\)/g, "").trim();
             if (!t) return;
+            var fr = t.match(/^(.+?)\s*(\d+)\/(\d+)\s*(개|장|알)?$/);
+            if (fr) {
+                var fn = fr[1].replace(/\s*(약간|조금|적당량|소량)\s*$/, "").trim();
+                for (var j = 0; j < SKIP.length; j++) { if (fn.indexOf(SKIP[j]) > -1) return; }
+                out.push({ name: fn, qty: parseInt(fr[2], 10) / (parseInt(fr[3], 10) || 1), unit: fr[4] || "개" });
+                return;
+            }
             var m = t.match(/^(.+?)\s*([\d.]+)\s*(g|ml|개|장|알|T|t|큰술|작은술|컵)?$/);
             var name = (m ? m[1] : t).replace(/\s*(약간|조금|적당량|소량)\s*$/, "").trim();
             var qty  = m && m[2] ? parseFloat(m[2]) : null;
@@ -62,9 +69,14 @@
     function tidy(name) {
         // "초기용 쌀가루", "중기 쌀가루" 를 하나로 묶는다
         var n = name.replace(/^(초기용|중기용|후기용|초기|중기|후기|완료기)\s*/, "").trim();
+        // 손질 상태는 장볼 때 상관없다 ('다진 소고기' · '푹 익은 바나나' · '불린 쌀' 은 소고기 · 바나나 · 쌀을 산다)
+        n = n.replace(/^(후숙|푹 익은|생물|익힌|물기 짠|찌개용|찐|불린|다진|생)\s+/, "").trim();
         /* ⚠️ 레시피마다 '소고기 안심' 과 '소고기' 로 달리 적혀 있어서 장보기에 소고기가 두 줄로 잡혔다
               (30g 한 팩 + 30g 한 팩 → 실제로는 60g 한 팩). 같은 걸 한 이름으로 모은다. */
-        var SAME = { "소고기 안심": "소고기", "소고기안심": "소고기", "한우 안심": "소고기", "한우": "소고기", "비타민": "비타민채" };
+        var SAME = { "소고기 안심": "소고기", "소고기안심": "소고기", "소고기 다짐육": "소고기", "소고기다짐육": "소고기", "소고기 불고기감": "소고기",
+                     "한우 안심": "소고기", "한우": "소고기", "비타민": "비타민채", "달걀": "계란", "계란 노른자": "계란",
+                     "새우살": "새우", "가자미살": "가자미", "돼지안심": "돼지 안심", "알배추": "배추", "알배기배추": "배추",
+                     "방토": "방울토마토", "브로콜리 꽃송이": "브로콜리" };
         return SAME[n] || n;
     }
 
@@ -271,7 +283,7 @@
         cand.sort(function (a, b) { return (a.seen - b.seen) || (a.n - b.n) || (a.i - b.i); });
         return cand.slice(0, 3).map(function (c) {
             if (shown) shown.push(c.name);
-            return c.n ? c.name + " (새 재료 " + c.n + ")" : c.name;
+            return c.n ? c.name + " (새 재료 " + c.n + "가지)" : c.name;
         });
     }
 
@@ -418,7 +430,7 @@
             '<div style="font-size:13.5px; font-weight:900; color:#FFFFFF; margin-bottom:4px;">' +
                 '🍲 남는 걸로 이런 것도 돼요</div>' +
             '<div style="font-size:11.5px; font-weight:600; color:#A3958A; margin-bottom:8px; line-height:1.6;">' +
-                '이유식 재료는 늘 남습니다. 버리기 전에 한 번 보세요</div>' +
+                '이유식 재료는 늘 남아요. 버리기 전에 한 번 보세요</div>' +
             rows.join("") +
         '</div>';
     }
@@ -447,7 +459,7 @@
                 ? '<div style="margin-top:16px; background:#EAF7F1; border:1px solid #A7DFC8; ' +
                   'border-radius:14px; padding:14px 16px;">' +
                   '<div style="font-size:12.5px; font-weight:900; color:#1F6F52; margin-bottom:8px;">' +
-                      '📦 언제깠지에 있어요. 안 사셔도 됩니다</div>' +
+                      '📦 언제깠지에 있어요. 안 사셔도 돼요</div>' +
                   r.have.map(function (it) {
                       return '<span style="display:inline-block; font-size:11.5px; font-weight:800; ' +
                              'color:#1F6F52; background:#FFFFFF; border-radius:8px; padding:5px 9px; ' +
@@ -472,7 +484,7 @@
 
             '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-top:11px; line-height:1.7; word-break:keep-all;">' +
-                                '재료 옆 🛒를 누르면 <b>그 재료만 바로</b> 열립니다. ' +
+                                '재료 옆 🛒를 누르면 <b>그 재료만 바로</b> 열려요. ' +
                 '여러 개는 목록을 복사해 검색창에 붙여 넣으세요. 산 건 왼쪽 네모를 눌러 표시하세요.</div>' +
 
         '</div>';

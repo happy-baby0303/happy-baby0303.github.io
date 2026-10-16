@@ -157,43 +157,43 @@
             head = "카시트를 얹을 수 있나요";
             body = "카시트 탭에서 <b>우리 카시트</b>를 골라두시면, " +
                    "이 유모차에 <b>얹히는지</b> 알려드릴게요.<br>" +
-                   "차에서 잠든 아기를 안 깨우고 옮길 수 있는지가 여기서 갈립니다.";
+                   "차에서 잠든 아기를 안 깨우고 옮길 수 있는지가 여기서 갈려요.";
         } else if (v.kind === "fixed") {
             tone = GRAY; bg = "#FBF8F3"; bd = "#EDE6DE";
-            head = "이 카시트는 안 얹힙니다";   // 배지와 한 줄에 들어가게 짧게 ('얹힙니다' 가 있어야 PLUS 배지가 붙는다)
+            head = "이 카시트는 안 얹혀요";   // 배지와 한 줄에 들어가게 짧게 ('얹힙니다' 가 있어야 PLUS 배지가 붙는다)
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "은/는") + " 차에 고정해서 쓰는 카시트예요. " +
                    "유모차에 얹는 건 <b>신생아용 바구니 카시트</b>뿐이라, 어떤 어댑터를 사도 연결되지 않아요.<br>" +
-                   "차에서 잠들면 아기를 안아서 옮기셔야 합니다. 어댑터는 사지 마세요.";
+                   "차에서 잠들면 아기를 안아서 옮기셔야 해요. 어댑터는 사지 마세요.";
         } else if (v.kind === "ok") {
             tone = GREEN; bg = "#EAF7F1"; bd = "#A7DFC8";
-            head = "얹힙니다 · 어댑터 없이";
+            head = "얹혀요 · 어댑터 없이";
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "을/를") + " <b>" + esc(st.name) + "</b>에 바로 꽂을 수 있어요.<br>" +
                    "<b>차에서 잠들었으면 카시트째 들어 올려</b> 유모차에 얹으세요. " +
                    "아기를 안 깨우고 옮기는 가장 쉬운 방법이에요.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span>';
         } else if (v.kind === "adapter") {
             tone = GOLD; bg = "#FFF9E6"; bd = "#FDE68A";
-            head = "어댑터가 있으면 얹힙니다";
+            head = "어댑터가 있으면 얹혀요";
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "과/와") + " <b>" + esc(st.name) + "</b>" + pp(st.name, "은/는") + " " +
-                   "<b>따로 파는 어댑터</b>가 있어야 연결됩니다.<br>" +
+                   "<b>따로 파는 어댑터</b>가 있어야 연결돼요.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span><br><br>' +
                    "⚠️ 사기 전에 <b>두 제품 모델명을 함께</b> 제조사에 물어보세요. " +
-                   "같은 브랜드여도 연식에 따라 규격이 다릅니다.";
+                   "같은 브랜드여도 연식에 따라 규격이 달라요.";
         } else if (v.kind === "no") {
             tone = RED; bg = "#FFF2F2"; bd = "#FCA5A5";
-            head = "이 조합은 안 얹힙니다";
+            head = "이 조합은 안 얹혀요";
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "은/는") + " <b>" + esc(st.name) + "</b>에 연결되지 않아요. " +
-                   "어댑터를 사도 안 됩니다.<br>" +
+                   "어댑터를 사도 안 돼요.<br>" +
                    '<span style="color:' + GRAY + ';">' + esc(v.txt) + '</span><br><br>' +
-                   "차에서 잠들면 <b>아기를 안아서</b> 옮기셔야 합니다. " +
+                   "차에서 잠들면 <b>아기를 안아서</b> 옮기셔야 해요. " +
                    "다음에 한쪽을 바꾸실 때 이 조합을 기억해 두세요.";
         } else {
             tone = GRAY; bg = "#FBF8F3"; bd = "#EDE6DE";
-            head = "이 조합은 저희도 모릅니다";
+            head = "이 조합은 아직 자료가 없어요";
             body = "<b>" + esc(seat) + "</b>" + pp(seat, "과/와") + " <b>" + esc(st.name) + "</b>의 연결은 " +
-                   "저희가 가진 자료에 없어요.<br>" +
-                   "<b>아마 될 거예요</b> 라고 말씀드리면 10만원짜리 어댑터를 잘못 사시게 됩니다. " +
-                   "두 제조사 중 한 곳에 모델명을 대고 물어보시는 게 확실합니다.";
+                   "배냇함이 모은 자료에 없어요.<br>" +
+                   "<b>아마 될 거예요</b>라고 말씀드렸다가 10만 원짜리 어댑터를 잘못 사시게 될 수 있어요. " +
+                   "두 제조사 중 한 곳에 모델명을 대고 물어보시는 게 확실해요.";
         }
 
         /* 무료 유저에게는 판정을 가린다. 이게 PLUS 의 값어치다. */
@@ -204,7 +204,7 @@
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '<b>' + esc(seat) + '</b>' + pp(seat, "과/와") + ' <b>' + esc(st.name) + '</b>.<br>' +
-                    '차에서 잠든 아기를 <b>안 깨우고 옮길 수 있는지</b>가 이 둘로 정해집니다.' +
+                    '차에서 잠든 아기를 <b>안 깨우고 옮길 수 있는지</b>가 이 둘로 정해져요.' +
                 '</div>' +
                 '<div style="margin-top:13px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
                     'border-radius:13px; padding:15px;">' +
@@ -213,7 +213,7 @@
                     '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                         'line-height:1.75; word-break:keep-all;">' +
                         '어댑터가 필요한지, 사도 안 되는지까지요. ' +
-                        '<b>잘못 사면 7~10만원입니다.</b></div>' +
+                        '<b>잘못 사면 7~10만 원이에요.</b></div>' +
                 '</div>' +
             '</div>';
         }

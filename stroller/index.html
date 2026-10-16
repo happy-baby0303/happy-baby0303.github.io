@@ -7,15 +7,17 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-N8RVVNWZ');</script>
     <meta charset="UTF-8">
+    <script src="../shared/curatorlite.js?v=b7"></script>
+    <script src="../native.js?v=2"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 유모차 고르기</title>
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="배냇함 | 내 차에 들어가는 유모차 찾기">
-    <meta property="og:description" content="엘베 없는 빌라, 내 차 트렁크에 맞는 유모차를 찾아드려요 엘베 없는 빌라, 내 차 트렁크에 딱 맞는 유모차를 1초만에 찾아보세요.">
-    <meta property="og:image" content="https://happy-baby0303.github.io/baby-master/stroller/og-image.png"> 
-    <meta property="og:url" content="https://happy-baby0303.github.io/baby-master/stroller/index.html">
+    <meta property="og:description" content="아기 개월수와 우리 집 계단, 차 트렁크에 맞는 유모차를 골라 드려요.">
+    <meta property="og:image" content="https://happy-baby0303.github.io/icon-512.png">
+    <meta property="og:url" content="https://happy-baby0303.github.io/stroller/index.html">
 
     <!-- ⚠️ 폰트는 style.css 의 @import 가 아니라 여기서. 본 앱과 같은 v1.3.8 로 고정. -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -84,7 +86,7 @@
     
     <!-- 2. 서브 타이틀: '안전'과 '핸들링' 가치를 강조 -->
     <p style="margin: 0; font-size: 13.5px; font-weight: 600; color: #A3958A;">
-        흔들림 없는 안전한 승차감과 부드러운 핸들링
+        개월수 · 계단 · 차 트렁크에 맞는 유모차 찾기
     </p>
 </div>
 
@@ -95,7 +97,7 @@
         <!-- 🗂️ 탭 막대 — JS 가 만들지 않고 여기 박아둔다.
              그래야 처음부터 제자리에 있어서 화면이 안 튄다. -->
         <div id="stroller-tabbar" style="display:flex; gap:4px; background:#F6F2EC; border:1px solid #EDE6DE; border-radius:14px; padding:4px; margin:0 0 20px;">
-            <div id="stab-pick" onclick="window.switchStrollerTab && window.switchStrollerTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#4A413C; box-shadow:0 2px 8px rgba(0,0,0,0.06);">🍼 유모차 고르기</div>
+            <div id="stab-pick" onclick="window.switchStrollerTab && window.switchStrollerTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#4A413C; box-shadow:0 2px 8px rgba(0,0,0,0.06);">🚼 유모차 고르기</div>
             <div id="stab-use" onclick="window.switchStrollerTab && window.switchStrollerTab('use')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:transparent; color:#A3958A;">🧰 쓰면서 챙길 것</div>
         </div>
 
@@ -179,17 +181,17 @@
             <div class="filter-row">
                 <div class="filter-label">핵심 스펙</div>
                 <div class="filter-btns">
-                    <button class="stroller-filt-btn" data-filter="spec-autofold">⚡ 오토폴딩</button>
-                    <button class="stroller-filt-btn" data-filter="spec-cabin">✈️ 기내반입 ⭕</button>
-                    <button class="stroller-filt-btn" data-filter="spec-light">🪶 6.5kg 이하</button>
-                    <button class="stroller-filt-btn" data-filter="spec-heavy">🛡️ 10kg 이상</button>
+                    <button class="stroller-filt-btn" data-filter="spec-autofold">오토폴딩</button>
+                    <button class="stroller-filt-btn" data-filter="spec-cabin">기내 반입</button>
+                    <button class="stroller-filt-btn" data-filter="spec-light">6.5kg 이하</button>
+                    <button class="stroller-filt-btn" data-filter="spec-heavy">10kg 이상</button>
                 </div>
             </div>
             <div class="filter-row">
                 <div class="filter-label">예산 범위</div>
                 <div class="filter-btns">
-                    <button class="stroller-filt-btn" data-filter="price-under50">💸 50만원 이하</button>
-                    <button class="stroller-filt-btn" data-filter="price-over100">💎 100만원 이상</button>
+                    <button class="stroller-filt-btn" data-filter="price-under50">50만 원 이하</button>
+                    <button class="stroller-filt-btn" data-filter="price-over100">100만 원 이상</button>
                 </div>
             </div>
         </div>
@@ -201,7 +203,7 @@
             </button>
         </div>
 
-        <div class="result-title" id="result-top-title" style="display:none;">🏆 조건에 맞는 3종</div>
+        <div class="result-title" id="result-top-title" style="display:none;">조건에 잘 맞는 3종</div>
         <div id="result-top-area" class="result-area"></div>
 
         <button id="show-more-btn" class="show-more-btn" style="display:none;" onclick="toggleOthers()">나머지 결과 보기 ▾</button>
@@ -219,26 +221,26 @@
 
     </main>
     <!-- 🧰 안전망 — 제일 먼저 -->
-    <script src="../shared/safenet.js"></script>
+    <script src="../shared/safenet.js?v=b7"></script>
     <script src="../shared/babyswitch.js"></script>
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <script src="data.js?v=b7"></script>
+    <script src="app.js?v=b7"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="strollerguide.js"></script>
-    <script src="strollerown.js"></script>
+    <script src="strollerguide.js?v=b7"></script>
+    <script src="strollerown.js?v=b7"></script>
     <!-- ⚠️ strollerused.js 가 폴더에 있는데 이 줄이 없어서
          통째로 안 돌고 있었습니다. 중고 확인 · 리콜 안내가 전부 그 안에 있습니다. -->
-    <script src="strollerused.js"></script>
+    <script src="strollerused.js?v=b7"></script>
     <!-- ⚖️ 최대 사용 체중 — 아기 몸무게와 견줘서 알려준다 -->
-    <script src="strollerlimit.js"></script>
+    <script src="strollerlimit.js?v=b7"></script>
     <!-- 🔗 우리 카시트가 이 유모차에 얹히나 — PLUS -->
-    <script src="strollermatch.js"></script>
+    <script src="strollermatch.js?v=b7"></script>
     <!-- 🚗 우리 차에 들어가나 — 차 바꿨을 때 · 렌터카 · 친정 차 -->
-    <script src="strollertrunk.js"></script>
+    <script src="strollertrunk.js?v=b7"></script>
     <!-- 🧭 오늘 어디 가세요 — 나가기 전에 보는 것. PLUS 의 중심 -->
-    <script src="strollergo.js"></script>
-    <script src="strollertabs.js"></script>
-    <script src="../shared/plusmark.js"></script>
+    <script src="strollergo.js?v=b7"></script>
+    <script src="strollertabs.js?v=b7"></script>
+    <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <script src="../shared/curatorback.js"></script>

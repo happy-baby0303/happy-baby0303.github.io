@@ -170,7 +170,7 @@
 
         var sub = hasSleepData()
             ? esc(nm("의")) + " 잠 기록까지 보고 짜드릴게요.<br>이번 주에 제일 급한 걸 하나만 골라주세요."
-            : "이번 주에 제일 급한 걸 하나만 골라주세요.<br>" + esc(nm("")) + " 개월수와 갖고 계신 장난감을 보고 짭니다.";
+            : "이번 주에 제일 급한 걸 하나만 골라주세요.<br>" + esc(nm("")) + " 개월수와 갖고 계신 장난감을 보고 짜요.";
 
         var html =
         '<div id="curator-modal" style="position:fixed; inset:0; background:rgba(0,0,0,0.55); ' +
@@ -390,6 +390,7 @@
             if (btn) window.filterPlays('all', btn);
         }
         setTimeout(function () {
+            if (typeof window.revealPlay === "function") { window.revealPlay(id); return; }
             var b = document.getElementById("timer-btn-" + id);
             if (b) {
                 var card = b.closest('div[style*="background: #FFFFFF"]');
@@ -458,7 +459,7 @@
             var aw = awakeMins();
             if (aw !== null && aw >= 60) {
                 var h = Math.floor(aw / 60), mm = aw % 60;
-                return "깬 지 " + (h ? h + "시간 " : "") + mm + "분 됐어요. 다음 잠 오기 전에 하기 좋습니다.";
+                return "깬 지 " + (h ? h + "시간 " : "") + mm + "분 됐어요. 다음 잠 오기 전에 하기 좋아요.";
             }
         }
         if (p.category === "dad") return "주말이라 아빠 손이 있는 날이에요.";
@@ -629,7 +630,7 @@
             '</div>' +
             (buyCnt === 0
                 ? '<div style="margin-top:10px; font-size:12.5px; font-weight:800; color:#1F6F52;">' +
-                  '\u2705 이번 주는 살 게 없어요. 전부 집에 있는 걸로 됩니다.</div>' : '') +
+                  '\u2705 이번 주는 살 게 없어요. 전부 집에 있는 걸로 돼요.</div>' : '') +
         '</div>';
     }
 
@@ -711,7 +712,7 @@
                           'line-height:1.75; word-break:keep-all;">' +
                           '놀이 42가지는 아래에서 전부 무료로 보실 수 있어요.<br>' +
                           'PLUS는 ' + esc(nm("")) + ' 개월수와 갖고 계신 장난감에 맞춰 ' +
-                          '<b>일주일을 대신 짜드리는 것</b>입니다.</div></div>') +
+                          '<b>일주일을 대신 짜드리는 것</b>이에요.</div></div>') +
             '</div>' +
         '</div>';
     }

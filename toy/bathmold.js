@@ -92,9 +92,9 @@
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 (over
-                    ? '물총·분수·오리처럼 <b>안에 구멍이 있는 것</b>은 며칠만 지나도 속이 새까매집니다. ' +
-                      '겉은 멀쩡해 보여도요. 아기가 그걸 입에 뭅니다.'
-                    : '2주에 한 번씩만 봐주시면 됩니다.') +
+                    ? '물총·분수·오리처럼 <b>안에 구멍이 있는 것</b>은 며칠만 지나도 속이 새까매져요. ' +
+                      '겉은 멀쩡해 보여도요. 아기가 그걸 입에 물어요.'
+                    : '2주에 한 번씩만 봐주시면 돼요.') +
                 (list.length ? '<br><br><b>가지고 계신 것</b> · ' + esc(names) +
                     (list.length > 4 ? ' 외 ' + (list.length - 4) + '개' : '') : '') +
             '</div>' +
@@ -103,10 +103,10 @@
                 ? '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; padding:13px 14px; margin-top:12px; ' +
                   'font-size:12px; font-weight:600; color:#7A6F68; line-height:1.8;">' +
                   '① 구멍을 <b>손으로 꾹 눌러 물을 다 빼세요</b><br>' +
-                  '② 따뜻한 물 1L + 식초 한 큰술에 <b>30분</b> 담가둡니다<br>' +
-                  '③ 헹구고 <b>구멍이 아래로 가게</b> 세워서 완전히 말립니다<br>' +
-                  '④ 흔들었을 때 <b>속에서 물소리가 나면</b> 아직 덜 마른 겁니다<br>' +
-                  '⑤ 속이 이미 까매졌으면 <b>버리세요.</b> 닦아서 될 일이 아닙니다' +
+                  '② 따뜻한 물 1L + 식초 한 큰술에 <b>30분</b> 담가둬요<br>' +
+                  '③ 헹구고 <b>구멍이 아래로 가게</b> 세워서 완전히 말려요<br>' +
+                  '④ 흔들었을 때 <b>속에서 물소리가 나면</b> 아직 덜 마른 거예요<br>' +
+                  '⑤ 속이 이미 까매졌으면 <b>버리세요.</b> 닦아서 될 일이 아니에요' +
                   '</div>'
                 : '') +
 
@@ -116,7 +116,7 @@
 
             '<div style="font-size:11px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-top:9px; line-height:1.6;">' +
-                '살 때 <b>구멍이 없거나 열리는 것</b>을 고르면 이 일이 없어집니다.</div>' +
+                '살 때 <b>구멍이 없거나 열리는 것</b>을 고르면 이 일이 없어져요.</div>' +
         '</div>';
     }
 
@@ -172,7 +172,7 @@
             d.style.cssText =
                 "padding:11px 13px; border-radius:12px; margin:0; font-size:12px; font-weight:700; line-height:1.65; " +
                 "background:#FFF9E6; border:1px solid #FDE68A; color:#8A6D00;";
-            d.innerHTML = "🦠 <b>안에 구멍이 있으면 물이 고입니다.</b> 쓰고 나서 물을 빼고 " +
+            d.innerHTML = "🦠 <b>안에 구멍이 있으면 물이 고여요.</b> 쓰고 나서 물을 빼고 " +
                           "구멍이 아래로 가게 말리세요. 2주에 한 번은 식초물에 담가 주시고요.";
             putNote(card, d, 2);
         });

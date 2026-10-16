@@ -128,11 +128,11 @@
         { id: "bottle", icon: "", name: "젖병",     unit: "ml",
           tip: "눈금이 있고 이미 소독돼 있어서 제일 편해요" },
         { id: "cup",    icon: "", name: "계량컵",   unit: "ml",
-          tip: "눈금대로 부으시면 됩니다" },
+          tip: "눈금대로 부으면 돼요" },
         { id: "spoon",  icon: "", name: "같은 숟가락", unit: "술",
           tip: "가루 뜬 그 숟가락으로 물도 재세요" },
         { id: "scale",  icon: "", name: "저울",     unit: "g",
-          tip: "물 1ml = 1g 이라 눈금 그대로예요" }
+          tip: "물 1ml = 1g이라 눈금 그대로예요" }
     ];
 
     var TOOL_KEY = "tosil_food_tool";
@@ -208,9 +208,9 @@
             '<div style="background:#F0EEFB; border:1px solid #DDD9F5; border-radius:13px; ' +
                 'padding:14px 15px; font-size:13px; font-weight:700; color:var(--fg-blue); ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                '⚖️ <b>정확히 안 맞아도 됩니다.</b> 다 끓이고 숟가락으로 떠서 ' +
+                '⚖️ <b>정확히 안 맞아도 돼요.</b> 다 끓이고 숟가락으로 떠서 ' +
                 '<b>주르륵 흐르면</b> 초기 미음이 맞아요. 되직하면 물을 조금 더, ' +
-                '너무 묽으면 1~2분 더 끓이면 됩니다.</div>' +
+                '너무 묽으면 1~2분 더 끓이면 돼요.</div>' +
 
             '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:13px; ' +
                 'padding:14px 15px; margin-top:10px; font-size:12.5px; font-weight:700; ' +
@@ -222,7 +222,7 @@
             '<div style="font-size:12px; font-weight:700; color:' + GRAY + '; ' +
                 'margin-top:11px; line-height:1.7; word-break:keep-all;">' +
                 '중기부터는 물을 조금씩 줄이세요. <b>8배죽은 이 물의 8할, 6배죽은 6할</b>쯤이에요. ' +
-                '그때쯤이면 눈대중이 이미 생기셨을 겁니다.</div>' +
+                '그때쯤이면 눈대중이 이미 생기셨을 거예요.</div>' +
         '</div>';
     }
 
@@ -236,7 +236,7 @@
         var out = [];
         Object.keys(db).forEach(function (day) {
             (db[day] || []).forEach(function (r) {
-                if (r && r.type === "test" && r.ingredient) {
+                if (r && r.type === "test" && r.ingredient && !r.past) {
                     out.push({ day: day, name: String(r.ingredient).trim(), status: r.status || "pass" });
                 }
             });
@@ -266,7 +266,8 @@
             txt = "⚠️ <b>" + esc(last.name) + "</b>에서 이상이 있었어요 · 다음 진료 때 꼭 말씀하세요";
         } else if (d < 3) {
             bg = "#FFF9E6"; bd = "#FDE68A"; col = "var(--fg-gold)";
-            txt = "⏳ <b>" + esc(last.name) + "</b> " + (d + 1) + "일째 · <b>" + (3 - d) + "일 더</b> 지켜본 뒤 새 재료를 주세요";
+            var free = new Date(); free.setDate(free.getDate() + (3 - d));
+            txt = "⏳ <b>" + esc(last.name) + "</b> 지켜보는 " + (d + 1) + "일째 · 새 재료는 <b>" + (free.getMonth() + 1) + "월 " + free.getDate() + "일</b>부터 주세요";
         } else {
             bg = "#EAF7F1"; bd = "#A7DFC8"; col = "var(--fg-green)";
             txt = "✅ <b>" + esc(last.name) + "</b> 통과 · 새 재료를 시작하셔도 돼요";
@@ -285,12 +286,12 @@
        ---------------------------------------------------------- */
 
     var BASICS = [
-        ["1", "재료 손질", "소고기는 <b>찬물에 20분</b>만. 더 담그면 철분까지 빠집니다. 채소는 질긴 줄기·씨·껍질을 도려내고 이파리나 과육만 쓰세요."],
-        ["2", "익혀서 곱게 갈기", "고기는 푹 삶고 <b>삶은 물은 버리지 마세요.</b> 그게 육수입니다. 채소는 1분 데치거나 찝니다."],
-        ["3", "⭐ 찬물에 가루를 먼저", "여기가 제일 많이 실패해요. <b>뜨거운 물에 쌀가루를 넣으면 수제비처럼 떡집니다.</b> 다 식은 물에 넣고 덩어리 없이 풀어주세요."],
+        ["1", "재료 손질", "소고기는 <b>찬물에 20분</b>만. 더 담그면 철분까지 빠져요. 채소는 질긴 줄기·씨·껍질을 도려내고 이파리나 과육만 쓰세요."],
+        ["2", "익혀서 곱게 갈기", "고기는 푹 삶고 <b>삶은 물은 버리지 마세요.</b> 그게 육수예요. 채소는 1분 데치거나 쪄요."],
+        ["3", "⭐ 찬물에 가루를 먼저", "여기가 제일 많이 실패해요. <b>뜨거운 물에 쌀가루를 넣으면 수제비처럼 떡져요.</b> 다 식은 물에 넣고 덩어리 없이 풀어주세요."],
         ["4", "센 불 → 끓으면 약불 5~7분", "파르르 끓어오르면 <b>곧바로 제일 약한 불</b>로. 주걱으로 바닥을 긁듯이 계속 저어주세요."],
-        ["5", "고운 체에 거르기", "초기에는 <b>필수</b>예요. 곱게 갈아도 목에 걸리는 조각이 남습니다."],
-        ["6", "식혀서 소분", "<b>완전히 식힌 뒤</b> 담으세요. 뜨거울 때 닫으면 물이 맺혀 상합니다. 냉장 <b>2일</b> · 냉동 <b>2주</b>."]
+        ["5", "고운 체에 거르기", "초기에는 <b>필수</b>예요. 곱게 갈아도 목에 걸리는 조각이 남아요."],
+        ["6", "식혀서 소분", "<b>완전히 식힌 뒤</b> 담으세요. 뜨거울 때 닫으면 물이 맺혀 상해요. 냉장 <b>2일</b> · 냉동 <b>2주</b>."]
     ];
 
     function basicsBody() {
@@ -314,7 +315,7 @@
             '<div style="font-size:12.5px; font-weight:700; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
             '전신 두드러기 · 쌕쌕거림 · 입술이나 눈두덩 붓기 · 반복 구토 · 축 처짐<br>' +
             '먹던 것을 <b>즉시 멈추고</b> 눕히세요. 숨이 차 보이면 앉히고, 토할 것 같으면 옆으로. ' +
-            '<b>좋아 보여도 병원에 가야 합니다.</b> 몇 시간 뒤 다시 심해지기도 해요.</div></div>' +
+            '<b>좋아 보여도 병원에 가야 해요.</b> 몇 시간 뒤 다시 심해지기도 해요.</div></div>' +
 
         '<div style="background:#FFF9E6; border:1px solid #FDE68A; border-radius:12px; padding:14px; margin-bottom:9px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:var(--fg-gold); margin-bottom:6px;">그 재료를 빼고 진료</div>' +
@@ -324,12 +325,12 @@
         '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:14px;">' +
             '<div style="font-size:13.5px; font-weight:900; color:#7A6F68; margin-bottom:6px;">이건 알레르기가 아닐 수 있어요</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
-            '<b>입 주변만</b> 빨개지는 건 산이 닿아서인 경우가 많아요(토마토·딸기·귤). 먹인 뒤 닦아주면 덜합니다.<br>' +
-            '변에 <b>재료가 그대로</b> 보이는 것도 흔해요. 아직 소화가 덜 되는 것뿐입니다.<br>' +
-            '애매하면 <b>119에 전화해서 물어보셔도 됩니다.</b> 무료고 24시간 해요.</div></div>' +
+            '<b>입 주변만</b> 빨개지는 건 산이 닿아서인 경우가 많아요(토마토·딸기·귤). 먹인 뒤 닦아 주면 덜해요.<br>' +
+            '변에 <b>재료가 그대로</b> 보이는 것도 흔해요. 아직 소화가 덜 되는 것뿐이에요.<br>' +
+            '애매하면 <b>119에 전화해서 물어보셔도 돼요.</b> 무료고 24시간 해요.</div></div>' +
 
         '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; margin-top:10px; line-height:1.7;">' +
-            '진단은 의사가 합니다. 가족 중에 알레르기가 있으면 <b>시작 전에</b> 소아과와 먼저 상의하세요.</div>';
+            '진단은 의사가 해요. 가족 중에 알레르기가 있으면 <b>시작 전에</b> 소아과와 먼저 상의하세요.</div>';
     }
 
     var open = { basics: false, sign: false };
@@ -377,12 +378,35 @@
         var b = document.getElementById("fg-aller");
         if (b) b.innerHTML = statusLine() +
             fold("rule",  "🚦", "새 재료는 사흘씩", "하나씩, 아침에, 사흘 이상", ruleBody()) +
-            fold("sign",  "🚨", "알레르기 이상 신호", "언제 병원에 가야 하는지", signBody());
+            (liteNow() ? "" : fold("sign",  "🚨", "알레르기 이상 신호", "언제 병원에 가야 하는지", signBody()));
     }
 
     /* ---------- 🥄 미음 만들기 — 셋을 하나로 ---------- */
 
+    /* 7개월이 지나면(중기부터) '초기 미음' 카드가 레시피 탭 맨 위를 다 차지했다.
+       그때는 한 줄로 접어 두고 누르면 편다. 늦게 시작해서 '초기 이유식' 으로 적어 둔 집은 8개월까지 펴 둔다. */
+    var mixOpen = null;
+    function mixStartsOpen() {
+        var m = monthsOld();
+        if (m === null || m < 7) return true;
+        var st = localStorage.getItem("tosil_feedingStage") || "";
+        return st.indexOf("초기") > -1 && m <= 8;
+    }
+    window.toggleMixCard = function () { mixOpen = !(mixOpen === null ? mixStartsOpen() : mixOpen); paint(); };
+
     function mixCard() {
+        if (!(mixOpen === null ? mixStartsOpen() : mixOpen)) {
+            return '<div class="matrix-panel" onclick="window.toggleMixCard()" style="margin-bottom:16px; padding:18px 20px; cursor:pointer;">' +
+                '<div style="display:flex; align-items:center; gap:11px;">' +
+                    '<div style="font-size:19px;">🥄</div>' +
+                    '<div style="flex:1; min-width:0;">' +
+                        '<div style="font-size:14.5px; font-weight:900; color:' + DARK + ';">미음 만들기</div>' +
+                        '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; margin-top:2px;">초기에 쓰던 쌀가루 : 물 비율</div>' +
+                    '</div>' +
+                    '<div style="font-size:13px; font-weight:800; color:' + GRAY + ';">펼치기 ▾</div>' +
+                '</div>' +
+            '</div>';
+        }
         var c = batch(spoons), t = toolNow();
         var name = esc(babyName());
 
@@ -408,7 +432,10 @@
 
         return '<div class="matrix-panel" style="margin-bottom:16px;">' +
 
-            '<div class="matrix-header">🥄 미음 만들기</div>' +
+            (mixStartsOpen()
+                ? '<div class="matrix-header">🥄 미음 만들기</div>'
+                : '<div class="matrix-header" onclick="window.toggleMixCard()" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">' +
+                    '<span>🥄 미음 만들기</span><span style="font-size:13px; font-weight:800; color:' + GRAY + ';">접기 ▴</span></div>') +
 
             '<div style="text-align:center; padding:2px 0 16px;">' +
                 '<div style="font-size:21px; font-weight:900; color:' + BLUE + '; letter-spacing:-0.8px;">' +
@@ -430,12 +457,12 @@
             '<div style="background:#FFF9E6; border:1px solid #FDE68A; border-radius:13px; ' +
                 'padding:14px 15px; font-size:12.5px; font-weight:700; color:var(--fg-gold); ' +
                 'line-height:1.7; word-break:keep-all; margin-top:4px;">' +
-                '⚖️ <b>정확히 안 맞아도 됩니다.</b> 다 끓이고 숟가락으로 떠서 ' +
-                '<b>주르륵 흐르면</b> 초기 미음이 맞아요. 되직하면 물을 조금 더, 묽으면 1~2분 더 끓이면 됩니다.<br>' +
+                '⚖️ <b>정확히 안 맞아도 괜찮아요.</b> 다 끓이고 숟가락으로 떠서 ' +
+                '<b>주르륵 흐르면</b> 초기 미음이 맞아요. 되직하면 물을 조금 더, 묽으면 1~2분 더 끓이면 돼요.<br>' +
                 /* ⚠️ '숟가락 크기 상관없어요' 는 물도 같은 숟가락으로 잴 때만 맞다. ml 로 재면 310ml 는 밥숟가락 기준이라
       티스푼으로 가루를 뜨면 세 배 가까이 묽어진다. 도구에 따라 말을 바꾼다. */
                 (t.id === 'spoon'
-                    ? '숟가락이 크든 작든 상관없어요. <b>같은 숟가락으로 가루 1 : 물 12</b>만 지키면 됩니다.'
+                    ? '숟가락이 크든 작든 상관없어요. <b>같은 숟가락으로 가루 1 : 물 12</b>만 지키면 돼요.'
                     : '쌀가루는 <b>밥숟가락으로 깎아서</b> 뜨세요. 숟가락이 더 크거나 작으면 물 양도 달라져요.') + '</div>' +
 
         '</div>';
@@ -446,12 +473,16 @@
 
     /* ---------- 사흘 규칙 본문 (기존 카드에서 떼어냄) ---------- */
 
+    /* 플레이 앱에서는 응급 처치 안내를 숨긴다 (shared/curatorlite.js) */
+    function liteNow() { try { return typeof window.isPlayLite === 'function' && window.isPlayLite(); } catch (e) { return false; } }
+
     function ruleBody() {
         return '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
             'line-height:1.75; word-break:keep-all;">' +
             '새 재료는 <b>하나씩, 아침에, 사흘 이상</b> 지켜보고 다음으로 넘어가세요. ' +
-            '아침에 주는 건 <b>낮 동안 병원에 갈 수 있어서</b>입니다.<br><br>' +
-            '이상이 있었던 재료는 스스로 다시 시도하지 마시고, <b>다음 진료 때 꼭 말씀하세요.</b></div>';
+            '아침에 주는 건 <b>낮 동안 병원에 갈 수 있어서</b>예요.<br><br>' +
+            (liteNow() ? '먹고 나서 평소와 다른 모습이 보이면 <b>바로 소아과에 물어보세요.</b> ' : '') +
+            '이상이 있었던 재료는 다시 먹이지 말고, <b>다음 진료 때 꼭 말씀하세요.</b></div>';
     }
 
     function mount() {

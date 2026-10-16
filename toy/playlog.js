@@ -206,7 +206,7 @@
             '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
                 '📔 ' + (t.getMonth() + 1) + '월 놀이 기록</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; margin-bottom:14px;">' +
-                '처방전에서 <b>놀았어요</b>를 누르면 여기 쌓입니다</div>' +
+                '처방전에서 <b>놀았어요</b>를 누르면 여기 쌓여요</div>' +
 
             (st.days === 0
                 ? '<div style="background:#FBF8F3; border-radius:13px; padding:18px 14px; ' +

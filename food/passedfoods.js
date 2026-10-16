@@ -43,6 +43,13 @@
     var ID = "passed-foods", SHEET = "passed-sheet";
     var DAY = 86400000;
 
+    /* '쌀 · 소고기 · 애호박예요' 처럼 받침을 안 봤다 */
+    function copulaOf(w) {
+        var c = String(w || '').trim().slice(-1), code = c ? c.charCodeAt(0) - 0xAC00 : -1;
+        if (code < 0 || code > 11171) return '이에요';
+        return (code % 28) ? '이에요' : '예요';
+    }
+
     function esc(s) {
         return String(s == null ? "" : s)
             .replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -489,7 +496,7 @@
             '</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; margin-bottom:20px; word-break:keep-all;">' +
-                '탈 없이 먹여본 것만 골라주세요. 이미 통과한 재료를 <b>다시 테스트로 띄우지 않기 위해서</b>예요.<br>' +
+                '탈 없이 먹여본 것만 골라 주세요. 골라 두면 식단표가 그 재료를 <b>새 재료로 또 넣지 않아요.</b><br>' +
                 '<b>이상이 있었던 재료는 고르지 마세요.</b> 그건 달력에서 따로 기록해 주세요.</div>' +
 
             haveHTML(have) +
@@ -558,12 +565,12 @@
         return '<div id="' + ID + '" style="background:#FFF9E6; border:1px solid #FDE68A; ' +
             'border-radius:14px; padding:16px; margin:20px 0 14px;">' +
             '<div style="font-size:14px; font-weight:900; color:#8A6D00; margin-bottom:6px;">' +
-                '🥄 지금까지 먹여본 재료가 있나요?</div>' +
+                (p.length ? '🥄 먹여본 재료가 더 있나요?' : '🥄 지금까지 먹여본 재료가 있나요?') + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.7; margin-bottom:12px; word-break:keep-all;">' +
-                '식단표는 <b>아직 안 먹여본 재료</b>부터 짭니다. ' +
-                '이미 소고기를 먹여보셨는데 앱이 모르면, 소고기를 또 "새 테스트"로 띄워요.<br>' +
-                '한 번만 골라주시면 그런 일이 없습니다.</div>' +
+                (p.length ? '지금 아는 건 <b>' + esc(p.slice(0, 4).join(' · ')) + (p.length > 4 ? ' 외 ' + (p.length - 4) + '가지' : '') + '</b>' + copulaOf(p.length > 4 ? '가지' : p[p.length - 1]) + '.<br>' : '') +
+                '식단표는 <b>아직 안 먹여본 재료</b>부터 짜요. ' +
+                '이미 먹여본 재료를 골라 두면 그 재료를 새 재료로 또 넣지 않아요.</div>' +
             '<div onclick="window.openPassedSheet()" style="text-align:center; padding:14px; ' +
                 'background:#8A6D00; color:#FFFFFF; border-radius:12px; ' +
                 'font-size:14px; font-weight:900; cursor:pointer;">먹여본 재료 고르기</div>' +
@@ -591,7 +598,7 @@
         var sib = host.previousElementSibling;
         for (var i = 0; i < 3 && sib; i++) {
             var t = sib.textContent || "";
-            if (t.indexOf("식단표 자동 생성") > -1 || t.indexOf("배냇함 PLUS") > -1) { anchor = sib; break; }
+            if (t.indexOf("식단표 자동 생성") > -1 || t.indexOf("식단표 짜기") > -1 || t.indexOf("배냇함 PLUS") > -1) { anchor = sib; break; }
             sib = sib.previousElementSibling;
         }
         anchor.parentNode.insertBefore(box.firstChild, anchor);
@@ -623,7 +630,7 @@
                         'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                         (p.length
                             ? esc(p.slice(0, 6).join(" · ")) + (p.length > 6 ? " 외 " + (p.length - 6) + "가지" : "")
-                            : "이미 통과한 재료를 다시 테스트로 띄우지 않아요") + '</div>' +
+                            : "먹여본 재료는 새 재료로 또 권하지 않아요") + '</div>' +
                 '</div>' +
                 '<div style="font-size:11.5px; font-weight:800; color:' +
                     (p.length ? "#1F6F52" : BLUE) + '; flex-shrink:0;">' +

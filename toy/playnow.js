@@ -214,7 +214,7 @@
             '</div>' +
             '<div onclick="window.playNowDone(\'' + esc(p.id) + '\')" ' +
                 'style="flex-shrink:0; padding:9px 13px; border-radius:11px; cursor:pointer; ' +
-                'background:#F6F2EC; color:#7A6F68; font-size:12px; font-weight:800;">했어요</div>' +
+                'background:#F6F2EC; color:#7A6F68; font-size:12px; font-weight:800;">놀았어요</div>' +
         '</div>';
     }
 
@@ -249,7 +249,7 @@
                     '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                         'line-height:1.75; word-break:keep-all;">' +
                         esc(nm("가")) + ' 좋아한 갈래를 먼저 올리고, ' +
-                        '이번 주에 이미 한 건 빼드립니다.</div>' +
+                        '이번 주에 이미 한 건 빼드려요.</div>' +
                 '</div>' +
             '</div>';
         }
@@ -260,14 +260,14 @@
                 '⏱️ 지금 몇 분 있으세요</div>' +
             '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.75; word-break:keep-all;">' +
-                (n ? '오늘 <b>' + n + '개</b> 하셨어요. 한 건 빼고 골랐습니다.'
+                (n ? '오늘 <b>' + n + '개</b> 하셨어요. 한 건 빼고 골랐어요.'
                    : '그 시간 안에 끝나는 놀이만, 준비물 없는 것부터.') +
             '</div>' +
             chips() +
             (list.length
                 ? '<div style="margin-top:10px;">' + list.map(rowHTML).join("") + '</div>'
                 : '<div style="margin-top:14px; font-size:12.5px; font-weight:700; color:' + GREEN + '; ' +
-                  'line-height:1.7;">오늘 이 시간대 놀이는 다 하셨어요. 충분합니다 🤍</div>') +
+                  'line-height:1.7;">오늘 이 시간대 놀이는 다 하셨어요. 충분해요 🤍</div>') +
         '</div>';
     }
 

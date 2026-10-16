@@ -23,7 +23,7 @@
     'use strict';
 
     var HOST = "toy-gift";
-    var LINK = "https://happy-baby0303.github.io/baby-master/toy/index.html";
+    var LINK = "https://happy-baby0303.github.io/toy/index.html";
 
     var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
     var GOLD = "#8A6D00", PURPLE = "#7F77DD";
@@ -154,7 +154,7 @@
             list.map(function (t, i) {
                 return (i + 1) + ". " + t.name + (t.freeTime ? "  (" + t.freeTime + ")" : "");
             }).join("\n") +
-            "\n\n이미 있는 건 빼고 골랐어요. 하나만 골라주셔도 충분합니다 🤍\n" +
+            "\n\n이미 있는 건 빼고 골랐어요. 하나만 골라주셔도 충분해요 🤍\n" +
             "👉 " + LINK;
 
         if (typeof Kakao === "undefined" || !Kakao.isInitialized()) {
@@ -192,7 +192,7 @@
 
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '돌잔치에 같은 장난감이 세 개 들어옵니다. ' +
+                '돌잔치에 같은 장난감이 세 개 들어와요. ' +
                 '<b>갖고 계신 건 빼고</b>, 그날 개월수에 맞는 걸로 골라드릴게요.</div>';
 
         if (day) {
@@ -213,7 +213,7 @@
 
         if (!list.length) {
             out += '<div style="margin-top:13px; font-size:12.5px; font-weight:700; color:' + GRAY + '; ' +
-                'line-height:1.7;">고를 게 없네요. 갖고 계신 걸 너무 잘 챙기셨습니다.</div>';
+                'line-height:1.7;">고를 게 없네요. 갖고 계신 걸 너무 잘 챙기셨어요.</div>';
             return out + '</div>';
         }
 
@@ -244,8 +244,8 @@
                     'line-height:1.7; word-break:keep-all;">' +
                     (have.length
                         ? '등록하신 ' + have.length + '개는 빼고 골랐어요. '
-                        : '<b>우리 집 육아템을 등록하시면</b> 이미 있는 건 빼고 골라드립니다. ') +
-                    '받는 분이 고르기 쉽게 다섯 개까지만 보냅니다.</div>';
+                        : '<b>우리 집 육아템을 등록하시면</b> 이미 있는 건 빼고 골라드려요. ') +
+                    '받는 분이 고르기 쉽게 다섯 개까지만 보내요.</div>';
         } else {
             out += '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
                 'border-radius:13px; padding:16px;">' +
@@ -253,7 +253,7 @@
                     '나머지 ' + (list.length - show.length) + '개와 카톡 보내기는 PLUS에서</div>' +
                 '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
-                    '목록을 그대로 카톡으로 보내시면 됩니다. ' +
+                    '목록을 그대로 카톡으로 보내시면 돼요. ' +
                     '<b>"아무거나~" 대신 목록을 보내면 같은 선물이 겹칠 일이 줄어요.</b></div></div>';
         }
 

@@ -32,7 +32,7 @@
          맨 끝에서 불렀더니 그 전까지 화면이 파랗게 그려졌다가 보라로 바뀌었다. -->
     <script src="./theme.js"></script>
     <!-- 🧰 안전망: 한 곳이 죽어도 나머지 화면은 살게. 제일 먼저 켜져 있어야 한다 -->
-      <script src="./shared/safenet.js?v=2"></script>
+      <script src="./shared/safenet.js?v=3"></script>
     <!-- 📱 플레이 앱에서만 의료 기능을 숨긴다(웹은 그대로). 화면이 그려지기 전에 켜져야 해서 여기 둔다 -->
       <script src="./playlite.js?v=3"></script>
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
@@ -156,6 +156,7 @@
     box-sizing: border-box !important;
     background: #FAF7F2 !important;
     backdrop-filter: none !important;
+    opacity: 1 !important;                     /* style.css 의 0.95 — 밑의 글씨가 비쳤다 */
 }
 
 /* 안전영역은 여기 한 번만. 헤더가 sticky 라 이 위쪽에서 시작한다. */
@@ -3509,8 +3510,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- ⏸ 앱이 뒤에 있을 때 타이머가 일을 안 하게. setInterval 을 감싸므로 제일 먼저 -->
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
-<script src="script.js?v=20261016-3"></script>
-    <script src="./stage.js"></script>
+<script src="script.js?v=20261016-4"></script>
+    <script src="./stage.js?v=2"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js"></script>
     <script src="./familynews.js"></script>

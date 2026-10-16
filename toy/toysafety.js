@@ -73,9 +73,9 @@
 
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
-                '사운드북·피아노·리모컨 장난감 안에 동전만 한 전지가 들어 있습니다.<br>' +
-                '삼키면 <b>식도에 걸린 채로 그 자리를 태웁니다.</b> 침에 닿아 전류가 흐르면서, 두 시간 안에도 구멍이 날 수 있어요. ' +
-                '<b>숨은 잘 쉬어져서</b> 부모가 알아차리기 어렵습니다.' +
+                '사운드북·피아노·리모컨 장난감 안에 동전만 한 전지가 들어 있어요.<br>' +
+                '삼키면 <b>식도에 걸린 채로 그 자리를 태워요.</b> 침에 닿아 전류가 흐르면서, 두 시간 안에도 구멍이 날 수 있어요. ' +
+                '<b>숨은 잘 쉬어져서</b> 부모가 알아차리기 어려워요.' +
                 (list.length
                     ? '<br><br><b>가지고 계신 것 중</b> · ' + esc(names) +
                       (list.length > 4 ? ' 외 ' + (list.length - 4) + '개' : '')
@@ -83,15 +83,19 @@
             '</div>' +
 
             /* ⚠️ 이 네 줄은 지우지 마세요. 제일 중요한 부분입니다. */
-            '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:13px; ' +
+            /* 플레이 앱(shared/curatorlite.js)에서는 응급 처치 안내를 숨기고 아래 한 줄만 보인다 */
+            '<div class="pl-only" style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:13px; ' +
+                'padding:14px 15px; margin-top:13px; font-size:13px; font-weight:900; color:' + RED + ';">' +
+                '삼킨 것 같으면 기다리지 말고 바로 응급실에 가세요</div>' +
+            '<div class="pl-hide" style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:13px; ' +
                 'padding:14px 15px; margin-top:13px;">' +
                 '<div style="font-size:13px; font-weight:900; color:' + RED + '; margin-bottom:7px;">' +
                     '삼킨 것 같으면 바로 응급실</div>' +
                 '<div style="font-size:12.5px; font-weight:700; color:' + RED + '; line-height:1.9;">' +
-                    '· <b>토하게 하지 마세요.</b> 올라오면서 식도를 또 지납니다<br>' +
+                    '· <b>토하게 하지 마세요.</b> 올라오면서 식도를 또 지나요<br>' +
                     '· <b>물도 음식도 주지 마세요</b><br>' +
-                    '· 같은 전지나 제품 상자를 <b>들고 가세요.</b> 크기를 알아야 합니다<br>' +
-                    '· 확실하지 않아도 갑니다. <b>기다리는 게 제일 위험합니다</b>' +
+                    '· 같은 전지나 제품 상자를 <b>들고 가세요.</b> 크기를 알아야 해요<br>' +
+                    '· 확실하지 않아도 가요. <b>기다리는 게 제일 위험해요</b>' +
                 '</div>' +
             '</div>' +
 
@@ -108,27 +112,27 @@
         return '<div style="margin-top:8px;">' +
 
             row("🔩", "전지함이 나사로 잠겨 있나요",
-                "손으로 열리는 뚜껑이면 아기 손에도 열립니다. 살 때 <b>나사로 잠기는 것</b>을 고르세요. " +
+                "손으로 열리는 뚜껑이면 아기 손에도 열려요. 살 때 <b>나사로 잠기는 것</b>을 고르세요. " +
                 "이미 있는 건 나사가 풀려 있지 않은지 한 번 확인해 주세요.", RED) +
 
             row("🗑️", "뺀 전지를 식탁이나 서랍에 두지 마세요",
-                "새 것보다 <b>쓰던 전지가 더 흔한 사고 원인</b>입니다. 힘이 남아 있어서 위험한 건 똑같고, " +
+                "새 것보다 <b>쓰던 전지가 더 흔한 사고 원인</b>이에요. 힘이 남아 있어서 위험한 건 똑같고, " +
                 "아무 데나 두기 쉬워서요. 바로 테이프를 감아 높은 곳에 치우세요.", RED) +
 
             row("🏷️", "KC 마크와 연령 표시를 보세요",
-                "국내에 파는 완구는 <b>KC 안전확인</b> 대상입니다. 마크와 <b>사용 연령</b>이 함께 적혀 있어요. " +
-                "직구나 노마켓 제품은 이게 없는 경우가 있습니다. " +
+                "국내에 파는 완구는 <b>KC 안전확인</b> 대상이에요. 마크와 <b>사용 연령</b>이 함께 적혀 있어요. " +
+                "직구나 노마켓 제품은 이게 없는 경우가 있어요. " +
                 "연령 표시는 취향이 아니라 <b>부품 크기 기준</b>이에요.", GOLD) +
 
             row("📢", "리콜된 제품인지 확인하기",
-                "완구 리콜은 생각보다 자주 납니다. 모델명으로 찾으면 바로 나와요.<br>" +
+                "완구 리콜은 생각보다 자주 나요. 모델명으로 찾으면 바로 나와요.<br>" +
                 '<a href="https://www.safetykorea.kr" target="_blank" rel="noopener" ' +
                 'style="display:inline-block; margin-top:9px; padding:11px 16px; border-radius:11px; ' +
                 'background:#FBF8F3; border:1px solid #DCD3C8; color:' + DARK + '; ' +
                 'font-size:12.5px; font-weight:900; text-decoration:none;">' +
                 '제품안전정보센터에서 찾아보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>' +
                 '<div style="margin-top:7px; font-size:11px; font-weight:600; color:' + GRAY + ';">' +
-                '국가기술표준원이 운영하는 곳입니다 · 배냇함과 관련 없습니다</div>', GOLD) +
+                '국가기술표준원이 운영하는 곳이에요 · 배냇함과 관련 없어요</div>', GOLD) +
 
             '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-top:12px; line-height:1.7; word-break:keep-all;">' +
@@ -205,7 +209,7 @@
                 "padding:11px 13px; border-radius:12px; margin:0; font-size:12px; font-weight:700; line-height:1.65; " +
                 "background:#FFF2F2; border:1px solid #FCA5A5; color:#C62828;";
             d.innerHTML = "🔋 <b>전지함이 나사로 잠기는지 확인하세요.</b> " +
-                          "손으로 열리는 뚜껑이면 아기 손에도 열립니다.";
+                          "손으로 열리는 뚜껑이면 아기 손에도 열려요.";
             putNote(card, d, 1);
         });
     }

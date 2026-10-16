@@ -113,7 +113,7 @@
             '<div style="margin-top:14px; font-size:12.5px; font-weight:600; color:#A3958A; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 '<b style="color:#7A6F68;">레시피 ' + recipeCount() + '종과 알레르기 기록은 계속 무료예요.</b><br>' +
-                '뭘 먹일지 고르는 건 원래 열려 있습니다.</div>' +
+                '뭘 먹일지 고르는 건 원래 열려 있어요.</div>' +
 
             '<div onclick="window.closeFoodPaywall(); window.goFoodPlus();" ' +
                 /* PLUS 로 가는 문은 금색으로. 검은 막대가 한 화면에 여러 개 겹치지 않게 */
@@ -146,7 +146,8 @@
         // '식단표 자동 생성하기' 버튼 찾기
         var all = box.querySelectorAll("*");
         for (var i = 0; i < all.length; i++) {
-            if ((all[i].textContent || "").indexOf("식단표 자동 생성") > -1 &&
+            var tx = all[i].textContent || "";
+            if ((tx.indexOf("식단표 자동 생성") > -1 || tx.indexOf("식단표 짜기") > -1) &&
                 all[i].children.length === 0) { btn = all[i]; break; }
         }
 

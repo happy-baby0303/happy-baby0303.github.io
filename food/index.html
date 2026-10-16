@@ -2,13 +2,15 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <script src="../shared/curatorlite.js?v=b7"></script>
+    <script src="../native.js?v=2"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 이유식 고르기</title>
     <!-- ⚠️ 폰트는 style.css 의 @import 가 아니라 여기서. 본 앱과 같은 v1.3.8 로 고정. -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=b7">
 </head>
 <body>
 
@@ -52,14 +54,14 @@
 <div class="hero-title" style="text-align: center; margin-bottom: 24px;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
         <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
-            <span class="gradient-text">안심 이유식 식단</span>
+            <span>안심 이유식 식단</span>
         </h2>
         <span class="dynamic-age-badge" style="background: #F0EEFB; color: #7F77DD; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
         </span>
     </div>
     
     <p style="margin: 0; font-size: 13.5px; font-weight: 600; color: #A3958A;">
-        새 재료는 하나씩, 사흘씩 지켜보며
+        새 재료는 하나씩, 사흘씩 지켜봐요
     </p>
 </div>
 
@@ -93,19 +95,19 @@
                             <div style="font-size: 12px; font-weight: 600; color: #7F77DD; margin-top: 2px;">몇 g 넣으면 몇 g 나오는지, 저울 하나로 끝</div>
                         </div>
                     </div>
-                    <div id="food-calc-chevron" style="color: #7F77DD; font-weight: 900; font-size: 14px; transition: transform 0.3s ease;">▼</div>
+                    <div id="food-calc-chevron" style="color: #7F77DD; display: flex; transition: transform 0.3s ease;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
                 </div>
 
                 <div id="food-calc-body" style="display: none; padding: 20px; border-top: 1px solid #EDE6DE;">
                     <!-- 1. 베이스 재료 -->
-                    <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #7A6F68;">1. 베이스 재료 및 농도</label>
+                    <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #7A6F68;">1. 재료와 농도</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                        <select id="food-base-type" style="flex: 1; padding: 14px 10px; border-radius: 12px; font-size: 13px; font-weight: 700; background: #FBF8F3; border: 1px solid #EDE6DE; outline: none; color: #4A413C;">
+                        <select id="food-base-type" class="fsel" style="flex: 1; padding: 14px 32px 14px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; background-color: #FBF8F3; border: 1px solid #EDE6DE; outline: none; color: #4A413C;">
                             <option value="flour">쌀가루</option>
                             <option value="raw">불린 쌀</option>
                             <option value="cooked">지은 밥</option>
                         </select>
-                        <select id="food-ratio-type" style="flex: 1.5; padding: 14px 10px; border-radius: 12px; font-size: 13px; font-weight: 700; background: #FBF8F3; border: 1px solid #EDE6DE; outline: none; color: #4A413C;">
+                        <select id="food-ratio-type" class="fsel" style="flex: 1.5; padding: 14px 32px 14px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; background-color: #FBF8F3; border: 1px solid #EDE6DE; outline: none; color: #4A413C;">
                             <option value="10">10배죽 (주르륵)</option>
                             <option value="8">8배죽 (마요네즈)</option>
                             <option value="7">7배죽 (묽은죽)</option>
@@ -123,17 +125,17 @@
 
                     <!-- 역산 -->
                     <div id="calc-view-reverse" style="display: block;">
-                        <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #7A6F68;">2. 목표 완성량 (g)</label>
+                        <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #7A6F68;">2. 만들 양 (g)</label>
                         <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #EDE6DE; border-radius: 12px; padding-right: 16px; margin-bottom: 16px;">
                             <input type="number" id="food-target-yield" placeholder="예: 120 (60g씩 2끼)" style="flex: 1; width: 100%; padding: 14px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; font-size: 16px; color: #7F77DD;">
                             <span style="font-size: 14px; font-weight: 800; color: #A3958A;">g</span>
                         </div>
-                        <button onclick="calcReverseFood()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 12px; border: none; background: #7F77DD; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">재료량 역산하기</button>
+                        <button onclick="calcReverseFood()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 12px; border: none; background: #7F77DD; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">넣을 양 계산하기</button>
                         
                         <div id="food-reverse-result" style="display: none; margin-top: 16px; background: #FAF7F2; padding: 24px; border-radius: 16px; border: 1px solid #EDE6DE; text-align: center;">
                             <div style="display: flex; justify-content: space-around; align-items: center;">
                                 <div>
-                                    <div style="font-size: 12px; font-weight: 800; color: #A3958A; margin-bottom: 4px;">베이스 재료</div>
+                                    <div style="font-size: 12px; font-weight: 800; color: #A3958A; margin-bottom: 4px;">쌀</div>
                                     <div style="font-size: 14px; font-weight: 800; color: #4A413C;"><span id="rev-base-g" style="font-size: 28px; font-weight: 900; color: #7F77DD;">0</span> g</div>
                                 </div>
                                 <div style="font-size: 20px; color: #DCD3C8; font-weight: 300;">+</div>
@@ -143,53 +145,53 @@
                                 </div>
                             </div>
                             <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE6DE; font-size: 11.5px; font-weight: 700; color: #A3958A; line-height: 1.5; word-break: keep-all; text-align: left;">
-                                ⚖️ 냄비를 저울에 올리고 <b style="color:#7A6F68;">영점(0g)</b>을 누른 뒤 그대로 부으세요. 물 1ml = 1g이라 계량컵보다 정확합니다.
+                                ⚖️ 냄비를 저울에 올리고 <b style="color:#7A6F68;">영점(0g)</b>을 누른 뒤 그대로 부으세요. 물 1ml = 1g이라 계량컵보다 정확해요.
                             </div>
                         </div>
                     </div>
 
                     <!-- 정방향 -->
                     <div id="calc-view-forward" style="display: none;">
-                        <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #7A6F68;">2. 베이스 재료의 투입량 (g)</label>
+                        <label style="font-size: 13px; font-weight: 800; margin-bottom: 8px; display: block; color: #7A6F68;">2. 넣을 쌀 양 (g)</label>
                         <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #EDE6DE; border-radius: 12px; padding-right: 16px; margin-bottom: 16px;">
                             <input type="number" id="food-base-weight" placeholder="예: 20" style="flex: 1; width: 100%; padding: 14px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; font-size: 16px; color: #7F77DD;">
                             <span style="font-size: 14px; font-weight: 800; color: #A3958A;">g</span>
                         </div>
 
-                        <select id="food-cook-method" style="width: 100%; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 700; background: #FBF8F3; border: 1px solid #EDE6DE; outline: none; margin-bottom: 16px; color: #4A413C;">
+                        <select id="food-cook-method" class="fsel" style="width: 100%; padding: 14px 36px 14px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; background-color: #FBF8F3; border: 1px solid #EDE6DE; outline: none; margin-bottom: 16px; color: #4A413C;">
                             <option value="0.15">냄비 (뚜껑 덮고 약불)</option>
                             <option value="0.25">냄비 (뚜껑 열고 저어가며)</option>
                             <option value="0.05">이유식 마스터기</option>
                             <option value="0.08">밥솥 / 찜기</option>
                         </select>
 
-                        <button onclick="calcBabyFoodWater()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 12px; border: none; background: #7F77DD; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">예상 완성량 계산</button>
+                        <button onclick="calcBabyFoodWater()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 12px; border: none; background: #7F77DD; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">몇 g 나올지 보기</button>
 
                         <div id="food-calc-result" style="display: none; margin-top: 16px; background: #FAF7F2; padding: 24px; border-radius: 16px; border: 1px solid #EDE6DE; text-align: center;">
                             <div style="font-size: 12px; font-weight: 800; color: #A3958A; margin-bottom: 4px;">부어야 할 물 (저울 기준)</div>
                             <div style="font-size: 16px; font-weight: 900; color: #7A6F68; margin-bottom: 16px;"><span id="res-water-g">0</span> g</div>
                             
-                            <div style="font-size: 12px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;">최종 완성량</div>
+                            <div style="font-size: 12px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;">다 끓이면</div>
                             <div style="font-size: 14px; font-weight: 800; color: #4A413C; margin-bottom: 4px;"><span id="res-yield-g" style="font-size: 34px; font-weight: 900; color: #7F77DD; letter-spacing: -1px;">0</span> g</div>
                             <div id="res-cube-info" style="font-size: 12px; font-weight: 700; color: #A3958A; margin-bottom: 12px;"></div>
 
                             <div id="res-food-tip" style="font-size: 11.5px; font-weight: 700; color: #A3958A; line-height: 1.5; word-break: keep-all; background: #FFFFFF; padding: 12px; border-radius: 10px; border: 1px solid #EDE6DE; text-align: left;">
-                                냄비를 저울에 올리고 <strong>영점(0g)</strong>을 누른 뒤 부으세요. 물 1ml = 1g이라 계량컵보다 정확합니다.
+                                냄비를 저울에 올리고 <strong>영점(0g)</strong>을 누른 뒤 부으세요. 물 1ml = 1g이라 계량컵보다 정확해요.
                             </div>
                         </div>
                         
                         <details style="margin-top: 24px; background: #FFFFFF; border: 1px solid #EDE6DE; border-radius: 12px;">
                             <summary style="padding: 14px 16px; font-size: 13px; font-weight: 800; color: #7A6F68; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;">
-                                <span>🎯 우리집 냄비 회수율 맞추기</span>
-                                <span style="font-size: 12px; color: #A3958A;">▼</span>
+                                <span>우리 집 냄비에 맞추기</span>
+                                <span class="arrow" style="color: #A3958A;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
                             </summary>
                             <div style="padding: 0 16px 16px 16px; border-top: 1px dashed #EDE6DE; margin-top: 4px; padding-top: 16px;">
                                 <div style="font-size: 11.5px; font-weight: 600; color: #A3958A; line-height: 1.5; margin-bottom: 12px; word-break: keep-all;">
-                                    계산된 양과 실제 완성량이 다른가요? 딱 한 번만 <b>'저울에 찍힌 실제 완성 무게'</b>를 적어주시면, 다음부터 훨씬 정확하게 계산해 드립니다.
+                                    계산한 양과 실제로 나온 양이 다른가요? 한 번만 <b>저울에 찍힌 무게</b>를 적어 주시면 다음부터 더 정확하게 계산해 드려요.
                                 </div>
                                 <div style="display: flex; gap: 8px;">
-                                    <input type="number" id="food-actual-yield" placeholder="실제 나온 g수" style="flex: 1; padding: 12px; border: 1px solid #EDE6DE; border-radius: 10px; outline: none; font-weight: 800; text-align: center; font-size: 14px; background: #FBF8F3;">
-                                    <button onclick="saveEvapCalibration()" style="padding: 12px 16px; font-size: 13px; font-weight: 800; border-radius: 10px; border: none; background: #4A413C; color: #FFF; cursor: pointer; white-space: nowrap;">보정하기</button>
+                                    <input type="number" id="food-actual-yield" placeholder="실제 나온 g수" style="flex: 1; min-width: 0; width: auto; padding: 12px; border: 1px solid #EDE6DE; border-radius: 10px; outline: none; font-weight: 800; text-align: center; font-size: 14px; background: #FBF8F3;">
+                                    <button onclick="saveEvapCalibration()" style="padding: 12px 16px; font-size: 13px; font-weight: 800; border-radius: 10px; border: none; background: #4A413C; color: #FFF; cursor: pointer; white-space: nowrap; flex-shrink: 0;">맞추기</button>
                                 </div>
                             </div>
                         </details>
@@ -198,11 +200,11 @@
                     </div>
                 </div>
             </div>
-<div class="matrix-panel">
+<div class="matrix-panel" id="food-filter-panel">
                 <div class="matrix-header">🥄 안심 식단 고르기</div>
                 <div class="matrix-grid">
                     <div class="matrix-item">
-                        <label>👶 아기 월령</label>
+                        <label>아기 개월수</label>
                         <div class="custom-select-wrapper">
                             <select id="food-age" onchange="window.__foodUserFiltered=true; runFoodEngine()">
                                 <option value="early">초기 · 4~6개월</option>
@@ -213,7 +215,7 @@
                         </div>
                     </div>
                     <div class="matrix-item">
-                        <label>🎯 현재 가장 큰 고민</label>
+                        <label>요즘 고민</label>
                         <div class="custom-select-wrapper">
                             <select id="food-goal" onchange="window.__foodUserFiltered=true; runFoodEngine()">
                                 <option value="all">특별한 고민 없음</option>
@@ -224,11 +226,11 @@
                         </div>
                     </div>
                     <div class="matrix-item full-width">
-                        <label>🥕 냉장고 파먹기 (반드시 포함할 재료)</label>
+                        <label>꼭 넣을 재료</label>
                         <input type="text" id="fridge-search" placeholder="예: 고구마, 소고기" oninput="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #EDE6DE; background: #FBF8F3; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
                     </div>
                     <div class="matrix-item full-width">
-                        <label>⚠️ 알레르기 차단 (제외할 재료)</label>
+                        <label>뺄 재료</label>
                         <input type="text" id="custom-allergy-search" placeholder="예: 계란, 유제품, 복숭아" oninput="window.__foodUserFiltered=true; runFoodEngine()" style="width: 100%; padding: 16px; border: 1px solid #EDE6DE; background: #FBF8F3; border-radius: 14px; font-size: 15px; font-weight: 600; outline: none; transition: 0.2s;">
                     </div>
                 </div>
@@ -245,11 +247,11 @@
                 <!-- 1. 시작 전 까만색 트리거 버튼 (유치한 이모지 삭제) -->
                 <div id="autopilot-trigger-box" style="background: #4A413C; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
                                        <div data-plus-head style="font-size: 18px; font-weight: 900; color: #FFFFFF; margin-bottom: 16px; letter-spacing: -0.5px;">우리 아기 맞춤 영양 식단표</div>
-                    <div style="font-size: 13.5px; font-weight: 600; color: #A3958A; line-height: 1.5; margin-bottom: 24px; word-break: keep-all;">
-                        냉장고에 유통기한이 임박한 재료와 알레르기 데이터를 조합해 7일 치 식단표를 짜드립니다.
+                    <div style="font-size: 13.5px; font-weight: 600; color: #DDD3C8; line-height: 1.6; margin-bottom: 24px; word-break: keep-all;">
+                        먹여본 재료와 냉장고에 곧 써야 할 큐브를 보고 7일 식단표를 짜 드려요. 새 재료는 하나씩, 사흘씩 넣어요.
                     </div>
-                    <button onclick="renderAutoPilotUI()" style="width: 100%; padding: 16px; border-radius: 12px; background: #7F77DD; color: #FFF; font-size: 15px; font-weight: 900; border: none; cursor: pointer; transition: 0.2s;">
-                        식단표 자동 생성하기 〉
+                    <button id="btn-make-plan" onclick="renderAutoPilotUI()" style="width: 100%; padding: 16px; border-radius: 12px; background: #7F77DD; color: #FFF; font-size: 15px; font-weight: 900; border: none; cursor: pointer; transition: 0.2s;">
+                        7일 식단표 짜기 ›
                     </button>
                 </div>
 
@@ -267,22 +269,22 @@
                 <div id="traffic-light-result" style="margin-top: 16px; display:none;"></div>
             </div>
 <div data-html2canvas-ignore="true" style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-                <button onclick="downloadCalendarImage()" style="background: #4A413C; color: #FFF; padding: 12px 20px; border-radius: 12px; font-weight: 900; font-size: 14.5px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: 0.2s;">
+                <button onclick="downloadCalendarImage()" style="background: #FFFFFF; color: #7A6F68; padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #DCD3C8; cursor: pointer; transition: 0.2s;">
                     달력 이미지로 저장
                 </button>
             </div>
-<div style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
+<div id="food-cal-card" style="background: #FFFFFF; border-radius: 20px; padding: 20px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <button onclick="changeMonth(-1)" style="background: #F6F2EC; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: 900; color: #7A6F68; cursor: pointer; transition: 0.2s;">&lt;</button>
+                    <button onclick="changeMonth(-1)" aria-label="지난달" style="background: #F6F2EC; border: none; width: 36px; height: 36px; border-radius: 10px; color: #7A6F68; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
                     <h3 id="cal-month-title" style="margin: 0; font-size: 18px; font-weight: 900; color: #4A413C;">2026년 7월</h3>
-                    <button onclick="changeMonth(1)" style="background: #F6F2EC; border: none; width: 36px; height: 36px; border-radius: 10px; font-weight: 900; color: #7A6F68; cursor: pointer; transition: 0.2s;">&gt;</button>
+                    <button onclick="changeMonth(1)" aria-label="다음 달" style="background: #F6F2EC; border: none; width: 36px; height: 36px; border-radius: 10px; color: #7A6F68; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
                 </div>
 
                 <div id="cal-monthly-summary" style="background: #FAF7F2; padding: 14px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px dashed #DCD3C8;">
                     <div style="font-size: 13.5px; font-weight: 800; color: #7A6F68;">이번 달 새 재료</div>
                     <div style="font-size: 14px; font-weight: 900;">
-                        <span id="sum-pass" style="color:#059669; background:#ECFDF5; padding:4px 8px; border-radius:6px;">🟢 0</span> 
-                        <span id="sum-fail" style="color:#D32F2F; background:#FFF0F1; padding:4px 8px; border-radius:6px; margin-left:4px;">🚨 0</span>
+                        <span id="sum-pass" style="color:#059669; background:#ECFDF5; padding:4px 8px; border-radius:6px;">통과 0</span> 
+                        <span id="sum-fail" style="color:#D32F2F; background:#FFF0F1; padding:4px 8px; border-radius:6px; margin-left:4px;">이상 0</span>
                     </div>
                 </div>
                 
@@ -320,7 +322,7 @@
 <div id="meal-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
             <div style="background: #ffffff; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; animation: slideUp 0.3s ease-out;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #4A413C;">🍲 오늘의 식단 기록</h3>
+                    <h3 id="meal-sheet-title" style="margin: 0; font-size: 18px; font-weight: 800; color: #4A413C;">🍲 오늘 식단 기록</h3>
                     <button onclick="closeSheets()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #A3958A; padding: 0;">✕</button>
                 </div>
                 
@@ -331,12 +333,12 @@
 
                 <div style="display: flex; gap: 12px; margin-bottom: 24px;">
                     <div style="flex: 1;">
-                        <label style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">섭취량 (ml)</label>
+                        <label style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">먹은 양 (g)</label>
                         <input type="number" id="meal-amount-input" placeholder="모르면 비워두세요" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #EDE6DE; font-size: 15px; font-weight: 700; outline: none;">
                     </div>
                     <div style="flex: 1;">
                         <label style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">아기 반응</label>
-                        <select id="meal-reaction-input" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #EDE6DE; font-size: 15px; font-weight: 700; outline: none; appearance: none; background: #FFF;">
+                        <select id="meal-reaction-input" class="fsel" style="width: 100%; padding: 14px 36px 14px 14px; border-radius: 12px; border: 1px solid #EDE6DE; font-size: 15px; font-weight: 700; outline: none; background-color: #FFF; color: #4A413C;">
                             <option value="😍 완뚝">😍 완뚝 (다 먹음)</option>
                             <option value="🤔 절반">🤔 절반 남김</option>
                             <option value="😭 거부">😭 입 꾹 닫음</option>
@@ -359,7 +361,7 @@
 
                 <div style="display: flex; gap: 10px;">
                     <button onclick="skipDeduction()" style="flex: 1; padding: 16px; border-radius: 14px; background: #F6F2EC; color: #7A6F68; font-weight: 800; font-size: 15px; border: none; cursor: pointer;">건너뛰기</button>
-                    <button onclick="confirmDeduction()" style="flex: 2; padding: 16px; border-radius: 14px; background: #7F77DD; color: #FFFFFF; font-weight: 900; font-size: 15px; border: none; cursor: pointer;">✅ 차감하고 저장</button>
+                    <button onclick="confirmDeduction()" style="flex: 2; padding: 16px; border-radius: 14px; background: #7F77DD; color: #FFFFFF; font-weight: 900; font-size: 15px; border: none; cursor: pointer;">큐브 빼고 저장</button>
                 </div>
             </div>
         </div><div id="test-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">
@@ -370,16 +372,16 @@
                 </div>
                 
                 <div style="margin-bottom: 24px;">
-                    <label style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">오늘 처음 먹여본 재료 (1개만)</label>
+                    <label id="test-sheet-label" style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">오늘 처음 먹여본 재료 (1개만)</label>
                     <input type="text" id="test-ing-input" placeholder="예: 청경채" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #7F77DD; font-size: 15px; font-weight: 700; outline: none; background:#F2F0FC;">
                 </div>
 
-                <div style="font-size: 13px; font-weight: 800; color: #7A6F68; margin-bottom: 8px;">알레르기 반응 (신체 변화)</div>
+                <div style="font-size: 13px; font-weight: 800; color: #7A6F68; margin-bottom: 8px;">먹고 나서 어땠나요</div>
                 <div style="display: flex; gap: 8px; margin-bottom: 24px;">
                     <button id="btn-al-pass" onclick="setAllergyStatus('pass')" style="flex: 1; padding: 14px; border-radius: 12px; background: #ECFDF5; color: #059669; border: 2px solid #10B981; font-weight: 800; font-size: 14px; cursor: pointer;">🟢 무사 통과</button>
                     <button id="btn-al-fail" onclick="setAllergyStatus('fail')" style="flex: 1; padding: 14px; border-radius: 12px; background: #FFF0F1; color: #D32F2F; border: 2px solid transparent; font-weight: 800; font-size: 14px; cursor: pointer;">🚨 발진/알레르기</button>
                 </div>
-                <button onclick="saveTestRecord()" style="width: 100%; padding: 16px; border-radius: 14px; background: #E32636; color: #FFFFFF; font-weight: 900; font-size: 16px; border: none; cursor: pointer;">테스트 결과 저장</button>
+                <button onclick="saveTestRecord()" style="width: 100%; padding: 16px; border-radius: 14px; background: #4A413C; color: #FFFFFF; font-weight: 900; font-size: 16px; border: none; cursor: pointer;">기록하기</button>
             </div>
         </div><div id="cooking-mode-modal" style="display: none; position: fixed; inset: 0; background: #FFFFFF; z-index: 99999; flex-direction: column; animation: slideUp 0.3s ease-out; transition: background-color 0.5s;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #EDE6DE; background: transparent;">
@@ -408,12 +410,11 @@
                 </div>
                 <div style="display: flex; justify-content: center; gap: 10px; margin-top: 12px;">
                     <button id="cook-timer-btn" onclick="toggleCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #7F77DD; border: none; font-weight: 800; font-size: 16px; color: #FFFFFF; cursor: pointer;">▶ 시작</button>
-                    <button onclick="resetCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #FFF0F1; border: 1px solid #FECACA; font-weight: 800; font-size: 16px; color: #D32F2F; cursor: pointer;">🔄 초기화</button>
+                    <button onclick="resetCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #FFF0F1; border: 1px solid #FECACA; font-weight: 800; font-size: 16px; color: #D32F2F; cursor: pointer;">초기화</button>
                 </div>
             </div>
 
             <div style="flex: 1; overflow-y: auto; padding: 20px; background: transparent;">
-                <div style="font-size: 14px; font-weight: 800; color: #A3958A; margin-bottom: 16px;">완료한 단계는 터치해서 지워주세요</div>
                 <div id="cook-steps-container" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px;"></div>
             </div>
         </div>
@@ -451,22 +452,22 @@
 
     <script src="../html2canvas.min.js"></script>
     <!-- 🧰 안전망 — 제일 먼저 -->
-    <script src="../shared/safenet.js"></script>
+    <script src="../shared/safenet.js?v=b7"></script>
     <script src="../shared/babyswitch.js"></script>
-    <script src="data.js"></script>
+    <script src="data.js?v=b7"></script>
     <script>try { document.getElementById('food-count-badge').textContent = babyFoodData.length + '종 레시피'; } catch (e) {}</script>
-    <script src="app.js?v=1002"></script>
+    <script src="app.js?v=b7"></script>
     <!-- 토핑 이유식: 재료마다 몇 g · 처음 먹인 재료 (홈 맘마 기록과 같은 칸) -->
     <script src="../shared/topping.js?v=1"></script>
     <script src="toppingmeal.js?v=1"></script>
-    <script src="passedfoods.js"></script>
+    <script src="passedfoods.js?v=b7"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="foodguide.js?v=1"></script>
+    <script src="foodguide.js?v=b7"></script>
     <script src="cookmode.js"></script>
-    <script src="shoplist.js"></script>
-    <script src="planlock.js"></script>
-    <script src="nextfood.js"></script>
-    <script src="../shared/plusmark.js"></script>
+    <script src="shoplist.js?v=b7"></script>
+    <script src="planlock.js?v=b7"></script>
+    <script src="nextfood.js?v=b7"></script>
+    <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <script src="../shared/curatorback.js"></script>

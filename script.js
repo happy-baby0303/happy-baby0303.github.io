@@ -2653,27 +2653,34 @@ function updateMainAISensors(months) {
     const txtToy = document.getElementById('main-txt-toy');
     if(!txtStroller) return;
 
-    if (months <= 6) txtStroller.innerText = "디럭스 (안전한 승차감)";
+    /* ⚠️ 큐레이터 안의 기준과 같게. 예전엔 13~15개월에 '앞보기 전환' 이라고 해서 카시트 큐레이터의
+       '15개월 전엔 반드시 뒤보기' 와 반대로 말했고, 0개월 아기에게 '초기 쌀미음' 을 권했다. */
+    if (months <= 6) txtStroller.innerText = "디럭스 (누워서 타는 시기)";
     else if (months <= 12) txtStroller.innerText = "절충형 (혼자 앉는 시기)";
     else txtStroller.innerText = "휴대용 (가벼운 외출용)";
 
-    if (months <= 12) txtCarseat.innerText = "신생아용 (뒤보기 필수)";
-    else txtCarseat.innerText = "토들러용 (앞보기 전환)";
+    if (months < 15) txtCarseat.innerText = "뒤보기 필수 (15개월까지)";
+    else txtCarseat.innerText = "토들러용 (뒤보기 오래)";
 
-    if (months <= 3) txtBottle.innerText = "신생아 (배앓이 방지)";
-    else if (months <= 5) txtBottle.innerText = "4~5개월 (젖꼭지 업)";
-    else txtBottle.innerText = "6개월+ (빨대컵 연습)";
+    if (months <= 3) txtBottle.innerText = "신생아 (배앓이 덜한 젖병)";
+    else if (months <= 5) txtBottle.innerText = "젖꼭지 단계 바꿀 때";
+    else if (months <= 8) txtBottle.innerText = "컵 처음 보여줄 때";
+    else if (months <= 11) txtBottle.innerText = "빨대컵 연습할 때";
+    else txtBottle.innerText = "젖병 졸업할 때";
 
-    if (months <= 6) txtFood.innerText = "초기 (쌀미음 스타트)";
-   else if (months <= 9) txtFood.innerText = "중기 (입자 크기 업)";
-   else if (months <= 14) txtFood.innerText = "완료기 (진밥 적응기)";
-   else txtFood.innerText = "유아식 (무염/저염 반찬 레시피)";
+    if (months < 4) txtFood.innerText = "준비기 (아직 이유식 전)";
+    else if (months <= 6) txtFood.innerText = "초기 (쌀미음부터)";
+    else if (months <= 9) txtFood.innerText = "중기 (알갱이 조금씩 크게)";
+    else if (months <= 11) txtFood.innerText = "후기 (무른 밥에 가깝게)";
+    else if (months <= 14) txtFood.innerText = "완료기 (진밥 적응기)";
+    else txtFood.innerText = "유아식 (싱겁게 반찬)";
 
    // 🧸 장난감 센서 (아기 발달 단계 세분화 완벽 적용!)
-    if (months <= 4) txtToy.innerText = "터미타임 (고개 가누기)";
-    else if (months <= 6) txtToy.innerText = "배밀기 (전신 근육 발달)";
-    else if (months <= 9) txtToy.innerText = "기어다니기 (활동 반경 확장)";
-    else if (months <= 12) txtToy.innerText = "걸음마 (잡고 일어서기)";
+    if (months < 2) txtToy.innerText = "신생아 (보고 듣는 놀이)";
+    else if (months < 4) txtToy.innerText = "터미타임 (고개 가누기)";
+    else if (months < 7) txtToy.innerText = "뒤집기 (엎드려 노는 때)";
+    else if (months < 10) txtToy.innerText = "배밀이 · 기어가기";
+    else if (months <= 12) txtToy.innerText = "잡고 서기 (걸음마 전후)";
     else txtToy.innerText = "소근육 놀이 (블록·조작북)";
 }
 
@@ -11019,7 +11026,7 @@ window.updateMyPageProfile = function() {
 
         // 대표님 화면(스크린샷)에 맞춰 텍스트 교체
         const userInfo = document.getElementById('mypage-user-info');
-        if (userInfo) userInfo.innerText = `${roleName} · 배냇함와 함께하는 중!`;
+        if (userInfo) userInfo.innerText = `${roleName} · 배냇함과 함께하는 중!`;
         
         const profileCircle = document.getElementById('mypage-profile-icon');
         if(profileCircle && typeof window.getCurrentUserProfileIcon === 'function') {

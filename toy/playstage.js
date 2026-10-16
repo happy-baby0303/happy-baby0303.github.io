@@ -170,7 +170,7 @@
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '지금은 <b>' + mo + '개월</b>이라서 <b>' + NAME[ms] + '</b> 놀이를 드리고 있어요.<br>' +
-                    '그런데 발달은 개월수로 오지 않습니다. ' +
+                    '그런데 발달은 개월수로 오지 않아요. ' +
                     '5개월에 뒤집는 아기도, 9개월에 뒤집는 아기도 있어요.</div>' +
                 '<div style="margin-top:13px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
                     'border-radius:13px; padding:15px;">' +
@@ -178,7 +178,7 @@
                         '배냇함 도감에 찍힌 도장으로 맞춰드려요</div>' +
                     '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
                         'line-height:1.75; word-break:keep-all;">' +
-                        '<b>' + esc(nm("가")) + ' 실제로 해낸 것</b>에 맞춰 놀이를 고릅니다. ' +
+                        '<b>' + esc(nm("가")) + ' 실제로 해낸 것</b>에 맞춰 놀이를 골라요. ' +
                         '안 맞는 놀이가 일곱 개 오는 일이 없어요.</div>' +
                 '</div>' +
             '</div>';
@@ -193,7 +193,7 @@
                     'line-height:1.75; word-break:keep-all;">' +
                     '배냇함 도감에 <b>뒤집기·배밀이·잡고서기</b> 도장을 찍으시면, ' +
                     '개월수 대신 그걸 보고 놀이를 골라드려요.<br>' +
-                    '지금은 <b>' + mo + '개월</b> 기준으로 <b>' + NAME[ms] + '</b> 놀이를 드리고 있습니다.</div>' +
+                    '지금은 <b>' + mo + '개월</b> 기준으로 <b>' + NAME[ms] + '</b> 놀이를 드리고 있어요.</div>' +
                 /* 한 화면에 검은 막대가 셋이라 무거웠다. 이 칸의 단추는 테두리만. */
                 '<div onclick="location.href=\'../index.html\'" ' +
                     'style="margin-top:12px; text-align:center; padding:13px; background:#FFFFFF; ' +
@@ -209,16 +209,16 @@
         var line;
         if (same) {
             line = '<b>' + NAME[st.stage] + '</b> 놀이를 드리고 있어요. ' +
-                   '도감의 <b>' + esc(MARK[st.by] || "") + '</b> 도장과 개월수가 같은 곳을 가리킵니다.';
+                   '도감의 <b>' + esc(MARK[st.by] || "") + '</b> 도장과 개월수가 같은 곳을 가리켜요.';
         } else if (faster) {
             line = '도감에 <b>' + esc(MARK[st.by] || "") + '</b> 도장이 찍혀 있어요.<br>' +
-                   '개월수로는 <b>' + NAME[ms] + '</b> 시기지만 <b>' + NAME[st.stage] + '</b> 놀이로 올렸습니다. ' +
+                   '개월수로는 <b>' + NAME[ms] + '</b> 시기지만 <b>' + NAME[st.stage] + '</b> 놀이로 올렸어요. ' +
                    esc(nm("는")) + ' 이미 하고 있으니까요.';
         } else {
             /* ⚠️ '늦었다' 는 말을 쓰지 않는다. 발달은 경쟁이 아니다. */
             line = '도감에 마지막으로 찍힌 도장 · <b>' + esc(MARK[st.by] || "") + '</b><br>' +
                    '개월수로 <b>' + NAME[ms] + '</b> 놀이를 주면 안 맞을 수 있어서 ' +
-                   '<b>' + NAME[st.stage] + '</b> 시기에 맞춰 드립니다. 지금 할 수 있는 걸 충분히 하는 게 낫습니다.';
+                   '<b>' + NAME[st.stage] + '</b> 시기에 맞춰 드려요. 지금 할 수 있는 걸 충분히 하는 게 나아요.';
         }
 
         return '<div id="' + ID + '" class="bnh-card">' +

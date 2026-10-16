@@ -54,7 +54,7 @@
     var PANE = { pick: "view-stroller-pick", use: "view-stroller-use" };
 
     var TABS = [
-        { id: "pick", label: "\uD83C\uDF7C 유모차 고르기" },
+        { id: "pick", label: "\uD83D\uDEBC 유모차 고르기" },   // 🍼 젖병 → 🚼 (위 큐레이터 탭과 같은 표시)
         { id: "use",  label: "\uD83E\uDDF0 쓰면서 챙길 것" }
     ];
 

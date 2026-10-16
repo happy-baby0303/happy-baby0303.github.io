@@ -18,7 +18,7 @@ const carseatData = [
         rotation: "yes", safety: ["isize", "adac"], price: "mid",
         bodySpec: "📏 40~105cm / ⚖️ 최대 19kg",
         specs: { adacScore: "1.8 (좋음)", reboundStopper: "컴팩트 베이스" }, // 👈 [수정됨] 최우수 -> 좋음
-        desc: "회전형 중에 많이 팔리는 제품입니다. 하단 베이스가 슬림해서 아반떼, K3 같은 준중형 차량 뒷좌석에 장착해도 앞좌석 공간이 꽤 확보됩니다.",
+        desc: "회전형 중에 많이 팔리는 제품이에요. 하단 베이스가 슬림해서 아반떼, K3 같은 준중형 차량 뒷좌석에 장착해도 앞좌석 공간이 꽤 확보돼요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGfNlAgYqi", searchKeyword: "조이 아이스핀 360"
     },
     {
@@ -27,7 +27,7 @@ const carseatData = [
         rotation: "yes", safety: ["isize", "kc"], price: "low", // 👈 [수정됨] all -> kc
         bodySpec: "📏 40~145cm / ⚖️ 12세까지",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "성장 맞춤형 이너시트" },
-        desc: "예산이 빠듯하면 좋은 선택이에요. 다만 단계별 제품만큼 각 시기에 꼭 맞지는 않습니다.",
+        desc: "예산이 빠듯하면 좋은 선택이에요. 다만 단계별 제품만큼 각 시기에 꼭 맞지는 않아요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGf7TZOCC4", searchKeyword: "순성 아크 올인원"
     },
     {
@@ -38,7 +38,7 @@ const carseatData = [
         rotation: "yes", safety: ["kc"], price: "low", // 👈 [수정됨] all -> kc
         bodySpec: "📏 신생아~160cm / ⚖️ 체중: ~36kg",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "락킹벨트 (안전벨트로도 장착)" },
-        desc: "ISOFIX가 없는 구형 차량에도 안전벨트로 달 수 있습니다. 탑테더 방식이라 카니발이나 팰리세이드 3열에도 설치하기 좋습니다.",
+        desc: "ISOFIX가 없는 구형 차량에도 안전벨트로 달 수 있어요. 탑테더 방식이라 카니발이나 팰리세이드 3열에도 설치하기 좋아요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGf9ELqdaK", searchKeyword: "폴레드 올에이지 360" 
     },
     {
@@ -47,7 +47,7 @@ const carseatData = [
         rotation: "no", safety: ["kc"], price: "high", // 👈 [수정됨] all -> kc
         bodySpec: "📏 15개월~12세 / ⚖️ 9~36kg",
         specs: { adacScore: "미참여 · 유럽 인증", reboundStopper: "V-Tether (탑테더)" },
-        desc: "바닥 지지대(레그)가 없는 탑테더 방식이라, 바닥에 수납함이 있는 카니발이나 대형 SUV 뒷좌석에 맞습니다.",
+        desc: "바닥 지지대(레그)가 없는 탑테더 방식이라, 바닥에 수납함이 있는 카니발이나 대형 SUV 뒷좌석에 맞아요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGgKssx7dY", searchKeyword: "브라이텍스 베르사픽스"
     },
     {
@@ -56,7 +56,7 @@ const carseatData = [
         rotation: "no", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 100~150cm",
         specs: { adacScore: "2.1 (좋음)", reboundStopper: "Click Assist 라이트 시스템" },
-        desc: "버클 쪽에 불이 들어와서 어두운 지하주차장에서도 아이가 혼자 안전벨트를 매기 쉽습니다.",
+        desc: "버클 쪽에 불이 들어와서 어두운 지하주차장에서도 아이가 혼자 안전벨트를 매기 쉬워요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGgISmBuSG", searchKeyword: "맥시코시 코어 프로"
     },
     {
@@ -65,7 +65,7 @@ const carseatData = [
         rotation: "no", safety: ["kc"], price: "low",
         bodySpec: "📏 신생아 전용 / ⚖️ 최대 13kg",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "3점식 안전벨트 장착" },
-        desc: "신생아용 바구니 카시트입니다. 퇴원할 때 아기를 안고 타면 안 돼서, 오래 쓸 카시트를 아직 못 골랐다면 바구니형을 먼저 준비하는 집이 많습니다.",
+        desc: "신생아용 바구니 카시트예요. 퇴원할 때 아기를 안고 타면 안 돼서, 오래 쓸 카시트를 아직 못 골랐다면 바구니형을 먼저 준비하는 집이 많아요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/gbI2WnHhcG", searchKeyword: "에어보스 바구니 카시트"
     },
     {
@@ -74,7 +74,7 @@ const carseatData = [
         rotation: "no", safety: ["kc"], price: "mid",
         bodySpec: "📏 9개월~12세 / ⚖️ 9~36kg",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "확장형 V자 프레임" },
-        desc: "국내에서 오래 팔린 주니어 카시트입니다. 아이가 클수록 어깨 골격에 맞춰 프레임이 V자로 넓어집니다.",
+        desc: "국내에서 오래 팔린 주니어 카시트예요. 아이가 클수록 어깨 골격에 맞춰 프레임이 V자로 넓어져요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/gbJfStdujQ", searchKeyword: "다이치 브이가드"
     },
     {
@@ -83,7 +83,7 @@ const carseatData = [
         rotation: "no", safety: ["kc"], price: "low",
         bodySpec: "📏 12개월~5세 / ⚖️ 9~18kg",
         specs: { adacScore: 	"미참여", reboundStopper: "백팩 폴딩 시스템" },
-        desc: "접어서 가방처럼 메고 다닐 수 있는 휴대용 카시트입니다. 여행지 렌터카나 택시를 탈 때 쓰기 좋습니다.",
+        desc: "접어서 가방처럼 메고 다닐 수 있는 휴대용 카시트예요. 여행지 렌터카나 택시를 탈 때 쓰기 좋아요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/gbI7uY934C", searchKeyword: "다이치 이지캐리2"
     },
     {
@@ -92,7 +92,7 @@ const carseatData = [
         rotation: "yes", safety: ["isize"], price: "mid",
         bodySpec: "📏 신생아~105cm / ⚖️ 18kg",
         specs: { adacScore: "미참여", reboundStopper: "친환경 밤부 모달 소재" },
-        desc: "다이치의 회전형 카시트입니다. 땀이 많은 아기를 생각해 통기성 있는 밤부 소재를 썼습니다.",
+        desc: "다이치의 회전형 카시트예요. 땀이 많은 아기를 생각해 통기성 있는 밤부 소재를 썼어요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/gbJmzhQHqC",
         searchKeyword: "다이치 블리바 360"
     },
@@ -106,7 +106,7 @@ const carseatData = [
         rotation: "yes", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 40~105cm",
         specs: { adacScore: "2.1 (좋음)", reboundStopper: "리바운드 스토퍼 (충돌 뒤 튕김을 줄임)" },
-        desc: "오래 팔린 독일 브랜드입니다. 값이 나가는 만큼 오래 쓰는 쪽에 가깝고, 정품 확인과 A/S를 생각하면 공식몰이 안전합니다.",
+        desc: "오래 팔린 독일 브랜드예요. 값이 나가는 만큼 오래 쓰는 쪽에 가깝고, 정품 확인과 A/S를 생각하면 공식몰이 안전해요.",
         purchasePlatform: "official", linkUrl: "https://brand.naver.com/safian", searchKeyword: "브라이텍스 듀얼픽스 공식몰"
     },
     {
@@ -115,7 +115,7 @@ const carseatData = [
         rotation: "no", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 100~150cm / ⚖️ 15~50kg",
         specs: { adacScore: "1.9 (좋음)", reboundStopper: "헤드레스트 각도 조절" },
-        desc: "주니어 카시트에서 자주 비교되는 제품입니다. 차에서 아이가 잠들었을 때 머리가 앞으로 쏠리는 걸 줄이도록 헤드레스트 각도를 조절할 수 있습니다.",
+        desc: "주니어 카시트에서 자주 비교되는 제품이에요. 차에서 아이가 잠들었을 때 머리가 앞으로 쏠리는 걸 줄이도록 헤드레스트 각도를 조절할 수 있어요.",
         purchasePlatform: "official", linkUrl: "https://cybex-online.com/ko-kr", searchKeyword: "싸이벡스 솔루션 T 아이픽스"
     },
     {
@@ -124,7 +124,7 @@ const carseatData = [
         rotation: "yes", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 45~87cm",
         specs: { adacScore: "1.7 (좋음)", reboundStopper: "유모차에서 평평하게 눕힘" }, // 👈 [수정됨] 최우수 -> 좋음
-        desc: "부가부, 스토케 같은 디럭스 유모차에 그대로 얹히는 바구니 카시트입니다. 차 밖에서는 요람처럼 180도 눕혀집니다.",
+        desc: "부가부, 스토케 같은 디럭스 유모차에 그대로 얹히는 바구니 카시트예요. 차 밖에서는 요람처럼 180도 눕혀져요.",
         purchasePlatform: "official", linkUrl: "https://cybex-online.com/ko-kr/car-seats/cloud-t-isize", searchKeyword: "싸이벡스 클라우드 T"
     },
     {
@@ -133,7 +133,7 @@ const carseatData = [
         rotation: "yes", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 40~105cm",
         specs: { adacScore: "2.1 (좋음)", reboundStopper: "측면 보호대 자동 펼침" },
-        desc: "네덜란드 브랜드입니다. 아이를 태우면 측면 보호대(SIP)가 자동으로 펼쳐지는 구조입니다.",
+        desc: "네덜란드 브랜드예요. 아이를 태우면 측면 보호대(SIP)가 자동으로 펼쳐지는 구조예요.",
         purchasePlatform: "official", linkUrl: "https://nunababy.com/kr", searchKeyword: "뉴나 프라임"
     },
     {
@@ -142,7 +142,7 @@ const carseatData = [
         rotation: "no", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 40~75cm",
         specs: { adacScore: "1.7 (좋음)", reboundStopper: "스토케 유모차 어댑터 프리 결합" }, // 👈 [수정됨] 최우수 -> 좋음
-        desc: "스토케 유모차를 쓰신다면 어댑터 없이 프레임에 바로 꽂힙니다.",
+        desc: "스토케 유모차를 쓰신다면 어댑터 없이 프레임에 바로 꽂혀요.",
         purchasePlatform: "official", linkUrl: "https://www.stokke.com/KOR/ko-kr/", searchKeyword: "스토케 이지고 모듈러"
     }
 ];

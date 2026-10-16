@@ -96,7 +96,7 @@
         var cur = myDepth();
         var a = window.prompt(
             "트렁크를 열고 안쪽 깊이를 재주세요.\n" +
-            "뒷좌석 등받이부터 트렁크 문까지, 가장 긴 쪽입니다. (cm, 숫자만)",
+            "뒷좌석 등받이부터 트렁크 문까지, 가장 긴 쪽이에요. (cm, 숫자만)",
             cur === null ? "" : String(cur));
         if (a === null) return;
         var v = parseFloat(String(a).replace(/[^0-9.]/g, ""));
@@ -204,17 +204,17 @@
                 tone = GREEN; bg = "#EAF7F1"; bd = "#A7DFC8";
                 head = "들어갈 것 같아요";
                 body = '<b>' + esc(r.car.name) + '</b> 트렁크에 <b>' + esc(st.name) + '</b>.<br>' +
-                       '깊이로 <b>' + r.depthLeft + 'cm</b>, 높이로 <b>' + r.heightLeft + 'cm</b> 남습니다.';
+                       '깊이로 <b>' + r.depthLeft + 'cm</b>, 높이로 <b>' + r.heightLeft + 'cm</b> 남아요.';
             } else if (r.kind === "tight") {
                 tone = GOLD; bg = "#FFF9E6"; bd = "#FDE68A";
-                head = "빠듯합니다";
+                head = "빠듯해요";
                 body = '<b>' + esc(r.car.name) + '</b>에 <b>' + esc(st.name) + '</b>' + pp(st.name, "은/는") + ' ' +
                        '깊이 <b>' + r.depthLeft + 'cm</b> · 높이 <b>' + r.heightLeft + 'cm</b> 여유뿐이에요.<br>' +
-                       '들어가도 <b>다른 짐은 못 넣습니다.</b> 장 보는 날은 뒷좌석을 비워두세요.';
+                       '들어가도 <b>다른 짐은 못 넣어요.</b> 장 보는 날은 뒷좌석을 비워두세요.';
             } else {
                 tone = RED; bg = "#FFF2F2"; bd = "#FCA5A5";
-                head = "이 차엔 어렵습니다";
-                body = '<b>' + esc(st.name) + '</b> 접은 크기가 <b>' + esc(r.car.name) + '</b> 트렁크보다 큽니다.<br>' +
+                head = "이 차엔 어려워요";
+                body = '<b>' + esc(st.name) + '</b> 접은 크기가 <b>' + esc(r.car.name) + '</b> 트렁크보다 커요.<br>' +
                        '뒷좌석을 접거나, 나들이용 가벼운 유모차를 따로 두는 쪽이 현실적이에요.';
             }
 
@@ -223,7 +223,7 @@
             if (hardFold && r.kind !== "no") {
                 body += '<br><br><span style="color:' + GOLD + ';">⚠️ 이 제품은 <b>' +
                         esc(st.specs.folding) + '</b> 이에요. ' +
-                        '치수는 맞아도 매번 시트를 빼야 합니다.</span>';
+                        '치수는 맞아도 매번 시트를 빼야 해요.</span>';
             }
 
             body = '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
@@ -238,8 +238,8 @@
                         : '<div style="margin-top:12px; padding:13px 14px; background:#FFF9E6; ' +
                           'border:1px solid #FDE68A; border-radius:12px; font-size:11.5px; ' +
                           'font-weight:700; color:' + GOLD + '; line-height:1.75; word-break:keep-all;">' +
-                          '⚠️ 이 트렁크 치수는 <b>저희가 모은 추정값</b>이에요. 제조사 공식 제원이 아닙니다.<br>' +
-                          '연식·트림·스페어타이어에 따라 달라서, <b>줄자로 한 번 재면 훨씬 정확합니다.</b><br>' +
+                          '⚠️ 이 트렁크 치수는 <b>배냇함이 모은 추정값</b>이에요. 제조사 공식 제원이 아니에요.<br>' +
+                          '연식·트림·스페어타이어에 따라 달라서, <b>줄자로 한 번 재면 훨씬 정확해요.</b><br>' +
                           '<span onclick="window.setTrunkDepth()" style="display:inline-block; margin-top:9px; ' +
                           'padding:10px 14px; background:' + DARK + '; color:#FFFFFF; border-radius:10px; ' +
                           'font-weight:900; cursor:pointer;">우리 차 깊이 직접 재서 넣기</span></div>') +

@@ -180,7 +180,7 @@
 
     window.appErrorText = function () {
         var list = load();
-        if (!list.length) return "문제 기록이 없습니다.";
+        if (!list.length) return "문제 기록이 없어요.";
         return "배냇함 문제 기록 " + list.length + "건\n" +
             "(" + new Date().toLocaleString() + " 기준)\n\n" +
             list.map(function (x) {
@@ -218,7 +218,7 @@
                 '<div style="font-size:14px; font-weight:900; color:var(--text-m);">문제 기록 ' + n + '건</div>' +
                 '<div style="font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:2px; ' +
                     'word-break:keep-all; line-height:1.55;">' +
-                    '화면이 비거나 이상했던 순간이 적혀 있어요. 눌러서 복사한 뒤 보내주시면 고치는 데 큰 도움이 됩니다.</div>' +
+                    '화면이 비거나 이상했던 순간이 적혀 있어요. 눌러서 복사한 뒤 보내주시면 고치는 데 큰 도움이 돼요.</div>' +
             '</div>' +
             '<div onclick="event.stopPropagation(); window.clearAppErrors()" ' +
                 'style="flex-shrink:0; font-size:11.5px; font-weight:800; color:var(--text-sub); ' +

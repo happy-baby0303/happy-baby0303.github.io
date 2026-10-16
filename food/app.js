@@ -77,11 +77,12 @@ function toggleFavView() {
     const btn = document.getElementById('btn-show-fav');
     
     // 보관함 모드일 때 매트릭스와 검색창 숨기기
-    const matrixPanel = document.querySelector('.matrix-panel');
+    // ⚠️ 첫 번째 matrix-panel 은 미음 카드다. 찜 보기에서 숨길 건 '안심 식단 고르기' 칸
+    const matrixPanel = document.getElementById('food-filter-panel') || document.querySelector('.matrix-panel');
     const searchBox = document.querySelector('.search-box');
 
     if (isFavViewMode) {
-        btn.innerHTML = '🔙 이유식 매칭 화면으로 돌아가기';
+        btn.innerHTML = '← 추천 식단으로 돌아가기';
         btn.style.background = '#F6F2EC';
         btn.style.color = '#7A6F68';
         btn.style.borderColor = '#DCD3C8';
@@ -104,7 +105,7 @@ function renderFavorites() {
     const favorites = JSON.parse(localStorage.getItem('favFoods')) || [];
 
     if (favorites.length === 0) {
-        resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">💔</div><div class="empty-text"><b>아직 찜한 식단이 없어요</b><span>마음에 드는 레시피에 하트(❤️)를 눌러보세요.</span></div></div>`;
+        resultArea.innerHTML = `<div class="premium-empty-state"><div class="empty-icon">🤍</div><div class="empty-text"><b>아직 찜한 식단이 없어요</b><span>마음에 드는 레시피에서 찜하기를 눌러 보세요.</span></div></div>`;
         return;
     }
 
@@ -402,7 +403,7 @@ function generateCardHTML(item) {
                 </ul>
             </div>
 
-            <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="display:block; width:100%; background:#FEE500; border:none; color:#191919; padding:16px; border-radius:14px; font-weight:900; font-size:15px; text-align:center; transition:0.2s; cursor:pointer; box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);">
+            <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="display:block; width:100%; background:#FFFFFF; border:1px solid #EDE6DE; color:#7A6F68; padding:15px; border-radius:14px; font-weight:800; font-size:14.5px; text-align:center; transition:0.2s; cursor:pointer;">
                 여보한테 장볼 거 보내기
             </button>
         </div>
@@ -551,7 +552,7 @@ function runFoodEngine() {
         let top3Results = filtered.slice(0, 3); 
         let otherResults = filtered.slice(3); 
 
-        let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">✨ 오늘의 추천 식단 TOP ${top3Results.length}</div>`;
+        let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">추천 식단 ${top3Results.length}가지</div>`;
         htmlOutput += top3Results.map(item => generateCardHTML(item)).join('');
 
         if (otherResults.length > 0) {
@@ -560,7 +561,7 @@ function runFoodEngine() {
                     나머지 ${otherResults.length}개 레시피 더보기 ▾
                 </button>
                 <div id="food-other-area" style="display:none; flex-direction: column;">
-                    <div style="font-size: 14px; font-weight: 800; color: #A3958A; margin-bottom: 16px;">🔍 추가 매칭 리스트</div>
+                    <div style="font-size: 14px; font-weight: 800; color: #A3958A; margin-bottom: 16px;">다른 레시피</div>
                     ${otherResults.map(item => generateCardHTML(item)).join('')}
                 </div>
             `;
@@ -574,7 +575,7 @@ function runFoodEngine() {
               사용자가 '필터를 직접 바꿨을 때' 만 올려준다. */
         if (window.__foodUserFiltered) {
             window.__foodUserFiltered = false;
-            var mp = document.querySelector('.matrix-panel');
+            var mp = document.getElementById('food-filter-panel') || document.querySelector('.matrix-panel');   // 미음 카드로 올라가던 것
             if (mp) mp.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
@@ -743,8 +744,8 @@ function renderCalendar() {
     // 월간 요약 대시보드 업데이트
     const sumPass = document.getElementById('sum-pass');
     const sumFail = document.getElementById('sum-fail');
-    if(sumPass) sumPass.innerText = `🟢 ${monthPass}개`;
-    if(sumFail) sumFail.innerText = `🚨 ${monthFail}개`;
+    if(sumPass) sumPass.innerText = `통과 ${monthPass}`;
+    if(sumFail) sumFail.innerText = `이상 ${monthFail}`;
 
     renderSelectedDateRecords();
 }
@@ -1156,9 +1157,23 @@ function setAllergyStatus(status) {
 let editingDate = null;
 let editingIndex = -1;
 
+/* 기록 창 제목: 고른 날이 오늘이면 '오늘', 아니면 '10월 15일' */
+function foodDayWord(dateStr) {
+    const t = new Date();
+    const tk = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    if (!dateStr || dateStr === tk) return '오늘';
+    const p = String(dateStr).split('-').map(Number);
+    return p.length === 3 ? `${p[1]}월 ${p[2]}일` : '오늘';
+}
+function setMealSheetTitle(dateStr) {
+    const h = document.getElementById('meal-sheet-title');
+    if (h) h.textContent = `🍲 ${foodDayWord(dateStr)} 식단 기록`;
+}
+
 function openMealSheet() {
     editingDate = null;
     editingIndex = -1;
+    setMealSheetTitle(selectedDateStr);
     document.getElementById('meal-bottom-sheet').style.display = 'flex';
     document.getElementById('meal-menu-input').value = '';
     document.getElementById('meal-amount-input').value = '';
@@ -1169,6 +1184,7 @@ function openMealSheet() {
 window.openMealSheetForUpdate = function(dateStr, index, menuName) {
     editingDate = dateStr;
     editingIndex = index;
+    setMealSheetTitle(dateStr);
     document.getElementById('meal-bottom-sheet').style.display = 'flex';
     document.getElementById('meal-menu-input').value = menuName;
     document.getElementById('meal-amount-input').value = '';
@@ -1176,6 +1192,8 @@ window.openMealSheetForUpdate = function(dateStr, index, menuName) {
 };
 
 function openTestSheet() {
+    const lb = document.getElementById('test-sheet-label');
+    if (lb) lb.textContent = `${foodDayWord(selectedDateStr)} 처음 먹여본 재료 (1개만)`;
     document.getElementById('test-bottom-sheet').style.display = 'flex';
     document.getElementById('test-ing-input').value = '';
     setAllergyStatus('pass');
@@ -1195,7 +1213,7 @@ function saveMealRecord() {
     
     if (!menu) return alert('메뉴 이름을 적어 주세요 (예: 소고기 미음)');
 
-    const finalAmount = amount ? `${amount}ml` : '양 모름';
+    const finalAmount = amount ? `${amount}g` : '양 모름';
     const timeStr = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'});
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
 
@@ -1224,7 +1242,7 @@ function saveMealRecord() {
 
 function saveTestRecord() {
     const ingredient = document.getElementById('test-ing-input').value.trim();
-    if (!ingredient) return alert('처음 먹여 본 재료를 적어 주세요');
+    if (!ingredient) return alert('처음 먹여본 재료를 적어 주세요');
 
     saveToCalendarDB({ type: 'test', ingredient, status: currentAllergyStatus });
     closeSheets();
@@ -1482,18 +1500,21 @@ window.skipDeduction = function() {
 };
 
 // ==========================================
-// 📸 달력 이미지로 저장 (view-calendar 전체를 찍는다)
+// 📸 달력 이미지로 저장 (달력 카드를 찍는다)
+// ⚠️ 탭을 셋으로 나눈 뒤 'view-calendar' 는 빈 이름표만 남았다. 그걸 찍어서 빈 그림이 나왔다.
+//    앱(플레이)에서는 native.js 가 a.download 를 가로채 사진첩에 저장한다.
 // ==========================================
 window.downloadCalendarImage = function() {
     // 1. 찰칵! 소리와 함께 캡처 중이라는 걸 보여줍니다.
-    const btn = event.currentTarget;
+    const btn = (window.event && window.event.currentTarget) || document.querySelector('[onclick^="downloadCalendarImage"]');
     const originalText = btn.innerHTML;
+    const originalCss = btn.style.cssText;
     btn.innerHTML = '이미지 만드는 중…';
     btn.style.background = '#A3958A';
     btn.disabled = true;
 
     // 2. 캡처할 타겟: 캘린더 전체 화면!
-    const targetEl = document.getElementById('view-calendar');
+    const targetEl = document.getElementById('food-cal-card');
 
     // 3. 카메라(html2canvas) 작동!
     html2canvas(targetEl, {
@@ -1503,28 +1524,29 @@ window.downloadCalendarImage = function() {
     }).then(canvas => {
         // ✨ 마케팅 핵심: 캡처된 사진 우측 하단에 '워터마크' 강제 삽입!
         const ctx = canvas.getContext('2d');
-        ctx.font = "900 24px 'Malgun Gothic', sans-serif";
+        ctx.setTransform(1, 0, 0, 1, 0, 0);   // ⚠️ html2canvas 가 남긴 확대 · 이동 때문에 글씨가 그림 밖에 찍혀 안 보였다
+        ctx.font = "800 22px Pretendard, 'Malgun Gothic', sans-serif";
         ctx.fillStyle = "#A3958A";
         ctx.textAlign = "right";
-        ctx.fillText("✨ Designed by 배냇함", canvas.width - 30, canvas.height - 30);
+        ctx.fillText("배냇함", canvas.width - 28, canvas.height - 22);
 
         // 4. 이미지 다운로드 실행
         const link = document.createElement('a');
-        link.download = `배냇함_우리아기_식단표_${new Date().getTime()}.png`;
+        link.download = `배냇함_이유식달력_${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
         // 5. 버튼 원상복구
         btn.innerHTML = originalText;
-        btn.style.background = '#4A413C';
+        btn.style.cssText = originalCss;
         btn.disabled = false;
         
-        setTimeout(() => { alert("📸 식단표 그림을 저장했어요"); }, 300);
+        setTimeout(() => { alert("이유식 달력을 그림으로 저장했어요"); }, 300);
     }).catch(err => {
         console.error("캡처 실패:", err);
         alert("그림을 저장하지 못했어요. 잠시 뒤 다시 해 주세요");
         btn.innerHTML = originalText;
-        btn.style.background = '#4A413C';
+        btn.style.cssText = originalCss;
         btn.disabled = false;
     });
 };
@@ -1580,7 +1602,7 @@ function calcBabyFoodWater() {
     const weightVal = document.getElementById('food-base-weight').value;
 
     if (!weightVal || parseFloat(weightVal) <= 0) {
-        alert("넣을 베이스 재료 무게를 숫자로 적어 주세요");
+        alert("넣을 쌀 무게를 숫자로 적어 주세요");
         return;
     }
 
@@ -1610,14 +1632,14 @@ function calcBabyFoodWater() {
     
     let portionTip = meals > 0 
         ? `(우리 아기 1끼 ${mealSize}g 기준 <b>약 ${meals}끼</b>${rest >= 20 ? `하고 ${rest}g 남는` : ''} 분량)` 
-        : `(아직 한 끼 분량(${mealSize}g)이 안 돼요 재료를 조금 더 늘려볼까요?)`;
+        : `(아직 한 끼(${mealSize}g)가 안 돼요. 쌀을 조금 늘려 보세요)`;
 
     document.getElementById('res-cube-info').innerHTML = portionTip;
 
     const isCalib = !!localStorage.getItem('tosil_food_yield');
     const statusEl = document.getElementById('food-calib-status');
     if (statusEl) {
-        statusEl.innerHTML = isCalib ? `✅ 우리 집 화력에 맞춘 회수율(<b>${Math.round(rate * 100)}%</b>) 적용 중` : '';
+        statusEl.innerHTML = isCalib ? `우리 집 냄비에 맞춰 계산했어요 (끓이면 <b>${Math.round(rate * 100)}%</b>가 남아요)` : '';
     }
 
     document.getElementById('food-calc-result').style.display = 'block';
@@ -1632,7 +1654,7 @@ function saveEvapCalibration() {
 
     if (!actual || actual <= 0 || !waterG || !weight) {
         statusEl.style.color = '#E32636';
-        statusEl.innerText = '⚠️ 저울로 잰 완성 무게를 숫자로 입력해주세요.';
+        statusEl.innerText = '저울로 잰 완성 무게를 숫자로 적어 주세요';
         return;
     }
 
@@ -1641,12 +1663,12 @@ function saveEvapCalibration() {
 
     if (rate > 1) {
         statusEl.style.color = '#E32636';
-        statusEl.innerText = '⚠️ 투입량보다 많이 나왔어요. 용기 무게를 빼셨나요?';
+        statusEl.innerText = '넣은 양보다 많이 나왔어요. 그릇 무게를 빼셨나요?';
         return;
     }
     if (rate < 0.4) {
         statusEl.style.color = '#E32636';
-        statusEl.innerText = '⚠️ 절반 이상이 날아갔어요. 불이 너무 셌거나 계량 오류일 수 있어요';
+        statusEl.innerText = '절반 넘게 줄었어요. 불이 셌거나 잘못 잰 것 같아요';
         return;
     }
 
@@ -1713,7 +1735,7 @@ function calcReverseFood() {
         brothTip = `<div style="margin-top:8px; font-size:11.5px; color:#7A6F68; background:#FFF; padding:8px; border-radius:8px; border:1px solid #D5D1F4; box-shadow:0 2px 4px rgba(127, 119, 221,0.05);">🍲 <b>육수 큐브(30ml) 1개</b>를 쓰신다면 맹물은 <b>${realisticWaterG - 30}ml</b>만 부어주세요</div>`;
     }
 
-    noteEl.innerHTML = `💡 젖병 눈금에 맞춘 <b>현실 레시피</b>예요<br>이렇게 끓이면 약 <b>${finalYieldG.toLocaleString()}g</b> 정도 완성돼요.${brothTip}`;
+    noteEl.innerHTML = `💡 젖병 눈금에 맞춰 반올림했어요<br>이렇게 끓이면 약 <b>${finalYieldG.toLocaleString()}g</b> 정도 완성돼요.${brothTip}`;
 }
 
 // ==========================================
@@ -1764,7 +1786,32 @@ window.generatePremiumMealPlan = function() {
     let recipePool = shuffle(safeValidRecipes);
 
     let weeklyPlan = [];
-    const days = ['월', '화', '수', '목', '금', '토', '일'];
+    /* 시작하는 날: 오늘. 지금 지켜보는 새 재료가 있으면(사흘이 안 지났으면) 사흘을 채운 다음 날부터.
+       ⚠️ 예전엔 카드 요일을 '월~일' 로 박아 두고 달력에는 '오늘부터' 넣었다.
+          금요일에 짜면 카드는 '월요일' 인데 달력엔 금요일로 갔고,
+          애호박을 지켜보는 중인데 첫날부터 새 재료를 또 넣었다. */
+    const planWait = (function () {
+        const t = new Date(); t.setHours(0, 0, 0, 0);
+        let lastDay = '', last = null;
+        Object.keys(calendarData).forEach(day => {
+            (calendarData[day] || []).forEach(r => {
+                if (!r || r.type !== 'test' || !r.ingredient || r.past) return;
+                if (day > lastDay) { lastDay = day; last = r; }
+                else if (day === lastDay && r.status === 'fail') last = r;
+            });
+        });
+        if (last && last.status !== 'fail') {
+            const p = lastDay.split('-').map(Number);
+            const free = new Date(p[0], p[1] - 1, p[2]); free.setHours(0, 0, 0, 0);
+            free.setDate(free.getDate() + 3);
+            if (free > t) return { start: free, name: String(last.ingredient).trim() };
+        }
+        return { start: t, name: '' };
+    })();
+    window.currentPlanStart = planWait.start;
+    window.currentPlanWait = planWait.name;
+    const WEEK_KO = ['일', '월', '화', '수', '목', '금', '토'];
+    const days = [0, 1, 2, 3, 4, 5, 6].map(i => WEEK_KO[(planWait.start.getDay() + i) % 7]);
     let lastRecipe = null;
 
     /* ==========================================================
@@ -1908,8 +1955,8 @@ window.renderAutoPilotUI = function() {
 
     container.innerHTML = `
         <div style="text-align:center; padding: 60px 20px; background:#FBF8F3; border-radius:16px; border:1px solid #EDE6DE;">
-            <div style="color:#4A413C; font-weight:900; font-size:16px; margin-bottom:8px;">우리아기 식단 설계 중...</div>
-            <div style="color:#A3958A; font-weight:600; font-size:13.5px;">아기의 취향과 알레르기 데이터를 분석하고 있습니다.</div>
+            <div style="color:#4A413C; font-weight:900; font-size:16px; margin-bottom:8px;">7일 식단표를 짜고 있어요</div>
+            <div style="color:#A3958A; font-weight:600; font-size:13.5px;">먹여본 재료와 알레르기 기록을 보고 있어요</div>
         </div>
     `;
     
@@ -1932,7 +1979,7 @@ window.applyPlanToCalendar = function() {
     if (!plan || plan.length === 0) return alert("먼저 식단표를 만들어 주세요");
 
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
-    let today = new Date();
+    let today = window.currentPlanStart ? new Date(window.currentPlanStart) : new Date();
 
     plan.forEach((day, index) => {
         // 오늘부터 7일간의 날짜를 계산
@@ -1941,6 +1988,8 @@ window.applyPlanToCalendar = function() {
         let dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
 
         if (!records[dateStr]) records[dateStr] = [];
+        // 다시 눌러도 같은 날에 '계획됨' 이 두 줄 생기지 않게 (예전 계획은 새 계획으로 바꾼다)
+        records[dateStr] = records[dateStr].filter(r => !(r && r.type === 'meal' && String(r.amount || '').indexOf('계획됨') > -1));
         
         // 캘린더에 식단 꽂아넣기
         records[dateStr].push({ 
@@ -1955,12 +2004,36 @@ window.applyPlanToCalendar = function() {
     localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
     renderCalendar(); // 달력 새로고침
     
-    alert("오늘부터 7일 식단을 달력에 넣었어요.");
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    const s0 = new Date(today); s0.setHours(0, 0, 0, 0);
+    alert((s0 > t0 ? `${s0.getMonth() + 1}월 ${s0.getDate()}일부터` : '오늘부터') + ' 7일 식단을 달력에 넣었어요.');
     // 달력 위치로 스크롤 부드럽게 이동
     document.getElementById('cal-month-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
 // 💡 화면 렌더링 독립 함수 (UI 밸런스 복구 및 공간 최적화)
+/* 카드 머리의 날짜 ('10월 19일') — 식단표가 시작하는 날부터 */
+function planDateLabel(index) {
+    const s = window.currentPlanStart ? new Date(window.currentPlanStart) : new Date();
+    s.setDate(s.getDate() + index);
+    return `${s.getMonth() + 1}월 ${s.getDate()}일`;
+}
+/* 카드의 한 줄 설명: 새 재료는 사흘을 한 덩어리로 넣으니 '첫날 · 2일째 · 3일째' 를 보여 준다
+   (예전엔 사흘 내내 '새 알레르기 테스트' 라서 매일 새 재료를 주는 것처럼 보였다) */
+function planTypeLabel(day) {
+    const t = String(day.type || '');
+    if (t === '안전 밸런스 식단') return '먹어 본 재료로';
+    if (t === '이미 먹어본 재료') return '먹어 본 재료로';
+    if (t === '냉장고 재고 소진') return '냉장고 재료 먼저';
+    if (t === '변경됨') return '바꾼 메뉴';
+    if (t.indexOf('테스트') > -1) {
+        const st = String(day.testStage || '').split(' · ');
+        const nf = Array.isArray(day.newFoods) && day.newFoods.length ? day.newFoods : (st[0] === '첫날' && st[1] ? [st[1]] : []);
+        const who = nf.length === 1 ? nf[0] : nf.length > 1 ? `새 재료 ${nf.length}가지` : '새 재료';
+        return st[0] ? `${who} ${st[0]}` : who;
+    }
+    return t;
+}
 // 💡 화면 렌더링 독립 함수 (철분 파란색 변경, 중복 뱃지 삭제, 터치 장바구니 탑재!)
 window.drawAutoPilotUI = function(highlightIndex = -1) {
     const container = document.getElementById('autopilot-result-container');
@@ -1998,8 +2071,9 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
 
                       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; padding: 0 4px;">
             <div style="flex: 1; min-width: 0;">
-                <div style="font-size: 13px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;">이번 주 맞춤형 식단</div>
+                <div style="font-size: 13px; font-weight: 800; color: #7F77DD; margin-bottom: 4px;">${planDateLabel(0)} ~ ${planDateLabel(6)}</div>
                 <div data-plus-head style="font-size: 18px; font-weight: 900; color: #4A413C; letter-spacing: -0.5px;">우리 아기 7일 식단표</div>
+                ${window.currentPlanWait ? `<div style="font-size: 12px; font-weight: 700; color: #8A6D00; margin-top: 6px; word-break: keep-all;">${window.currentPlanWait} 지켜보는 중이라 ${planDateLabel(0)}부터 짰어요</div>` : ''}
             </div>
         </div>
         
@@ -2047,7 +2121,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
             <div class="${cardClass}" onclick="openCookingMode('${day.recipe.name}')" style="cursor: pointer; min-width: 170px; max-width: 170px; height: 210px; background: ${bg}; border: 1px solid ${border}; border-radius: 20px; padding: 20px; scroll-snap-align: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
                 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
-                    <div style="font-size: 13px; font-weight: 900; color: #A3958A;">Day ${index + 1}</div>
+                    <div style="font-size: 13px; font-weight: 900; color: #A3958A;">${planDateLabel(index)}</div>
                     <button onclick="event.stopPropagation(); swapDailyRecipe(${index})" style="font-size: 11.5px; font-weight: 800; color: #7A6F68; background: #FFFFFF; border:1px solid #DCD3C8; padding: 4px 10px; border-radius: 8px; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
                         교체
                     </button>
@@ -2059,7 +2133,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
                 </div>
                 
                 <div style="display: inline-block; align-self: flex-start; color: ${badgeColor}; font-size: 11px; font-weight: 800; margin-bottom: 12px;">
-                    ${day.type === '안전 밸런스 식단' ? '• 안전 식단' : `• ${day.type}`}
+                    • ${planTypeLabel(day)}
                 </div>
                 
                 <div style="flex: 1; display: flex; align-items: flex-start;">
@@ -2079,7 +2153,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
 
     html += `
         <button onclick="applyPlanToCalendar()" style="width: 100%; background: #4A413C; color: #FFF; border: none; padding: 16px; border-radius: 14px; font-size: 15.5px; font-weight: 900; margin-bottom: 24px; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition: 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <span style="font-size:18px;">✅</span> 이 식단표를 내 달력에 자동 등록하기
+            이 식단표를 달력에 넣기
         </button>
     `;
 
@@ -2089,27 +2163,27 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
     let weightCnt = plan.filter(p => p.recipe.goal === 'weight').length;
     
     // 기본값 세팅
-    let reportTitle = "골고루 균형 잡힌 영양 식단";
+    let reportTitle = "골고루 먹는 식단";   // 광고 문구 같던 제목을 짧은 말로
     let reportColor = "#059669"; let reportBg = "#ECFDF5";
     
     // 가장 많이 포함된 식단에 맞춰 타이틀과 테마 색상 자동 변경! (철분은 파란색으로 통일)
-    if (ironCnt >= 3) { reportTitle = "소고기 듬뿍 철분 집중 보충 식단"; reportColor = "#7F77DD"; reportBg = "#F2F0FC"; } 
-    else if (weightCnt >= 3) { reportTitle = "포만감 든든 체중 증량 식단"; reportColor = "#059669"; reportBg = "#ECFDF5"; }
-    else if (poopCnt >= 3) { reportTitle = "속이 편안한 황금똥 식단"; reportColor = "#B45309"; reportBg = "#FFF9E6"; }
+    if (ironCnt >= 3) { reportTitle = "철분 챙기는 식단"; reportColor = "#7F77DD"; reportBg = "#F2F0FC"; } 
+    else if (weightCnt >= 3) { reportTitle = "든든하게 살 오르는 식단"; reportColor = "#059669"; reportBg = "#ECFDF5"; }
+    else if (poopCnt >= 3) { reportTitle = "응가 편한 식단"; reportColor = "#B45309"; reportBg = "#FFF9E6"; }
 
     // 아코디언(details)으로 깔끔하게 접어두면서, 누르면 상세 횟수가 나오도록!
     html += `
         <details style="background: #FFFFFF; border: 1px solid #EDE6DE; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
             <summary style="padding: 16px 20px; font-size: 14px; font-weight: 800; color: #4A413C; cursor: pointer; display: flex; justify-content: space-between; align-items: center; outline:none;">
-                               <div data-plus-head style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📊</span> 주간 영양 분석 리포트</div>
-                <span class="arrow" style="font-size: 12px; color: #A3958A; transition:0.3s;">▼</span>
+                               <div data-plus-head style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📊</span> 이번 주 영양</div>
+                <span class="arrow" style="color: #A3958A; display: inline-flex; transition: 0.3s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
             </summary>
             <div style="padding: 0 20px 20px; border-top: 1px dashed #EDE6DE; margin-top: 4px; padding-top: 16px;">
                 <div style="font-size: 14.5px; font-weight: 800; color: ${reportColor}; line-height: 1.4; margin-bottom: 8px;">
-                    이번 주는 [${reportTitle}]으로 설계되었어요
+                    이번 주는 ${reportTitle}이에요
                 </div>
                 <div style="font-size: 13px; font-weight: 600; color: #7A6F68;">
-                    철분 특화 ${ironCnt}회 · 소화/배변 ${poopCnt}회 · 체중/골격 ${weightCnt}회
+                    철분 챙기기 ${ironCnt}번 · 응가 돕기 ${poopCnt}번 · 체중 늘리기 ${weightCnt}번
                 </div>
             </div>
         </details>
@@ -2119,7 +2193,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
         <details style="background: #FFFFFF; border: 1px solid #EDE6DE; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
             <summary style="padding: 16px 20px; font-size: 14px; font-weight: 800; color: #4A413C; cursor: pointer; display: flex; justify-content: space-between; align-items: center; outline:none;">
                <div data-plus-head style="display:flex; align-items:center; gap:8px;"><span style="font-size:16px;">📋</span> 일주일 식단표 한눈에 보기</div>
-                <span class="arrow" style="font-size: 12px; color: #A3958A; transition:0.3s;">▼</span>
+                <span class="arrow" style="color: #A3958A; display: inline-flex; transition: 0.3s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
             </summary>
             <div style="padding: 0 20px 20px; border-top: 1px dashed #EDE6DE; margin-top: 4px; padding-top: 12px;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; text-align: left;">
@@ -2142,13 +2216,13 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
     const missingCount = missingIngredients.length;
     const missingTagsHtml = missingCount > 0 
         ? missingIngredients.map(ing => `<span class="shop-tag" onclick="this.classList.toggle('checked')">${ing}</span>`).join('')
-        : '<div style="color:#4ADE80; font-size:14px; font-weight:800; text-align:center; padding:10px 0;">필요한 재료가 냉장고에 모두 있습니다 🎉</div>';
+        : '<div style="color:#4ADE80; font-size:14px; font-weight:800; text-align:center; padding:10px 0;">필요한 재료가 냉장고에 모두 있어요 🎉</div>';
 
     html += `
         <div style="background: #4A413C; border-radius: 16px; padding: 24px; text-align: left; box-shadow: 0 4px 16px rgba(0,0,0,0.05); position: relative; overflow: hidden; margin-bottom: 32px;">
             <div style="font-size: 12px; font-weight: 900; color: #7F77DD; margin-bottom: 8px;">스마트 장보기 비서</div>
             <div style="font-size: 15.5px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px; line-height:1.4;">
-                이번 주 식단을 완성하려면<br><span style="color:#4ADE80;">총 ${missingCount}개의 식재료</span>가 부족합니다.
+                이번 주 식단을 완성하려면<br><span style="color:#4ADE80;">총 ${missingCount}개의 식재료</span>가 부족해요.
             </div>
             <div style="font-size: 12px; color: #A3958A; font-weight: 600; margin-bottom: 20px;">
                 💡 장 보실 때 재료를 터치해서 하나씩 지워보세요

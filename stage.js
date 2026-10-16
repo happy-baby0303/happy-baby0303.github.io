@@ -646,7 +646,7 @@
     window.openWipeSheet = function () {
         sheet('<div class="pg-serif" style="font-size:20px;font-weight:700;color:#3B322C;margin-bottom:10px;">임신 · 준비 기록을 모두 지울까요?</div>' +
             '<div style="font-size:13.5px;font-weight:600;color:var(--text-sub);line-height:1.85;word-break:keep-all;">' +
-                '예정일, 주기, 체온, 증상 · 체중 · 태동, 문답, 신청 체크, 가족 소식 페이지가 지워져요. 남편 폰에서도 지워지고, 되돌릴 수 없어요.<br>' +
+                '예정일, 주기, 체온, 증상 · 체중 · 태동, 문답, 신청 체크, 가족 소식 페이지가 지워져요. 짝꿍 폰에서도 지워지고, 되돌릴 수 없어요.<br>' +
                 '배냇함에 담은 사진 · 소리 · 편지는 그대로 남아요.</div>' +
             primary("모두 지우기", "window.confirmWipe()") +
             '<div onclick="document.getElementById(\'stage-sheet\').remove()" style="text-align:center;padding:14px;font-size:13.5px;font-weight:800;color:var(--text-sub);cursor:pointer;">취소</div>');

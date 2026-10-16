@@ -170,7 +170,7 @@
             '</div>' +
             '<div style="margin-top:6px; font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '목록에 없으면 아래 칸에 이름만 적어주셔도 됩니다.</div>' +
+                '목록에 없으면 아래 칸에 이름만 적어주셔도 돼요.</div>' +
 
             '<div style="margin-top:20px; display:flex; flex-direction:column; gap:7px;">' +
                 seats().map(function (s) {
@@ -197,7 +197,7 @@
 
             '<div onclick="window.closeSeatSheet()" style="margin-top:22px; text-align:center; ' +
                 'padding:15px; background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
-                'font-size:14.5px; font-weight:900; cursor:pointer;">다 됐습니다</div>' +
+                'font-size:14.5px; font-weight:900; cursor:pointer;">다 됐어요</div>' +
         '</div>';
     }
 
@@ -231,7 +231,7 @@
                 '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                     'word-break:keep-all;">' +
                     '두꺼운 외투를 입은 채 채우면, 충돌 순간 옷이 납작해지면서 ' +
-                    '<b>하네스가 그만큼 헐거워집니다.</b> 벗겨서 태우고 <b>담요를 위에 덮어</b> 주세요. ' +
+                    '<b>하네스가 그만큼 헐거워져요.</b> 벗겨서 태우고 <b>담요를 위에 덮어</b> 주세요. ' +
                     '차 안이 따뜻해지면 담요만 걷으면 되고요.</div>' +
             '</div>';
         }
@@ -244,7 +244,7 @@
                     '\u2600\uFE0F 여름이에요 \u00b7 쿨시트는 순정부터</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                     'word-break:keep-all;">' +
-                    '두꺼운 패드는 겨울 패딩과 <b>같은 이유로</b> 하네스를 헐겁게 만듭니다. ' +
+                    '두꺼운 패드는 겨울 패딩과 <b>같은 이유로</b> 하네스를 헐겁게 만들어요. ' +
                     '아래 <b>쿨시트 사기 전에</b> 카드를 먼저 보세요. ' +
                     '<a href="https://www.google.com/search?q=' + encodeURIComponent(q) + '" ' +
                     'target="_blank" rel="noopener" style="color:#6A61CE; font-weight:800;">' +
@@ -281,11 +281,11 @@
             return '<div style="margin-top:16px; background:#EAF7F1; border:1px solid #A7DFC8; ' +
                 'border-radius:14px; padding:15px 16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:#1F6F52;">' +
-                    '\u2705 다음 카시트는 안 사셔도 됩니다</div>' +
+                    '\u2705 다음 카시트는 안 사셔도 돼요</div>' +
                 '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '쓰고 계신 게 주니어까지 되는 제품이에요. ' +
-                    '헤드레스트와 어깨끈 위치만 그때그때 맞춰주시면 됩니다.</div>' +
+                    '헤드레스트와 어깨끈 위치만 그때그때 맞춰주시면 돼요.</div>' +
             '</div>';
         }
 
@@ -302,7 +302,7 @@
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 (leftCm > 0 ? '키 상한까지 <b>' + leftCm + 'cm</b> 남았어요. ' : '') +
-                '그다음은 <b>주니어 카시트</b>이고, 한 번 사면 대개 <b>만 12세까지</b> 씁니다.' +
+                '그다음은 <b>주니어 카시트</b>이고, 한 번 사면 대개 <b>만 12세까지</b> 써요.' +
                 (v ? '' : '<br><span style="color:' + GRAY + ';">키를 한 번 더 재서 적어주시면 ' +
                           '<b>몇 개월 뒤인지</b>까지 알려드릴게요.</span>') +
             '</div>' +
@@ -319,7 +319,7 @@
                 }).join("") +
             '</div>' +
             '<div style="margin-top:9px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
-                'line-height:1.7;">서두르실 필요는 없어요. <b>키 상한에 닿을 때</b> 사시면 됩니다.</div>' +
+                'line-height:1.7;">서두르실 필요는 없어요. <b>키 상한에 닿을 때</b> 사시면 돼요.</div>' +
         '</div>';
     }
 
@@ -330,17 +330,17 @@
     var INSTALL_NOTE = {
         isofix_leg: {
             name: "ISOFIX + 바닥 기둥 (서포트 레그)",
-            warn: "새 차 뒷좌석 <b>바닥에 수납함이 있으면 기둥을 쓰면 안 됩니다.</b> " +
-                  "뚜껑이 부서지면서 카시트가 내려앉아요. 카니발\u00b7팰리세이드 같은 차가 그렇습니다."
+            warn: "새 차 뒷좌석 <b>바닥에 수납함이 있으면 기둥을 쓰면 안 돼요.</b> " +
+                  "뚜껑이 부서지면서 카시트가 내려앉아요. 카니발\u00b7팰리세이드 같은 차가 그래요."
         },
         isofix_tether: {
             name: "ISOFIX + 탑테더",
             warn: "새 차 뒷좌석 <b>등받이 뒤에 탑테더 고리가 있는지</b> 확인하세요. " +
-                  "트렁크 쪽 천장이나 바닥에 있는 차도 있습니다."
+                  "트렁크 쪽 천장이나 바닥에 있는 차도 있어요."
         },
         belt: {
             name: "안전벨트 고정",
-            warn: "새 차에 <b>ISOFIX 고리가 있으면</b> 그쪽이 더 단단합니다. " +
+            warn: "새 차에 <b>ISOFIX 고리가 있으면</b> 그쪽이 더 단단해요. " +
                   "등받이와 방석 사이를 손으로 더듬어 쇠고리가 잡히는지 보세요."
         }
     };
@@ -381,7 +381,7 @@
                 (note
                     ? '지금 카시트는 <b>' + note.name + '</b> 방식이에요.<br>' + note.warn
                     : '카시트 장착 방식이 새 차에 맞는지 확인하세요.') +
-                '<br><br><b>차가 바뀌면 장착도 처음부터 다시입니다.</b> ' +
+                '<br><br><b>차가 바뀌면 장착도 처음부터 다시예요.</b> ' +
                 '아래 <b>태우기 전 3분 점검</b>을 한 번 훑어보세요.' +
             '</div>' +
         '</div>';
@@ -494,17 +494,17 @@
                     'line-height:1.7; word-break:keep-all;">' +
                     '<b>' + h + " / " + autoMax + 'cm</b> \u00b7 ' +
                     (leftCm <= 0
-                        ? '<b style="color:' + RED + ';">키 기준을 넘었어요. 바꾸실 때입니다.</b>'
+                        ? '<b style="color:' + RED + ';">키 기준을 넘었어요. 바꾸실 때예요.</b>'
                         : '앞으로 <b>' + leftCm + 'cm</b> 남았어요' +
                           (function () {
                               var v = cmPerMonth(o);
                               if (!v) return '.';
                               var mo = Math.round(leftCm / v);
-                              return ' \u00b7 <b>약 ' + (mo < 1 ? 1 : mo) + '개월</b> 더 씁니다. ' +
+                              return ' \u00b7 <b>약 ' + (mo < 1 ? 1 : mo) + '개월</b> 더 써요. ' +
                                      '<span style="color:' + GRAY + '; font-weight:600;">(한 달에 ' +
                                      v.toFixed(1) + 'cm씩 자라고 계세요)</span>';
                           })()) +
-                    '<br>몸무게가 남아도 <b>키가 먼저 차면 바꿔야 합니다.</b> ' +
+                    '<br>몸무게가 남아도 <b>키가 먼저 차면 바꿔야 해요.</b> ' +
                     '머리 윗부분이 등받이 위로 2.5cm 안쪽까지 오면 그때예요.</div>';
         } else if (h && !autoMax) {
             out += '<div style="font-size:12px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
@@ -520,7 +520,7 @@
             '<div style="margin-top:5px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all; margin-bottom:12px;">' +
                 '제품마다 달라서 <b>우리가 정할 수 없는 숫자</b>예요. ' +
-                '한 번만 옮겨 적어두시면 다시 설명서를 찾을 일이 없습니다.</div>' +
+                '한 번만 옮겨 적어두시면 다시 설명서를 찾을 일이 없어요.</div>' +
 
             '<div style="display:flex; align-items:center; gap:8px; margin-bottom:9px;">' +
                 '<span style="flex:1; font-size:12px; font-weight:800; color:#7A6F68;">뒤보기 상한 키</span>' +
@@ -551,14 +551,14 @@
             out += row("뒤보기로 더 쓸 수 있는 키",
                 rleft > 0 ? rleft + "cm 남음" : "상한을 넘었어요",
                 rleft > 0
-                    ? "<b>더 오래 뒤를 볼수록 안전합니다.</b> 다리가 접히는 건 문제가 안 돼요."
-                    : "이제 앞보기로 돌리셔도 되는 키입니다. 그래도 서두르실 필요는 없어요.",
+                    ? "<b>더 오래 뒤를 볼수록 안전해요.</b> 다리가 접히는 건 문제가 안 돼요."
+                    : "이제 앞보기로 돌리셔도 되는 키예요. 그래도 서두르실 필요는 없어요.",
                 rleft > 0 ? GREEN : GOLD);
         } else if (m !== null && m < 15) {
             out += row("앞보기 전환",
                 (15 - m) + "개월 남음",
-                "15개월 전에는 반드시 뒤보기입니다. 그리고 <b>15개월은 최소한이지 권장이 아니에요.</b> " +
-                "위에 뒤보기 상한 키를 적어주시면 더 정확히 세어드립니다.",
+                "15개월 전에는 반드시 뒤보기예요. 그리고 <b>15개월은 최소한이지 권장이 아니에요.</b> " +
+                "위에 뒤보기 상한 키를 적어주시면 더 정확히 세어드려요.",
                 RED);
         }
 
@@ -573,11 +573,11 @@
         out += row("어깨끈 높이 확인",
             hd === null ? "아직 안 적음" : hd + "일 전",
             (hd === null
-                ? "아이가 크면 어깨끈을 다시 맞춰야 하는데, 대부분 그냥 씁니다. 맞추신 날을 눌러두세요."
+                ? "아이가 크면 어깨끈을 다시 맞춰야 하는데, 대부분 그냥 써요. 맞추신 날을 눌러두세요."
                 : (grew !== null && grew > 0 ? "그동안 <b>" + grew + "cm</b> 자랐어요. " : "") +
                   (hd >= HARNESS_DAYS
-                      ? "<b>한 번 보실 때가 됐습니다.</b> 뒤보기는 어깨보다 아래, 앞보기는 어깨 높이나 그 위예요."
-                      : "다음에 볼 때는 " + (HARNESS_DAYS - hd) + "일쯤 뒤입니다.")),
+                      ? "<b>한 번 보실 때가 됐어요.</b> 뒤보기는 어깨보다 아래, 앞보기는 어깨 높이나 그 위예요."
+                      : "다음에 볼 때는 " + (HARNESS_DAYS - hd) + "일쯤 뒤예요.")),
             hd !== null && hd >= HARNESS_DAYS ? GOLD : "#7A6F68");
 
         // 유효기간
@@ -588,7 +588,7 @@
             out += row("유효기간",
                 dleft > 0 ? "D-" + dleft : "지났어요",
                 dleft > 0
-                    ? "플라스틱이 삭습니다. <b>중고로 넘기실 때도 이 날짜를 알려주세요.</b>"
+                    ? "플라스틱이 삭아요. <b>중고로 넘기실 때도 이 날짜를 알려주세요.</b>"
                     : "<b>만료된 카시트는 쓰지 마시고 중고로 팔지도 마세요.</b>",
                 dleft > 180 ? "#7A6F68" : RED);
         }
@@ -624,11 +624,11 @@
                     '언제까지 쓸 수 있는지 알려드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
-                    '카시트는 나이가 아니라 <b>키</b>가 기준입니다. ' +
+                    '카시트는 나이가 아니라 <b>키</b>가 기준이에요. ' +
                     esc(nm("의")) + ' 키를 넣으면 남은 기간을, ' +
                     '설명서에서 숫자 두 개만 옮겨 적으면 <b>뒤보기 여유와 만료일</b>도 챙겨드려요.<br>' +
                     '어깨끈은 얼마나 자랐는지, <b>다음 카시트는 몇 개월 뒤</b>인지, ' +
-                    '겨울엔 패딩\u00b7여름엔 쿨시트까지 <b>때가 되면 먼저</b> 말씀드립니다.</div>' +
+                    '겨울엔 패딩\u00b7여름엔 쿨시트까지 <b>때가 되면 먼저</b> 말씀드려요.</div>' +
             '</div>' +
         '</div>';
     }
@@ -648,14 +648,14 @@
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 12px; font-size:13px; font-weight:600; ' +
                 'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
-                '\u26A0\uFE0F <b>두꺼운 패드는 하네스를 헐겁게 만듭니다.</b> ' +
+                '\u26A0\uFE0F <b>두꺼운 패드는 하네스를 헐겁게 만들어요.</b> ' +
                 '충돌 순간 그 두께가 눌리면서 끈에 여유가 생겨요. ' +
-                '패딩을 벗기고 태우라는 것과 <b>같은 이유</b>입니다.</div>' +
+                '패딩을 벗기고 태우라는 것과 <b>같은 이유</b>예요.</div>' +
 
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'word-break:keep-all; margin-bottom:12px;">' +
                 '\u2705 <b>' + (brand ? esc(brand) + ' 순정' : '먼저 순정') + '부터 찾아보세요.</b> ' +
-                '제조사가 만든 건 두께와 버클 구멍 위치를 맞춰서 냅니다.</div>' +
+                '제조사가 만든 건 두께와 버클 구멍 위치를 맞춰서 내요.</div>' +
 
             '<a href="https://www.google.com/search?q=' + encodeURIComponent(q) + '" ' +
                 'target="_blank" rel="noopener" style="display:block; text-align:center; padding:13px; ' +
@@ -668,7 +668,7 @@
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.9; ' +
                 'word-break:keep-all;">' +
                 '\u2460 버클이 <b>딸깍 소리 나게 끝까지</b> 채워지나<br>' +
-                '\u2461 채운 뒤 쇄골에서 하네스가 <b>손가락에 집히나</b> (집히면 헐거운 겁니다)<br>' +
+                '\u2461 채운 뒤 쇄골에서 하네스가 <b>손가락에 집히나</b> (집히면 헐거운 거예요)<br>' +
                 '\u2462 어깨끈 구멍 위치가 <b>원래 자리와 같나</b>' +
             '</div>' +
             '<div style="margin-top:11px; font-size:12px; font-weight:800; color:' + RED + '; ' +
@@ -686,14 +686,14 @@
                     '\uD83D\uDEA8 운전 중에는 먹이지 마세요</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                     'word-break:keep-all;">' +
-                    '뒤보기라 백미러로도 안 보입니다. ' +
+                    '뒤보기라 백미러로도 안 보여요. ' +
                     '<b>조용해지면 잘 먹는 게 아니라 막힌 걸 수도 있어요.</b><br>' +
-                    '배고파서 우는 거면 <b>차를 세우세요.</b> 5분 서는 게 제일 빠른 길입니다.</div>' +
+                    '배고파서 우는 거면 <b>차를 세우세요.</b> 5분 서는 게 제일 빠른 길이에요.</div>' +
             '</div>' +
 
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'word-break:keep-all; margin-bottom:12px;">' +
-                '\u26A0\uFE0F 급정거하면 <b>딱딱한 건 흉기가 됩니다.</b> ' +
+                '\u26A0\uFE0F 급정거하면 <b>딱딱한 건 흉기가 돼요.</b> ' +
                 '플라스틱 사운드북, 태블릿 거치대는 빼세요. ' +
                 '천이나 말랑한 것만 손에 쥐여주시고요.</div>' +
 
@@ -711,8 +711,8 @@
             '<div class="matrix-header">\uD83D\uDCC4 사고 뒤에 챙길 것</div>' +
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
-                '\u26A0\uFE0F <b>가벼운 접촉사고라도 카시트는 교체 대상일 수 있습니다.</b> ' +
-                '겉이 멀쩡해도 안쪽 구조가 상해요. 눈에 안 보입니다.<br>' +
+                '\u26A0\uFE0F <b>가벼운 접촉사고라도 카시트는 교체 대상일 수 있어요.</b> ' +
+                '겉이 멀쩡해도 안쪽 구조가 상해요. 눈에 안 보여요.<br>' +
                 '바꿔야 하는지는 <b>\uD83D\uDEA8 사고가 났다면</b> 카드에서 다섯 가지로 확인하세요.</div>' +
 
             '<div style="background: #FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
@@ -727,7 +727,7 @@
 
             '<div style="margin-top:11px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '보상 여부는 보험사와 약관이 정합니다. ' +
+                '보상 여부는 보험사와 약관이 정해요. ' +
                 '우리는 <b>물어볼 것만</b> 정리해드려요.</div>' +
         '</div>';
     }
@@ -737,7 +737,7 @@
             '<div class="matrix-header">\uD83E\uDDFC 토했을 때</div>' +
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
-                '<b>하네스에 세제를 쓰지 마세요.</b> 세제나 유연제가 닿으면 섬유가 약해집니다. ' +
+                '<b>하네스에 세제를 쓰지 마세요.</b> 세제나 유연제가 닿으면 섬유가 약해져요. ' +
                 '충돌 때 아이를 붙잡아야 하는 그 끈이에요.</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:2; ' +
                 'word-break:keep-all;">' +

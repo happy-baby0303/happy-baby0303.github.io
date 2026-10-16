@@ -296,7 +296,7 @@
         if (a.length) {
             out += '<div style="margin-top:11px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
-                '같은 날 여러 번 유축하셨으면 그 줄의 <b>+</b> 를 누르시면 됩니다. ' +
+                '같은 날 여러 번 유축하셨으면 그 줄의 <b>+</b> 를 누르시면 돼요. ' +
                 '<span onclick="window.clearMilk()" style="color:' + BLUE + '; cursor:pointer;">전부 지우기</span></div>';
         }
 
@@ -312,7 +312,7 @@
                     '몇 팩이 며칠 남았는지 알려드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
-                    '유축할 때마다 한 번씩 눌러두시면 <b>오래된 것부터 위로</b> 올려드립니다. ' +
+                    '유축할 때마다 한 번씩 눌러두시면 <b>오래된 것부터 위로</b> 올려드려요. ' +
                     '냉동실 뒤에 밀려서 상하는 팩이 없어져요. ' +
                     '해동한 건 따로 24시간을 세드리고요.</div>' +
             '</div>' +
