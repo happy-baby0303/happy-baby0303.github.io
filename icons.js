@@ -158,6 +158,9 @@
         }
     }
 
+    /* ⚠️ 맨 끝에서 불려서, 알림을 눌러 앱이 다시 열릴 때 큰 스크립트를 다 읽기 전까지 이모지 탭이 잠깐 보였다.
+          이제 index.html 의 탭 줄(</nav>) 바로 다음에서 부르고, 불리자마자 한 번 칠한다. */
+    try { paint(); } catch (e) {}
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 

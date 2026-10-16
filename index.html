@@ -1142,6 +1142,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             <button id="sync-badge-btn" onclick="openFamilySyncModal()" style="background: #F7F3ED; color: #7A6F68; border: none; padding: 6px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s;">
                 <span id="sync-status-icon">🔗</span><span id="sync-status-text">연동설정</span>
             </button>
+            <script>/* 다시 열릴 때 큰 스크립트를 다 읽기 전까지 '🔗 연동설정' 이 잠깐 보였다. 저장된 가족 코드만 보고 바로 맞춘다 (updateSyncBadge 와 같은 모양) */
+            (function () { try { var c = localStorage.getItem('family_sync_code'), b = document.getElementById('sync-badge-btn'); if (!b || !c) return;
+              b.style.background = '#F0EEFB'; b.style.color = '#6A61CE'; b.style.pointerEvents = 'none';
+              document.getElementById('sync-status-text').textContent = '안심 보관중'; document.getElementById('sync-status-icon').textContent = '☁️'; } catch (e) {} })();</script>
           <button onclick="window.openSettingsTab()" style="background:none; border:none; font-size: 20px; cursor:pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
                 ⚙️
             </button>
@@ -2830,6 +2834,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <div id="nav-info" class="nav-item" onclick="switchTab('info', this)"><span class="icon">📚</span><span class="label">육아정보</span></div>
   <div id="nav-memorybox" class="nav-item" onclick="switchTab('memorybox', this)" style="display: flex; flex-direction: column; align-items: center; justify-content: center;"><span class="icon">🧺</span><span class="label">배냇함</span></div>
 </nav>
+<!-- 탭 아이콘은 탭 줄 바로 다음에서 칠한다 (다시 열릴 때 이모지가 비치지 않게) -->
+<script src="./icons.js?v=2"></script>
 
 <!-- 🎒 외출 준비물 체크리스트 모달 -->
 <div id="checklist-modal" class="modal-overlay" style="z-index: 5000; display:none;" onclick="closeChecklist(event)">
@@ -3503,7 +3509,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- ⏸ 앱이 뒤에 있을 때 타이머가 일을 안 하게. setInterval 을 감싸므로 제일 먼저 -->
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
-<script src="script.js?v=20261016-2"></script>
+<script src="script.js?v=20261016-3"></script>
     <script src="./stage.js"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js"></script>
@@ -3549,10 +3555,12 @@ body.mode-senior #hero-drag-tip { display: none !important; }
  <script src="./homefix.js?v=2"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js?v=2"></script>
-<script src="./sleeppicker.js?v=1"></script>
+<script src="./sleeppicker.js?v=2"></script>
 <!-- 토핑 이유식: 맘마 기록 → 이유식에서 재료마다 몇 g (이유식 달력과 같은 칸) -->
 <script src="./shared/topping.js?v=1"></script>
 <script src="./toppingtrack.js?v=1"></script>
+<!-- 저장할 때 날짜가 오늘과 많이 다르면 한 번 묻기 (바퀴가 넓어져 날짜 쪽을 스칠 수 있어서) -->
+<script src="./recordguard.js?v=1"></script>
 <!-- 이유식 달력(식단 · 새 재료 · 알레르기)을 부부 폰에 같이 -->
 <script src="./foodcalsync.js?v=1"></script>
 <script src="./bedtime.js"></script>
@@ -3583,8 +3591,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->
 <script src="./sealsoon.js?v=1"></script>
-<!-- 🎨 하단 탭 아이콘 — 이모지 대신 직접 그린 것 -->
-<script src="./icons.js?v=1"></script>
+<!-- 🎨 하단 탭 아이콘(icons.js)은 탭 줄(</nav>) 바로 다음으로 옮겼다 -->
 
 <!-- 💩 기저귀 바텀시트 모달 -->
 <div id="diaper-bottom-sheet" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; flex-direction: column; justify-content: flex-end;">

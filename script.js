@@ -4446,8 +4446,17 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 .drum-picker::-webkit-scrollbar { display: none; }
                 .drum-picker { -ms-overflow-style: none; scrollbar-width: none; }
                 /* 💡 비활성 숫자는 작고 연하게, 선택된 숫자는 크고 진하게 확실한 대비 주기 */
-                .drum-item { height: 44px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #C4B5A9; transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+                .drum-item { height: 44px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #C4B5A9; transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); box-sizing: border-box; }
                 .drum-item.active { font-size: 24px; font-weight: 900; color: var(--text-m); }
+                /* ⚠️ 바퀴 하나가 36px 띠였다. 손가락이 그 띠를 조금만 벗어나도(월 · 일 글자 · 빈칸) 아무것도 안 움직였다.
+                      '스크롤이 잘 안 된다' 는 말의 원인. 이제 바퀴 네 개가 상자를 4등분해서 어디를 쓸어도 그 자리 바퀴가 돈다.
+                      글자(월 · 일 · :)와 가운데 선은 바퀴 위에 얹기만 한다(손가락이 통과한다). */
+                .tw-cell { flex: 1; min-width: 0; position: relative; height: 100%; }
+                .tw-cell .drum-picker { height: 100%; width: 100%; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; }
+                .tw-unit { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); font-size: 14px; font-weight: 800; color: var(--text-m); pointer-events: none; }
+                .tw-date .drum-item { justify-content: flex-end; padding-right: 28px; }
+                .tw-hour .drum-item { justify-content: flex-end; padding-right: 14px; }
+                .tw-min .drum-item { justify-content: flex-start; padding-left: 14px; }
             </style>
             
             <div style="display:flex; justify-content:center; align-items:center; height: 140px; position:relative; overflow:hidden; background:var(--bg-sub); border-radius:20px; box-shadow:inset 0 2px 6px rgba(0,0,0,0.02);">
@@ -4455,30 +4464,15 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 <!-- 선택 영역 파란색 하이라이트 박스 -->
                 <div style="position:absolute; top:50%; left:12px; right:12px; height:44px; transform:translateY(-50%); background:rgba(127, 119, 221, 0.08); border-radius:12px; pointer-events:none; border: 1px solid rgba(127, 119, 221, 0.15);"></div>
 
-                <!-- 🌟 레이아웃을 정확히 5:5로 쪼개서 한가운데 틈이 생기지 않도록 강제 정렬! -->
-                <div style="display: flex; width: 100%; height: 100%; z-index: 1;">
-                    
-                    <!-- 📅 왼쪽 그룹: 월, 일 (우측 정렬로 가운데를 향해 바짝 붙임) -->
-                    <div style="flex: 1; display: flex; justify-content: flex-end; align-items: center; padding-right: 16px;">
-                        <div id="picker-month" class="drum-picker" style="height:100%; overflow-y:auto; scroll-snap-type:y mandatory; width:36px;"></div>
-                        <div style="font-size:14px; font-weight:800; color:var(--text-m); margin:0 6px 0 2px;">월</div>
-                        
-                        <div id="picker-day" class="drum-picker" style="height:100%; overflow-y:auto; scroll-snap-type:y mandatory; width:36px;"></div>
-                        <div style="font-size:14px; font-weight:800; color:var(--text-m); margin-left:2px;">일</div>
-                    </div>
-
-                    <!-- ➖ 정중앙 그룹: 구분선 (무조건 화면 한가운데 오차 없이 고정) -->
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <div style="width:2px; height:24px; background:var(--border); border-radius:1px; opacity:0.6;"></div>
-                    </div>
-
-                    <!-- ⏰ 오른쪽 그룹: 시, 분 (좌측 정렬로 가운데를 향해 바짝 붙임) -->
-                    <div style="flex: 1; display: flex; justify-content: flex-start; align-items: center; padding-left: 16px;">
-                        <div id="picker-hour" class="drum-picker" style="height:100%; overflow-y:auto; scroll-snap-type:y mandatory; width:36px;"></div>
-                        <div style="font-size:22px; font-weight:900; color:var(--text-m); margin:0 4px; padding-bottom:4px;">:</div>
-                        <div id="picker-minute" class="drum-picker" style="height:100%; overflow-y:auto; scroll-snap-type:y mandatory; width:36px;"></div>
-                    </div>
-
+                <!-- 바퀴 넷이 4등분: 월 · 일 | 시 : 분 -->
+                <div style="display: flex; width: 100%; height: 100%; z-index: 1; position: relative;">
+                    <div class="tw-cell tw-date"><div id="picker-month" class="drum-picker"></div><span class="tw-unit">월</span></div>
+                    <div class="tw-cell tw-date"><div id="picker-day" class="drum-picker"></div><span class="tw-unit">일</span></div>
+                    <div class="tw-cell tw-hour"><div id="picker-hour" class="drum-picker"></div></div>
+                    <div class="tw-cell tw-min"><div id="picker-minute" class="drum-picker"></div></div>
+                    <!-- 가운데 선 · 시:분 사이 쌍점 (손가락은 통과) -->
+                    <div style="position:absolute; left:50%; top:50%; width:2px; height:24px; transform:translate(-50%,-50%); background:var(--border); border-radius:1px; opacity:0.6; pointer-events:none;"></div>
+                    <div style="position:absolute; left:75%; top:50%; transform:translate(-50%,-55%); font-size:22px; font-weight:900; color:var(--text-m); pointer-events:none;">:</div>
                 </div>
             </div>
             
@@ -4971,8 +4965,24 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
 
             setTimeout(() => { el.style.scrollBehavior = 'smooth'; }, 50); // 위치 잡은 후 부드러움 ON
 
+            /* ⚠️ 달을 바꾸면 '일' 바퀴를 다시 만드는데, 그때마다 스크롤 감지가 하나씩 더 붙었다.
+                  옛 감지는 옛 칸 수(31일)로 계산해서 바퀴를 엉뚱한 자리로 튕기기도 했다. 붙이기 전에 옛 것을 뗀다. */
+            if (el.__drumScroll) el.removeEventListener('scroll', el.__drumScroll);
+            // 위 · 아래 칸을 누르면 그 숫자로 굴러간다
+            if (!el.__drumTap) {
+                el.__drumTap = true;
+                el.addEventListener('click', (e) => {
+                    const it = e.target.closest('.drum-item');
+                    if (!it) return;
+                    const list = Array.prototype.indexOf.call(el.querySelectorAll('.drum-item'), it);
+                    if (list < 0) return;
+                    el.style.scrollBehavior = 'smooth';
+                    el.scrollTop = list * 44;
+                });
+            }
+
             // 스크롤 감지 및 무한 휠 마술
-            el.addEventListener('scroll', () => {
+            el.__drumScroll = () => {
                 clearTimeout(el.isScrolling);
                 el.isScrolling = setTimeout(() => {
                     let index = Math.round(el.scrollTop / 44);
@@ -5005,7 +5015,8 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                         }
                     }
                 }, 80);
-            });
+            };
+            el.addEventListener('scroll', el.__drumScroll, { passive: true });
         }
         
         // 4개 바퀴 장착!
@@ -5694,7 +5705,7 @@ window.updateTrackerDashboard = function() {
             for(let date in grouped) {
                 historyHtml += `
                     <div style="position: sticky; top: -1px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">📅 ${date}</div>
+                        <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}</div>
                         ${window.getDailySummaryHtml(grouped[date])}
                     </div>
                 `;
@@ -5712,13 +5723,17 @@ window.updateTrackerDashboard = function() {
                     else if (r.type === 'med') icon = '💊';
 
                     let txt = '';
+                    let subLine = '';   // 둘째 줄 (토핑 이유식 재료)
                     let displayTime = r.time; 
                     
                     if(r.type === 'feed') {
                         if (r.subType === '모유') txt = `모유 (${r.status}) ${r.amount}분`;
-                        /* ⚠️ 이유식도 'ml' 로 적혀 있었다 (이유식은 g). 토핑이면 재료마다 g 도 붙인다 */
-                        else if (r.subType === '이유식') txt = `이유식 ${r.amount}g` + (Array.isArray(r.parts) && r.parts.length
-                            ? ` <span style="font-size:12px; font-weight:700; color:var(--text-sub);">${r.parts.map(p => String(p.n).replace(/[<>&"']/g, '') + ' ' + (parseInt(p.g) || 0)).join(' · ')}</span>` : '');
+                        /* ⚠️ 이유식도 'ml' 로 적혀 있었다 (이유식은 g).
+                              토핑이면 재료는 아랫줄에 '소고기 20g' 처럼 (같은 줄에 붙이면 '40g 소고기 20' 이 한 덩어리로 읽혔다) */
+                        else if (r.subType === '이유식') {
+                            txt = `이유식 ${r.amount}g`;
+                            if (Array.isArray(r.parts) && r.parts.length) subLine = r.parts.map(p => String(p.n).replace(/[<>&"']/g, '') + ' ' + (parseInt(p.g) || 0) + 'g').join(' · ');
+                        }
                         else txt = `${r.subType} ${r.amount}ml`;
                     }
                     else if(r.type === 'diaper') {
@@ -5775,6 +5790,7 @@ window.updateTrackerDashboard = function() {
                                     <div style="font-size:18px; flex-shrink:0; background:var(--bg-sub); width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:10px;">${icon}</div>
                                     <div style="min-width:0;">
                                         <div style="font-weight:900; color:var(--text-m); font-size:14px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${txt}</div>
+                                        ${subLine ? `<div style="color:#A3958A; font-weight:700; font-size:12px; line-height:1.45; word-break:keep-all;">${subLine}</div>` : ''}
                                         ${displayTime.includes('~') ? `<div style="color:#C4B5A9; font-weight:700; font-size:11.5px;">${displayTime}</div>` : ''}
                                     </div>
                                 </div>
@@ -13524,23 +13540,26 @@ window.getDailySummaryHtml = function(dailyRecords) {
 
     let summaryItems = [];
     
-    if (formulaAmt > 0) summaryItems.push(`<span style="color:#7F77DD; font-weight:800;">분유 ${formulaAmt}ml</span>`);
-    if (breastMins > 0) summaryItems.push(`<span style="color:#B98A2E; font-weight:800;">모유 ${breastMins}분</span>`);
-    if (babyfoodAmt > 0) summaryItems.push(`<span style="color:#B98A2E; font-weight:800;">이유식 ${babyfoodAmt}g</span>`);
+    /* 색은 '오늘 하루' 줄의 점과 맞춘다 (잠 보라 · 맘마 · 이유식 주황 · 기저귀 초록).
+       ⚠️ 기저귀가 빨강이라 경고처럼 보였고, 분유는 잠과 같은 보라라 헷갈렸다 */
+    if (formulaAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">분유 ${formulaAmt}ml</span>`);
+    if (breastMins > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">모유 ${breastMins}분</span>`);
+    if (babyfoodAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">이유식 ${babyfoodAmt}g</span>`);
     if (totalSleepMins > 0) {
         let h = Math.floor(totalSleepMins / 60);
         let m = totalSleepMins % 60;
         let sleepText = h > 0 ? `수면 ${h}시간 ${m}분` : `수면 ${m}분`;
         summaryItems.push(`<span style="color:#7F77DD; font-weight:800;">${sleepText}</span>`);
     }
-    if (pee > 0 || poop > 0) summaryItems.push(`<span style="color:#EF4444; font-weight:800;">기저귀 ${pee+poop}번</span>`);
+    if (pee > 0 || poop > 0) summaryItems.push(`<span style="color:#2FA584; font-weight:800;">기저귀 ${pee+poop}번</span>`);
 
     if (summaryItems.length === 0) return '';
 
-    // 🚨 패딩(padding)을 확 줄이고 폰트를 다듬어서 공간을 압축했습니다!
+    /* ⚠️ 한 줄로 옆으로 밀어 두어서, 이유식까지 있는 날은 끝(기저귀 3번)이 잘려 '기저귀 3' 으로 보였다.
+          넘치면 다음 줄로 내린다. 칸마다 통째로 넘어가게(nowrap) 하고, 칸 사이는 띄우기만 한다 */
     return `
-        <div style="font-size: 12.5px; display: flex; overflow-x: auto; white-space: nowrap; scrollbar-width: none; gap: 8px; padding: 2px 0 4px 0; align-items: center;">
-            ${summaryItems.join('<span style="color:#EDE6DE; font-size:11px; font-weight:bold;">|</span>')}
+        <div style="font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 3px 12px; padding: 2px 0 4px 0; align-items: center;">
+            ${summaryItems.map(x => x.replace('<span style="', '<span style="white-space:nowrap; ')).join('')}
         </div>
     `;
 };

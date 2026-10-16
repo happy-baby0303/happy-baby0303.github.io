@@ -33,11 +33,18 @@
             '.sp-label{width:46px;flex-shrink:0;text-align:center;font-size:13px;font-weight:800;color:#A3958A;line-height:1.35;}' +
             '.sp-wrap{flex:1;display:flex;justify-content:center;align-items:center;height:114px;position:relative;overflow:hidden;background:var(--bg-sub);border-radius:16px;}' +
             '.sp-band{position:absolute;top:50%;left:8px;right:8px;height:38px;transform:translateY(-50%);background:rgba(127,119,221,0.08);border:1px solid rgba(127,119,221,0.15);border-radius:12px;pointer-events:none;}' +
-            '.sp-col{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;width:36px;-ms-overflow-style:none;scrollbar-width:none;}' +
+            /* ⚠️ 바퀴가 36px 띠라서, 손가락이 조금만 벗어나도(월 · 일 글자 · 빈칸) 아무것도 안 움직였다 (아내분 문의: 스크롤이 잘 안 된다).
+                  이제 바퀴 넷이 상자를 4등분한다. 글자(월 · 일 · :)와 가운데 선은 위에 얹기만 하고 손가락은 통과한다. */
+            '.sp-cells{display:flex;width:100%;height:100%;position:relative;z-index:1;}' +
+            '.sp-cell{flex:1;min-width:0;position:relative;height:100%;}' +
+            '.sp-col{height:100%;width:100%;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;-ms-overflow-style:none;scrollbar-width:none;}' +
             '.sp-col::-webkit-scrollbar{display:none;}' +
-            '.sp-item{height:38px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#C4B5A9;scroll-snap-align:center;flex-shrink:0;transition:all .2s cubic-bezier(.2,.8,.2,1);}' +
+            '.sp-item{height:38px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#C4B5A9;scroll-snap-align:center;flex-shrink:0;box-sizing:border-box;transition:all .2s cubic-bezier(.2,.8,.2,1);}' +
             '.sp-item.on{font-size:22px;font-weight:900;color:var(--text-m);}' +
-            '.sp-unit{font-size:14px;font-weight:800;color:var(--text-m);}';
+            '.sp-date .sp-item{justify-content:flex-end;padding-right:24px;}' +
+            '.sp-hour .sp-item{justify-content:flex-end;padding-right:11px;}' +
+            '.sp-min .sp-item{justify-content:flex-start;padding-left:11px;}' +
+            '.sp-unit{position:absolute;top:50%;right:6px;transform:translateY(-50%);font-size:14px;font-weight:800;color:var(--text-m);pointer-events:none;}';
         document.head.appendChild(st);
     }
 
@@ -67,6 +74,15 @@
             for (var i = 0; i < self.items.length; i++) self.items[i].classList.remove('on');
             if (self.items[idx]) self.items[idx].classList.add('on');
         };
+        // 위 · 아래 칸을 누르면 그 숫자로 굴러간다
+        el.addEventListener('click', function (e) {
+            var it = e.target.closest('.sp-item');
+            if (!it) return;
+            var idx = Array.prototype.indexOf.call(self.items, it);
+            if (idx < 0) return;
+            el.style.scrollBehavior = 'smooth';
+            el.scrollTop = idx * ROW;
+        });
         el.addEventListener('scroll', function () {
             clearTimeout(self.t);
             self.t = setTimeout(function () {
@@ -104,16 +120,13 @@
         line.appendChild(label);
         line.appendChild(box);
         box.innerHTML = '<div class="sp-band"></div>' +
-            '<div style="display:flex;width:100%;height:100%;z-index:1;">' +
-                '<div style="flex:1;display:flex;justify-content:flex-end;align-items:center;padding-right:14px;">' +
-                    '<div class="sp-col" data-k="m"></div><div class="sp-unit" style="margin:0 6px 0 2px;">월</div>' +
-                    '<div class="sp-col" data-k="d"></div><div class="sp-unit" style="margin-left:2px;">일</div>' +
-                '</div>' +
-                '<div style="display:flex;align-items:center;"><div style="width:2px;height:22px;background:var(--border);border-radius:1px;opacity:.6;"></div></div>' +
-                '<div style="flex:1;display:flex;justify-content:flex-start;align-items:center;padding-left:14px;">' +
-                    '<div class="sp-col" data-k="h"></div><div style="font-size:21px;font-weight:900;color:var(--text-m);margin:0 4px;padding-bottom:4px;">:</div>' +
-                    '<div class="sp-col" data-k="i"></div>' +
-                '</div>' +
+            '<div class="sp-cells">' +
+                '<div class="sp-cell sp-date"><div class="sp-col" data-k="m"></div><span class="sp-unit">월</span></div>' +
+                '<div class="sp-cell sp-date"><div class="sp-col" data-k="d"></div><span class="sp-unit">일</span></div>' +
+                '<div class="sp-cell sp-hour"><div class="sp-col" data-k="h"></div></div>' +
+                '<div class="sp-cell sp-min"><div class="sp-col" data-k="i"></div></div>' +
+                '<div style="position:absolute;left:50%;top:50%;width:2px;height:22px;transform:translate(-50%,-50%);background:var(--border);border-radius:1px;opacity:.6;pointer-events:none;"></div>' +
+                '<div style="position:absolute;left:75%;top:50%;transform:translate(-50%,-55%);font-size:21px;font-weight:900;color:var(--text-m);pointer-events:none;">:</div>' +
             '</div>';
         row.parentNode.insertBefore(line, row);
         row.style.display = 'none';                                 // 원래 칸은 숨겨 두고 값만 쓴다
