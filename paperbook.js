@@ -32,9 +32,10 @@
         else alert(m);
     }
 
+    /* ⚠️ 규칙이 '내 로그인 uid 이름의 문서' 만 받는다 (waitlist_paperbook/{uid}).
+          예전엔 로그인이 아직 안 붙었으면 폰에 남은 옛 uid 를 썼다 → 거절. 살아 있는 로그인만 쓴다. */
     function uid() {
-        return (window.auth && window.auth.currentUser && window.auth.currentUser.uid) ||
-               localStorage.getItem("firebase_uid") || "";
+        return (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || "";
     }
 
     function done() { return localStorage.getItem(KEY) === "1"; }
@@ -44,15 +45,15 @@
         if (!b) return;
         if (done()) {
             b.textContent = "신청해 두었어요";
-            b.style.background = "#EDE6DE";
-            b.style.color = "#7A6F68";
+            b.style.background = "#F5EFE6";
+            b.style.color = "#8A7F76";
             b.style.boxShadow = "none";
         }
     }
 
     window.notifyPaperBook = function () {
         if (done()) {
-            toast("이미 신청해 두었어요. 열리면 알려드릴게요");
+            toast("이미 신청해 두었어요. 열리면 알려 드릴게요");
             return;
         }
 
@@ -60,11 +61,18 @@
            나중에 앱이 서버에 붙으면 그때 올라간다. */
         try { localStorage.setItem(KEY, "1"); } catch (e) {}
         paint();
-        toast("\uD83D\uDCD6 열리면 제일 먼저 알려드릴게요");
+        toast("\uD83D\uDCD6 열리면 제일 먼저 알려 드릴게요");
 
+        send(0);
+    };
+
+    /* 로그인이 아직 안 붙었으면 조금 기다렸다 올린다. 끝내 못 올리면 폰에만 남는다 (다음에 열 때 다시 올린다) */
+    function send(n) {
         var id = uid();
-        if (!id || !window.db || typeof window.setDoc !== "function") return;
-
+        if (!id || !window.db || typeof window.setDoc !== "function") {
+            if (n < 8) setTimeout(function () { send(n + 1); }, 500);
+            return;
+        }
         try {
             window.setDoc(
                 window.doc(window.db, "waitlist_paperbook", id),
@@ -77,17 +85,21 @@
                         ? window.bookshelfPages() : null
                 },
                 { merge: true }
-            ).catch(function (e) {   // 서버가 거절해도 '처리 안 된 에러' 로 새지 않게
+            ).then(function () {
+                try { localStorage.setItem(KEY + "_up", "1"); } catch (e) {}
+            }).catch(function (e) {   // 서버가 거절해도 '처리 안 된 에러' 로 새지 않게
                 console.warn("[종이책] 신청 올리기 실패 — 폰에는 남았습니다", e);
             });
         } catch (e) {
             console.warn("[종이책] 신청 올리기 실패 — 폰에는 남았습니다", e);
         }
-    };
+    }
 
     function boot() {
         paint();
         setTimeout(paint, 1200);
+        /* ⚠️ 예전엔 이 화면이 서버를 못 써서 신청이 폰에만 남았다. 그때 신청한 분도 이제 올린다 */
+        if (done() && localStorage.getItem(KEY + "_up") !== "1") setTimeout(function () { send(0); }, 2500);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

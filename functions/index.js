@@ -70,7 +70,7 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
   const senderUid = request.auth && request.auth.uid;
   if (!senderUid) return { success: false, error: "로그인이 필요합니다." };
 
-  const { syncCode, title, body, excludeToken, link } = request.data || {};
+  const { syncCode, title, body, excludeToken, link, skipRoles } = request.data || {};
   if (!syncCode) return { success: false, error: "가족 코드가 없습니다." };
 
   /* 알림을 누르면 갈 곳 (예: "diary.html", "index.html?go=toolbox")
@@ -102,7 +102,14 @@ exports.sendFamilyPush = onCall(SEOUL, async (request) => {
       return { success: false, error: "이 가족방의 구성원이 아닙니다." };
     }
 
-    const targetUids = all.filter((uid) => uid !== senderUid);
+    /* 부부 문답처럼 엄마 · 아빠 둘만의 알림은 도우미(할머니 · 시터 선생님)에게 안 보낸다.
+       ⚠️ 보낸 사람만 빼고 방 사람 모두에게 갔다. 아빠가 문답에 답하면 할머니 폰에도
+          "아빠가 답을 남겼어요 · 내 답을 쓰면 서로 보여요" 가 떴다. 할머니는 쓸 수도 없는 글이다.
+       skipRoles 가 없으면 예전처럼 모두에게 간다 (바통 · 육퇴 알림은 그대로). */
+    const skip = Array.isArray(skipRoles)
+      ? skipRoles.filter((r) => typeof r === "string").slice(0, 5) : [];
+    const targetUids = all.filter((uid) => uid !== senderUid &&
+      !(skip.length && !Array.isArray(raw) && skip.includes(raw[uid])));
     if (targetUids.length === 0) {
       logger.warn("가족방에 상대가 없음", { syncCode, senderUid, members: all });
       return { success: false, error: "알림을 보낼 가족이 없습니다." };

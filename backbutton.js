@@ -37,6 +37,8 @@
 
     var LAYERS = [
         { id: "diary-box",              close: "closeDiaryBox" },
+        { id: "qa-sheet",               close: "closeQaSheet" },    // 우리의 문답 — 홈에서 바로 쓰는 창
+        { id: "stage-sheet",            close: null },              // 열 달의 문답 · 임신 기록 창 (열 때 만들고 닫을 때 지운다)
         { id: "letterbox-modal",        close: "closeLetterBox" },
         { id: "sleepmap-modal",         close: "closeSleepMap" },
         { id: "tracker-sheet-overlay",  close: "closeTrackerSheet" },
@@ -49,7 +51,7 @@
         { id: "export-sheet",           close: null },
         { id: "bs-sheet",               close: null },
         { id: "iospush-sheet",          close: null },
-        { id: "invite-bottom-sheet",    close: null },
+        { id: "invite-bottom-sheet",    close: "hide" },   // ⚠️ index.html 에 박힌 창이다. 뒤로가기가 지워 버려서 다시 못 열었다
         { id: "milestone-bottom-sheet", close: null },
         { id: "mb-photo-viewer",        close: "closePhotoViewer" },
         { id: "note-sheet",             close: "closeNoteSheet" },

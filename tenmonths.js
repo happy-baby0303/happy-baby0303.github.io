@@ -240,6 +240,7 @@
     window.__qaTest = { merge: merge, load: load, entry: entry, Q: Q };
 
     function boot() {
+        if (window.__noStageWatch) return;      // 우리의 문답 화면(diary.html)은 「기다리며」 권에 질문만 빌려 쓴다
         try { if (!(localStorage.getItem("tosil_stage_beta") === "1" || localStorage.getItem("tosil_stage_live") === "1")) return; } catch (e) { return; }
         setTimeout(watch, 3600);
     }

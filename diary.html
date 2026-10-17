@@ -3,1205 +3,843 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>💌 우리의 문답</title>
+    <meta name="theme-color" content="#FAF7F2">
+    <title>우리의 문답</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
-    
+    <!-- 열 달의 문답과 같은 명조 -->
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+
     <script>
-            if (localStorage.getItem('tosil_dark_mode') === 'on') {
+        if (localStorage.getItem('tosil_dark_mode') === 'on') {
             document.documentElement.classList.add('dark-mode');
             document.addEventListener('DOMContentLoaded', function () {
                 document.body.classList.add('dark-mode');
             });
         }
+
+        /* ⚠️ 다둥이 집에서 둘째를 골라 놓고 들어와도 질문에는 첫째 이름이 나왔다.
+              본체(script.js)는 아기마다 키에 꼬리표를 붙여 저장하는데
+              이 화면은 그 프록시가 없어서 꼬리표 없는 원본(= 첫째)을 읽었다.
+              여기서 쓰는 아기 키 세 개만 같은 규칙으로 읽고 쓴다. */
+        (function () {
+            var sfx = localStorage.getItem('tosil_active_baby_suffix') || '';
+            window.currentBabySuffix = sfx;
+            window.__noStageWatch = true;     // 열 달의 문답 실시간 연동은 홈에서만 한다
+            if (!sfx) return;
+            var KEYS = ['tosil_babyName', 'tosil_startDate', 'tosil_preg_qa'];
+            var g = Storage.prototype.getItem, s = Storage.prototype.setItem, r = Storage.prototype.removeItem;
+            function k(x) { return KEYS.indexOf(x) > -1 ? x + sfx : x; }
+            Storage.prototype.getItem = function (x) { return g.call(this, k(x)); };
+            Storage.prototype.setItem = function (x, v) { return s.call(this, k(x), v); };
+            Storage.prototype.removeItem = function (x) { return r.call(this, k(x)); };
+        })();
     </script>
 
     <style>
-        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg-color: #FAF7F2; 
-            --card-bg: #FFFFFF;
-            --text-title: #3E3A37; 
-            --text-main: #5C5652;
-            --text-sub: #A39D98;
-            --border-color: #F0ECE6;
-            --primary: #7F77DD; 
-            --primary-light: #F0EEFB;
-            --dad-color: #6DA0FF; 
-            --mom-color: #FF8570;
-            --shadow-sm: 0 4px 16px rgba(138, 126, 116, 0.05);
-            --shadow-md: 0 12px 32px rgba(138, 126, 116, 0.08);
+            --bg: #FAF7F2; --paper: #FFFDF9; --line: #EFE7DC; --ink: #3B322C; --sub: #8A7F76;
+            --mute: #B5AAA0; --tint: #F5EFE6; --gold: #B98A2E;
+            --serif: 'Gowun Batang', 'Noto Serif KR', 'Noto Serif CJK KR', serif;
         }
+        html, body { background: var(--bg); }
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+               color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; letter-spacing: -0.3px;
+               word-break: keep-all; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        button { font-family: inherit; color: inherit; }
+        .wrapper { max-width: 480px; margin: 0 auto;
+                   padding: calc(12px + env(safe-area-inset-top, 0px)) 20px calc(48px + env(safe-area-inset-bottom, 0px)); }
 
-        body { background: var(--bg-color); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
-        .wrapper { width: 100%; max-width: 480px; padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(60px + env(safe-area-inset-bottom, 0px)) 20px; display: flex; flex-direction: column; position: relative; }
-        
-        .nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-top: 10px; }
-        .home-btn { background: var(--card-bg); border: 1px solid var(--border-color); font-size: 15px; color: var(--text-main); cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 14px; transition: 0.2s; box-shadow: var(--shadow-sm); }
-        .coin-badge { background: #FFF7E6; color: #D48806; padding: 10px 16px; border-radius: 16px; font-size: 15px; font-weight: 900; display: flex; align-items: center; gap: 6px; cursor: pointer; border: 1px solid #FFE58F; box-shadow: 0 4px 12px rgba(212, 136, 6, 0.15); transition: 0.2s; }
-        
-        .tab-group { display: flex; background: #EBE5DD; border-radius: 20px; overflow: hidden; padding: 4px; margin-bottom: 24px; }
-        .tab-btn { flex: 1; background: transparent; color: #8A7E78; border: none; padding: 12px 0; border-radius: 16px; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active { background: var(--card-bg); box-shadow: var(--shadow-sm); color: var(--text-title); font-weight: 900; } 
+        .top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+        .back { display: inline-flex; align-items: center; gap: 2px; background: none; border: none; padding: 8px 10px 8px 0;
+                font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; }
+        .back svg { width: 20px; height: 20px; }
+        .coin { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px 7px 10px; border-radius: 999px;
+                background: #FFF; border: 1px solid var(--line); font-size: 13.5px; font-weight: 800; color: var(--ink); cursor: pointer; }
+        .coin-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+                    background: radial-gradient(circle at 35% 35%, #F3D27A, #D6A23A); box-shadow: inset 0 0 0 1px rgba(150,105,20,0.28); }
+        .coin-unit { font-size: 12px; font-weight: 700; color: var(--sub); margin-left: -2px; }
 
-        .view-section { display: none; animation: fadeIn 0.4s ease-out; }
-        .view-section.active { display: flex; flex-direction: column; flex-grow: 1; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .title { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); letter-spacing: -0.6px; margin-top: 18px; }
+        .sub { font-size: 12.5px; font-weight: 600; color: var(--sub); margin-top: 7px; line-height: 1.6; }
 
-        .card { background: var(--card-bg); border-radius: 36px; padding: 48px 24px 32px 24px; box-shadow: var(--shadow-md); border: 1px solid #FFFFFF; text-align: center; display: flex; flex-direction: column; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .tabs { display: flex; gap: 22px; margin-top: 22px; border-bottom: 1px solid var(--line); }
+        .tab { background: none; border: none; padding: 0 0 11px; font-size: 14.5px; font-weight: 700; color: var(--mute);
+               cursor: pointer; position: relative; }
+        .tab.on { color: var(--ink); }
+        .tab.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ink); border-radius: 2px; }
 
-        .day-badge-wrap { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 24px; }
-        .nav-badge { background: #F5F1EA; color: var(--text-sub); width: 36px; height: 36px; border-radius: 50%; font-size: 14px; font-weight: 900; cursor: pointer; border: none; }
-        .day-text { font-family: 'Georgia', serif; font-size: 16px; font-weight: 900; color: var(--primary); letter-spacing: 1px; }
-        
-        /* 🚨 메인 작성 화면 질문도 좌측 에세이 정렬로 변경 */
-        .question { font-size: 19px; font-weight: 800; line-height: 1.6; color: var(--text-title); text-align: left; word-break: keep-all; margin-bottom: 36px; padding: 0 10px; }
+        .view { display: none; padding-top: 20px; }
+        .view.on { display: block; animation: fade .3s ease-out; }
+        @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-        .unlinked-notice { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #FFF5F2; border: 1.5px dashed #FFB4A2; padding: 12px 20px; border-radius: 20px; margin: 0 auto 28px auto; box-shadow: 0 4px 12px rgba(255, 133, 112, 0.08); }
-        .unlinked-notice p { font-size: 13px; color: #D25E4B; margin: 0; font-weight: 700; word-break: keep-all; }
+        .card { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 18px 20px 20px; }
+        .card-head { display: flex; align-items: center; justify-content: space-between; min-height: 32px; }
+        .nav { display: flex; gap: 6px; }
+        .nav button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: #FFF; color: var(--sub);
+                      display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .nav button[disabled] { opacity: 0.35; cursor: default; }
+        .nav svg { width: 16px; height: 16px; }
+        #qa-question { margin-top: 10px; font-size: 20px; }
+        .only-parents { text-align: center; padding: 34px 10px 18px; font-size: 14px; font-weight: 600; color: var(--sub); line-height: 1.7; }
 
-        textarea { width: 100%; min-height: 180px; border: 2px solid var(--border-color); background: #FDFBF9; font-size: 16px; color: var(--text-main); resize: none; outline: none; line-height: 1.8; text-align: left; font-weight: 600; padding: 32px 24px; border-radius: 24px; box-shadow: inset 0 4px 12px rgba(138, 126, 116, 0.04); }
-        textarea:focus { border-color: #FFB4A2; background: #FFF; box-shadow: 0 0 0 4px var(--primary-light), inset 0 2px 8px rgba(138, 126, 116, 0.02); }
-        
-        .answer-bubble { background: #FDFBF9; border: 1px solid var(--border-color); padding: 24px 20px; border-radius: 24px; margin-bottom: 16px; text-align: left; position: relative; box-shadow: var(--shadow-sm); }
-        .answer-bubble.dad { border-top: 4px solid var(--dad-color); }
-        .answer-bubble.mom { border-top: 4px solid var(--mom-color); }
-        .bubble-role { font-size: 13px; font-weight: 900; margin-bottom: 12px; color: var(--text-sub); letter-spacing: 0.5px; }
-        .bubble-text { font-size: 16px; line-height: 1.7; color: var(--text-main); white-space: pre-wrap; word-break: keep-all; font-weight: 600; }
-        
-        .edit-answer-btn { position: absolute; top: 16px; right: 16px; background: #FFF; color: var(--text-sub); border: 1px solid var(--border-color); border-radius: 10px; padding: 6px 12px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow: var(--shadow-sm); }
-        .save-btn { width: 100%; padding: 20px; background: #5D5651; color: #FFF; border: none; border-radius: 20px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 24px; box-shadow: 0 8px 24px rgba(93, 86, 81, 0.2); }
-        .next-btn { width: 100%; padding: 20px; background: #F2F0EB; color: var(--text-main); border: none; border-radius: 20px; font-size: 15px; font-weight: 800; cursor: pointer; display: none; margin-top: 10px; }
+        /* 우리의 책장 */
+        .rows { border-top: 1px solid var(--line); }
+        .row { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 2px;
+               background: none; border: none; border-bottom: 1px solid var(--line); cursor: pointer; text-align: left; }
+        .row-t { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+        .h2 { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--ink); margin-top: 34px; letter-spacing: -0.4px; }
+        .past { margin-top: 14px; border-top: 1px solid var(--line); }
+        .past-row { display: flex; width: 100%; align-items: center; gap: 10px; padding: 14px 2px; background: none; border: none;
+                    border-bottom: 1px solid var(--line); cursor: pointer; text-align: left; }
+        .past-no { width: 38px; flex-shrink: 0; font-family: var(--serif); font-size: 15px; font-weight: 700; color: var(--mute); }
+        .past-q { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .past-q.on { color: var(--ink); }
+        .past-st { flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--sub); }
+        .past-st.open { color: var(--ink); font-weight: 700; }
+        .past-st.mute { color: var(--mute); }
+        .past-more { display: block; width: 100%; padding: 15px; background: none; border: none; font-size: 13.5px; font-weight: 700;
+                     color: var(--sub); cursor: pointer; }
 
-        .history-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 40px; }
-        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-sub); font-size: 15px; line-height: 1.6; font-weight: 700; }
-        .history-card { background: var(--card-bg); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .history-day-label { font-family: 'Georgia', serif; font-size: 13px; font-weight: 800; color: var(--primary); letter-spacing: 1px; }
-        .q-text { font-size: 18px; font-weight: 900; color: var(--text-title); margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
-        .a-text { font-size: 15px; color: var(--text-main); line-height: 1.6; margin-bottom: 12px; background: #FDFBF9; padding: 16px; border-radius: 14px; }
-        .a-role { font-size: 12px; font-weight: 900; color: var(--text-sub); margin-bottom: 6px; }
+        /* 아래에서 올라오는 창 · 가운데 창 */
+        .sheet-wrap { position: fixed; inset: 0; z-index: 9000; background: rgba(43,36,30,0.45); display: none;
+                      align-items: flex-end; justify-content: center; opacity: 0; transition: opacity .25s; }
+        .sheet-wrap.on { display: flex; }
+        .sheet-wrap.show { opacity: 1; }
+        .sheet { width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; background: var(--paper);
+                 border-radius: 24px 24px 0 0; transform: translateY(40px); transition: transform .35s cubic-bezier(.2,.8,.2,1);
+                 padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .sheet-wrap.show .sheet { transform: none; }
+        .sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 16px 14px 20px; }
+        .sheet-title { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.4px; }
+        .x { background: none; border: none; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+             color: var(--mute); cursor: pointer; flex-shrink: 0; }
+        .x svg { width: 20px; height: 20px; }
 
-        /* =======================================================
-           📖 프리미엄 베이비북(PDF) 하이엔드 뷰어 모달
-           ======================================================= */
-        .pdf-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; opacity: 0; transition: opacity 0.3s; }
-        .pdf-modal-content { background: #EFEBE4; width: 100%; max-width: 480px; height: 85vh; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.4); transform: translateY(50px); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .pdf-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border-bottom: 1px solid #E5E0DA; z-index: 10; }
-        .pdf-header h2 { font-size: 16px; font-weight: 900; color: #3E3A37; margin: 0; letter-spacing: -0.5px; }
-        
-        .pdf-body { flex: 1; overflow-y: auto; padding: 40px 20px; display: flex; flex-direction: column; gap: 32px; background: #EFEBE4; align-items: center; }
-        
-        .premium-book-page { width: 100%; max-width: 360px; min-height: 480px; padding: 50px 36px; position: relative; box-shadow: 2px 4px 16px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.1); border-radius: 2px 6px 6px 2px; }
-        .premium-book-page::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 30px; background: linear-gradient(to right, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 100%); pointer-events: none; }
-        
-        .premium-cover { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-left: 4px solid; padding: 60px 30px; }
+        .cover-stage { background: #F3EBE1; height: 230px; display: flex; align-items: center; justify-content: center; }
+        .mini-book { width: 128px; height: 184px; border-radius: 2px 6px 6px 2px; box-shadow: 4px 10px 26px rgba(80,60,40,0.16);
+                     border-left: 5px solid; display: flex; flex-direction: column; justify-content: center; align-items: center;
+                     text-align: center; padding: 18px 14px; position: relative; transition: background .3s; }
+        .mini-book::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 14px;
+                             background: linear-gradient(to right, rgba(0,0,0,0.06), rgba(0,0,0,0)); }
+        .shop { padding: 16px 20px 24px; }
+        .shop-note { font-size: 12.5px; font-weight: 600; color: var(--sub); line-height: 1.65; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+        .shop-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+        .swatch { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; }
+        .shop-name { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+        .shop-desc { font-size: 12px; font-weight: 600; color: var(--sub); margin-top: 3px; }
+        .shop-act { margin-left: auto; flex-shrink: 0; }
+        .pay, .use { padding: 8px 13px; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .pay { border: none; background: var(--ink); color: #FFFDF9; }
+        .pay.short { background: var(--tint); color: var(--mute); }
+        .use { border: 1px solid var(--line); background: #FFF; color: var(--ink); }
+        .using { display: inline-block; font-size: 13px; font-weight: 700; color: var(--gold); padding: 8px 4px; }
+        .shop-foot { font-size: 11.5px; color: var(--mute); text-align: center; margin-top: 18px; }
 
-        /* =======================================================
-           📚 프리미엄 북 테마 상점 모달
-           ======================================================= */
-        .store-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); display: none; flex-direction: column; justify-content: flex-end; z-index: 9999; }
-        .store-modal-content { background: var(--bg-color); width: 100%; height: 90vh; border-radius: 32px 32px 0 0; display: flex; flex-direction: column; overflow: hidden; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -20px 50px rgba(0,0,0,0.2); }
-        .store-header { padding: 24px; display: flex; justify-content: space-between; align-items: center; background: #FFF; border-bottom: 1px solid var(--border-color); z-index: 20; }
-        
-        .store-preview-area { height: 260px; background: #F8F9FA; border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
-        .mini-book-wrap { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
-        
-        .mini-book { width: 140px; height: 200px; border-radius: 2px 6px 6px 2px; box-shadow: 4px 8px 24px rgba(0,0,0,0.1); border-left: 4px solid; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px 16px; position: relative; transition: 0.3s; }
-        .mini-book::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 15px; background: linear-gradient(to right, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 100%); pointer-events: none; }
-        
-        .shop-area { flex: 1; background: #FDFBF9; padding: 20px; overflow-y: auto; }
-        .shop-grid { display: flex; flex-direction: column; gap: 12px; }
-        .shop-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; box-shadow: var(--shadow-sm); }
-        .shop-item:active { transform: scale(0.98); }
-        .shop-item.active-theme { border: 2px solid #7F77DD; background: #F2F0FC; }
-        .shop-item-left { display: flex; align-items: center; gap: 16px; }
-        .theme-color-circle { width: 44px; height: 44px; border-radius: 50%; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); flex-shrink: 0; }
-        .shop-item-name { font-size: 15px; font-weight: 900; color: var(--text-title); margin-bottom: 4px; }
-        .shop-item-desc { font-size: 12px; font-weight: 600; color: var(--text-sub); }
-        .shop-item-btn { font-size: 13px; font-weight: 900; padding: 8px 16px; border-radius: 12px; flex-shrink: 0; transition: 0.2s; border: none; cursor: pointer; }
-        .btn-buy { background: #4A413C; color: #FFF; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .btn-equip { background: #EBE5DD; color: #4A413C; }
-        .btn-equipped { background: transparent; color: #7F77DD; pointer-events: none; }
+        .pv-wrap { position: fixed; inset: 0; z-index: 9100; background: rgba(43,36,30,0.55); display: none; align-items: center;
+                   justify-content: center; padding: 18px; opacity: 0; transition: opacity .25s; }
+        .pv-wrap.on { display: flex; }
+        .pv-wrap.show { opacity: 1; }
+        .pv { width: 100%; max-width: 440px; height: 86vh; background: var(--paper); border-radius: 24px; display: flex;
+              flex-direction: column; overflow: hidden; transform: translateY(30px); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+        .pv-wrap.show .pv { transform: none; }
+        .pv-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 14px 12px 22px; border-bottom: 1px solid var(--line); }
+        .pv-body { flex: 1; overflow-y: auto; background: #EFE7DC; padding: 24px 16px 30px; display: flex; flex-direction: column;
+                   align-items: center; gap: 20px; -webkit-overflow-scrolling: touch; }
+        .page { width: 100%; max-width: 340px; min-height: 430px; padding: 40px 30px; position: relative; text-align: left;
+                box-shadow: 2px 4px 16px rgba(0,0,0,0.07); border-radius: 2px 6px 6px 2px; border-left: 4px solid; }
+        .page::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 26px; pointer-events: none;
+                        background: linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0)); }
+        .pv-empty { text-align: center; color: var(--sub); padding: 30px 10px; font-size: 13.5px; font-weight: 600; line-height: 1.7; }
+        .pv-foot { padding: 16px 22px calc(16px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line);
+                   text-align: center; background: var(--paper); flex-shrink: 0; }
+
+        .cf-wrap { position: fixed; inset: 0; z-index: 9300; background: rgba(43,36,30,0.45); display: flex; align-items: center;
+                   justify-content: center; padding: 24px; }
+        .cf { width: 100%; max-width: 320px; background: var(--paper); border-radius: 20px; padding: 26px 20px 18px; text-align: center; }
+        .cf-t { font-family: var(--serif); font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--ink); word-break: keep-all; }
+        .cf-s { font-size: 13px; font-weight: 600; color: var(--sub); margin-top: 8px; line-height: 1.65; word-break: keep-all; }
+        .cf-btns { display: flex; gap: 8px; margin-top: 20px; }
+        .cf-btns button { flex: 1; padding: 14px; border-radius: 13px; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+        .cf-no { background: #FFF; border: 1px solid var(--line); color: var(--sub); }
+        .cf-ok { background: var(--ink); border: none; color: #FFFDF9; }
+
+        .setup { position: fixed; inset: 0; z-index: 9500; background: rgba(43,36,30,0.5); display: none; align-items: center;
+                 justify-content: center; padding: 24px; }
+        .setup-card { width: 100%; max-width: 330px; background: var(--paper); border-radius: 24px; padding: 30px 22px 22px; text-align: center; }
+        .setup-btns { display: flex; gap: 10px; margin-top: 24px; }
+        .setup-btns button { flex: 1; padding: 18px 0; border-radius: 16px; border: 1px solid var(--line); background: #FFF;
+                             font-size: 16px; font-weight: 800; color: var(--ink); cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="wrapper">
-       <header class="nav-header">
-            <div style="display:flex; gap:8px;">
-                <button class="home-btn" onclick="window.leaveDiary()">❮ 홈</button>
-            </div>
-
-            <div class="coin-badge" onclick="openStoreModal()">
-                <span>🪙</span> <span id="header-coin-count">0</span>
-            </div>
+        <header class="top">
+            <button class="back" onclick="window.leaveDiary()" aria-label="홈으로">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>홈
+            </button>
+            <!-- ⚠️ '🪙 0' 만 있어서 무엇인지 알 수 없었다. 코인이라고 적고, 누르면 쓰는 곳(표지)이 열린다 -->
+            <button class="coin" onclick="openStoreModal()" aria-label="모은 코인 · 표지 고르기">
+                <span class="coin-dot"></span><span id="header-coin-count">0</span><span class="coin-unit">코인</span>
+            </button>
         </header>
 
-        <div style="display: flex; justify-content: center; margin-bottom: 32px;">
-            <div class="tab-group" style="width: 100%;">
-                <button class="tab-btn active" id="btn-tab-write" onclick="switchTab('write')">오늘의 기록</button>
-                <button class="tab-btn" id="btn-tab-read" onclick="switchTab('read')">우리의 책장</button>
-            </div>
-        </div>
+        <h1 class="title">우리의 문답</h1>
+        <p class="sub">하루에 한 질문. 둘 다 쓰면 서로의 답이 열려요.</p>
 
-        <!-- ✍️ 쓰기 탭 -->
-        <div id="view-write" class="view-section active">
-            <main class="card">
-                <div class="day-badge-wrap">
-                    <button class="nav-badge" onclick="moveQuestion(-1)">❮</button>
-                    <div><div class="day-text" id="diary-day">DAY 1</div></div>
-                    <button class="nav-badge" onclick="moveQuestion(1)">❯</button>
-                </div>
+        <nav class="tabs">
+            <button class="tab on" id="btn-tab-write" onclick="switchTab('write')">오늘의 문답</button>
+            <button class="tab" id="btn-tab-read" onclick="switchTab('read')">우리의 책장</button>
+        </nav>
 
-                <h1 class="question" id="question-text">질문을 불러오는 중…</h1>
-                
-                <div id="answer-section">
-                    <div id="input-mode">
-                        <div class="unlinked-notice" id="unlinked-notice" style="display: none;">
-                            <p>💌 연동 전 작성한 글은 <b>나만의 일기장</b>에 쏙 보관돼요</p>
-                        </div>
-                        <textarea id="my-answer" placeholder="생각나는 대로 짧게 적어도 돼요."></textarea>
-                        <button class="save-btn" id="btn-submit">기록 남기기</button>
-                    </div>
-
-                    <div id="view-mode" style="display: none;">
-                        <div class="answer-bubble dad" id="view-husband-card" style="display:none;">
-                            <button class="edit-answer-btn" onclick="enableEditMode('husband')" id="edit-btn-husband" style="display:none;">수정</button>
-                            <div class="bubble-role">아빠</div>
-                            <div class="bubble-text" id="view-husband-text"></div>
-                        </div>
-
-                        <div class="answer-bubble mom" id="view-wife-card" style="display:none;">
-                            <button class="edit-answer-btn" onclick="enableEditMode('wife')" id="edit-btn-wife" style="display:none;">수정</button>
-                            <div class="bubble-role">엄마</div>
-                            <div class="bubble-text" id="view-wife-text"></div>
-                        </div>
-                        
-                        <button class="next-btn" id="next-btn" onclick="moveQuestion(1)">다음 장 쓰기 ›</button>
+        <!-- ✍️ 쓰기 -->
+        <section id="view-write" class="view on">
+            <article class="card">
+                <div class="card-head">
+                    <span class="qa-meta" id="qa-dayno">1번째 질문</span>
+                    <div class="nav">
+                        <button id="qa-prev" onclick="moveQuestion(-1)" aria-label="앞 질문">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <button id="qa-nextq" onclick="moveQuestion(1)" aria-label="다음 질문">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
                     </div>
                 </div>
-            </main>
-        </div>
+                <h2 class="qa-q" id="qa-question">질문을 불러오는 중…</h2>
+                <div id="qa-body"></div>
+            </article>
+        </section>
 
-        <!-- 📖 서재 (모아보기) 탭 -->
-        <div id="view-read" class="view-section">
-            <div class="book-progress-wrap" style="display: flex; justify-content: space-between; align-items: center; background: #F8F9FA; padding: 24px 20px; border-radius: 20px; border: 1px solid #EDE6DE; margin-bottom: 48px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-                <div style="text-align: left;">
-                    <div style="font-family: 'Georgia', serif; font-size: 11px; color: #A39D98; letter-spacing: 1.5px; margin-bottom: 6px;">Premium Essay</div>
-                    <div style="font-size: 15px; font-weight: 800; color: #3E3A37; line-height: 1.4;">우리의 기록이 모여<br>한 권의 책이 됩니다</div>
-                </div>
-                <button onclick="openPdfPreview()" style="background: #FFFFFF; color: #7A6F68; border: 1px solid #D1D6DB; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    미리보기 ›
+        <!-- 📖 우리의 책장 — bookshelf.js 가 맨 위에 책장(#bookshelf-box)을 꽂는다 -->
+        <section id="view-read" class="view">
+            <div class="rows">
+                <button class="row" onclick="openPdfPreview()">
+                    <span class="row-t">책으로 미리보기</span><span class="qa-meta">둘 다 쓴 날이 한 쪽이 돼요 ›</span>
+                </button>
+                <button class="row" onclick="openStoreModal()">
+                    <span class="row-t">표지 고르기</span><span class="qa-meta" id="row-coin">코인 0 ›</span>
                 </button>
             </div>
-            <main class="history-list" id="history-container"></main>
-        </div>
+            <h2 class="h2" id="past">지난 문답</h2>
+            <p class="qa-meta" style="margin-top:6px;">지난 질문에도 언제든 답할 수 있어요.</p>
+            <div class="past" id="qa-past"></div>
+        </section>
     </div>
 
-    <!-- 📚 프리미엄 북 테마 상점 모달 -->
-    <div id="store-modal" class="store-modal-overlay" onclick="closeStoreModal(event)">
-        <div class="store-modal-content" onclick="event.stopPropagation()">
-            <div class="store-header">
-                <div style="font-size: 18px; font-weight: 900; color: var(--text-title);">📚 표지 고르기</div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="coin-badge" style="margin: 0; padding: 8px 12px; background:var(--bg-color); border:none; box-shadow:none; color:var(--text-title);">
-                        <span>🪙</span> <span id="modal-coin-count">0</span>
-                    </div>
-                    <button onclick="closeStoreModalForce()" style="background: none; border: none; font-size: 24px; color: var(--text-sub); cursor: pointer;">✕</button>
+    <!-- 📚 표지 고르기 -->
+    <div id="store-modal" class="sheet-wrap" onclick="closeStoreModal(event)">
+        <div class="sheet" onclick="event.stopPropagation()">
+            <div class="sheet-head">
+                <div class="sheet-title">표지 고르기</div>
+                <div style="display:flex; align-items:center; gap:4px;">
+                    <span class="coin" style="cursor:default;"><span class="coin-dot"></span><span id="modal-coin-count">0</span><span class="coin-unit">코인</span></span>
+                    <button class="x" onclick="closeStoreModalForce()" aria-label="닫기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
                 </div>
             </div>
-            
-            <div class="store-preview-area" id="store-preview-area"></div>
-
-            <div class="shop-area">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-sub); margin-bottom: 16px;">코인으로 바꾸는 표지</div>
-                <div class="shop-grid" id="store-grid-container"></div>
-                
-                <!-- 🚨 [방어 문구 추가] -->
-                <div style="margin-top: 24px; font-size: 11px; color: #A39D98; text-align: center; line-height: 1.5; letter-spacing: -0.3px;">
-                    * 화면과 실제 종이 색은 조금 다를 수 있어요.
-                </div>
+            <div class="cover-stage" id="store-preview-area"></div>
+            <div class="shop">
+                <div class="shop-note">질문에 답할 때마다 코인이 100개씩 쌓여요. 모은 코인으로 책 표지 색을 바꿀 수 있어요.</div>
+                <div id="store-grid-container"></div>
+                <div class="shop-foot">* 화면과 실제 종이 색은 조금 다를 수 있어요.</div>
             </div>
         </div>
     </div>
 
-    <!-- 📖 프리미엄 에세이북 미리보기 모달 -->
-    <div id="pdf-preview-modal" class="pdf-modal-overlay">
-        <div class="pdf-modal-content">
-            <div class="pdf-header">
-                <h2>📖 책으로 미리보기</h2>
-                <button onclick="closePdfPreview()" style="background:none; border:none; font-size:24px; color:#A39992; cursor:pointer;">✕</button>
+    <!-- 📖 책으로 미리보기 -->
+    <div id="pdf-preview-modal" class="pv-wrap" onclick="if (event.target === this) closePdfPreview()">
+        <div class="pv">
+            <div class="pv-head">
+                <div class="sheet-title" style="font-size:18px;">책으로 미리보기</div>
+                <button class="x" onclick="closePdfPreview()" aria-label="닫기">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
             </div>
-            <div class="pdf-body" id="pdf-pages-container"></div>
-            
-           <!-- 🌟 투명하고 세련된 출판 안내 하단 바 (오해 방지 & 기대감 고취) -->
-            <div style="padding: 20px 24px; background:#FFFFFF; border-top:1px solid #E8E3DD; text-align:center; flex-shrink: 0;">
-                <!-- ⚠️ 여기 있던 문구와 버튼을 고쳤습니다. 이유를 적어둡니다.
+            <div class="pv-body" id="pdf-pages-container"></div>
+            <div class="pv-foot">
+                <!-- ⚠️ 여기 있던 문구와 버튼을 고쳤다. 이유를 적어 둔다.
 
-                     전에는 이렇게 되어 있었습니다.
+                     전에는 이렇게 되어 있었다.
                        "하드커버 양장본 실물 책으로 소장하실 수 있습니다"
                        [실물 양장본 출판 사전 안내 신청하기]
-                       → 누르면 alert 하나. 신청이 어디에도 안 남습니다.
+                       → 누르면 alert 하나. 신청이 어디에도 안 남았다.
 
-                     세 가지가 문제였습니다.
-                       ① "소장하실 수 있습니다" 는 이미 되는 것처럼 들립니다.
-                          제작처도 값도 아직 없습니다.
-                       ② "사전 예약" 은 법적으로 청약 유인입니다.
-                          받아놓고 안 만들면 그건 약속을 어긴 게 됩니다.
-                       ③ 버튼을 눌러도 아무 데도 안 남으니, 정작 열었을 때
-                          누구에게 알려야 할지 모릅니다. 알려준다는 말도 거짓말이 됩니다.
+                     세 가지가 문제였다.
+                       ① "소장하실 수 있습니다" 는 이미 되는 것처럼 들린다. 제작처도 값도 아직 없다.
+                       ② "사전 예약" 은 법적으로 청약 유인이다. 받아 놓고 안 만들면 약속을 어긴 게 된다.
+                       ③ 버튼을 눌러도 아무 데도 안 남으니, 정작 열었을 때 누구에게 알려야 할지 모른다.
 
-                     지금 사실대로 적고, 신청은 진짜로 남깁니다. -->
-
-                <div style="font-size: 11.5px; color: #8A7E78; margin-bottom: 12px; line-height: 1.6; font-weight: 600; letter-spacing: -0.3px;">
-                    100쪽이 차면 <b style="color: #4A413C;">종이책으로 만드는 걸 준비하고 있어요.</b><br>
-                    아직 값과 제작처를 정하는 중이라 신청은 못 받습니다.
+                     지금 사실대로 적고, 신청은 진짜로 남긴다 (paperbook.js → waitlist_paperbook). -->
+                <div style="font-size:12px; color:var(--sub); line-height:1.65; font-weight:600; word-break:keep-all;">
+                    100쪽이 차면 <b style="color:var(--ink);">종이책으로 만드는 걸 준비하고 있어요.</b><br>
+                    아직 값과 제작처를 정하는 중이라 신청은 못 받아요.
                 </div>
-                <button id="book-notify-btn" onclick="window.notifyPaperBook && window.notifyPaperBook()" style="width:100%; padding:16px; background:#4A413C; color:#FFF; border:none; border-radius:16px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 8px 16px rgba(74, 65, 60, 0.15); transition: 0.2s;">
-                    열리면 알려주세요
-                </button>
-                <div style="font-size:10.5px; color:#A79C90; margin-top:9px; line-height:1.5; font-weight:600;">
-                    이름만 적어두는 거예요. 결제도, 예약도 아닙니다.
+                <button id="book-notify-btn" class="qa-btn solid" onclick="window.notifyPaperBook && window.notifyPaperBook()">열리면 알려 주세요</button>
+                <div style="font-size:11px; color:var(--mute); margin-top:9px; line-height:1.5; font-weight:600;">
+                    이름만 적어 두는 거예요. 결제도, 예약도 아니에요.
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 👩‍👧 온보딩 모달 -->
-    <div id="setup-modal" class="modal-overlay" style="display:none; z-index:99999; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); justify-content:center; align-items:center;">
-        <div style="background:var(--card-bg); width:100%; max-width:320px; border-radius:24px; padding:32px 24px; text-align:center;">
-            <h2 style="font-size:22px; font-weight:900; margin-bottom:12px; color:var(--text-title);" id="diary-welcome-title">반가워요 👋</h2>
-            <p style="margin-bottom:30px; color:var(--text-sub); line-height:1.5; font-weight:600; font-size:15px;">서로의 이야기를 담기 위해<br>나의 역할을 선택해주세요.</p>
-            <div style="display:flex; gap:10px;">
-                <button onclick="saveSetup('husband')" style="flex:1; padding:20px 0; background:var(--primary-light); border:1px solid #D5D1F4; border-radius:16px; color:var(--primary); font-size:16px; font-weight:900; cursor:pointer;">👨 아빠</button>
-                <button onclick="saveSetup('wife')" style="flex:1; padding:20px 0; background:var(--mom-light); border:1px solid #FFD1D1; border-radius:16px; color:var(--mom-color); font-size:16px; font-weight:900; cursor:pointer;">👩 엄마</button>
+    <!-- 👩‍👧 누가 쓰는지 -->
+    <div id="setup-modal" class="setup">
+        <div class="setup-card">
+            <div class="cf-t" style="font-size:21px;" id="diary-welcome-title">반가워요</div>
+            <div class="cf-s">서로의 이야기를 나눠 담으려면<br>누가 쓰는지 알아야 해요.</div>
+            <div class="setup-btns">
+                <button onclick="saveSetup('husband')">아빠</button>
+                <button onclick="saveSetup('wife')">엄마</button>
             </div>
         </div>
     </div>
 
     <script src="data.js"></script>
-    
-    <script>
-        const STORE_DB = [
-            { id: 'theme_beige', name: '크림 화이트 (기본)', desc: '기본 종이 색', price: 0, bg: '#FCFBF8', borderLeft: '#EAE5DF', textTitle: '#4A413C', textSub: '#A39992', line: '#EAE5DF' },
-            { id: 'theme_sand', name: '뮤트 샌드', desc: '따뜻한 모래색', price: 500, bg: '#F4F1EB', borderLeft: '#D6CFC4', textTitle: '#4A413C', textSub: '#8A7E78', line: '#D6CFC4' },
-            { id: 'theme_blossom', name: '페일 로즈', desc: '말린 장미색', price: 800, bg: '#F8F1F1', borderLeft: '#E6D5D5', textTitle: '#5C414A', textSub: '#A89299', line: '#E6D5D5' },
-            { id: 'theme_forest', name: '소프트 세이지', desc: '은은한 풀잎색', price: 1200, bg: '#F1F4F2', borderLeft: '#C8D4CB', textTitle: '#2C3A32', textSub: '#7B8C81', line: '#C8D4CB' },
-            { id: 'theme_navy', name: '미드나잇 블루', desc: '짙은 밤하늘색', price: 1500, bg: '#2B2F36', borderLeft: '#3A3F4A', textTitle: '#F0EDE6', textSub: '#8E94A0', line: '#3A3F4A' }
-        ];
-
-        window.updateCoinUI = function() {
-            let coins = parseInt(localStorage.getItem('tosil_coins')) || 0;
-            document.getElementById('header-coin-count').innerText = coins;
-            if(document.getElementById('modal-coin-count')) document.getElementById('modal-coin-count').innerText = coins;
-        };
-
-        window.openStoreModal = function() {
-            window.updateCoinUI();
-            let inventory = JSON.parse(localStorage.getItem('tosil_inventory')) || [];
-            if(!inventory.includes('theme_beige')) {
-                inventory.push('theme_beige');
-                localStorage.setItem('tosil_inventory', JSON.stringify(inventory));
-            }
-            window.renderStore();
-            document.getElementById('store-modal').style.display = 'flex';
-            setTimeout(() => { document.querySelector('.store-modal-content').style.transform = 'translateY(0)'; }, 10);
-        };
-
-        window.closeStoreModalForce = function() {
-            document.querySelector('.store-modal-content').style.transform = 'translateY(100%)';
-            setTimeout(() => { document.getElementById('store-modal').style.display = 'none'; }, 400);
-        };
-
-        window.closeStoreModal = function(e) {
-            if (e.target.id === 'store-modal') window.closeStoreModalForce();
-        };
-
-        window.renderStore = function() {
-            const container = document.getElementById('store-grid-container');
-            let inventory = JSON.parse(localStorage.getItem('tosil_inventory')) || ['theme_beige'];
-            let activeThemeId = localStorage.getItem('tosil_active_theme') || 'theme_beige';
-            
-            window.renderMiniBookPreview(activeThemeId);
-            
-            let html = '';
-            STORE_DB.forEach(item => {
-                const isOwned = inventory.includes(item.id);
-                const isActive = activeThemeId === item.id;
-                
-                let btnHtml = '';
-                if (isActive) {
-                    btnHtml = `<button class="shop-item-btn btn-equipped">적용됨</button>`;
-                } else if (isOwned) {
-                    btnHtml = `<button class="shop-item-btn btn-equip" onclick="window.buyOrApplyTheme('${item.id}', 0)">적용하기</button>`;
-                } else {
-                    btnHtml = `<button class="shop-item-btn btn-buy" onclick="window.buyOrApplyTheme('${item.id}', ${item.price})">${item.price}🪙 구매</button>`;
-                }
-
-                html += `
-                    <div class="shop-item ${isActive ? 'active-theme' : ''}">
-                        <div class="shop-item-left">
-                            <div class="theme-color-circle" style="background: ${item.bg}; border: 1px solid ${item.line};"></div>
-                            <div style="text-align:left;">
-                                <div class="shop-item-name">${item.name}</div>
-                                <div class="shop-item-desc">${item.desc}</div>
-                            </div>
-                        </div>
-                        ${btnHtml}
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        };
-
-        window.renderMiniBookPreview = function(themeId) {
-            const theme = STORE_DB.find(t => t.id === themeId) || STORE_DB[0];
-            const area = document.getElementById('store-preview-area');
-            const babyName = window.escHTML(localStorage.getItem('tosil_babyName') || '아기');
-            
-            area.innerHTML = `
-                <div class="mini-book-wrap">
-                    <div class="mini-book" style="background: ${theme.bg}; border-left-color: ${theme.borderLeft};">
-                        <div style="font-size: 8px; color: ${theme.textSub}; margin-bottom: 12px; letter-spacing: 1px;">우리가 처음 만난<br>그 해의 기록</div>
-                        <div style="font-size: 14px; font-weight: 900; color: ${theme.textTitle}; margin-bottom: 6px;">${babyName}</div>
-                        <div style="width: 12px; height: 1px; background: ${theme.line}; margin: 0 auto;"></div>
-                    </div>
-                </div>
-            `;
-        };
-
-        window.buyOrApplyTheme = function(id, price) {
-            let inventory = JSON.parse(localStorage.getItem('tosil_inventory')) || ['theme_beige'];
-            let coins = parseInt(localStorage.getItem('tosil_coins')) || 0;
-
-            if (!inventory.includes(id)) {
-                if (coins < price) return window.showToast("코인이 모자라요. 매일 한 쪽씩 쓰면 모여요.");
-                if (confirm(`[${STORE_DB.find(i=>i.id===id).name}] 표지를 ${price}코인으로 바꿀까요?`)) {
-                    coins -= price;
-                    inventory.push(id);
-                    localStorage.setItem('tosil_coins', coins);
-                    localStorage.setItem('tosil_inventory', JSON.stringify(inventory));
-                    window.showToast("새 표지로 바꿨어요");
-                } else {
-                    return;
-                }
-            }
-            
-            localStorage.setItem('tosil_active_theme', id);
-            window.updateCoinUI();
-            window.renderStore();
-        };
-    </script>
-    
-    <!-- Firebase 로직 (메인 프로젝트와 완벽 통합 & 익명 로그인 삭제 완료!) -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    /* ⚠️ 이 페이지엔 Functions 가 없었다.
-          diarylock.js 의 재촉 버튼과 '답 남겼어요' 알림이 window.functions 를 찾다가
-          늘 "잠시 뒤 다시 눌러주세요" 로 끝났다. 알림이 한 번도 안 나갔다. */
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-
-    // 🚨 1. 다이어리용이 아닌, '메인 앱(happybaby)'의 파이어베이스 주소로 통일!
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
-        authDomain: "happybaby-6de42.firebaseapp.com",
-        projectId: "happybaby-6de42",
-        storageBucket: "happybaby-6de42.firebasestorage.app",
-        messagingSenderId: "1075311024495",
-        appId: "1:1075311024495:web:b9212eab58802dabf9709a"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app); 
-    const auth = getAuth(app);
-    // sendFamilyPush 는 서울(asia-northeast3) 에 배포돼 있다
-    window.functions = getFunctions(app, "asia-northeast3");
-    window.httpsCallable = httpsCallable;
-
-    // index.html 에서 로그인한 세션을 이 페이지가 물려받는다.
-    // Auth 모듈을 초기화하지 않으면 Firestore 가 토큰을 못 붙여서
-    // 규칙의 signedIn() 이 false 가 되고 permission-denied 가 난다.
-    const authReady = new Promise(function (resolve) {
-        const stop = onAuthStateChanged(auth, function (user) {
-            stop();
-            resolve(user);
-        });
-    });
-
-    let unsubscribe = null;
-
-    window.getCurrentDay = function() {
-        return parseInt(document.getElementById("diary-day").innerText.replace("DAY ", "")) || 1;
-    };
-
-  // index.html 이 로그인 직후 TS-XXXXXXXX 코드를 발급하고
-    // families/{코드} 문서까지 만들어 둔다. 1인 유저도 이미 자기 방이 있다.
-    //
-    // 예전의 "personal_backup_" + kakaoId 는 오히려 독이었다.
-    // 규칙이 collectionId.split('_')[1] 로 가족 코드를 찾는데,
-    // diary_personal_backup_123 을 쪼개면 두 번째 조각이 'personal' 이라
-    // families/personal 을 찾다가 항상 거부당한다. 밑줄이 구조를 깨뜨렸다.
-    function getSafeSyncCode() {
-        return localStorage.getItem("family_sync_code") || null;
-    }
-
-    function myAnsKey() {
-        return (localStorage.getItem("tosil_userRole") || "husband") === "husband" ? "husbandAns" : "wifeAns";
-    }
-    function readLocalDay(day) {
-        try { return JSON.parse(localStorage.getItem(`day_${day}_data`)) || {}; } catch (e) { return {}; }
-    }
-
-    /* 못 올린 날 — 저장은 눌렀는데 서버가 아직 못 받은 내 답 */
-    const PENDING_KEY = "tosil_diary_pending";
-    function pendingDays() {
-        try { return (JSON.parse(localStorage.getItem(PENDING_KEY)) || []).map(Number).filter(Boolean); }
-        catch (e) { return []; }
-    }
-    function isPending(day) { return pendingDays().indexOf(Number(day)) > -1; }
-    function markPending(day, on) {
-        const l = pendingDays().filter(function (d) { return d !== Number(day); });
-        if (on) l.push(Number(day));
-        try { localStorage.setItem(PENDING_KEY, JSON.stringify(l)); } catch (e) {}
-    }
-
-    /* 칸마다 비어 있지 않은 쪽을 쓴다. 둘 다 있으면 서버가 기준이다.
-       단, 아직 못 올린 내 글은 이 폰이 맞다 (서버엔 옛 글이 있을 수 있다). */
-    function mergeDay(day, local, server) {
-        const merged = Object.assign({}, local || {});
-        const keepMine = isPending(day) ? myAnsKey() : null;
-        ["husbandAns", "wifeAns", "date"].forEach(function (k) {
-            if (k === keepMine && merged[k]) return;
-            if (server && server[k]) merged[k] = server[k];
-        });
-        return merged;
-    }
-
-     window.startFamilyNameSync = async function() {
-        /* ⚠️ startSync 가 일차를 넘길 때마다 이걸 불러서
-              onSnapshot 이 넘긴 횟수만큼 쌓였다. 한 번이면 된다. */
-        if (window.__familyNameSyncOn) return;
-        window.__familyNameSyncOn = true;
-        const syncCode = getSafeSyncCode();
-        if (!syncCode) return; // 코드가 없으면 서버 통신 안 함
-        if (!(await authReady)) return; // 로그인 전이면 서버 통신 안 함
-        
-        const myKakaoName = localStorage.getItem("kakao_nickname");
-        const myRole = localStorage.getItem("tosil_userRole"); 
-        
-        const nameDocRef = doc(db, "settings_" + syncCode, "family_names");
-        if (myKakaoName && myRole) {
-            setDoc(nameDocRef, { [myRole]: myKakaoName }, { merge: true }).catch(()=>{});
-        }
-        
-        onSnapshot(nameDocRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.wife) localStorage.setItem('family_wife_name', data.wife);
-                if (data.husband) localStorage.setItem('family_husband_name', data.husband);
-            }
-        });
-    };
-
-  window.startSync = async function() {
-        window.startFamilyNameSync();
-        
-        const currentDay = window.getCurrentDay();
-        const currentRole = localStorage.getItem("tosil_userRole") || "husband";
-        const syncCode = getSafeSyncCode(); // 👈 안전한 코드로 불러오기
-        
-        // 연동을 안 한 유저라면 안내 문구 띄우기
-        const noticeEl = document.getElementById("unlinked-notice");
-        if (noticeEl) noticeEl.style.display = (!localStorage.getItem("family_sync_code")) ? "inline-flex" : "none"; 
-
-        const localDataStr = localStorage.getItem(`day_${currentDay}_data`);
-        let localData = localDataStr ? JSON.parse(localDataStr) : {};
-
-        window.renderCurrentCard(localData, currentRole);
-
-    // 코드가 없으면 서버에서 받아오는 리스너 작동 안 함 (로컬에서만 쾌적하게 작동)
-        if (!syncCode) return;
-        if (!(await authReady)) return; // 로그인이 붙기 전엔 로컬만 쓴다
-
-        const docRef = doc(db, "diary_" + syncCode, `day_${currentDay}`);
-        if (unsubscribe) unsubscribe();
-
-        unsubscribe = onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists()) {
-                /* ⚠️ 서버 사본으로 통째로 덮었다.
-                      아직 서버에 못 올라간 내 답(지하철·엘리베이터·비행기 모드)이 있으면
-                      앱을 다시 여는 순간 그게 지워졌다. 칸마다 합친다. */
-                const fireData = mergeDay(currentDay, readLocalDay(currentDay), docSnap.data());
-                localStorage.setItem(`day_${currentDay}_data`, JSON.stringify(fireData));
-                window.renderCurrentCard(fireData, currentRole);
-            }
-        });
-    };
-
-    /* ⚠️ 문답은 '지금 보고 있는 일차' 만 서버에서 받아왔다.
-          폰을 바꾸거나 앱을 다시 깔면 우리의 책장·배냇함·포토북이 전부 비었다.
-          서버엔 다 있는데 화면엔 없는 것 — 사용자에겐 '사라진 것' 과 같다.
-          하루 한 번, 그리고 이 폰에 문답이 하나도 없을 때 통째로 받아온다. */
-    window.pullAllDiary = async function(force) {
-        const syncCode = getSafeSyncCode();
-        if (!syncCode) return 0;
-        if (!(await authReady)) return 0;
-
-        let localCount = 0;
-        for (let i = 1; i <= (window.DIARY_MAX_DAY || 2000); i++) {
-            if (localStorage.getItem(`day_${i}_data`)) { localCount++; break; }
-        }
-        const last = Number(localStorage.getItem("tosil_diary_pulled_at") || 0);
-        if (!force && localCount && Date.now() - last < 24 * 3600000) return 0;
-
-        let changed = 0;
-        try {
-            const snap = await getDocs(collection(db, "diary_" + syncCode));
-            snap.forEach(function (d) {
-                const m = /^day_(\d+)$/.exec(d.id);
-                if (!m) return;
-                const server = d.data() || {};
-                const local = readLocalDay(m[1]);
-                const merged = mergeDay(m[1], local, server);
-                if (JSON.stringify(merged) !== JSON.stringify(local)) {
-                    localStorage.setItem(`day_${m[1]}_data`, JSON.stringify(merged));
-                    changed++;
-                }
-            });
-            localStorage.setItem("tosil_diary_pulled_at", String(Date.now()));
-        } catch (e) {
-            console.warn("[문답] 전체 받아오기 실패", e);
-        }
-        return changed;
-    };
-
-    let flushing = false;
-    window.flushDiaryPending = async function () {
-        if (flushing) return 0;
-        const list = pendingDays();
-        if (!list.length) return 0;
-        const syncCode = getSafeSyncCode();
-        if (!syncCode) return 0;
-        if (!(await authReady)) return 0;
-        flushing = true;
-        const key = myAnsKey();
-        let n = 0;
-        try {
-            for (const day of list) {
-                const d = readLocalDay(day);
-                if (!d[key]) { markPending(day, false); continue; }
-                const up = {}; up[key] = d[key];
-                if (d.date) up.date = d.date;
-                try {
-                    await setDoc(doc(db, "diary_" + syncCode, `day_${day}`), up, { merge: true });
-                    markPending(day, false); n++;
-                } catch (e) { console.warn("[문답] 못 올린 답 다시 올리기 실패", day, e); }
-            }
-        } finally { flushing = false; }
-        return n;
-    };
-    window.addEventListener("online", function () { window.flushDiaryPending(); });
-
-    window.renderCurrentCard = function(data, currentRole) {
-        const hText = data.husbandAns || "";
-        const wText = data.wifeAns || "";
-        const myAns = (currentRole === "husband") ? hText : wText;
-        const isEditing = document.getElementById("btn-submit").innerText.includes("수정");
-
-        if (myAns && !isEditing) {
-            document.getElementById("input-mode").style.display = "none";
-            document.getElementById("view-mode").style.display = "block";
-
-            const hCard = document.getElementById("view-husband-card");
-            const hTextEl = document.getElementById("view-husband-text");
-            const hEditBtn = document.getElementById("edit-btn-husband");
-            
-            hCard.style.display = "block";
-            if (hText) {
-                hTextEl.innerText = hText;
-                hCard.style.opacity = "1";
-                hEditBtn.style.display = (currentRole === "husband") ? "block" : "none";
-            } else {
-                hTextEl.innerText = "아빠의 답을 기다리고 있어요";
-                hCard.style.opacity = "0.5";
-                hEditBtn.style.display = "none";
-            }
-
-            const wCard = document.getElementById("view-wife-card");
-            const wTextEl = document.getElementById("view-wife-text");
-            const wEditBtn = document.getElementById("edit-btn-wife");
-
-            wCard.style.display = "block";
-            if (wText) {
-                wTextEl.innerText = wText;
-                wCard.style.opacity = "1";
-                wEditBtn.style.display = (currentRole === "wife") ? "block" : "none";
-            } else {
-                wTextEl.innerText = "엄마의 답을 기다리고 있어요";
-                wCard.style.opacity = "0.5";
-                wEditBtn.style.display = "none";
-            }
-
-            if (hText && wText) {
-                document.getElementById("next-btn").style.display = "block";
-                // 홈 카드의 '서로의 답이 열렸어요' 는 여기서 봤으면 내린다
-                try { localStorage.setItem("tosil_qa_seen_day", String(window.getCurrentDay())); } catch (e) {}
-            } else {
-                document.getElementById("next-btn").style.display = "none";
-            }
-        } else if (!myAns && !isEditing) {
-            document.getElementById("input-mode").style.display = "block";
-            document.getElementById("view-mode").style.display = "none";
-        }
-        try { if (window.renderDiaryEcho) window.renderDiaryEcho(window.getCurrentDay(), data); } catch (e) {}
-    };
-
-    window.enableEditMode = function(roleToEdit) {
-        const currentRole = localStorage.getItem("tosil_userRole") || "husband";
-        if (currentRole !== roleToEdit) return; 
-
-        const currentDay = window.getCurrentDay();
-        const rawData = localStorage.getItem(`day_${currentDay}_data`);
-        let ans = "";
-        if (rawData) {
-            const data = JSON.parse(rawData);
-            ans = (currentRole === "husband") ? (data.husbandAns || "") : (data.wifeAns || "");
-        }
-        
-        document.getElementById("view-mode").style.display = "none";
-        document.getElementById("input-mode").style.display = "block";
-        
-        const answerInput = document.getElementById("my-answer");
-        answerInput.value = ans;
-        answerInput.focus();
-        
-        document.getElementById("btn-submit").innerText = "수정 완료하기";
-    };
-
-    document.getElementById("btn-submit").addEventListener("click", async () => {
-        const ans = document.getElementById("my-answer").value.trim();
-        if(!ans) return window.showToast("한 줄만 적어도 괜찮아요");
-
-        const btn = document.getElementById("btn-submit");
-        const isEditing = btn.innerText.includes("수정");
-        
-        btn.innerText = "저장 중... ⏳";
-        btn.disabled = true;
-
-        const currentDay = window.getCurrentDay();
-        const currentRole = localStorage.getItem("tosil_userRole") || "husband";
-        const syncCode = getSafeSyncCode(); // 👈 여기서도 안전한 코드로 불러오기
-
-        let localData = {};
-        const existing = localStorage.getItem(`day_${currentDay}_data`);
-        if (existing) {
-            try { localData = JSON.parse(existing); } catch(e) {}
-        }
-        if (currentRole === "husband") localData.husbandAns = ans;
-        else localData.wifeAns = ans;
-        /* ⚠️ 고칠 때마다 date 를 오늘로 덮어써서
-              3일째 답을 40일째에 고치면 배냇함 연대기에서 40일째로 옮겨갔다.
-              date 는 '그 대화가 이뤄진 날' 이다. 고치기는 그 날을 안 바꾼다. */
-        const stampDate = !isEditing || !localData.date;
-        if (stampDate) localData.date = new Date().toISOString();
-
-        // 내 폰에 먼저 저장
-        localStorage.setItem(`day_${currentDay}_data`, JSON.stringify(localData));
-
-        // 서버 전송 로직 (코드가 있을 때만 작동)
-        /* ⚠️ 서버가 '받았다' 고 할 때까지 await 했다.
-              Firestore 는 연결이 없으면 에러를 안 내고 연결될 때까지 기다린다.
-              그래서 신호 약한 곳에서 저장을 누르면 버튼이 '저장 중... ⏳' 에서 안 풀렸다.
-              내 폰엔 이미 저장됐다. 5초만 기다리고, 못 올린 날은 적어 뒀다가 다음에 올린다. */
-        let queued = false;
-        if (syncCode) {
-            markPending(currentDay, true);
-            try {
-                const docRef = doc(db, "diary_" + syncCode, `day_${currentDay}`);
-                const updateData = (currentRole === "husband") ? { husbandAns: ans } : { wifeAns: ans };
-                if (stampDate) updateData.date = localData.date;
-                const sent = setDoc(docRef, updateData, { merge: true })
-                    .then(function () { markPending(currentDay, false); return true; })
-                    .catch(function (e) { console.log("서버 전송 중 에러 (오프라인 모드일 수 있음):", e); return false; });
-                const ok = await Promise.race([sent, new Promise(function (r) { setTimeout(function () { r(false); }, 5000); })]);
-                queued = !ok;
-            } catch(e) { queued = true; console.log("서버 전송 중 에러 (오프라인 모드일 수 있음):", e); }
-        }
-
-        btn.innerText = "기록 남기기"; 
-        btn.disabled = false;
-        
-        window.renderCurrentCard(localData, currentRole);
-        
-        const claimedKey = `day_${currentDay}_coin_claimed_${currentRole}`;
-        if (!localStorage.getItem(claimedKey)) {
-            let coins = parseInt(localStorage.getItem('tosil_coins')) || 0;
-            coins += 100;
-            localStorage.setItem('tosil_coins', coins);
-            localStorage.setItem(claimedKey, 'true');
-            window.updateCoinUI();
-            window.showToast("기록했어요 · 100코인이 쌓였어요");
-        } else {
-            window.showToast("고쳤어요");
-        }
-        if (queued) {
-            setTimeout(function () { window.showToast("📶 연결되면 짝꿍에게 바로 보낼게요"); }, 2900);
-        }
-
-        /* ⚠️ 저장은 이름 없는 클릭 리스너 안에서 끝난다.
-              diarylock.js(짝꿍 알림)와 bookshelf.js(책장 다시 세기)가
-              window.submitAnswer 를 감싸려고 했는데 그런 함수가 없었다.
-              그래서 '답 남겼어요' 알림이 한 번도 안 나갔다.
-              이제 저장이 끝나면 여기서 한 번 알린다. 둘 다 이걸 듣는다. */
-        try {
-            window.dispatchEvent(new CustomEvent("diary:saved", { detail: {
-                day: currentDay,
-                role: currentRole,
-                isEditing: isEditing,
-                complete: !!(localData.husbandAns && localData.wifeAns)
-            }}));
-        } catch (e) {}
-    });
-
-    window.showToast = function(msg) {
-        const oldToast = document.getElementById('diary-toast');
-        if (oldToast) oldToast.remove();
-        const toast = document.createElement('div');
-        toast.id = 'diary-toast';
-        toast.innerHTML = msg;
-        toast.style.cssText = `position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#fff; padding:12px 24px; border-radius:30px; font-size:14px; font-weight:800; z-index:999999; opacity:0; transition:0.3s; pointer-events:none; white-space:normal; width:max-content; max-width:calc(100vw - 40px); text-align:center; word-break:keep-all; line-height:1.5; box-shadow:var(--shadow-md);`;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.style.opacity = '1', 10);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2500);
-    };
-</script>
+    <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
+    <script src="tenmonths.js?v=2"></script>
+    <script src="qacore.js?v=1"></script>
 
     <script>
-        window.babyName = localStorage.getItem('tosil_babyName') || '아기';
-        window.viewingDay = 1;
-
-        /* ⚠️ 200일까지만 훑었다. 매일 쓰는 부부는 6개월 반이면 넘는다.
-              넘는 순간 문답이 DAY 1 로 열리고, 책장·연대기에서 201일째부터가 안 보였다.
-              책장(bookshelf.js)이 쓰던 2000 으로 맞춘다. */
-        window.DIARY_MAX_DAY = 2000;
-
-        // 짝꿍이 쓴 글은 HTML 로 해석하지 않고 글자 그대로 보여준다
-        function escHTML(s) {
-            return String(s == null ? '' : s)
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        }
-        function escLines(s) { return escHTML(s).replace(/\n/g, '<br>'); }
-        window.escHTML = escHTML;
-
-        function myKey() {
-            return (localStorage.getItem('tosil_userRole') || 'husband') === 'husband' ? 'husbandAns' : 'wifeAns';
-        }
-        function partnerKey() { return myKey() === 'husbandAns' ? 'wifeAns' : 'husbandAns'; }
-        function partnerWord() { return myKey() === 'husbandAns' ? '엄마' : '아빠'; }
-        function readDay(i) {
-            try { return JSON.parse(localStorage.getItem(`day_${i}_data`)) || null; } catch (e) { return null; }
-        }
-        function questionText(i) {
-            if (typeof window.diaryQuestion === 'function') return window.diaryQuestion(i);
-            const q = questionDB[(i - 1) % questionDB.length];
-            return q ? q.question.replace(/{babyName}/g, window.babyName) : '';
-        }
-
-        /* ⚠️ '둘 다 안 쓴 첫 날' 로 열었다.
-              아빠가 5일째에 답하면 엄마 폰엔 5일째가 '누가 쓴 날' 이 돼서
-              엄마는 6일째로 열리고, 아빠는 다음에 7일째로 열렸다.
-              둘이 영영 다른 질문에 답하게 된다. 교환일기가 아니게 된다.
-              '내가 아직 안 쓴 첫 날' 로 연다. 짝꿍이 먼저 쓴 날이 있으면 거기로 간다. */
-        function getFirstUnansweredDay() {
-            const mine = myKey();
-            for (let i = 1; i <= window.DIARY_MAX_DAY; i++) {
-                const data = readDay(i);
-                if (!data || !data[mine]) return i;
-            }
-            return 1;
-        }
-
-        window.moveQuestion = function(direction) {
-            window.__diaryUserMoved = true;
-            window.viewingDay += direction;
-            if(window.viewingDay < 1) window.viewingDay = 1; 
-
-            document.getElementById("input-mode").style.display = "block";
-            document.getElementById("view-mode").style.display = "none";
-            document.getElementById("my-answer").value = ""; 
-            document.getElementById("btn-submit").innerText = "기록 남기기";
-
-            window.initAppUI();
-            setTimeout(window.startSync, 50); 
-        };
-
-        window.initAppUI = function() {
-            window.updateCoinUI(); 
-            const index = (window.viewingDay - 1) % questionDB.length; 
-            const todayData = questionDB[index] || { target:"가족", question: "오늘 하루는 어땠나요?", context:"육아" };
-
-            document.getElementById("diary-day").innerText = `DAY ${window.viewingDay}`;
-            
-            // 🚨 메인화면: 질문에 Q. 를 붙여 시선을 잡아줌
-            let qText = "Q. " + questionText(window.viewingDay);
-            document.getElementById("question-text").innerText = qText;
-
-            /* 101일째부터는 질문이 한 바퀴 돈다. 숨기지 않고 알려준다.
-               같은 질문에 100일 뒤의 우리는 뭐라고 할까 — 그게 이 날의 재미다. */
-            let echo = document.getElementById("diary-echo-tag");
-            const before = (typeof window.diaryEchoDay === 'function') ? window.diaryEchoDay(window.viewingDay) : 0;
-            if (before) {
-                if (!echo) {
-                    echo = document.createElement("div");
-                    echo.id = "diary-echo-tag";
-                    echo.style.cssText = "align-self:flex-start; margin:-22px 10px 22px; padding:5px 11px; border-radius:10px; background:#F5F1EA; color:#8A7E78; font-size:12px; font-weight:800; letter-spacing:-0.2px;";
-                    const qEl = document.getElementById("question-text");
-                    qEl.parentNode.insertBefore(echo, qEl.nextSibling);
-                }
-                echo.textContent = "DAY " + before + " 에 받았던 질문이에요 · 답을 쓰면 그때 우리가 보여요";
-            } else if (echo) {
-                echo.remove();
-            }
-        };
-
-        /* 같은 질문 · 그때의 우리 — 내 답을 쓴 뒤에만 보인다 (먼저 보면 따라 쓰게 된다) */
-        window.renderDiaryEcho = function (day, data) {
-            const old = document.getElementById("diary-echo-box");
-            if (old) old.remove();
-            const before = (typeof window.diaryEchoDay === 'function') ? window.diaryEchoDay(day) : 0;
-            if (!before || !data || !data[myKey()]) return;
-            const past = readDay(before);
-            if (!past || !(past.husbandAns && past.wifeAns)) return;
-
-            const box = document.createElement("div");
-            box.id = "diary-echo-box";
-            box.style.cssText = "text-align:left; margin:6px 0 16px; padding:20px 20px 8px; border-radius:24px; background:#FBF8F3; border:1px dashed #E3D9CC;";
-            box.innerHTML =
-                '<div style="font-size:12px; font-weight:900; color:#B98A2E; letter-spacing:1.5px; margin-bottom:14px;">DAY ' + before + ' · 같은 질문, 그때의 우리</div>' +
-                '<div style="font-size:12px; font-weight:800; color:var(--text-sub); margin-bottom:5px;">아빠</div>' +
-                '<div style="font-size:14.5px; line-height:1.75; color:var(--text-main); margin-bottom:14px; word-break:keep-all;">' + escLines(past.husbandAns) + '</div>' +
-                '<div style="font-size:12px; font-weight:800; color:var(--text-sub); margin-bottom:5px;">엄마</div>' +
-                '<div style="font-size:14.5px; line-height:1.75; color:var(--text-main); margin-bottom:12px; word-break:keep-all;">' + escLines(past.wifeAns) + '</div>';
-            const next = document.getElementById("next-btn");
-            next.parentNode.insertBefore(box, next);
-        };
-
-        window.switchTab = function(tabName) {
-            document.getElementById('btn-tab-write').classList.remove('active');
-            document.getElementById('btn-tab-read').classList.remove('active');
-            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
-            document.getElementById('view-write').classList.remove('active');
-            document.getElementById('view-read').classList.remove('active');
-            document.getElementById(`view-${tabName}`).classList.add('active');
-            if (tabName === 'read') window.renderHistory();
-        };
-
-        /* ⚠️ 두 가지가 틀려 있었다.
-              ① 한 사람만 쓴 날도 두 사람 답을 다 보여줬다.
-                 '내 답을 먼저 써야 짝꿍 답이 열린다' 가 이 탭 하나로 무너졌다.
-                 탭만 넘기면 먼저 볼 수 있었다.
-              ② 답을 HTML 로 그대로 넣었다. 답에 < 가 들어가면 글이 잘려 나갔다.
-              둘 다 쓴 날은 한 쪽으로, 짝꿍만 쓴 날은 '열어보러 가기' 로만 보여준다. */
-        window.renderHistory = function() {
-            const container = document.getElementById('history-container');
-            container.innerHTML = ''; 
-            let hasRecord = false;
-            const mine = myKey(), yours = partnerKey();
-
-            for (let i = 1; i <= window.DIARY_MAX_DAY; i++) {
-                const d = readDay(i);
-                if (!d || !(d.husbandAns || d.wifeAns)) continue;
-                hasRecord = true;
-
-                const card = document.createElement('div');
-                card.className = 'history-card';
-                const head = `<div class="card-header"><span class="history-day-label">DAY ${i}</span></div>` +
-                             `<p class="q-text">Q. ${escHTML(questionText(i))}</p>`;
-
-                if (d[mine] && d[yours]) {
-                    card.innerHTML = head +
-                        `<div class="a-text" style="border-left: 3px solid var(--dad-color);"><div class="a-role">아빠</div>${escLines(d.husbandAns)}</div>` +
-                        `<div class="a-text" style="border-left: 3px solid var(--mom-color);"><div class="a-role">엄마</div>${escLines(d.wifeAns)}</div>`;
-                } else if (d[mine]) {
-                    const who = mine === 'husbandAns' ? '아빠' : '엄마';
-                    card.innerHTML = head +
-                        `<div class="a-text" style="border-left: 3px solid var(--${mine === 'husbandAns' ? 'dad' : 'mom'}-color);"><div class="a-role">${who}</div>${escLines(d[mine])}</div>` +
-                        `<div style="font-size:13px; font-weight:700; color:var(--text-sub); padding:4px 2px;">${partnerWord()}의 답을 기다리는 중이에요</div>`;
-                } else {
-                    card.innerHTML = head +
-                        `<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; padding:15px 16px; text-align:center;">` +
-                            `<div style="font-size:13.5px; font-weight:800; color:#B07A00; line-height:1.6; word-break:keep-all;">${partnerWord()}가 먼저 답했어요 · 내 답을 쓰면 열려요</div>` +
-                            `<button onclick="window.goDiaryDay(${i})" style="margin-top:10px; padding:11px 18px; border:none; border-radius:12px; background:#4A413C; color:#FFF; font-size:13px; font-weight:800; cursor:pointer;">이 날 쓰러 가기</button>` +
-                        `</div>`;
-                }
-                container.prepend(card);
-            }
-            if (!hasRecord) {
-                container.innerHTML = `<div class="empty-state">🌱<br>아직 완성된 페이지가 없어요.</div>`;
-            }
-        };
-
-        window.goDiaryDay = function (i) {
-            window.viewingDay = i;
-            window.moveQuestion(0);
-            window.switchTab('write');
-            window.scrollTo(0, 0);
-        };
-
-        window.saveSetup = function(roleVal) {
-            if (!roleVal) return;
-            localStorage.setItem('tosil_userRole', roleVal);
-            /* 본체에도 같이 적는다. 한 번 고르면 앱 전체가 같은 사람으로 본다. */
-            localStorage.setItem('user_role', roleVal === 'husband' ? 'dad' : 'mom');
-            document.getElementById('setup-modal').style.display = 'none';
-            location.reload(); 
-        };
-
-        window.openPdfPreview = function() {
-            const modal = document.getElementById('pdf-preview-modal');
-            const container = document.getElementById('pdf-pages-container');
-            
-            const babyName = escHTML(window.babyName || '우리아기');
-            const rawDate = localStorage.getItem('tosil_startDate');
-            let formattedDate = "202X. 03. 03"; 
-            if (rawDate) {
-                const d = new Date(rawDate);
-                formattedDate = `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}`;
-            }
-            
-            const myKakaoName = localStorage.getItem('kakao_nickname') || '';
-            const myRole = localStorage.getItem('tosil_userRole') || 'husband'; 
-            
-            const familyMomName = localStorage.getItem('family_wife_name') || '';
-            const familyDadName = localStorage.getItem('family_husband_name') || '';
-            
-            let momName = familyMomName;
-            let dadName = familyDadName;
-            if (myRole === 'wife' && myKakaoName) momName = myKakaoName;
-            if (myRole === 'husband' && myKakaoName) dadName = myKakaoName;
-            momName = escHTML(momName);
-            dadName = escHTML(dadName);
-
-            let activeThemeId = localStorage.getItem('tosil_active_theme') || 'theme_beige';
-            let theme = STORE_DB.find(t => t.id === activeThemeId) || STORE_DB[0];
-            
-            let momDisplayStr = momName ? `엄마 <span style="color:${theme.textTitle}; font-weight:900;">${momName}</span>` : `엄마 <span style="color:${theme.textSub}; font-weight:700;">[엄마 성함]</span>`;
-            let dadDisplayStr = dadName ? `아빠 <span style="color:${theme.textTitle}; font-weight:900;">${dadName}</span>` : `아빠 <span style="color:${theme.textSub}; font-weight:700;">[아빠 성함]</span>`;
-
-            // 🚨 표지에도 테마 배경색이 완벽하게 적용되도록 수정!
-            let html = `
-                <div class="premium-book-page premium-cover" style="background: ${theme.bg}; border-left-color: ${theme.borderLeft};">
-                    <div style="text-align: center; width: 100%;">
-                        <div style="font-family: 'Georgia', serif; font-size: 11px; color: ${theme.textSub}; letter-spacing: 2px; line-height: 1.8; margin-bottom: 28px;">
-                            " 네가 우리에게<br>온 날부터 "
-                        </div>
-                        <div style="font-size: 24px; font-weight: 900; color: ${theme.textTitle}; letter-spacing: -1px; line-height: 1.4; margin-bottom: 32px;">
-                            우리가 처음 만난<br>그 해의 기록
-                        </div>
-                        <div style="margin-bottom: 28px;">
-                            <div style="font-size: 18px; font-weight: 900; color: ${theme.textTitle}; margin-bottom: 6px; letter-spacing: 1px;">${babyName}</div>
-                            <div style="font-family: 'Georgia', serif; font-size: 12px; font-weight: 600; color: ${theme.textSub}; letter-spacing: 1.5px;">${formattedDate}</div>
-                        </div>
-                        <div style="width: 20px; height: 1px; background: ${theme.line}; margin: 0 auto 28px auto;"></div>
-                        <div style="font-size: 13.5px; color: ${theme.textTitle}; font-weight: 600; line-height: 1.8; letter-spacing: 0.5px; margin-bottom: 12px;">
-                            ${momDisplayStr}<br>
-                            ${dadDisplayStr}
-                        </div>
-                        <div style="font-size: 11px; color: ${theme.textSub}; font-weight: 600; letter-spacing: -0.3px;">
-                            * 지금 보이는 이름은 카카오 닉네임이에요
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // 🚨 내지(DAY n) 에디토리얼 레이아웃 전면 개편
-            /* ⚠️ '지금 보고 있는 일차' 까지만 담았다. DAY 3 을 보다가 누르면 책이 세 쪽이었다.
-                  그리고 한 사람만 쓴 날도 넣어서 잠금이 여기서도 풀렸다.
-                  책장과 같은 규칙 — 둘 다 쓴 날이 한 쪽이다. */
-            let hasRecord = false;
-            for (let i = 1; i <= window.DIARY_MAX_DAY; i++) {
-                const rawData = localStorage.getItem(`day_${i}_data`);
-                if (rawData) {
-                    try {
-                        const d = JSON.parse(rawData);
-                        if(d.husbandAns && d.wifeAns) {
-                            hasRecord = true;
-                            const qText = escHTML(questionText(i));
-
-                            html += `
-                                <div class="premium-book-page" style="background: ${theme.bg}; border-left-color: ${theme.borderLeft}; color: ${theme.textTitle}; display: flex; flex-direction: column; justify-content: flex-start; padding: 50px 36px;">
-                                    <div class="essay-date" style="color: ${theme.textSub}; text-align: left; border-bottom: 1px solid ${theme.line}; padding-bottom: 16px; margin-bottom: 32px;">- DAY ${i} -</div>
-                                    
-                                    <div class="essay-q" style="color: ${theme.textTitle}; font-size: 16px; font-weight: 700; line-height: 1.7; text-align: left; word-break: keep-all; margin-bottom: 40px; opacity: 0.95;">
-                                        Q. ${qText}
-                                    </div>
-                                    
-                                    <div class="essay-ans-wrap" style="display: flex; flex-direction: column; gap: 36px; text-align: left;">
-                                        ${d.husbandAns ? `
-                                            <div>
-                                                <div style="font-size: 11px; font-weight: 800; color: ${theme.textSub}; letter-spacing: 2px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                                    <div style="width: 12px; height: 1px; background: ${theme.textSub}; opacity: 0.5;"></div> 아빠
-                                                </div>
-                                                <div style="font-size: 14px; line-height: 1.9; color: ${theme.textTitle}; opacity: 0.85;">${escLines(d.husbandAns)}</div>
-                                            </div>
-                                        ` : ''}
-                                        ${d.wifeAns ? `
-                                            <div>
-                                                <div style="font-size: 11px; font-weight: 800; color: ${theme.textSub}; letter-spacing: 2px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                                    <div style="width: 12px; height: 1px; background: ${theme.textSub}; opacity: 0.5;"></div> 엄마
-                                                </div>
-                                                <div style="font-size: 14px; line-height: 1.9; color: ${theme.textTitle}; opacity: 0.85;">${escLines(d.wifeAns)}</div>
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    } catch(e) {}
-                }
-            }
-
-            if(!hasRecord) {
-                html += `<div style="text-align:center; color:#A3958A; padding:40px; font-weight: 700;">아직 둘 다 답한 페이지가 없어요.</div>`;
-            }
-
-            container.innerHTML = html;
-            modal.style.display = 'flex';
-            container.scrollTop = 0; 
-
-            setTimeout(() => { 
-                modal.style.opacity = '1'; 
-                modal.firstElementChild.style.transform = 'translateY(0)'; 
-            }, 10);
-        };
-
-        window.closePdfPreview = function() {
-            const modal = document.getElementById('pdf-preview-modal');
-            modal.style.opacity = '0';
-            modal.firstElementChild.style.transform = 'translateY(50px)';
-            setTimeout(() => { modal.style.display = 'none'; }, 300);
-        };
-
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
               앱 본체는 user_role(dad/mom), 이 화면은 tosil_userRole(husband/wife).
               서로 모르는 값이라 본체에서 아빠를 고르고 여기서 또 물어봤고,
-              다르게 고르면 아빠 답이 엄마 칸에 저장됐다.
-              본체 값이 있으면 그걸 따른다. 본체가 늘 우선이다. */
+              다르게 고르면 아빠 답이 엄마 칸에 저장됐다. 본체 값이 있으면 그걸 따른다. */
         (function syncRole() {
             var main = localStorage.getItem('user_role');
             if (main !== 'dad' && main !== 'mom') return;
             var want = (main === 'dad') ? 'husband' : 'wife';
-            if (localStorage.getItem('tosil_userRole') !== want) {
-                localStorage.setItem('tosil_userRole', want);
-            }
+            if (localStorage.getItem('tosil_userRole') !== want) localStorage.setItem('tosil_userRole', want);
         })();
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedRole = localStorage.getItem('tosil_userRole'); 
-            if (!savedRole) {
-                document.getElementById('setup-modal').style.display = 'flex';
-            } else {
-                window.viewingDay = getFirstUnansweredDay();
-                /* 홈의 '우리의 문답' 카드에서 들어오면 그 질문을 연다 (diary.html?day=12) */
-                try {
-                    const qd = parseInt(new URLSearchParams(location.search).get('day'), 10);
-                    if (qd > 0 && qd <= (window.DIARY_MAX_DAY || 2000)) { window.viewingDay = qd; window.__diaryUserMoved = true; }
-                } catch (e) {}
-                window.initAppUI();
-                setTimeout(window.startSync, 50); 
+        window.showToast = function (msg) {
+            var old = document.getElementById('diary-toast');
+            if (old) old.remove();
+            var t = document.createElement('div');
+            t.id = 'diary-toast';
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); left:50%; transform:translateX(-50%); ' +
+                'background:rgba(43,36,30,0.92); color:#FFFDF9; padding:12px 20px; border-radius:30px; font-size:14px; font-weight:700; ' +
+                'z-index:999999; opacity:0; transition:opacity .3s; pointer-events:none; width:max-content; max-width:calc(100vw - 40px); ' +
+                'text-align:center; word-break:keep-all; line-height:1.5;';
+            document.body.appendChild(t);
+            setTimeout(function () { t.style.opacity = '1'; }, 10);
+            setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 300); }, 2500);
+        };
+
+        /* ---------- 표지 ---------- */
+        window.STORE_DB = [
+            { id: 'theme_beige',   name: '크림 화이트 (기본)', desc: '기본 종이 색', price: 0,    bg: '#FCFBF8', borderLeft: '#EAE5DF', textTitle: '#4A413C', textSub: '#A39992', line: '#EAE5DF' },
+            { id: 'theme_sand',    name: '뮤트 샌드',   desc: '따뜻한 모래색', price: 500,  bg: '#F4F1EB', borderLeft: '#D6CFC4', textTitle: '#4A413C', textSub: '#8A7E78', line: '#D6CFC4' },
+            { id: 'theme_blossom', name: '페일 로즈',   desc: '말린 장미색',   price: 800,  bg: '#F8F1F1', borderLeft: '#E6D5D5', textTitle: '#5C414A', textSub: '#A89299', line: '#E6D5D5' },
+            { id: 'theme_forest',  name: '소프트 세이지', desc: '은은한 풀잎색', price: 1200, bg: '#F1F4F2', borderLeft: '#C8D4CB', textTitle: '#2C3A32', textSub: '#7B8C81', line: '#C8D4CB' },
+            { id: 'theme_navy',    name: '미드나잇 블루', desc: '짙은 밤하늘색', price: 1500, bg: '#2B2F36', borderLeft: '#3A3F4A', textTitle: '#F0EDE6', textSub: '#8E94A0', line: '#3A3F4A' }
+        ];
+        function inventory() {
+            var l;
+            try { l = JSON.parse(localStorage.getItem('tosil_inventory')) || []; } catch (e) { l = []; }
+            if (l.indexOf('theme_beige') < 0) l.push('theme_beige');
+            return l;
+        }
+        function activeTheme() { return localStorage.getItem('tosil_active_theme') || 'theme_beige'; }
+        function themeOf(id) { return STORE_DB.filter(function (t) { return t.id === id; })[0] || STORE_DB[0]; }
+
+        window.updateCoinUI = function () {
+            var c = window.QA ? QA.coins() : 0;
+            ['header-coin-count', 'modal-coin-count'].forEach(function (id) {
+                var el = document.getElementById(id); if (el) el.textContent = c.toLocaleString('ko-KR');
+            });
+            var row = document.getElementById('row-coin');
+            if (row) row.textContent = '코인 ' + c.toLocaleString('ko-KR') + ' ›';
+        };
+
+        window.openStoreModal = function () {
+            window.updateCoinUI();
+            window.renderStore();
+            var w = document.getElementById('store-modal');
+            w.classList.add('on');
+            setTimeout(function () { w.classList.add('show'); }, 10);
+        };
+        window.closeStoreModalForce = function () {
+            var w = document.getElementById('store-modal');
+            w.classList.remove('show');
+            setTimeout(function () { w.classList.remove('on'); }, 260);
+        };
+        window.closeStoreModal = function (e) { if (e.target.id === 'store-modal') window.closeStoreModalForce(); };
+
+        window.renderMiniBookPreview = function (themeId) {
+            var t = themeOf(themeId);
+            var name = QA.esc(localStorage.getItem('tosil_babyName') || '우리 아기');
+            document.getElementById('store-preview-area').innerHTML =
+                '<div class="mini-book" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + ';">' +
+                    '<div style="font-size:8.5px; color:' + t.textSub + '; margin-bottom:14px; letter-spacing:1px; line-height:1.6;">우리가 처음 만난<br>그 해의 기록</div>' +
+                    '<div style="font-family:var(--serif); font-size:15px; font-weight:700; color:' + t.textTitle + '; margin-bottom:8px;">' + name + '</div>' +
+                    '<div style="width:12px; height:1px; background:' + t.line + ';"></div>' +
+                '</div>';
+        };
+
+        window.renderStore = function () {
+            var inv = inventory(), on = activeTheme(), coins = QA.coins();
+            window.renderMiniBookPreview(on);
+            var html = '';
+            STORE_DB.forEach(function (it) {
+                var act;
+                if (on === it.id) act = '<span class="using">쓰는 중</span>';
+                else if (inv.indexOf(it.id) > -1) act = '<button class="use" onclick="buyOrApplyTheme(\'' + it.id + '\')">바꾸기</button>';
+                else act = '<button class="pay' + (coins < it.price ? ' short' : '') + '" onclick="buyOrApplyTheme(\'' + it.id + '\')">' +
+                           it.price.toLocaleString('ko-KR') + ' 코인</button>';
+                html += '<div class="shop-row">' +
+                    '<div class="swatch" style="background:' + it.bg + '; border:1px solid ' + it.line + ';"></div>' +
+                    '<div><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
+                    '<div class="shop-act">' + act + '</div></div>';
+            });
+            document.getElementById('store-grid-container').innerHTML = html;
+        };
+
+        /* ⚠️ 표지를 살 때 브라우저 confirm 창이 떴다.
+              앱 안에서 'happy-baby0303.github.io 내용:' 이 찍힌 회색 창이 나온다. 우리 화면으로 묻는다. */
+        window.qaConfirm = function (title, sub, okLabel, onOk) {
+            var old = document.getElementById('qa-confirm'); if (old) old.remove();
+            var w = document.createElement('div');
+            w.id = 'qa-confirm';
+            w.className = 'cf-wrap';
+            w.innerHTML = '<div class="cf"><div class="cf-t">' + title + '</div>' + (sub ? '<div class="cf-s">' + sub + '</div>' : '') +
+                '<div class="cf-btns"><button class="cf-no">그만두기</button><button class="cf-ok">' + okLabel + '</button></div></div>';
+            w.addEventListener('click', function (e) { if (e.target === w) w.remove(); });
+            w.querySelector('.cf-no').onclick = function () { w.remove(); };
+            w.querySelector('.cf-ok').onclick = function () { w.remove(); onOk(); };
+            document.body.appendChild(w);
+        };
+
+        window.buyOrApplyTheme = function (id) {
+            var it = themeOf(id), inv = inventory(), coins = QA.coins();
+            function apply() {
+                localStorage.setItem('tosil_active_theme', id);
+                window.updateCoinUI();
+                window.renderStore();
+            }
+            if (inv.indexOf(id) > -1) { apply(); window.showToast('표지를 바꿨어요'); return; }
+            if (coins < it.price) {
+                window.showToast((it.price - coins).toLocaleString('ko-KR') + '코인 더 모으면 돼요. 질문 하나에 100코인이에요');
+                return;
+            }
+            window.qaConfirm('「' + it.name + '」 표지로 바꿀까요?',
+                it.price.toLocaleString('ko-KR') + '코인을 써요. 남는 코인은 ' + (coins - it.price).toLocaleString('ko-KR') + '개예요.',
+                '바꾸기', function () {
+                    localStorage.setItem('tosil_coins', String(coins - it.price));
+                    inv.push(id);
+                    localStorage.setItem('tosil_inventory', JSON.stringify(inv));
+                    apply();
+                    window.showToast('새 표지로 바꿨어요');
+                });
+        };
+    </script>
+
+    <!-- Firebase — 앱 본체(index.html)와 같은 프로젝트 · 같은 로그인 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        /* ⚠️ 이 페이지엔 Functions 가 없었다. 재촉 버튼과 '답 남겼어요' 알림이 늘 "잠시 뒤 다시" 로 끝났다. */
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyXVAf-uiqutmfCd5Bhh34bQmbnFynpas",
+            authDomain: "happybaby-6de42.firebaseapp.com",
+            projectId: "happybaby-6de42",
+            storageBucket: "happybaby-6de42.firebasestorage.app",
+            messagingSenderId: "1075311024495",
+            appId: "1:1075311024495:web:b9212eab58802dabf9709a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        // sendFamilyPush 는 서울(asia-northeast3) 에 배포돼 있다
+        window.functions = getFunctions(app, "asia-northeast3");
+        window.httpsCallable = httpsCallable;
+        /* ⚠️ 종이책 알림 신청(paperbook.js)이 window.db · setDoc 을 찾았는데 이 페이지는 안 열어 줬다.
+              그래서 '신청해 두었어요' 라고 해 놓고 서버엔 한 건도 안 올라갔다. qacore.js 도 이걸 쓴다. */
+        window.db = db; window.doc = doc; window.setDoc = setDoc; window.getDoc = getDoc;
+        window.onSnapshot = onSnapshot; window.collection = collection; window.getDocs = getDocs;
+        window.auth = auth;
+
+        // index.html 에서 로그인한 세션을 이 페이지가 물려받는다.
+        // Auth 를 안 띄우면 Firestore 가 토큰을 못 붙여서 규칙의 signedIn() 이 false 가 된다.
+        const authReady = new Promise(function (resolve) {
+            const stop = onAuthStateChanged(auth, function (user) { stop(); resolve(user); });
+        });
+        window.__qaAuthReady = authReady;
+
+        // index.html 이 로그인 직후 TS-XXXXXXXX 코드를 만들어 둔다. 혼자 쓰는 사람도 이미 자기 방이 있다.
+        function syncCode() { return localStorage.getItem("family_sync_code") || null; }
+
+        window.startFamilyNameSync = async function () {
+            /* ⚠️ 질문을 넘길 때마다 이걸 불러서 onSnapshot 이 넘긴 만큼 쌓였다. 한 번이면 된다. */
+            if (window.__familyNameSyncOn) return;
+            window.__familyNameSyncOn = true;
+            const code = syncCode();
+            if (!code || !(await authReady)) return;
+            const myName = localStorage.getItem("kakao_nickname");
+            const myRole = localStorage.getItem("tosil_userRole");
+            const ref = doc(db, "settings_" + code, "family_names");
+            if (myName && myRole) setDoc(ref, { [myRole]: myName }, { merge: true }).catch(() => {});
+            onSnapshot(ref, (snap) => {
+                if (!snap.exists()) return;
+                const d = snap.data();
+                if (d.wife) localStorage.setItem('family_wife_name', d.wife);
+                if (d.husband) localStorage.setItem('family_husband_name', d.husband);
+            }, () => {});
+        };
+
+        /* 지금 보고 있는 질문 하나를 실시간으로 듣는다 — 짝꿍이 쓰면 바로 열린다 */
+        let unsubscribe = null, watching = 0;
+        window.startSync = async function () {
+            window.startFamilyNameSync();
+            const code = syncCode();
+            if (!code || !(await authReady)) return;
+            const day = window.viewingDay;
+            if (unsubscribe && watching === day) return;
+            if (unsubscribe) unsubscribe();
+            watching = day;
+            unsubscribe = onSnapshot(doc(db, "diary_" + code, "day_" + day), (snap) => {
+                if (!snap.exists()) return;
+                /* ⚠️ 서버 사본으로 통째로 덮었다. 아직 못 올라간 내 답이 있으면 다시 여는 순간 지워졌다.
+                      칸마다 합친다 (qacore.js mergeDay). */
+                const loc = QA.read(day), merged = QA.mergeDay(day, loc, snap.data());
+                if (JSON.stringify(merged) !== JSON.stringify(loc)) QA.write(day, merged);
+                if (window.viewingDay === day) window.renderCard();
+            }, (e) => console.warn("[문답] 실시간 연동 에러", e));
+        };
+
+        /* ⚠️ 문답은 '지금 보고 있는 질문' 만 서버에서 받아왔다.
+              폰을 바꾸거나 앱을 다시 깔면 책장·배냇함·포토북이 전부 비었다.
+              하루 한 번, 그리고 이 폰에 문답이 하나도 없을 때 통째로 받아온다. */
+        window.pullAllDiary = async function (force) {
+            const code = syncCode();
+            if (!code || !(await authReady)) return 0;
+            let has = false;
+            for (let i = 1; i <= QA.MAX_DAY; i++) { if (localStorage.getItem(`day_${i}_data`)) { has = true; break; } }
+            const last = Number(localStorage.getItem("tosil_diary_pulled_at") || 0);
+            if (!force && has && Date.now() - last < 24 * 3600000) return 0;
+            let changed = 0;
+            try {
+                const snap = await getDocs(collection(db, "diary_" + code));
+                snap.forEach(function (d) {
+                    const m = /^day_(\d+)$/.exec(d.id);
+                    if (!m) return;
+                    const loc = QA.read(m[1]), merged = QA.mergeDay(m[1], loc, d.data() || {});
+                    if (JSON.stringify(merged) !== JSON.stringify(loc)) { QA.write(m[1], merged); changed++; }
+                });
+                localStorage.setItem("tosil_diary_pulled_at", String(Date.now()));
+            } catch (e) {
+                console.warn("[문답] 전체 받아오기 실패", e);
+            }
+            return changed;
+        };
+    </script>
+
+    <script>
+        (function () {
+            window.viewingDay = 1;
+            /* ⚠️ 200일까지만 훑었다. 매일 쓰는 부부는 6개월 반이면 넘는다. 책장과 같은 2000 으로. */
+            window.DIARY_MAX_DAY = QA.MAX_DAY;
+            window.escHTML = QA.esc;
+            window.getCurrentDay = function () { return window.viewingDay; };
+
+            /* ---------- 질문 카드 ---------- */
+            window.renderCard = function (o) {
+                o = o || {};
+                var day = window.viewingDay;
+                document.getElementById('qa-dayno').textContent = day + '번째 질문';
+                document.getElementById('qa-question').textContent = QA.question(day) || '오늘 하루는 어땠나요?';
+                document.getElementById('qa-prev').disabled = day <= 1;
+                var body = document.getElementById('qa-body');
+                var mk = QA.myKey();
+                if (!mk) {
+                    body.innerHTML = localStorage.getItem('user_role') === 'senior'
+                        ? '<div class="only-parents">우리의 문답은 엄마 · 아빠 둘이 나누는 이야기예요.</div>' : '';
+                    return;
+                }
+                var d = QA.read(day);
+                var mode = (!d[mk] || QA.editing(day)) ? 'form' : 'view';
+                var same = body.getAttribute('data-day') === String(day) && body.getAttribute('data-mode') === mode;
+                /* 쓰는 중에 짝꿍 답이 오면 화면을 통째로 다시 그렸다 → 쓰던 글과 커서가 날아간다.
+                   글칸은 그대로 두고 '누가 답했는지' 두 줄만 바꾼다. */
+                if (same && mode === 'form' && !o.force) {
+                    var tmp = document.createElement('div');
+                    tmp.innerHTML = QA.bodyHTML(day, {});
+                    ['qa-pills', 'qa-note'].forEach(function (id) {
+                        var a = document.getElementById(id), b = tmp.querySelector('#' + id);
+                        if (a && b && a.outerHTML !== b.outerHTML) a.outerHTML = b.outerHTML;
+                    });
+                    return;
+                }
+                /* 바뀐 게 없으면 다시 그리지 않는다.
+                   ⚠️ 저장하면 서버가 같은 내용을 한 번 더 알려 준다. 그때 다시 그리면서
+                      방금 뜬 '💌 서로의 답이 열렸어요' 가 지워졌다. */
+                var waiting = !!d[mk] && !d[QA.otherKey(mk)];     // 알리기 · 초대하기 칸은 기다릴 때만 있다
+                var sig = JSON.stringify([d, QA.editing(day), waiting ? [localStorage.getItem(QA.K.nudge) === QA.today(), QA.partnerState()] : 0]);
+                if (same && !o.force && body.getAttribute('data-sig') === sig) return;
+                var both = !!(d.husbandAns && d.wifeAns);
+                var reveal = !!o.reveal || (both && QA.recentOpen(day));
+                if (both) QA.markSeen(day);
+                body.innerHTML = QA.bodyHTML(day, { reveal: reveal });
+                body.setAttribute('data-day', String(day));
+                body.setAttribute('data-mode', mode);
+                body.setAttribute('data-sig', sig);
+            };
+
+            function goDay(day) {
+                window.viewingDay = Math.max(1, Math.min(Number(day) || 1, QA.MAX_DAY));
+                window.renderCard({ force: true });
+                setTimeout(function () { if (typeof window.startSync === 'function') window.startSync(); }, 30);
+            }
+            window.moveQuestion = function (dir) {
+                window.__diaryUserMoved = true;
+                goDay(window.viewingDay + dir);
+            };
+            window.goDiaryDay = function (i) {
+                window.__diaryUserMoved = true;
+                window.switchTab('write');
+                goDay(i);
+                window.scrollTo(0, 0);
+            };
+
+            QA.setHost({
+                render: function (day, o) {
+                    if (day === window.viewingDay) window.renderCard(o);
+                    window.updateCoinUI();
+                    if (document.getElementById('view-read').classList.contains('on')) window.renderPast();
+                },
+                next: function (day) {
+                    window.__diaryUserMoved = true;
+                    goDay(day);
+                    var card = document.querySelector('.card');
+                    if (card && card.getBoundingClientRect().top < 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+            window.addEventListener('qa:coins', function () { window.updateCoinUI(); });
+
+            /* ---------- 탭 ---------- */
+            window.switchTab = function (name) {
+                ['write', 'read'].forEach(function (n) {
+                    document.getElementById('btn-tab-' + n).classList.toggle('on', n === name);
+                    document.getElementById('view-' + n).classList.toggle('on', n === name);
+                });
+                if (name === 'read') {
+                    if (typeof window.refreshBookshelf === 'function') window.refreshBookshelf();
+                    window.renderPast();
+                }
+            };
+
+            /* ---------- 지난 문답 ----------
+               ⚠️ 책장 탭 아래에 같은 모양 카드가 줄줄이 쌓였다. 한 줄씩 훑어보고, 누르면 그 질문으로 간다.
+                  한 사람만 쓴 날은 답을 안 보여 준다 (먼저 보면 따라 쓰게 된다). */
+            var pastShown = 0;
+            window.renderPast = function (more) {
+                var box = document.getElementById('qa-past');
+                if (!box) return;
+                var st = QA.scan();
+                var top = Math.max(st.firstMine, st.last, 1);
+                pastShown = more ? pastShown + 30 : Math.max(pastShown, 30);
+                var rows = '';
+                for (var i = top, n = 0; i >= 1 && n < pastShown; i--, n++) {
+                    var d = QA.read(i), m = !!d.wifeAns, f = !!d.husbandAns;
+                    var stt = (m && f) ? '<span class="past-st open">열림</span>'
+                            : (m || f) ? '<span class="past-st">' + (m ? '엄마만' : '아빠만') + '</span>'
+                            : '<span class="past-st mute">아직</span>';
+                    rows += '<button class="past-row" onclick="goDiaryDay(' + i + ')">' +
+                        '<span class="past-no">' + i + '</span>' +
+                        '<span class="past-q' + (m && f ? ' on' : '') + '">' + QA.esc(QA.question(i)) + '</span>' + stt + '</button>';
+                }
+                if (top - pastShown >= 1) rows += '<button class="past-more" onclick="renderPast(true)">더 보기</button>';
+                box.innerHTML = rows;
+            };
+
+            /* ---------- 처음 왔을 때: 누가 쓰는지 ---------- */
+            window.saveSetup = function (roleVal) {
+                if (!roleVal) return;
+                localStorage.setItem('tosil_userRole', roleVal);
+                /* 본체에도 같이 적는다. 한 번 고르면 앱 전체가 같은 사람으로 본다. */
+                localStorage.setItem('user_role', roleVal === 'husband' ? 'dad' : 'mom');
+                document.getElementById('setup-modal').style.display = 'none';
+                location.reload();
+            };
+
+            /* ---------- 책으로 미리보기 ---------- */
+            function dot(iso) {
+                var t = Date.parse(iso || '');
+                if (isNaN(t)) return '';
+                var d = new Date(t);
+                return d.getFullYear() + '. ' + String(d.getMonth() + 1).padStart(2, '0') + '. ' + String(d.getDate()).padStart(2, '0');
+            }
+            window.openPdfPreview = function () {
+                var esc = QA.esc, t = themeOf(activeTheme());
+                var baby = esc(localStorage.getItem('tosil_babyName') || '우리 아기');
+                var born = localStorage.getItem('tosil_startDate');
+                var bornStr = born ? dot(born + 'T00:00:00') : '';
+
+                var myName = localStorage.getItem('kakao_nickname') || '';
+                var myRole = localStorage.getItem('tosil_userRole') || 'husband';
+                var mom = localStorage.getItem('family_wife_name') || '';
+                var dad = localStorage.getItem('family_husband_name') || '';
+                if (myRole === 'wife' && myName) mom = myName;
+                if (myRole === 'husband' && myName) dad = myName;
+                function nameLine(role, nm) {
+                    return role + ' ' + (nm ? '<b style="color:' + t.textTitle + ';">' + esc(nm) + '</b>'
+                                            : '<span style="color:' + t.textSub + ';">[' + role + ' 이름]</span>');
+                }
+
+                var html =
+                    '<div class="page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + '; display:flex; align-items:center; justify-content:center; text-align:center;">' +
+                        '<div style="width:100%;">' +
+                            '<div style="font-family:var(--serif); font-size:11.5px; color:' + t.textSub + '; letter-spacing:2px; line-height:1.9; margin-bottom:26px;">“ 네가 우리에게<br>온 날부터 ”</div>' +
+                            '<div style="font-family:var(--serif); font-size:24px; font-weight:700; color:' + t.textTitle + '; letter-spacing:-0.8px; line-height:1.45; margin-bottom:30px;">우리가 처음 만난<br>그 해의 기록</div>' +
+                            '<div style="font-family:var(--serif); font-size:18px; font-weight:700; color:' + t.textTitle + '; margin-bottom:6px;">' + baby + '</div>' +
+                            (bornStr ? '<div style="font-size:12px; font-weight:600; color:' + t.textSub + '; letter-spacing:1.5px; margin-bottom:26px;">' + bornStr + '</div>' : '<div style="height:20px;"></div>') +
+                            '<div style="width:20px; height:1px; background:' + t.line + '; margin:0 auto 24px;"></div>' +
+                            '<div style="font-size:13.5px; color:' + t.textTitle + '; font-weight:600; line-height:1.9;">' + nameLine('엄마', mom) + '<br>' + nameLine('아빠', dad) + '</div>' +
+                            '<div style="font-size:11px; color:' + t.textSub + '; font-weight:600; margin-top:10px;">* 지금 보이는 이름은 카카오 닉네임이에요</div>' +
+                        '</div>' +
+                    '</div>';
+
+                /* ⚠️ '지금 보고 있는 질문' 까지만 담았다. 3번째 질문을 보다가 누르면 책이 세 쪽이었다.
+                      그리고 한 사람만 쓴 날도 넣어서 잠금이 여기서도 풀렸다. 책장과 같은 규칙 — 둘 다 쓴 날이 한 쪽이다. */
+                var pages = QA.scan().done;
+                pages.forEach(function (day) {
+                    var d = QA.read(day);
+                    var label = function (w) {
+                        return '<div style="font-size:11px; font-weight:700; color:' + t.textSub + '; letter-spacing:2px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">' +
+                               '<span style="width:12px; height:1px; background:' + t.textSub + '; opacity:.5;"></span>' + w + '</div>';
+                    };
+                    var ans = function (s) {
+                        return '<div style="font-size:14px; line-height:1.9; color:' + t.textTitle + '; opacity:.88; white-space:pre-wrap; word-break:keep-all;">' + esc(s) + '</div>';
+                    };
+                    html += '<div class="page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + '; color:' + t.textTitle + ';">' +
+                        '<div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:' + t.textSub + '; border-bottom:1px solid ' + t.line + '; padding-bottom:14px; margin-bottom:30px;">' +
+                            '<span>' + day + '번째 질문</span><span>' + dot(d.date) + '</span></div>' +
+                        '<div style="font-family:var(--serif); font-size:17px; font-weight:700; line-height:1.7; word-break:keep-all; margin-bottom:34px;">' + esc(QA.question(day)) + '</div>' +
+                        '<div style="display:flex; flex-direction:column; gap:28px;">' +
+                            '<div>' + label('엄마') + ans(d.wifeAns) + '</div>' +
+                            '<div>' + label('아빠') + ans(d.husbandAns) + '</div>' +
+                        '</div>' +
+                    '</div>';
+                });
+                if (!pages.length) html += '<div class="pv-empty">아직 둘 다 답한 쪽이 없어요.<br>둘 다 쓴 날이 한 쪽이 돼요.</div>';
+
+                var box = document.getElementById('pdf-pages-container');
+                box.innerHTML = html;
+                box.scrollTop = 0;
+                var w = document.getElementById('pdf-preview-modal');
+                w.classList.add('on');
+                setTimeout(function () { w.classList.add('show'); }, 10);
+            };
+            window.closePdfPreview = function () {
+                var w = document.getElementById('pdf-preview-modal');
+                w.classList.remove('show');
+                setTimeout(function () { w.classList.remove('on'); }, 260);
+            };
+
+            /* ---------- 시작 ---------- */
+            window.addEventListener('DOMContentLoaded', function () {
+                window.updateCoinUI();
+                var p = new URLSearchParams(location.search);
+                if (!QA.myKey() && localStorage.getItem('user_role') !== 'senior') {
+                    document.getElementById('setup-modal').style.display = 'flex';
+                    return;
+                }
+                /* ⚠️ '둘 다 안 쓴 첫 날' 로 열었다. 짝꿍이 먼저 쓴 날을 건너뛰어서
+                      둘이 영영 다른 질문에 답하게 됐다. '내가 아직 안 쓴 첫 날' 로 연다. */
+                window.viewingDay = QA.scan().firstMine;
+                /* 홈 카드 · 알림에서 들어오면 그 질문을 연다 (diary.html?day=12) */
+                var qd = parseInt(p.get('day'), 10);
+                if (qd > 0 && qd <= QA.MAX_DAY) { window.viewingDay = qd; window.__diaryUserMoved = true; }
+                window.renderCard({ force: true });
+                if (p.get('tab') === 'read') {
+                    window.switchTab('read');
+                    /* 홈 카드의 '지난 문답 보기' 는 책장 아래 목록으로 바로 간다 */
+                    if (location.hash === '#past') setTimeout(function () {
+                        var h = document.getElementById('past');
+                        if (h) window.scrollTo(0, h.getBoundingClientRect().top + window.pageYOffset - 16);
+                    }, 60);
+                }
+                setTimeout(function () { if (typeof window.startSync === 'function') window.startSync(); }, 50);
 
                 // 새 폰이면 여기서 지난 문답이 채워진다
                 setTimeout(async function () {
+                    try { QA.flush(); } catch (e) {}     // 기다리지 않는다 — 연결되면 알아서 올라간다
                     if (typeof window.pullAllDiary !== 'function') return;
-                    // 기다리지 않는다 — 연결이 없으면 연결될 때 알아서 올라간다
-                    try { if (window.flushDiaryPending) window.flushDiaryPending(); } catch (e) {}
-                    const changed = await window.pullAllDiary();
+                    var changed = await window.pullAllDiary();
                     if (!changed) return;
                     if (!window.__diaryUserMoved) {
-                        const want = getFirstUnansweredDay();
-                        if (want !== window.viewingDay) {
-                            window.viewingDay = want;
-                            window.initAppUI();
-                            window.startSync();
-                        }
+                        var want = QA.scan().firstMine;
+                        if (want !== window.viewingDay) { window.viewingDay = want; window.startSync(); }
                     }
-                    if (document.getElementById('view-read').classList.contains('active')) window.renderHistory();
+                    window.renderCard({ force: !window.__diaryUserMoved });
+                    if (document.getElementById('view-read').classList.contains('on')) window.renderPast();
                     if (typeof window.refreshBookshelf === 'function') window.refreshBookshelf();
                 }, 400);
-            }
-        });
 
-        /* ⚠️ 이 페이지엔 뒤로가기 처리가 없었다 (본 앱 backbutton.js 는 index.html 전용).
-              책을 펼치거나 미리보기를 연 채 뒤로가기를 누르면 화면이 닫히는 게 아니라
-              페이지째 빠져나갔다. 알림을 눌러 바로 들어온 경우엔 앱이 꺼졌다.
-                덮은 화면이 있으면  → 그것만 닫는다
-                책장 탭이면        → 쓰기 탭으로
-                그 외              → 홈으로 (앱을 끄지 않는다) */
-        /* ⚠️ 홈 버튼이 index.html 을 '새로' 열었다. 문답을 오갈 때마다 기록이 한 칸씩 쌓여서
-              홈에서 뒤로가기를 눌러도 앱이 안 닫히고 문답으로 되돌아왔다.
-              index.html 에서 들어왔으면 그 자리로 '돌아간다'. 알림으로 바로 들어왔으면 홈을 연다. */
-        window.leaveDiary = function (fromPop) {
-            let fromApp = false;
-            try {
-                const r = document.referrer ? new URL(document.referrer) : null;
-                fromApp = !!(r && r.origin === location.origin && !/diary\.html$/i.test(r.pathname));
-            } catch (e) {}
-            const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-                               navigator.standalone === true;
-            /* 지금 몇 번째 칸인가 — 뒤로가기로 왔으면 지킴 칸이 앞에 하나 남아 있다 */
-            const pos = history.length - (fromPop ? 2 : 1);
-            if (fromApp && pos > 0) {
-                /* 앱(스토어 앱·홈 화면 앱)이면 첫 화면으로 돌아간다 → 그 뒤 뒤로가기 두 번이면 앱이 닫힌다.
-                   브라우저 탭이면 첫 칸이 다른 사이트일 수 있어서 바로 앞 칸(홈)으로만 간다. */
-                const steps = (standalone && history.length <= 45) ? pos : Math.min(pos, fromPop ? 1 : 2);
-                /* 뒤로 갈 칸 수는 history.length 로 셌으니 늘 있는 칸이다.
-                   '못 돌아가면 새로 연다' 타이머를 두면, 느린 망에서 돌아가는 도중에
-                   새 페이지를 또 열어서 기록이 꼬인다. 두지 않는다. */
-                history.go(-steps);
-                return;
-            }
-            location.replace('index.html');
-        };
-
-        (function diaryBack() {
-            const LAYERS = [
-                { id: 'bs-volume', close: function () {
-                    const el = document.getElementById('bs-volume');
-                    if (el) el.remove();
-                    document.body.style.overflow = '';
-                } },
-                { id: 'pdf-preview-modal', close: function () { window.closePdfPreview(); } },
-                { id: 'store-modal',       close: function () { window.closeStoreModalForce(); } }
-            ];
-            function open(id) {
-                const el = document.getElementById(id);
-                if (!el || !el.isConnected) return false;
-                const st = window.getComputedStyle(el);
-                return st.display !== 'none' && st.visibility !== 'hidden';
-            }
-            function guard() {
-                try { history.pushState({ diary: 1 }, '', location.href); } catch (e) {}
-            }
-            window.addEventListener('popstate', function () {
-                for (let i = 0; i < LAYERS.length; i++) {
-                    if (open(LAYERS[i].id)) { LAYERS[i].close(); guard(); return; }
-                }
-                const read = document.getElementById('view-read');
-                if (read && read.classList.contains('active')) { window.switchTab('write'); guard(); return; }
-                window.leaveDiary(true);
+                // 혼자 쓰는 방인지 — '살짝 알리기' 대신 '초대하기' 를 보여 준다
+                QA.checkPartner().then(function (s) { if (s) window.renderCard(); });
             });
-            guard();
+
+            /* ⚠️ 이 페이지엔 뒤로가기 처리가 없었다 (본 앱 backbutton.js 는 index.html 전용).
+                  책을 펼치거나 미리보기를 연 채 뒤로가기를 누르면 페이지째 빠져나갔다.
+                    덮은 화면이 있으면  → 그것만 닫는다
+                    책장 탭이면        → 쓰기 탭으로
+                    그 외              → 홈으로 (앱을 끄지 않는다)
+               ⚠️ 홈 버튼이 index.html 을 '새로' 열었다. 오갈 때마다 기록이 쌓여서 홈에서 뒤로가기를 눌러도
+                  앱이 안 닫히고 문답으로 되돌아왔다. index.html 에서 들어왔으면 그 자리로 '돌아간다'. */
+            window.leaveDiary = function (fromPop) {
+                var fromApp = false;
+                try {
+                    var r = document.referrer ? new URL(document.referrer) : null;
+                    fromApp = !!(r && r.origin === location.origin && !/diary\.html$/i.test(r.pathname));
+                } catch (e) {}
+                var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                                 navigator.standalone === true;
+                /* 지금 몇 번째 칸인가 — 뒤로가기로 왔으면 지킴 칸이 앞에 하나 남아 있다 */
+                var pos = history.length - (fromPop ? 2 : 1);
+                if (fromApp && pos > 0) {
+                    var steps = (standalone && history.length <= 45) ? pos : Math.min(pos, fromPop ? 1 : 2);
+                    history.go(-steps);
+                    return;
+                }
+                location.replace('index.html');
+            };
+
+            (function diaryBack() {
+                var LAYERS = [
+                    { id: 'qa-confirm',        close: function () { var el = document.getElementById('qa-confirm'); if (el) el.remove(); } },
+                    { id: 'bs-volume',         close: function () { var el = document.getElementById('bs-volume'); if (el) el.remove(); document.body.style.overflow = ''; } },
+                    { id: 'pdf-preview-modal', close: function () { window.closePdfPreview(); } },
+                    { id: 'store-modal',       close: function () { window.closeStoreModalForce(); } }
+                ];
+                function open(id) {
+                    var el = document.getElementById(id);
+                    if (!el || !el.isConnected) return false;
+                    var st = window.getComputedStyle(el);
+                    return st.display !== 'none' && st.visibility !== 'hidden';
+                }
+                function guard() { try { history.pushState({ diary: 1 }, '', location.href); } catch (e) {} }
+                window.addEventListener('popstate', function () {
+                    for (var i = 0; i < LAYERS.length; i++) {
+                        if (open(LAYERS[i].id)) { LAYERS[i].close(); guard(); return; }
+                    }
+                    if (document.getElementById('view-read').classList.contains('on')) { window.switchTab('write'); guard(); return; }
+                    window.leaveDiary(true);
+                });
+                guard();
+            })();
         })();
     </script>
 
-    <!-- 🔒 육아문답 상호 잠금 — 내가 써야 짝꿍 답이 열린다 -->
-    <script src="diarylock.js"></script>
-    <!--        100장마다 책 한 권이 꽂히는 책장 -->
-    <script src="bookshelf.js?v=2"></script>
+    <!--        100쪽마다 책 한 권이 꽂히는 책장 -->
+    <script src="bookshelf.js?v=3"></script>
     <!-- 📖 종이책 알림 신청 — 진짜로 남긴다 -->
-    <script src="paperbook.js?v=1"></script>
+    <script src="paperbook.js?v=2"></script>
 </body>
 </html>

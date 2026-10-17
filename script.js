@@ -3650,6 +3650,16 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 1200);
             return;
         }
+        /* 우리의 문답에서 '짝꿍 초대하기' 를 누르면 ?go=invite 로 돌아온다 (문답 화면엔 카카오 공유가 없다) */
+        if (go === 'invite') {
+            setTimeout(function () {
+                var nm = document.getElementById('invite-baby-name');
+                if (nm) nm.innerText = localStorage.getItem('tosil_babyName') || '우리 아기';
+                var sheet = document.getElementById('invite-bottom-sheet');
+                if (sheet) sheet.style.display = 'flex';
+            }, 1500);
+            return;
+        }
 
         var map = { toolbox: 'nav-toolbox', home: 'nav-home', info: 'nav-info',
                     memorybox: 'nav-memorybox', photo: 'nav-memorybox', baton: 'nav-toolbox' };
