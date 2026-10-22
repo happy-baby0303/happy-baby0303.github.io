@@ -456,7 +456,7 @@
     <script src="../shared/babyswitch.js"></script>
     <script src="data.js?v=b7"></script>
     <script>try { document.getElementById('food-count-badge').textContent = babyFoodData.length + '종 레시피'; } catch (e) {}</script>
-    <script src="app.js?v=b7"></script>
+    <script src="app.js?v=b8"></script>
     <!-- 토핑 이유식: 재료마다 몇 g · 처음 먹인 재료 (홈 맘마 기록과 같은 칸) -->
     <script src="../shared/topping.js?v=1"></script>
     <script src="toppingmeal.js?v=1"></script>
@@ -464,13 +464,15 @@
     <script src="../shared/disclosure.js"></script>
     <script src="foodguide.js?v=b7"></script>
     <script src="cookmode.js"></script>
-    <script src="shoplist.js?v=b7"></script>
+    <script src="shoplist.js?v=b8"></script>
     <script src="planlock.js?v=b7"></script>
     <script src="nextfood.js?v=b7"></script>
     <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
-    <script src="../shared/curatorback.js"></script>
+    <!-- 💌 짝꿍 배냇함으로 보내기 (장볼 거) — 누를 때만 서버에 붙는다 -->
+    <script src="../shared/familysend.js?v=1"></script>
+    <script src="../shared/curatorback.js?v=2"></script>
 
 <!-- 🚀 우측 하단 위로 가기 버튼 -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">

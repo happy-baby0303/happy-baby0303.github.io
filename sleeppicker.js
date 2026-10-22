@@ -33,7 +33,7 @@
             '.sp-label{width:46px;flex-shrink:0;text-align:center;font-size:13px;font-weight:800;color:#A3958A;line-height:1.35;}' +
             '.sp-wrap{flex:1;display:flex;justify-content:center;align-items:center;height:114px;position:relative;overflow:hidden;background:var(--bg-sub);border-radius:16px;}' +
             '.sp-band{position:absolute;top:50%;left:8px;right:8px;height:38px;transform:translateY(-50%);background:rgba(127,119,221,0.08);border:1px solid rgba(127,119,221,0.15);border-radius:12px;pointer-events:none;}' +
-            /* ⚠️ 바퀴가 36px 띠라서, 손가락이 조금만 벗어나도(월 · 일 글자 · 빈칸) 아무것도 안 움직였다 (아내분 문의: 스크롤이 잘 안 된다).
+            /* ⚠️ 바퀴가 36px 띠라서, 손가락이 조금만 벗어나도(월 · 일 글자 · 빈칸) 아무것도 안 움직였다 (아이폰 쓰는 분 문의: 스크롤이 잘 안 된다).
                   이제 바퀴 넷이 상자를 4등분한다. 글자(월 · 일 · :)와 가운데 선은 위에 얹기만 하고 손가락은 통과한다. */
             '.sp-cells{display:flex;width:100%;height:100%;position:relative;z-index:1;}' +
             '.sp-cell{flex:1;min-width:0;position:relative;height:100%;}' +
@@ -48,8 +48,25 @@
         document.head.appendChild(st);
     }
 
-    /* 바퀴 하나 (월 · 일 · 시 · 분 중 하나) */
+    /* 바퀴 하나 (월 · 일 · 시 · 분 중 하나)
+       ⚠️ 브라우저 스크롤로 돌리던 바퀴가 아이폰에서 잘 안 돌았다 (아이폰 쓰는 분 문의, 두 번째).
+          이제 손가락을 직접 따라가는 바퀴(timewheel.js)를 쓴다. 아이폰 · 갤럭시가 똑같이 돈다.
+          timewheel.js 가 없을 때(옛 저장본)만 아래 ScrollColumn 으로 돈다. */
     function Column(el, min, max, value, onPick) {
+        if (!window.TimeWheel) return new ScrollColumn(el, min, max, value, onPick);
+        var self = this;
+        var w = window.TimeWheel(el, {
+            min: min, max: max, value: value, row: ROW,
+            itemClass: 'sp-item', activeClass: 'on',
+            onChange: function (v) { self.value = v; onPick(); }
+        });
+        self.el = el; self.min = min; self.max = max; self.value = w.value;
+        self.build = function (mn, mx, v) { self.min = mn; self.max = mx; w.setRange(mn, mx, v); self.value = w.value; };
+        self.set = function (v) { w.set(v); self.value = w.value; };
+    }
+
+    /* 옛 바퀴 (브라우저 스크롤) — timewheel.js 를 못 읽었을 때만 */
+    function ScrollColumn(el, min, max, value, onPick) {
         var self = this;
         self.el = el; self.min = min; self.max = max; self.onPick = onPick;
         self.build = function (mn, mx, v) {

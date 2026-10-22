@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v80';
+const CACHE = 'baenaet-v81';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -192,7 +192,9 @@ const ASSETS = [
     './shared/safenet.js',
     './playlite.js',
     './native.js',
+    './timewheel.js',       /* 시간 바퀴 — 손가락을 직접 따라간다 (sleeppicker · 기록 바퀴가 같이 쓴다) */
     './sleeppicker.js',
+    './kakaoname.js',
     './shared/topping.js',
     './toppingtrack.js',
     './foodcalsync.js',
@@ -218,6 +220,8 @@ const ASSETS = [
     './shared/plusgate.js',
     './shared/favsync.js',
     './shared/curatorback.js',
+    './shared/familysend.js',
+    './carseat/carseatown.js',
     './shared/curatorlite.js'
 ];
 

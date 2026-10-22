@@ -481,15 +481,20 @@
             window.__familyNameSyncOn = true;
             const code = syncCode();
             if (!code || !(await authReady)) return;
-            const myName = localStorage.getItem("kakao_nickname");
+            /* ⚠️ 로그인하면 이름이 늘 '육아동지' 였다. 그 이름이 여기로 올라가 책 표지에 '엄마 육아동지 · 아빠 육아동지' 가 찍혔다.
+                  진짜 카카오 이름만 올리고, 받을 때도 '육아동지' 는 버린다 (이름이 없으면 표지는 [아빠 이름] 칸). */
+            const FAKE = "육아동지";
+            const rawName = (localStorage.getItem("kakao_nickname") || "").trim();
+            const myName = rawName && rawName !== FAKE ? rawName : "";
             const myRole = localStorage.getItem("tosil_userRole");
             const ref = doc(db, "settings_" + code, "family_names");
             if (myName && myRole) setDoc(ref, { [myRole]: myName }, { merge: true }).catch(() => {});
             onSnapshot(ref, (snap) => {
                 if (!snap.exists()) return;
                 const d = snap.data();
-                if (d.wife) localStorage.setItem('family_wife_name', d.wife);
-                if (d.husband) localStorage.setItem('family_husband_name', d.husband);
+                const keep = (k, v) => { if (v && v !== FAKE) localStorage.setItem(k, v); else localStorage.removeItem(k); };
+                keep('family_wife_name', d.wife);
+                keep('family_husband_name', d.husband);
             }, () => {});
         };
 
@@ -681,10 +686,14 @@
                 var born = localStorage.getItem('tosil_startDate');
                 var bornStr = born ? dot(born + 'T00:00:00') : '';
 
+                var FAKE = '육아동지';
                 var myName = localStorage.getItem('kakao_nickname') || '';
+                if (myName === FAKE) myName = '';
                 var myRole = localStorage.getItem('tosil_userRole') || 'husband';
                 var mom = localStorage.getItem('family_wife_name') || '';
                 var dad = localStorage.getItem('family_husband_name') || '';
+                if (mom === FAKE) mom = '';
+                if (dad === FAKE) dad = '';
                 if (myRole === 'wife' && myName) mom = myName;
                 if (myRole === 'husband' && myName) dad = myName;
                 function nameLine(role, nm) {

@@ -404,7 +404,7 @@ function generateCardHTML(item) {
             </div>
 
             <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="display:block; width:100%; background:#FFFFFF; border:1px solid #EDE6DE; color:#7A6F68; padding:15px; border-radius:14px; font-weight:800; font-size:14.5px; text-align:center; transition:0.2s; cursor:pointer;">
-                여보한테 장볼 거 보내기
+                ${typeof window.shopSendLabel === 'function' ? window.shopSendLabel() : '여보한테 장볼 거 보내기'}
             </button>
         </div>
     `;
@@ -618,6 +618,9 @@ try {
       받는 사람은 그게 수수료 링크인 줄 모른다. 공정위 지침상 대가성을 알리지 않은 추천이 된다.
       재료 목록만 보낸다. */
 function shareToHusband(recipeName, ingredients) {
+    /* ⚠️ 레시피 재료를 그램 그대로 보냈다 ("소고기 10g"). 장볼 수 있는 이름 · 단위로 바꾸고,
+          누구에게 보낼지(남편 · 아내) 보여 주는 창으로 연다 (shoplist.js) */
+    if (typeof window.openShopSend === 'function') return window.openShopSend(recipeName, [ingredients], '오늘 이유식은 [' + recipeName + '] 할게요.');
     const items = String(ingredients || '').split(',').map(i => i.trim()).filter(Boolean);
     let shareText = `여보, 오늘 이유식은 [${recipeName}] 할게요.\n장볼 거 적어서 보내요.\n\n`;
     items.forEach(item => { shareText += `· ${item}\n`; });

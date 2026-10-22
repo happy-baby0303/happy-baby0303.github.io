@@ -378,24 +378,25 @@
         var chars = text.length + String(o.desc || "").length + String(o.caption || "").length +
                     lines.reduce(function (n, x) { return n + String(x.text || "").length; }, 0);
 
-        /* 글 길이로 사진 칸을 정한다. 종이 높이는 shell 이 잡아준다. */
+        /* 글 길이로 사진 크기의 '상한' 을 정한다. 종이 높이는 shell 이 잡아준다.
+           ⚠️ 글이 한 줄(사진 설명)뿐인 날도 사진을 820px 에 묶어서 세로 사진 밑이 40% 비었다.
+              글이 짧을수록 사진을 키운다 (위아래 머리 · 바닥 줄을 빼고 남는 자리 1,370px 안에서). */
+        var hasText = !!(o.title || o.desc || o.caption || text || (l && l.ms) || lines.length);
         var imgH = 820;
         if (chars > 520) imgH = 400;
         else if (chars > 320) imgH = 480;
         else if (chars > 180) imgH = 620;
         else if (chars > 80) imgH = 720;
-        if (!o.img) imgH = 0;
+        else if (chars > 40) imgH = 940;
+        else imgH = 1080;
+        /* ⚠️ 글이 한 줄도 없는 날(사진만 있는 날)은 사진 밑이 통째로 빈 종이였다. 남은 자리를 전부 사진에 */
+        if (!hasText) imgH = 1300;
 
-        /* ⚠️ 글이 한 줄도 없는 날이 있다. 사진만 있는 날이다.
-              그런 쪽은 사진 밑이 통째로 빈 종이였다.
-              돈 받고 파는 책에서 반 장이 비면 그건 낭비로 보인다.
-              글이 없으면 사진에게 남은 자리를 전부 준다. */
-        var hasText = !!(o.title || o.desc || o.caption || text || (l && l.ms) || lines.length);
-        var photoBox = o.img
-            ? (hasText
-                ? 'height:' + imgH + 'px;'
-                : 'flex:1; min-height:0; margin-bottom:10px;')
-            : '';
+        /* ⚠️ 사진 없는 날(첫 순간만 · 편지만)은 글이 종이 맨 위에 붙고 아래 80% 가 빈 종이였다.
+              돈 받고 파는 책에서 그건 덜 만든 쪽으로 보인다. 사진이 없으면 글을 크게 쓴다.
+           ⚠️ 가로 사진은 사진 칸(세로 1,080px) 가운데에 떠서, 사진과 설명 사이가 한 뼘씩 벌어졌다.
+              사진 칸을 없애고 사진 자체에 상한을 준다. 사진 + 글을 한 덩어리로 묶어 종이 가운데에 놓는다. */
+        var bare = !o.img;
 
         var stat = statLine(l);
 
@@ -405,30 +406,29 @@
                 '<div style="font-size:16px; font-weight:800; color:' + GOLD + '; ' +
                     'letter-spacing:5px; margin-bottom:12px;">' + esc(o.kicker || "그날") + '</div>' +
                 '<div style="font-size:21px; font-weight:600; color:' + INK_L + '; ' +
-                    'margin-bottom:34px;">' + esc(pretty(o.key)) + '  \u00b7  ' + esc(dday(o.key)) + '</div>' +
+                    'margin-bottom:34px;">' + esc(pretty(o.key)) + '  ·  ' + esc(dday(o.key)) + '</div>' +
+
+                '<div style="flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center;' +
+                    (bare ? ' padding:0 10px 70px;' : ' padding-bottom:24px;') + '">' +
 
                 /* ⚠️ 사진 칸 바탕이 #F7F4F1 이었다. 종이색(#FDFBF7)과 달라서
                       세로 사진 양옆에 회색 띠가 그어진 것처럼 보였다.
-                      바탕을 종이와 같게 해서 띠를 없애고,
-                      대신 사진 자체에 아주 옅은 그림자를 준다.
-                      상자 안에 갇힌 그림이 아니라 종이에 놓인 인화지로 보이게. */
+                      사진 자체에 아주 옅은 그림자를 준다. 상자 안에 갇힌 그림이 아니라 종이에 놓인 인화지로 보이게. */
                 (o.img
-                    ? '<div style="width:100%; ' + photoBox + ' background:' + PAPER + '; ' +
-                          'overflow:hidden; display:flex; ' +
-                          'align-items:center; justify-content:center;">' +
-                          '<img src="' + o.img + '" style="max-width:100%; max-height:100%; ' +
+                    ? '<div style="width:100%; display:flex; justify-content:center; flex-shrink:0;">' +
+                          '<img src="' + o.img + '" style="max-width:100%; max-height:' + imgH + 'px; ' +
                               'width:auto; height:auto; object-fit:contain; display:block; ' +
                               'box-shadow:0 3px 16px rgba(96,78,60,0.13);">' +
                       '</div>'
                     : '') +
 
-                '<div style="margin-top:' + (o.img ? 40 : 0) + 'px;">' +
-                    (o.title ? '<div style="font-family:\'Gowun Batang\',serif; font-size:46px; ' +
+                '<div style="' + (o.img && hasText ? 'margin-top:40px;' : '') + '">' +
+                    (o.title ? '<div style="font-family:\'Gowun Batang\',serif; font-size:' + (bare ? 60 : 46) + 'px; ' +
                         'font-weight:700; letter-spacing:-2px; line-height:1.35; ' +
-                        'word-break:keep-all; margin-bottom:18px;">' + esc(o.title) + '</div>' : '') +
+                        'word-break:keep-all; margin-bottom:' + (bare ? 24 : 18) + 'px;">' + esc(o.title) + '</div>' : '') +
 
-                    (o.desc ? '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; ' +
-                        'line-height:1.75; word-break:keep-all; margin-bottom:18px;">' +
+                    (o.desc ? '<div style="font-size:' + (bare ? 27 : 23) + 'px; font-weight:400; color:' + INK_S + '; ' +
+                        'line-height:1.75; word-break:keep-all; margin-bottom:' + (bare ? 40 : 18) + 'px;">' +
                         esc(o.desc) + '</div>' : '') +
 
                     (o.caption ? '<div style="font-family:\'Nanum Pen Script\',cursive; ' +
@@ -436,7 +436,7 @@
                         'word-break:keep-all; margin-bottom:18px;">' + esc(o.caption) + '</div>' : '') +
 
                     (text ? '<div style="font-family:\'Nanum Pen Script\',cursive; ' +
-                        'font-size:' + (chars > 320 ? 38 : 44) + 'px; color:' + INK + '; ' +
+                        'font-size:' + (chars > 320 ? 38 : (bare ? 52 : 44)) + 'px; color:' + INK + '; ' +
                         'line-height:1.7; white-space:pre-wrap; word-break:keep-all;">' +
                         esc(text) + '</div>' : '') +
 
@@ -453,11 +453,12 @@
                                 esc(x.text) + '</div>';
                         }).join("") + '</div>' : '') +
                 '</div>' +
+                '</div>' +
 
-                '<div style="margin-top:auto; padding-top:30px; border-top:1px solid ' + LINE + '; ' +
+                '<div style="padding-top:30px; border-top:1px solid ' + LINE + '; ' +
                     'display:flex; justify-content:space-between; align-items:center; ' +
                     'font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:0.5px;">' +
-                    '<span>' + esc(stat.join("   \u00b7   ")) + '</span>' +
+                    '<span>' + esc(stat.join("   ·   ")) + '</span>' +
                     '<span>' + esc(dday(o.key)) + '</span>' +
                 '</div>' +
             '</div>', folio
@@ -490,10 +491,12 @@
         );
     }
 
-    function voicePage(list, folio) {
+    function voicePage(list, folio, more) {
+        /* ⚠️ 소리가 한두 개면 종이 위쪽에 한 줄 놓이고 나머지 4분의 3이 비었다. 적으면 가운데로, 파형도 크게 */
+        var few = list.length <= 3;
         var rows = list.map(function (v) {
             var wave = (typeof window.renderWave === "function" && v.peaks)
-                ? window.renderWave(v.peaks, { w: 900, h: 74, color: "#C69A3C", gap: 2.2, min: 3 })
+                ? window.renderWave(v.peaks, { w: 900, h: few ? 130 : 74, color: "#C69A3C", gap: 2.2, min: 3 })
                 : "";
             return '<div style="padding:26px 0; border-bottom:1px solid ' + LINE + ';">' +
                 '<div style="display:flex; align-items:baseline; gap:16px; margin-bottom:' + (wave ? 14 : 0) + 'px;">' +
@@ -505,13 +508,13 @@
         }).join("");
 
         return shell(
-            '<div style="height:100%; display:flex; flex-direction:column;">' +
+            '<div style="height:100%; display:flex; flex-direction:column;' + (few ? ' justify-content:center; padding-bottom:90px; box-sizing:border-box;' : '') + '">' +
                 '<div style="font-size:16px; font-weight:800; color:' + GOLD + '; letter-spacing:5px; margin-bottom:14px;">담긴 목소리</div>' +
                 '<div style="font-family:\'Gowun Batang\',serif; font-size:44px; font-weight:700; letter-spacing:-2px; margin-bottom:36px;">' +
                     '소리의 모양</div>' +
                 '<div>' + rows + '</div>' +
-                '<div style="margin-top:40px; font-size:22px; font-weight:400; color:' + INK_S + '; line-height:1.8;">' +
-                    '소리는 종이에 담기지 않지만,<br>그 모양은 이렇게 남길 수 있습니다.</div>' +
+                (more ? '' : '<div style="margin-top:40px; font-size:22px; font-weight:400; color:' + INK_S + '; line-height:1.8;">' +
+                    '소리는 종이에 담기지 않지만,<br>그 모양은 이렇게 남길 수 있습니다.</div>') +
             '</div>', folio
         );
     }
@@ -565,7 +568,8 @@
                 '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; line-height:1.9;">' +
                     '다음 장은 아직 비어 있어요.<br>내일 또 한 줄이 쌓입니다.</div>' +
                 tail +
-                '<div style="margin-top:auto; font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:3px;">배냇함</div>' +
+                /* ⚠️ 맨 아래 '배냇함' 에 margin-top:auto 를 주니 가운데 정렬이 풀려서 마지막 장 글이 종이 위쪽에 몰렸다. 바닥에 따로 놓는다 */
+                '<div style="position:absolute; left:0; right:0; bottom:64px; text-align:center; font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:3px;">배냇함</div>' +
             '</div>', ""
         );
     }
@@ -668,23 +672,36 @@
               하루를 한 장에 담는다. 사진이 여러 장인 날만 장수가 늘어나고,
               편지는 그 날의 첫 장에 같이 실린다. */
         data.forEach(function (d) {
-            d.anni.forEach(function (a) { pages.push({ type: "anni", a: a, key: d.key }); });
+            /* ⚠️ '백일' 은 기념일이기도 하고 첫 도감 항목이기도 하다. 둘 다 한 장씩 만들어서
+                  백일만 세 쪽(기념일 · 도감 · 그날 사진)이 됐다. 같은 이름이면 기념일 쪽은 뺀다 (도감 쪽이 '기념일' 로 선다). */
+            var msTitles = d.ms.map(function (m) { return m.title; });
+            d.anni.forEach(function (a) {
+                if (msTitles.indexOf(a.label) > -1) return;
+                pages.push({ type: "anni", a: a, key: d.key });
+            });
+            var anniLabels = d.anni.map(function (a) { return a.label; });
 
             var letter = d.letter || null;   // 그 날 첫 장에만 싣는다
             var lines = (d.lines && d.lines.length) ? d.lines : null;   // 엄마·아빠의 한 줄도 첫 장에
 
+            /* ⚠️ 도감에 사진을 따로 안 붙인 첫 순간은 글만 있는 쪽이 됐고, 바로 다음 쪽에 같은 날 찍은 사진이 따로 나왔다.
+                  첫 순간에 사진이 없으면 그날 찍은 사진을 한 장 데려온다. */
+            var loose = d.photos.filter(function (p) { return !p.msId; });
+
             d.ms.forEach(function (m) {
                 var found = (typeof window.getMilestonePhoto === "function") ? window.getMilestonePhoto(m.id) : null;
+                var src = found ? found.photo : null;
+                if (!src && loose.length) src = loose.shift();
                 pages.push({
-                    type: "day", key: d.key, src: found ? found.photo : null,
-                    kicker: "처음 해낸 일", title: m.title, desc: m.desc,
-                    caption: found ? (found.photo.caption || "") : "",
+                    type: "day", key: d.key, src: src,
+                    kicker: anniLabels.indexOf(m.title) > -1 ? "기념일" : "처음 해낸 일", title: m.title, desc: m.desc,
+                    caption: src ? (src.caption || "") : "",
                     letter: letter, lines: lines
                 });
                 letter = null; lines = null;
             });
 
-            d.photos.filter(function (p) { return !p.msId; }).forEach(function (p) {
+            loose.forEach(function (p) {
                 pages.push({
                     type: "day", key: d.key, src: p,
                     kicker: "그날의 사진", title: "", desc: "",
@@ -710,10 +727,27 @@
             window.voiceDays().sort().forEach(function (k) {
                 (window.getDayVoices(k) || []).forEach(function (v) {
                     var t = v.msId && typeof msItem === "function" && msItem(v.msId) ? msItem(v.msId).title : (v.note || "그날의 소리");
-                    vs.push({ label: t, when: pretty(k), sec: v.sec || 0, peaks: v.peaks || null });
+                    vs.push({ label: t, when: pretty(k), sec: v.sec || 0, peaks: v.peaks || null, key: k, id: v.id });
                 });
             });
-            if (vs.length) pages.push({ type: "voice", list: vs });
+            /* ⚠️ 예전에 담은 소리는 파형(peaks)이 없는 게 있다. 그러면 '소리의 모양' 쪽에 이름만 덩그러니 남았다.
+                  굽기 전에 한 번 계산해 본다 (한 개에 4초까지만 기다린다). */
+            if (typeof window.voicePeaks === "function") {
+                for (var vi = 0; vi < vs.length && vi < 21; vi++) {
+                    if (vs[vi].peaks || !vs[vi].id) continue;
+                    try {
+                        vs[vi].peaks = await Promise.race([
+                            window.voicePeaks(vs[vi].key, vs[vi].id),
+                            new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })
+                        ]);
+                    } catch (e) {}
+                }
+            }
+            /* 한 쪽에 일곱 개까지 (더 넣으면 종이 밖으로 넘친다). 넘으면 다음 쪽으로 */
+            vs = vs.slice(0, 21);
+            for (var vc = 0; vc < vs.length; vc += 7) {
+                pages.push({ type: "voice", list: vs.slice(vc, vc + 7), more: vc + 7 < vs.length });
+            }
         }
 
         /* 이 책에 실제로 담긴 것들을 센다 */
@@ -753,8 +787,11 @@
         // 3) 한 장씩 굽는다
 
         var jsPDF = window.jspdf.jsPDF;
+        /* ⚠️ unit:"px" 로 1240×1754 를 주면 jsPDF 가 1px 을 1/72인치가 아니라 1/96인치로 늘려서
+              쪽 크기가 58×82cm 로 찍혔다 ('A5 판형으로 인쇄소에 그대로' 가 아니었다). 진짜 A5(148×210mm)로 놓는다. */
         var pdf = previewOnly ? null
-            : new jsPDF({ orientation: "portrait", unit: "px", format: [PW, PH], compress: true });
+            : new jsPDF({ orientation: "portrait", unit: "mm", format: "a5", compress: true });
+        var A5W = 148, A5H = 210, imgHmm = A5W * PH / PW, imgTop = (A5H - imgHmm) / 2;
         var shots = [];
         var folioNo = 0;
 
@@ -769,7 +806,7 @@
                 folioNo++;
                 if (p.type === "anni")        html = anniPage(p.a, p.key, String(folioNo));
                 else if (p.type === "letter") html = letterPage(p.l, p.key, String(folioNo));
-                else if (p.type === "voice")  html = voicePage(p.list, String(folioNo));
+                else if (p.type === "voice")  html = voicePage(p.list, String(folioNo), p.more);
                 else if (p.type === "diary")  html = diaryPage(p.e, String(folioNo));
                 else if (p.type === "day") html = dayPage({
                     img: p.img, kicker: p.kicker, title: p.title,
@@ -783,8 +820,8 @@
 
             var jpg = await shoot(html);
             if (previewOnly) { shots.push(jpg); continue; }
-            if (n > 0) pdf.addPage([PW, PH], "portrait");
-            pdf.addImage(jpg, "JPEG", 0, 0, PW, PH, undefined, "FAST");
+            if (n > 0) pdf.addPage("a5", "portrait");
+            pdf.addImage(jpg, "JPEG", 0, imgTop, A5W, imgHmm, undefined, "FAST");
         }
 
         closeProgress();
@@ -811,6 +848,42 @@
                     pdf.save(fname);
                 });
             };
+            /* ⚠️ 플레이 앱(안드로이드)에서는 '저장하기' 가 공유 창만 띄웠다. 안드로이드 공유 창에는 '파일에 저장' 이 없어서
+                  카톡 · 드라이브로 보내지 않으면 책이 어디에도 안 남았다 (창을 닫으면 그대로 사라짐).
+                  앱에서는 먼저 휴대폰 '다운로드 › 배냇함' 폴더에 저장하고, 그다음에 보낼지 묻는다. */
+            var F = window.__NATIVE_APP__ && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BaenaetFiles;
+            if (F && typeof F.save === "function" && typeof window.showConfirm === "function") {
+                var saveBook = function () {
+                    progress(1, 1, "휴대폰에 저장하는 중이에요");
+                    new Promise(function (ok, fail) {
+                        var r = new FileReader();
+                        r.onload = function () { ok(String(r.result).split(",")[1] || ""); };
+                        r.onerror = function () { fail(r.error); };
+                        r.readAsDataURL(file);
+                    }).then(function (b64) {
+                        return F.save({ base64: b64, name: fname, mime: "application/pdf" });
+                    }).then(function () {
+                        closeProgress();
+                        window.showConfirm("다운로드 › 배냇함 폴더에 저장했어요.<br><span style='font-size:12px;color:#A3958A;'>인쇄소나 가족에게 바로 보낼 수도 있어요.</span>",
+                            shareBook, "📖", "보내기", "#B98A2E");
+                        /* 이미 저장은 끝났다. 여기서 '취소' 는 어색하다 → '닫기' (창이 닫히면 원래 글자로) */
+                        var bc = document.getElementById("btn-confirm-cancel"), bo = document.getElementById("btn-confirm-ok");
+                        if (bc) {
+                            bc.innerText = "닫기";
+                            var back = function () { bc.innerText = "취소"; };
+                            bc.addEventListener("click", back, { once: true });
+                            if (bo) bo.addEventListener("click", back, { once: true });
+                        }
+                    }).catch(function (e) {
+                        console.warn("[포토북] 앱 저장 실패", e);
+                        closeProgress();
+                        shareBook();         // 저장이 안 되면 공유 창으로라도
+                    });
+                };
+                window.showConfirm("📖 " + pages.length + "쪽짜리 책이 만들어졌어요.<br><span style='font-size:12px;color:#A3958A;'>휴대폰 '다운로드 › 배냇함' 폴더에 저장할게요.</span>",
+                    saveBook, "📖", "저장하기", "#B98A2E");
+                return;
+            }
             if (typeof window.showConfirm === "function") {
                 window.showConfirm("📖 " + pages.length + "쪽짜리 책이 만들어졌어요.<br><span style='font-size:12px;color:#A3958A;'>창이 뜨면 '파일에 저장'을 누르거나 인쇄소로 바로 보내세요.</span>",
                     shareBook, "📖", "저장하기", "#B98A2E");

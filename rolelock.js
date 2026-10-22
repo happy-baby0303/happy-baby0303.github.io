@@ -83,6 +83,7 @@
             rememberMyLabel(snap.data() || {});
             var role = m[uid] || null;
             applyRole(role);
+            if (role) registerDevice(role);   // 가족 명단에 '이 폰은 아빠 · 오늘' 을 적는다 (6시간에 한 번)
             return role;
         } catch (e) {
             console.warn("[역할] 확인 실패", e);
@@ -253,11 +254,100 @@
         } catch (e) { famCache = null; }
         return famCache;
     }
+    /* ---------- 이 기기를 가족 보관함에 알리기 ----------
+       ⚠️ '우리 가족' 에 '보호자' 가 네 줄 떴다. 테스트하며 여러 번 로그인해 남은 옛 연결들인데,
+          누가 엄마고 누가 아빠인지, 어느 줄이 지금도 쓰이는지 알 길이 없었다.
+          그래서 짝꿍을 잘못 내보낼까 봐 정리도 못 했다.
+       → 기기마다 열릴 때(6시간에 한 번) 가족 보관함(settings_코드/devices)에
+         '나는 아빠 · 카카오 이름 · 언제 열었다' 를 적는다. 명단은 그걸 보고 '아빠 · 이름 · 오늘' 로 보여 주고,
+         엄마 · 아빠가 이미 따로 보이는데 남은 줄, 오래 아무도 안 연 줄만 '정리' 할 수 있게 한다. */
+    var DEV_MARK = "tosil_device_seen";
+    var DAY = 86400000;
+    function devicesRef(code) { return window.doc(window.db, "settings_" + code, "devices"); }
+    function appKind() {
+        if (window.__NATIVE_APP__) return "app";
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent || "") ? "iphone" : "web";
+    }
+    function kakaoName() {
+        try { return typeof window.realKakaoName === "function" ? window.realKakaoName() : ""; } catch (e) { return ""; }
+    }
+    async function registerDevice(serverRole) {
+        var code = syncCode(), uid = myUid();
+        if (!code || !uid || !window.db || typeof window.setDoc !== "function" || typeof window.getDoc !== "function") return;
+        var role = serverRole === "viewer" ? "senior" : (localStorage.getItem("user_role") || "");
+        var label = localStorage.getItem("tosil_helper_label") || "";
+        var me = { role: role, label: label, name: kakaoName(), app: appKind() };
+        var sig = [code, uid, me.role, me.label, me.name, me.app].join("|");
+        var last = {};
+        try { last = JSON.parse(localStorage.getItem(DEV_MARK) || "{}") || {}; } catch (e) {}
+        if (last.sig === sig && Date.now() - (last.at || 0) < 6 * 3600000) return;
+        me.at = Date.now();
+        var data = {}; data[uid] = me;
+        try {
+            var snap = await window.getDoc(devicesRef(code));
+            if (!snap.exists() || !(snap.data() || {})._since) data._since = Date.now();
+            await window.setDoc(devicesRef(code), data, { merge: true });
+            localStorage.setItem(DEV_MARK, JSON.stringify({ sig: sig, at: Date.now() }));
+            devCache = null;
+        } catch (e) { /* 인터넷이 없으면 다음에 다시 */ }
+    }
+    window.__registerDevice = registerDevice;
+
+    var devCache = null, devAt = 0;
+    async function loadDevices(force) {
+        var code = syncCode();
+        if (!code || !window.db || typeof window.getDoc !== "function") return {};
+        if (!force && devCache && Date.now() - devAt < 60000) return devCache;
+        try {
+            var s = await window.getDoc(devicesRef(code));
+            devCache = s.exists() ? (s.data() || {}) : {}; devAt = Date.now();
+        } catch (e) { devCache = {}; }
+        return devCache;
+    }
+
+    function roleWord(info, serverRole) {
+        if (serverRole === "viewer") return "";
+        var r = info && info.role;
+        return r === "mom" ? "엄마" : (r === "dad" ? "아빠" : "");
+    }
+    function seenText(at) {
+        if (!at) return "";
+        var d = Math.floor((startOfDay(Date.now()) - startOfDay(at)) / DAY);
+        if (d <= 0) return "오늘";
+        if (d === 1) return "어제";
+        if (d < 30) return d + "일 전";
+        return "한 달 넘게 안 열었어요";
+    }
+    function startOfDay(t) { var x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); }
+    function escName(s) {
+        return String(s || "").replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+    }
+
+    /* 이 줄을 정리해도 되나 — 짝꿍을 잘못 내보내는 일이 없게, 확실할 때만
+         · 한 달 넘게 이 연결로 연 기기가 없다
+         · 이 연결로 연 기록이 아예 없는데, 엄마 · 아빠는 다른 줄로 이미 보인다 (최근 한 달 안)
+         · 이 연결로 연 기록이 아예 없는데, 기기 기록을 모은 지 사흘이 지났다 */
+    function stale(uid, m, dev, me) {
+        if (uid === me || m[uid] === "viewer") return false;
+        var info = dev[uid], now = Date.now();
+        if (info && info.at) return now - info.at > 30 * DAY;
+        var mom = false, dad = false;
+        Object.keys(m).forEach(function (u) {
+            var x = dev[u];
+            if (u === uid || !x || !x.at || now - x.at > 30 * DAY) return;
+            if (x.role === "mom") mom = true;
+            if (x.role === "dad") dad = true;
+        });
+        if (mom && dad) return true;
+        return !!(dev._since && now - dev._since > 3 * DAY);
+    }
+
     async function paintMembers() {
         var card = document.getElementById("family-members-card");
         if (!card) return;
         var fam = await loadFamily(false), m = fam && fam.members;
         if (!m || Array.isArray(m)) { card.style.display = "none"; return; }
+        var dev = await loadDevices(false);
         var labels = Object.assign({}, fam.labels || {});
         /* 방금 초대한 사람(이름표 없는 도우미가 딱 한 명)에게 초대할 때 고른 이름을 붙인다 */
         var unnamed = Object.keys(m).filter(function (u) { return m[u] === "viewer" && !labels[u]; });
@@ -266,26 +356,77 @@
             try { await window.updateDoc(window.doc(window.db, "families", syncCode()), { labels: labels, inviteLabel: "" }); famCache = null; } catch (e) {}
         }
         card.style.display = "";
-        var me = myUid(), ids = Object.keys(m), helpers = 0;
-        var rows = ids.sort(function (a, b) { return (m[a] === "viewer") - (m[b] === "viewer") || (a === me ? -1 : b === me ? 1 : 0); }).map(function (uid) {
-            var r = m[uid], isMe = uid === me, n = r === "viewer" ? ++helpers : 0, lb = r === "viewer" ? (labels[uid] || "") : "";
+        var me = myUid(), ids = Object.keys(m), helpers = 0, tidy = 0;
+        /* 나 → 엄마 · 아빠 → 확인 전 → 도우미 순서 */
+        function rank(u) {
+            if (u === me) return 0;
+            if (m[u] === "viewer") return 3;
+            return roleWord(dev[u], m[u]) ? 1 : 2;
+        }
+        var rows = ids.sort(function (a, b) { return rank(a) - rank(b); }).map(function (uid) {
+            var r = m[uid], isMe = uid === me, info = dev[uid] || null;
+            var n = r === "viewer" ? ++helpers : 0, lb = r === "viewer" ? (labels[uid] || "") : "";
+            var word = roleWord(isMe ? { role: localStorage.getItem("user_role") } : info, r);
+            var title = lb || word || roleName(r);
+            var old = stale(uid, m, dev, me);
+            if (old) tidy++;
+            var sub = "";
+            if (r !== "viewer") {
+                var bits = [];
+                var nm = isMe ? kakaoName() : (info && info.name);
+                if (nm) bits.push(escName(nm));
+                if (isMe) bits.push("이 폰");
+                else if (info && info.at) bits.push(seenText(info.at));
+                if (!info && !isMe) bits.push(old ? "예전 로그인으로 남은 연결 같아요" : "아직 확인 전이에요");
+                sub = bits.join(" · ");
+            }
             return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border);">' +
                 '<span style="width:34px;height:34px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:' +
                     (r === "viewer" ? "#F3EFE9" : "#EFEDFB") + ';">' + (r === "viewer" ? (ICON[lb] || "🤝") : "🏠") + '</span>' +
-                '<div style="flex:1;min-width:0;font-size:14.5px;font-weight:700;color:var(--text-m);">' + (lb || roleName(r)) + (!lb && n && helpers > 1 ? ' ' + n : '') +
-                    (r === "viewer" ? ' <span onclick="window.__nameHelper(\'' + uid + '\')" style="font-size:11.5px;font-weight:700;color:var(--text-sub);cursor:pointer;margin-left:4px;">' + (lb ? '바꾸기' : '이름 붙이기') + '</span>' : '') +
-                    (isMe ? ' <span style="font-size:11.5px;font-weight:800;color:#7F77DD;background:#EFEDFB;padding:2px 7px;border-radius:7px;margin-left:4px;">나</span>' : '') + '</div>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:14.5px;font-weight:700;color:var(--text-m);">' + title + (!lb && n && helpers > 1 ? ' ' + n : '') +
+                        (r === "viewer" ? ' <span onclick="window.__nameHelper(\'' + uid + '\')" style="font-size:11.5px;font-weight:700;color:var(--text-sub);cursor:pointer;margin-left:4px;">' + (lb ? '바꾸기' : '이름 붙이기') + '</span>' : '') +
+                        (isMe ? ' <span style="font-size:11.5px;font-weight:800;color:#7F77DD;background:#EFEDFB;padding:2px 7px;border-radius:7px;margin-left:4px;">나</span>' : '') + '</div>' +
+                    (sub ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + sub + '</div>' : '') +
+                '</div>' +
                 (r === "viewer" && !isMe ? '<span onclick="window.__kickHelper(\'' + uid + '\')" style="font-size:12.5px;font-weight:800;color:var(--text-sub);' +
-                    'border:1px solid var(--border);padding:7px 11px;border-radius:10px;cursor:pointer;">' + (isFamilyLabel(lb) ? '연결 끊기' : '내보내기') + '</span>' : '') +
+                    'border:1px solid var(--border);padding:7px 11px;border-radius:10px;cursor:pointer;flex-shrink:0;">' + (isFamilyLabel(lb) ? '연결 끊기' : '내보내기') + '</span>' : '') +
+                (old ? '<span onclick="window.__tidyMember(\'' + uid + '\')" style="font-size:12.5px;font-weight:800;color:var(--text-sub);' +
+                    'border:1px solid var(--border);padding:7px 11px;border-radius:10px;cursor:pointer;flex-shrink:0;">정리</span>' : '') +
             '</div>';
         }).join("");
         card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">' +
                 '<span style="font-size:16px;font-weight:900;color:var(--text-m);">우리 가족</span>' +
                 '<span style="font-size:12.5px;font-weight:700;color:var(--text-sub);">' + ids.length + '명</span></div>' + rows +
+            (tidy ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);line-height:1.6;margin-top:10px;word-break:keep-all;">' +
+                '\'정리\' 는 예전 로그인으로 남은 줄을 지우는 거예요. 기록은 그대로예요.</div>' : '') +
             (helpers ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);line-height:1.6;margin-top:10px;word-break:keep-all;">' +
                 '돌봄이 끝나면 연결을 끊어 주세요. 그 폰에서는 더 이상 기록을 보거나 남길 수 없어요. 엄마 아빠 둘만의 기록(가계부 · 문답 · 편지)은 처음부터 보이지 않아요.</div>' : '');
         card.setAttribute("data-labels", JSON.stringify(labels));
     }
+
+    window.__tidyMember = function (uid) {
+        box('<div style="font-size:18px;font-weight:800;color:var(--text-m,#4A413C);">이 줄을 정리할까요?</div>' +
+            '<div style="font-size:13px;font-weight:600;color:var(--text-sub,#8A7F76);line-height:1.7;margin-top:8px;word-break:keep-all;">' +
+                '예전 로그인으로 남은 연결이에요. 정리해도 아기 기록은 그대로예요. 혹시 이 연결로 쓰던 폰이 있으면 초대 링크로 다시 들어오면 돼요.</div>' +
+            '<div style="display:flex;gap:8px;margin-top:18px;">' +
+                '<div onclick="window.__pinCancel()" style="flex:1;padding:14px;border-radius:14px;border:1px solid var(--border,#EDE6DE);font-size:14.5px;font-weight:700;color:var(--text-s,#8A7F76);cursor:pointer;">취소</div>' +
+                '<div onclick="window.__tidyConfirm(\'' + uid + '\')" style="flex:1.4;padding:14px;border-radius:14px;background:#4A413C;color:#FFF;font-size:14.5px;font-weight:800;cursor:pointer;">정리하기</div></div>');
+    };
+    window.__tidyConfirm = async function (uid) {
+        close();
+        var code = syncCode(), fam = await loadFamily(true), m = fam && fam.members, dev = await loadDevices(true);
+        /* 누르는 사이 그 연결로 누가 열었으면 멈춘다 */
+        if (!code || !m || Array.isArray(m) || !(uid in m) || !stale(uid, m, dev, myUid()) || typeof window.updateDoc !== "function") {
+            paintMembers();
+            return toast("지금은 정리하지 않을게요. 그 연결로 방금 연 폰이 있어요");
+        }
+        var next = {}; Object.keys(m).forEach(function (k) { if (k !== uid) next[k] = m[k]; });
+        try {
+            await window.updateDoc(window.doc(window.db, "families", code), { members: next });
+            famCache = null; toast("정리했어요"); paintMembers();
+        } catch (e) { console.warn("[가족] 정리 실패", e); toast("정리하지 못했어요. 다시 해 주세요"); }
+    };
     window.__nameHelper = function (uid) {
         var b = LABELS.map(function (l) {
             return '<div onclick="window.__setHelperName(\'' + uid + '\',\'' + l + '\')" style="padding:13px;border-radius:13px;border:1px solid var(--border,#EDE6DE);' +

@@ -3812,12 +3812,35 @@ async function acceptBaton(id) {
 
 // 💌 바통터치 취소 (모달 적용)
 async function cancelBaton(id) {
-    showConfirm("이 부탁을 취소하시겠습니까?", async function() {
+    /* ⚠️ 받은 사람이 '어려워요' 를 눌러도 "이 부탁을 취소하시겠습니까?" · "부탁을 취소했어요" 가 떴고,
+          부탁한 사람은 아무 소식 없이 부탁이 사라졌다. 장볼 거를 보냈는데 아무도 안 사 오는 일이 생긴다.
+          받은 사람이 내려놓으면 부탁한 사람 폰에 알린다. */
+    const all = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
+    const rec = all.find(r => r.id === id);
+    if (!rec) return;
+    const mine = !rec.by || rec.by === window.myUid();
+    const ask = mine ? "보낸 부탁을 지울까요?" : "지금은 어렵다고 알릴까요?";
+    showConfirm(ask, async function() {
         let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
         records = records.filter(r => r.id !== id);
         await saveBatonToFirebase(records);
-        showToast("부탁을 취소했어요");
-    }, "🤔", "취소", "#A3958A");
+        if (mine) return showToast("부탁을 지웠어요");
+        showToast((rec.byRole || "짝꿍") + "에게 알렸어요");
+        const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
+        if (syncCode && window.functions && window.httpsCallable) {
+            const isShop = rec.kind === 'shop';
+            window.httpsCallable(window.functions, 'sendFamilyPush')({
+                syncCode: syncCode,
+                excludeUid: window.myUid(),
+                excludeToken: window.myPushToken(),
+                title: isShop ? "🛒 " + window.myRoleWord() + "가 오늘은 장 보기 어렵대요"
+                              : "🙏 " + window.myRoleWord() + "가 지금은 어렵대요",
+                body: String(rec.text || "").replace(/^🛒\s*장보기\s*—\s*/, "").slice(0, 60),
+                link: "index.html?go=baton",
+                skipRoles: ['viewer']
+            }).catch(e => console.warn("푸시 발송 에러", e));
+        }
+    }, mine ? "🤔" : "🙏", mine ? "지우기" : "알리기", "#A3958A");
 }
 window.createBatonTask = createBatonTask;
 window.completeBaton = completeBaton;
@@ -3839,21 +3862,28 @@ function renderBatonTasks() {
         return;
     }
 
+    /* ⚠️ 여기만 '요청중 · 미션접수 · 처리중 · 해결완료' 였다 (홈의 받은 부탁 카드는 이미 사람 말로 바뀌었다).
+          그리고 내가 보낸 부탁에도 '미션접수' 가 떠서 내 부탁을 내가 받을 수 있었다.
+          내가 보낸 건 '보냈어요 · 취소' 만, 받은 건 '제가 할게요 → 다 했어요' 로. */
+    const myId = (window.auth && window.auth.currentUser) ? window.auth.currentUser.uid : (localStorage.getItem('firebase_uid') || '');
+    const chip = (txt, bg, fg, bd) => `<span style="background:${bg} !important; color:${fg} !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid ${bd} !important; white-space:nowrap; display:inline-block; flex-shrink:0;">${txt}</span>`;
     let html = '';
     records.forEach(r => {
         let statusHtml = '';
         let actionBtn = '';
+        const mine = !!(r.by && myId && r.by === myId);
         
         // 🚨 테마 간섭 회피용 RGB 코드 + 이모지 삭제
         if (r.status === 'requested') {
-            statusHtml = `<span style="background:rgb(255, 240, 241) !important; color:rgb(240, 68, 82) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(255, 227, 227) !important; white-space:nowrap; display:inline-block; flex-shrink:0;">요청중</span>`;
-            actionBtn = `<button onclick="acceptBaton('${r.id}')" style="padding:14px; background:rgb(127, 119, 221) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(127,119,221,0.3);">미션접수</button>`;
+            statusHtml = mine ? chip('보냈어요', 'rgb(247, 243, 237)', 'rgb(122, 111, 104)', 'rgb(237, 230, 222)')
+                              : chip('기다리고 있어요', 'rgb(255, 240, 241)', 'rgb(214, 74, 90)', 'rgb(255, 227, 227)');
+            if (!mine) actionBtn = `<button onclick="acceptBaton('${r.id}')" style="padding:14px; background:rgb(127, 119, 221) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(127,119,221,0.3);">제가 할게요</button>`;
         } else if (r.status === 'accepted') {
-            statusHtml = `<span style="background:rgb(235, 244, 255) !important; color:rgba(127, 119, 221) !important; font-size:11.5px; font-weight:900; padding:4px 8px; border-radius:6px; border:1px solid rgb(177, 214, 255) !important; white-space:nowrap; display:inline-block; flex-shrink:0;">처리중</span>`;
-            actionBtn = `<button onclick="completeBaton('${r.id}')" style="padding:14px; background:rgb(0, 179, 122) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(0,179,122,0.3);">해결완료</button>`;
+            statusHtml = chip(mine ? '맡아 줬어요' : '제가 맡았어요', 'rgb(242, 240, 252)', 'rgb(127, 119, 221)', 'rgb(221, 217, 247)');
+            if (!mine) actionBtn = `<button onclick="completeBaton('${r.id}')" style="padding:14px; background:rgb(160, 119, 34) !important; color:#FFF !important; border:none; border-radius:12px; font-size:13.5px; font-weight:900; cursor:pointer; flex-shrink:0; white-space:nowrap; box-shadow:0 4px 12px rgba(160,119,34,0.28);">다 했어요</button>`;
         }
 
-        let cancelBtn = `<button onclick="cancelBaton('${r.id}')" style="padding:14px; background:var(--bg-sub) !important; color:rgb(139, 149, 161) !important; border:none; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; flex-shrink:0; white-space:nowrap; margin-right:8px;">취소</button>`;
+        let cancelBtn = `<button onclick="cancelBaton('${r.id}')" style="padding:14px; background:var(--bg-sub) !important; color:rgb(139, 149, 161) !important; border:none; border-radius:12px; font-size:13.5px; font-weight:800; cursor:pointer; flex-shrink:0; white-space:nowrap;${actionBtn ? ' margin-right:8px;' : ''}">${mine ? '취소' : '어려워요'}</button>`;
         
         // 보상 텍스트에서 이모지 제거 (✨, 🎁 등 제거)
         let cleanReward = r.reward ? r.reward.replace(/[✨🎁]/g, '').trim() : '';
@@ -3864,7 +3894,7 @@ function renderBatonTasks() {
         <div class="timeline-item" style="background:#FFFFFF; border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.01); margin-bottom:8px;" data-theme-src="">
             <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
                 <div style="flex:1; min-width:0;">
-                    <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:6px; line-height:1.4; word-break:keep-all;">${r.text}</div>
+                    <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:6px; line-height:1.4; word-break:keep-all;">${window.escapeHTML(String(r.text || ''))}</div>
                     <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-s); font-weight:600;">
                         ${statusHtml} <span style="margin-left:2px;">${r.time}</span>
                     </div>
@@ -4148,17 +4178,26 @@ function updateSmartBanner() {
 
     let cards = [];
 
-    // 1. 아내가 보낸 SOS — 가장 급한 것이라 맨 위
+    // 1. 짝꿍이 보낸 부탁 — 가장 급한 것이라 맨 위
+    /* ⚠️ 내가 보낸 부탁에도 'SOS 짝꿍이 손을 내밀었어요 · 미션 받으러 가기' 가 떴다.
+          장볼 거를 남편에게 보낸 엄마 홈 맨 위에 자기가 보낸 장보기가 'SOS' 로 올라왔다.
+          받은 것만, 누가 보냈는지 사람 말로. */
     const batonRecords = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
-    const urgentBaton = batonRecords.find(r => r.status === 'requested');
+    const myBatonUid = (typeof window.myUid === 'function') ? window.myUid() : (localStorage.getItem('firebase_uid') || '');
+    const urgentBaton = batonRecords.find(r => r.status === 'requested' && (!r.by || r.by !== myBatonUid));
     if (urgentBaton && !isDismissed('baton')) {
+        const who = (urgentBaton.byRole === '아빠' || urgentBaton.byRole === '엄마') ? urgentBaton.byRole + '가' : '짝꿍이';
+        const isShop = urgentBaton.kind === 'shop' && Array.isArray(urgentBaton.items) && urgentBaton.items.length;
+        const esc = (t) => (typeof window.escapeHTML === 'function' ? window.escapeHTML(String(t || '')) : String(t || ''));
         cards.push(card({
             key: 'baton',
             accent: '#7F77DD',
-            label: 'SOS',
-            head: '짝꿍이 손을 내밀었어요',
-            body: '"' + urgentBaton.text + '"',
-            cta: '미션 받으러 가기',
+            label: isShop ? '장보기' : '부탁',
+            head: isShop ? who + ' 장 볼 거를 보냈어요' : who + ' 부탁을 보냈어요',
+            body: isShop
+                ? esc(urgentBaton.items.slice(0, 3).map(x => String(x).replace(/\s*\(.*\)\s*$/, '')).join(' · ') + (urgentBaton.items.length > 3 ? ' 외 ' + (urgentBaton.items.length - 3) + '가지' : ''))
+                : '"' + esc(urgentBaton.text) + '"',
+            cta: '바통터치에서 보기',
             action: "switchTab('toolbox', document.getElementById('nav-toolbox')); setTimeout(() =&gt; switchTool('baton'), 50);"
         }));
     }
@@ -4954,6 +4993,29 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             const el = document.getElementById(id);
             if(!el) return;
 
+            /* ⚠️ 브라우저 스크롤 + 자석(scroll-snap)으로 돌리던 바퀴가 아이폰에서 잘 안 돌았다 (아이폰 쓰는 분 문의).
+                  이제 손가락을 직접 따라가는 바퀴(timewheel.js)를 쓴다. 칸에는 예전처럼 .drum-item / .active / data-val 이 붙어서
+                  아래 updateHiddenValues 는 그대로 읽는다. timewheel.js 가 없을 때(옛 저장본)만 아래 옛 바퀴로 돈다. */
+            if (window.TimeWheel) {
+                if (el.__wheel) { el.__wheel.setRange(min, max, current); return; }
+                el.__wheel = window.TimeWheel(el, {
+                    min: min, max: max, value: current, row: 44,
+                    itemClass: 'drum-item', activeClass: 'active',
+                    onChange: (v) => {
+                        if (id === 'picker-month') {
+                            // 2월 28일 · 30일 — 달이 바뀌면 '일' 바퀴의 끝도 바뀐다
+                            const maxDays = getDaysInMonth(parseInt(yearInput.value), v);
+                            const dayEl = document.getElementById('picker-day');
+                            let selectedDay = dayEl && dayEl.__wheel ? dayEl.__wheel.value : 1;
+                            if (selectedDay > maxDays) selectedDay = maxDays;
+                            buildDrum('picker-day', 1, maxDays, selectedDay);
+                        }
+                        updateHiddenValues();
+                    }
+                });
+                return;
+            }
+
             // ✨ 핵심 패치: 숫자를 31세트 반복해서 물리적으로 끝이 없게 만듭니다!
             const REPEAT = 31; 
             const CENTER = 15; 
@@ -5044,10 +5106,16 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         
         // 저장하기용 히든 데이터 업데이트
         function updateHiddenValues() {
-            const m = document.querySelector('#picker-month .active')?.dataset.val || "01";
-            const d = document.querySelector('#picker-day .active')?.dataset.val || "01";
-            const h = document.querySelector('#picker-hour .active')?.dataset.val || "00";
-            const min = document.querySelector('#picker-minute .active')?.dataset.val || "00";
+            // 바퀴가 멈출 숫자를 먼저 본다 (굴러가는 중에는 화면 글자가 아직 옛 숫자다)
+            const pick = (id, def) => {
+                const el = document.getElementById(id);
+                if (el && el.__wheel && el.__wheel.value !== undefined) return String(el.__wheel.value).padStart(2, '0');
+                return document.querySelector('#' + id + ' .active')?.dataset.val || def;
+            };
+            const m = pick('picker-month', "01");
+            const d = pick('picker-day', "01");
+            const h = pick('picker-hour', "00");
+            const min = pick('picker-minute', "00");
             
             dateInput.value = `${yearInput.value}-${m}-${d}`;
             timeInput.value = `${h}:${min}`;
@@ -6855,7 +6923,7 @@ window.saveTrackerRecord = async function() {
         
         if (sleepAmount < 0) {
             if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; }
-            return window.showToast('⚠️ 종료 시간이 시작 시간보다 빠릅니다.');
+            return window.showToast('깬 시간이 잠든 시간보다 앞서 있어요. 시간을 다시 봐 주세요');
         }
 
         // 💡 무한수면 킬스위치!
@@ -7299,8 +7367,7 @@ window.openReceiptModal = function() {
         font-family: 'Courier New', Courier, monospace !important;
         color: #111 !important;
         width: 100% !important;
-        max-height: 85vh !important;
-        overflow-y: auto !important;
+        overflow: hidden !important;
         box-sizing: border-box !important;
         border: none !important;
         border-radius: 8px !important;
@@ -7314,19 +7381,19 @@ window.openReceiptModal = function() {
             #receipt-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
             
             .rcpt-wrap {
-                padding: 24px 20px;
+                padding: 20px 18px 18px;
                 background: #F4F4F0;
                 position: relative;
                 text-shadow: 0.5px 0.5px 0px rgba(0,0,0,0.3);
             }
-            .rcpt-dash { border-top: 1.5px dashed #333; margin: 10px 0; opacity: 0.6; }
-            .rcpt-bold-line { border-top: 2px solid #111; margin: 10px 0; opacity: 0.9; }
+            .rcpt-dash { border-top: 1.5px dashed #333; margin: 9px 0; opacity: 0.6; }
+            .rcpt-bold-line { border-top: 2px solid #111; margin: 9px 0; opacity: 0.9; }
             
-            .rcpt-item { display: flex; align-items: flex-end; margin-bottom: 2px; font-size: 13px; font-weight: 900; color: #111; }
+            .rcpt-item { display: flex; align-items: flex-end; margin-bottom: 1px; font-size: 13px; font-weight: 900; color: #111; }
             .rcpt-item .dots { flex-grow: 1; border-bottom: 1.5px dotted #666; margin: 0 8px; position: relative; top: -4px; opacity: 0.5; }
-            .rcpt-ko { font-size: 11px; color: #555; font-family: 'Pretendard', sans-serif; font-weight: 600; text-transform: none; margin-bottom: 8px; letter-spacing: -0.3px; }
+            .rcpt-ko { font-size: 11px; color: #555; font-family: 'Pretendard', sans-serif; font-weight: 600; text-transform: none; margin-bottom: 6px; letter-spacing: -0.3px; }
             
-            .barcode-strip { width: 100%; height: 36px; background: repeating-linear-gradient(90deg, #111 0, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 5px, transparent 5px, transparent 8px, #111 8px, #111 12px, transparent 12px, transparent 15px, #111 15px, #111 16px, transparent 16px, transparent 19px, #111 19px, #111 22px); margin: 0 auto; mix-blend-mode: multiply; opacity: 0.85; }
+            .barcode-strip { width: 100%; height: 30px; background: repeating-linear-gradient(90deg, #111 0, #111 2px, transparent 2px, transparent 4px, #111 4px, #111 5px, transparent 5px, transparent 8px, #111 8px, #111 12px, transparent 12px, transparent 15px, #111 15px, #111 16px, transparent 16px, transparent 19px, #111 19px, #111 22px); margin: 0 auto; mix-blend-mode: multiply; opacity: 0.85; }
         </style>
     `;
 
@@ -7337,14 +7404,14 @@ window.openReceiptModal = function() {
 
     let html = customStyle + `
         <div class="rcpt-wrap">
-            <div onclick="window.closeReceiptModal()" style="position: absolute; top: 12px; right: 16px; font-size: 24px; color: #111; font-family: sans-serif; font-weight: 300; cursor: pointer; z-index: 10; padding: 4px;">✕</div>
+            <div onclick="window.closeReceiptModal()" data-html2canvas-ignore="true" style="position: absolute; top: 10px; right: 14px; font-size: 24px; color: #111; font-family: sans-serif; font-weight: 300; cursor: pointer; z-index: 10; padding: 4px;">✕</div>
 
-            <!-- 헤더 -->
-            <div style="text-align: center; margin-bottom: 12px;">
-                <div style="font-weight: 900; font-size: 24px; letter-spacing: 2px; margin-bottom: 4px;">TOSIL CAFE</div>
+            <!-- 헤더 (⚠️ 'TOSIL CAFE' 는 옛 이름이었다. 저장해서 나누는 그림이라 배냇함으로) -->
+            <div style="text-align: center; margin-bottom: 10px;">
+                <div style="font-weight: 900; font-size: 23px; letter-spacing: 2px; margin-bottom: 3px;">BAENAET CAFE</div>
                 <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: #444;">BABY CARE ROASTERS</div>
-                <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #666; margin-top: 2px;">HOME SWEET HOME, KOREA</div>
-                <div style="font-size: 10px; font-weight: 800; color: #7F77DD; margin-top: 4px; font-family: 'Pretendard', sans-serif; text-transform: none;">📶 WI-FI: LOVE0303*#</div>
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #666; margin-top: 1px;">HOME SWEET HOME, KOREA</div>
+                <div style="font-size: 10px; font-weight: 800; color: #7F77DD; margin-top: 3px; font-family: 'Pretendard', sans-serif; text-transform: none;">📶 WI-FI: LOVE0303*#</div>
             </div>
 
             <div class="rcpt-dash"></div>
@@ -7359,7 +7426,7 @@ window.openReceiptModal = function() {
             <div class="rcpt-dash"></div>
 
             <!-- 내역 타이틀 -->
-            <div style="font-size: 12px; font-weight: 900; margin-bottom: 12px; text-align: center; letter-spacing: 2px;">
+            <div style="font-size: 12px; font-weight: 900; margin-bottom: 9px; text-align: center; letter-spacing: 2px;">
                 [ ORDER DETAILS ]
             </div>
 
@@ -7384,21 +7451,27 @@ window.openReceiptModal = function() {
             <div class="rcpt-bold-line"></div>
 
             <!-- 하단 간격 축소 -->
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 12px;">
                 <span style="font-size: 18px; font-weight: 900; color: #000;">TOTAL</span>
                 <span style="font-size: 22px; font-weight: 900; letter-spacing: -1px; color: #000;">∞ LOVE</span>
             </div>
 
             <!-- 하단 푸터 (바코드) -->
-            <div style="text-align: center; font-size: 11px; font-weight: 800; margin-bottom: 12px; line-height: 1.5; color: #444;">
+            <div style="text-align: center; font-size: 11px; font-weight: 800; margin-bottom: 10px; line-height: 1.45; color: #444;">
                 <div>PAID BY: PARENTS SOUL</div>
                 <div>CARD: ****-****-****-0303</div>
                 <div>AUTH CODE: 77777777</div>
             </div>
 
-            <div class="barcode-strip"></div>
-            <div style="text-align: center; font-size: 10px; margin-top: 8px; letter-spacing: 5px; font-weight: 900; color: #111;">
-                0303-TOSIL-BABY
+            ${(() => {
+                /* ⚠️ 바코드를 줄무늬 그라데이션으로 그렸더니 '이미지 저장' 그림에서만 통째로 빠졌다 (저장 도구가 못 그린다).
+                      막대를 하나씩 놓는다. 화면 · 저장 그림이 같다. */
+                const seq = [2,1,1,3,1,2,2,1,3,1,1,2,1,3,2,1,1,2,3,1,2,1,1,3,1,2,2,1,1,3,2,1,3,1,1,2,1,1,3,2,1,2,1,3,1,1,2,2,1,3,1,2,1,1,2,3,1,1,2,1,2,1,3,1];
+                return '<div style="display:flex; height:30px; opacity:0.85;">' +
+                    seq.map((w, i) => `<span style="flex:${w} 0 0; ${i % 2 ? '' : 'background:#111;'}"></span>`).join('') + '</div>';
+            })()}
+            <div style="text-align: center; font-size: 10px; margin-top: 7px; letter-spacing: 5px; font-weight: 900; color: #111;">
+                0303-BAENAET-BABY
             </div>
             
             <!-- 🚨 여기에 있던 쓸데없는 까만색 닫기 버튼 삭제 완료! -->
@@ -7407,7 +7480,29 @@ window.openReceiptModal = function() {
 
     contentDiv.innerHTML = html;
     document.getElementById('receipt-modal').style.display = 'flex';
+    window.fitReceipt();
+    setTimeout(window.fitReceipt, 300);   // 글꼴이 늦게 뜨면 길이가 바뀐다
 };
+
+/* ⚠️ 항목이 늘면 영수증이 화면보다 길어져 안에서 스크롤해야 했다. 화면을 캡처하면 아래가 잘려 안 예뻤다.
+      이제 화면 높이에 맞춰 영수증 전체를 살짝 줄여 한 장에 담는다.
+      '이미지 저장' 은 줄이지 않은 원래 크기로 찍는다 (downloadReceipt). */
+window.fitReceipt = function() {
+    const modal = document.getElementById('receipt-modal');
+    const c = document.getElementById('receipt-content');
+    if (!modal || !c || modal.style.display === 'none') return;
+    modal.style.paddingTop = 'max(16px, env(safe-area-inset-top, 0px))';
+    modal.style.paddingBottom = 'max(16px, env(safe-area-inset-bottom, 0px))';
+    c.style.zoom = '';
+    const box = c.parentNode;
+    const buttons = box && box.lastElementChild !== c ? box.lastElementChild : null;
+    const ms = getComputedStyle(modal);
+    const avail = modal.clientHeight - parseFloat(ms.paddingTop) - parseFloat(ms.paddingBottom)
+                - (buttons ? buttons.offsetHeight + 16 : 0) - 4;
+    const natural = c.offsetHeight;
+    if (natural > avail && avail > 0) c.style.zoom = String(Math.max(0.6, Math.floor((avail / natural) * 1000) / 1000));
+};
+window.addEventListener('resize', () => { if (typeof window.fitReceipt === 'function') window.fitReceipt(); });
 
 // 닫기 버튼 유지
 window.closeReceiptModal = function() {
@@ -7431,14 +7526,27 @@ window.downloadReceipt = function() {
 
     // 캡처하는 동안 저장 버튼 임시 숨김 (버튼까지 사진에 찍히는 것 방지)
     const btn = document.querySelector('#receipt-modal button[onclick*="downloadReceipt"]');
-    if (btn) btn.style.display = 'none';
+    if (btn) btn.style.visibility = 'hidden';
 
-    html2canvas(target, {
+    /* 화면에서는 한 장에 담으려고 줄여 보일 수 있다 (fitReceipt). 저장은 원래 크기 그대로, 끝까지 다 찍는다.
+       화면 밖에 사본을 하나 놓고 그걸 찍는다 (화면이 깜빡이지 않게). */
+    const shot = target.cloneNode(true);
+    shot.removeAttribute('id');
+    shot.style.zoom = '';
+    shot.style.position = 'fixed';
+    shot.style.left = '-10000px';
+    shot.style.top = '0';
+    shot.style.width = (target.parentNode ? target.parentNode.clientWidth : 340) + 'px';
+    shot.style.maxHeight = 'none';
+    document.body.appendChild(shot);
+
+    html2canvas(shot, {
         scale: 2, // 화질 2배 뻥튀기 (고화질)
         backgroundColor: '#ffffff',
         useCORS: true // 🚨 카카오 프사 같은 외부 이미지 깨짐 방지
     }).then(canvas => {
-        if (btn) btn.style.display = 'block'; // 버튼 원상복구
+        shot.remove();
+        if (btn) btn.style.visibility = ''; // 버튼 원상복구
 
         // 🚨 2번 원인 방어: 모바일에서 다운로드 강제 실행 꼼수
         const dataUrl = canvas.toDataURL("image/png");
@@ -7456,7 +7564,8 @@ window.downloadReceipt = function() {
             alert("📸 영수증을 앨범에 저장했어요");
         }
     }).catch(err => {
-        if (btn) btn.style.display = 'block';
+        shot.remove();
+        if (btn) btn.style.visibility = '';
         console.error("영수증 캡처 에러:", err);
         alert("저장하지 못했어요. 잠시 뒤 다시 해 주세요.");
     });
@@ -8855,13 +8964,19 @@ window.renderSettingsTab = function() {
     if (!container) return;
 
     // 🌟 1. 로그인 상태 확인해서 프로필 화면 그리기
-    const savedNickname = localStorage.getItem('kakao_nickname');
-    const savedProfileImg = localStorage.getItem('kakao_profile_image');
+    /* ⚠️ 로그인했는지를 '이름이 있나' 로 봤다. 그래서 로그인할 때 이름 자리에 '육아동지' 를 박아 넣어야 했고,
+          설정에 늘 '육아동지 님' 이 떴다. 로그인은 카카오 번호로 보고,
+          이름은 카카오 이름 → 없으면 '꿈이 아빠' 처럼 부른다 (kakaoname.js) */
+    const loggedIn = !!(localStorage.getItem('kakao_id') || localStorage.getItem('kakao_nickname'));
+    const savedNickname = window.escapeHTML(typeof window.myDisplayName === 'function'
+        ? window.myDisplayName() : (localStorage.getItem('kakao_nickname') || ''));
+    const savedProfileImg = /^https:\/\//.test(localStorage.getItem('kakao_profile_image') || '')
+        ? localStorage.getItem('kakao_profile_image') : '';
     let profileHtml = '';
 
-    if (savedNickname) {
+    if (loggedIn) {
         const imgTag = savedProfileImg 
-            ? `<img src="${savedProfileImg}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` 
+            ? `<img src="${window.escapeHTML(savedProfileImg)}" referrerpolicy="no-referrer" onerror="this.parentNode.textContent='👤'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` 
             : `👤`;
             
         profileHtml = `
@@ -9741,6 +9856,15 @@ window.renderHomeBatonList = function() {
         (!r.by || r.by !== myUid)      // by 가 없는 옛날 기록은 그대로 보여준다
     );
 
+    /* 이 칸은 아빠 화면에만 있었다(엄마가 부탁하고 아빠가 받는 모양). 이제 아빠도 '아내한테 장볼 거' 를 보낸다.
+       엄마 폰도 받은 부탁이 있을 때만 이 칸을 연다 (없으면 엄마 홈에는 안 보인다). */
+    const block = container.closest('.show-on-dad-block');
+    if (block) {
+        const senior = document.body.classList.contains('mode-senior') || localStorage.getItem('user_role') === 'senior';
+        if (activeRecords.length && !senior) block.style.setProperty('display', 'block', 'important');
+        else block.style.removeProperty('display');
+    }
+
     if (activeRecords.length === 0) {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 34px 20px; background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.04); text-align: center;">
@@ -9765,6 +9889,17 @@ window.renderHomeBatonList = function() {
     var PURPLE = 'rgb(127, 119, 221)';
     var CREAM  = 'rgb(251, 248, 243)';
 
+    /* 장보기 부탁(이유식 큐레이터에서 보낸 것)은 마트에서 그대로 보게 한 줄씩 — 메모(기름 적은 부위 …)까지 */
+    function bodyOf(r) {
+        var esc = window.escapeHTML;
+        if (r.kind === 'shop' && Array.isArray(r.items) && r.items.length) {
+            return '\uD83D\uDED2 장 볼 거 ' + r.items.length + '가지' +
+                '<div style="margin-top:8px; font-size:14px; font-weight:700; line-height:1.75; color:var(--text-s); letter-spacing:-0.2px;">' +
+                r.items.map(function (it) { return '· ' + esc(String(it)); }).join('<br>') + '</div>';
+        }
+        return esc(String(r.text || ''));
+    }
+
     let html = '';
     activeRecords.forEach(r => {
 
@@ -9772,7 +9907,8 @@ window.renderHomeBatonList = function() {
 
         // 머리말 — 지금 이 부탁이 어떤 상태인지를 사람 말로
         var head = waiting
-            ? '\uD83D\uDC8C <b style="color:' + PURPLE + ' !important;">' + r.time + '</b> 에 손을 내밀었어요'
+            ? '\uD83D\uDC8C ' + (r.byRole === '아빠' || r.byRole === '엄마' ? r.byRole + '가 ' : '') +
+              '<b style="color:' + PURPLE + ' !important;">' + r.time + '</b>에 보낸 부탁'
             : '\uD83E\uDD1D 제가 맡았어요';
 
         // 약속한 것
@@ -9813,7 +9949,7 @@ window.renderHomeBatonList = function() {
                  'margin-bottom:10px; letter-spacing:-0.2px;">' + head + '</div>' +
 
             '<div style="font-size:17px; font-weight:800; color:var(--text-m); ' +
-                 'line-height:1.5; word-break:keep-all; letter-spacing:-0.4px;">' + r.text + '</div>' +
+                 'line-height:1.5; word-break:keep-all; letter-spacing:-0.4px;">' + bodyOf(r) + '</div>' +
 
             rewardHtml +
 
@@ -11712,7 +11848,11 @@ window.logoutKakao = function() {
         localStorage.removeItem('kakao_profile_image');
         localStorage.removeItem('tosil_is_master');
         localStorage.removeItem('tosil_is_subadmin');
-        
+
+        /* ⚠️ 파이어베이스 로그인은 그대로 두었다. 다시 열리면 로그인 감지가 카카오 번호를 되살려서
+              '로그아웃했어요' 뒤에도 계속 로그인된 채로 동기화됐다. 서버 로그인도 같이 끊는다. */
+        try { if (window.auth && typeof window.auth.signOut === 'function') window.auth.signOut(); } catch (e) {}
+
         window.showToast("👋 로그아웃했어요");
         setTimeout(() => location.reload(), 800);
     }, "👋", "로그아웃", "#A3958A");
@@ -13448,7 +13588,7 @@ window.calcSleepRange = function() {
     let diffMins = Math.floor((endObj.getTime() - startObj.getTime()) / 60000);
 
     if (diffMins < 0) {
-        totalText.innerHTML = `<span style="color:#D32F2F; font-size:15px;">종료 시간이 더 빠릅니다 🚨</span>`;
+        totalText.innerHTML = `<span style="color:#D32F2F; font-size:15px;">깬 시간이 잠든 시간보다 앞서요</span>`;
         totalText.style.background = "#FFF0F1";
         amountHidden.value = -1; 
         return;

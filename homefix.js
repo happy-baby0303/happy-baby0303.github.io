@@ -63,6 +63,21 @@
         var n = Math.floor((t - d) / 86400000);
         return isNaN(n) ? null : n;
     }
+    /* 카시트에 쓸 키 — 홈 성장 기록과 큐레이터에 적은 키 중 더 새 것 */
+    function seatHeight(cs) {
+        var best = null;
+        var recs = getJSON("tosil_growth_records", []);
+        (Array.isArray(recs) ? recs : []).forEach(function (r) {
+            var h = Number(r && r.height), at = String((r && r.date) || "");
+            if (!(h > 30 && h < 160) || !/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
+            if (!best || at > best.at) best = { cm: h, at: at };
+        });
+        var own = Number(cs && cs.height);
+        if (own > 0 && cs.heightAt && (!best || String(cs.heightAt) > best.at)) best = { cm: own, at: String(cs.heightAt) };
+        return best;
+    }
+    function babyNm2() { return String(get("tosil_babyName") || "").trim() || "아기"; }
+
     function monthsOld() {
         var s = get("tosil_startDate");
         if (!s) return null;
@@ -336,16 +351,43 @@
                                 "먼저 쓰시면 좋아요", "bottle/index.html");
         }
 
-        /* ── 카시트 : 어깨끈 ── */
+        /* ── 카시트 ──
+           ⚠️ 테스터 문의: "카시트는 검색하면 끝이라 그 기능을 더 안 쓴다".
+              산 다음 3년(어깨끈 · 키 한계 · 겨울 패딩)을 챙기는 '우리 카시트' 는 큐레이터 안 깊숙이 있었고,
+              어깨끈은 한 번이라도 '맞췄어요' 를 누른 사람에게만 다시 말했다 (대부분 한 번도 안 누른다).
+              그리고 키는 큐레이터에 따로 적어야 해서, 홈 성장 기록에 키를 적어도 카시트는 몰랐다.
+           → 우리 카시트를 적어 둔 집이면 여기서 먼저 말한다. 키는 성장 기록과 큐레이터 중 더 새 것을 쓴다. */
         var cs = getJSON("tosil_carseat_own", {});
-        if (cs.harnessAt) {
+        var CS_HREF = "carseat/index.html?go=own";
+        if (cs.id || cs.name) {
+            var hNow = seatHeight(cs);
+            var lim = Number(cs.rearMax) || Number(cs.limitCm) || 0;
+            var left = (hNow && lim) ? Math.round((lim - hNow.cm) * 10) / 10 : null;
             var hd = daysSince(cs.harnessAt);
-            if (hd !== null && hd >= 60) {
-                var grew = (cs.harnessH && cs.height) ? (cs.height - Number(cs.harnessH)) : null;
-                if (grew !== null && (grew <= 0 || grew > Math.max(4, hd * 0.15))) grew = null;
-                push("\uD83D\uDE98", "카시트 어깨끈 높이",
-                     (grew ? "그동안 " + grew + "cm 자랐어요" : hd + "일 지났어요"),
-                     "carseat/index.html");
+            var grew = (cs.harnessH && hNow) ? Math.round((hNow.cm - Number(cs.harnessH)) * 10) / 10 : null;
+            /* 두 달에 9cm 넘게 자랄 수는 없다 — 카시트를 바꿨거나 잘못 적은 것. 그럴 땐 숫자를 말하지 않는다 */
+            if (grew !== null && (grew <= 0 || (hd !== null && grew > Math.max(4, hd * 0.15)))) grew = null;
+            var nm2 = babyNm2();
+
+            if (left !== null && left <= 3) {
+                push("\uD83D\uDE98", left <= 0 ? "카시트 키 한계를 넘었어요" : "카시트 키 한계까지 " + left + "cm",
+                     left <= 0 ? "다음 카시트로 바꿀 때예요" : nm2 + " 키 " + hNow.cm + "cm · 한계 " + lim + "cm",
+                     CS_HREF, left <= 0);
+            } else if (hd === null) {
+                push("\uD83D\uDE98", "카시트 어깨끈, 한 번 맞춰 볼까요",
+                     "맞춘 날을 적어 두면 클 때마다 알려 드려요", CS_HREF);
+            } else if (hd >= 60 || (grew !== null && grew >= 3)) {
+                push("\uD83D\uDE98", "카시트 어깨끈 높이 볼 때예요",
+                     (grew ? "맞춘 뒤로 " + grew + "cm 자랐어요" : hd + "일 지났어요"), CS_HREF);
+            }
+
+            /* 겨울 패딩 — 큐레이터에서 겨울 안내를 한 번 보면 이 줄은 내려간다 (carseatown.js 가 적는다) */
+            var mo = new Date().getMonth() + 1, yr = new Date().getFullYear();
+            if (mo >= 11 || mo <= 2) {
+                var season = mo >= 11 ? yr + "-" + (yr + 1) : (yr - 1) + "-" + yr;
+                if (get("tosil_carseat_winter_seen") !== season) {
+                    push("\uD83E\uDDE5", "겨울엔 패딩 벗기고 카시트에", "두꺼운 외투는 하네스를 헐겁게 해요", CS_HREF);
+                }
             }
         }
         /* ── 카시트 : 유효기간 ── */

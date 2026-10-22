@@ -252,8 +252,10 @@ function generateReportHTML(item) {
             ${purchaseBtn}
 
             <button onclick="shareToHusband('${item.id}')" style="display:block; width:100%; background:#FBF8F3; border:1px solid #EDE6DE; color:#7A6F68; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
-                여보한테 이 카시트 보내기
+                ${csPartnerWord()}한테 이 카시트 보내기
             </button>
+
+            <div id="own-btn-${item.id}">${ownSeatCta(item.id)}</div>
 
         </div>
     `;
@@ -382,6 +384,30 @@ function resetFilters() {
     applyGlobalBabyProfile();
     if (!isFavViewMode) runCarseatEngine();
 }
+
+/* 누구한테 보내나 — 엄마 폰이면 남편, 아빠 폰이면 아내 (테스터 문의: "남편한테 보내기 · 아내한테 보내기") */
+function csPartnerWord() {
+    const r = localStorage.getItem('user_role');
+    return r === 'mom' ? '남편' : (r === 'dad' ? '아내' : '여보');
+}
+
+/* ⚠️ 테스터 문의: "카시트는 검색하면 끝이라 그 기능을 더 안 쓴다".
+      고른 다음 3년(어깨끈 · 키 한계 · 겨울 패딩)을 챙기는 '우리 카시트' 가 있는데, 고르기 카드에서 거기로 가는 길이 없었다.
+      카드마다 '이 카시트 쓰고 있어요' 를 두고, 누르면 우리 카시트로 적고 바로 그 카드로 간다 (carseatown.js). */
+function ownSeatCta(id) {
+    const mine = typeof window.isMySeat === 'function' && window.isMySeat(id);
+    if (mine) {
+        return `<div onclick="window.showMySeat && window.showMySeat()" style="margin-top:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:15px 16px; border-radius:14px; background:#EFEDFB; border:1px solid #DDD9F5; cursor:pointer;">
+                <span style="font-size:13.5px; font-weight:900; color:#6A61CE;">✓ 우리 카시트예요</span>
+                <span style="font-size:12.5px; font-weight:800; color:#6A61CE; white-space:nowrap;">쓰면서 챙길 것 ›</span>
+            </div>`;
+    }
+    return `<button onclick="window.registerMySeat && window.registerMySeat('${id}')" style="display:block; width:100%; margin-top:10px; background:#FFFFFF; border:1.5px dashed #DCD3C8; color:#4A413C; padding:15px; border-radius:14px; font-weight:900; font-size:14px; cursor:pointer;">이 카시트 쓰고 있어요</button>
+        <div style="margin-top:7px; font-size:11.5px; font-weight:600; color:#A3958A; text-align:center; line-height:1.6; word-break:keep-all;">적어 두면 어깨끈 맞출 때 · 키 한계가 다가올 때 먼저 알려 드려요</div>`;
+}
+window.refreshCarseatCards = function () {
+    document.querySelectorAll('[id^="own-btn-"]').forEach(el => { el.innerHTML = ownSeatCta(el.id.slice(8)); });
+};
 
 // 🚀 카카오톡 공유 시에도 '자동 검색 링크' 및 '정상 딥링크' 적용!
 function shareToHusband(id) {

@@ -38,6 +38,8 @@
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
       <script src="./native.js?v=2"></script>
       <script src="./familyhome.js?v=1"></script>
+      <!-- 🙋 카카오 이름 — 로그인하면 늘 '육아동지' 가 들어가던 것. 진짜 이름을 묻고, 없으면 '꿈이 아빠' 로 부른다 -->
+      <script src="./kakaoname.js?v=1"></script>
     <!-- 🎨 색 칠하기는 맨 먼저. 예전엔 본문 맨 끝에서 불려서, 그 전까지 화면이 파랗게 한 번 그려졌다.
          여기서 부르면 본문이 만들어지는 순간부터 보라로 칠해서 파란 장면이 아예 안 생긴다. -->
     <!-- 카카오톡 SDK (이게 있어야 카톡이 뜹니다!) -->
@@ -143,7 +145,7 @@
         ─────────────────────────
           로고 위에 140px      🔴
 
-      이게 형님이 보신 그 공백이다.
+      화면에 보이던 그 공백이 이것이다.
 
       바로잡는다.
         · 헤더는 sticky 그대로 둔다 (흐름 안에 있으면 body 여백이 필요 없다)
@@ -493,11 +495,13 @@ div[style*="color: #7A6F68"] {
     letter-spacing: -0.2px !important;
 }
 
-/* 4. 메인 액션 버튼 (쨍한 파란색 -> 감성적인 코랄/블루 그라데이션) */
+/* 4. 메인 액션 버튼
+   ⚠️ 예전 파란색(#3182F6) 버튼을 보라로 바꿀 때 이 줄의 '고르는 칸' 만 보라로 바뀌고 칠은 파란 그라데이션 그대로였다.
+      그래서 보라로 적은 버튼(영수증 이미지 저장 · 수유 끝내기 · 아기 정보 저장 …)이 전부 파랗게 떴다. 배냇함 보라로. */
 button[style*="background: #7F77DD"], 
 button[style*="background:#7F77DD"] {
-    background: linear-gradient(135deg, #7FA8DF 0%, #5B8ACA 100%) !important; /* 은은한 수채화 블루 */
-    box-shadow: 0 8px 20px rgba(91, 138, 202, 0.25) !important;
+    background: linear-gradient(135deg, #8E87E4 0%, #7F77DD 100%) !important;
+    box-shadow: 0 8px 20px rgba(127, 119, 221, 0.25) !important;
     border-radius: 18px !important;
     font-weight: 800 !important;
     letter-spacing: -0.5px !important;
@@ -3247,7 +3251,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                              
                              localStorage.setItem('firebase_uid', user.uid);
                              localStorage.setItem('kakao_id', user.uid); 
-                             localStorage.setItem('kakao_nickname', '육아동지'); // 닉네임 기본값
+                             /* ⚠️ 여기서 이름을 늘 '육아동지' 로 박았다. 설정에 '육아동지 님', 문답 책 표지에 '아빠 육아동지' 가 찍혔다.
+                                   서버가 돌려준 카카오 이름을 쓰고, 없으면 카카오에 한 번 더 묻는다 (kakaoname.js) */
+                             if (typeof window.saveKakaoProfile === 'function') window.saveKakaoProfile(result.data || {});
+                             if (typeof window.fetchKakaoName === 'function') window.fetchKakaoName(true);
                              
                              const pendingCode = localStorage.getItem('pending_invite_code');
                              if (!pendingCode) {
@@ -3489,7 +3496,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 firebase_uid: liveUid,                      // 👈 이게 없어서 계속 거부당했다
                 kakaoId: localStorage.getItem('kakao_id') || '',
                 syncCode: syncCode,
-                nickname: localStorage.getItem('kakao_nickname') || '육아동지',
+                nickname: (typeof window.realKakaoName === 'function' ? window.realKakaoName() : '') || '',
                 source: 'earlybird_vip',
                 requestedAt: new Date().toISOString()
             }, { merge: true });
@@ -3510,7 +3517,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- ⏸ 앱이 뒤에 있을 때 타이머가 일을 안 하게. setInterval 을 감싸므로 제일 먼저 -->
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
-<script src="script.js?v=20261017-1"></script>
+<script src="script.js?v=20261022-1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js?v=2"></script>
@@ -3519,7 +3526,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <script src="./readylist.js"></script>
     <script src="./prepstage.js"></script>
 <script src="./outingreturn.js"></script>
-<script src="./rolelock.js?v=2"></script>
+<script src="./rolelock.js?v=3"></script>
     <script src="./sitterplus.js"></script>
     <script src="./duty.js?v=1"></script>
 <script src="./graveyard.js"></script>
@@ -3549,16 +3556,18 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 우리의 문답 — 저장 · 알림 · 코인을 문답 화면과 같이 쓴다 (홈에서 바로 쓰기) -->
 <script src="./qacore.js?v=1"></script>
 <script src="./diary.js?v=2"></script>
-<script src="./photobook.js"></script>
+<script src="./photobook.js?v=2"></script>
 <script src="./premium.js"></script>
     <!-- 🎁 출시 기념 무료 개방 (구글 결제 붙이기 전까지) -->
     <script src="./plusfree.js"></script>
 <script src="./anniversaries.js"></script>
 <script src="./home.js"></script>
- <script src="./homefix.js?v=2"></script>
+ <script src="./homefix.js?v=3"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js?v=2"></script>
-<script src="./sleeppicker.js?v=2"></script>
+<!-- 🕰 시간 바퀴 — 손가락을 직접 따라간다 (아이폰에서 바퀴가 잘 안 돌던 것) -->
+<script src="./timewheel.js?v=1"></script>
+<script src="./sleeppicker.js?v=3"></script>
 <!-- 토핑 이유식: 맘마 기록 → 이유식에서 재료마다 몇 g (이유식 달력과 같은 칸) -->
 <script src="./shared/topping.js?v=1"></script>
 <script src="./toppingtrack.js?v=1"></script>
@@ -3589,7 +3598,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 💩 기저귀 시트 — 옛 이름을 진짜 기록 시트로 보내준다 -->
 <script src="./diapersheet.js?v=1"></script>
 <!-- ← 안드로이드 뒤로가기 — 덮은 화면을 닫는다. 앱이 꺼지지 않게 -->
-<script src="./backbutton.js?v=3"></script>
+<script src="./backbutton.js?v=4"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->

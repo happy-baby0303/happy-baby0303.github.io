@@ -273,7 +273,7 @@ function generateCardHTML(item, rank) {
             ${purchaseBtn}
 
             <button onclick="shareToHusband('${item.id}')" style="display:block; width:100%; background:#FBF8F3; border:1px solid #EDE6DE; color:#7A6F68; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
-                여보한테 이 젖병 보내기
+                ${(() => { const r = localStorage.getItem('user_role'); return r === 'mom' ? '남편' : (r === 'dad' ? '아내' : '여보'); })()}한테 이 젖병 보내기
             </button>
         </div>
     `;

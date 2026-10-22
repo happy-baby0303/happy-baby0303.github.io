@@ -23,6 +23,15 @@
       어깨끈을 어떻게 맞추는지는 무료고,
       '4cm 자랐으니 지금 맞출 때' 라고 세어주는 것이 PLUS다.
 
+   ⚠️ 테스터 문의: "카시트는 검색하면 끝이라 그 기능을 더 안 쓴다".
+      산 다음 3년이 진짜인데, 고르기 화면에서 여기로 오는 길이 없었고
+      키도 여기에 따로 적어야 해서 홈 성장 기록과 따로 놀았다.
+        · 고르기 카드에 '이 카시트 쓰고 있어요' → 바로 여기로 (registerMySeat)
+        · 키는 홈 '성장 기록' 에 더 새 값이 있으면 그걸 쓴다 (syncHeight)
+        · 홈 '오늘 챙길 것' 이 어깨끈 · 키 한계 · 겨울 패딩을 먼저 말한다 (homefix.js)
+          그래서 여기서 키 한계(limitCm)와 이름(title)을 같이 적어 둔다 — 홈은 카시트 목록이 없다
+        · 홈에서 누르면 carseat/index.html?go=own 으로 와서 '쓰면서 챙길 것' 의 이 카드가 바로 보인다
+
    index.html 에서 carseatguide.js 다음에 로드하세요.
    ============================================================ */
 (function () {
@@ -117,6 +126,7 @@
             o[f] = (n > 0 && n < 200) ? n : "";
             if (f === "height" && o[f]) {
                 o.heightAt = today();
+                o.heightFrom = "";
                 /* \u26a0\ufe0f 잰 값을 남겨둔다.
                       이게 있어야 '몇 개월 뒤' 를 이 아이의 실제 속도로 셀 수 있다.
                       평균 성장 속도를 지어내면 틀린 달수가 나온다. */
@@ -140,6 +150,108 @@
         o.harnessH = o.height || "";      // 그때 키를 같이 적어둔다
         save(o); paint();
     };
+    /* ---------- 키는 홈 '성장 기록' 에서 ----------
+       ⚠️ 홈에서 키를 재서 적어도 여기는 몰랐다. '45일 전 기록 · 다시 재보실래요?' 가 계속 떴고
+          남은 기간도 옛 키로 셌다. 성장 기록에 더 새 키가 있으면 그걸 쓴다 (잰 날짜도 그대로). */
+    function growthLatest() {
+        var recs = [];
+        try { recs = JSON.parse(localStorage.getItem("tosil_growth_records")) || []; } catch (e) {}
+        var best = null;
+        (Array.isArray(recs) ? recs : []).forEach(function (r) {
+            var h = Number(r && r.height), at = String((r && r.date) || "");
+            if (!(h > 30 && h < 160) || !/^\d{4}-\d{2}-\d{2}$/.test(at)) return;
+            if (!best || at > best.at) best = { cm: h, at: at };
+        });
+        return best;
+    }
+    function syncHeight() {
+        var g = growthLatest();
+        if (!g) return;
+        var o = own();
+        if (o.heightAt && String(o.heightAt) >= g.at) return;       // 여기 적은 게 더 새것
+        var cm = Math.round(g.cm);
+        o.height = cm; o.heightAt = g.at; o.heightFrom = "growth";
+        o.hist = Array.isArray(o.hist) ? o.hist : [];
+        var last = o.hist[o.hist.length - 1];
+        if (last && last.at === g.at) last.cm = cm;
+        else {
+            o.hist.push({ cm: cm, at: g.at });
+            if (o.hist.length > 8) o.hist = o.hist.slice(-8);
+        }
+        save(o);
+    }
+
+    /* 홈 '오늘 챙길 것' 이 읽는 것 — 홈에는 카시트 목록(data.js)이 없어서 여기서 적어 둔다 */
+    function remember() {
+        var o = own();
+        var t = seatTitle(o), lim = maxCmOf(seatById(o.id)) || "";
+        if (o.title === t && o.limitCm === lim) return;
+        o.title = t; o.limitCm = lim;
+        save(o);
+    }
+
+    function toast(msg) {
+        var old = document.getElementById("seat-toast");
+        if (old) old.remove();
+        var t = document.createElement("div");
+        t.id = "seat-toast";
+        t.setAttribute("style", "position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%); " +
+            "width:max-content; max-width:calc(100% - 40px); box-sizing:border-box; background:rgba(43,36,30,0.94); color:#FFFFFF; " +
+            "padding:13px 18px; border-radius:14px; font-size:13.5px; font-weight:800; line-height:1.55; text-align:center; " +
+            "word-break:keep-all; z-index:100040;");
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function () { if (t.parentNode) t.remove(); }, 3200);
+    }
+
+    /* '우리 카시트' 카드 — carseattabs.js 가 그릇(#carseat-own)에서 카드를 꺼내 '쓰면서 챙길 것' 에 바로 놓는다 */
+    function ownPanel() {
+        var list = document.querySelectorAll('[data-from="' + HOST + '"]');
+        for (var i = 0; i < list.length; i++) {
+            var hd = list[i].querySelector(".matrix-header");
+            if (hd && /우리 카시트/.test(hd.textContent || "")) return list[i];
+        }
+        var host = document.getElementById(HOST);
+        var p = host && host.querySelector(".matrix-panel");
+        return (p && p.offsetHeight) ? p : null;
+    }
+    /* 위에 붙어 있는 머리(제목 · 탭) 아래로 카드 머리가 오게 */
+    function scrollToOwn(smooth) {
+        var el = ownPanel();
+        if (!el || !el.offsetHeight) return false;
+        var head = document.querySelector(".app-header");
+        var y = el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) -
+                (head ? head.getBoundingClientRect().height : 0) - 12;
+        noRestoreUntil = Date.now() + 1500;
+        try { window.scrollTo({ top: Math.max(0, y), behavior: smooth ? "smooth" : "auto" }); }
+        catch (e) { window.scrollTo(0, Math.max(0, y)); }
+        return true;
+    }
+    var noRestoreUntil = 0;      // 이 시각까지는 paint() 의 '스크롤 되돌리기' 를 하지 않는다 (카드로 데려가는 중)
+
+    function showOwn() {
+        try { localStorage.setItem("tosil_carseat_tab", "use"); } catch (e) {}
+        noRestoreUntil = Date.now() + 1500;
+        if (typeof window.switchCarseatTab === "function") { try { window.switchCarseatTab("use"); } catch (e) {} }
+        setTimeout(function () { scrollToOwn(true); }, 650);    // 카드를 꺼내 놓는 게(carseattabs.js) 끝난 뒤
+    }
+
+    /* 고르기 카드의 '이 카시트 쓰고 있어요' — 고르고 끝이 아니라, 여기서부터 같이 챙긴다 */
+    window.registerMySeat = function (id) {
+        if (!seatById(id)) return;
+        var o = own();
+        var had = o.id === id;
+        o.id = id;
+        if (!o.since) o.since = today();
+        save(o);
+        paint();
+        if (typeof window.refreshCarseatCards === "function") { try { window.refreshCarseatCards(); } catch (e) {} }
+        showOwn();
+        if (!had) toast("우리 카시트로 적어 뒀어요. 어깨끈 맞출 때 · 키 한계가 다가올 때 홈에서 먼저 알려 드릴게요");
+    };
+    window.isMySeat = function (id) { return !!id && own().id === id; };
+    window.showMySeat = showOwn;
+
     window.openSeatSheet = function () {
         var old = document.getElementById("seat-sheet");
         if (old) old.remove();
@@ -224,6 +336,8 @@
         var m = new Date().getMonth() + 1;
 
         if (m >= 11 || m <= 2) {
+            var y = new Date().getFullYear();
+            try { localStorage.setItem("tosil_carseat_winter_seen", m >= 11 ? y + "-" + (y + 1) : (y - 1) + "-" + y); } catch (e) {}
             return '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin-bottom:14px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + RED + '; margin-bottom:5px;">' +
@@ -482,6 +596,8 @@
                 '<span style="flex:1; text-align:right; font-size:11.5px; font-weight:700; color:' +
                     (hAge !== null && hAge >= HEIGHT_DAYS ? GOLD : GRAY) + ';">' +
                     (hAge === null ? "재보고 적어주세요"
+                        : o.heightFrom === "growth"
+                            ? "성장 기록 \u00b7 " + (hAge === 0 ? "오늘" : hAge + "일 전") + (hAge >= HEIGHT_DAYS ? " \u00b7 다시 재보실래요?" : "")
                         : hAge === 0 ? "오늘 적으셨어요"
                         : hAge + "일 전 기록" + (hAge >= HEIGHT_DAYS ? " \u00b7 다시 재보실래요?" : "")) +
                 '</span>' +
@@ -756,6 +872,7 @@
         /* ⚠️ 카드를 통째로 다시 그리면 높이가 잠깐 0이 되면서 화면이 위로 튄다.
               '오늘 봤어요' 를 누를 때마다 스크롤이 날아가서 다시 내려와야 했다. */
         var _y = window.scrollY || window.pageYOffset || 0;
+        try { syncHeight(); remember(); } catch (e) {}
         host.innerHTML = (isPlus() ? ownHTML() : teaseHTML()) +
                          coolHTML() + carRideHTML() + crashHTML() + washHTML();
         try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
@@ -771,7 +888,7 @@
                 window.addEventListener("wheel", off, { passive: true, once: true });
             } catch (e) {}
             var tick = function () {
-                if (stop || n++ > 13) return;
+                if (stop || n++ > 13 || Date.now() < noRestoreUntil) return;
                 if (Math.abs((window.scrollY || 0) - _y) > 8) window.scrollTo(0, _y);
                 setTimeout(tick, 60);
             };
@@ -792,7 +909,18 @@
         paint();
     }
 
+    var GO_OWN = /[?&]go=own(&|$)/.test(location.search || "");
+    if (GO_OWN) { try { localStorage.setItem("tosil_carseat_tab", "use"); } catch (e) {} }   // carseattabs.js 가 읽기 전에
+
     function boot() {
+        if (GO_OWN) {
+            var tries = 0;
+            var go = setInterval(function () {
+                var el = ownPanel();
+                if (el && el.getAttribute("data-from")) { clearInterval(go); setTimeout(function () { scrollToOwn(false); }, 400); }
+                else if (++tries > 40) { clearInterval(go); scrollToOwn(false); }
+            }, 150);
+        }
         /* \u26a0\ufe0f 늦게 붙으면 그 칸이 한동안 비어 보인다.
               바로 시도하고, 앵커가 아직 없으면 촘촘히 다시 본다. */
         mount();

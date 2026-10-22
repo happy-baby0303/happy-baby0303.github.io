@@ -56,7 +56,15 @@ exports.kakaoCustomAuth = onCall(US, async (request) => {
     const uid = `kakao:${kakaoUser.id}`;
 
     const firebaseToken = await admin.auth().createCustomToken(uid);
-    return { customToken: firebaseToken };
+
+    /* 카카오 이름도 같이 돌려준다. 앱이 로그인할 때마다 이름 자리에 '육아동지' 를 박아 넣었다.
+       (카카오 디벨로퍼스의 '닉네임' 동의 항목이 꺼져 있으면 빈칸으로 간다 → 앱이 '꿈이 아빠' 로 부른다) */
+    const account = kakaoUser.kakao_account || {};
+    const profile = account.profile || {};
+    const props = kakaoUser.properties || {};
+    const nickname = String(profile.nickname || props.nickname || "").slice(0, 30);
+    const thumb = profile.is_default_image ? "" : String(profile.thumbnail_image_url || props.thumbnail_image || "");
+    return { customToken: firebaseToken, nickname, thumbnail: thumb.replace(/^http:\/\//, "https://") };
   } catch (error) {
     logger.error("카카오 로그인 에러", error);
     throw new HttpsError("internal", "카카오 로그인 처리 중 서버 에러가 발생했습니다.");
