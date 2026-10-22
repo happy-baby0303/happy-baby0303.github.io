@@ -225,6 +225,14 @@ window.myPushToken = function () {
     return localStorage.getItem('fcm_token') || null;
 };
 
+/* 맘수다(누구나 읽는 공개 글)에서 쓰는 이름.
+   ⚠️ 예전엔 로그인하면 kakao_nickname 이 늘 '육아동지' 여서 그게 익명 이름 노릇을 했다.
+      이제 그 자리에 진짜 카카오 이름(실명일 수 있다)이 들어간다 (kakaoname.js).
+      공개 글에 실명이 찍히지 않게, 맘수다는 카카오 이름을 쓰지 않는다. 직접 정한 이름이 없으면 예전처럼 '육아동지'. */
+window.communityNick = function (def) {
+    return localStorage.getItem('community_nickname') || (localStorage.getItem('kakao_id') ? '육아동지' : (def || '배냇함'));
+};
+
 /* ⚠️ PLUS 창을 여는 함수 이름이 파일마다 달랐다.
       homefix 는 openUpsell / startPremium 을 부르고
       photobook 도 openUpsell 을 부르는데,
@@ -10619,7 +10627,7 @@ window.submitPost = function(btnElement) {
     if (!content.trim()) { resetBtn(); return window.showToast('⚠️ 내용을 입력해주세요'); }
 
     let posts = JSON.parse(localStorage.getItem('tosil_community_posts')) || [];
-    const myName = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함';
+    const myName = window.communityNick('배냇함');
     const authorName = isAnonymous ? '익명마미' : myName;
     const authorIcon = window.getCurrentUserProfileIcon(isAnonymous);
 
@@ -10873,7 +10881,7 @@ window.showPostOptions = async function() {
     const post = posts.find(p => p.id === postId);
     if (!post) return;
 
-    const myName = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함';
+    const myName = window.communityNick('배냇함');
     const isMyPost = (post.authorName === myName || post.authorName === '익명마미');
 
     let isMasterAdmin = false;
@@ -11021,7 +11029,7 @@ window.openMyActivity = function(type) {
     else if (type === 'scraps') titleEl.innerText = '스크랩한 글';
 
     let allPosts = JSON.parse(localStorage.getItem('tosil_community_posts')) || [];
-    let myNickname = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함'; 
+    let myNickname = window.communityNick('배냇함'); 
 
     let filtered = [];
     if (type === 'posts') filtered = allPosts.filter(p => p.authorName === myNickname);
@@ -11145,7 +11153,7 @@ window.openMyPage = function() {
     if (typeof window.switchTab === 'function') window.switchTab('mypage', null);
     
     const input = document.getElementById('comm-nickname-input');
-    if(input) input.value = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함';
+    if(input) input.value = window.communityNick('배냇함');
     window.scrollTo(0, 0);
 };
 
@@ -12360,7 +12368,7 @@ window.showCommentOptions = async function(commentId, postId) {
     let comment = comments.find(c => c.id === commentId);
     if (!comment) return;
 
-    const myName = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함';
+    const myName = window.communityNick('배냇함');
     const isMyComment = (comment.authorName === myName || comment.authorName === '익명마미');
 
     let isMasterAdmin = localStorage.getItem('tosil_is_master') === 'true';
@@ -12522,7 +12530,7 @@ window.addComment = function() {
         return;
     }
 
-    const myName = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '배냇함';
+    const myName = window.communityNick('배냇함');
     const myIcon = window.getCurrentUserProfileIcon(false);
     const timestamp = new Date().getTime();
 
