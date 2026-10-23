@@ -522,7 +522,8 @@
             var sd = stamp.at ? Math.floor((Date.now() - stamp.at) / 86400000) : null;
             if (PLAY_NAME[stamp.stage] && sd !== null && sd >= 0 && sd <= 21 && !seen("toy_" + stamp.stage)) {
                 var tt = MS_TITLE[stamp.id] || "";
-                push("\uD83E\uDDF8", "이제 " + PLAY_NAME[stamp.stage] + " 시기 놀이로 바꿔 볼까요",
+                /* ⚠️ '…놀이로 바꿔 볼까요' 는 놀이를 이미 하고 있던 집의 말이다. 막 깐 사람에게는 무엇을 바꾸라는 건지 몰랐다 */
+                push("\uD83E\uDDF8", "이제 " + PLAY_NAME[stamp.stage] + " 시기 놀이를 해 볼 때예요",
                      "도감에 '" + tt + "'" + josa(tt, "을", "를") + " 찍었어요", "toy/index.html", false, "toy_" + stamp.stage);
             }
         } else {
@@ -530,8 +531,8 @@
             [2, 4, 7, 10].forEach(function (n) {
                 var d = daysPastMonth(n);
                 if (d === null || d < 0 || d > 21 || seen("toy_m" + n)) return;
-                push("\uD83E\uDDF8", pre + n + "개월 무렵 놀이로 바꿔 볼까요",
-                     "도감에 발달 도장을 찍으면 그에 맞춰 골라 드려요", "toy/index.html", false, "toy_m" + n);
+                push("\uD83E\uDDF8", pre + n + "개월 무렵 놀이를 해 볼 때예요",
+                     "해낸 걸 도감에 찍으면 거기에 맞춰 골라 드려요", "toy/index.html", false, "toy_m" + n);
             });
         }
 
@@ -574,7 +575,7 @@
             '</div>' +
             '<div style="font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.6; margin-bottom:12px;">' +
-                '다섯 큐레이터에서 모았어요. 급한 건 아니에요.</div>' +
+                '때가 된 것만 모았어요. 급한 건 아니에요.</div>' +
 
             show.map(function (x, i) {
                 /* 마지막 줄 밑줄은 카드 끝선과 겹쳐 두 줄로 보였다 */

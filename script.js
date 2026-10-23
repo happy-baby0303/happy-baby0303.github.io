@@ -7855,8 +7855,10 @@ document.addEventListener("DOMContentLoaded", () => {
             window.showForcedLoginStep();
         } 
         // 2-2. 로그인은 했는데 첫째 이름조차 없으면? -> 1단계 (이름 입력)
+        //      초대 링크로 들어온 폰이면 이름을 묻지 않는다 — 가족방에 들어가면 받아 온다
         else if (!savedName) {
-            if(step1) step1.style.display = 'flex';
+            if (localStorage.getItem('pending_invite_code') && typeof window.showJoinScreen === 'function') window.showJoinScreen('loading');
+            else if(step1) step1.style.display = 'flex';
         }
         // 2-3. 🚨 다둥이 추가 중인 상황! (이름은 방금 지어줘서 있는데 생일이 없음) -> 로그인 무시하고 무조건 2단계(생일 입력) 직행!
         else {
@@ -7904,24 +7906,123 @@ window.showForcedLoginStep = function() {
         if(innerCard) innerCard.appendChild(step0);
     }
     step0.style.display = 'flex';
+    window.paintInviteNote();
+};
+
+/* 초대 링크로 들어온 폰 — 로그인 전에는 가족방을 못 읽는다. 초대장에 실린 아기 이름(?n=)으로 말한다 */
+window.paintInviteNote = function () {
+    const note = document.getElementById('ob-invite-note');
+    if (!note) return;
+    const code = localStorage.getItem('pending_invite_code');
+    if (!code) { note.style.display = 'none'; return; }
+    const nm = String(localStorage.getItem('pending_invite_name') || '').trim();
+    const esc = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    note.innerHTML = '💌 ' + (nm ? '<b>' + esc(nm) + '</b> 기록에 초대받았어요' : '가족방에 초대받았어요') +
+        '<span>카카오로 시작하면 바로 같이 봐요</span>';
+    note.style.display = 'block';
+};
+
+/* 개인정보처리방침 — 앱 밖으로 나가지 않게 이 화면 위에 띄운다 */
+window.openPrivacy = function () {
+    if (document.getElementById('privacy-sheet')) return;
+    const w = document.createElement('div');
+    w.id = 'privacy-sheet';
+    w.style.cssText = 'position:fixed; inset:0; z-index:10000003; background:var(--bg-main, #FAF7F2); display:flex; flex-direction:column;';
+    w.innerHTML = '<div style="display:flex; align-items:center; justify-content:space-between; padding:calc(14px + env(safe-area-inset-top, 0px)) 18px 12px; border-bottom:1px solid var(--border, #EDE6DE);">' +
+        '<div style="font-size:16px; font-weight:800; color:var(--text-m, #4A413C);">개인정보처리방침</div>' +
+        '<div onclick="document.getElementById(\'privacy-sheet\').remove()" style="padding:8px 4px 8px 16px; font-size:14.5px; font-weight:800; color:#7F77DD; cursor:pointer;">닫기</div></div>' +
+        '<iframe src="privacy.html" title="개인정보처리방침" style="flex:1; width:100%; border:0; background:#FAF7F2;"></iframe>';
+    document.body.appendChild(w);
+};
+
+/* ---------- 초대 링크로 들어온 폰: 가족방에 들어가는 동안 · 들어왔을 때 · 못 들어갔을 때 ----------
+   ⚠️ 온보딩 화면을 바로 닫고 들어가서, 그 사이 '아기를 등록해주세요' 빈 홈이 비쳤다.
+   ⚠️ 초대 시간(30분)이 지나면 안내 한 줄만 뜨고 그대로 갇혔다 (다시 열어도 같은 초대로 또 실패했다).
+   kind: 'loading' | 'done' | 'fail' */
+window.showJoinScreen = function (kind, opts) {
+    opts = opts || {};
+    const ov = document.getElementById('onboarding-overlay');
+    if (!ov) return;
+    ov.style.display = 'flex';
+    ['onboarding-step-0', 'onboarding-step-1', 'onboarding-step-2', 'onboarding-step-3'].forEach((id) => {
+        const e = document.getElementById(id); if (e) e.style.display = 'none';
+    });
+    const ld = document.getElementById('onboarding-step-loading');
+    let jf = document.getElementById('onboarding-step-join');
+    const esc = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    if (kind === 'fail') {
+        if (ld) ld.style.display = 'none';
+        if (!jf) {
+            jf = document.createElement('div');
+            jf.id = 'onboarding-step-join';
+            jf.className = 'ob-step';
+            (ld && ld.parentNode ? ld.parentNode : ov).appendChild(jf);
+        }
+        jf.style.display = 'flex';
+        jf.innerHTML =
+            '<div class="ob-body" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
+                '<img src="./box.webp" alt="" width="120" height="94" style="display:block; width:120px; height:auto; margin:0 auto 24px; opacity:0.9;">' +
+                '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title, #3B322C); line-height:1.45; letter-spacing:-0.5px; word-break:keep-all;">' + esc(opts.title || '') + '</div>' +
+                '<div style="font-size:14px; font-weight:600; color:var(--text-sub, #8A7F76); line-height:1.8; margin-top:14px; word-break:keep-all;">' + (opts.body || '') + '</div>' +
+            '</div>' +
+            '<div class="ob-foot">' +
+                '<button class="ob-next" onclick="window.retryJoin()">다시 해 보기</button>' +
+                '<div onclick="window.startOwnFamily()" style="text-align:center; padding:16px 0 4px; font-size:13.5px; font-weight:700; color:var(--text-sub, #8A7F76); cursor:pointer;">초대 없이 우리 아기 새로 등록할게요</div>' +
+            '</div>';
+        return;
+    }
+    if (jf) jf.style.display = 'none';
+    if (ld) {
+        ld.style.display = 'flex';
+        const t = document.getElementById('loading-text');
+        if (t) t.innerHTML = kind === 'done'
+            ? '<span style="color:#7F77DD">' + esc(opts.name || '우리 아기') + '</span>네 가족방에<br>들어왔어요'
+            : '가족방에<br>들어가는 중이에요';
+    }
+};
+window.hideJoinScreen = function () {
+    const ov = document.getElementById('onboarding-overlay');
+    const ld = document.getElementById('onboarding-step-loading');
+    const jf = document.getElementById('onboarding-step-join');
+    if (ld) ld.style.display = 'none';
+    if (jf) jf.style.display = 'none';
+    // 로그인 · 아기 정보가 다 있는 폰(설정에서 코드를 넣은 경우)만 화면을 닫는다. 아니면 온보딩이 이어진다
+    if (ov && localStorage.getItem('tosil_babyName')) ov.style.display = 'none';
+    else if (typeof window.showForcedLoginStep === 'function' && !localStorage.getItem('firebase_uid')) window.showForcedLoginStep();
+    else { const s1 = document.getElementById('onboarding-step-1'); if (s1) s1.style.display = 'flex'; }
+};
+window.retryJoin = function () {
+    const code = localStorage.getItem('pending_invite_code');
+    if (code && typeof window.connectSyncCode === 'function') window.connectSyncCode(code);
+    else window.startOwnFamily();
+};
+// 초대 대신 새로 시작 — 다시 열면 새 가족방을 만들고 아기 이름부터 묻는다
+window.startOwnFamily = function () {
+    localStorage.removeItem('pending_invite_code');
+    localStorage.removeItem('pending_invite_name');
+    location.reload();
 };
 
 // 🔄 다음/이전 단계 연결 (기존과 동일)
 window.nextOnboardingStep = function(step) {
+    const escName = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
     if (step === 2) {
         const name = document.getElementById('ob-name').value.trim();
-        if (!name) return alert('우리 아기의 예쁜 이름을 입력해주세요 😊');
+        if (!name) return alert('아기 이름(태명)을 적어 주세요');
         
-        document.getElementById('ob-greeting-name').innerHTML = `<span style="color:#7F77DD;">${name}</span>의 생일은<br>언제인가요?`;
+        document.getElementById('ob-greeting-name').innerHTML = `<span style="color:#7F77DD;">${escName(name)}</span>의 생일은<br>언제인가요?`;
         document.getElementById('onboarding-step-1').style.display = 'none';
         document.getElementById('onboarding-step-2').style.display = 'flex';
         document.getElementById('onboarding-step-3').style.display = 'none';
     } else if (step === 3) {
         const date = document.getElementById('ob-date').value;
-        if (!date) return alert('생일(또는 예정일)을 꼭 선택해주세요 🎂');
+        if (!date) return alert('생일(또는 예정일)을 골라 주세요');
         
-        const name = document.getElementById('ob-name').value.trim();
-        document.getElementById('ob-stage-name').innerText = name; 
+        // '지금 서준이는 · 꿈이는' — 받침이 있으면 '이' 를 붙인다 (뒤의 '는' 은 화면에 있다)
+        const name = document.getElementById('ob-name').value.trim() || localStorage.getItem('tosil_babyName') || '아기';
+        const lc = name.charCodeAt(name.length - 1);
+        const jong = lc >= 0xAC00 && lc <= 0xD7A3 && (lc - 0xAC00) % 28 !== 0;
+        document.getElementById('ob-stage-name').innerText = name + (jong ? '이' : ''); 
         
         document.getElementById('onboarding-step-2').style.display = 'none';
         document.getElementById('onboarding-step-3').style.display = 'flex';
@@ -7939,9 +8040,17 @@ window.finishOnboarding = function(feedingStage) {
     const guardian = document.getElementById('ob-guardian');
     if (guardian && !guardian.checked) {
         if (typeof window.showToast === 'function') window.showToast('보호자(법정대리인) 확인에 체크해 주세요');
+        // 어디에 체크하는지 칸을 짚어 준다
+        const card = document.getElementById('ob-guardian-card');
+        if (card) {
+            card.classList.remove('need'); void card.offsetWidth; card.classList.add('need');
+            try { card.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+        }
         try { guardian.focus(); } catch (e) {}
         return;
     }
+    { const card = document.getElementById('ob-guardian-card'); if (card) card.classList.remove('need'); }
+    { const t = document.getElementById('super-toast-msg'); if (t) t.remove(); }   // 안내가 다음 화면까지 남지 않게
     try { localStorage.setItem('tosil_guardian_consent', new Date().toISOString()); } catch (e) {}
 
     // 🚨 다둥이 추가 때는 2단계(생일)부터 시작하므로 ob-name 칸이 비어 있다.
@@ -7956,20 +8065,11 @@ window.finishOnboarding = function(feedingStage) {
     
     const loadingText = document.getElementById('loading-text');
 
-    // ⏱️ 0초: 첫 번째 멘트
-    loadingText.innerHTML = `<span style="color:#7F77DD">${name}</span>의<br>생일 데이터를 동기화하는 중...`;
-    
-    // ⏱️ 1.2초 뒤: 두 번째 멘트
-    setTimeout(() => {
-        loadingText.innerHTML = `현재 월령에 맞는<br>성장 구간 분석 중...`;
-    }, 1200);
+    /* ⚠️ 3.5초 동안 '생일 데이터 동기화 중 → 성장 구간 분석 중 → 세팅 완료 🎉' 가 지나갔다.
+          분석하는 것도 없는데 분석한다고 했다. 하는 일(저장 · 가족방에 올리기)만 말하고 바로 넘어간다. */
+    const escN = String(name).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    loadingText.innerHTML = `<span style="color:#7F77DD">${escN}</span>의 배냇함을<br>만들고 있어요`;
 
-    // ⏱️ 2.4초 뒤: 세 번째 멘트
-    setTimeout(() => {
-        loadingText.innerHTML = `[${feedingStage}]에 딱 맞는<br>배냇함 세팅 완료 🎉`;
-    }, 2400);
-
-    // ⏱️ 3.5초 뒤: 마술이 끝나면 데이터 저장 및 서버 동기화 후 새로고침!
     setTimeout(async () => {
                localStorage.setItem('tosil_babyName', name);
         localStorage.setItem('tosil_startDate', date);
@@ -8006,7 +8106,7 @@ window.finishOnboarding = function(feedingStage) {
 
         document.getElementById('onboarding-overlay').style.display = 'none';
         location.reload(); 
-    }, 3500); 
+    }, 900); 
 };
 
 // ✏️ 메인화면에서 연필 눌러서 수정할 때 (기존 기능 그대로 유지)
@@ -8124,7 +8224,9 @@ window.sendKakaoInvite = function(role = 'master', label) {
     const syncCode = localStorage.getItem('family_sync_code');
     if (!syncCode) return alert("가족 코드가 아직 없어요. 로그인한 뒤 다시 해 주세요.");
 
-    const inviteUrl = `https://happy-baby0303.github.io/?code=${syncCode}`;
+    // 아기 이름을 같이 싣는다 — 받은 사람의 시작 화면이 로그인 전에도 '꿈이 기록에 초대받았어요' 라고 말한다
+    const inviteName = String(localStorage.getItem('tosil_babyName') || '').trim().slice(0, 20);
+    const inviteUrl = `https://happy-baby0303.github.io/?code=${syncCode}` + (inviteName ? `&n=${encodeURIComponent(inviteName)}` : '');
     const callBaby = (typeof window.babyCall === 'function') ? window.babyCall('') : (localStorage.getItem('tosil_babyName') || '우리 아기');
     const familyKind = label === '할머니' || label === '할아버지' || label === '가족';
     const titleText = role === 'master' ? `${callBaby} 기록, 같이 봐요`
@@ -9416,7 +9518,10 @@ window.showRoleOnboarding = function() {
 
     const overlay = document.createElement('div');
     overlay.id = 'role-onboarding-overlay';
-    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);';
+    /* ⚠️ 9999 라서 첫 담기(99990) · 알림 묻는 창 아래에 깔렸다. 처음 깐 사람은 역할을 고르기 전에 스무 살 편지를 썼고,
+          아빠가 쓴 편지가 '엄마가 쓰는 편지' 로 봉인됐다. 역할이 먼저다 (첫 담기는 이 창이 닫힐 때까지 기다린다 · firstfill.js).
+          온보딩 화면(9999999)보다는 아래 — 로그인 전에는 안 보인다. */
+    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100004; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);';
 
     overlay.innerHTML = `
         <div style="background:var(--bg-card, #fff); width:100%; max-width:340px; border-radius:24px; padding:30px 22px 22px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.12); animation: popIn 0.3s ease;">
@@ -10406,15 +10511,36 @@ window.showToast = function(message) {
     `;
     document.body.appendChild(toast);
 
+    /* ⚠️ 아래에서 올라온 창의 버튼(알려 주세요 · 저장하기)을 말풍선이 3초 넘게 가렸다 (처음 기록 직후 '알림 켤까요?' 에서).
+          말풍선 자리에 떠 있는 창의 버튼이 있으면 화면 위쪽에 띄운다. 홈의 보통 화면에서는 그대로 아래. */
+    let atTop = false;
+    try {
+        const y = window.innerHeight - 124;
+        for (const fx of [0.3, 0.5, 0.7]) {
+            const el = document.elementFromPoint(window.innerWidth * fx, y);
+            const act = el && el.closest ? el.closest('button, a, input, textarea, select, [onclick]') : null;
+            if (!act) continue;
+            for (let n = act; n && n !== document.body; n = n.parentElement) {
+                if (getComputedStyle(n).position === 'fixed') { atTop = !(n.matches && n.matches('nav, .bottom-nav')); break; }
+            }
+            if (atTop) break;
+        }
+    } catch (e) {}
+    if (atTop) {
+        toast.style.bottom = 'auto';
+        toast.style.top = 'calc(env(safe-area-inset-top, 0px) + 72px)';
+        toast.style.transition = 'opacity 0.3s ease';
+    }
+
     setTimeout(() => {
         toast.style.opacity = '1';
-        toast.style.bottom = '100px'; 
+        if (!atTop) toast.style.bottom = '100px'; 
     }, 10);
 
     // 글이 기니까 읽을 시간을 위해 2.5초 -> 3.5초로 연장
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.bottom = '-50px';
+        if (!atTop) toast.style.bottom = '-50px';
         setTimeout(() => { toast.remove(); }, 300);
     }, 3500); 
 };

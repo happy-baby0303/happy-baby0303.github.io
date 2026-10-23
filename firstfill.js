@@ -104,6 +104,12 @@
         }
     };
 
+    /* ⚠️ '배냇함 열어보기' 를 눌러도 닫히기만 하고 홈에 남았다. 이름대로 배냇함 탭을 연다 */
+    window.firstFillOpenBox = function () {
+        window.closeFirstFill();
+        try { if (typeof window.switchTab === "function") window.switchTab("memorybox", document.getElementById("nav-memorybox")); } catch (e) {}
+    };
+
     window.firstFillNext = function () {
         stopPoll();
         step++;
@@ -188,11 +194,13 @@
         var name = esc(babyName());
 
         if (step === 0) {
+            // 짝꿍 초대로 들어온 폰은 상자를 '연' 게 아니라 '들어온' 것이다 (connectSyncCode 가 tosil_joined_at 을 남긴다)
+            var joined = !!localStorage.getItem("tosil_joined_at");
             shell(
                 '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">' +
                     '<img src="./box.webp" alt="" width="132" height="103" style="display:block; width:132px; height:auto; margin:0 auto 22px;">' +
                     '<div class="serif-display" style="font-size:25px; font-weight:700; color:var(--text-title); ' +
-                        'letter-spacing:-0.6px; line-height:1.45;">' + name + '의 배냇함을<br>열었어요</div>' +
+                        'letter-spacing:-0.6px; line-height:1.45;">' + name + (joined ? '의 배냇함에<br>들어왔어요' : '의 배냇함을<br>열었어요') + '</div>' +
                     '<div style="font-size:14px; font-weight:600; color:var(--text-sub); line-height:1.9; margin-top:20px; word-break:keep-all;">' +
                         '여기 담긴 건 나중에<br>' + esc(callName("가")) + ' 꺼내 볼 것들이에요.<br><br>' +
                         '3분이면 첫 세 가지를 담을 수 있어요.' +
@@ -266,7 +274,7 @@
                     '<div style="font-size:14px; font-weight:600; color:var(--text-sub); line-height:1.9; margin-top:26px; word-break:keep-all;">' +
                         tail + '</div>' +
                 '</div>' +
-                '<div onclick="window.closeFirstFill()" style="text-align:center; padding:17px; background:' + PURPLE + '; ' +
+                '<div onclick="window.firstFillOpenBox()" style="text-align:center; padding:17px; background:' + PURPLE + '; ' +
                     'color:#FFF; border-radius:16px; font-size:15.5px; font-weight:800; cursor:pointer;">배냇함 열어보기</div>'
             );
         }
@@ -279,18 +287,33 @@
         draw();
     };
 
+    // 할머니 · 시터 선생님 폰 — 봉인 편지 · 소리 칸은 엄마 아빠 것이다 (돌봄 도우미는 서버에서 못 읽는다)
+    function isHelper() {
+        return localStorage.getItem("tosil_role_locked") === "viewer" || localStorage.getItem("user_role") === "senior";
+    }
+
     function shouldShow() {
         if (localStorage.getItem(FLAG)) return false;          // 한 번 보면 다시 안 뜬다
+        if (isHelper()) return false;
         if (!localStorage.getItem("tosil_babyName")) return false;  // 온보딩 전
         if (!localStorage.getItem("tosil_startDate")) return false;
         var c = counts();
         return (c.photo + c.voice + c.seal) === 0;              // 이미 담은 게 있으면 필요 없다
     }
 
+    /* ⚠️ '이 폰은 누구 폰인가요?' 보다 먼저 떠서, 역할을 고르기 전에 스무 살 편지를 썼다.
+          편지에는 '엄마가 쓰는 편지' 가 붙는다 (역할이 없으면 엄마로 친다). 아빠가 먼저 깔면 아빠 편지가 엄마 이름으로 봉인됐다.
+          역할이 정해질 때까지 기다린다 (초대 링크로 들어온 짝꿍도 같다). */
+    function roleReady() {
+        return !!(localStorage.getItem("user_role") || localStorage.getItem("tosil_role_locked"));
+    }
+
     function boot() {
         // 앱이 자리를 잡고 나서. 로그인·동기화가 끝나야 업로드가 된다.
-        setTimeout(function () {
-            if (shouldShow()) window.openFirstFill(0);
+        var tries = 0;
+        setTimeout(function wait() {
+            if (!roleReady()) { if (++tries < 240) setTimeout(wait, 1000); return; }   // 역할 창에 답할 때까지 (4분)
+            setTimeout(function () { if (shouldShow()) window.openFirstFill(0); }, tries ? 700 : 0);
         }, 2200);
     }
 

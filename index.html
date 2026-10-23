@@ -927,118 +927,126 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 </head>
 
 <body>
-<!-- 🚀 온보딩 오버레이 (모바일 키보드 & 브라우저 하단 바 완벽 방어 패치 + 카카오 로그인 탑재) -->
+<!-- 🚀 온보딩 오버레이 — 시작(카카오) · 이름 · 생일 · 단계 · 기다리는 화면
+     ⚠️ 이름 · 생일 · 단계 화면 머리에 👋 🎂 🥄 큰 이모지가 있었고, 생일 뒤 3.5초 동안 '성장 구간 분석 중…' 이 지나갔다.
+        분석하는 것도 없는데 분석한다고 했다. 첫 담기(firstfill.js)와 같은 모양 — 상자 그림 · 명조 제목 · 점 세 개 — 으로 맞춘다. -->
+<style>
+    #onboarding-overlay .ob-step { flex-direction: column; height: 100%; overflow: hidden; background: var(--bg-main, #FAF7F2); }
+    #onboarding-overlay .ob-body { flex: 1; padding: 0 28px; overflow-y: auto; box-sizing: border-box; }
+    #onboarding-overlay .ob-foot { padding: 16px 24px; padding-bottom: max(26px, env(safe-area-inset-bottom)); box-sizing: border-box; }
+    #onboarding-overlay .ob-dots { display: flex; gap: 5px; justify-content: center; padding: 28px 0 0; }
+    #onboarding-overlay .ob-dots i { display: block; width: 6px; height: 6px; border-radius: 3px; background: var(--border, #E5DDD2); }
+    #onboarding-overlay .ob-dots i.on { width: 20px; background: #7F77DD; }
+    #onboarding-overlay .ob-dots i.done { background: #7F77DD; }
+    #onboarding-overlay .ob-hi { font-size: 14px; font-weight: 700; color: var(--text-sub, #8A7F76); margin: 46px 0 10px; }
+    #onboarding-overlay .ob-title { font-size: 25px; font-weight: 700; color: var(--text-title, #3B322C); letter-spacing: -0.6px; line-height: 1.45; margin: 0 0 12px; word-break: keep-all; }
+    #onboarding-overlay .ob-sub { color: var(--text-sub, #8A7F76); font-size: 14px; font-weight: 600; line-height: 1.6; margin: 0 0 24px; word-break: keep-all; }
+    #onboarding-overlay .ob-next { width: 100%; padding: 17px; border-radius: 16px; background: #4A413C; color: #FFFFFF; font-weight: 800; font-size: 16px; border: none; cursor: pointer; font-family: inherit; }
+    #onboarding-overlay .ob-back { flex: 1; padding: 17px; border-radius: 16px; background: var(--bg-sub, #F1EBE3); color: var(--text-s, #7A6F68); font-weight: 800; font-size: 15px; border: none; cursor: pointer; font-family: inherit; }
+    #onboarding-overlay .ob-pick { width: 100%; padding: 16px 18px; border-radius: 14px; background: #FFFFFF; border: 1px solid var(--border, #EDE6DE); text-align: left; font-size: 15px; font-weight: 800; color: var(--text-m, #4A413C); cursor: pointer; font-family: inherit; }
+    #ob-guardian-card { display: flex; align-items: flex-start; gap: 10px; padding: 14px; margin: 0 0 16px; background: #FFFFFF; border: 1px solid var(--border, #EDE6DE); border-radius: 14px; cursor: pointer; text-align: left; transition: border-color .2s, box-shadow .2s; }
+    #ob-guardian-card.need { border-color: #7F77DD; box-shadow: 0 0 0 3px rgba(127,119,221,0.16); animation: obNudge .4s ease; }
+    @keyframes obNudge { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-5px) } 75% { transform: translateX(5px) } }
+    @keyframes obBreath { 0%,100% { transform: scale(1); opacity: .88 } 50% { transform: scale(1.04); opacity: 1 } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    #ob-invite-note { display: none; margin: 0 0 14px; padding: 14px 16px; background: #FFFFFF; border: 1px solid rgba(185,138,46,0.30); border-radius: 14px; text-align: center; font-size: 14.5px; font-weight: 700; color: var(--text-m, #4A413C); line-height: 1.6; word-break: keep-all; }
+    #ob-invite-note span { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-sub, #8A7F76); }
+</style>
 <div id="onboarding-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background: #F6F2EC; z-index: 9999999; justify-content: center; align-items: center; overflow: hidden; box-sizing: border-box;">
-    
-    <div style="width: 100%; max-width: 480px; height: 100%; height: 100dvh; background: var(--bg-card, #FFFFFF); box-sizing: border-box; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative;">
-        
-        <!-- 💡 스텝 0: 맨 처음 카카오 로그인 화면 (최초 등장) -->
-        <div id="onboarding-step-0" style="display: flex; flex-direction: column; height: 100%; overflow: hidden; background: var(--bg-main, #FAF7F2);">
-            <div style="flex: 1; padding: 24px; padding-top: 64px; overflow-y: auto; box-sizing: border-box; text-align: center;">
-                <picture><source srcset="./box.webp" type="image/webp"><img src="./box.png" alt="" width="150" height="117" decoding="async" style="display: block; width: 150px; height: auto; margin: 0 auto 18px;"></picture>
-                <h1 style="font-size: 26px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.4; margin: 0 0 16px 0;">
+
+    <!-- ⚠️ 아기 사진 카드의 D+ · 이름 자리에 '등록 전 · 아기를 등록해주세요' 가 박혀 있어서, 앱을 열 때마다(가족방에 막 들어온 순간에도)
+         스크립트가 이름을 채우기 전 잠깐 그 글자가 비쳤다. 자리는 비워 두고 renderBabyInfo 가 채운다 (아기가 없으면 거기서 같은 말을 쓴다). -->
+    <div style="width: 100%; max-width: 480px; height: 100%; height: 100dvh; background: var(--bg-main, #FAF7F2); box-sizing: border-box; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); position: relative;">
+
+        <!-- 💡 시작 화면 — 카카오 로그인 (처음 여는 폰) -->
+        <div id="onboarding-step-0" class="ob-step" style="display: flex;">
+            <div class="ob-body" style="display: flex; flex-direction: column; justify-content: center; text-align: center;">
+                <picture><source srcset="./box.webp" type="image/webp"><img src="./box.png" alt="" width="150" height="117" decoding="async" style="display: block; width: 150px; height: auto; margin: 0 auto 22px;"></picture>
+                <h1 class="serif-display" style="font-size: 27px; font-weight: 700; color: var(--text-title, #3B322C); letter-spacing: -0.6px; line-height: 1.45; margin: 0 0 14px 0;">
                     우리 가족 육아 동지,<br>배냇함
                 </h1>
-                <p style="color: var(--text-s, #A3958A); font-size: 15px; font-weight: 600; line-height: 1.5;">
+                <p style="color: var(--text-sub, #8A7F76); font-size: 15px; font-weight: 600; line-height: 1.7; margin: 0;">
                     수유·기저귀는 같이 적고,<br>아기의 처음은 함께 담아요.
                 </p>
             </div>
-            
-            <div style="padding: 16px 24px; padding-bottom: max(32px, env(safe-area-inset-bottom)); background: var(--bg-main, #FAF7F2); box-sizing: border-box;">
-                <!-- 🚨 여기에 카카오 로그인 함수 연결! -->
-                <button onclick="window.loginWithKakao()" style="width: 100%; padding: 18px; border-radius: 16px; background: #FEE500; color: #4A413C; font-weight: 900; font-size: 16.5px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(254,229,0,0.2);">
+
+            <div class="ob-foot">
+                <!-- 초대 링크로 들어온 폰이면 무슨 초대인지 먼저 보여 준다 (showForcedLoginStep 이 채운다) -->
+                <div id="ob-invite-note"></div>
+                <button onclick="window.loginWithKakao()" style="width: 100%; padding: 18px; border-radius: 16px; background: #FEE500; color: #3B322C; font-weight: 900; font-size: 16.5px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(254,229,0,0.2); font-family: inherit;">
                     💬 카카오로 3초 만에 시작하기
                 </button>
+                <div style="margin-top: 14px; font-size: 12px; font-weight: 600; color: var(--text-sub, #A3958A); text-align: center; line-height: 1.6;">
+                    시작하면 <span onclick="window.openPrivacy()" style="text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">개인정보처리방침</span>에 동의하게 돼요
+                </div>
             </div>
         </div>
 
-        <!-- 💡 스텝 1: 이름 입력 (이제 처음에 안 보이고 로그인 성공해야 보임 -> display: none 처리됨) -->
-        <div id="onboarding-step-1" style="display: none; flex-direction: column; height: 100%; overflow: hidden;">
-            <div style="flex: 1; padding: 24px; padding-top: 60px; overflow-y: auto; box-sizing: border-box;">
-                <div style="font-size: 40px; margin-bottom: 16px;">👋</div>
-                <h1 style="font-size: 24px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.4; margin: 0 0 16px 0;">
-                    반가워요<br>우리 아기의 이름(태명)을<br>알려주세요.
-                </h1>
-                <input type="text" id="ob-name" placeholder="예) 튼튼이" style="width: 100%; padding: 14px 0; border: none; border-bottom: 3px solid #7F77DD; font-size: 24px; font-weight: 900; color: var(--text-m, #4A413C); outline: none; background: transparent; transition: 0.2s;" autocomplete="off">
+        <!-- 💡 1. 이름 (로그인 뒤) -->
+        <div id="onboarding-step-1" class="ob-step" style="display: none;">
+            <div class="ob-body">
+                <div class="ob-dots"><i class="on"></i><i></i><i></i></div>
+                <div class="ob-hi">반가워요</div>
+                <h1 class="serif-display ob-title">우리 아기 이름(태명)을<br>알려 주세요</h1>
+                <input type="text" id="ob-name" placeholder="예) 튼튼이" style="width: 100%; padding: 14px 0; border: none; border-bottom: 2px solid #7F77DD; font-size: 24px; font-weight: 800; color: var(--text-m, #4A413C); outline: none; background: transparent; transition: 0.2s; margin-top: 18px; border-radius: 0; font-family: inherit;" autocomplete="off">
             </div>
-            <div style="padding: 16px 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); background: var(--bg-card, #FFFFFF); box-sizing: border-box;">
-                <button onclick="nextOnboardingStep(2)" style="width: 100%; padding: 16px; border-radius: 16px; background: #4A413C; color: #FFFFFF; font-weight: 800; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    다음으로
-                </button>
+            <div class="ob-foot">
+                <button class="ob-next" onclick="nextOnboardingStep(2)">다음으로</button>
             </div>
         </div>
 
-        <!-- 💡 스텝 2: 날짜 입력 -->
-        <div id="onboarding-step-2" style="display: none; flex-direction: column; height: 100%; overflow: hidden;">
-            <div style="flex: 1; padding: 24px; padding-top: 60px; overflow-y: auto; box-sizing: border-box;">
-                <div style="font-size: 40px; margin-bottom: 16px;">🎂</div>
-                <h1 id="ob-greeting-name" style="font-size: 24px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.4; margin: 0 0 12px 0;">
+        <!-- 💡 2. 생일 -->
+        <div id="onboarding-step-2" class="ob-step" style="display: none;">
+            <div class="ob-body">
+                <div class="ob-dots"><i class="done"></i><i class="on"></i><i></i></div>
+                <h1 id="ob-greeting-name" class="serif-display ob-title" style="margin-top: 76px;">
                     튼튼이의 생일은<br>언제인가요?
                 </h1>
-                <p style="color: var(--text-s, #A3958A); font-size: 14px; font-weight: 600; margin-bottom: 24px;">
-                    출산 전이시라면 예정일을 선택해주세요.
-                </p>
-                <input type="date" id="ob-date" style="width: 100%; padding: 16px; border: 1px solid var(--border, #EDE6DE); border-radius: 14px; font-size: 18px; font-weight: 800; color: var(--text-m, #4A413C); outline: none; box-sizing: border-box; background: var(--bg-sub, #FAF7F2);">
+                <p class="ob-sub">아직 태어나기 전이면 예정일을 골라 주세요.</p>
+                <input type="date" id="ob-date" style="width: 100%; padding: 16px; border: 1px solid var(--border, #EDE6DE); border-radius: 14px; font-size: 18px; font-weight: 800; color: var(--text-m, #4A413C); outline: none; box-sizing: border-box; background: #FFFFFF; font-family: inherit;">
             </div>
-            <div style="padding: 16px 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); background: var(--bg-card, #FFFFFF); display: flex; gap: 12px; box-sizing: border-box;">
-                <button onclick="nextOnboardingStep(1)" style="flex: 1; padding: 16px; border-radius: 16px; background: var(--bg-sub, #F6F2EC); color: var(--text-s, #7A6F68); font-weight: 800; font-size: 15px; border: none; cursor: pointer;">
-                    이전
-                </button>
-                <button onclick="nextOnboardingStep(3)" style="flex: 2; padding: 16px; border-radius: 16px; background: #4A413C; color: #FFFFFF; font-weight: 800; font-size: 16px; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    다음으로
-                </button>
+            <div class="ob-foot" style="display: flex; gap: 10px;">
+                <button class="ob-back" onclick="nextOnboardingStep(1)">이전</button>
+                <button class="ob-next" style="flex: 2;" onclick="nextOnboardingStep(3)">다음으로</button>
             </div>
         </div>
 
-        <!-- 💡 스텝 3: 이유식 단계 입력 -->
-        <div id="onboarding-step-3" style="display: none; flex-direction: column; height: 100%; overflow: hidden;">
-            <div style="flex: 1; padding: 24px; padding-top: 60px; overflow-y: auto; box-sizing: border-box;">
-                <div style="font-size: 40px; margin-bottom: 16px;">🥄</div>
-                <h1 style="font-size: 24px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.4; margin: 0 0 8px 0;">
-                    현재 <span id="ob-stage-name" style="color:#7F77DD;">아기</span>의<br>수유/이유식 단계는요?
+        <!-- 💡 3. 수유 · 이유식 단계 + 보호자 동의 -->
+        <div id="onboarding-step-3" class="ob-step" style="display: none;">
+            <div class="ob-body">
+                <div class="ob-dots"><i class="done"></i><i class="done"></i><i class="on"></i></div>
+                <h1 class="serif-display ob-title" style="margin-top: 76px;">
+                    지금 <span id="ob-stage-name" style="color:#7F77DD;">아기</span>는<br>무엇을 먹나요?
                 </h1>
-                <p style="color: var(--text-s, #A3958A); font-size: 14px; font-weight: 600; margin-bottom: 20px;">
-                    딱 맞는 정보와 식단을 추천해 드릴게요.
-                </p>
+                <p class="ob-sub" style="margin-bottom: 18px;">시기에 맞는 정보와 식단을 골라 드릴게요.</p>
 
-                <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
-                    <!-- ⚠️ 개인정보 보호법 제22조의2 — 만 14세 미만 아동의 개인정보는 법정대리인 동의가 있어야 한다.
-                     아기 이름·생일·사진·건강 기록이 전부 여기 해당한다. 마지막 단계에서 한 번 받는다. -->
-                <label for="ob-guardian" style="display:flex; align-items:flex-start; gap:9px; margin-bottom:14px; cursor:pointer; text-align:left;">
+                <!-- ⚠️ 개인정보 보호법 제22조의2 — 만 14세 미만 아동의 개인정보는 법정대리인 동의가 있어야 한다.
+                     아기 이름·생일·사진·건강 기록이 전부 여기 해당한다. 여기서 한 번 받는다. -->
+                <label id="ob-guardian-card" for="ob-guardian">
                     <input type="checkbox" id="ob-guardian" style="width:19px; height:19px; margin-top:1px; flex-shrink:0; accent-color:#7F77DD;">
                     <span style="font-size:12.5px; font-weight:700; color:var(--text-s, #7A6F68); line-height:1.6; word-break:keep-all;">
                         저는 이 아이의 <b>보호자(법정대리인)</b>이며, 아이의 정보를 배냇함에 기록하는 것에 동의합니다.
                     </span>
                 </label>
-                <button onclick="finishOnboarding('모유/분유')" style="width: 100%; padding: 16px; border-radius: 14px; background: var(--bg-sub, #FAF7F2); border: 1px solid var(--border, #EDE6DE); text-align: left; font-size: 15px; font-weight: 800; color: var(--text-m, #4A413C); cursor: pointer; transition: 0.2s;">
-                        아직 모유/분유만 먹어요
-                    </button>
-                    <button onclick="finishOnboarding('초기 이유식')" style="width: 100%; padding: 16px; border-radius: 14px; background: var(--bg-sub, #FAF7F2); border: 1px solid var(--border, #EDE6DE); text-align: left; font-size: 15px; font-weight: 800; color: var(--text-m, #4A413C); cursor: pointer; transition: 0.2s;">
-                        초기 이유식 시작했어요
-                    </button>
-                    <button onclick="finishOnboarding('중후기 이유식')" style="width: 100%; padding: 16px; border-radius: 14px; background: var(--bg-sub, #FAF7F2); border: 1px solid var(--border, #EDE6DE); text-align: left; font-size: 15px; font-weight: 800; color: var(--text-m, #4A413C); cursor: pointer; transition: 0.2s;">
-                        중/후기 이유식 진행 중이에요
-                    </button>
-                    <button onclick="finishOnboarding('유아식/일반식')" style="width: 100%; padding: 16px; border-radius: 14px; background: var(--bg-sub, #FAF7F2); border: 1px solid var(--border, #EDE6DE); text-align: left; font-size: 15px; font-weight: 800; color: var(--text-m, #4A413C); cursor: pointer; transition: 0.2s;">
-                        이제 어른처럼 유아식/일반식 먹어요 
-                    </button>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
+                    <button class="ob-pick" onclick="finishOnboarding('모유/분유')">아직 모유 · 분유만 먹어요</button>
+                    <button class="ob-pick" onclick="finishOnboarding('초기 이유식')">초기 이유식을 시작했어요</button>
+                    <button class="ob-pick" onclick="finishOnboarding('중후기 이유식')">중기 · 후기 이유식을 먹어요</button>
+                    <button class="ob-pick" onclick="finishOnboarding('유아식/일반식')">유아식 · 일반식을 먹어요</button>
                 </div>
             </div>
-            <div style="padding: 16px 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); background: var(--bg-card, #FFFFFF); box-sizing: border-box;">
-                <button onclick="nextOnboardingStep(2)" style="width: 100%; padding: 16px; border-radius: 16px; background: var(--bg-sub, #F6F2EC); color: var(--text-s, #7A6F68); font-weight: 800; font-size: 15px; border: none; cursor: pointer;">
-                    이전
-                </button>
+            <div class="ob-foot">
+                <button class="ob-back" style="width: 100%;" onclick="nextOnboardingStep(2)">이전</button>
             </div>
-        </div> 
+        </div>
 
-        <div id="onboarding-step-loading" style="display: none; flex-direction: column; height: 100%; justify-content: center; align-items: center; text-align: center;">
-            <div style="font-size: 56px; margin-bottom: 24px; animation: spin 1.5s linear infinite;">⏳</div>
-            <h2 id="loading-text" style="font-size: 22px; font-weight: 900; color: var(--text-m, #4A413C); line-height: 1.5;">
-                데이터를 분석하고 있어요...
+        <!-- 💡 기다리는 화면 — 로그인 · 상자 만들기 · 가족방 들어가기 -->
+        <div id="onboarding-step-loading" class="ob-step" style="display: none; justify-content: center; align-items: center; text-align: center; padding: 24px;">
+            <img src="./box.webp" alt="" width="120" height="94" style="display: block; width: 120px; height: auto; margin: 0 auto 26px; animation: obBreath 1.6s ease-in-out infinite;">
+            <h2 id="loading-text" class="serif-display" style="font-size: 21px; font-weight: 700; color: var(--text-title, #3B322C); line-height: 1.55; margin: 0; word-break: keep-all;">
+                잠시만요
             </h2>
-            <style>
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-            </style>
         </div>
 
     </div>
@@ -1204,8 +1212,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
                 <!-- 좌측 하단: D-day와 아기 이름 -->
                 <div style="position: absolute; bottom: 20px; left: 20px; z-index: 10; text-align: left;">
-                    <h2 class="home-hero-title" id="res-baby-dday" style="font-size: 38px; font-weight: 900; color: #FFFFFF; margin: 0 0 4px 0; text-shadow: 0 4px 12px rgba(0,0,0,0.3); letter-spacing: -1px;">등록 전</h2>
-                    <div id="res-baby-name" style="font-size: 15px; color: rgba(255,255,255,0.9); font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,0.3);">아기를 등록해주세요</div>
+                    <h2 class="home-hero-title" id="res-baby-dday" style="font-size: 38px; font-weight: 900; color: #FFFFFF; margin: 0 0 4px 0; text-shadow: 0 4px 12px rgba(0,0,0,0.3); letter-spacing: -1px;">&nbsp;</h2>
+                    <div id="res-baby-name" style="font-size: 15px; color: rgba(255,255,255,0.9); font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,0.3);">&nbsp;</div>
                 </div>
             </div>
         </div>
@@ -3211,6 +3219,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     const inviteCode = urlParams.get('code');
     if (inviteCode) {
         localStorage.setItem('pending_invite_code', inviteCode);
+        // 초대장에 실린 아기 이름 — 로그인 전에는 가족방을 못 읽어서, 시작 화면은 이걸로 무슨 초대인지 말한다
+        const inviteName = (urlParams.get('n') || '').trim().slice(0, 20);
+        if (inviteName) localStorage.setItem('pending_invite_name', inviteName);
+        else localStorage.removeItem('pending_invite_name');
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
@@ -3237,6 +3249,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
              // 로딩 화면 띄우기
              document.getElementById('onboarding-step-0').style.display = 'none';
              document.getElementById('onboarding-step-loading').style.display = 'flex';
+             const lt = document.getElementById('loading-text');
+             if (lt) lt.innerHTML = localStorage.getItem('pending_invite_code') ? '가족방에<br>들어가는 중이에요' : '로그인하는 중이에요';
 
              // 2. 방금 만든 '배냇함 우회 서버'로 티켓 보내기
              const kakaoCustomAuth = httpsCallable(functions, 'kakaoCustomAuth');
@@ -3262,6 +3276,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                              if (!pendingCode) {
                                  document.getElementById('onboarding-step-loading').style.display = 'none';
                                  document.getElementById('onboarding-step-1').style.display = 'flex';
+                             } else if (typeof window.showJoinScreen === 'function') {
+                                 window.showJoinScreen('loading');   // 가족방에 들어갈 때까지 이 화면 (빈 홈이 비치지 않게)
                              }
                          })
                          .catch((error) => {
@@ -3303,8 +3319,9 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         // 1. 초대 링크(딥링크)로 들어온 경우 우선 처리
         const pendingCode = localStorage.getItem('pending_invite_code');
         if (pendingCode && pendingCode !== localStorage.getItem('family_sync_code')) {
-            const obOverlay = document.getElementById('onboarding-overlay');
-            if (obOverlay) obOverlay.style.display = 'none';
+            /* ⚠️ 여기서 온보딩 화면을 바로 닫아서, 가족방에 들어가는 동안 '아기를 등록해주세요' 빈 홈이 비쳤다 */
+            if (typeof window.showJoinScreen === 'function') window.showJoinScreen('loading');
+            else { const obOverlay = document.getElementById('onboarding-overlay'); if (obOverlay) obOverlay.style.display = 'none'; }
             await window.connectSyncCode(pendingCode);
             return;
         }
@@ -3396,8 +3413,40 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         if (!inputCode || inputCode.length < 5 || !inputCode.startsWith("TS-")) return alert("🚨 올바른 가족 코드를 입력해주세요.");
         if (inputCode === localStorage.getItem('family_sync_code')) return alert("이미 참여 중인 가족 코드입니다.");
 
-        if (!confirm("연동하면 이 기기의 기존 기록이 가족방 기록으로 대체됩니다.\n계속하시겠습니까?")) return;
-        alert("⏳ 코드를 확인 중입니다...");
+        /* ⚠️ 새 폰에도 브라우저 확인창(confirm)으로 '이 기기의 기존 기록이 대체됩니다' 를 물었다.
+              대체될 게 없는 폰이고, 앱에서는 사이트 주소가 제목으로 붙어 나와 낯설었다.
+              이 폰에 아기 · 기록이 있을 때만, 앱 안의 확인창으로 묻는다. */
+        const fromLink = (typeof autoCode === 'string');
+        let hasLocal = false;
+        try { hasLocal = (JSON.parse(localStorage.getItem('tosil_tracker_records')) || []).length > 0 || !!localStorage.getItem('tosil_startDate'); } catch (e) {}
+        if (hasLocal) {
+            const ok = await new Promise((resolve) => {
+                if (typeof window.showConfirm !== 'function') return resolve(confirm("가족방에 들어가면 이 폰에 있던 기록 대신 가족방 기록이 보여요. 계속할까요?"));
+                window.showConfirm("가족방에 들어가면 이 폰에 있던 기록 대신\n가족방 기록이 보여요.\n\n계속할까요?", () => resolve(true), '🏠', '들어가기');
+                const m = document.getElementById('custom-confirm-modal');
+                if (m) m.style.zIndex = '10000005';          // 안내 화면(온보딩) 위로
+                const cancel = document.getElementById('btn-confirm-cancel');
+                if (cancel) { const prev = cancel.onclick; cancel.onclick = function () { if (prev) prev.call(this); resolve(false); }; }
+            });
+            if (!ok) {
+                // 안 들어가기로 했으면 그 초대는 접는다 (안 그러면 앱을 열 때마다 또 묻는다)
+                if (fromLink) { localStorage.removeItem('pending_invite_code'); localStorage.removeItem('pending_invite_name'); }
+                if (typeof window.hideJoinScreen === 'function') window.hideJoinScreen();
+                return;
+            }
+        }
+        const failJoin = (why) => {
+            const T = {
+                expired: ["초대 시간이 지났어요", "초대 링크는 보낸 뒤 잠깐만 열려 있어요.<br>링크를 보낸 분에게 다시 보내 달라고 해 주세요."],
+                nofamily: ["가족방을 찾지 못했어요", "링크가 잘렸거나 없어진 가족방이에요.<br>링크를 보낸 분에게 다시 받아 주세요."],
+                error: ["가족방에 들어가지 못했어요", "인터넷 연결을 확인하고 다시 해 주세요."]
+            }[why] || ["가족방에 들어가지 못했어요", "잠시 뒤에 다시 해 주세요."];
+            if (fromLink && typeof window.showJoinScreen === 'function') return window.showJoinScreen('fail', { title: T[0], body: T[1] });
+            if (typeof window.hideJoinScreen === 'function') window.hideJoinScreen();
+            alert(T[0] + "\n\n" + T[1].replace(/<br>/g, "\n"));
+        };
+        if (typeof window.showJoinScreen === 'function') window.showJoinScreen('loading');
+        else alert("⏳ 코드를 확인 중입니다...");
         try {
             const docSnap = await getDoc(doc(window.db, "families", inputCode));
             if (docSnap.exists()) {
@@ -3472,16 +3521,19 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 }
 
                 localStorage.removeItem('pending_invite_code');
-                alert(`🎉 [${data.babyName || '우리아기'}]네 가족 연동 완료`);
-                location.reload(); 
+                localStorage.removeItem('pending_invite_name');
+                // 첫 담기 말투('들어왔어요') · 초대한 사람에게 '들어왔어요' 알림 (joinhello.js)
+                localStorage.setItem('tosil_joined_at', String(Date.now()));
+                localStorage.setItem('tosil_join_hello', '1');
+                if (typeof window.showJoinScreen === 'function') window.showJoinScreen('done', { name: data.babyName || '우리 아기' });
+                else alert(`🎉 [${data.babyName || '우리아기'}]네 가족 연동 완료`);
+                setTimeout(() => location.reload(), 900);
             } else {
-                alert("❌ 서버에 등록되지 않은 코드입니다.");
+                failJoin('nofamily');
             }
                 } catch (error) {
             console.error(error);
-            alert(error && error.code === 'permission-denied'
-                ? "⏳ 초대 시간이 지났어요.\n\n짝꿍에게 앱에서 '가족 코드'를 다시 열어달라고 부탁한 뒤,\n30분 안에 다시 시도해주세요."
-                : "🚨 등록되지 않은 코드예요. 다시 확인해주세요.");
+            failJoin(error && error.code === 'permission-denied' ? 'expired' : 'error');
         }
     };
 
@@ -3520,7 +3572,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261023-5"></script>
+<script src="script.js?v=20261023-6"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3556,7 +3608,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./data.js"></script>
 <script src="./notes.js"></script>
 <script src="./sealed.js"></script>
-<script src="./firstfill.js"></script>
+<script src="./firstfill.js?v=2"></script>
 <!-- 우리의 문답 — 저장 · 알림 · 코인을 문답 화면과 같이 쓴다 (홈에서 바로 쓰기) -->
 <script src="./qacore.js?v=1"></script>
 <script src="./diary.js?v=2"></script>
@@ -3566,7 +3618,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <script src="./plusfree.js?v=2"></script>
 <script src="./anniversaries.js"></script>
 <script src="./home.js"></script>
- <script src="./homefix.js?v=5"></script>
+ <script src="./homefix.js?v=6"></script>
 <script src="./weekly.js?v=3"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js?v=2"></script>
@@ -3584,6 +3636,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./daysend.js?v=1"></script>
 <script src="./carelog.js?v=1"></script>
 <script src="./recap.js?v=1"></script>
+<script src="./joinhello.js?v=1"></script>
 <script src="./remind.js"></script>
     <script src="./carealarm.js"></script>
     <script src="./pushcheck.js"></script>      
@@ -3606,7 +3659,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 💩 기저귀 시트 — 옛 이름을 진짜 기록 시트로 보내준다 -->
 <script src="./diapersheet.js?v=1"></script>
 <!-- ← 안드로이드 뒤로가기 — 덮은 화면을 닫는다. 앱이 꺼지지 않게 -->
-<script src="./backbutton.js?v=6"></script>
+<script src="./backbutton.js?v=7"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->

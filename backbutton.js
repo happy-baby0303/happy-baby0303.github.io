@@ -44,6 +44,7 @@
         { id: "pt-sheet",               close: null },              // 이른둥이 예정일 넣기 (정보 수정 창 위에 뜬다 — 이게 먼저 닫혀야 한다)
         { id: "week-sheet",             close: null },              // 이번 주 한 장
         { id: "recap-sheet",            close: null },              // 50일 · 백일 · 돌 한 장
+        { id: "privacy-sheet",          close: null },              // 개인정보처리방침 (시작 화면에서 연다)
         { id: "letterbox-modal",        close: "closeLetterBox" },
         { id: "sleepmap-modal",         close: "closeSleepMap" },
         { id: "tracker-sheet-overlay",  close: "closeTrackerSheet" },   // 기록 입력
