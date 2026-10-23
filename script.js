@@ -49,7 +49,9 @@ const BABY_SPECIFIC_KEYS = [
     // 이른둥이 교정 나이 (preterm.js · shared/babyage.js) — 출산 예정일은 아기마다 다르다
     'tosil_preterm',
     // 홈 '오늘 챙길 것' 에서 한 번 눌러 본 '지금 시기' 줄 (homefix.js) — 이유식 단계 · 놀이 시기는 아기마다 다르다
-    'tosil_todo_seen'
+    'tosil_todo_seen',
+    // 이번 주 한 장 (weekly.js) — 닫은 주 · 짝꿍에게 알린 주
+    'tosil_week_card'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')
@@ -8928,97 +8930,8 @@ async function completeBaton(id) {
     }
 }
 
-// ==========================================
-// 💌 주간 육아 리포트 열고 닫는 엔진
-// ==========================================
-window.openWeeklyReport = function() {
-    const modal = document.getElementById('weekly-report-modal');
-    if(modal) {
-        modal.style.display = 'flex';
-        // 💡 선택 사항이었던 폭죽 효과 적용! (앞서 추가한 shootConfetti 함수가 있으면 실행됨)
-        if(typeof window.shootConfetti === 'function') {
-            window.shootConfetti();
-        }
-    } else {
-        console.error("주간 리포트 모달창을 찾을 수 없습니다.");
-    }
-};
-
-window.closeWeeklyReport = function() {
-    const modal = document.getElementById('weekly-report-modal');
-    if(modal) {
-        modal.style.display = 'none';
-    }
-};
-
-// ==========================================
-// 💌 주간 육아 리포트 자동 계산 & 스케줄링 엔진 (정식 런칭용)
-// ==========================================
-window.initWeeklyReport = function() {
-    const reportBtn = document.getElementById('weekly-report-btn');
-    if (!reportBtn) return;
-
-    // 1. 일요일(0)과 월요일(1)에만 노출되도록 스케줄링
-    const dayOfWeek = new Date().getDay();
-    
-    // 일, 월요일이 아니면 숨기고 함수 종료!
-    if (dayOfWeek !== 0 && dayOfWeek !== 1) {
-        reportBtn.style.display = 'none'; 
-        return; 
-    }
-
-    // 2. 엄마/아빠 모드에 따른 카피라이팅 & 색상 변경
-    const isDad = document.body.classList.contains('mode-dad') || localStorage.getItem('user_role') === 'dad';
-    const titleEl = document.getElementById('weekly-btn-title');
-    const descEl = document.getElementById('weekly-btn-desc');
-    const iconEl = document.getElementById('weekly-btn-icon');
-
-    if (isDad) {
-        // 👨 아빠 버전
-        reportBtn.style.background = 'linear-gradient(135deg, #F0EEFB, #E4E0F8)';
-        reportBtn.style.borderColor = '#D5D1F4';
-        if(titleEl) { titleEl.style.color = '#7F77DD'; titleEl.innerText = '토닥토닥, 이번 주도 빛났어요 ✨'; }
-        if(descEl) { descEl.style.color = '#6A61CE'; descEl.innerText = '아빠의 다정한 일주일 요약'; }
-        if(iconEl) { iconEl.innerText = '👨‍🍼'; }
-    } else {
-        // 👩 엄마 버전
-        reportBtn.style.background = 'linear-gradient(135deg, #FFF0F1, #FFE5E5)';
-        reportBtn.style.borderColor = '#FFD1D1';
-        if(titleEl) { titleEl.style.color = '#D32F2F'; titleEl.innerText = '사랑 듬뿍 담긴 일주일 요약💖'; }
-        if(descEl) { descEl.style.color = '#D32F2F'; descEl.innerText = '엄마의 따뜻한 일주일 요약'; }
-        if(iconEl) { iconEl.innerText = '💌'; }
-    }
-
-    // 세팅이 끝났으니 화면에 보여줍니다.
-    reportBtn.style.display = 'flex';
-
-    // 3. 기록된 데이터 통계 계산
-    let trackers = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
-    let oneWeekAgo = new Date().getTime() - (7 * 24 * 60 * 60 * 1000); 
-    
-    let feedCount = 0; let diaperCount = 0;
-    trackers.forEach(t => {
-        if (t.timestamp >= oneWeekAgo) {
-            if (t.type === 'feed') feedCount++;
-            if (t.type === 'diaper') diaperCount++;
-        }
-    });
-
-    let batonCount = parseInt(localStorage.getItem('tosil_baton_done_count')) || 0;
-
-    const elFeed = document.getElementById('rep-feed');
-    const elDiaper = document.getElementById('rep-diaper');
-    const elBaton = document.getElementById('rep-baton');
-
-    if(elFeed) elFeed.innerText = feedCount;
-    if(elDiaper) elDiaper.innerText = diaperCount;
-    if(elBaton) elBaton.innerText = batonCount;
-};
-
-// 🚨 [필수] 앱이 처음 켜질 때 위 함수를 자동으로 실행해 주는 스위치!
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(window.initWeeklyReport, 100); 
-});
+/* 💌 '주간 육아 리포트' 는 여는 버튼(#weekly-report-btn)이 화면에 없어 한 번도 안 열렸다. 지웠다.
+   한 주 정리는 weekly.js (일요일 저녁 ~ 화요일 홈 카드 · 한 장으로 보기 · 짝꿍에게 알리기) 가 한다. */
 
 // ==========================================
 // ⚙️ [설정 탭] 전체 UI 렌더링 엔진 (버튼 색상 딜레이 완벽 제거 💜)
@@ -10467,7 +10380,9 @@ window.showToast = function(message) {
         font-size: 14px;
         font-weight: 800;
         box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        z-index: 9999999;
+        /* ⚠️ 아래에서 올라오는 창(교정 나이 · 임신 기록 · 온보딩 위에 뜨는 창, 10000001)보다 아래라서
+              '동의에 체크해 주세요' · '날짜를 다시 확인해 주세요' 같은 안내가 창 뒤에 숨었다. 안내는 늘 맨 위에 */
+        z-index: 10000010;
         opacity: 0;
         transition: opacity 0.3s ease, bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         

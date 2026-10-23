@@ -41,6 +41,8 @@
         { id: "diary-box",              close: "closeDiaryBox" },
         { id: "qa-sheet",               close: "closeQaSheet" },    // 우리의 문답 — 홈에서 바로 쓰는 창
         { id: "stage-sheet",            close: null },              // 열 달의 문답 · 임신 기록 창 (열 때 만들고 닫을 때 지운다)
+        { id: "pt-sheet",               close: null },              // 이른둥이 예정일 넣기 (정보 수정 창 위에 뜬다 — 이게 먼저 닫혀야 한다)
+        { id: "week-sheet",             close: null },              // 이번 주 한 장
         { id: "letterbox-modal",        close: "closeLetterBox" },
         { id: "sleepmap-modal",         close: "closeSleepMap" },
         { id: "tracker-sheet-overlay",  close: "closeTrackerSheet" },   // 기록 입력
@@ -67,7 +69,6 @@
         { id: "bedtime-sheet",          close: null },   // 육퇴 시간 고르기
         { id: "e119-card",              close: "close119Card" },           // 119에 읽어줄 카드 — 급할 때 여는 화면
         { id: "receipt-modal",          close: "closeReceiptModal" },      // 오늘의 영수증 (육퇴 배너)
-        { id: "weekly-report-modal",    close: "closeWeeklyReport" },
         { id: "global-image-viewer",    close: "closeImageViewer" },
         { id: "family-sync-modal",      close: "closeFamilySyncModalForce" },
         { id: "premium-modal",          close: "closeFestivalModalForce" },

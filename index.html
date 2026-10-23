@@ -3520,7 +3520,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261023-2"></script>
+<script src="script.js?v=20261023-3"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3567,6 +3567,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./anniversaries.js"></script>
 <script src="./home.js"></script>
  <script src="./homefix.js?v=4"></script>
+<script src="./weekly.js?v=1"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js?v=2"></script>
 <!-- 🕰 시간 바퀴 — 손가락을 직접 따라간다 (아이폰에서 바퀴가 잘 안 돌던 것) -->
@@ -3586,7 +3587,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./memories.js"></script>    
 <script src="./firstwords.js"></script>  
 <script src="./babytab.js"></script> 
-<script src="./homelayout.js"></script>
+<script src="./homelayout.js?v=2"></script>
 <script src="./settingscards.js"></script>
 <script src="./emoji.js"></script>
 <script src="./feverguard.js"></script> 
@@ -3602,7 +3603,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 💩 기저귀 시트 — 옛 이름을 진짜 기록 시트로 보내준다 -->
 <script src="./diapersheet.js?v=1"></script>
 <!-- ← 안드로이드 뒤로가기 — 덮은 화면을 닫는다. 앱이 꺼지지 않게 -->
-<script src="./backbutton.js?v=4"></script>
+<script src="./backbutton.js?v=5"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->
@@ -3783,41 +3784,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     </div>
 </div>
 
-<!-- ▼▼▼ 바로 여기!! 주간 육아 리포트 팝업(모달) 본체 추가! ▼▼▼ -->
-<div id="weekly-report-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 999999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; backdrop-filter: blur(5px);">
-    <div class="box-main" style="width: 100%; max-width: 400px; border-radius: 24px; padding: 32px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; text-align: center; border: 2px solid #FFE5E5;">
-        
-        <button onclick="window.closeWeeklyReport()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 20px; color: #A3958A; cursor: pointer;">✕</button>
-
-        <div style="font-size: 40px; margin-bottom: 12px;">💌</div>
-        <div style="font-size: 14px; font-weight: 800; color: #D32F2F; margin-bottom: 8px;">[이번 주] 육아 리포트</div>
-        <div style="font-size: 20px; font-weight: 900; color: var(--text-m); margin-bottom: 24px; line-height: 1.4;">이번 한 주도<br>정말 고생 많으셨어요</div>
-
-     <div class="box-sub" style="border-radius: 16px; padding: 20px; margin-bottom: 24px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                    <span style="font-size: 14px; font-weight: 700; color: var(--text-s);">🍼 이번 주 수유 기록</span>
-                    <span style="font-size: 15px; font-weight: 900; color: var(--text-m);"><span id="rep-feed" style="color:#7F77DD;">0</span>회</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                    <span style="font-size: 14px; font-weight: 700; color: var(--text-s);">💩 갈아치운 기저귀</span>
-                    <span style="font-size: 15px; font-weight: 900; color: var(--text-m);"><span id="rep-diaper" style="color:#D32F2F;">0</span>장</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 14px; font-weight: 700; color: var(--text-s);">🏃‍♂️ 아내의 바통터치</span>
-                    <span style="font-size: 15px; font-weight: 900; color: var(--text-m);"><span id="rep-baton" style="color:#B98A2E;">0</span>번 완료</span>
-                </div>
-            </div>
-
-        <p style="font-size: 13.5px; color: var(--text-s); line-height: 1.6; word-break: keep-all; font-weight: 600; margin-bottom: 24px;">
-            보이지 않는 곳에서 밤잠 설치며 아기를 돌본 엄마의 땀방울과, 퇴근 후 달려와 육아에 동참한 아빠의 노력이 모여 우리 아기는 이번 주도 건강하게 자랐습니다. 다가오는 새로운 일주일도 배냇함이 든든하게 응원할게요 파이팅 🤍
-        </p>
-
-        <button onclick="window.closeWeeklyReport()" style="width: 100%; padding: 16px; background: var(--text-m); color: var(--bg-card); border: none; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer;">
-            위로받고 닫기 🥲
-        </button>
-    </div>
-</div>
-<!-- ▲▲▲ 주간 육아 리포트 팝업(모달) 끝 ▲▲▲ -->
+<!-- 주간 육아 리포트 창은 여는 버튼이 없어 지웠다. 한 주 정리는 weekly.js -->
 
 <!-- ==========================================
      📝 글쓰기 모달 영역 (완전체 통합본)
