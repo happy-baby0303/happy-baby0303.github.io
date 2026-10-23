@@ -365,7 +365,34 @@
                                : '<div class="wk-btn light" id="wk-tell" onclick="window.__weekTell()">짝꿍 폰에도 알리기</div>') : '') +
         '</div>';
         document.body.appendChild(w);
+        if (canTell() && !sent) partnerCheck().then(function (has) {
+            /* 가족방에 나밖에 없으면 '알렸어요' 가 거짓말이 된다. 대신 짝꿍을 부른다 (모르면 그대로 둔다) */
+            var b = document.getElementById("wk-tell");
+            if (has !== false || !b) return;
+            b.textContent = "짝꿍을 초대하면 이 한 장이 짝꿍 폰에도 가요";
+            b.onclick = function () {
+                closeSheet();
+                var nm = document.getElementById("invite-baby-name");
+                if (nm) nm.innerText = babyName();
+                var sh = document.getElementById("invite-bottom-sheet");
+                if (sh) sh.style.display = "flex";
+            };
+        });
     };
+
+    /* 가족방에 나 말고 엄마 · 아빠가 있나 (돌봄 도우미는 빼고) — 모르면 null */
+    function partnerCheck() {
+        var code = get("family_sync_code"), me = window.auth && window.auth.currentUser && window.auth.currentUser.uid;
+        if (!code || !me || !window.db || typeof window.getDoc !== "function" || typeof window.doc !== "function") return Promise.resolve(null);
+        try {
+            return window.getDoc(window.doc(window.db, "families", code)).then(function (snap) {
+                var m = snap.exists() ? (snap.data() || {}).members : null;
+                if (!m) return null;
+                var ids = Array.isArray(m) ? m : Object.keys(m);
+                return ids.some(function (u) { return u !== me && (Array.isArray(m) || m[u] !== "viewer"); });
+            }).catch(function () { return null; });
+        } catch (e) { return Promise.resolve(null); }
+    }
 
     /* ---------- 짝꿍 폰에 알리기 ---------- */
     window.__weekTell = function () {
