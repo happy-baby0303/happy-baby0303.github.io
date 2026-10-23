@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v84';
+const CACHE = 'baenaet-v85';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -199,6 +199,8 @@ const ASSETS = [
     './preterm.js',
     './weekly.js',          /* 이번 주 한 장 */
     './daysend.js',         /* 하루 끝 짝꿍에게 */
+    './carelog.js',         /* 가족 장부 — 두 폰이 같은 숫자를 낸다 */
+    './recap.js',           /* 50일 · 백일 · 돌 한 장 */
     './shared/topping.js',
     './toppingtrack.js',
     './foodcalsync.js',

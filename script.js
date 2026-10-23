@@ -53,7 +53,9 @@ const BABY_SPECIFIC_KEYS = [
     // 이번 주 한 장 (weekly.js) — 닫은 주 · 짝꿍에게 알린 주
     'tosil_week_card',
     // 하루 끝 짝꿍에게 (daysend.js) — 보낸 날
-    'tosil_day_sent'
+    'tosil_day_sent',
+    // 백일 · 돌 한 장 (recap.js) — 닫은 날 · 알린 날 / 가족 장부 사본 (carelog.js) — 아기마다 따로 센다
+    'tosil_recap', 'tosil_carelog'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')
