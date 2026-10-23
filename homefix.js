@@ -78,15 +78,75 @@
     }
     function babyNm2() { return String(get("tosil_babyName") || "").trim() || "아기"; }
 
-    function monthsOld() {
+    /* 발달을 세기 시작하는 날 — 이른둥이는 예정일부터 (shared/babyage.js 교정 나이) */
+    function devStart() {
+        try { if (window.BabyAge) return window.BabyAge.start(); } catch (e) {}
         var s = get("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
-        var b = new Date(p[0], p[1] - 1, p[2]), t = new Date();
+        var d = new Date(p[0], p[1] - 1, p[2]);
+        return isNaN(d.getTime()) ? null : d;
+    }
+    function monthsOld() {
+        var b = devStart();
+        if (!b) return null;
+        var t = new Date();
         var m = (t.getFullYear() - b.getFullYear()) * 12 + (t.getMonth() - b.getMonth());
         if (t.getDate() < b.getDate()) m--;
         return m < 0 ? 0 : m;
+    }
+    /* (발달 나이로) N개월이 된 날부터 며칠 지났나 — 아직이면 음수 */
+    function daysPastMonth(n) {
+        var b = devStart();
+        if (!b) return null;
+        var at = new Date(b.getFullYear(), b.getMonth() + n, b.getDate());
+        var t = new Date(); t.setHours(0, 0, 0, 0);
+        return Math.floor((t - at) / 86400000);
+    }
+    function todayKey() {
+        var t = new Date();
+        return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
+    }
+    function josa(w, a, b) {   // 받침 있으면 a, 없으면 b ('을'/'를')
+        var c = String(w || "").charCodeAt(String(w || "").length - 1);
+        return (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0) ? a : b;
+    }
+
+    /* 한 번 눌러 본 '지금 시기' 줄은 다시 안 띄운다 (아기마다 — script.js BABY_SPECIFIC_KEYS) */
+    var SEEN_KEY = "tosil_todo_seen";
+    function seen(id) { var o = getJSON(SEEN_KEY, {}); return !!(o && typeof o === "object" && o[id]); }
+
+    /* 이유식을 이미 시작했나 — 아기 정보의 먹는 단계 · 이유식 달력 · 맘마 기록 중 하나라도 */
+    function startedSolids() {
+        if (/이유식|유아식/.test(String(get("tosil_feedingStage") || ""))) return true;
+        var cal = getJSON("tosil_food_calendar", {});
+        if (cal && typeof cal === "object" && Object.keys(cal).length) return true;
+        var recs = getJSON("tosil_tracker_records", []);
+        return Array.isArray(recs) && recs.some(function (r) { return r && r.type === "feed" && r.subType === "이유식"; });
+    }
+
+    /* 도감 발달 도장 → 놀이 시기 (놀이 큐레이터 toy/playstage.js 의 MS_STAGE 와 같은 기준 · 고치면 같이) */
+    var MS_STAGE = { m17: "flip", m21: "flip", m28: "crawl", m29: "crawl", m30: "crawl", m34: "stand", m35: "stand", m42: "stand" };
+    var MS_TITLE = { m17: "뒤집기 연습", m21: "첫 뒤집기", m28: "혼자 앉기", m29: "배밀이", m30: "네발 기기",
+                     m34: "잡고 서기", m35: "잡고 옆으로 걷기", m42: "첫걸음" };
+    var PLAY_ORDER = ["newborn", "tummy", "flip", "crawl", "stand"];
+    var PLAY_NAME = { tummy: "터미타임", flip: "뒤집기", crawl: "배밀이 · 기기", stand: "잡고 서기" };
+    function stampStage() {
+        var raw = getJSON("tosil_milestones", []), dates = getJSON("tosil_milestone_dates", {}) || {};
+        var best = null;
+        (Array.isArray(raw) ? raw : []).forEach(function (a) {
+            var id = typeof a === "string" ? a : (a && a.id);
+            if (!MS_STAGE[id]) return;
+            var at = Number(dates[id]) || 0;
+            if (!at && a && a.date) {                      // 'YYYY. MM. DD'
+                var p = String(a.date).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+                if (p) at = new Date(+p[1], +p[2] - 1, +p[3]).getTime();
+            }
+            var i = PLAY_ORDER.indexOf(MS_STAGE[id]);
+            if (!best || i > best.i || (i === best.i && at > best.at)) best = { i: i, id: id, at: at, stage: MS_STAGE[id] };
+        });
+        return best;
     }
 
     /* ==========================================================
@@ -309,8 +369,8 @@
 
     var TODO = [];
 
-    function push(icon, text, sub, href, urgent) {
-        TODO.push({ icon: icon, text: text, sub: sub || "", href: href, urgent: !!urgent });
+    function push(icon, text, sub, href, urgent, seenId) {
+        TODO.push({ icon: icon, text: text, sub: sub || "", href: href, urgent: !!urgent, seen: seenId || "" });
     }
 
     function collect() {
@@ -422,15 +482,78 @@
                               "지난주에 짠 거예요", "toy/index.html");
         }
 
-        /* ── 이유식 : 생우유 ── */
+        /* ── 이유식 : 생우유 (젖병 큐레이터와 같이 교정 나이로 센다) ── */
         var m = monthsOld();
-        if (m !== null && m === 12) {
+        if (m !== null && m === 12 && !seen("milk_12")) {
             push("\uD83E\uDD5B", "이제 생우유를 시작하셔도 되는 때예요",
-                 "한 번에 바꾸지 말고 천천히", "bottle/index.html");
+                 "한 번에 바꾸지 말고 천천히", "bottle/index.html", false, "milk_12");
         }
+
+        /* ── 지금 시기 : 큐레이터 안에서만 말하던 '바꿀 때' 를 홈에서 먼저 ──
+           이유식 단계 · 컵 · 놀이 시기. 이른둥이는 교정 나이로 센다 (shared/babyage.js).
+           때가 된 날부터 한 달쯤만 띄우고, 한 번 눌러 보면 다시 안 띄운다.
+           ⚠️ 젖꼭지 단계는 넣지 않는다. 젖병 큐레이터가 '개월수로 정하지 않는다 · 먹는 모습으로 본다' 고 말한다.
+           ⚠️ 놀이는 도감에 발달 도장이 있으면 그걸 따른다 (놀이 큐레이터와 같은 기준). 늦다 · 빠르다는 말하지 않는다. */
+        var pre = (window.BabyAge && window.BabyAge.on()) ? "교정 " : "";
+        var fs = String(get("tosil_feedingStage") || "");
+        var SOON = [
+            { id: "food_start", at: 5, win: 45, icon: "\uD83E\uDD44", t: "이유식 준비를 시작해 볼 때예요",
+              s: "보통 6개월 무렵 쌀미음부터 시작해요", href: "food/index.html", skip: startedSolids },
+            { id: "food_mid", at: 7, win: 30, icon: "\uD83E\uDD63", t: "이유식 중기로 넘어갈 때예요",
+              s: pre + "7~9개월 · 알갱이를 조금씩 키워요", href: "food/index.html", skip: function () { return /중후기|유아식/.test(fs); } },
+            { id: "food_late", at: 10, win: 30, icon: "\uD83C\uDF5A", t: "이유식 후기로 넘어갈 때예요",
+              s: pre + "10~11개월 · 무른 밥에 가깝게", href: "food/index.html", skip: function () { return /유아식/.test(fs); } },
+            { id: "food_done", at: 12, win: 30, icon: "\uD83C\uDF7D\uFE0F", t: "이유식 완료기예요",
+              s: "진밥과 하루 세 끼로 넘어가요", href: "food/index.html", skip: function () { return /유아식/.test(fs); } },
+            { id: "cup_6", at: 6, win: 30, icon: "\uD83E\uDD64", t: "컵을 처음 쥐여 줄 때예요",
+              s: "이유식을 시작하면서 같이 쥐어 보게 하는 집이 많아요", href: "bottle/index.html" },
+            { id: "cup_9", at: 9, win: 30, icon: "\uD83E\uDD64", t: "빨대컵으로 물을 줘 볼 때예요",
+              s: "흘리는 게 당연한 시기예요", href: "bottle/index.html", skip: function () { return !!get("tosil_bottle_cup"); } }
+        ];
+        SOON.forEach(function (x) {
+            var d = daysPastMonth(x.at);
+            if (d === null || d < 0 || d >= x.win || seen(x.id)) return;
+            if (x.skip && x.skip()) return;
+            push(x.icon, x.t, x.s, x.href, false, x.id);
+        });
+
+        var stamp = stampStage();
+        if (stamp) {
+            var sd = stamp.at ? Math.floor((Date.now() - stamp.at) / 86400000) : null;
+            if (PLAY_NAME[stamp.stage] && sd !== null && sd >= 0 && sd <= 21 && !seen("toy_" + stamp.stage)) {
+                var tt = MS_TITLE[stamp.id] || "";
+                push("\uD83E\uDDF8", "이제 " + PLAY_NAME[stamp.stage] + " 시기 놀이로 바꿔 볼까요",
+                     "도감에 '" + tt + "'" + josa(tt, "을", "를") + " 찍었어요", "toy/index.html", false, "toy_" + stamp.stage);
+            }
+        } else {
+            /* 도장을 안 찍는 집 — 발달 나이로 시기가 바뀌는 날부터 3주 */
+            [2, 4, 7, 10].forEach(function (n) {
+                var d = daysPastMonth(n);
+                if (d === null || d < 0 || d > 21 || seen("toy_m" + n)) return;
+                push("\uD83E\uDDF8", pre + n + "개월 무렵 놀이로 바꿔 볼까요",
+                     "도감에 발달 도장을 찍으면 그에 맞춰 골라 드려요", "toy/index.html", false, "toy_m" + n);
+            });
+        }
+
+        /* 급한 것 → 지금 시기 → 나머지 (같은 칸끼리는 넣은 차례 그대로) */
+        TODO = TODO.map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) {
+            var ra = a.x.urgent ? 0 : (a.x.seen ? 1 : 2), rb = b.x.urgent ? 0 : (b.x.seen ? 1 : 2);
+            return ra - rb || a.i - b.i;
+        }).map(function (o) { return o.x; });
 
         return TODO;
     }
+
+    /* 누르면 그 큐레이터로. '지금 시기' 줄은 본 걸로 적어 둔다 */
+    var SHOWN = [];
+    window.__homeTodoGo = function (i) {
+        var x = SHOWN[i];
+        if (!x) return;
+        if (x.seen) {
+            try { var o = getJSON(SEEN_KEY, {}) || {}; o[x.seen] = todayKey(); localStorage.setItem(SEEN_KEY, JSON.stringify(o)); } catch (e) {}
+        }
+        location.href = x.href;
+    };
 
     function todoHTML() {
         var list = collect();
@@ -439,6 +562,7 @@
         var plus = isPlus();
         var show = plus ? list.slice(0, 6) : list.slice(0, 1);
         var hidden = list.length - show.length;
+        SHOWN = show;
 
         return '<div id="home-todo" style="background: #FFFFFF; border:1px solid #F2F5F8; ' +
             'border-radius:20px; padding:18px; margin-bottom:20px; ' +
@@ -452,10 +576,12 @@
                 'line-height:1.6; margin-bottom:12px;">' +
                 '다섯 큐레이터에서 모았어요. 급한 건 아니에요.</div>' +
 
-            show.map(function (x) {
-                return '<div onclick="location.href=\'' + x.href + '\'" ' +
+            show.map(function (x, i) {
+                /* 마지막 줄 밑줄은 카드 끝선과 겹쳐 두 줄로 보였다 */
+                var line = (i < show.length - 1 || hidden > 0) ? 'border-bottom:1px solid #F6F2EC; ' : '';
+                return '<div onclick="window.__homeTodoGo(' + i + ')" ' +
                     'style="display:flex; align-items:center; gap:11px; padding:12px 0; ' +
-                    'border-bottom:1px solid #F6F2EC; cursor:pointer;">' +
+                    line + 'cursor:pointer;">' +
                     '<div style="flex-shrink:0; font-size:17px;">' + x.icon + '</div>' +
                     '<div style="flex:1; min-width:0;">' +
                         '<div style="font-size:13.5px; font-weight:800; color:' +

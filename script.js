@@ -47,7 +47,9 @@ const BABY_SPECIFIC_KEYS = [
     //   그래서 둘째를 고른 채 맘마 기록에서 토핑을 적으면 첫째 달력에 들어가고, 응급 카드는 늘 첫째 알레르기를 보여 줬다
     'tosil_food_calendar',
     // 이른둥이 교정 나이 (preterm.js · shared/babyage.js) — 출산 예정일은 아기마다 다르다
-    'tosil_preterm'
+    'tosil_preterm',
+    // 홈 '오늘 챙길 것' 에서 한 번 눌러 본 '지금 시기' 줄 (homefix.js) — 이유식 단계 · 놀이 시기는 아기마다 다르다
+    'tosil_todo_seen'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')

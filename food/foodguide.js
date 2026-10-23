@@ -65,8 +65,10 @@
         if (el && el.value && el.value !== "all") return el.value;
         var m = monthsOld();
         if (m === null) return "early";
+        /* ⚠️ 9개월을 후기로 쳤다. 이 큐레이터의 단계표(app.js · 고르는 칸)는 중기 7~9개월 · 후기 10~11개월이다.
+              같은 날 위 뱃지는 '중기', 여기 한 끼 양은 '후기' 로 나왔다. */
         if (m < 7) return "early";
-        if (m < 9) return "mid";
+        if (m < 10) return "mid";
         if (m < 12) return "late";
         return "done";
     }
