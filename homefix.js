@@ -854,9 +854,12 @@
         var todo = todoHTML();
         var old = document.getElementById("home-todo");
         if (!todo) { if (old) old.remove(); }
-        else {
+        else if (!old || old.getAttribute("data-k") !== todo) {
+            /* ⚠️ 켜고 6초 동안 0.3초마다 같은 카드를 새로 갈아 끼웠다. 그 사이에 누르면 손가락 밑 카드가 사라져
+                  안 눌리기도 했다. 내용이 바뀌었을 때만 바꾼다. */
             var box = document.createElement("div");
             box.innerHTML = todo;
+            box.firstChild.setAttribute("data-k", todo);
             if (old && old.parentNode) old.parentNode.replaceChild(box.firstChild, old);
             else if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box.firstChild, anchor);
         }

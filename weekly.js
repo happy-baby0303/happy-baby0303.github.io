@@ -367,20 +367,36 @@
         document.body.appendChild(w);
         if (canTell() && !sent) partnerCheck().then(function (has) {
             /* 가족방에 나밖에 없으면 '알렸어요' 가 거짓말이 된다. 대신 짝꿍을 부른다 (모르면 그대로 둔다) */
-            var b = document.getElementById("wk-tell");
-            if (has !== false || !b) return;
-            b.textContent = "짝꿍을 초대하면 이 한 장이 짝꿍 폰에도 가요";
-            b.onclick = function () {
-                closeSheet();
-                var nm = document.getElementById("invite-baby-name");
-                if (nm) nm.innerText = babyName();
-                var sh = document.getElementById("invite-bottom-sheet");
-                if (sh) sh.style.display = "flex";
-            };
+            if (has === false) inviteInstead(document.getElementById("wk-tell"));
         });
     };
 
-    /* 가족방에 나 말고 엄마 · 아빠가 있나 (돌봄 도우미는 빼고) — 모르면 null */
+    function inviteInstead(b) {
+        if (!b) return;
+        b.textContent = "짝꿍을 초대하면 이 한 장이 짝꿍 폰에도 가요";
+        b.onclick = function () {
+            closeSheet();
+            var nm = document.getElementById("invite-baby-name");
+            if (nm) nm.innerText = babyName();
+            var sh = document.getElementById("invite-bottom-sheet");
+            if (sh) sh.style.display = "flex";
+        };
+    }
+
+    /* 가족방에 나 말고 엄마 · 아빠가 있나 (돌봄 도우미는 빼고) — 모르면 null. 하루 끝 보내기(daysend.js)도 쓴다 */
+    window.familyHasPartner = function () { return partnerCheck(); };
+
+    /* 서버(sendFamilyPush)는 못 보냈을 때 오류를 던지지 않고 { success:false, error } 로 답한다.
+       ⚠️ 그 답도 '보냈다' 로 읽었다. 짝꿍 폰 알림이 꺼져 있어 아무 데도 안 갔는데 '짝꿍 폰에 알렸어요' 가 떴다.
+       'sent' 갔다 · 'nopartner' 받을 엄마 · 아빠가 없다 · 'notoken' 짝꿍 폰 알림이 꺼졌다 · 'failed' 그 밖. 하루 끝 보내기(daysend.js)도 쓴다 */
+    window.familyPushResult = function (r) {
+        var d = (r && r.data) || {};
+        if (d.success !== false) return "sent";
+        var err = String(d.error || "");
+        if (err.indexOf("가족이 없") > -1) return "nopartner";
+        if (err.indexOf("토큰") > -1 || d.sent === 0) return "notoken";
+        return "failed";
+    };
     function partnerCheck() {
         var code = get("family_sync_code"), me = window.auth && window.auth.currentUser && window.auth.currentUser.uid;
         if (!code || !me || !window.db || typeof window.getDoc !== "function" || typeof window.doc !== "function") return Promise.resolve(null);
@@ -411,10 +427,20 @@
             body: who + "가 " + rangeText(g) + "을 한 장으로 정리했어요",
             link: "index.html?go=week&w=" + g.key,
             skipRoles: ["viewer"]
-        }).then(function () {
-            setState("sent", g.key);
-            if (btn) { btn.className = "wk-btn done"; btn.textContent = "짝꿍 폰에 알렸어요"; btn.style.opacity = ""; }
-            toast("짝꿍 폰에 알렸어요");
+        }).then(function (r) {
+            var how = window.familyPushResult(r);
+            if (how === "sent") {
+                setState("sent", g.key);
+                if (btn) { btn.className = "wk-btn done"; btn.textContent = "짝꿍 폰에 알렸어요"; btn.style.opacity = ""; btn.onclick = null; }
+                return toast("짝꿍 폰에 알렸어요");
+            }
+            if (btn) { btn.style.opacity = ""; btn.onclick = window.__weekTell; }
+            if (how === "nopartner") { inviteInstead(btn); return toast("짝꿍이 아직 가족방에 없어요"); }
+            if (how === "notoken") {
+                if (btn) btn.textContent = "짝꿍 폰 알림이 꺼져 있어요 · 다시 알리기";
+                return toast("짝꿍 폰 알림이 꺼져 있어요. 사진으로 저장해서 보내 볼까요");
+            }
+            toast("알림을 못 보냈어요. 잠시 뒤에 다시 눌러 주세요");
         }).catch(function (e) {
             console.warn("[이번 주] 알림 실패", e);
             if (btn) { btn.style.opacity = ""; btn.onclick = window.__weekTell; }

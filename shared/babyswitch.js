@@ -57,7 +57,7 @@
         /* 이른둥이 교정 나이 (shared/babyage.js) — 예정일은 아기마다 다르다 */
         'tosil_preterm',
         /* 홈 '오늘 챙길 것' 에서 본 '지금 시기' 줄 (본 앱 homefix.js) */
-        'tosil_todo_seen', 'tosil_week_card'
+        'tosil_todo_seen', 'tosil_week_card', 'tosil_day_sent'
 
         /* ⚠️ 유모차·트렁크·차종(tosil_stroller_own · tosil_stroller_car · tosil_trunk_depth ·
               tosil_stroller_limit)은 일부러 넣지 않는다. 그건 아이가 아니라 '집 물건' 이다.

@@ -51,7 +51,9 @@ const BABY_SPECIFIC_KEYS = [
     // 홈 '오늘 챙길 것' 에서 한 번 눌러 본 '지금 시기' 줄 (homefix.js) — 이유식 단계 · 놀이 시기는 아기마다 다르다
     'tosil_todo_seen',
     // 이번 주 한 장 (weekly.js) — 닫은 주 · 짝꿍에게 알린 주
-    'tosil_week_card'
+    'tosil_week_card',
+    // 하루 끝 짝꿍에게 (daysend.js) — 보낸 날
+    'tosil_day_sent'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')
@@ -7357,8 +7359,13 @@ window.closeEmergencyModal = function(e) { if(e.target.id === 'emergency-modal')
 // ==========================================
 // 🧾 영수증 띄우기 (중복 닫기 버튼 삭제 + 초강력 다이어트 💯)
 // ==========================================
-window.openReceiptModal = function() {
-    const today = new Date();
+window.openReceiptModal = function(dayKey) {
+    /* 짝꿍 폰에서 '오늘 하루' 알림을 누르면 그날 영수증을 연다 (daysend.js · ?go=receipt&d=날짜).
+       다음 날 아침에 눌러도 그날 것이 나와야 한다. 날짜가 없으면 오늘. */
+    const now = new Date();
+    const picked = (typeof dayKey === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dayKey)) ? window.parseLocalDate(dayKey) : null;
+    const isToday = !picked || picked.toDateString() === now.toDateString();
+    const today = isToday ? now : new Date(picked.getFullYear(), picked.getMonth(), picked.getDate(), 23, 59);
     
     // 영수증 발행일시 
     const yyyy = today.getFullYear();
@@ -7393,7 +7400,7 @@ window.openReceiptModal = function() {
             if (sr.end - sr.start <= 20 * 3600000) totalSleepMins += window.minsInRange(sr.start, sr.end, startOfToday, endOfToday);
             return;
         }
-        if (ts >= startOfToday) {
+        if (ts >= startOfToday && ts < endOfToday) {
             if (record.type === 'feed') {
                 // ⚠️ 모유는 amount 에 '분' 이 들어간다. 분유 ml 에 더하면 20분 + 120ml = 140ml 가 됐다.
                 if (record.subType === '이유식') totalFood += parseInt(record.amount) || 0;
@@ -7410,7 +7417,7 @@ window.openReceiptModal = function() {
 
     // 지금 자는 중이면 진행분도 (홈 통계와 같게)
     const sleepingSince = Number(localStorage.getItem('tosil_sleep_start')) || 0;
-    if (sleepingSince) totalSleepMins += window.minsInRange(sleepingSince, Date.now(), startOfToday, endOfToday);
+    if (sleepingSince && isToday) totalSleepMins += window.minsInRange(sleepingSince, Date.now(), startOfToday, endOfToday);
 
     let sleepH = Math.floor(totalSleepMins / 60);
     let sleepM = totalSleepMins % 60;
