@@ -56,7 +56,8 @@
         return null;
     }
     function monthsOld() {
-        var s = localStorage.getItem("tosil_startDate");
+        /* 이른둥이는 교정 나이로 — 예정일부터 센다 (shared/babyage.js) */
+        var s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
@@ -575,7 +576,7 @@
                 return '<div style="margin-top:16px; background:#FFF2F2; border:1px solid #FCA5A5; ' +
                     'border-radius:14px; padding:15px 16px;">' +
                     '<div style="font-size:13px; font-weight:900; color:' + RED + ';">' +
-                        '\u26A0\uFE0F ' + esc(nm("는")) + ' 아직 ' + m + '개월이에요</div>' +
+                        '\u26A0\uFE0F ' + esc(nm("는")) + ' 아직 ' + (window.BabyAge ? window.BabyAge.pre() : '') + m + '개월이에요</div>' +
                     '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                         'line-height:1.8; word-break:keep-all;">' +
                         '휴대용은 <b>등받이가 충분히 눕지 않는 것</b>이 많아요. ' +
@@ -597,7 +598,7 @@
                 '\uD83D\uDED2 두 번째 유모차를 생각할 때예요</div>' +
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +
-                esc(nm("가")) + ' ' + m + '개월이라 <b>걷다 안기다를 반복</b>해요. ' +
+                esc(nm("가")) + ' ' + (window.BabyAge ? window.BabyAge.pre() : '') + m + '개월이라 <b>걷다 안기다를 반복</b>해요. ' +
                 '그때마다 ' + kg + 'kg을 접었다 폈다 하게 되고요.<br>' +
                 '<b>서두르실 필요는 없어요.</b> 지금 것으로 버티다가 진짜 힘들 때 사셔도 돼요.</div>' +
             (picks.length

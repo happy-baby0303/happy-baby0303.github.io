@@ -74,6 +74,14 @@
         return m < 0 ? null : m;
     }
 
+    /* 이른둥이는 교정 나이로 고른다 (shared/babyage.js). 열 기준(3개월 미만)은 태어난 날 그대로 — monthsOld */
+    function devMonths() {
+        var m = monthsOld();
+        if (m === null || !window.BabyAge || !window.BabyAge.on()) return m;
+        var d = window.BabyAge.days();
+        return d === null ? m : Math.max(0, Math.floor(d / 30.436875));
+    }
+
     function context() {
         var recs = [];
         try { recs = JSON.parse(localStorage.getItem("tosil_fever_records")) || []; } catch (e) {}
@@ -94,6 +102,8 @@
 
         return {
             months:     monthsOld(),
+            dev:        devMonths(),
+            corr:       !!(window.BabyAge && window.BabyAge.on()),
             hot:        hot,
             maxTemp:    maxTemp,
             feverAgo:   lastAt ? Math.floor((now - lastAt) / 86400000) : null,
@@ -242,11 +252,11 @@
 
                 var s = 0, why = "";
 
-                var hit = rangeHit(c.months, r.ranges);
+                var hit = rangeHit(c.dev, r.ranges);
                 if (hit > -1) {
                     s += r.base;
                     why = (r.whys && r.whys[hit]) ? r.whys[hit]
-                        : ((c.months === 0) ? "갓 태어난 무렵" : "생후 " + c.months + "개월");
+                        : ((c.dev === 0) ? "갓 태어난 무렵" : (c.corr ? "교정 " : "생후 ") + c.dev + "개월");
                 }
                 if (r.boost) {
                     var b = r.boost(c);
@@ -657,9 +667,9 @@
     }
 
     function pickHTML(res) {
-        var head = (res.ctx.months === null)
+        var head = (res.ctx.dev === null)
             ? "지금 챙기면 좋은 글"
-            : res.ctx.months + "개월 " + ((typeof window.babyCall === "function") ? window.babyCall("에게") : babyName() + "에게") + " 지금 필요한 것";
+            : (res.ctx.corr ? "교정 " : "") + res.ctx.dev + "개월 " + ((typeof window.babyCall === "function") ? window.babyCall("에게") : babyName() + "에게") + " 지금 필요한 것";
 
         var rows = res.list.map(rowHTML).join(
             '<div style="height:1px; background:var(--border); opacity:0.55;"></div>');

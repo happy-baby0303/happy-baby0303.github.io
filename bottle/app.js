@@ -30,7 +30,7 @@ function getUvSafety(item) {
 }
 
 function applyGlobalBabyProfile() {
-    const birthStr = localStorage.getItem('tosil_startDate');
+    const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     if(!birthStr) return; 
     
     const [y, m, d] = birthStr.split('-').map(Number);
@@ -52,7 +52,7 @@ function applyGlobalBabyProfile() {
     if(banner) banner.style.display = 'none'; 
 
     const badge = document.getElementById('dynamic-age-badge');
-    if(badge) badge.innerText = `생후 ${months}개월 맞춤`;
+    if(badge) badge.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
 }
 
 function toggleFavorite(id) {

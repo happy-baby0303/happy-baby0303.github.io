@@ -51,7 +51,8 @@
         return n + (jong ? "이" : "") + (j || "");
     }
     function monthsOld() {
-        var s = localStorage.getItem("tosil_startDate");
+        /* 이른둥이는 교정 나이로 — 예정일부터 센다 (shared/babyage.js) */
+        var s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
@@ -669,7 +670,7 @@
                 'min-width:0; word-break:keep-all;">\uD83D\uDCC5 이번 주 놀이</div>' +
             '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 12px;">' +
                 '<div style="font-size:12.5px; font-weight:700; color:' + GRAY + '; min-width:0;">' +
-                    (m === null ? '' : esc(m + "개월 " + nm("") + " 맞춤")) + '</div>' +
+                    (m === null ? '' : esc((window.BabyAge ? window.BabyAge.pre() : "") + m + "개월 " + nm("") + " 맞춤")) + '</div>' +
                 '<div id="play-week-toggle" onclick="window.togglePlayWeekCards()" ' +
                     'style="flex-shrink:0; font-size:12.5px; font-weight:800; background:#F6F2EC; ' +
                     'color:' + GRAY + '; padding:6px 12px; border-radius:8px; cursor:pointer;">접어두기 \u2227</div>' +

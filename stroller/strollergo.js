@@ -78,7 +78,8 @@
     }
 
     function monthsOld() {
-        var s = localStorage.getItem("tosil_startDate");
+        /* 이른둥이는 교정 나이로 — 예정일부터 센다 (shared/babyage.js) */
+        var s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
@@ -186,7 +187,7 @@
             var m = monthsOld();
             if (m !== null && m >= 6)
                 add(GRAY, "아기 의자",
-                    esc(nm("가")) + " " + m + "개월이면 <b>하이체어가 있는지</b> 미리 물어보는 게 편해요.");
+                    esc(nm("가")) + " " + (window.BabyAge ? window.BabyAge.pre() : "") + m + "개월이면 <b>하이체어가 있는지</b> 미리 물어보는 게 편해요.");
 
         } else if (where === "car") {
             if (typeof window.refreshStrollerTrunk === "function")

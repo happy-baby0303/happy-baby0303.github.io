@@ -62,7 +62,8 @@
     }
 
     function monthsOld() {
-        var s = localStorage.getItem("tosil_startDate");
+        /* 이른둥이는 교정 나이로 — 예정일부터 센다 (shared/babyage.js) */
+        var s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
@@ -262,7 +263,7 @@
 
         var basis = real
             ? "최근 " + real.days + "일 기록 기준 하루 <b>" + real.avg + "번</b> 수유"
-            : (m === null ? "일반적인 기준" : "생후 " + m + "개월 평균 하루 " + feeds + "번쯤");
+            : (m === null ? "일반적인 기준" : (window.BabyAge ? window.BabyAge.pre("생후 ") : "생후 ") + m + "개월 평균 하루 " + feeds + "번쯤");
 
         var chip = function (v, t) {
             var on = (howMode === v);

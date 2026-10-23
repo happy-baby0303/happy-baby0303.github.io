@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function applyGlobalBabyProfile() {
-    const birthStr = localStorage.getItem('tosil_startDate');
+    const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     let autoMilestone = 'all'; 
 
     if (birthStr) {
@@ -67,7 +67,7 @@ function applyGlobalBabyProfile() {
         if (months < 0) months = 0;
 
         document.querySelectorAll('.dynamic-age-badge').forEach(b => {
-            b.innerText = `생후 ${months}개월 맞춤`;
+            b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
         });
 
                /* ⚠️ 놀이 탭(playweek·playlog)과 같은 기준이어야 한다.

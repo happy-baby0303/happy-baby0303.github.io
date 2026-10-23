@@ -8,7 +8,7 @@ let isFavViewMode = false;
 
 // 🚀 1. 이유식 데이터 자동 동기화 (군더더기 삭제)
 function applyGlobalBabyProfile() {
-    const birthStr = localStorage.getItem('tosil_startDate');
+    const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
     if(!birthStr) return;
 
@@ -40,7 +40,7 @@ function applyGlobalBabyProfile() {
     // ✨ 2. 쿨한 뱃지에 '월령' + '이유식 단계'를 한 방에 쏴주기
     const badges = document.querySelectorAll('.dynamic-age-badge');
     badges.forEach(b => {
-        b.innerText = `생후 ${months}개월 | ${ageText}`;
+        b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 | ${ageText}`;
     });
 }
 
@@ -1827,7 +1827,7 @@ window.generatePremiumMealPlan = function() {
           필터를 '전체'로 두면 안 걸리기 때문이다.
        ========================================================== */
     const babyMonths = (function () {
-        const s = localStorage.getItem('tosil_startDate');
+        const s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로
         if (!s) return null;
         const p = String(s).split('-').map(Number);
         if (p.length !== 3) return null;

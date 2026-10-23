@@ -6,7 +6,7 @@ let isFavViewMode = false;
 
 // 🚀 유모차 글로벌 데이터 자동 동기화
 function applyGlobalBabyProfile() {
-    const birthStr = localStorage.getItem('tosil_startDate');
+    const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     if (!birthStr) return; 
 
     // 날짜 쏠림(UTC) 버그 방지용 파싱
@@ -26,7 +26,7 @@ function applyGlobalBabyProfile() {
     if (banner) banner.style.display = 'none';
 
     document.querySelectorAll('.dynamic-age-badge').forEach(b => {
-        b.innerText = `생후 ${months}개월 맞춤`;
+        b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
     });
 
     let ageFilter = 'all';

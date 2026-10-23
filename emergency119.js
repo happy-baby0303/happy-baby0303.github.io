@@ -67,6 +67,14 @@
     }
     window.babyAgeForEmergency = ageText;
 
+    /* 이른둥이면 태어난 주수와 교정 나이를 같이 (구급대 · 응급실에서 묻는다) — shared/babyage.js */
+    function pretermText() {
+        var A = window.BabyAge;
+        if (!A || !A.on()) return "";
+        var g = A.ga();
+        return g ? g.w + "주" + (g.d ? " " + g.d + "일" : "") + "에 태어남 · " + A.label() : "";
+    }
+
     function birthDateText() {
         var s = localStorage.getItem("tosil_startDate");
         if (!s) return "";
@@ -166,6 +174,7 @@
         var L = [];
 
         L.push(babyName() + " · " + a.line + (birthDateText() ? " · " + birthDateText() : ""));
+        if (pretermText()) L.push(pretermText());
         if (s.weight) L.push("몸무게 " + s.weight + "kg");
 
         if (s.last && Number(s.last.temp)) {
@@ -251,6 +260,9 @@
         body += row("나이", a.line.replace(/ \(.*/, ""),
                     (a.days !== null ? a.days + "일" : "") +
                     (birthDateText() ? (a.days !== null ? " · " : "") + birthDateText() : ""));
+
+        var pt = pretermText();
+        if (pt) body += row("출생", pt.split(" · ")[0], pt.split(" · ")[1] || "");
 
         if (s.weight) body += row("몸무게", s.weight + " kg");
         else { body += row("몸무게", "—", "", null, true); empty++; }

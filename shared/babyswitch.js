@@ -52,7 +52,10 @@
 
         /* 본 앱(script.js)에도 있는 것들 — 두 목록이 같아야 한다 */
         'tosil_hero_pos', 'tosil_vaccines', 'tosil_vaccines_t', 'tosil_life_ledger',
-        'tosil_letters_cloud_v1', 'tosil_letters_pulled_at'
+        'tosil_letters_cloud_v1', 'tosil_letters_pulled_at',
+
+        /* 이른둥이 교정 나이 (shared/babyage.js) — 예정일은 아기마다 다르다 */
+        'tosil_preterm'
 
         /* ⚠️ 유모차·트렁크·차종(tosil_stroller_own · tosil_stroller_car · tosil_trunk_depth ·
               tosil_stroller_limit)은 일부러 넣지 않는다. 그건 아이가 아니라 '집 물건' 이다.

@@ -45,7 +45,9 @@ const BABY_SPECIFIC_KEYS = [
     'tosil_vaccines', 'tosil_vaccines_t',
     // 이유식 달력 (식단 · 새 재료 · 알레르기). 큐레이터(babyswitch.js)는 이미 아이마다 따로 봤는데 본 앱에만 빠져 있었다.
     //   그래서 둘째를 고른 채 맘마 기록에서 토핑을 적으면 첫째 달력에 들어가고, 응급 카드는 늘 첫째 알레르기를 보여 줬다
-    'tosil_food_calendar'
+    'tosil_food_calendar',
+    // 이른둥이 교정 나이 (preterm.js · shared/babyage.js) — 출산 예정일은 아기마다 다르다
+    'tosil_preterm'
 ];
 
 // 2. 현재 선택된 아기의 꼬리표 (첫째는 '', 둘째는 '_2', 셋째는 '_3')
@@ -864,7 +866,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
             </div>
 
             <div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
-                <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 6px;">${isEvent ? '가기 전에 알아두면' : '이 곳은요'}</div>
+                <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 6px;">${isEvent ? '가기 전에 알아두면' : '이곳은요'}</div>
                 <div style="font-size: 13.5px; font-weight: 600; color: var(--text-m); line-height: 1.4; word-break: keep-all;">"${review || '주말에 아이와 방문하기 좋은 안전한 인프라를 갖추고 있습니다.'}"</div>
             </div>
 
@@ -2309,6 +2311,8 @@ window.openChecklistModal = function(theme = 'basic') {
     if (targetDate) {
         const dday = Math.ceil(Math.abs(new Date() - window.parseLocalDate(targetDate)) / (1000 * 60 * 60 * 24));
         months = Math.floor(dday / 30);
+        // 이른둥이는 교정 나이로 (분유 · 이유식 중 무엇을 챙길지는 먹는 단계를 따른다)
+        if (window.BabyAge && window.BabyAge.on()) months = Math.max(0, Math.floor((window.BabyAge.days() || 0) / 30));
     }
 
     let h = window.outingHours;
@@ -2653,7 +2657,7 @@ window.closeChecklist = function(e) { if (e.target.id === 'checklist-modal') win
 // ==========================================
 // 🚨 7. 아기 발달 센서 엔진 (초압축 한줄 카피)
 // ==========================================
-function updateMainAISensors(months) {
+function updateMainAISensors(months, realMonths) {
     const txtStroller = document.getElementById('main-txt-stroller');
     const txtCarseat = document.getElementById('main-txt-carseat');
     const txtBottle = document.getElementById('main-txt-bottle');
@@ -2667,7 +2671,9 @@ function updateMainAISensors(months) {
     else if (months <= 12) txtStroller.innerText = "절충형 (혼자 앉는 시기)";
     else txtStroller.innerText = "휴대용 (가벼운 외출용)";
 
-    if (months < 15) txtCarseat.innerText = "뒤보기 필수 (15개월까지)";
+    // 카시트는 법 · 안전 기준이라 이른둥이도 태어난 날로 센다 (카시트 큐레이터와 같게)
+    const carMonths = (typeof realMonths === 'number') ? realMonths : months;
+    if (carMonths < 15) txtCarseat.innerText = "뒤보기 필수 (15개월까지)";
     else txtCarseat.innerText = "토들러용 (뒤보기 오래)";
 
     if (months <= 3) txtBottle.innerText = "신생아 (배앓이 덜한 젖병)";
@@ -2713,7 +2719,7 @@ function getPercentile(z) {
 // ==========================================
 let growthChartObj = null;
 
-window.calcHealthMaster = function() {
+window.calcHealthMaster = function(quiet) {
     const b = document.getElementById('v-birth').value;
     const gender = document.getElementById('v-gender').value;
     const hVal = document.getElementById('v-height').value;
@@ -2728,22 +2734,49 @@ window.calcHealthMaster = function() {
     if(!b) return say("아기 생년월일을 넣어 주세요");
     if(!h && !w) return say("키나 몸무게 중 하나는 적어 주세요");
     
-    const birthDate = new Date(b);
-    const today = new Date();
-    const diffDays = Math.ceil((today - birthDate) / (1000*60*60*24));
+    /* ⚠️ new Date('2026-05-26') 은 영국 자정(한국 아침 9시)이라, 낮에 재면 홈의 D+ 보다 하루가 많았다 (홈 D+149 · 여기 D+150).
+          홈과 같은 셈(한국 자정부터 · 내림)으로 맞춘다. */
+    const birthDate = window.parseLocalDate(b);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((today - birthDate) / (1000*60*60*24));
     if (diffDays < 0) return say("생년월일이 오늘보다 뒤예요");
     try { localStorage.setItem('tosil_growth_gender', gender || ''); } catch (e) {}
     
     const week = Math.floor(diffDays / 7);
     const month = Math.floor(diffDays / 30.436875); 
+
+    /* 이른둥이 교정 나이 (preterm.js) — 또래 비교와 원더윅스는 예정일부터 센다. 예방접종은 태어난 날 그대로.
+       생년월일 칸을 다른 날로 바꿔 넣었으면(다른 아기를 재 보는 것) 교정하지 않는다. */
+    const BA = window.BabyAge;
+    const isMine = b === localStorage.getItem('tosil_startDate');
+    const corr = !!(BA && isMine && BA.on());
+    const devDays = corr ? diffDays - BA.early() : diffDays;
+    const devWeek = Math.floor(devDays / 7);
+    const devMonth = Math.max(0, Math.floor(devDays / 30.436875));
     
     document.getElementById('res-dday').innerText = diffDays;
     document.getElementById('res-month').innerText = month;
     document.getElementById('res-week').innerText = week;
+    const corrEl = document.getElementById('res-corr');
+    if (corrEl) {
+        if (corr) {
+            const pill = devDays < 0 ? '예정일까지 ' + (-devDays) + '일' : '교정 ' + devMonth + '개월 (' + devWeek + '주 차)';
+            const cap = devDays < 0 ? '아직 예정일 전이라 또래 비교가 잘 맞지 않아요. 병원에서 쓰는 이른둥이 성장 곡선을 따라 주세요'
+                                    : '예정일부터 센 나이예요. 또래 비교와 원더윅스는 이 나이로 봤어요';
+            corrEl.innerHTML = '<div class="box-sub" style="display:inline-block; padding:8px 16px; border-radius:12px; font-size:13px; font-weight:800; color:#6A61CE;">' + pill + '</div>' +
+                '<div style="margin-top:8px;">' + cap + '</div>';
+            corrEl.style.display = 'block';
+        } else if (BA && isMine && month < 24 && typeof window.openPretermSheet === 'function') {
+            corrEl.innerHTML = '<span onclick="window.openPretermSheet()" style="cursor:pointer; text-decoration:underline; text-underline-offset:3px;">일찍 태어났다면 교정 나이로 보기 ›</span>';
+            corrEl.style.display = 'block';
+        } else {
+            corrEl.style.display = 'none';
+        }
+    }
 
    // 원더윅스 로직
-    let curWW = wwList.find(x => week >= (x.w - 1) && week <= (x.w + 1));
-    let nxtWW = wwList.find(x => x.w > week);
+    let curWW = wwList.find(x => devWeek >= (x.w - 1) && devWeek <= (x.w + 1));
+    let nxtWW = wwList.find(x => x.w > devWeek);
     
     let st = document.getElementById('ww-status');
     if(st) {
@@ -2756,7 +2789,7 @@ window.calcHealthMaster = function() {
             st.className = 'ww-status-box box-tint-green'; 
             st.removeAttribute('style');
             st.style.padding = '20px'; st.style.borderRadius = '16px'; st.style.marginBottom = '12px';
-            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 지금은 비교적 편안한 때예요</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '다음 도약기는 <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + nxtWW.w + '주 무렵)</strong>이에요' : '도약기를 모두 지났어요.'}</span>`; 
+            st.innerHTML = `<div style="font-size:14.5px; font-weight:900; color:var(--success); margin-bottom:6px;">☀️ 지금은 비교적 편안한 때예요</div><span style="font-size:13px; color:var(--text-s);">${nxtWW ? '다음 도약기는 <strong style="color:var(--text-m);">' + nxtWW.t + ' (' + (corr ? '교정 ' : '') + nxtWW.w + '주 무렵)</strong>이에요' : '도약기를 모두 지났어요.'}</span>`; 
         }
     }
 
@@ -2766,7 +2799,7 @@ window.calcHealthMaster = function() {
     const wwHead = 'padding:10px 2px; background:#F6F2EC; font-size:12px; white-space:nowrap;';
     let table = `<colgroup><col style="width:25%"><col style="width:18%"><col style="width:57%"></colgroup>` +
         `<tr><th style="${wwHead}">주차</th><th style="${wwHead}">도약기</th><th style="${wwHead}">특성 지표</th></tr>`;
-    wwList.forEach(x => { let active = (week >= x.w-1 && week <= x.w+1) ? 'style="background:#FFF0F1; color:#D32F2F; font-weight:800;"' : ''; table += `<tr ${active}><td style="${wwCell}">${x.w-1}~<wbr>${x.w+1}주</td><td style="${wwCell}">${String(x.t).replace(/\s*원더윅스/, '')}</td><td style="${wwCell} text-align:left; overflow-wrap:anywhere;">${x.d}</td></tr>`; });
+    wwList.forEach(x => { let active = (devWeek >= x.w-1 && devWeek <= x.w+1) ? 'style="background:#FFF0F1; color:#D32F2F; font-weight:800;"' : ''; table += `<tr ${active}><td style="${wwCell}">${x.w-1}~<wbr>${x.w+1}주</td><td style="${wwCell}">${String(x.t).replace(/\s*원더윅스/, '')}</td><td style="${wwCell} text-align:left; overflow-wrap:anywhere;">${x.d}</td></tr>`; });
     document.getElementById('ww-table').innerHTML = table;
 
     // 백신
@@ -2777,7 +2810,7 @@ window.calcHealthMaster = function() {
 
     // 백분위 계산
     let standardArr = growthStandard[gender] || growthStandard['boy'];
-    let std = standardArr.slice().reverse().find(x => month >= x.m);
+    let std = standardArr.slice().reverse().find(x => devMonth >= x.m);
     if(!std) std = standardArr[0]; 
 
     const sdHeight = std.h * 0.04; 
@@ -2925,7 +2958,9 @@ document.getElementById('growth-insight').innerHTML = insightMsg;
 
     // ✨ [대기업 앱 UX] 결과창 띄우기 전 '계산 중' 딜레이 추가
     const gRes = document.getElementById('growth-result');
-    if(gRes) {
+    if (gRes && quiet === true) {
+        gRes.style.display = 'block';   // 교정 나이를 켜고 끌 때 — 다시 계산만 하고 화면은 그대로 둔다
+    } else if(gRes) {
         gRes.style.display = 'none'; // 먼저 닫아놓고
         
         // 돋보기 아이콘과 함께 로딩 멘트 노출
@@ -6161,6 +6196,7 @@ window.updateTrackerDashboard = function() {
     const savedDate = localStorage.getItem('tosil_startDate');
     let babyDays = 100; // 기본값
     if (savedDate) babyDays = Math.floor((nowTime - window.parseLocalDate(savedDate).getTime()) / (1000 * 60 * 60 * 24));
+    if (savedDate && window.BabyAge && window.BabyAge.on()) babyDays -= window.BabyAge.early();   // 이른둥이는 교정 나이로 (적게 먹는 때가 더 길다)
     
     const minFormula = babyDays <= 30 ? 10 : (babyDays <= 100 ? 20 : 40);
     const minBreast = babyDays <= 30 ? 2 : (babyDays <= 100 ? 3 : 5);
@@ -7148,19 +7184,31 @@ window.startSettingsRealtimeSync = function() {
     }));
 };
 
-// 내 폰에서 아기 정보를 바꿨을 때 서버로 발사하는 함수
-window.syncBabySettingsToFirebase = function() {
+// 내 폰에서 아기 정보를 바꿨을 때 서버로 보내는 함수
+//   targetId: 아기 꼬리표 (없으면 지금 보는 아기) · skipFamily: 가족방 문서는 건드리지 않는다 (온보딩이 따로 적는다)
+/* ⚠️ 정의만 있고 부르는 곳이 없었다. 정보 수정에서 이름 · 생일을 고쳐도 이 폰에만 남고 짝꿍 폰은 옛날 그대로였다.
+      짝꿍 폰은 startSettingsRealtimeSync 로 이 칸(settings_/info)을 듣고 있다. */
+window.syncBabySettingsToFirebase = function(targetId, skipFamily) {
     const syncCode = localStorage.getItem("family_sync_code");
-    if (!syncCode || typeof db === 'undefined' || typeof setDoc === 'undefined') return;
-    
+    if (!syncCode || syncCode.includes('unlinked') || !window.db || typeof window.setDoc !== 'function' || typeof window.doc !== 'function') return Promise.resolve();
+    const sfx = (typeof targetId === 'string') ? targetId : (window.currentBabySuffix || '');
+    const raw = (k) => originalGetItem.call(localStorage, k + sfx);
     const settings = {
-        babyName: localStorage.getItem('tosil_babyName') || '우리아기',
-        startDate: localStorage.getItem('tosil_startDate') || '',
-        feedingStage: localStorage.getItem('tosil_feedingStage') || '모유/분유'
+        babyName: raw('tosil_babyName') || '우리아기',
+        startDate: raw('tosil_startDate') || '',
+        feedingStage: raw('tosil_feedingStage') || '모유/분유'
     };
-    
     // 🚨 [다둥이 패치] 아기 설정 경로 분리
-    setDoc(doc(db, "settings_" + syncCode + window.currentBabySuffix, "info"), settings).catch(e=>console.warn(e));
+    const jobs = [window.setDoc(window.doc(window.db, "settings_" + syncCode + sfx, "info"), settings)];
+    // 첫째는 가족방 문서에도 — 새 폰에서 가족방을 되찾을 때 familyhome.js 가 여기서 이름 · 생일을 받는다
+    if (!sfx && !skipFamily && typeof window.updateDoc === 'function') {
+        jobs.push(window.updateDoc(window.doc(window.db, "families", syncCode), { babyName: settings.babyName, babyBirth: settings.startDate }));
+    }
+    // 연결이 없으면 서버 답을 기다리지 않는다 (파이어베이스가 이 폰에 줄 세워 뒀다가 보낸다)
+    return Promise.race([
+        Promise.all(jobs.map(p => Promise.resolve(p).catch(e => console.warn('[아기 정보] 올리기 실패', e && e.code)))),
+        new Promise(r => setTimeout(r, 1500))
+    ]);
 };
 
 // ==========================================
@@ -7926,6 +7974,9 @@ window.finishOnboarding = function(feedingStage) {
             }
         } catch (e) {}
 
+        // 아기 설정 칸도 같이 — 짝꿍 폰은 이 칸(settings_/info)을 듣고 이름 · 생일을 맞춘다
+        try { if (typeof window.syncBabySettingsToFirebase === 'function') await window.syncBabySettingsToFirebase(window.currentBabySuffix || '', true); } catch (e) {}
+
         // 🚨 [필수 패치] 서버(families 문서)에 아기 이름/생일 실시간 반영!
         const code = localStorage.getItem('family_sync_code');
         if (code && window.db && window.updateDoc) {
@@ -8189,6 +8240,9 @@ window.renderBabyInfo = function() {
     const diffTime = today.getTime() - birthDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const monthAge = Math.floor(diffDays / 30.436875);
+    // 이른둥이 교정 나이 (preterm.js) — 원더윅스 · 큐레이터 한 줄은 예정일부터 센다. D+ 는 태어난 날 그대로
+    const devDays = (window.BabyAge && window.BabyAge.on()) ? diffDays - window.BabyAge.early() : diffDays;
+    const devMonthAge = Math.max(0, Math.floor(devDays / 30.436875));
 
     // 3. 이름 & D-Day 뿌리기 (뱃지 크기 밸런스 조정)
     if(nameEl) nameEl.innerText = `${savedName}의 공간`; 
@@ -8202,7 +8256,7 @@ window.renderBabyInfo = function() {
     // ✨ 뱃지 상태 동적 계산 (도약기 vs 평온기)
     let badgeText = "🚀 도약기"; // 기본값
     if (typeof wwList !== 'undefined') {
-        let currentWeek = Math.floor(diffDays / 7); 
+        let currentWeek = Math.floor(devDays / 7); 
         let isWonderWeek = wwList.some(x => currentWeek >= (x.w - 1) && currentWeek <= (x.w + 1));
         badgeText = isWonderWeek ? "🚀 원더윅스 도약기" : "☀️ 원더윅스 평온기";
     }
@@ -8217,7 +8271,7 @@ window.renderBabyInfo = function() {
     if(typeof applyTimeBasedGreeting === 'function') applyTimeBasedGreeting(savedName);
 
     // 6. 하단 위젯 & 센서 가동
-    if(typeof updateMainAISensors === 'function') updateMainAISensors(monthAge); 
+    if(typeof updateMainAISensors === 'function') updateMainAISensors(devMonthAge, monthAge); 
 
     // 7. 맞춤 알림 배너 갱신 (smart-banner-container 가 담당)
     if(typeof updateSmartBanner === 'function') updateSmartBanner();
@@ -9539,6 +9593,7 @@ window.renderDadQuests = function() {
     const savedDateForDad = localStorage.getItem('tosil_startDate');
     let dadBabyDays = 100;
     if (savedDateForDad) dadBabyDays = Math.floor((now - window.parseLocalDate(savedDateForDad).getTime()) / (1000 * 60 * 60 * 24));
+    if (savedDateForDad && window.BabyAge && window.BabyAge.on()) dadBabyDays -= window.BabyAge.early();
     const minFormulaDad = dadBabyDays <= 30 ? 10 : (dadBabyDays <= 100 ? 20 : 40);
     const minBreastDad = dadBabyDays <= 30 ? 2 : (dadBabyDays <= 100 ? 3 : 5);
     
@@ -9676,6 +9731,7 @@ window.updateDadBriefing = function() {
                 const briefDate = localStorage.getItem('tosil_startDate');
                 let briefDays = 100;
                 if (briefDate) briefDays = Math.floor((now.getTime() - window.parseLocalDate(briefDate).getTime()) / (1000 * 60 * 60 * 24));
+                if (briefDate && window.BabyAge && window.BabyAge.on()) briefDays -= window.BabyAge.early();
                 const minF = briefDays <= 30 ? 10 : (briefDays <= 100 ? 20 : 40);
                 const minB = briefDays <= 30 ? 2 : (briefDays <= 100 ? 3 : 5);
 
@@ -14600,6 +14656,7 @@ window.deleteBabyProfile = function(targetId, babyName) {
             });
             /* 임신 · 준비 기록 (stage.js) 은 growth_ 칸의 'stage' 문서에 있다. 가족 소식 페이지도 닫는다 */
             refs.push(window.doc(window.db, 'growth_' + code + targetId, 'stage'));
+            refs.push(window.doc(window.db, 'growth_' + code + targetId, 'babyage'));   // 이른둥이 예정일 (preterm.js)
             try {
                 const nid = Storage.prototype.getItem.call(localStorage, 'tosil_news_id' + targetId);
                 if (nid && window.setDoc) window.setDoc(window.doc(window.db, 'news', nid), { family: code, off: true, updatedAt: Date.now() }).catch(function () {});
@@ -14629,23 +14686,36 @@ window.deleteBabyProfile = function(targetId, babyName) {
 
 // ✏️ [업데이트] 정보 수정 모달 열기 (일반식 추가 완료)
 window.editBabyProfile = function(targetId) {
-    const name = localStorage.getItem('tosil_babyName' + targetId) || '';
-    const date = localStorage.getItem('tosil_startDate' + targetId) || '';
-    const stage = localStorage.getItem('tosil_feedingStage' + targetId) || '모유/분유';
+    /* ⚠️ 프록시를 타서, 둘째를 보는 중에 첫째(꼬리표 '')를 고치면 둘째 칸을 읽고 썼다 (둘째 이름 · 생일이 바뀌었다).
+          원본 칸으로 직접 읽고 쓴다 (openBabyManagementModal 과 같은 방법). */
+    const name = originalGetItem.call(localStorage, 'tosil_babyName' + targetId) || '';
+    const date = originalGetItem.call(localStorage, 'tosil_startDate' + targetId) || '';
+    const stage = originalGetItem.call(localStorage, 'tosil_feedingStage' + targetId) || '모유/분유';
+    // 이른둥이 교정 나이 (preterm.js)
+    const ptRow = (typeof window.pretermStatus === 'function' && typeof window.openPretermSheet === 'function')
+        ? `<div onclick="window.openPretermSheet('${targetId}', document.getElementById('edit-date').value)" style="display:flex; align-items:center; gap:10px; padding:12px; margin-bottom:20px; border:1px solid var(--border); border-radius:10px; cursor:pointer; box-sizing:border-box;">
+                    <div style="flex:1; min-width:0; text-align:left;">
+                        <div style="font-size:13.5px; font-weight:800; color:var(--text-m);">일찍 태어났나요?</div>
+                        <div id="edit-preterm-sub" data-sfx="${targetId}" style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:3px; line-height:1.5; word-break:keep-all;">${window.escapeHTML(window.pretermStatus(targetId, date))}</div>
+                    </div>
+                    <div style="color:#A3958A; font-size:14px; flex-shrink:0;">›</div>
+                </div>`
+        : '';
 
     const editHtml = `
         <div id="edit-baby-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px;">
             <div style="background:var(--bg-card); width:100%; max-width:340px; border-radius:24px; padding:24px;">
                 <h3 style="margin:0 0 20px 0;">정보 수정</h3>
-                <input type="text" id="edit-name" value="${name}" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid var(--border); border-radius:10px;" placeholder="이름">
+                <input type="text" id="edit-name" value="${window.escapeHTML(name)}" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid var(--border); border-radius:10px;" placeholder="이름">
                 <input type="date" id="edit-date" value="${date}" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid var(--border); border-radius:10px;">
-                <select id="edit-stage" style="width:100%; padding:12px; margin-bottom:20px; border:1px solid var(--border); border-radius:10px;">
+                <select id="edit-stage" style="width:100%; padding:12px; margin-bottom:${ptRow ? '10px' : '20px'}; border:1px solid var(--border); border-radius:10px;">
                     <option value="모유/분유" ${stage === '모유/분유' ? 'selected' : ''}>모유/분유</option>
                     <option value="초기 이유식" ${stage === '초기 이유식' ? 'selected' : ''}>초기 이유식</option>
                     <option value="중후기 이유식" ${stage === '중후기 이유식' ? 'selected' : ''}>중/후기 이유식</option>
                     <!-- 👇 여기에 유아식/일반식 추가됨 -->
                     <option value="유아식/일반식" ${stage === '유아식/일반식' ? 'selected' : ''}>유아식/일반식 </option>
                 </select>
+                ${ptRow}
                 <button onclick="window.saveBabyProfile('${targetId}')" style="width:100%; padding:14px; background:#7F77DD; color:white; border:none; border-radius:12px; font-weight:900;">저장하기</button>
             </div>
         </div>
@@ -14654,22 +14724,29 @@ window.editBabyProfile = function(targetId) {
 };
 
 // 💾 [신규] 정보 저장 로직
-window.saveBabyProfile = function(targetId) {
-    const newName = document.getElementById('edit-name').value;
+window.saveBabyProfile = async function(targetId) {
+    const newName = document.getElementById('edit-name').value.trim();
     const newDate = document.getElementById('edit-date').value;
     const newStage = document.getElementById('edit-stage').value;
+    if (!newName || !newDate) return window.showToast("이름과 생일을 확인해 주세요");
 
-    localStorage.setItem('tosil_babyName' + targetId, newName);
-    localStorage.setItem('tosil_startDate' + targetId, newDate);
-    localStorage.setItem('tosil_feedingStage' + targetId, newStage);
+    originalSetItem.call(localStorage, 'tosil_babyName' + targetId, newName);
+    originalSetItem.call(localStorage, 'tosil_startDate' + targetId, newDate);
+    originalSetItem.call(localStorage, 'tosil_feedingStage' + targetId, newStage);
+    originalSetItem.call(localStorage, 'tosil_baby' + targetId, JSON.stringify({ name: newName, birth: newDate, stage: newStage }));
     
     // 프로필 이름 리스트도 갱신
     let profiles = window.getBabyProfiles();
-    profiles = profiles.map(p => p.id === targetId ? { ...p, name: newName } : p);
+    profiles = profiles.map(p => (p.id || '') === targetId ? { ...p, name: newName } : p);
     originalSetItem.call(localStorage, 'tosil_baby_profiles', JSON.stringify(profiles));
 
+    // 짝꿍 폰에도 (새로고침 전에 보내 둔다)
+    const modal = document.getElementById('edit-baby-modal');
+    if (modal) modal.style.pointerEvents = 'none';
+    try { if (typeof window.syncBabySettingsToFirebase === 'function') await window.syncBabySettingsToFirebase(targetId); } catch (e) {}
+
     window.showToast("✅ 고쳤어요");
-    document.getElementById('edit-baby-modal').remove();
+    if (modal) modal.remove();
     location.reload();
 };
 
@@ -15301,6 +15378,7 @@ window.downloadPediatricianReport = function() {
         const diffDays = Math.floor((today - window.parseLocalDate(savedDate)) / (1000 * 60 * 60 * 24));
         const months = Math.floor(diffDays / 30);
         ageText = `생후 ${diffDays}일 (${months}개월)`;
+        if (window.BabyAge && window.BabyAge.on()) { const g = window.BabyAge.ga(); ageText += ` · ${window.BabyAge.label()} (${g.w}주${g.d ? ' ' + g.d + '일' : ''}에 태어남)`; }
     }
 
     // 최근 24시간 Vital Signs 크롤링
@@ -15571,10 +15649,12 @@ window.downloadPediatricianPDF = function() {
     const growths = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
     const trackers = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
 
-    let ageText = '-';
+    let ageText = '-', ageSub = '';
     if (birth) {
         const d = Math.floor((Date.now() - new Date(birth)) / 86400000);
         ageText = `생후 ${Math.floor(d / 30.44)}개월 (${d}일)`;
+        // 이른둥이 — 의사 선생님은 교정 나이와 태어난 주수를 같이 본다 (월령 칸 아래 작은 줄)
+        if (window.BabyAge && window.BabyAge.on()) { const g = window.BabyAge.ga(); ageSub = `${window.BabyAge.label()} · ${g.w}주${g.d ? ' ' + g.d + '일' : ''} 출생`; }
     }
 
     /* 최근 7일 생활 패턴
@@ -15648,10 +15728,11 @@ window.downloadPediatricianPDF = function() {
         </div>
 
         <div style="display:flex;gap:10px;margin-bottom:26px;">
-            ${[['이름',babyName],['월령',ageText],['체중',weight!=='-'?weight+'kg':'-'],['키',height!=='-'?height+'cm':'-']].map(([k,v])=>`
+            ${[['이름',babyName],['월령',ageText,ageSub],['체중',weight!=='-'?weight+'kg':'-'],['키',height!=='-'?height+'cm':'-']].map(([k,v,sub])=>`
                 <div style="flex:1;background:#FBF8F3;border:1px solid #EDE6DE;border-radius:12px;padding:15px;">
                     <div style="font-size:11px;font-weight:800;color:#A3958A;margin-bottom:7px;">${k}</div>
-                    <div style="font-size:16px;font-weight:900;">${v}</div>
+                    <div style="font-size:16px;font-weight:900;">${v}</div>${sub ? `
+                    <div style="font-size:11.5px;font-weight:800;color:#7F77DD;margin-top:5px;">${sub}</div>` : ''}
                 </div>`).join('')}
         </div>
 

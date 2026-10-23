@@ -171,16 +171,23 @@
 
     function paintSheetBanner() {
         if (!freeOpen()) return;
-        /* 결제 안내 시트가 열릴 때마다 맨 위에 한 번 */
-        var sheets = ["premium-sheet", "plus-sheet", "paywall-sheet", "premium-modal"];
+        /* 결제 안내 창(showPaywall)이 열릴 때마다 맨 위에 한 번
+           ⚠️ 'premium-modal' 은 이름과 달리 나들이 '행사' 를 눌렀을 때 뜨는 창이다. 거기에 이 띠를 넣고 있었다.
+              게다가 넣은 띠에 표시(class)가 빠져서 '이미 넣었나' 를 못 알아봤고, 넣는 것 자체가 화면 변화라 0.3초마다 또 넣었다.
+              → 행사를 누르면 '출시 기념으로 모두 열려 있어요' 가 끝없이 쌓여 행사 내용이 안 보였다 (앱을 켜 둔 내내 늘었다).
+              진짜 결제 창(premium-paywall-modal)에만 넣고, 넣는 띠 자체에 표시를 단다. */
+        var sheets = ["premium-paywall-modal", "premium-sheet", "plus-sheet", "paywall-sheet"];
         for (var i = 0; i < sheets.length; i++) {
             var el = document.getElementById(sheets[i]);
             if (!el || el.querySelector(".plusfree-banner")) continue;
             var host = el.querySelector("div") || el;
             var box = document.createElement("div");
-            box.className = "plusfree-banner";
             box.innerHTML = banner();
-            if (box.firstChild) host.insertBefore(box.firstChild, host.firstChild);
+            var b = box.firstChild;
+            if (!b) continue;
+            b.classList.add("plusfree-banner");
+            if (sheets[i] === "premium-paywall-modal") b.style.marginTop = "22px";   // 오른쪽 위 닫기(×) 버튼과 겹치지 않게
+            host.insertBefore(b, host.firstChild);
         }
     }
 

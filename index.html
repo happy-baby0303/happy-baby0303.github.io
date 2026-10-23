@@ -1816,6 +1816,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                             <div class="box-sub" style="display:inline-block; padding:8px 16px; border-radius:12px; font-size:13px; font-weight:800; margin-top:16px;">
                                 생후 <span id="res-month">0</span>개월 (<span id="res-week">0</span>주 차)
                             </div>
+                            <!-- 이른둥이 교정 나이 (preterm.js) — calcHealthMaster 가 채운다 -->
+                            <div id="res-corr" style="display:none; margin-top:8px; font-size:12.5px; font-weight:700; color:var(--text-s); line-height:1.6; word-break:keep-all;"></div>
                         </div>
             
                         <!-- 등수 표시 -->
@@ -3517,8 +3519,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- ⏸ 앱이 뒤에 있을 때 타이머가 일을 안 하게. setInterval 을 감싸므로 제일 먼저 -->
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
-<script src="script.js?v=20261022-2"></script>
+<script src="./shared/babyage.js?v=1"></script>
+<script src="script.js?v=20261023-1"></script>
     <script src="./stage.js?v=2"></script>
+    <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js?v=2"></script>
     <script src="./familynews.js"></script>
@@ -3559,7 +3563,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./photobook.js?v=2"></script>
 <script src="./premium.js"></script>
     <!-- 🎁 출시 기념 무료 개방 (구글 결제 붙이기 전까지) -->
-    <script src="./plusfree.js"></script>
+    <script src="./plusfree.js?v=2"></script>
 <script src="./anniversaries.js"></script>
 <script src="./home.js"></script>
  <script src="./homefix.js?v=3"></script>
@@ -3588,9 +3592,9 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./feverguard.js"></script> 
 <script src="./mobile.js"></script>
 <script src="./fit.js"></script>
-<script src="./emergency119.js"></script>
+<script src="./emergency119.js?v=2"></script>
 <script src="./libraryplus.js"></script>
-<script src="./infopick.js"></script>
+<script src="./infopick.js?v=2"></script>
 <script src="./sosplus.js"></script>
 <!-- 🍎 아이폰은 홈 화면에 담아둔 앱에만 알림을 준다.
      그 안내를 띄운다. 안드로이드·PC 에서는 아무 일도 안 한다. -->

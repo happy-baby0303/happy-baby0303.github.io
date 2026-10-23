@@ -135,7 +135,8 @@
     ];
 
     function monthsOld() {
-        var s = localStorage.getItem("tosil_startDate");
+        /* 이른둥이는 교정 나이로 — 예정일부터 센다 (shared/babyage.js) */
+        var s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
@@ -233,7 +234,7 @@
             /* ── 지금 시기 + 도감 진행률 ── */
             '<div style="font-size:12.5px; font-weight:900; color:' + DARK + '; margin-bottom:8px;">' +
                 '🌱 ' + esc(nm("는")) + ' 지금 <span style="color:' + PURPLE + ';">' + s.name + '</span> 시기예요' +
-                (m !== null ? ' <span style="font-weight:700; color:' + GRAY + ';">· ' + m + '개월</span>' : '') + '</div>' +
+                (m !== null ? ' <span style="font-weight:700; color:' + GRAY + ';">· ' + (window.BabyAge ? window.BabyAge.pre() : '') + m + '개월</span>' : '') + '</div>' +
 
             '<div style="font-size:12px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                 'word-break:keep-all; margin-bottom:8px;">' +

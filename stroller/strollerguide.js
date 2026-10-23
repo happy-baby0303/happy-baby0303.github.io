@@ -55,7 +55,8 @@
     }
 
     function monthsOld() {
-        var s = localStorage.getItem("tosil_startDate");
+        /* 이른둥이는 교정 나이로 — 예정일부터 센다 (shared/babyage.js) */
+        var s = window.BabyAge ? window.BabyAge.key() : localStorage.getItem("tosil_startDate");
         if (!s) return null;
         var p = String(s).split("-").map(Number);
         if (p.length !== 3) return null;
@@ -178,17 +179,17 @@
 
         var txt;
         if (m < 4) {
-            txt = "<b>" + esc(nm("는")) + " 지금 " + m + "개월이에요.</b> 목을 가누기 전에는 " +
+            txt = "<b>" + esc(nm("는")) + " 지금 " + (window.BabyAge ? window.BabyAge.pre() : "") + m + "개월이에요.</b> 목을 가누기 전에는 " +
                   "<b>등받이가 거의 평평하게 눕는 것</b>이어야 해요. 각도가 서면 고개가 앞으로 꺾여 숨길이 눌려요. " +
                   "휴대용은 이 시기에 맞지 않는 게 많아요.";
         } else if (m < 12) {
-            txt = "<b>" + esc(nm("는")) + " 지금 " + m + "개월이에요.</b> 앉기 시작하면 고를 폭이 넓어져요. " +
+            txt = "<b>" + esc(nm("는")) + " 지금 " + (window.BabyAge ? window.BabyAge.pre() : "") + m + "개월이에요.</b> 앉기 시작하면 고를 폭이 넓어져요. " +
                   "다만 <b>완전히 눕는 각도</b>는 낮잠 잘 때 여전히 쓰이니 아예 없는 건 피하시는 게 좋아요.";
         } else if (m < 24) {
-            txt = "<b>" + esc(nm("는")) + " 지금 " + m + "개월이에요.</b> 이 시기부터 <b>무게가 제일 중요해져요.</b> " +
+            txt = "<b>" + esc(nm("는")) + " 지금 " + (window.BabyAge ? window.BabyAge.pre() : "") + m + "개월이에요.</b> 이 시기부터 <b>무게가 제일 중요해져요.</b> " +
                   "걷다 안기다를 반복해서, 접어서 드는 일이 하루에도 여러 번 생기거든요.";
         } else {
-            txt = "<b>" + esc(nm("는")) + " 지금 " + m + "개월이에요.</b> 유모차를 오래 타지는 않지만 " +
+            txt = "<b>" + esc(nm("는")) + " 지금 " + (window.BabyAge ? window.BabyAge.pre() : "") + m + "개월이에요.</b> 유모차를 오래 타지는 않지만 " +
                   "<b>외출 끝자락에 잠들 때</b> 필요해요. 가벼운 휴대용 하나가 알맞은 시기예요.";
         }
 

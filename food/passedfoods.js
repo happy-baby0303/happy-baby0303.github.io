@@ -167,8 +167,9 @@
     }
 
     // 이유식은 대개 6개월쯤 시작 — 그 무렵을 기본으로 (아직 안 왔으면 일주일 전)
+    // 이른둥이는 교정 나이로 6개월쯤이라 예정일부터 센다 (shared/babyage.js)
     function startGuess() {
-        var b = birthKey();
+        var b = (window.BabyAge && window.BabyAge.on()) ? window.BabyAge.key() : birthKey();
         if (b) {
             var p = b.split("-").map(Number);
             var d = new Date(p[0], p[1] - 1, p[2]);
