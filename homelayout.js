@@ -63,6 +63,8 @@
         { find: "home-todo",                note: "오늘 챙길 것" },
         { find: "em-letter",                note: "오늘의 편지 한 줄" },
         { find: "now-status-card",          note: "지금 상태 + 기록 버튼" },
+        /* 밤사이는 기록 버튼 '아래' 에 둔다. 위에 두면 아침마다 기록 버튼이 화면 밖으로 밀려서 늘 누르던 자리가 바뀐다 */
+        { find: "home-night-card",          note: "밤사이 — 어젯밤 잠 · 깬 때 · 맘마 · 기저귀 (아침 5시 ~ 낮 12시 · nightcard.js)" },
         { find: "tracker-stats-container",  note: "오늘 하루 + 오늘 통계" },
         { find: "info-month-home",          note: "이번 달 밤중 수유 (통계에 붙어서)" },
         { find: "em-count",                 note: "오늘의 우리" },
