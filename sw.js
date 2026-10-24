@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v88';
+const CACHE = 'baenaet-v89';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -208,6 +208,7 @@ const ASSETS = [
     './foodcalsync.js',
     './recordguard.js',
     './quickrec.js',        /* 기록 한 번에 — 지난번 그대로 골라 두기 */
+    './sleepguard.js',      /* 잊은 잠 타이머 */
     './familyhome.js',
     './plusfree.js',
     './toolbrief.js',

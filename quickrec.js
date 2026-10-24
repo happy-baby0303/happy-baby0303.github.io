@@ -287,6 +287,8 @@
             var raw = val('v-sleep-amount'), a = num(raw);
             if (a < 0) return ['깬 시간이 잠든 시간보다 앞서요', false];
             if (a > 24 * 60) return ['잠든 날짜를 한 번 봐 주세요', false];
+            // 낮잠 4시간 반 · 밤잠 14시간이 넘으면 (타이머를 끄는 걸 잊었을 때) — 기준은 sleepguard.js 와 같다
+            if (typeof window.sleepTimerTooLong === 'function' && window.sleepTimerTooLong(st.subType, a)) return ['깬 시간을 한 번 봐 주세요 · ' + st.subType + ' ' + dur(a), false];
             if (a === 0) return nowish(s) ? [icon + st.subType + ' · ' + since, true] : ['깬 시간을 골라 주세요', false];
             return [icon + st.subType + ' ' + dur(a) + ' 남기기', true];
         }
