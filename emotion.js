@@ -601,7 +601,7 @@
             }
             // 어젯밤 9시 ~ 오늘 새벽 5시에 남긴 기록 (잠 말고) — 깬 횟수를 셀 재료
             else if (ts >= eveStart && ts < nightEnd) {
-                nightRecs.push({ t: ts, feed: r.type === "feed" && feedKind(r) !== "food" });
+                nightRecs.push({ t: ts, feed: r.type === "feed" && feedKind(r) !== "food", by: r.byWord || "" });
             }
 
             if (ts < s0 || ts >= e0) return;
@@ -642,10 +642,14 @@
             if (g[1] >= eveStart && g[1] < nightEnd && next && next[0] > g[1] && next[0] - g[1] < 3 * H) events.push({ t: g[1], feed: false });
         });
         events.sort(function (a, b) { return a.t - b.t; });
-        var last = -Infinity;
+        var last = -Infinity, meW = myTitle(), ptW = meW === '아빠' ? '엄마' : '아빠';
+        st.dawnByMe = 0; st.dawnByPartner = 0;
         events.forEach(function (x) {
             if (x.t - last > 45 * 60000) { if (x.t >= s0) st.wakes++; else st.eveWakes++; }
             if (x.feed && x.t >= s0) st.nightFeeds++;
+            // 새벽을 누가 챙겼나 — 기록에 붙은 이름 (nightcard.js). 이름 없는 옛 기록은 세지 않는다
+            if (x.t >= s0 && x.by === meW) st.dawnByMe++;
+            else if (x.t >= s0 && x.by === ptW) st.dawnByPartner++;
             last = x.t;
         });
         segs.forEach(function (g) {
@@ -722,13 +726,19 @@
         if (tag === "night") return st.wakes + (st.eveWakes || 0) >= 1;
         if (tag === "nightfeed") return st.nightFeeds >= 1;
         if (tag === "bottle") return st.milkCount > 0;
+        if (tag === "both") return st.dawnByMe > 0 && st.dawnByPartner > 0;
         return false;
     }
-    function pickFor(pool, key, st) {
+    function pickRaw(pool, key, st) {
         if (!pool || !pool.length) return "";
         var ok = pool.filter(function (x) { return tagFits(tagOf(x), st); });
         if (!ok.length) ok = pool.filter(function (x) { return !tagOf(x); });
-        return untag(seedPick(ok, key));
+        return seedPick(ok, key) || "";
+    }
+    function pickFor(pool, key, st) { return untag(pickRaw(pool, key, st)); }
+    /* 새벽을 짝꿍만 챙긴 날 — 그 문장의 '나를 부르는 말' 과 '짝꿍' 을 바꿔 끼운다 */
+    function swapRoles(line) {
+        return String(line || "").replace(/\{me\}/g, "\u0000").replace(/\{partner\}/g, "{me}").replace(/\u0000/g, "{partner}");
     }
 
     // 이유식을 처음 먹은 날 (기록을 쓴 지 일주일은 넘어야 '처음' 이라고 말한다)
@@ -764,14 +774,26 @@
         // 문단을 매일 똑같이 쌓으면 한 달이면 눈치챈다. 있는 날만 넣고, 가끔은 통째로 뺀다.
         var paras = [];
 
+        /* 새벽을 누가 챙겼나. ⚠️ 아빠가 새벽 맘마를 다 했는데 엄마 폰 편지에 '제일 먼저 일어나는 건 늘 엄마였다' 가 나갔다.
+              짝꿍 기록뿐이면 새벽 문장을 짝꿍 이야기로, 둘 다 있으면 '둘이 같이' 문장으로 쓴다. 이름이 없는 옛 기록은 그대로. */
+        var theirsOnly = st.dawnByPartner > 0 && !st.dawnByMe, both = st.dawnByPartner > 0 && st.dawnByMe > 0;
+
         var sl = sleepLevel(st, b), sleepLine = "";
         if (sl === "good") sleepLine = pickFor(rd.sleepGood, key + "b", st);
-        else if (sl === "bad") sleepLine = pickFor(rd.sleepBad, key + "c", st);
+        else if (sl === "bad") {
+            var rawBad = pickRaw(rd.sleepBad, key + "c", st);
+            sleepLine = untag(theirsOnly && tagOf(rawBad) === "night" ? swapRoles(rawBad) : rawBad);
+        }
         paras.push([seedPick(rd.intro, key + "a"), sleepLine]);
 
         // 새벽에 깬 날 — 부모가 제일 힘든 시간을 아기가 알아봐 주는 자리
         if (st.wakes >= 1 && rd.dawn && rd.dawn.length) {
-            paras.push([pickFor(rd.dawn, key + "n", st)]);
+            var dawnLine = both ? pickFor(rd.dawn.filter(function (x) { return tagOf(x) === "both"; }), key + "n", st) : "";
+            if (!dawnLine) {
+                dawnLine = pickFor(rd.dawn, key + "n", st);
+                if (theirsOnly) dawnLine = swapRoles(dawnLine);
+            }
+            paras.push([dawnLine]);
         }
 
         var body = [];
@@ -1013,6 +1035,8 @@
 
     /* ---------- 2. 오늘 당신 ---------- */
 
+    function dawnWakesToday() { try { return todayStats().wakes || 0; } catch (e) { return 0; } }
+
     function buildParentCount(ledger) {
         var today = ledger.days[todayKey()];
         if (!today || today.care < 2) return '';
@@ -1029,10 +1053,13 @@
 
         // 🌟 [추가됨] 방문 횟수에 따른 훈장 수여식
         var gradeMsg = '';
-        /* ⚠️ '1분 대기조 명예 훈장', '새벽의 수호자 임명장 쾅쾅!' 은 AI 가 쓴 티가 났다 */
+        /* ⚠️ '1분 대기조 명예 훈장', '새벽의 수호자 임명장 쾅쾅!' 은 꾸민 말이라 어색했다 */
         if (today.care >= 20) gradeMsg = "정말 바쁜 하루였어요. 수고 많았어요.";
-        else if (today.dawn >= 3) gradeMsg = "새벽에 많이 깬 날이에요. 낮에 잠깐이라도 눈 붙여요.";
-        else if (today.care <= 5) gradeMsg = "오늘은 조금 여유로웠네요.";
+        /* ⚠️ 새벽 기록 수(맘마 · 기저귀 · 다시 재움)로 셌더니 한 번 깨서 세 가지를 한 날도 '많이 깬 날' 이 됐다.
+              편지와 같은 셈으로 '깬 횟수' 를 본다 (45분 안에 붙은 기록은 한 번 깬 것) */
+        else if (dawnWakesToday() >= 3) gradeMsg = "새벽에 많이 깬 날이에요. 낮에 잠깐이라도 눈 붙여요.";
+        /* ⚠️ 아침 9시에도 '오늘은 조금 여유로웠네요' 가 떴다. 하루가 다 가지 않았다. 저녁에만 말한다 */
+        else if (today.care <= 5 && new Date().getHours() >= 18) gradeMsg = "오늘은 조금 여유로웠네요.";
 
         var sub = '';
         if (today.dawn > 0) sub = '그중 ' + today.dawn + '번은 모두가 잠든 새벽이었고요.';

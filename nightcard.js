@@ -16,7 +16,9 @@
        기저귀     1번
                 02:15 소변 (아빠)
        [아빠에게 고맙다고 하기]
-       남긴 기록으로만 셌어요                 일주일 잠 보기 ›
+       남긴 기록으로만 셌어요
+     ⚠️ 바로 아래 '오늘 하루' 카드가 '일주일 잠 보기 ›' 와 '어젯밤 몇 시에 잠들어 몇 시에 깼어요 · 가장 길게 …' 를 또 말했다.
+        카드가 떠 있는 동안에는 '오늘 하루' 의 그 한 줄(#today-sleep-caption)을 숨기고, 이 카드에는 잠 보기 링크를 달지 않는다.
 
    밤은 어디서 어디까지
      잠 기록이 있으면 어젯밤 잠 — 한가운데가 어젯밤 8시 ~ 오늘 아침 7시인 잠들 (편지 · emotion.js 의 '어젯밤' 과 같은 셈).
@@ -274,8 +276,6 @@
                 (done ? 'background:var(--bg-sub);color:' + SUB + ';' : 'background:rgba(127,119,221,0.10);color:#5B53B8;') + '">' +
                 (done ? esc(help.word) + '에게 고맙다고 했어요' : esc(help.word) + '에게 고맙다고 하기') + '</div>';   // ⚠️ 💛 는 emoji.js 가 장식으로 지운다 (알림 제목에만 쓴다)
         }
-        var map = n.bySleep && typeof window.openSleepMap === 'function'      // 잠을 안 적는 집엔 잠 지도가 비어 있다
-            ? '<span onclick="window.openSleepMap()" style="font-size:12px;font-weight:700;color:#7F77DD;cursor:pointer;">일주일 잠 보기 ›</span>' : '';
         return '<div id="' + CARD + '" class="hide-on-senior" style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 18px 14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">' +
                 '<span style="font-size:16px;font-weight:900;color:' + INK + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">밤사이 ' + esc(babyCall('')) + '</span>' +
@@ -285,7 +285,7 @@
                 '</span></div>' +
             rows + thanks +
             '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">' +
-                '<span style="font-size:11.5px;font-weight:600;color:var(--text-sub);">남긴 기록으로만 셌어요</span>' + map +
+                '<span style="font-size:11.5px;font-weight:600;color:var(--text-sub);">남긴 기록으로만 셌어요</span>' +
             '</div></div>';
     }
 
@@ -298,6 +298,17 @@
         return el && el.parentNode === host ? el : null;
     }
     var lastHTML = '';
+    /* 카드가 떠 있으면 '오늘 하루' 의 잠 한 줄을 숨긴다 (같은 말을 두 번 하지 않게) */
+    function mark(on) {
+        var root = document.documentElement;
+        if (!document.getElementById('nc-style')) {
+            var st = document.createElement('style');
+            st.id = 'nc-style';
+            st.textContent = 'html.nc-on #today-sleep-caption{display:none !important;}';
+            (document.head || root).appendChild(st);
+        }
+        root.classList.toggle('nc-on', !!on);
+    }
     function render() {
         var host = document.getElementById('tab-home');
         var old = document.getElementById(CARD);
@@ -307,6 +318,7 @@
             n = nightOf(now);
             if (!n.any) n = null;
         }
+        mark(!!n);
         if (!n) { if (old) old.remove(); lastHTML = ''; return; }
         var html = cardHTML(n, now);
         if (old && html === lastHTML && old.parentNode === host) return;   // 그대로면 손대지 않는다 (화면이 튀지 않게)
@@ -329,6 +341,7 @@
         var c = document.getElementById(CARD);
         if (c) c.remove();
         lastHTML = '';
+        mark(false);
     };
 
     window.__nightThanks = function () {

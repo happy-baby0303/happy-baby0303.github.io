@@ -614,7 +614,7 @@
         if (!n) return "";
 
         var line, color;
-        if (!n.prev)              { line = "다음 달과 견줘볼 수 있게 쌓이는 중이에요"; color = "var(--text-sub)"; }
+        if (!n.prev)              { line = (n.month % 12 + 1) + "월부터 이번 달과 견줘 드려요"; color = "var(--text-sub)"; }
         else if (n.now < n.prev)  { line = "지난달보다 " + (n.prev - n.now) + "번 줄었어요"; color = GREEN; }
         else if (n.now > n.prev)  { line = "지난달보다 " + (n.now - n.prev) + "번 늘었어요"; color = GOLD; }
         else                      { line = "지난달과 같아요"; color = "var(--text-sub)"; }
@@ -636,7 +636,7 @@
 
             '<div style="font-size:10.5px; font-weight:600; color:var(--text-sub); ' +
                 'margin-top:9px; padding-top:9px; border-top:1px solid var(--border); line-height:1.55;">' +
-                '밤 10시~새벽 6시에 <b>기록된</b> 수유만 셌어요. 안 적은 건 안 들어갑니다.</div>' +
+                '밤 10시~새벽 6시에 남긴 수유만 셌어요.</div>' +
         '</div>';
     }
 

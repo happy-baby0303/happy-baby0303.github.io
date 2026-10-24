@@ -197,7 +197,7 @@ function generateCardHTML(item, rank) {
         myCoupangLink = item.coupangLink;
     } else {
         const searchKeyword = `${item.brand} ${item.name}`; 
-        const partnerCode = "AF9932454"; // 대표님 파트너스 코드
+        const partnerCode = "AF9932454"; // 쿠팡 파트너스 코드
         myCoupangLink = `https://www.coupang.com/np/search?q=${encodeURIComponent(searchKeyword)}&lptag=${partnerCode}`;
     }
     
@@ -217,9 +217,10 @@ function generateCardHTML(item, rank) {
                 </a>
             </div>
             
+            ${/^(MAM|누비|누크|닥터브라운|란시노|스와비넥스|아벤트|치코|코모토모|토미티피|트위스트쉐이크|헤겐|비박스)/.test(String(item.brand || '')) ? `
             <div class="coupang-safety-guard" style="font-size: 11px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
                 ※ 해외 직구 상품은 교환·환불이 까다로울 수 있어요. 주문 전에 판매자를 확인하세요.
-            </div>
+            </div>` : ''}
         `;
     } else {
         // 4등 이하는 정보성 버튼만 노출 (네이버 검색)

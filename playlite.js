@@ -312,9 +312,8 @@
     }
 
     // 홈 '챙겨두기' — 해열제 자리에 성장 기록 (새 기능이 아니라 툴박스에 있는 걸 꺼내 둔다)
-    var TXT_STYLE = 'position:absolute; top:56%; left:0; width:100%; transform:translateY(-50%); ' +
-                    'display:flex; flex-direction:column; justify-content:center; align-items:center; ' +
-                    'text-align:center; margin:0;';
+    /* 값은 왼쪽 아래 — 옆 저금통 칸 · 위의 네 칸과 같은 정렬 (index.html 의 #db-growth-text 규칙과 같다) */
+    var TXT_STYLE = 'position:absolute; left:20px; right:20px; bottom:30px; text-align:left; margin:0;';
     function growthHTML() {
         var recs = [];
         try { recs = JSON.parse(lsGet('tosil_growth_records')) || []; } catch (e) {}
@@ -325,7 +324,7 @@
             if (!last || String(r.date || '') >= String(last.date || '')) last = r;
         }
         if (!last) {
-            return '<div style="font-size:13px; font-weight:800; color:#B3A498;">터치해서<br>키·몸무게를 적어요</div>';
+            return '<div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">재 본 키·몸무게를<br>적어 두세요</div>';
         }
         var w = Number(last.weight), h = Number(last.height);
         var big = w ? (+w.toFixed(1)) + 'kg' : (+h.toFixed(1)) + 'cm';

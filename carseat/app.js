@@ -191,16 +191,21 @@ function generateReportHTML(item) {
         ? item.linkUrl
         : coupangSearchUrl;
 
+    /* '해외 직구' 안내는 해외 브랜드에만 단다. ⚠️ 순성 · 다이치 같은 국내 브랜드 카드에도 매번 붙어서
+          열네 장에 같은 말이 열네 번 나왔다. */
+    const csAbroad = /^(조이|뉴나|맥시코시|브라이텍스|스토케|싸이벡스)/.test(String(item.brand || ''));
+    const csGuard = csAbroad ? `
+           <div class="coupang-safety-guard" style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 10px; line-height: 1.5; word-break: keep-all;">
+               ※ 해외 직구 카시트는 KC 인증 표시가 없을 수 있어요. 국내 정식 수입품인지 확인하세요.
+           </div>` : '';
+
     // 구매 버튼. '최저가' 는 입증할 수 없는 말이라 쓰지 않는다.
     let purchaseBtn = item.purchasePlatform === 'coupang' 
         ? `<div style="margin-top: 24px;">
                <a href="${buyUrl}" target="_blank" class="buy-btn coupang" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 0; background: #4A413C; color: #FFF; border: 1px solid #4A413C; box-shadow: 0 4px 14px rgba(0,0,0,0.1); font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
                    ${buyUrl === item.linkUrl ? '쿠팡에서 이 제품 보기' : '쿠팡에서 가격 비교하기'}${CS_CHEVRON}
                </a>
-           </div>
-           <div class="coupang-safety-guard" style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 10px; line-height: 1.5; word-break: keep-all;">
-               ※ 해외 직구 카시트는 KC 인증 표시가 없을 수 있어요. 국내 정식 수입품인지 확인하세요.
-           </div>`
+           </div>${csGuard}`
         : `<div style="margin-top: 24px;">
                <a href="${item.linkUrl}" target="_blank" class="buy-btn official" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 0; background: #FBF8F3; color: #4A413C; border: 1px solid #DCD3C8; font-size: 15px; padding: 18px 0; border-radius: 14px; font-weight: 900; text-decoration: none; transition: 0.2s;">
                    공식 스토어에서 보기${CS_CHEVRON}

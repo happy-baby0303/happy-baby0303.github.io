@@ -176,7 +176,7 @@
                     '<div>' +
                         '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">우리의 문답</div>' +
                         '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">' +
-                            (list.length ? esc(list.length + "개의 대화가 오갔어요") : "첫 대화를 기다리는 중") + '</div>' +
+                            (list.length ? esc("문답 " + list.length + "개를 주고받았어요") : "첫 문답을 기다리는 중") + '</div>' +
                     '</div>' +
                     '<div onclick="window.closeDiaryBox()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; padding:2px 8px; line-height:1;">×</div>' +
                 '</div>' +

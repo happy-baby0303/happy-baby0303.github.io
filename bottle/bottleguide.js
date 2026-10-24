@@ -211,14 +211,22 @@
        배냇함은 수유 기록이 있어서 답할 수 있다.
        ---------------------------------------------------------- */
 
-    function feedsPerDay() {
+    function feedRecs() {
         var recs = [];
         try { recs = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
-        var now = Date.now(), byDay = {};
-        recs.forEach(function (r) {
-            if (!r || r.type !== "feed" || !Number(r.timestamp)) return;
-            if (Number(r.timestamp) < now - 7 * 86400000) return;
-            var d = new Date(Number(r.timestamp));
+        return recs.filter(function (r) { return r && r.type === "feed" && Number(r.timestamp); });
+    }
+    function isFood(r) { return String(r.subType || "").indexOf("이유식") > -1; }
+
+    /* ⚠️ 이유식까지 '수유' 로 셌고, 반쯤 지난 오늘과 일주일 전 그날까지 평균에 넣어서 하루 횟수가 적게 나왔다.
+          젖병으로 먹는 것(분유 · 유축 · 모유)만, 다 지난 날(어제까지 7일)로 센다. */
+    function feedsPerDay() {
+        var d0 = new Date(); d0.setHours(0, 0, 0, 0);
+        var to = d0.getTime(), from = to - 7 * 86400000, byDay = {};
+        feedRecs().forEach(function (r) {
+            var t = Number(r.timestamp);
+            if (isFood(r) || t < from || t >= to) return;
+            var d = new Date(t);
             var k = d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
             byDay[k] = (byDay[k] || 0) + 1;
         });
@@ -238,10 +246,29 @@
         return 5;
     }
 
-    var howMode = "mixed";
+    /* ⚠️ 분유만 먹는 집에도 늘 '모유 + 젖병' 이 골라져 있었다. 지난 2주 기록으로 먼저 골라 둔다.
+          모유 직수가 대부분이면 '모유 위주', 분유가 대부분이면 '분유 위주', 그 밖엔 '모유 + 젖병'.
+          유축이 대부분이면 젖병은 많이 쓰지만 분유는 아니라서 '모유 + 젖병' 으로 둔다. 기록이 적으면 고르지 않는다. */
+    function guessHow() {
+        var since = Date.now() - 14 * 86400000, breast = 0, formula = 0, pumped = 0;
+        feedRecs().forEach(function (r) {
+            if (isFood(r) || Number(r.timestamp) < since) return;
+            var sub = String(r.subType || "");
+            if (sub.indexOf("모유") > -1) breast++;
+            else if (sub.indexOf("유축") > -1) pumped++;
+            else formula++;
+        });
+        var n = breast + formula + pumped;
+        if (n < 6) return "mixed";
+        if (breast / n >= 0.8) return "breast";
+        if (formula / n >= 0.8) return "formula";
+        return "mixed";
+    }
+    var howMode = null;
     window.setBottleHow = function (v) { howMode = v; paintGuide(); };
 
     function howManyHTML() {
+        if (!howMode) howMode = guessHow();
         var m = monthsOld();
         var real = feedsPerDay();
         var feeds = real ? real.avg : typicalFeeds(m);

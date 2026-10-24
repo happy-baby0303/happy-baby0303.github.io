@@ -383,7 +383,7 @@
                 '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' +
                     '개월수 · 몸무게 · 체온 · 마지막 해열제를 한 화면에</div>' +
             '</div>' +
-            '<div style="font-size:12px; color:' + RED + '; flex-shrink:0;">〉</div>';
+            '<div style="font-size:12px; color:' + RED + '; flex-shrink:0;">›</div>';
 
         shell.insertBefore(el, block);
     }
@@ -426,7 +426,7 @@
                     '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:2px;">' +
                         '119에 읽어줄 카드가 준비돼 있어요</div>' +
                 '</div>' +
-                '<div style="font-size:12px; color:' + RED + '; flex-shrink:0;">〉</div>' +
+                '<div style="font-size:12px; color:' + RED + '; flex-shrink:0;">›</div>' +
             '</div>';
 
         var el = box.firstChild;

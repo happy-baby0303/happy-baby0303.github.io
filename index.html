@@ -34,7 +34,7 @@
     <!-- 🧰 안전망: 한 곳이 죽어도 나머지 화면은 살게. 제일 먼저 켜져 있어야 한다 -->
       <script src="./shared/safenet.js?v=3"></script>
     <!-- 📱 플레이 앱에서만 의료 기능을 숨긴다(웹은 그대로). 화면이 그려지기 전에 켜져야 해서 여기 둔다 -->
-      <script src="./playlite.js?v=3"></script>
+      <script src="./playlite.js?v=4"></script>
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
       <script src="./native.js?v=2"></script>
       <script src="./familyhome.js?v=1"></script>
@@ -314,40 +314,37 @@ body.mode-senior #export-card /* 👈 🚨 요놈이 바로 '배냇함 내려받
     border: 1px solid #EDF0F3 !important;
 }
 
-/* ========================================== */
-/* 🌡️ 스마트 관리(해열/저금통) 글씨 완벽 수평 정렬 패치 */
-/* ========================================== */
-/* 1. 카드의 자동 정렬(flex) 기능을 꺼서 요소들이 멋대로 밀려나지 않게 제압 */
-[onclick*="directGoToolbox('fever')"], #db-ledger-card {
+/* ==========================================
+   홈 '챙겨두기' 두 칸 (체온 또는 성장 기록 · 목표 저금통)
+   ⚠️ 제목은 왼쪽 위인데 값만 가운데에 떠 있었다. 위의 네 칸(첫 순간 도감 · 부부 문답 …)처럼
+      값도 왼쪽 아래에 둔다. 두 칸의 값 높이가 같게 바닥에서 같은 거리(30px)에 두고, 저금통 막대는 그 아래에 둔다.
+   ========================================== */
+[onclick*="directGoToolbox('fever')"], #db-ledger-card, #db-growth-card {
     position: relative !important;
-    display: block !important; 
+    display: block !important;
 }
-
-/* 2. 글씨 박스를 공중부양시켜서 양쪽 카드의 똑같은 높이(56%)에 강제로 못 박기 */
-#db-fever-text, #db-ledger-text {
+#db-fever-text, #db-ledger-text, #db-growth-text {
     position: absolute !important;
-    top: 56% !important;
-    left: 0 !important;
-    width: 100% !important;
-    transform: translateY(-50%) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-    text-align: center !important;
+    top: auto !important;
+    bottom: 30px !important;
+    left: 20px !important;
+    right: 20px !important;
+    width: auto !important;
+    transform: none !important;
+    display: block !important;
+    text-align: left !important;
     margin: 0 !important;
 }
 
-/* 3. 저금통 막대기도 바닥(bottom: 20px)에 단단히 고정 */
 #db-ledger-progress-wrap {
     position: absolute !important;
-    bottom: 20px !important;
+    bottom: 16px !important;
     left: 20px !important;
     right: 20px !important;
     width: auto !important;
     margin: 0 !important;
 }
-검은 카드 시절 잔재 일괄 청소 */
+/* 검은 카드 시절 잔재 일괄 청소 */
 .dad-hero-card [style*="rgba(255,255,255"],
 #dad-quest-container [style*="rgba(255,255,255"] {
     background: #FAF7F2 !important;
@@ -1158,7 +1155,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             <script>/* 다시 열릴 때 큰 스크립트를 다 읽기 전까지 '🔗 연동설정' 이 잠깐 보였다. 저장된 가족 코드만 보고 바로 맞춘다 (updateSyncBadge 와 같은 모양) */
             (function () { try { var c = localStorage.getItem('family_sync_code'), b = document.getElementById('sync-badge-btn'); if (!b || !c) return;
               b.style.background = '#F0EEFB'; b.style.color = '#6A61CE'; b.style.pointerEvents = 'none';
-              document.getElementById('sync-status-text').textContent = '안심 보관중'; document.getElementById('sync-status-icon').textContent = '☁️'; } catch (e) {} })();</script>
+              document.getElementById('sync-status-text').textContent = '안심 보관 중'; document.getElementById('sync-status-icon').textContent = '☁️'; } catch (e) {} })();</script>
           <button onclick="window.openSettingsTab()" style="background:none; border:none; font-size: 20px; cursor:pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
                 ⚙️
             </button>
@@ -1169,7 +1166,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
 <div class="wrapper">
     <!-- 🚨 하단 여백 추가: 홈 탭 전체에 padding-bottom: 90px을 줘서 스크롤 시 숨막히지 않게 만듭니다! -->
-    <!-- 🚨 여기서부터 tab-home 시작 🚨 -->
+    <!-- 홈 -->
     <div id="tab-home" class="tab-content active">
 
         <!-- 📢 홈 화면 실시간 공지 배너 -->
@@ -1307,14 +1304,13 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 <div id="ai-time-greeting" style="font-size: 16px; font-weight: 900; color: var(--text-m); letter-spacing: -0.3px;">지금 우리 아기</div>
             </div>
 
-            <!-- 👇👇👇 여기서부터 덮어씌우세요! 👇👇👇 -->
             <!-- 🚨 상태 요약 3분할 (글씨가 길어져도 수평 고정 패치!) -->
             <div style="display: flex; gap: 4px; justify-content: space-between; align-items: stretch;">
                 
                 <!-- 1. 수유 -->
                 <div style="flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: flex-start;">
                     <div style="width: 36px; height: 36px; border-radius: 12px; background: #F2F0FC; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-bottom: 8px;">🍼</div>
-                    <div style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-bottom: 4px;">수유</div>
+                    <div style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-bottom: 4px;">맘마</div>
                     <div id="now-feed" style="font-size: 13.5px; font-weight: 800; color: var(--text-m); letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">-</div>
                 </div>
                 
@@ -1339,9 +1335,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 </div>
                 
             </div>
-            <!-- 👆👆👆 여기까지 덮어씌우면 끝! 👆👆👆 -->
 
-            <!-- 하단 여백선 (이 태그 바로 위까지 덮어쓰시면 완벽합니다) -->
+            <!-- 아래 여백선 -->
             <div style="height: 1px; background: #F6F2EC; margin: 20px -20px 16px -20px;"></div>
             
              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
@@ -1349,7 +1344,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                     <span>기록하기</span>
                     <span onclick="window.openTrackerSettings()" style="cursor:pointer; opacity: 0.7;" title="알림 텀 설정">⚙️</span>
                 </div>
-                <span id="tracker-history-btn" onclick="window.toggleTrackerHistory()" style="font-size: 12px; color: #7F77DD; font-weight: 800; background:#F0EEFB; padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;">통계·기록 보기 〉</span>
+                <span id="tracker-history-btn" onclick="window.toggleTrackerHistory()" style="font-size: 12px; color: #7F77DD; font-weight: 800; background:#F0EEFB; padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;">통계·기록 보기 ›</span>
             </div>
 
             <!-- 기록 버튼 4개 -->
@@ -1448,7 +1443,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         <div style="font-size:16px; color:#CBD5E1; line-height: 1;">›</div>
                     </div>
                     <div id="db-fever-text">
-                        <div style="font-size:13px; font-weight:800; color:#B3A498;">터치해서<br>체온을 기록하세요</div>
+                        <div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">체온을 재면<br>여기에 적어 두세요</div>
                     </div>
                 </div>
 
@@ -1456,16 +1451,16 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 <div id="db-ledger-card" onclick="directGoToolbox('money')" style="background: linear-gradient(145deg, #FFFFFF 0%, #FAF7F2 100%); height: 135px; border-radius: 24px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); border: 1px solid #F6F2EC; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; box-sizing: border-box;">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <div style="display:flex; align-items:center; gap: 6px;">
-                            <span style="font-size:18px;">🏆</span>
+                            <span style="font-size:18px;">🐷</span>
                             <span style="font-size:13.5px; font-weight:900; color:var(--text-m);">목표 저금통</span>
                         </div>
                         <div style="font-size:16px; color:#CBD5E1; line-height: 1;">›</div>
                     </div>
                     <div id="db-ledger-text">
-                        <div style="font-size:13px; font-weight:800; color:#B3A498;">사고 싶은 물건<br>목표액을 설정하세요</div>
+                        <div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">사고 싶은 걸 정해 두고<br>조금씩 모아요</div>
                     </div>
                     <div id="db-ledger-progress-wrap" class="box-sub" style="width:100%; height:6px; border-radius:3px; overflow:hidden; display:none; border: none; background: #F6F2EC;">
-                        <div id="db-ledger-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #B98A2E, #38E5A7); border-radius:3px; transition:width 0.5s ease;"></div>
+                        <div id="db-ledger-progress-bar" style="width:0%; height:100%; background:#7F77DD; border-radius:3px; transition:width 0.5s ease;"></div>
                     </div>
                 </div>
             </div>
@@ -1526,7 +1521,6 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
                     <!-- 🌟 쾌적한 원터치 입력 폼 -->
                     <div style="text-align: center; padding: 10px 0;">
-                        <!-- 🚨 수정됨: 대표님 아이디어 카피 반영! -->
                         <div style="font-size: 14px; font-weight: 800; color: #7F77DD; margin-bottom: 8px;">얼마를 기록할까요?</div>
                         
              <!-- 🚨 [최종 해결] theme.js의 간섭을 피하기 위해 색상 코드를 CSS 변수(var)로 교체하여 고무줄 너비 정상 작동! -->
@@ -1539,7 +1533,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
                         <!-- 카테고리 버튼들 -->
                         <div id="expense-category-area" style="opacity: 0.3; pointer-events: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(10px);">
-                            <div style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">👇 터치하면 즉시 저장됩니다</div>
+                            <div style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">어디에 썼나요? 누르면 바로 남아요</div>
                             <div style="display:flex; gap:8px; width:100%; justify-content:center;">
                                 <button class="btn-main" onclick="window.addDailyExpense('diaper')" style="flex:1; padding:16px 0; border-radius:16px; background: #F2F0FC !important; color: #6A61CE !important; border: none !important; font-weight:900; font-size:13.5px; cursor:pointer; margin:0; box-shadow: 0 4px 12px rgba(2,132,199,0.1) !important;">🧻 위생</button>
                                 <button class="btn-main" onclick="window.addDailyExpense('food')" style="flex:1; padding:16px 0; border-radius:16px; background: #ECFDF5 !important; color: #A07722 !important; border: none !important; font-weight:900; font-size:13.5px; cursor:pointer; margin:0; box-shadow: 0 4px 12px rgba(5,150,105,0.1) !important;">🍼 식비</button>
@@ -1574,7 +1568,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 <!-- 📊 3. 소비 패턴 진단 (수동 입력칸 삭제, 차트만 표시) -->
                 <div class="box-main" style="border-radius:24px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                        <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">📊 <span id="money-month-title">이번 달</span> 소비 패턴</div>
+                        <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">📊 <span id="money-month-title">이번 달</span>에 쓴 돈</div>
                         <button onclick="window.resetMoneyAll()" style="background: #FFF0F1; color: #D32F2F; border: 1px solid #FFE3E3; padding: 6px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer;">초기화</button>
                     </div>
 
@@ -1597,7 +1591,6 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                             <div id="money-insight-detail" style="font-size:13.5px; line-height:1.6; padding:18px; border-radius:16px; font-weight:700; background: var(--bg-sub); border: none; color: var(--text-m);"></div>
                         </div>
                     </div>
-                    <!-- 🚨 여기서부터 아래 닫기 태그(</div>)까지 꼭 포함되어야 안 깨집니다! -->
                     <!-- 데이터가 없을 때 빈 상태 표시 -->
                     <div id="money-empty-state" style="padding: 30px 0; text-align: center; color: var(--text-s); font-size: 13.5px; font-weight: 800;">
                         위에서 금액을 입력하면<br>자동으로 분석 리포트가 완성됩니다 ✨
@@ -1609,9 +1602,9 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     
     <!-- 타이틀 & 지난달 내역 버튼을 박스 안으로 쏙 집어넣음 -->
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; padding: 0 4px;">
-        <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">📋 최근 머니로그</div>
+        <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">📋 최근 내역</div>
         <div style="display: flex; gap: 12px; align-items: center;">
-            <button onclick="window.toggleHistory()" style="background: transparent; color: #A3958A; border: none; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0;">지난달 내역 〉</button>
+            <button onclick="window.toggleHistory()" style="background: transparent; color: #A3958A; border: none; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0;">지난달 내역 ›</button>
         </div>
     </div>
 
@@ -1773,11 +1766,11 @@ body.mode-senior #hero-drag-tip { display: none !important; }
   <!-- 🚨 [수정 완료] 글자 잘림 방어 코드는 유지하면서, 보기 좋게 다시 가운데 정렬(center) 적용! -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
             <div style="min-width:0;">
-                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">1. 생년월일</label>
+                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">태어난 날</label>
                 <input type="text" id="v-birth" class="box-main" placeholder="날짜 선택" onfocus="(this.type='date')" onblur="(this.value === '' ? this.type='text' : this.type='date')" style="width:100%; box-sizing:border-box; padding:14px 4px !important; border-radius:12px; font-size:12px !important; font-weight:800; outline:none; text-align:center; letter-spacing:-1px !important;">
             </div>
             <div style="min-width:0;">
-                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">2. 성별</label>
+                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">성별</label>
                 <select id="v-gender" class="box-main" onchange="this.style.color = this.value ? 'var(--text-m)' : 'var(--text-s)'" style="width:100%; box-sizing:border-box; padding:14px 4px !important; border-radius:12px; font-size:13px !important; font-weight:800; outline:none; text-align:center; text-align-last:center; border:1px solid var(--border); background:var(--bg-card); color:var(--text-s); transition: 0.2s;">
                     <option value="" disabled selected style="color: var(--text-s);">선택</option>
                     <option value="boy" style="color: var(--text-m);">👦 남아</option>
@@ -1789,7 +1782,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                 <!-- ✨ [수정] padding-left를 24px로 늘려서 숫자를 오른쪽으로 미세 조정! -->
                         <div style="display:flex; gap:12px;">
                             <div style="flex:1; min-width:0;">
-                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">3. 현재 키 <span style="font-size:11px; color:var(--text-s); font-weight:600;">(선택)</span></label>
+                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">키</label>
                                 <div style="position:relative; display:flex; align-items:center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-sizing: border-box; transition: 0.2s;">
                                     <!-- padding-left: 24px 추가됨 -->
                                     <input type="number" id="v-height" step="0.1" placeholder="0.0" style="width:100%; box-sizing:border-box; padding:14px 14px 14px 24px; border:none; background:transparent; font-size:18px; font-weight:900; text-align:center; color:var(--text-m); outline:none;">
@@ -1797,7 +1790,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                                 </div>
                             </div>
                             <div style="flex:1; min-width:0;">
-                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">4. 체중 <span style="font-size:11px; color:var(--text-s); font-weight:600;">(선택)</span></label>
+                                <label style="font-size:13px; font-weight:800; display:block; margin-bottom:8px; color:var(--text-m);">몸무게</label>
                                 <div style="position:relative; display:flex; align-items:center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-sizing: border-box; transition: 0.2s;">
                                     <!-- padding-left: 24px 추가됨 -->
                                     <input type="number" id="v-weight-growth" step="0.1" placeholder="0.0" style="width:100%; box-sizing:border-box; padding:14px 14px 14px 24px; border:none; background:transparent; font-size:18px; font-weight:900; text-align:center; color:var(--text-m); outline:none;">
@@ -1898,42 +1891,40 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
         
     <!-- 타이틀 -->
-<h2 style="font-size: 20px; font-weight: 900; margin: 0 0 8px 0; color: #4A413C; letter-spacing: -0.5px;">🛍️ 나만의 핫딜 판독기 (최저가 기록)</h2>
+<h2 style="font-size: 20px; font-weight: 900; margin: 0 0 8px 0; color: #4A413C; letter-spacing: -0.5px;">🛍️ 핫딜 계산기</h2>
 
 <!-- 쿠팡 파트너스 안내 문구 (안전한 가독성 + 깔끔한 토스 스타일) -->
 <div style="font-size: 12.5px; font-weight: 600; color: #7A6F68; margin: 0 0 18px 0; line-height: 1.4; word-break: keep-all;">
     📢 본 서비스는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
 </div>
 
-<!-- 안내 문구 박스 (중복 문구 삭제 완료) -->
-<div style="background: #FFF4ED; padding: 16px; border-radius: 14px; margin-bottom: 24px; border: 1px solid #FFE4D6;">
-    <p style="font-size: 13.5px; font-weight: 700; color: #E65100; line-height: 1.5; word-break: keep-all; margin: 0;">
-        "남들이 얼마에 샀는지는 중요하지 않아요. <strong>내가 전에 샀던 가격(나의 최저가)을 배냇함이 기억했다가, 이번에 잘 산 건지 알려 드릴게요."</strong>
-    </p>
-</div>
+<!-- 무엇을 하는 칸인지 (따옴표 상자 대신 한 줄) -->
+<p style="font-size: 13.5px; font-weight: 700; color: #7A6F68; line-height: 1.6; word-break: keep-all; margin: 0 0 24px 0;">
+    낸 돈과 개수를 적으면 하나당 값을 계산해요. 전에 제일 싸게 산 값을 기억해 두었다가, 이번이 더 싼지 알려 드려요.
+</p>
         
         <!-- 1. 품목 선택 (모던한 회색 박스 입력칸) -->
         <div style="margin-bottom: 24px;">
-            <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">1. 품목 선택</label>
+            <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">무엇을 샀나요</label>
             <!-- 브라우저 기본 화살표를 남겨두기 위해 appearance는 건드리지 않음 -->
             <select id="hd-category" onchange="loadPastPrice()" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 700; outline: none; background: #FBF8F3; border: 1px solid #F7F3ED; color: var(--text-m);">
-                <option value="diaper" selected>🧻 기저귀 (장당 단가 계산)</option>
-                <option value="wipe">🫧 물티슈 (팩당 단가 계산)</option>
-                <option value="milk">🍼 분유 (통당 단가 계산)</option>
+                <option value="diaper" selected>🧻 기저귀 (1장 값으로)</option>
+                <option value="wipe">🫧 물티슈 (1팩 값으로)</option>
+                <option value="milk">🍼 분유 (1통 값으로)</option>
             </select>
         </div>
         
         <!-- 2. 결제액 / 3. 수량 -->
         <div style="display: flex; gap: 12px; margin-bottom: 24px;">
             <div style="flex: 1;">
-                <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">2. 최종 결제액</label>
+                <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">낸 돈</label>
                 <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
                     <input type="text" id="hd-total-price" inputmode="numeric" placeholder="45,000" onkeyup="formatNum(this)" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: #FF823A; font-size: 16px;">
                     <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">원</span>
                 </div>
             </div>
             <div style="flex: 1;">
-                <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">3. 총 수량</label>
+                <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">개수</label>
                 <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
                     <input type="number" id="hd-count" placeholder="180" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
                     <span id="hd-unit-label" style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">장</span>
@@ -1944,24 +1935,24 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         <!-- 4. 나의 역대 최저가 -->
         <div style="margin-bottom: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 800; margin: 0; color: #FF823A;">4. 나의 역대 최저가 (기준 단가)</label>
-                <span id="hd-past-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 800; background: #FFF4ED; color: #E65100; border: 1px solid #FFE4D6; display: none;">💾 자동 불러옴</span>
+                <label style="font-size: 14px; font-weight: 800; margin: 0; color: #FF823A;">전에 제일 싸게 산 값 (하나당)</label>
+                <span id="hd-past-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 800; background: #FFF4ED; color: #E65100; border: 1px solid #FFE4D6; display: none;">지난번 값</span>
             </div>
             <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                <input type="number" id="hd-standard-price" placeholder="처음 계산 시 자동 등록" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
+                <input type="number" id="hd-standard-price" placeholder="처음 계산하면 저절로 적혀요" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
                 <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">원</span>
             </div>
         </div>
         
         <!-- 핫딜 판독 버튼 (디자인 평탄화) -->
         <button class="btn-main" onclick="calcHotDeal()" style="width: 100%; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none; background: #FF823A; color: white; box-shadow: 0 4px 12px rgba(255, 130, 58, 0.25); cursor: pointer; transition: 0.2s;">
-            🔍 단가 계산하고 핫딜인지 보기
+            🔍 하나당 값 계산하기
         </button>
         
         <!-- 핫딜 결과창 (처음엔 숨김 처리됨) -->
         <div id="hd-result" style="display: none; margin-top: 24px; border-top: 1px solid #F7F3ED; padding-top: 24px;">
             <div style="background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 20px; padding: 24px; text-align: center;">
-                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">최종 체감 단가는</div>
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">하나당 값은</div>
                 <div id="hd-unit-price" style="font-size: 38px; font-weight: 900; color: #FF823A; margin-bottom: 12px; letter-spacing: -1px;">0원</div>
                 <div id="hd-verdict" style="font-size: 15px; font-weight: 800; padding: 14px; border-radius: 12px; margin-bottom: 16px;"></div>
                 <p id="hd-comment" style="font-size: 13.5px; line-height: 1.6; color: var(--text-m); word-break: keep-all; font-weight: 600; margin-bottom: 16px;"></p>
@@ -1978,10 +1969,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
         
         <!-- 타이틀 (파란 밑줄 삭제) -->
-        <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 24px 0; color: #4A413C; letter-spacing: -0.5px;">🧊 안심 이유식 큐브 냉장고</h2>
+        <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 24px 0; color: #4A413C; letter-spacing: -0.5px;">🧊 이유식 큐브 냉장고</h2>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <div style="font-size: 14px; font-weight: 800; color: #4A413C;">👆 자주 쓰는 재료 원터치 입력</div>
+            <div style="font-size: 14px; font-weight: 800; color: #4A413C;">자주 얼리는 재료</div>
             <button onclick="toggleCubeQuickEdit()" style="background: #FBF8F3; border: 1px solid #EDE6DE; color: #7A6F68; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:800; cursor:pointer; transition:0.2s;">⚙️ 편집</button>
         </div>
         
@@ -2052,15 +2043,15 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
                 <div class="box-main" style="border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;" data-theme-src="">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-                        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px;">🚨 부부 바통터치 (SOS 심부름)</div>
+                        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px;">💌 짝꿍에게 바통 넘기기</div>
                     </div>
                     
                     <div style="margin-bottom: 16px;">
-                        <label style="font-size:12.5px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🎁 미션 완료 보상 (선택)</label>
+                        <label style="font-size:12.5px; font-weight:800; color:var(--primary); display:block; margin-bottom:8px;">🎁 들어주면 해 줄 것 (선택)</label>
                         
                         <!-- 🚨 폰트 강제 적용 (font-family: inherit;) 및 글씨색상 추가! -->
                         <select id="baton-reward" class="box-sub" onchange="var customInput = document.getElementById('baton-reward-custom'); if(this.value === 'custom') { customInput.style.display = 'block'; customInput.focus(); } else { customInput.style.display = 'none'; customInput.value = ''; }" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13.5px; margin-bottom:8px; outline:none; border:1px solid var(--border); font-family: 'Pretendard', sans-serif; color: var(--text-m);">
-                            <option value="없음">선택 안 함 (순수한 사랑으로 해 줌)</option>
+                            <option value="없음">없어요 · 그냥 부탁할게요</option>
                             <option value="진한 뽀뽀 1회">진한 뽀뽀 1회</option>
                             <option value="게임 2시간 자유이용권">게임 2시간 자유이용권</option>
                             <option value="시원한 맥주 & 안주 세팅">시원한 맥주 & 안주 세팅</option>
@@ -2071,15 +2062,15 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         </select>
                         
                         <!-- 🚨 직접 입력창에도 폰트 강제 적용 -->
-                        <input type="text" id="baton-reward-custom" class="box-tint-blue" placeholder="원하는 보상을 당당하게 적어보세요!" style="display:none; width:100%; min-width:0; box-sizing: border-box; padding:12px; border-radius:12px; font-size: 13.5px; font-weight: 600; outline:none; border: 1px solid var(--border); font-family: 'Pretendard', sans-serif;">
+                        <input type="text" id="baton-reward-custom" class="box-tint-blue" placeholder="해 줄 것을 적어 주세요" style="display:none; width:100%; min-width:0; box-sizing: border-box; padding:12px; border-radius:12px; font-size: 13.5px; font-weight: 600; outline:none; border: 1px solid var(--border); font-family: 'Pretendard', sans-serif;">
                     </div>
 
                     <!-- 🚨 [수정됨] 텍스트 다이어트: 이모지 및 불필요한 서술어 삭제! -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
-                        <button class="box-main" onclick="addQuickBaton('새벽 수유 요청합니다')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">새벽 수유 대타</button>
-                        <button class="box-main" onclick="addQuickBaton('퇴근길 장보기')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">퇴근길 장보기</button>
-                        <button class="box-main" onclick="addQuickBaton('기저귀 처리반 SOS')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">기저귀 SOS</button>
-                                               <button class="box-main" onclick="addQuickBaton('아기 재우기 교대')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">아기 재우기</button>
+                        <button class="box-main" onclick="addQuickBaton('오늘 새벽 수유 부탁해요')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">새벽 수유 대타</button>
+                        <button class="box-main" onclick="addQuickBaton('퇴근길에 장 좀 봐 줘요')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">퇴근길 장보기</button>
+                        <button class="box-main" onclick="addQuickBaton('기저귀 좀 갈아 줘요')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">기저귀 갈아 주기</button>
+                                               <button class="box-main" onclick="addQuickBaton('아기 재우기 바꿔 줘요')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">아기 재우기</button>
                         <button class="box-main" onclick="addQuickBaton('퇴근 완료, 이제 내가 볼게요')" style="grid-column: span 2; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">퇴근 완료, 이제 내가 볼게요</button>
                     </div>
 
@@ -2090,7 +2081,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                     </div>
                 </div>
                 <!-- ✨ 다크모드 강제 테두리/배경색 방어용 투명 쉴드 추가! -->
-<div style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-top: 8px; margin-bottom: 12px;">📋 실시간 바통터치 미션 보드</div>
+<div style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-top: 8px; margin-bottom: 12px;">📋 주고받은 부탁</div>
 <div id="baton-list-container" style="display:flex; flex-direction:column; gap:10px; border: none !important; background: transparent !important;"></div>
             </div> <!-- panel-baton 닫기 -->
 
@@ -2110,7 +2101,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                             </div>
                         </div>
                         <div style="flex: 1;">
-                            <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">일일 수유 횟수</label>
+                            <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">하루 몇 번 먹나요</label>
                             <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
                                 <input type="number" id="calc-count" placeholder="6" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
                                 <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">회</span>
@@ -2125,10 +2116,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         <div style="font-size: 13.5px; font-weight: 800; color: #4A413C;">1회 권장 <strong style="font-size: 18px; color: #7F77DD;" id="res-one-ml">0</strong> ml</div>
                         <div id="formula-info-box" style="margin-top: 20px; padding: 14px; background: #FFFFFF; border-radius: 14px; border: 1px solid #EDE6DE; text-align: left;">
                             <div id="formula-warning" style="display:none; font-size: 12px; font-weight: 900; color: #D32F2F; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #EDE6DE;">
-                                🚨 1,000ml 초과 시 신장에 무리가 갈 수 있습니다. 초과분은 이유식으로 보충해 주세요.
+                                하루 1,000ml는 넘기지 않는 게 좋다고 해요. 더 먹고 싶어 하면 소아과에서 한 번 물어봐 주세요.
                             </div>
                             <p style="font-size: 11px; font-weight: 700; color: #A3958A; line-height: 1.5; word-break: keep-all; margin: 0;">
-                                <strong>계산 기준:</strong> 소아과 학회 표준 지침(체중당 130~150ml)을 따릅니다. 아기마다 소화 능력과 활동량이 다르니 이 수치는 <strong>참고용</strong>으로만 봐주세요. <b>우리 아기가 상위 몇 %인지, 성장 곡선을 잘 따라가고 있는지는 '성장 탭'에서 키/몸무게를 입력해 직접 확인해 보세요</b> 🤍
+                                <strong>계산 기준:</strong> 흔히 쓰는 '몸무게 1kg에 하루 130~150ml' 예요. 아기마다 먹는 양이 다르니 <strong>참고로만</strong> 봐 주세요. 또래와 견줘 보려면 툴박스 '성장' 에서 키 · 몸무게를 적어 보세요.
                             </p>
                         </div>
                     </div>
@@ -2142,16 +2133,16 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <button id="pong-tab-count" onclick="switchPongTab('count')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: #A3958A; cursor:pointer; transition:0.2s;">교차 수유 (조유량 다름)</button>
                     </div>
                     <div id="pong-desc" style="background: #FFF9E6; padding: 14px; border-radius: 14px; margin-bottom: 20px; font-size: 12.5px; font-weight: 700; color: #B78103; line-height: 1.5; word-break: keep-all; text-align: center;">
-                        💡 <strong>국산 분유끼리 바꿀 때(스푼당 조유량이 같을 때)</strong><br>한 젖병에 가루를 비율대로 섞어 먹이는 방식입니다.
+                        💡 <strong>스푼당 물 양(조유량)이 같은 분유끼리</strong> 바꿀 때 써요.<br>한 젖병에 두 분유 가루를 비율대로 섞어 먹여요.
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <label id="pong-input-label" style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">1회 총 수유량</label>
+                        <label id="pong-input-label" style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">한 번에 먹는 양</label>
                         <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
                             <input type="number" id="pong-input-val" placeholder="예: 160" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 18px;">
                             <span id="pong-input-unit" style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">ml</span>
                         </div>
                     </div>
-                    <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">진행 일차 선택</label>
+                    <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">바꾼 지 며칠째예요</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 24px;">
                         <button onclick="calcPong(1, this)" class="pong-btn box-main" style="flex:1; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-m); cursor:pointer;">1~2일차</button>
                         <button onclick="calcPong(2, this)" class="pong-btn box-main" style="flex:1; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-m); cursor:pointer;">3~4일차</button>
@@ -2179,10 +2170,10 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             <!-- ========================================== -->
             <div id="panel-tracker" class="panel-block" style="display:none; padding-top: 24px; padding-bottom: 24px;">
                 <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
-                    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C; letter-spacing: -0.5px;">✍️ 개봉일 네임펜 스티커</h2>
-                    <p style="font-size: 13px; font-weight: 700; color: #A3958A; margin-bottom: 20px; word-break: keep-all;">통에 적어둔 날짜가 지워져서 찝찝하셨죠? 터치 몇 번으로 안전하게 기록하세요.</p>
+                    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C; letter-spacing: -0.5px;">✍️ 뜯은 날 적어 두기</h2>
+                    <p style="font-size: 13px; font-weight: 700; color: #A3958A; margin-bottom: 20px; word-break: keep-all;">통에 네임펜으로 쓰던 날짜, 여기 적어 두면 지워지지 않아요. 언제까지 쓰면 좋은지도 같이 보여 드려요.</p>
                     <div style="margin-bottom: 24px;">
-                       <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">1. 어떤 물건을 뜯으셨나요?</label>
+                       <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">뜯은 것</label>
                         <!-- 👇 글씨를 짧고 명확하게 바꿨습니다 -->
                         <select id="open-item-type" onchange="window.updateOpenItemGuide()" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); margin-bottom: 12px;">
                             <option value="formula">🍼 분유</option>
@@ -2198,21 +2189,21 @@ body.mode-senior #hero-drag-tip { display: none !important; }
                         <div id="open-item-guide" style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #7F77DD; background: #F0EEFB; padding: 12px 14px; border-radius: 12px; word-break: keep-all; line-height: 1.4;">
                             💡 습기에 약해요. 열고 나서 3주(21일) 안에 다 쓰는 게 좋아요.
                         </div>
-                        <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">2. 언제 뜯었나요? (기본: 오늘)</label>
+                        <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">뜯은 날</label>
                         <input type="date" id="open-item-date" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); box-sizing: border-box;">
                     </div>
-                    <button class="btn-main" onclick="addOpenRecord()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 14px; border: none; background: #4A413C; color: white; cursor: pointer; margin-bottom: 24px;">📝 스티커 붙이기</button>
+                    <button class="btn-main" onclick="addOpenRecord()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 14px; border: none; background: #4A413C; color: white; cursor: pointer; margin-bottom: 24px;">📝 적어 두기</button>
                 </div>
                 <!-- 리스트 영역 -->
                 <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                    <h3 style="font-size: 16px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C;">📋 관리 중인 품목</h3>
+                    <h3 style="font-size: 16px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C;">📋 뜯어 둔 것</h3>
                     <div id="open-list-container" style="display:flex; flex-direction:column; gap:12px;"></div>
                 </div>
                 <!-- 🚨 배냇함 방어용 면책 조항 (맨 아래 배치!) -->
                 <div style="margin-top: 24px; padding: 16px; background: #F6F2EC; border-radius: 12px; border: 1px solid #EDE6DE;">
-                    <div style="font-size: 11px; font-weight: 900; color: #A3958A; margin-bottom: 4px;">⚠️ 배냇함 면책 안내</div>
+                    <div style="font-size: 11px; font-weight: 900; color: #A3958A; margin-bottom: 4px;">⚠️ 면책 안내</div>
                     <div style="font-size: 12px; font-weight: 600; color: #A3958A; line-height: 1.5; word-break: keep-all;">
-                        앱에서 제공하는 '개봉 후 권장 기한'은 소아과학회 및 식약처의 일반적인 가이드라인입니다. 보관 환경(온도, 습도, 침 섞임 등)에 따라 더 빨리 변질될 수 있으므로, <strong>사용 전 반드시 부모님께서 냄새와 상태를 직접 확인해 주세요.</strong> 본 앱은 참고용 도구이며, 변질된 제품 사용으로 인한 법적 책임을 지지 않습니다.
+                        앱에서 보여 드리는 '개봉 후 권장 기한'은 제품 설명서와 일반적인 보관 기준을 바탕으로 한 참고값입니다. 보관 환경(온도, 습도, 침 섞임 등)에 따라 더 빨리 변질될 수 있으므로, <strong>사용 전 반드시 냄새와 상태를 직접 확인해 주세요.</strong> 본 앱은 참고용 도구이며, 변질된 제품 사용으로 인한 법적 책임을 지지 않습니다.
                     </div>
                 </div>
             </div> <!-- panel-tracker 닫기 -->
@@ -2225,12 +2216,12 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             
             <!-- 1. 타이틀 유지 -->
             <h2 class="app-title" style="font-size: 24px; font-weight: 900; color: #4A413C; margin: 0 0 6px 0; letter-spacing: -0.5px;">🗺️  주말 나들이</h2>
-            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom: 24px; letter-spacing: -0.3px;">👶 아이와 함께하는 안심 주말 지도</p>
+            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom: 24px; letter-spacing: -0.3px;">아기랑 가기 좋은 주말 행사와 장소</p>
 
             <!-- 🎒 2. 단독 액션 카드: 외출 준비물 체크리스트 -->
             <button class="btn-main checklist-main-btn" onclick="openChecklistModal()" style="width: 100%; background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 18px; padding: 18px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; justify-content: center; align-items: center; cursor: pointer;">
                 <span style="font-size: 20px; margin-right: 8px;">🎒</span>
-                <span style="font-size: 15.5px; font-weight: 800; color: #4A413C;">외출 준비물 체크리스트 〉</span>
+                <span style="font-size: 15.5px; font-weight: 800; color: #4A413C;">외출 준비물 체크리스트 ›</span>
             </button>
 
             <!-- 🎛️ 3. 통합 컨트롤 패널 (탭 + 검색 + 필터 합체!) -->
@@ -2341,11 +2332,11 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <!-- 슬라이드 트랙 -->
     <div class="banner-track" style="display: flex; width: 300%; transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);">
         
-        <!-- 💳 1번: 종합 AI 매칭 유도 -> (유모차 폴더로 연결) -->
+        <!-- 1번: 개월수 맞춤 → 유모차 -->
         <a href="./stroller/index.html" style="width: 33.333%; text-decoration: none; padding: 22px 20px 36px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
             <div>
-                <div style="color: var(--primary); font-size: 12.5px; font-weight: 800; margin-bottom: 6px;">개월수에 맞춰 골랐어요</div>
-                <div style="color: var(--text-m); font-size: 16.5px; font-weight: 800; line-height: 1.45;">우리 아기 개월수에 맞는<br>육아템 보러 가기 ›</div>
+                <div style="color: var(--primary); font-size: 12.5px; font-weight: 800; margin-bottom: 6px;">유모차부터 장난감까지</div>
+                <div style="color: var(--text-m); font-size: 16.5px; font-weight: 800; line-height: 1.45;">지금 시기에 쓰는 것만<br>골라 봤어요 ›</div>
             </div>
             <div style="flex-shrink:0; width:56px; height:56px; border-radius:18px; background:var(--bg-sub, #F7F3ED); display:flex; align-items:center; justify-content:center; font-size:28px;">🧸</div>
         </a>
@@ -2353,8 +2344,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         <!-- 💳 2번: 배앓이/수유 고민 해결 -> (젖병 폴더로 연결) -->
         <a href="./bottle/index.html" style="width: 33.333%; text-decoration: none; padding: 22px 20px 36px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box;">
             <div>
-                <div style="color: var(--accent, #B98A2E); font-size: 12.5px; font-weight: 800; margin-bottom: 6px;">새벽에 자주 깬다면</div>
-                <div style="color: var(--text-m); font-size: 16.5px; font-weight: 800; line-height: 1.45;">혹시 배앓이 때문일까?<br>원인 찾고 꿀잠 재우기 ›</div>
+                <div style="color: var(--accent, #B98A2E); font-size: 12.5px; font-weight: 800; margin-bottom: 6px;">먹고 나서 자주 운다면</div>
+                <div style="color: var(--text-m); font-size: 16.5px; font-weight: 800; line-height: 1.45;">배앓이 덜 하는 젖병<br>골라 보기 ›</div>
             </div>
             <div style="flex-shrink:0; width:56px; height:56px; border-radius:18px; background:var(--bg-sub, #F7F3ED); display:flex; align-items:center; justify-content:center; font-size:28px;">🍼</div>
         </a>
@@ -2483,13 +2474,13 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">😭 얘가 왜 우는 걸까? 아기 울음소리 번역기</div>
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">😭 얘가 왜 우는 걸까? 울음소리로 짐작해 보기</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
                                 <div class="box-sub" style="padding: 14px; border-radius: 12px; margin-bottom: 16px;">
-                                    <strong style="color: var(--text-m); font-size:14px; margin-bottom:8px; display:block;">🗣️ 던스턴 베이비 랭귀지 (전 세계 공통)</strong>
-                                    생후 3~4개월까지 아기들의 반사 작용으로 나오는 울음소리 패턴입니다. 소리를 주의 깊게 들어보세요
+                                    <strong style="color: var(--text-m); font-size:14px; margin-bottom:8px; display:block;">🗣️ 던스턴 베이비 랭귀지</strong>
+                                    호주의 한 엄마가 정리한, 생후 3~4개월 무렵 울음소리 패턴이에요. 연구로 확인된 건 아니라서 맞을 때도 있고 아닐 때도 있어요. 참고로만 들어 보세요.
                                 </div>
                                 • <strong>네~ (Neh) = 배고파요 🍼</strong><br>
                                 혀가 입천장에 닿으면서 나는 소리. 쪽쪽 빠는 시늉을 같이 합니다.<br><br>
@@ -2796,15 +2787,15 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         <div class="box-main" style="background: var(--bg-card); border-radius: 20px; padding: 0 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 32px;">
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 800; color: var(--text-title); cursor: pointer;" onclick="window.openMyActivity('scraps')">
                 <span>📌 내가 스크랩한 글</span>
-                <span style="color: var(--text-sub);">〉</span>
+                <span style="color: var(--text-sub);">›</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 800; color: var(--text-title); cursor: pointer;" onclick="window.openBlockedUsers()">
                 <span>🚫 차단한 사용자 관리</span>
-                <span style="color: var(--text-sub);">〉</span>
+                <span style="color: var(--text-sub);">›</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; font-size: 15px; font-weight: 800; color: var(--text-title); cursor: pointer;" onclick="window.inviteMamsudaFriend()">
                 <span>🎁 맘수다 동네 친구 초대하기</span>
-                <span style="color: var(--text-sub);">〉</span>
+                <span style="color: var(--text-sub);">›</span>
             </div>
         </div>
     </div>
@@ -3235,7 +3226,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
  window.functionsUS = functions;      // 👈 추가 (혹시 몰라 남겨두는 미국 서버)
  window.httpsCallable = httpsCallable;
 
- // 카카오 SDK 초기화 (대표님 찐 앱키 자동 세팅 완료!)
+ // 카카오 SDK 초기화
  if (!Kakao.isInitialized()) {
      Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b'); 
  }
@@ -3572,7 +3563,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261023-6"></script>
+<script src="script.js?v=20261024-1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3587,16 +3578,16 @@ body.mode-senior #hero-drag-tip { display: none !important; }
     <script src="./duty.js?v=1"></script>
 <script src="./graveyard.js"></script>
 <script src="playdata.js"></script>
-<script src="receiptData.js"></script>
-<script src="./emotion.js"></script>
-<script src="./memorybox.js?v=1"></script>
+<script src="receiptData.js?v=2"></script>
+<script src="./emotion.js?v=2"></script>
+<script src="./memorybox.js?v=2"></script>
 <script src="./newbadge.js"></script>
 <script src="./monthcard.js"></script> 
 <script src="./monthgift.js"></script>
 <script src="./expiryalert.js"></script>
 <script src="./toolbrief.js"></script> 
 <script src="./placefilter.js"></script> 
-<script src="./nursing.js"></script>
+<script src="./nursing.js?v=2"></script>
 <script src="./outingsmart.js"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
@@ -3611,14 +3602,14 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./firstfill.js?v=2"></script>
 <!-- 우리의 문답 — 저장 · 알림 · 코인을 문답 화면과 같이 쓴다 (홈에서 바로 쓰기) -->
 <script src="./qacore.js?v=1"></script>
-<script src="./diary.js?v=2"></script>
+<script src="./diary.js?v=3"></script>
 <script src="./photobook.js?v=2"></script>
 <script src="./premium.js"></script>
     <!-- 🎁 출시 기념 무료 개방 (구글 결제 붙이기 전까지) -->
     <script src="./plusfree.js?v=2"></script>
 <script src="./anniversaries.js"></script>
 <script src="./home.js"></script>
- <script src="./homefix.js?v=6"></script>
+ <script src="./homefix.js?v=7"></script>
 <script src="./weekly.js?v=3"></script>
 <script src="./postcard.js"></script>
 <script src="./export.js?v=2"></script>
@@ -3631,7 +3622,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 저장할 때 날짜가 오늘과 많이 다르면 한 번 묻기 (바퀴가 넓어져 날짜 쪽을 스칠 수 있어서) -->
 <script src="./recordguard.js?v=1"></script>
 <!-- 기록 한 번에 — 기록 창을 열면 지난번 그대로 골라 두고, 저장 버튼에 무엇이 남는지 적는다 -->
-<script src="./quickrec.js?v=2"></script>
+<script src="./quickrec.js?v=3"></script>
 <!-- 잊은 잠 타이머 — 낮잠 4시간 반 · 밤잠 14시간이 넘게 켜져 있으면 홈과 수면 창에서 알려 주고, 그대로 남기기 전에 한 번 묻기 -->
 <script src="./sleepguard.js?v=1"></script>
 <!-- 방금 기록 되돌리기 — 저장 뒤 5초 동안 '되돌리기' (저장을 제일 바깥에서 감싼다) -->
@@ -3644,7 +3635,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./recap.js?v=1"></script>
 <script src="./joinhello.js?v=1"></script>
 <!-- 밤사이 — 아침에 홈 위쪽에 어젯밤 한 장 (기록마다 누가 남겼는지도 붙인다) -->
-<script src="./nightcard.js?v=1"></script>
+<script src="./nightcard.js?v=2"></script>
 <script src="./remind.js"></script>
     <script src="./carealarm.js"></script>
     <script src="./pushcheck.js"></script>      
@@ -3657,9 +3648,9 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./feverguard.js"></script> 
 <script src="./mobile.js"></script>
 <script src="./fit.js"></script>
-<script src="./emergency119.js?v=2"></script>
+<script src="./emergency119.js?v=3"></script>
 <script src="./libraryplus.js"></script>
-<script src="./infopick.js?v=2"></script>
+<script src="./infopick.js?v=3"></script>
 <script src="./sosplus.js"></script>
 <!-- 🍎 아이폰은 홈 화면에 담아둔 앱에만 알림을 준다.
      그 안내를 띄운다. 안드로이드·PC 에서는 아무 일도 안 한다. -->
@@ -3799,7 +3790,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         
         <!-- 🔘 2. 하단 버튼 영역 (저장하기 & 닫기) -->
         <div style="display: flex; gap: 12px; width: 100%;">
-            <!-- 참고: 닫기 버튼과 저장 버튼의 onclick 함수명은 대표님의 기존 JS 파일과 동일해야 합니다. -->
+            <!-- 닫기 · 저장 버튼의 함수 이름은 script.js 와 같아야 한다 -->
             <button onclick="document.getElementById('receipt-modal').style.display='none'" style="flex: 1; padding: 14px; background: var(--bg-sub); color: var(--text-m); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer;">닫기</button>
             <button onclick="downloadReceipt()" style="flex: 2; padding: 14px; background: #7F77DD; color: #FFF; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">📸 이미지 저장</button>
         </div>

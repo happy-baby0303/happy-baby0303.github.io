@@ -281,7 +281,12 @@
             var since = Math.abs(now - s) <= 5 * MIN ? '방금 잠들었어요' : hm(s) + '부터 자는 중';
             if (st.isSleeping) {
                 // 자는 중에 연 창 — 할 일은 위의 '방금 깼어요'. 저장은 잠든 시간만 고칠 때라 보조로 둔다
-                if (wasSleeping) return [icon + st.subType + ' · ' + hm(s) + '부터 자는 중', false];
+                // 바퀴로 잠든 시간을 바꿨으면 그게 할 일이다 — 무엇이 바뀌는지 말하고 진하게
+                if (wasSleeping) {
+                    var was = Number(localStorage.getItem('tosil_sleep_start')) || 0;
+                    if (was && !isNaN(s) && Math.abs(s - was) >= MIN) return [icon + hm(s) + '에 잠든 걸로 고치기', true];
+                    return [icon + st.subType + ' · ' + hm(s) + '부터 자는 중', false];
+                }
                 return [icon + st.subType + ' · ' + since, true];
             }
             var raw = val('v-sleep-amount'), a = num(raw);

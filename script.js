@@ -692,10 +692,16 @@ function filterPlaces() {
             if (aOn !== bOn) return aOn ? -1 : 1;
             return aOn ? (endOf(a) - endOf(b)) : (startOf(a) - startOf(b));
         });
+        /* ⚠️ 이틀 안에 끝나는 행사에 다 '곧 끝나요' 를 붙였더니, 주말엔 맨 위 카드 스무 장이 전부 '곧 끝나요' 였다.
+              뜻이 없어진다. 언제까지인지 말한다: 오늘 · 오늘까지 · 내일까지 · 모레까지 */
         const tagOf = (p) => {
             const s = startOf(p), e = endOf(p);
             if (s > todayNum) return 'D-' + Math.round((dayOf(s) - dayOf(todayNum)) / 86400000);
-            if (e !== 99999999 && (dayOf(e) - dayOf(todayNum)) / 86400000 <= 2) return '곧 끝나요';
+            if (e === 99999999) return '진행 중';
+            const left = Math.round((dayOf(e) - dayOf(todayNum)) / 86400000);
+            if (left <= 0) return s === e ? '오늘' : '오늘까지';
+            if (left === 1) return '내일까지';
+            if (left === 2) return '모레까지';
             return '진행 중';
         };
 
@@ -704,7 +710,8 @@ function filterPlaces() {
             const title = item.title || '', addr = item.addr1 || item.addr || item.locText || '', rawImg = String(item.firstimage || '').replace(/^http:\/\//i, 'https://');
             let sd = item.eventstartdate || item.datetime || '', ed = item.eventenddate || '';
             if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
-            const dateText = ed ? `${sd} ~ ${ed}` : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
+            /* 하루짜리 행사가 '10.24 ~ 10.24' 로 나왔다 */
+            const dateText = ed ? (ed === sd ? `${sd} 하루` : `${sd} ~ ${ed}`) : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
             const card = document.createElement('div'); card.className = 'fest-card';
             let imgHtml = rawImg ? `<img src="${rawImg}" loading="lazy" decoding="async" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:var(--bg-main); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
             
@@ -1455,7 +1462,7 @@ window.updateLedgerUI = function() {
         const pickYM = (typeof window.moneyPickedYM === 'function') ? window.moneyPickedYM() : null;
         const rows = (ledger.history || []).filter(h => !pickYM || window.moneyYM(h) === pickYM);
         if (rows.length === 0) {
-            html = `<div style="text-align:center; padding:20px; font-size:13px; color:#A3958A;">${pickYM ? window.moneyMonthLabel(pickYM) + '엔 기록이 없어요.' : '아직 입력된 머니로그 기록이 없습니다.'}</div>`;
+            html = `<div style="text-align:center; padding:20px; font-size:13px; color:#A3958A;">${pickYM ? window.moneyMonthLabel(pickYM) + '엔 기록이 없어요.' : '아직 남긴 내역이 없어요.'}</div>`;
         } else {
             rows.forEach(h => {
                 const isSave = h.type === 'saving';
@@ -1630,7 +1637,7 @@ function calcHotDeal() {
     const count = Number(countInput.value);
     let pastPrice = Number(standardInput.value.replace(/,/g,'')); 
     
-    if(!price || !count) return alert("최종 결제액과 총 수량을 정확히 입력해주세요");
+    if(!price || !count) return window.showToast ? window.showToast('낸 돈과 개수를 적어 주세요') : alert('낸 돈과 개수를 적어 주세요');
     
     const unitPrice = Math.round(price / count);
     document.getElementById('hd-unit-price').innerText = unitPrice.toLocaleString() + "원";
@@ -1641,9 +1648,9 @@ function calcHotDeal() {
 
     // 과거 최저가 기록이 없거나 비정상적일 때
     if (!pastPrice || pastPrice <= 0) {
-        verdictEl.innerHTML = `✅ 첫 핫딜 기준가 등록 완료`;
-        verdictEl.style.backgroundColor = "#7F77DD"; 
-        commentEl.innerHTML = `이 품목의 첫 체감가는 1${unitName}당 <strong>${unitPrice.toLocaleString()}원</strong>입니다. 이 가격을 내 '역대 최저가'로 안전하게 기억해 둘게요 📝`;
+        verdictEl.innerHTML = `처음 계산한 값이에요`;
+        verdictEl.style.backgroundColor = "#7F77DD";
+        commentEl.innerHTML = `1${unitName}에 <strong>${unitPrice.toLocaleString()}원</strong>이에요. 다음에 살 때 이 값과 견줘 드릴게요.`;
         
         localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
         standardInput.value = unitPrice;
@@ -1651,20 +1658,20 @@ function calcHotDeal() {
         const diffPast = pastPrice - unitPrice;
         
         if (diffPast > 0) {
-            verdictEl.innerHTML = `🎉 역대 최저가 갱신 1${unitName}당 <span style="color:#FFF; font-weight:900;">${diffPast.toLocaleString()}원 더 싸요</span>`;
-            verdictEl.style.backgroundColor = "#B98A2E"; 
-            commentEl.innerHTML = `기존 내 기록(${pastPrice.toLocaleString()}원) 대비 총 <strong>${(diffPast * count).toLocaleString()}원을 아꼈습니다</strong> 역대급 핫딜 방어 성공 👏`;
+            verdictEl.innerHTML = `지금까지 중 제일 싸요 · 1${unitName}에 <span style="color:#FFF; font-weight:900;">${diffPast.toLocaleString()}원 덜</span>`;
+            verdictEl.style.backgroundColor = "#B98A2E";
+            commentEl.innerHTML = `전에 제일 싸게 산 값(${pastPrice.toLocaleString()}원)보다 모두 <strong>${(diffPast * count).toLocaleString()}원</strong> 아꼈어요. 이 값을 새 기준으로 적어 둘게요.`;
             // 더 싸게 샀으므로 최저가 자동 갱신
             localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
             standardInput.value = unitPrice;
         } else if (diffPast < 0) {
-            verdictEl.innerHTML = `⚠️ 내 최저가보다 1${unitName}당 <span style="color:#FFF; font-weight:900;">${Math.abs(diffPast).toLocaleString()}원 비싸요.</span>`;
-            verdictEl.style.backgroundColor = "#D32F2F"; 
-            commentEl.innerHTML = `이전에 설정한 최저가(${pastPrice.toLocaleString()}원)보다 <strong>총 ${(Math.abs(diffPast) * count).toLocaleString()}원 손해</strong>입니다. 수량이 급한 게 아니라면 조금 더 기다려보세요 🤔`;
+            verdictEl.innerHTML = `전보다 1${unitName}에 <span style="color:#FFF; font-weight:900;">${Math.abs(diffPast).toLocaleString()}원 비싸요</span>`;
+            verdictEl.style.backgroundColor = "#D32F2F";
+            commentEl.innerHTML = `전에 제일 싸게 산 값(${pastPrice.toLocaleString()}원)보다 모두 <strong>${(Math.abs(diffPast) * count).toLocaleString()}원</strong> 더 내는 셈이에요. 급하지 않다면 조금 기다려 봐도 돼요.`;
         } else {
-            verdictEl.innerHTML = `⚖️ 역대 최저가 방어 성공`;
-            verdictEl.style.backgroundColor = "#7F77DD"; 
-            commentEl.innerHTML = `이전에 설정한 가장 저렴한 가격(${pastPrice.toLocaleString()}원)과 정확히 일치하네요 이번에도 스마트하게 잘 사셨습니다. 👍`;
+            verdictEl.innerHTML = `제일 싸게 샀던 값과 같아요`;
+            verdictEl.style.backgroundColor = "#7F77DD";
+            commentEl.innerHTML = `1${unitName}에 ${pastPrice.toLocaleString()}원, 전에 제일 싸게 산 값과 똑같아요.`;
         }
     }
     
@@ -2497,7 +2504,7 @@ window.renderChecklist = function() {
     const container = document.getElementById('checklist-items'); 
     if(!container) return; 
 
-    // 🎨 테마 컬러 (대표님 앱과 완벽히 동기화된 따뜻한 웜 베이지)
+    // 테마 색 (앱과 같은 따뜻한 베이지)
     const bgBase = "#FDFBF7"; // 전체 바탕 (웜 베이지)
     const bgBox = "#F2EFE8"; // 탭, 버튼 배경
     const bgCard = "#FFFFFF"; // 리스트 아이템 (하얀색으로 띄워서 입체감 부여)
@@ -3380,28 +3387,32 @@ function updateHomeDashboard() {
             <div style="font-size:12px; font-weight:800; color:var(--text-s); margin-top:4px;">${subText} <span style="opacity:0.6; font-weight:600;">(${latest.time})</span></div>
         `;
     } else {
-        feverText.innerHTML = `<div style="font-size:13px; font-weight:800; color:#A3958A;">체온을<br>기록해주세요</div>`;
+        feverText.innerHTML = `<div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">체온을 재면<br>여기에 적어 두세요</div>`;
     }
 
     const ledgerCard = document.getElementById('db-ledger-card');
     if (ledgerCard) {
-        const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "목표 설정하기", goalAmount: 100000 };
+        const ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "", goalAmount: 100000 };
         const targetAmount = ledger.goalAmount || 100000;
-        const percent = Math.min(Math.round((ledger.savedTotal / targetAmount) * 100), 100);
-        const goalName = ledger.goal || '공동 목표';
-        
+        const saved = Number(ledger.savedTotal) || 0;
+        const percent = Math.min(Math.round((saved / targetAmount) * 100), 100);
+        const goalName = (ledger.goal && ledger.goal !== '목표 설정하기') ? ledger.goal : '';
+        /* ⚠️ 목표를 정한 적도 없는데 '0% · 목표 설정하기' 가 크게 떴다. 정한 게 없으면 무엇을 하는 칸인지만 말한다 */
+        const started = !!goalName || saved > 0;
+
         const textEl = document.getElementById('db-ledger-text');
         const progressWrap = document.getElementById('db-ledger-progress-wrap');
         const progressBar = document.getElementById('db-ledger-progress-bar');
-        
+
         if(textEl) {
-            textEl.innerHTML = `
+            textEl.innerHTML = started ? `
                 <div style="font-size:22px; font-weight:900; color:#4A413C; letter-spacing:-0.5px; margin-bottom:4px;">${percent}%</div>
-                <div style="font-size:12px; font-weight:800; color:var(--text-s); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${goalName}</div>
-            `;
+                <div style="font-size:12px; font-weight:800; color:var(--text-s); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${window.escapeHTML ? window.escapeHTML(goalName || '모으는 중') : (goalName || '모으는 중')}</div>
+            ` : `<div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">사고 싶은 걸 정해 두고<br>조금씩 모아요</div>`;
         }
+        ledgerCard.classList.toggle('has-bar', started);
         if(progressWrap && progressBar) {
-            progressWrap.style.display = 'block';
+            progressWrap.style.display = started ? 'block' : 'none';
             progressBar.style.width = percent + "%";
         }
     }
@@ -3529,7 +3540,7 @@ function renderCubes() {
         container.innerHTML = `
             <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
                 <div style="font-size:24px; margin-bottom:10px;">🌬️</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">냉동실이 텅 비어있어요<br>이유식 재료를 얼리고 기록해보세요.</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s); line-height:1.6;">넣어 둔 큐브가 없어요<br>얼린 날을 적어 두면 오래된 것부터 보여 드려요</div>
             </div>`;
         return;
     }
@@ -3908,7 +3919,7 @@ function renderBatonTasks() {
     if (records.length === 0) {
         container.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; min-height: 110px; text-align: center; padding: 20px; background: var(--bg-sub); border-radius: 16px; border: 1px dashed var(--border);">
-                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">지금 기다리는 부탁이 없어요.<br>평화로운 공동 육아 중이에요.</div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-s); line-height: 1.5;">지금 기다리는 부탁이 없어요</div>
             </div>`;
         return;
     }
@@ -4140,7 +4151,7 @@ window.updateSyncBadge = function() {
         // ✅ [클라우드 방 활성화 상태]
         badgeBtn.style.background = "#F0EEFB";
         badgeBtn.style.color = "#6A61CE";
-        badgeText.innerText = "안심 보관중"; 
+        badgeText.innerText = "안심 보관 중"; 
         if(badgeIcon) badgeIcon.innerText = "☁️"; 
         
         badgeBtn.style.pointerEvents = "none"; 
@@ -4538,17 +4549,17 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         }
     }
 
-    // 🚨 안드로이드 날짜 쏠림 현상 원천 차단 & 대표님의 천재적인 UX 아이디어(연도 삭제+통합) 반영!
+    // 안드로이드에서 날짜가 하루 밀리는 걸 막는다. 연도는 빼고 월 · 일 · 시 · 분을 한 줄에 둔다
     let selectedD = new Date(displayDateStr);
     let todayD = new Date();
     let isToday = selectedD.toDateString() === todayD.toDateString();
     let initialDateText = isToday ? '오늘' : String(selectedD.getMonth()+1).padStart(2,'0') + '.' + String(selectedD.getDate()).padStart(2,'0');
     let initialDateColor = isToday ? '#7F77DD' : 'var(--text-m)';
 
-    // 🚨 [혁신적 UX] 대표님 기획 반영: 날짜+시간 통합 4륜 구동 스와이프 UI (완벽 대칭 패치!)
+    // 날짜와 시간을 바퀴 네 개(월 · 일 · 시 · 분)로 고른다
     const baseTimeInputHtml = `
         <div style="text-align: center; margin-bottom: 24px;">
-            <div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin-bottom:12px;">기록 시간 (스와이프하여 수정)</div>
+            <div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin-bottom:12px;">언제였나요 <span style="font-weight:600; color:var(--text-sub);">· 위아래로 밀어서 바꿔요</span></div>
             <style>
                 .drum-picker::-webkit-scrollbar { display: none; }
                 .drum-picker { -ms-overflow-style: none; scrollbar-width: none; }
@@ -5131,7 +5142,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                         items[index].classList.add('active');
                         updateHiddenValues();
                         
-                        // 🚨 2월 28일/30일 자동 렌더링 매직! (대표님 기존 로직 완벽 유지)
+                        // 달을 바꾸면 그달의 마지막 날(28 · 30 · 31일)까지만 보이게
                         if(id === 'picker-month') {
                             let newMonth = parseInt(items[index].dataset.val);
                             let newYear = parseInt(yearInput.value);
@@ -5898,7 +5909,6 @@ window.updateTrackerDashboard = function() {
                         txt = `<span style="color:#A07722">${r.subType}</span>`;
                     }
                     
-                    // 🚨 여기서부터 덮어쓰기!
                     historyHtml += `
                         <div class="swipe-list-item" style="position:relative; margin-bottom:8px; border-radius:12px; background:var(--bg-card); border:1px solid #EDE6DE; overflow:hidden;">
                             
@@ -5935,7 +5945,6 @@ window.updateTrackerDashboard = function() {
                             </div>
                         </div>
                     `;
-                    // 🚨 여기까지 덮어쓰기 완료!
                 });
             }
             historyHtml += '</div>';
@@ -6107,7 +6116,7 @@ window.updateTrackerDashboard = function() {
             ? (longestIsNow ? `${rel(longestStart)}에 잠들어 지금 자는 중이에요. ` : `${rel(longestStart)}에 잠들어 ${clock(longestEnd)}에 깼어요. `)
             : "";
         const cntTxt = sleepsStartedToday > 0 ? `오늘은 ${sleepsStartedToday}번 잠들었고, ` : '';
-        ribbonCaption = `<div style="font-size:12.5px; font-weight:500; color:var(--text-sub); margin-top:14px; letter-spacing:-0.2px; line-height:1.6;">${when}${cntTxt}가장 길게 잔 건 ${longTxt}이에요.</div>`;
+        ribbonCaption = `<div id="today-sleep-caption" style="font-size:12.5px; font-weight:500; color:var(--text-sub); margin-top:14px; letter-spacing:-0.2px; line-height:1.6;">${when}${cntTxt}가장 길게 잔 건 ${longTxt}이에요.</div>`;
     } else {
         ribbonCaption = `<div style="font-size:12.5px; font-weight:500; color:var(--text-sub); margin-top:14px;">아직 오늘 잠든 기록이 없어요.</div>`;
     }
@@ -6239,25 +6248,31 @@ window.updateTrackerDashboard = function() {
     /* ⚠️ 며칠 동안 기록을 안 하면 '맘마 먹은 지 204시간 경과!' 가 빨갛게 떴다.
           그건 아기 상태가 아니라 기록이 없는 것이다. 놀라게만 하고 할 일은 없다.
           12시간 안쪽일 때만 알린다. */
-    if (feedInterval > 0 && latestFeed && diffFeedMins >= feedInterval && diffFeedMins <= 12 * 60) {
+    /* ⚠️ 아기가 자는 중인데도 '수유한 지 3시간 넘었어요' 가 빨간 경고로 떴다. 자는 아기를 깨워 먹이라는 말처럼 읽힌다.
+          자는 동안에는 띠를 띄우지 않는다. 색도 경고색(빨강) 대신 맘마 버튼과 같은 보라로 둔다.
+          ✕ 를 누르면 그 기록에 대해서는 다시 띄우지 않는다 (예전에는 화면이 다시 그려질 때마다 돌아왔다). */
+    const briefKey = (kind, rec) => kind + ':' + (rec && (rec.id || rec.timestamp));
+    const briefHidden = (kind, rec) => { try { return localStorage.getItem('tosil_brief_hide') === briefKey(kind, rec); } catch (e) { return false; } };
+    const briefClose = (kind, rec) => `try{localStorage.setItem('tosil_brief_hide','${briefKey(kind, rec)}')}catch(e){}this.parentElement.parentElement.style.display='none'`;
+    if (!isSleeping && feedInterval > 0 && latestFeed && diffFeedMins >= feedInterval && diffFeedMins <= 12 * 60 && !briefHidden('feed', latestFeed)) {
         isFeedAlert = true;
-        briefBg = "#FFF0F1"; briefColor = "#D32F2F"; briefBorder = "#FFD1D1";
-        briefing = `🍼 수유한 지 ${Math.floor(diffFeedMins/60)}시간 넘었어요`;
+        briefBg = "#F3F1FC"; briefColor = "#4F47A5"; briefBorder = "#E4E0F7";
+        briefing = `🍼 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 넘었어요`;
         briefBadge = `
             <div style="display:flex; align-items:center; gap:10px;">
-                <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#EF5350; padding:6px 14px; border-radius:8px; cursor:pointer; box-shadow: 0 2px 4px rgba(239,83,80,0.3);">기록</div>
-                <div onclick="this.parentElement.parentElement.style.display='none'" style="font-size:16px; color:#EF5350; cursor:pointer; font-weight:bold;">✕</div>
+                <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#7F77DD; padding:6px 14px; border-radius:8px; cursor:pointer;">기록</div>
+                <div onclick="${briefClose('feed', latestFeed)}" aria-label="닫기" style="font-size:16px; color:#9C95E0; cursor:pointer; font-weight:bold;">✕</div>
             </div>
         `;
     }
         /* 기저귀 텀 — 설정 창에 저장만 되고 어디서도 쓰이지 않았다 */
         const diaperInterval = (function (v) { v = parseInt(v, 10); return isNaN(v) ? 180 : v; })(localStorage.getItem('tosil_diaper_interval'));
         const diffDiaperMins = latestDiaper ? Math.floor((nowTime - latestDiaper.timestamp) / 60000) : 0;
-        if (!isFeedAlert && diaperInterval > 0 && latestDiaper && diffDiaperMins >= diaperInterval && diffDiaperMins <= 12 * 60) {
+        if (!isFeedAlert && !isSleeping && diaperInterval > 0 && latestDiaper && diffDiaperMins >= diaperInterval && diffDiaperMins <= 12 * 60 && !briefHidden('diaper', latestDiaper)) {
             isFeedAlert = true;      // 같은 띠를 쓴다
             briefBg = "#FFF9E6"; briefColor = "#8A6D00"; briefBorder = "#F5E1A4";
             briefing = `🧷 기저귀 확인한 지 ${Math.floor(diffDiaperMins/60)}시간 넘었어요`;
-            briefBadge = `<div style="display:flex; align-items:center; gap:10px;"><div onclick="window.openTrackerSheet('diaper')" style="font-size:12px; font-weight:800; color:#fff; background:#B98A2E; padding:6px 14px; border-radius:8px; cursor:pointer;">기록하기</div><div onclick="this.parentElement.parentElement.style.display='none'" style="font-size:16px; color:#B98A2E; cursor:pointer; font-weight:bold;">✕</div></div>`;
+            briefBadge = `<div style="display:flex; align-items:center; gap:10px;"><div onclick="window.openTrackerSheet('diaper')" style="font-size:12px; font-weight:800; color:#fff; background:#B98A2E; padding:6px 14px; border-radius:8px; cursor:pointer;">기록하기</div><div onclick="${briefClose('diaper', latestDiaper)}" aria-label="닫기" style="font-size:16px; color:#B98A2E; cursor:pointer; font-weight:bold;">✕</div></div>`;
         }
 
 
@@ -6505,7 +6520,7 @@ setInterval(() => {
 // ==========================================
 window.applyTimeBasedGreeting = function(babyName) {
     /* ⚠️ 시간대마다 '활기찬 오후네요 🌤️ · 커피 한 잔의 여유를' 같은 인사로 카드 제목을 바꿨다.
-          AI 가 쓴 티가 났고, '서준는' 처럼 조사도 틀렸다. 카드가 무엇인지 알려 주는 제목 하나로 둔다. */
+          꾸민 말이라 어색했고, '서준는' 처럼 조사도 틀렸다. 카드가 무엇인지 알려 주는 제목 하나로 둔다. */
     const el = document.getElementById('ai-time-greeting');
     if (!el) return;
     const call = (typeof window.babyCall === 'function') ? window.babyCall('') : (babyName || '우리 아기');
@@ -7264,7 +7279,6 @@ window.openEmergencyModal = function(type) {
                 <div style="font-size: 13.5px; color: var(--text-s); line-height: 1.5; word-break: keep-all;">토사물이 기도를 막지 않게 <b>고개를 옆으로</b> 돌리고, 목 주변 단추나 지퍼를 풀어 호흡을 편하게 해주세요.</div>
             </div>
 
-            <!-- ✨ 대표님의 날카로운 인사이트 반영: 흔한 부모들의 실수 방지! -->
             <div class="box-tint-red" style="padding: 16px; border-radius: 16px; border-left: 4px solid var(--danger); margin-bottom: 8px;">
                 <div style="font-size: 14.5px; font-weight: 900; color: var(--danger); margin-bottom: 6px;">2️⃣ 🚫 억지로 열 내리기 절대 금지</div>
                 <div style="font-size: 13.5px; color: var(--danger); line-height: 1.5; word-break: keep-all;">경련 중 <b>옷을 억지로 벗기거나 물수건으로 닦지 마세요.</b> 해열제를 입에 물리면 <b>질식 위험</b>이 큽니다. 주무르기도 금지</div>
@@ -8488,16 +8502,16 @@ function switchPongTab(mode) {
         tabRatio.style.background = '#FFFFFF'; tabRatio.style.color = '#4A413C'; tabRatio.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
         tabCount.style.background = 'transparent'; tabCount.style.color = '#A3958A'; tabCount.style.boxShadow = 'none';
         
-        desc.innerHTML = '💡 <strong>비율 섞기 (조유량이 같을 때)</strong><br>스푼당 물의 양(조유량)이 <b>같은</b> 분유끼리 바꿀 때만 사용하세요<br>한 젖병에 가루를 비율대로 섞어 먹이는 방식입니다.';
-        label.innerText = '1회 총 수유량';
+        desc.innerHTML = '💡 <strong>스푼당 물 양(조유량)이 같은 분유끼리</strong> 바꿀 때 써요.<br>한 젖병에 두 분유 가루를 비율대로 섞어 먹여요.';
+        label.innerText = '한 번에 먹는 양';
         input.placeholder = '예: 160';
         unit.innerText = 'ml';
     } else {
         tabCount.style.background = '#FFFFFF'; tabCount.style.color = '#4A413C'; tabCount.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
         tabRatio.style.background = 'transparent'; tabRatio.style.color = '#A3958A'; tabRatio.style.boxShadow = 'none';
         
-        desc.innerHTML = '🚨 <strong>교차 수유하기 (조유량이 다를 때)</strong><br>조유량이 <b>다른</b> 분유는 가루를 섞으면 농도가 깨져 배앓이를 해요.<br>꼭 젖병 통째로 횟수를 교차해서 먹여주세요';
-        label.innerText = '하루 총 수유 횟수';
+        desc.innerHTML = '💡 <strong>스푼당 물 양(조유량)이 다른 분유끼리</strong> 바꿀 때 써요.<br>가루를 한 병에 섞으면 농도가 맞지 않아요. 병째로 번갈아 먹여요.';
+        label.innerText = '하루 몇 병 먹나요';
         input.placeholder = '예: 5';
         unit.innerText = '회 (병)';
     }
@@ -8728,7 +8742,7 @@ window.renderOpenRecords = function() {
         container.innerHTML = `
             <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
                 <div style="font-size:24px; margin-bottom:10px;">✨</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s);">아직 기록된 개봉품이 없습니다.<br>통에 적지 말고 여기에 저장하세요</div>
+                <div style="font-size:13.5px; font-weight:800; color:var(--text-s); line-height:1.6;">아직 적어 둔 게 없어요<br>분유나 연고를 뜯으면 여기에 남겨 두세요</div>
             </div>`;
         return;
     }
@@ -8851,13 +8865,13 @@ window.updateOpenItemGuide = function() {
     
     const guides = {
         'formula': '💡 습기에 약해요. 열고 나서 <strong>3주(21일) 안에</strong> 다 쓰는 게 좋아요.',
-        'fever': '💡 처방받은 약은 1주, 시판 병 시럽은 <strong>1달(30일) 권장</strong>',
-        'tub_oint': '💡 약국에서 덜어준 둥근 통 연고는 <strong>1달(30일) 이내</strong>',
-        'tube_oint': '💡 밀봉된 튜브형 연고(비판텐 등)는 <strong>6개월(180일)</strong>',
-        'eye_drop': '🚨 세균이 들어가기 쉬워요. 열고 나서 <strong>1달(30일) 안에</strong> 다 써요',
-        'cream': '💡 아기 피부에 직접 닿는 화장품은 개봉 후 <strong>6개월 권장</strong>',
-        'puree': '💡 침이 닿지 않게 덜어서 냉장 보관 시 <strong>2일 이내</strong>',
-        'wipe': '💡 수분이 마르고 세균 번식 위험이 있어 <strong>1달 권장</strong>'
+        'fever': '💡 처방받은 시럽은 <strong>1주</strong>, 사서 연 병 시럽은 <strong>1달(30일)</strong> 안에 쓰는 게 좋아요.',
+        'tub_oint': '💡 약국에서 덜어 준 둥근 통 연고는 <strong>1달(30일) 안에</strong> 써요.',
+        'tube_oint': '💡 튜브형 연고(비판텐 등)는 연 뒤 <strong>6개월(180일)</strong>까지 써요.',
+        'eye_drop': '💡 세균이 들어가기 쉬워요. 열고 나서 <strong>1달(30일) 안에</strong> 다 써요.',
+        'cream': '💡 피부에 바르는 건 연 뒤 <strong>6개월 안에</strong> 쓰는 게 좋아요.',
+        'puree': '💡 침이 닿지 않게 덜어서 냉장 보관하면 <strong>2일 안에</strong> 먹여요.',
+        'wipe': '💡 마르면서 세균이 생기기 쉬워서 <strong>1달 안에</strong> 쓰는 게 좋아요.'
     };
 
     if(guideEl && guides[val]) {
@@ -9073,7 +9087,7 @@ window.renderSettingsTab = function() {
                     ${imgTag}
                 </div>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 11.5px; font-weight: 800; color: #7F77DD; margin-bottom: 4px; white-space: nowrap; letter-spacing: -0.5px;">카카오 로그인 완료</div>
+                    <div style="font-size: 11.5px; font-weight: 800; color: #7F77DD; margin-bottom: 4px; white-space: nowrap; letter-spacing: -0.5px;">카카오로 로그인했어요</div>
                     <div style="font-size: 16px; font-weight: 900; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${savedNickname} <span style="font-size: 13.5px; font-weight: 600; color: var(--text-s);">님</span></div>
                 </div>
                 <button onclick="window.logoutKakao()" style="padding: 8px 14px; border-radius: 8px; background: #F7F3ED; color: #A3958A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; flex-shrink: 0;">
@@ -9118,7 +9132,7 @@ window.renderSettingsTab = function() {
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- 🖤 배우자 초대 (하이엔드 다크 톤) -->
                     <button onclick="window.sendKakaoInvite('master')" style="width: 100%; padding: 16px; border-radius: 14px; background: #4A413C; color: #FFFFFF; font-size: 14.5px; font-weight: 800; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: 0.2s;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-                        배우자 (아빠/엄마) 초대하기
+                        ${({ mom: '아빠', dad: '엄마' })[localStorage.getItem('user_role')] || '짝꿍'} 초대하기
                     </button>
                     
                     <!-- 🤍 시터/조부모 초대 (깔끔하고 부드러운 라이트 그레이 톤) -->
@@ -9128,7 +9142,7 @@ window.renderSettingsTab = function() {
                     
                     <!-- 🚪 방 나가기 (실수 방지를 위해 깔끔한 텍스트형으로 유지) -->
                     <button onclick="window.safeUnlinkFamilySync()" style="width: 100%; padding: 12px; background: transparent; color: #A3958A; font-size: 12.5px; font-weight: 700; border: none; cursor: pointer; margin-top: 4px; text-decoration: underline; text-underline-offset: 4px;">
-                        가족 연동 해제 및 방 나가기
+                        가족 연결 끊고 나가기
                     </button>
                 </div>
             </div>
@@ -11286,7 +11300,6 @@ window.updateMyPageProfile = function() {
         if (isMaster) roleName = "👑 대표 계정";
         else if (isSubAdmin) roleName = "🌟 관리자";
 
-        // 대표님 화면(스크린샷)에 맞춰 텍스트 교체
         const userInfo = document.getElementById('mypage-user-info');
         if (userInfo) userInfo.innerText = `${roleName} · 배냇함과 함께하는 중!`;
         
@@ -11305,8 +11318,8 @@ window.updateMyPageProfile = function() {
         return;
     } 
     
-    // 2. 대표님 카카오ID면 무조건 프리패스 (서버 기다릴 필요 없음)
-    const MASTER_IDS = ["4995493811", "대표님카카오ID숫자"]; 
+    // 2. 관리자 카카오 ID 면 서버를 기다리지 않는다
+    const MASTER_IDS = ["4995493811"];
     if (MASTER_IDS.includes(String(myKakaoId).trim())) {
         localStorage.setItem('tosil_is_master', 'true');
         renderAdminUI();
@@ -11357,7 +11370,7 @@ window.changeNickname = function() {
     
     // 🚨 해킹 방어막 적용 완료!
     const newName = window.escapeHTML(input.value.trim());
-    // 🕵️ [대표님 전용 비밀 명령어] 
+    // 관리자 확인용 명령
     // 닉네임 칸에 #내아이디# 라고 치고 변경을 누르면, 화면에는 안 남고 경고창(Alert)으로만 내 카카오 ID를 띄워줍니다!
     if (newName === '#내아이디#') {
         const myId = localStorage.getItem('kakao_id');
@@ -11761,7 +11774,7 @@ window.updateMyPageProfile = async function() {
         localStorage.removeItem('tosil_is_master');
         localStorage.removeItem('tosil_is_subadmin');
     } else {
-        // 👑 [1순위 직통 방어] 대표님의 진짜 파이어베이스 UID 하드코딩
+        // 관리자 UID
         const MASTER_UIDS = ["7Xj1jGZcV4OdWsyQrtUkuGq0HqJ3"]; 
         const isHardcodedMaster = MASTER_UIDS.some(id => String(id).trim() === String(myUid).trim());
 
@@ -12154,9 +12167,9 @@ window.handleSecretAdminClick = function() {
     if (window.adminClickCount >= 5) {
         window.adminClickCount = 0; 
         const myUid = localStorage.getItem('firebase_uid') || '';
-        const MASTER_UIDS = ["7Xj1jGZcV4OdWsyQrtUkuGq0HqJ3"]; // 대표님 진짜 UID
+        const MASTER_UIDS = ["7Xj1jGZcV4OdWsyQrtUkuGq0HqJ3"]; // 관리자 UID
         
-        // 🚨 로컬스토리지 글자가 아니라, 진짜 UID가 대표님 것이 맞을 때만 관제센터 오픈!
+        // 저장된 표시가 아니라 실제 UID 가 관리자일 때만 연다
         if (MASTER_UIDS.includes(String(myUid).trim())) {
             if (navigator.vibrate) navigator.vibrate([50, 50, 100]); 
             window.openAdminDashboard();
@@ -13687,7 +13700,10 @@ window.calcSleepRange = function() {
         const h = Math.floor(diffMins / 60);
         const m = diffMins % 60;
         
-        totalText.innerHTML = `현재 <span style="font-size:20px; margin:0 2px;">${h}</span>시간 <span style="font-size:20px; margin:0 2px;">${m}</span>분째 수면 중 💤`;
+        /* ⚠️ '현재 0시간 40분째 수면 중' 처럼 0시간까지 적었다. 사람은 '40분째 자는 중' 이라고 말한다 */
+        const big = (n) => `<span style="font-size:20px; margin:0 2px;">${n}</span>`;
+        totalText.innerHTML = diffMins < 1 ? '방금 잠들었어요'
+            : (h ? `${big(h)}시간` + (m ? ` ${big(m)}분` : '') : `${big(m)}분`) + '째 자는 중';
         totalText.style.background = "#F2F0FC";
         totalText.style.color = "#7F77DD";
         amountHidden.value = 0; // 서버에는 0으로 저장되어야 타이머로 인식함
@@ -13713,7 +13729,6 @@ window.calcSleepRange = function() {
     const h = Math.floor(diffMins / 60);
     const m = diffMins % 60;
     
-    // 💡 대표님 요청: 보라색 삭제! 파란색 테마로 100% 통일
     totalText.style.background = "#F2F0FC";
     totalText.style.color = "#7F77DD";
     totalText.innerHTML = `총 <span style="font-size:20px; margin:0 2px;">${h}</span>시간 <span style="font-size:20px; margin:0 2px;">${m}</span>분 수면 💤`;
@@ -15306,13 +15321,13 @@ window.addNewBabyProfile = function() {
 };
 
 // ==========================================
-// ✨ [마이페이지 설정] VIP 얼리버드 전용 황금 배지 렌더링 (대표님 화면 숨김 처리 완료)
+// 마이페이지 설정 — 얼리버드 배지 (관리자에게는 숨긴다)
 // ==========================================
 const originalRenderSettingsTab = window.renderSettingsTab;
 window.renderSettingsTab = function() {
     originalRenderSettingsTab(); // 원래 화면 먼저 그리고
     
-    // 👑 [핵심] 대표님(최고 관리자)이시라면 이 황금 배지와 VIP 배너를 아예 안 보이게 숨깁니다!
+    // 관리자에게는 배지와 VIP 배너를 숨긴다
     const isMaster = localStorage.getItem('tosil_is_master') === 'true';
     const isSubAdmin = localStorage.getItem('tosil_is_subadmin') === 'true';
 
@@ -15321,13 +15336,13 @@ window.renderSettingsTab = function() {
         const existingRibbon = document.getElementById('vip-badge-ribbon');
         if (existingRibbon) existingRibbon.remove();
 
-        // 설정 탭 안에 있는 '배냇함 VIP' 광고 배너도 대표님 눈에 안 보이게 숨김 처리!
+        // 설정 탭 안의 '배냇함 VIP' 배너도 숨긴다
         const container = document.getElementById('tab-settings');
         if (container) {
             const vipBanner = container.querySelector('div[style*="linear-gradient(135deg, #4A403A"]');
             if (vipBanner) vipBanner.style.display = 'none';
         }
-        return; // 대표님은 여기서 끝
+        return;
     }
     
     /* ⚠️ 무료 개방 중엔 isPremiumUser() 가 모두에게 true 다(plusfree.js).
@@ -15939,7 +15954,6 @@ window.endNightDuty = async function() {
     window.renderNightDuty();
     window.updateTrackerDashboard && window.updateTrackerDashboard();
 
-    // 🚨 여기서부터 시작되는 모달 그리기 부분만 교체!
     const body = document.getElementById('modal-dynamic-body');
     if (body) {
         body.innerHTML = `

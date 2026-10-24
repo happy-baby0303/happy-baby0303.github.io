@@ -471,7 +471,7 @@
               act: "window.openLetterBox()" },
             { icon: "🎙️", label: "소리함", sub: vN ? vN + "개 담겼어요" : "아직 비어 있어요",
               act: vN ? "window.openVoiceBox()" : "window.openVoiceSheet()" },
-            { icon: "💬", label: "문답함", sub: dN ? dN + "개의 대화" : "아직 비어 있어요",
+            { icon: "💬", label: "문답함", sub: dN ? "문답 " + dN + "개" : "아직 비어 있어요",
               act: "window.openDiaryBox && window.openDiaryBox()" },
             { icon: "🏅", label: "첫 도감", sub: milestoneSub(s),
               act: "window.openMilestoneModal && window.openMilestoneModal()" },

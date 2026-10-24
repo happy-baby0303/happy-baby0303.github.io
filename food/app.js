@@ -2160,7 +2160,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
         </button>
     `;
 
-    // 💡 [니치 복구 완료!] 각 영양소별 등장 횟수를 AI가 실시간으로 카운트!!
+    // 영양소마다 몇 번 나왔는지 센다
     let ironCnt = plan.filter(p => p.recipe.goal === 'iron').length;
     let poopCnt = plan.filter(p => p.recipe.goal === 'poop').length;
     let weightCnt = plan.filter(p => p.recipe.goal === 'weight').length;
@@ -2236,7 +2236,7 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
             </div>
             
             <a href="https://link.coupang.com/a/e2f58ZVlhQ" target="_blank" style="display: flex; justify-content:center; align-items:center; gap:8px; width: 100%; background: #7F77DD; color: #FFFFFF; padding: 16px 0; border-radius: 12px; font-weight: 900; font-size: 15px; text-decoration: none; transition: 0.2s;">
-                부족한 재료 로켓프레시로 한 번에 담기 〉
+                부족한 재료 로켓프레시로 한 번에 담기 ›
             </a>
         </div>
     `;

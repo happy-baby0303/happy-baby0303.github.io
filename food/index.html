@@ -51,10 +51,10 @@
     </header>
 
     <main class="container">
-<div class="hero-title" style="text-align: center; margin-bottom: 24px;">
+<div id="food-hero" class="hero-title" style="text-align: center; margin-bottom: 24px;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
         <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
-            <span>안심 이유식 식단</span>
+            <span>이유식 식단</span>
         </h2>
         <span class="dynamic-age-badge" style="background: #F0EEFB; color: #7F77DD; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
         </span>
@@ -92,7 +92,7 @@
                         <div style="font-size: 22px; background: #FFFFFF; width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(127, 119, 221,0.1);">💧</div>
                         <div>
                             <div style="font-size: 15px; font-weight: 800; color: #6A61CE;">이유식 계량 계산기</div>
-                            <div style="font-size: 12px; font-weight: 600; color: #7F77DD; margin-top: 2px;">몇 g 넣으면 몇 g 나오는지, 저울 하나로 끝</div>
+                            <div style="font-size: 12px; font-weight: 600; color: #7F77DD; margin-top: 2px;">몇 g 넣으면 몇 g 나오는지 계산해요</div>
                         </div>
                     </div>
                     <div id="food-calc-chevron" style="color: #7F77DD; display: flex; transition: transform 0.3s ease;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></div>
@@ -201,7 +201,7 @@
                 </div>
             </div>
 <div class="matrix-panel" id="food-filter-panel">
-                <div class="matrix-header">🥄 안심 식단 고르기</div>
+                <div class="matrix-header">🥄 식단 고르기</div>
                 <div class="matrix-grid">
                     <div class="matrix-item">
                         <label>아기 개월수</label>
@@ -457,7 +457,7 @@
     <script src="../shared/babyage.js?v=1"></script>
     <script src="data.js?v=b7"></script>
     <script>try { document.getElementById('food-count-badge').textContent = babyFoodData.length + '종 레시피'; } catch (e) {}</script>
-    <script src="app.js?v=b9"></script>
+    <script src="app.js?v=b10"></script>
     <!-- 토핑 이유식: 재료마다 몇 g · 처음 먹인 재료 (홈 맘마 기록과 같은 칸) -->
     <script src="../shared/topping.js?v=1"></script>
     <script src="toppingmeal.js?v=1"></script>

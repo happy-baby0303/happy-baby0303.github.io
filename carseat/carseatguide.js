@@ -218,12 +218,12 @@
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 '독일 자동차협회(ADAC)가 실제로 충돌시켜 매기는 점수예요. ' +
-                '<b>학점처럼 1점대가 제일 좋고 5점대가 제일 나빠요.</b> ' +
+                '<b>등급처럼 1점대가 제일 좋고 5점대가 제일 아쉬워요.</b> ' +
                 '2.1보다 1.7이 더 좋은 거예요.</div>' +
 
             '<div style="display:flex; gap:4px; margin-bottom:10px;">' +
                 ['0.5~1.5|매우 좋음|#1F9D6B','1.6~2.5|좋음|#7F77DD','2.6~3.5|보통|#E0A72E',
-                 '3.6~4.5|미흡|#E07B39','4.6~5.5|위험|#E32636'].map(function (s) {
+                 '3.6~4.5|아쉬움|#E07B39','4.6~5.5|미흡|#E32636'].map(function (s) {
                     var p = s.split("|");
                     return '<div style="flex:1; text-align:center; padding:9px 2px; border-radius:9px; ' +
                         'background:' + p[2] + '18; border:1px solid ' + p[2] + '44;">' +

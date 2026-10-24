@@ -285,16 +285,23 @@ function generateCardHtml(item) {
                 네이버 쇼핑에서 찾아보기<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; flex-shrink:0;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </a>
         </div>
+        ${/^(스토케|부가부|싸이벡스|어파베이비|에그|오이스터|뉴나|줄즈|잉글레시나|실버크로스|베이비젠|마이크라라이트|베이비조거|마운틴버기|퀴니|조이)/.test(String(item.name || '')) ? `
         <div class="coupang-safety-guard" style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 12px; line-height: 1.5; word-break: keep-all;">
             ※ 해외 직구 유모차는 국내 A/S가 안 될 수 있어요. 정식 수입품인지 확인하세요.
-        </div>
+        </div>` : ''}
     `;
 
     // 7. 같이 많이 사는 것
     /* ⚠️ 셋째 칸이 '유모차 가방걸이 고리' 였다. 같은 화면 맨 위 안전 카드(strollerguide.js)가
           '손잡이에 가방을 걸지 마세요 · 뒤로 넘어가는 가장 흔한 원인' 이라고 하는데, 바로 그걸 팔고 있었다.
           레인커버로 바꾼다. 선풍기는 날개 없는 것으로 찾게 한다 (손가락 끼임). */
-    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 날개없는 선풍기')}&lptag=${partnerCode}`;
+    /* ⚠️ 10월에도 '날개 없는 선풍기' 를 권했다. 첫 칸은 계절을 따른다.
+          6~8월 선풍기 · 4 · 5 · 9월 모기장 · 10~3월 방한 커버 */
+    const accMon = new Date().getMonth() + 1;
+    const accSeason = (accMon >= 6 && accMon <= 8) ? { icon: '🌬️', name: '날개 없는 선풍기', q: '유모차 날개없는 선풍기' }
+        : (accMon >= 4 && accMon <= 9) ? { icon: '🦟', name: '유모차 모기장', q: '유모차 모기장' }
+        : { icon: '🧣', name: '방한 커버', q: '유모차 방한커버' };
+    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent(accSeason.q)}&lptag=${partnerCode}`;
     const accBagUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 정리함 이너백')}&lptag=${partnerCode}`;
     const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 레인커버')}&lptag=${partnerCode}`;
 
@@ -309,10 +316,10 @@ function generateCardHtml(item) {
             <!-- ⚠️ 가운데 정렬 + 가로 스크롤을 같이 쓰면, 넘칠 때 끝이 잘리고 스크롤도 안 닿는다.
                  (플립처럼 좁은 화면에서 세 번째 칸이 반 잘렸다) 세 칸 격자로 고정한다. -->
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                <!-- 1. 선풍기 -->
+                <!-- 1. 계절 (선풍기 · 모기장 · 방한 커버) -->
                 <a href="${accFanUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">❄️</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">날개 없는 선풍기</div>
+                    <div style="font-size: 24px; margin-bottom: 6px;">${accSeason.icon}</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">${accSeason.name}</div>
                     <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
                 </a>
                 <!-- 2. 정리함 -->
@@ -323,7 +330,7 @@ function generateCardHtml(item) {
                 </a>
                 <!-- 3. 레인커버 -->
                 <a href="${accHookUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">🔗</div>
+                    <div style="font-size: 24px; margin-bottom: 6px;">☔</div>
                     <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">레인커버</div>
                     <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
                 </a>

@@ -753,7 +753,7 @@
         return '<style>#pp-mom::placeholder,#pp-dad::placeholder{font-weight:500;color:#C4BAAF;opacity:1;}</style>' +
             '<div style="font-size:15px; font-weight:900; color:var(--text-m);">📞 도우미가 걸 번호</div>' +
             '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin:4px 0 14px; line-height:1.6; word-break:keep-all;">' +
-                '할머니·시터 화면의 \'엄마에게 전화 / 아빠에게 전화\' 가 이 번호로 걸려요. 우리 가족에게만 보여요.</div>' +
+                '할머니·시터 화면의 \'엄마에게 전화 / 아빠에게 전화\'가 이 번호로 걸려요. 우리 가족에게만 보여요.</div>' +
             '<div style="display:flex; gap:8px;">' + input("mom", "엄마") + input("dad", "아빠") + '</div>' +
             '<div onclick="window.saveParentPhones()" style="margin-top:12px; text-align:center; padding:13px; background:#4A413C; ' +
                 'color:#FFF; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer;">저장</div>';
