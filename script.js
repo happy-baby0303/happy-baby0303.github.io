@@ -9272,7 +9272,7 @@ window.renderSettingsTab = function() {
                         '최신' 은 확인도 안 하고 적은 말이다. -->
                 <div onclick="window.handleSecretAdminClick()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: default; -webkit-tap-highlight-color: transparent;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">앱 버전</div>
-                    <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s);">1.0.0</div>
+                    <div style="font-size: 13.5px; font-weight: 800; color: var(--text-s);">${window.appBuildLabel ? window.appBuildLabel() : '1.0.0'}</div>
                 </div>
             </div>
 
@@ -12180,6 +12180,14 @@ window.adminClickCount = 0;
 window.adminClickTimer = null;
 
 // 1. 다다닥! 5번 터치 감지 로직
+/* 설정 '앱 버전' — 1.0.0 뒤에 언제 판인지 붙인다 (script.js?v=20261025-4 → 1.0.0 · 10.25)
+   의견을 보낼 때 같이 가는 판과 같은 값이라, 받은 의견이 어느 판 이야기인지 맞춰 볼 수 있다 */
+window.appBuildLabel = function () {
+    const el = document.querySelector('script[src*="script.js?v="]');
+    const m = el && /v=\d{4}(\d{2})(\d{2})/.exec(el.getAttribute('src') || '');
+    return '1.0.0' + (m ? ' · ' + Number(m[1]) + '.' + Number(m[2]) : '');
+};
+
 window.handleSecretAdminClick = function() {
     window.adminClickCount++;
     if (window.adminClickTimer) clearTimeout(window.adminClickTimer);
@@ -12255,23 +12263,7 @@ window.openAdminDashboard = function() {
                     </div>
                 </button>
 
-                <!-- 2. 신고/유저 관리 -->
-                <button onclick="window.showToast('🛠️ [3순위 진행 예정] 악성 유저 통제소 연동을 준비 중입니다.')" style="background:#27272A; border:1px solid #3F3F46; padding:18px; border-radius:16px; display:flex; align-items:center; gap:16px; text-align:left; cursor:pointer; transition:0.2s;">
-                    <div style="font-size:24px;">🚨</div>
-                    <div>
-                        <div style="font-size:15px; font-weight:900; color:#F87171; margin-bottom:4px;">신고 접수 및 악성 유저 관리</div>
-                        <div style="font-size:12px; font-weight:600; color:#B5A99E;">신고된 글 블라인드 및 카카오ID 영구 차단 기능</div>
-                    </div>
-                </button>
-
-                <!-- 3. 지도 관리 -->
-                <button onclick="window.showToast('🛠️ [4순위 진행 예정] 육아지도 DB 관리망 연동을 준비 중입니다.')" style="background:#27272A; border:1px solid #3F3F46; padding:18px; border-radius:16px; display:flex; align-items:center; gap:16px; text-align:left; cursor:pointer; transition:0.2s;">
-                    <div style="font-size:24px;">🗺️</div>
-                    <div>
-                        <div style="font-size:15px; font-weight:900; color:#FFF; margin-bottom:4px;">육아지도 핫플 & 행사 등록</div>
-                        <div style="font-size:12px; font-weight:600; color:#B5A99E;">코드 수정 없이 새로운 장소를 앱에 추가합니다.</div>
-                    </div>
-                </button>
+                <!-- (눌러도 '준비 중' 토스트만 뜨던 '신고 · 유저 관리' 와 '지도 관리' 버튼은 뺐다 — 만들 때 다시 넣는다) -->
             </div>
         </div>
     `;
