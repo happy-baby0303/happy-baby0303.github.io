@@ -11,6 +11,9 @@
  *  - careReminder     : asia-northeast3 (서울 / 5분마다)    ← 수유 · 기저귀 · 졸릴 때 알림
  *  - pushCheck        : asia-northeast3 (서울)              ← 앱의 '알림 점검'
  *  - sendFeedback     : asia-northeast3 (서울)              ← 앱의 '의견 보내기'
+ *  - myFeedback       : asia-northeast3 (서울)              ← 의견 보내기 창 아래 '보낸 의견과 답장'
+ *  - feedbackInbox    : asia-northeast3 (서울)              ← 관리자 화면 '의견함'
+ *  - replyFeedback    : asia-northeast3 (서울)              ← 의견함에서 답장 → 보낸 사람 폰으로 알림
  *
  * ⚠️ 이 파일을 고치면 꼭 배포해야 서버에 반영된다 (깃허브에 올리는 것과 별개)
  *      functions 폴더가 있는 곳(육아메이트 폴더)에서
@@ -1108,10 +1111,21 @@ exports.pushCheck = onCall(SEOUL, async (request) => {
  *   · 로그인한 사람만 · 글은 1000자까지 · 한 사람이 하루 10번까지 (장난 방지)
  *   · 답장 받을 이메일은 적은 사람만 (형식이 틀리면 버린다)
  *   · 앱 버전 · 플레이 앱인지 웹인지 · 폰 종류를 같이 받는다 — 원인 찾기용. 아기 이름 · 사진은 받지 않는다
- * 읽기: 파이어베이스 콘솔 → Firestore → feedback. 읽은 건 status 를 "read" 로 바꿔 두면 된다.
+ * 읽기 · 답장: 앱 관리자 화면(설정 → 앱 버전 다섯 번) → 의견함.
+ *   답장을 쓰면 보낸 사람 폰으로 "💌 보내 주신 의견에 답장이 왔어요" 가 가고,
+ *   그 사람의 의견 보내기 창 아래 '보낸 의견' 에 답장이 보인다.
  * 탈퇴하면 deleteUserAccount 가 그 사람이 보낸 의견도 지운다.
+ * 관리자 = 앱 관리자 화면과 같은 계정(ADMIN_UIDS) + Firestore admins 명단
  * ================================================================== */
 const FEEDBACK_DAILY = 10;
+const ADMIN_UIDS = ["7Xj1jGZcV4OdWsyQrtUkuGq0HqJ3"];   // script.js 의 MASTER_UIDS 와 같은 사람
+
+async function adminUids(db) {
+  const set = new Set(ADMIN_UIDS);
+  try { (await db.collection("admins").get()).docs.forEach((x) => set.add(x.id)); } catch (e) { /* 명단을 못 읽어도 위 계정은 있다 */ }
+  return [...set];
+}
+const cutStr = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 const MAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,100}\.[^\s@]{2,}$/;
 
 exports.sendFeedback = onCall(SEOUL, async (request) => {
@@ -1144,8 +1158,7 @@ exports.sendFeedback = onCall(SEOUL, async (request) => {
     });
 
     try {
-      const adm = await db.collection("admins").get();
-      const tk = await tokensOf(db, adm.docs.map((x) => x.id));
+      const tk = await tokensOf(db, await adminUids(db));
       const head = text.replace(/\s+/g, " ");
       await sendTo(db, tk, {
         title: "📮 새 의견이 왔어요",
@@ -1158,6 +1171,69 @@ exports.sendFeedback = onCall(SEOUL, async (request) => {
     return { ok: true, id: ref.id };
   } catch (e) {
     logger.error("[feedback] 실패", e);
+    return { ok: false, error: "server" };
+  }
+});
+
+/* 내가 보낸 의견과 답장 — 최근 10개 (uid 하나짜리 조건이라 색인이 따로 필요 없다 · 정렬은 여기서) */
+exports.myFeedback = onCall(SEOUL, async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) return { ok: false, error: "login" };
+  try {
+    const snap = await admin.firestore().collection("feedback").where("uid", "==", uid).get();
+    const list = snap.docs.map((d) => {
+      const x = d.data() || {};
+      return { id: d.id, text: x.text || "", at: Number(x.at) || 0, reply: x.reply || "", repliedAt: Number(x.repliedAt) || 0 };
+    }).sort((a, b) => b.at - a.at).slice(0, 10);
+    return { ok: true, list };
+  } catch (e) {
+    logger.error("[feedback] 내 의견 실패", e);
+    return { ok: false, error: "server" };
+  }
+});
+
+/* 📮 의견함 — 관리자만 · 최근 50개 */
+exports.feedbackInbox = onCall(SEOUL, async (request) => {
+  const uid = request.auth && request.auth.uid;
+  const db = admin.firestore();
+  if (!uid || !(await adminUids(db)).includes(uid)) return { ok: false, error: "admin" };
+  try {
+    const snap = await db.collection("feedback").orderBy("at", "desc").limit(50).get();
+    return { ok: true, list: snap.docs.map((d) => Object.assign({ id: d.id }, d.data())) };
+  } catch (e) {
+    logger.error("[feedback] 의견함 실패", e);
+    return { ok: false, error: "server" };
+  }
+});
+
+/* 💌 답장 — 관리자만. 저장하고 보낸 사람 폰으로 알린다 (누르면 의견 보내기 창이 열린다) */
+exports.replyFeedback = onCall(SEOUL, async (request) => {
+  const uid = request.auth && request.auth.uid;
+  const db = admin.firestore();
+  if (!uid || !(await adminUids(db)).includes(uid)) return { ok: false, error: "admin" };
+  const d = request.data || {};
+  const id = cutStr(d.id, 40), reply = cutStr(d.reply, 1000);
+  if (!/^[A-Za-z0-9]{1,40}$/.test(id) || !reply) return { ok: false, error: "empty" };
+  try {
+    const ref = db.collection("feedback").doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) return { ok: false, error: "gone" };
+    const now = Date.now();
+    await ref.update({ reply, repliedAt: now, status: "replied" });
+    const to = (snap.data() || {}).uid;
+    let sent = 0;
+    if (to) {
+      const head = reply.replace(/\s+/g, " ");
+      const r = await sendTo(db, await tokensOf(db, [to]), {
+        title: "💌 보내 주신 의견에 답장이 왔어요",
+        body: head.length > 60 ? head.slice(0, 60) + "…" : head,
+        tag: "feedback-reply", link: "index.html?go=feedback", ttl: TTL.family,
+      });
+      sent = r.sent;
+    }
+    return { ok: true, sent };
+  } catch (e) {
+    logger.error("[feedback] 답장 실패", e);
     return { ok: false, error: "server" };
   }
 });

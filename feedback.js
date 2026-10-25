@@ -6,6 +6,9 @@
      답장 받을 이메일은 적은 사람만.
      앱 버전 · 플레이 앱인지 웹인지 · 폰 종류가 같이 간다 (아기 이름 · 사진은 보내지 않는다)
    못 보내면 쓰던 글을 이 폰에 남겨 둔다 (다시 열면 그대로 있다)
+   창 아래에 '보낸 의견' — 관리자가 답장하면 여기 보이고, 폰으로도 알림이 온다
+     (알림을 누르면 index.html?go=feedback → 이 창이 열린다)
+   관리자 화면 '의견함' (window.openFeedbackInbox) — 읽고 답장한다
 
    index.html 에서 pushcheck.js 다음에 로드하세요.
    ============================================================ */
@@ -57,6 +60,7 @@
                 '<input id="fb-mail" type="email" inputmode="email" autocomplete="email" placeholder="적으면 이 주소로 답장해 드려요" value="' + esc(draft.email || "") + '" style="' + field + ' padding:12px 16px;">' +
                 '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin:10px 2px 16px; line-height:1.55; word-break:keep-all;">앱 버전과 폰 종류가 같이 가요. 아기 이름이나 사진은 보내지 않아요.</div>' +
                 '<div id="fb-send" style="text-align:center; padding:15px; border-radius:14px; background:' + INK + '; color:#FFFFFF; font-size:15px; font-weight:900; cursor:pointer;">보내기</div>' +
+                '<div id="fb-mine"></div>' +
             '</div>';
         document.body.appendChild(w);
         var t = document.getElementById("fb-text"), m = document.getElementById("fb-mail");
@@ -65,6 +69,99 @@
         m.oninput = keep;
         document.getElementById("fb-x").onclick = close;
         document.getElementById("fb-send").onclick = send;
+        loadMine();
+    };
+
+    /* ---------- 보낸 의견과 답장 ---------- */
+    function day(ms) { var d = new Date(ms); return (d.getMonth() + 1) + "월 " + d.getDate() + "일"; }
+    var CLAMP = "display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;";
+    async function loadMine() {
+        if (!window.functions || typeof window.httpsCallable !== "function") return;
+        try {
+            var r = await window.httpsCallable(window.functions, "myFeedback")({});
+            var list = ((r && r.data && r.data.list) || []).slice(0, 5);
+            var box = document.getElementById("fb-mine");
+            if (!box || !list.length) return;
+            box.innerHTML = '<div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin:24px 2px 8px;">보낸 의견</div>' +
+                list.map(function (x) {
+                    return '<div style="border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:8px;">' +
+                        '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub);">' + day(x.at) + '</div>' +
+                        '<div style="font-size:13.5px; font-weight:600; color:var(--text-m); margin-top:3px; line-height:1.5; word-break:keep-all; white-space:pre-wrap; ' + CLAMP + '">' + esc(x.text) + '</div>' +
+                        (x.reply
+                            ? '<div style="margin-top:10px; padding:10px 12px; border-radius:10px; background:#F4F2FC;">' +
+                                  '<div style="font-size:11.5px; font-weight:800; color:#6A61CE;">💌 답장 · ' + day(x.repliedAt || x.at) + '</div>' +
+                                  '<div style="font-size:13.5px; font-weight:600; color:#4F47A5; margin-top:3px; line-height:1.55; word-break:keep-all; white-space:pre-wrap;">' + esc(x.reply) + '</div>' +
+                              '</div>'
+                            : '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:6px;">읽고 답장해 드릴게요</div>') +
+                    '</div>';
+                }).join("");
+        } catch (e) { /* 못 불러오면 보내기만 쓴다 */ }
+    }
+
+    /* 답장 알림을 눌러 들어왔으면 이 창을 연다 (주소는 script.js 가 곧 지운다 — 불러올 때 미리 본다) */
+    if (/[?&]go=feedback/.test(location.search)) {
+        window.addEventListener("load", function () {
+            setTimeout(function () {
+                try { if (typeof window.switchTab === "function") window.switchTab("settings", document.getElementById("nav-settings")); } catch (e) {}
+                window.openFeedback();
+            }, 1500);
+        });
+    }
+
+    /* ---------- 의견함 (관리자 화면) ---------- */
+    var APP = { play: "플레이 앱", pwa: "홈 화면 앱", web: "웹" };
+    var ROLE = { mom: "엄마", dad: "아빠", senior: "도우미" };
+    function inboxCard(x) {
+        var meta = [day(x.at), ROLE[x.role] || x.role, APP[x.app] || x.app, x.version, x.email].filter(Boolean).map(esc).join(" · ");
+        var id = /^[A-Za-z0-9]{1,40}$/.test(x.id || "") ? x.id : "";
+        return '<div style="background:#27272A; border:1px solid #3F3F46; border-radius:16px; padding:14px 16px; margin-bottom:12px;">' +
+            '<div style="font-size:11.5px; font-weight:700; color:#A1A1AA; word-break:break-all;">' + meta + '</div>' +
+            '<div style="font-size:14.5px; font-weight:600; color:#FFFFFF; margin-top:6px; line-height:1.55; white-space:pre-wrap; word-break:keep-all;">' + esc(x.text) + '</div>' +
+            '<div style="font-size:11px; color:#71717A; margin-top:6px; word-break:break-all;">' + esc(x.device || "") + '</div>' +
+            '<div id="fb-r-' + id + '" style="margin-top:12px;">' +
+                (x.reply
+                    ? '<div style="padding:10px 12px; border-radius:10px; background:#3B3655; color:#DCD8F5; font-size:13.5px; line-height:1.55; white-space:pre-wrap;">💌 ' + esc(x.reply) + '</div>'
+                    : (id ? '<textarea id="fb-rt-' + id + '" rows="3" placeholder="답장을 쓰면 보낸 사람 폰으로 알림이 가요" style="width:100%; box-sizing:border-box; border-radius:12px; border:1px solid #52525B; background:#18181B; color:#FFFFFF; font-size:16px; padding:10px 12px; font-family:inherit; resize:none;"></textarea>' +
+                           '<div onclick="window.__fbReply(\'' + id + '\')" style="margin-top:8px; text-align:center; padding:11px; border-radius:12px; background:#7F77DD; color:#FFFFFF; font-size:14px; font-weight:900; cursor:pointer;">답장 보내기</div>' : '')) +
+            '</div>' +
+        '</div>';
+    }
+    window.openFeedbackInbox = async function () {
+        var old = document.getElementById("fb-inbox");
+        if (old) old.remove();
+        var w = document.createElement("div");
+        w.id = "fb-inbox";
+        w.setAttribute("style", "position:fixed; inset:0; z-index:10000000; background:#18181B; overflow-y:auto; padding:22px 18px 40px; box-sizing:border-box;");
+        w.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">' +
+                '<div style="font-size:20px; font-weight:900; color:#FFFFFF;">📮 의견함</div>' +
+                '<div id="fb-inbox-x" style="font-size:22px; color:#FFFFFF; cursor:pointer; padding:4px 8px;">✕</div>' +
+            '</div>' +
+            '<div id="fb-inbox-list" style="font-size:13.5px; font-weight:600; color:#A1A1AA;">불러오는 중…</div>';
+        document.body.appendChild(w);
+        document.getElementById("fb-inbox-x").onclick = function () { w.remove(); };
+        var list = document.getElementById("fb-inbox-list");
+        try {
+            var r = await window.httpsCallable(window.functions, "feedbackInbox")({});
+            var d = (r && r.data) || {};
+            if (!d.ok) { list.textContent = d.error === "admin" ? "관리자 계정이 아니에요" : "불러오지 못했어요"; return; }
+            list.innerHTML = (d.list || []).length ? d.list.map(inboxCard).join("") : "아직 온 의견이 없어요";
+        } catch (e) {
+            list.textContent = "불러오지 못했어요. 서버(functions)를 새로 올렸는지 확인해 주세요";
+        }
+    };
+    window.__fbReply = async function (id) {
+        var t = document.getElementById("fb-rt-" + id), box = document.getElementById("fb-r-" + id);
+        var reply = ((t && t.value) || "").trim();
+        if (!reply) { toast("답장을 적어 주세요"); return; }
+        try {
+            var r = await window.httpsCallable(window.functions, "replyFeedback")({ id: id, reply: reply });
+            var d = (r && r.data) || {};
+            if (!d.ok) { toast("보내지 못했어요 (" + (d.error || "?") + ")"); return; }
+            if (box) box.innerHTML = '<div style="padding:10px 12px; border-radius:10px; background:#3B3655; color:#DCD8F5; font-size:13.5px; line-height:1.55; white-space:pre-wrap;">💌 ' + esc(reply) + '</div>';
+            toast(d.sent ? "답장을 보냈어요" : "답장을 남겼어요. 그 사람 폰 알림은 꺼져 있어서 다음에 창을 열면 보여요");
+        } catch (e) {
+            toast("보내지 못했어요. 잠시 뒤 다시 눌러 주세요");
+        }
     };
 
     var busy = false;

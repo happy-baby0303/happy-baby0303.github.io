@@ -12238,6 +12238,14 @@ window.openAdminDashboard = function() {
             <div style="font-size:14px; font-weight:800; color:#B5A99E; margin-bottom:12px;">운영 모듈 제어</div>
             
             <div style="display:flex; flex-direction:column; gap:12px; overflow-y:auto; padding-bottom:20px;">
+                <!-- 의견함 (feedback.js) -->
+                <button onclick="window.openFeedbackInbox && window.openFeedbackInbox()" style="background:#27272A; border:1px solid #3F3F46; padding:18px; border-radius:16px; display:flex; align-items:center; gap:16px; text-align:left; cursor:pointer; transition:0.2s;">
+                    <div style="font-size:24px;">📮</div>
+                    <div>
+                        <div style="font-size:15px; font-weight:900; color:#FFF; margin-bottom:4px;">의견함</div>
+                        <div style="font-size:12px; font-weight:600; color:#B5A99E;">사용자가 보낸 의견을 읽고 답장합니다.</div>
+                    </div>
+                </button>
                 <!-- 1. 공지사항 컨트롤 -->
                 <button onclick="window.openNoticeController()" style="background:#27272A; border:1px solid #3F3F46; padding:18px; border-radius:16px; display:flex; align-items:center; gap:16px; text-align:left; cursor:pointer; transition:0.2s;">
                     <div style="font-size:24px;">📢</div>
