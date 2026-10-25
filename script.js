@@ -9370,19 +9370,34 @@ window.unlinkFamilySync = function() {
     window.showConfirm(
         "정말 가족 연동을 해지하시겠습니까?<br><span style='font-size:12px; color:#A3958A; font-weight:600;'>해지하면 옛날 코드는 영구 폐기되며 새 코드로 시작합니다.</span>",
         async function() {
-            // 1. 내 폰에서 삭제
-            localStorage.removeItem("family_sync_code");
-            
-            // 2. 🚨 카카오 백업 서버에서도 삭제! (새로고침 시 좀비처럼 부활하는 현상 차단)
-            const kakaoId = localStorage.getItem('kakao_id');
-            if (kakaoId && typeof window.db !== 'undefined') {
+            /* ⚠️ 이 폰에서 코드만 지웠다. 서버 가족 명단(families)에는 그대로 남아서
+                  · 나간 사람 폰으로 수유 · 바통 같은 가족 알림이 계속 갔고
+                  · 새 폰이나 앱을 새로 깔면 '내 가족방 기억하기'(familyhome.js)가 그 방으로 다시 데려갔다 — 아직 그 방 사람이라서
+                  (예전 '카카오 백업 지우기' 는 옛 문법이라 한 번도 돌지 않았다)
+               명단에서 내 칸을 빼고, 내 문서(users)에 적어 둔 방도 지운다.
+               돌봄 도우미도 스스로 나갈 수 있게 보안 규칙에 '(C) 나 혼자 나가기' 가 있어야 한다. */
+            const code = localStorage.getItem("family_sync_code");
+            const uid = (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || localStorage.getItem('firebase_uid') || '';
+            if (code && uid && window.db && window.doc && window.getDoc && window.updateDoc) {
                 try {
-                    // v8 호환 문법으로 카카오 백업 DB 초기화
-                    if (typeof window.db.collection === 'function') {
-                        await window.db.collection('kakao_users').doc(String(kakaoId)).set({ family_sync_code: null }, { merge: true });
+                    const ref = window.doc(window.db, 'families', code);
+                    const snap = await window.getDoc(ref);
+                    const m = snap && snap.exists() ? (snap.data() || {}).members : null;
+                    if (Array.isArray(m)) {
+                        if (m.indexOf(uid) >= 0) await window.updateDoc(ref, { members: m.filter(x => x !== uid) });
+                    } else if (m && Object.prototype.hasOwnProperty.call(m, uid)) {
+                        const next = Object.assign({}, m);
+                        delete next[uid];
+                        await window.updateDoc(ref, { members: next });
                     }
-                } catch(e) { console.warn("서버 백업 지우기 에러:", e); }
+                } catch (e) { console.warn("[가족 나가기] 명단에서 빼지 못했어요", e); }
+                try {
+                    const kid = localStorage.getItem('kakao_id') || uid;
+                    if (window.setDoc) await window.setDoc(window.doc(window.db, 'users', String(kid)), { firebase_uid: uid, family_code: '' }, { merge: true });
+                } catch (e) { console.warn("[가족 나가기] 내 문서 정리 실패", e); }
             }
+            localStorage.removeItem("family_sync_code");
+            localStorage.removeItem("tosil_home_saved");
             
             window.showToast("가족 연결을 끊었어요");
             
