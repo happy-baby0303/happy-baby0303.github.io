@@ -101,6 +101,12 @@
             '<div data-w="away" class="' + (w === "away" ? "on" : "") + '" onclick="window.setDutyWhere(\'away\')">밖에 있어요</div></div>';
     }
 
+    /* 다시 졸릴 때 (sleepwindow.js) — 집에 가기 전에 '곧 재울 때' 인지 알 수 있게 */
+    function sleepyTxt() {
+        var g = (typeof window.sleepyGuess === "function") ? window.sleepyGuess() : null;
+        return g ? g.short : "";
+    }
+
     function sinceStats(since) {
         var R = records().filter(function (r) { return r && Number(r.timestamp) >= since && Number(r.timestamp) <= Date.now() + 5 * MIN; });
         var feeds = R.filter(function (r) { return r.type === "feed" && r.subType !== "이유식"; });
@@ -140,7 +146,7 @@
             row("맘마", s.feeds.length ? s.feeds.length + "번" : NONE, lf ? "마지막 " + ago(lf.timestamp) + " · " + (lf.subType || "맘마") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : lf.subType === "이유식" ? "g" : "ml") : "") : "") +
             (s.foods.length ? row("이유식", s.foods.length + "번", "") : "") +
             row("기저귀", s.diapers.length ? s.diapers.length + "번" : NONE, ld ? "마지막 " + ago(ld.timestamp) + " · " + (ld.subType === "소변+대변" ? "소변 · 대변" : (ld.subType || "기저귀")) : "") +
-            (sleepTxt ? row("잠", sleepTxt, "") : "") +
+            (sleepTxt ? row("잠", sleepTxt, sleepyTxt()) : "") +
             (bat.length ? '<div onclick="var t=document.getElementById(\'home-dad-baton-list\'); if(t) t.scrollIntoView({behavior:\'smooth\', block:\'center\'});" ' +
                 'style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border-radius:13px;background:rgba(127,119,221,0.08);cursor:pointer;">' +
                 '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:800;color:#5B53B8;">💌 받은 부탁 ' + bat.length + '개' + (firstAsk ? ' · ' + firstAsk.replace(/</g, "&lt;") : '') + '</span>' +

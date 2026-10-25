@@ -14448,6 +14448,9 @@ window.updateSeniorBriefing = function() {
             if (now - wake < DAY_MS) {
                 sleepMain = '깬 지 ' + ago(wake).replace(' 전', '');
                 sleepSub = clock(wake) + '에 깼어요 · ' + span(Number(sl.amount)) + ' 잤어요';
+                /* 다시 졸릴 때 — 꿈이 기록으로 짐작한 것 (sleepwindow.js). 할머니 · 시터가 제일 궁금해한다 */
+                const sg = (typeof window.sleepyGuess === 'function') ? window.sleepyGuess(now) : null;
+                if (sg) sleepSub += '<br><span style="color:' + (sg.state === 'late' ? '#9A6B12' : '#6A61CE') + '; font-weight:800;">' + esc(sg.short) + '</span>';
             }
         }
     }
