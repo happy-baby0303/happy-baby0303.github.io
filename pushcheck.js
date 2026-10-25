@@ -20,9 +20,9 @@
          ⑤ 알림 서버                  (서버 코드가 새것인지 · 정기 작업이 도는지)
          ⑥ 서버에 이 폰 저장          (users 문서의 fcm_tokens)
          ⑦ 가족 연결                  (families 명단 · 다른 가족 폰)
-         ⑧ 육퇴 알림 · ⑨ 수유 · 기저귀 알림
+         ⑧ 육퇴 알림 · ⑨ 수유 · 기저귀 알림 · ⑩ 졸릴 때 알림
 
-        ⑤~⑨ 는 functions 의 pushCheck 가 본 그대로를 받아 온다.
+        ⑤~⑩ 은 functions 의 pushCheck 가 본 그대로를 받아 온다.
         결과는 글로 복사할 수 있다 — 그대로 보내 주면 어디가 문제인지 바로 안다.
 
    index.html 에서 carealarm.js 다음, settingscards.js 앞에 로드하세요.
@@ -30,7 +30,7 @@
 (function () {
     'use strict';
 
-    var SERVER_EXPECT = "2026-10-10";   // functions/index.js 의 SERVER_VERSION 과 같아야 한다
+    var SERVER_EXPECT = "2026-10-25";   // functions/index.js 의 SERVER_VERSION 과 같아야 한다
     var INK = "#4A413C", PURPLE = "#7F77DD";
     var OK = "#5B9A6E", WARN = "#B07A22", BAD = "#C9574B", WAIT = "#B5AAA0";
     var ASK_KEY = "tosil_pushask";      // { n: 닫은 횟수, at: 마지막으로 닫은 시각, feed: 기록 직후에 물어봤나 }
@@ -44,6 +44,7 @@
     function code() { return (typeof window.getSyncCode === "function" && window.getSyncCode()) || localStorage.getItem("family_sync_code") || ""; }
     function perm() { return ("Notification" in window) ? Notification.permission : "unsupported"; }
     function every(key) { var v = parseInt(localStorage.getItem(key), 10); return isNaN(v) ? 180 : v; }
+    function sleepyOn() { return typeof window.sleepyPushOn === "function" ? window.sleepyPushOn() : localStorage.getItem("tosil_sleepy_push") !== "off"; }
     function hm(m) { var h = Math.floor(m / 60), mm = m % 60; return h ? (h + "시간" + (mm ? " " + mm + "분" : "")) : (mm + "분"); }
     function kTime(ts) {
         var d = new Date(ts), h = d.getHours(), m = d.getMinutes(), hh = h % 12 === 0 ? 12 : h % 12;
@@ -207,17 +208,21 @@
                "border:1px solid var(--border); margin-bottom:12px; box-sizing:border-box; width:100%; cursor:pointer;";
 
     function careCardHTML() {
-        var f = every("tosil_feed_interval"), d = every("tosil_diaper_interval");
-        var on = f > 0 || d > 0;
+        var f = every("tosil_feed_interval"), d = every("tosil_diaper_interval"), z = sleepyOn();
+        var on = f > 0 || d > 0 || z;
         var p = perm();
         var line;
         if (!on) line = '지금은 꺼져 있어요';
         else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">이 폰 알림이 꺼져 있어요 · 눌러서 켜기</span>';
-        else line = esc([f > 0 ? "수유 " + hm(f) : "", d > 0 ? "기저귀 " + hm(d) : ""].filter(Boolean).join(" · ")) +
-                    '마다 알려 드려요  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>';
+        else {
+            /* 한 줄에 다 넣으면 '바꾸기 ›' 만 다음 줄로 떨어진다. 졸릴 때는 둘째 줄로 */
+            var t = [f > 0 ? "수유 " + hm(f) : "", d > 0 ? "기저귀 " + hm(d) : ""].filter(Boolean).join(" · ");
+            line = (t ? esc(t) + "마다" + (z ? "<br>졸릴 때도" : "") : "졸릴 때") +
+                   ' 알려 드려요  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>';
+        }
         return '<div style="font-size:22px;">🍼</div>' +
             '<div style="flex:1; min-width:0;">' +
-                '<div style="font-size:15px; font-weight:900; color:var(--text-m);">수유 · 기저귀 알림</div>' +
+                '<div style="font-size:15px; font-weight:900; color:var(--text-m);">수유 · 기저귀 · 졸릴 때 알림</div>' +
                 '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' + line + '</div>' +
             '</div>';
     }
@@ -229,12 +234,12 @@
             '<div style="font-size:13px; font-weight:800; color:' + PURPLE + '; flex-shrink:0;">점검하기 ›</div>';
     }
     async function onCareCard() {
-        var f = every("tosil_feed_interval"), d = every("tosil_diaper_interval");
-        if ((f > 0 || d > 0) && perm() === "default") {
+        var on = every("tosil_feed_interval") > 0 || every("tosil_diaper_interval") > 0 || sleepyOn();
+        if (on && perm() === "default") {
             var ok = await window.askPush();
-            return toast(ok ? "이제 수유 · 기저귀 시간에 알려 드릴게요" : "알림을 허용해야 폰으로 알려 드릴 수 있어요");
+            return toast(ok ? "이제 수유 · 기저귀 · 졸릴 때 알려 드릴게요" : "알림을 허용해야 폰으로 알려 드릴 수 있어요");
         }
-        if ((f > 0 || d > 0) && perm() === "denied") return window.openPushCheck();
+        if (on && perm() === "denied") return window.openPushCheck();
         if (typeof window.openTrackerSettings === "function") window.openTrackerSettings();
     }
     function redrawCare() {
@@ -284,7 +289,7 @@
         window.saveTrackerSettings = function () {
             var out = _saveSet.apply(this, arguments);
             var f = every("tosil_feed_interval"), d = every("tosil_diaper_interval");
-            if ((f > 0 || d > 0) && perm() === "default") window.askPush();
+            if ((f > 0 || d > 0 || sleepyOn()) && perm() === "default") window.askPush();
             setTimeout(redrawCare, 50);
             return out;
         };
@@ -301,7 +306,8 @@
         ["server", "서버에 이 폰 저장"],
         ["family", "가족 연결"],
         ["bed", "육퇴 알림"],
-        ["care", "수유 · 기저귀 알림"]
+        ["care", "수유 · 기저귀 알림"],
+        ["sleepy", "졸릴 때 알림"]
     ];
     var state = {};       // id → { s: ok|warn|bad|wait|off, d: 설명, a: [버튼 글, 할 일] }
     var running = false, lastToken = "";
@@ -434,7 +440,7 @@
             }
 
             if (!user) {
-                ["job", "server", "family", "bed", "care"].forEach(function (id) { set(id, "off", "로그인이 되면 이어서 볼게요"); });
+                ["job", "server", "family", "bed", "care", "sleepy"].forEach(function (id) { set(id, "off", "로그인이 되면 이어서 볼게요"); });
                 return;
             }
 
@@ -449,12 +455,12 @@
             try { s = await callCheck(); }
             catch (e) {
                 set("job", "bad", serverErr(e));
-                ["server", "family", "bed", "care"].forEach(function (id) { set(id, "off", "서버 점검이 되면 이어서 볼게요"); });
+                ["server", "family", "bed", "care", "sleepy"].forEach(function (id) { set(id, "off", "서버 점검이 되면 이어서 볼게요"); });
                 return;
             }
             if (!s.ok) {
                 set("job", "bad", s.error || "서버에서 점검하지 못했어요");
-                ["server", "family", "bed", "care"].forEach(function (id) { set(id, "off", ""); });
+                ["server", "family", "bed", "care", "sleepy"].forEach(function (id) { set(id, "off", ""); });
                 return;
             }
             var beat = (s.beat && s.beat.care) || 0;
@@ -502,6 +508,18 @@
                 var tail = me && me.away ? " · 지금 '밖에 있어요' 라서 아기 곁에 있는 가족 폰으로 가요" : "";
                 set("care", "ok", (bits.length ? bits.join(" · ") : "기록을 하나 남기면 다음 알림 시각이 잡혀요") + tail);
             }
+
+            /* ⑩ 졸릴 때 */
+            var g = typeof window.sleepyGuess === "function" ? window.sleepyGuess() : null;
+            var asleep = !!localStorage.getItem("tosil_sleep_start");
+            if (!sleepyOn()) set("sleepy", "off", "이 폰은 꺼 뒀어요", ["켜기", "careset"]);
+            else if (!s.version || s.version < SERVER_EXPECT) set("sleepy", "warn", "알림 서버를 새로 올려야 와요");
+            else if (me && me.away) set("sleepy", "ok", "지금 '밖에 있어요' 라서 아기 곁에 있는 가족 폰으로 가요");
+            else if (asleep) set("sleepy", "ok", "자는 중이에요. 깨면 다음 알림 시각을 잡아요");
+            else if (c && c.sleepyAt > now && c.sleepyPushed !== c.sleepyFrom) set("sleepy", "ok", "다음 알림 " + kTime(c.sleepyAt) + " · " + kTime(c.sleepyFor || c.sleepyAt) + "쯤 졸려할 때예요");
+            else if (c && c.sleepyFrom && c.sleepyPushed === c.sleepyFrom) set("sleepy", "ok", "이번에 깬 건 알려 드렸어요. 다시 자고 깨면 또 잡아요");
+            else if (g && g.at - 10 * 60000 > now) set("sleepy", "warn", "서버에 다음 알림 시각이 아직 안 적혔어요.", ["다시 적기", "caresync"]);
+            else set("sleepy", "off", "잠 기록이 더 쌓이면 시작해요. 비슷한 때 깬 날이 사흘 넘게 있어야 해요");
         } finally {
             running = false;
         }

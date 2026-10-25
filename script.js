@@ -5719,11 +5719,27 @@ window.drawTrackerStatsChart = function(records) {
     });
 };
 
+/* 😪 졸릴 때 알림 스위치 — 창 안에서는 눌러서 바꿔 두기만 하고, '저장하기' 에서 적는다 (텀 칸과 같게) */
+function paintSleepySetting(on) {
+    const row = document.getElementById('set-sleepy-row'), knob = document.getElementById('set-sleepy-knob');
+    if (!row || !knob) return;
+    row.setAttribute('aria-checked', on ? 'true' : 'false');
+    row.setAttribute('data-on', on ? '1' : '0');
+    knob.style.background = on ? '#7F77DD' : 'var(--border)';
+    if (knob.firstElementChild) knob.firstElementChild.style.left = on ? '22px' : '3px';
+}
+window.toggleSleepySetting = function () {
+    const row = document.getElementById('set-sleepy-row');
+    paintSleepySetting(!(row && row.getAttribute('data-on') === '1'));
+};
+
 window.openTrackerSettings = function() {
     const feedMins = localStorage.getItem('tosil_feed_interval') || 180;
     const diaperMins = localStorage.getItem('tosil_diaper_interval') || 180;
-    document.getElementById('set-feed-interval').value = Math.floor(feedMins / 60);
-    document.getElementById('set-diaper-interval').value = Math.floor(diaperMins / 60);
+    /* ⚠️ 2.5시간(150분)으로 정해도 창을 다시 열면 2 로 보였고, 그대로 저장하면 2시간이 됐다. 소수점까지 보여 준다 */
+    document.getElementById('set-feed-interval').value = parseFloat((feedMins / 60).toFixed(2));
+    document.getElementById('set-diaper-interval').value = parseFloat((diaperMins / 60).toFixed(2));
+    paintSleepySetting(localStorage.getItem('tosil_sleepy_push') !== 'off');
     document.getElementById('tracker-settings-modal').style.display = 'flex';
 };
 window.closeTrackerSettingsForce = function() { document.getElementById('tracker-settings-modal').style.display = 'none'; };
@@ -5736,9 +5752,11 @@ window.saveTrackerSettings = function() {
     const dHour = num('set-diaper-interval');
     localStorage.setItem('tosil_feed_interval', fHour * 60);
     localStorage.setItem('tosil_diaper_interval', dHour * 60);
+    const sleepyRow = document.getElementById('set-sleepy-row');
+    if (sleepyRow) localStorage.setItem('tosil_sleepy_push', sleepyRow.getAttribute('data-on') === '1' ? 'on' : 'off');
     window.closeTrackerSettingsForce();
     window.updateTrackerDashboard();
-    window.showToast("알림 텀을 저장했어요");
+    window.showToast("알림 설정을 저장했어요");
     if (typeof window.refreshCareAlarm === "function") window.refreshCareAlarm(true);
 };
 // ==========================================

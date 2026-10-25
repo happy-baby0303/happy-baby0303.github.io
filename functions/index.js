@@ -8,7 +8,7 @@
  *  - bedtimeReminder  : asia-northeast3 (서울 / 15분마다)   ← 육퇴 알림
  *  - countWaitlist    : asia-northeast3 (대기명단 카운터)
  *  - stageDaily       : asia-northeast3 (서울 / 매일 아침 9시) ← 임신 주차 · 신청 마감
- *  - careReminder     : asia-northeast3 (서울 / 5분마다)    ← 수유 · 기저귀 알림
+ *  - careReminder     : asia-northeast3 (서울 / 5분마다)    ← 수유 · 기저귀 · 졸릴 때 알림
  *  - pushCheck        : asia-northeast3 (서울)              ← 앱의 '알림 점검'
  *
  * ⚠️ 이 파일을 고치면 꼭 배포해야 서버에 반영된다 (깃허브에 올리는 것과 별개)
@@ -438,12 +438,12 @@ exports.deleteUserAccount = onCall(SEOUL, async (request) => {
  *    알림 글 자체가 잘못되면(너무 길다 등) 모든 토큰이 이 코드로 실패하는데,
  *    그걸 죽은 토큰으로 보고 지우면 가족 전원의 알림 주소가 한 번에 날아간다.
  * ================================================================== */
-const SERVER_VERSION = "2026-10-10";   // 앱의 '알림 점검' 이 새 서버 코드가 올라갔는지 이 값으로 본다
+const SERVER_VERSION = "2026-10-25";   // 앱의 '알림 점검' 이 새 서버 코드가 올라갔는지 이 값으로 본다
 const DEAD_CODES = new Set([
   "messaging/registration-token-not-registered",
   "messaging/invalid-registration-token",
 ]);
-const TTL = { care: 2 * 3600, bed: 3 * 3600, stage: 12 * 3600, family: 24 * 3600, check: 600 };
+const TTL = { care: 2 * 3600, sleepy: 20 * 60, bed: 3 * 3600, stage: 12 * 3600, family: 24 * 3600, check: 600 };
 
 function pad2(n) { return String(n).padStart(2, "0"); }
 function kstOf(ms) { return new Date(ms + 9 * 3600 * 1000); }
@@ -770,9 +770,25 @@ exports.stageDaily = onSchedule(
  *   · 밤 10시 ~ 아침 7시엔 할머니 · 돌봄 선생님 폰은 뺀다
  * ⚠️ 6시간 넘게 지난 건 보내지 않는다. 기록을 안 한 것일 수 있다.
  * ⚠️ 문구는 앱 carealarm.js 의 words() 와 같은 표다. 고치면 둘 다 고친다.
+ *
+ * 😪 졸릴 때 알림 (같은 장부 · 같은 5분마다)
+ *   앱(sleepwindow.js → carealarm.js)이 그 집 잠 기록으로 '다시 졸려할 때' 를 짐작해서
+ *   그 10분 전 시각을 적어 둔다.
+ *     care.{아기}: { sleepyAt: 알림 시각, sleepyFor: 졸려할 때, sleepyFrom: 깬 시각,
+ *                    sleepyGap: 보통 깨어 있던 시간(분), sleepyNight: 다음 잠이 밤잠인가 }
+ *     mute.{uid}.sleepy — 이 사람은 졸릴 때 알림을 껐다
+ *   · 한 번 깬 것(sleepyFrom)마다 한 번만 보낸다. 짐작이 5분 바뀌어도 두 번 울리지 않는다
+ *   · 15분 넘게 늦었으면 보내지 않는다 — 이미 잠들었거나 지나간 일이다
+ *   · 보내기 직전에 기록을 한 번 더 본다. 깬 뒤에 다시 잠든 기록이 있으면 보내지 않는다
+ *     (앱이 '잠들었어요' 를 장부에 못 적고 꺼졌어도 자는 아기 깨우는 알림이 가지 않게)
+ *   · 잠들면 앱이 sleepyAt 을 0 으로, sleepyFrom 을 잠든 시각으로 적는다
+ *   · 다음에 볼 시각은 careNext 와 따로 sleepyNext 에 둔다.
+ *     아직 새 앱을 안 받은 폰이 careNext 를 수유 · 기저귀만으로 다시 적어도 졸릴 때 알림이 밀리지 않게
+ * ⚠️ 졸릴 때 문구도 앱 carealarm.js 의 sleepyWords() 와 같은 표다.
  * ================================================================== */
 const LATE_MAX = 6 * 3600 * 1000;
 const AWAY_MAX = 14 * 3600 * 1000;
+const SLEEPY_LATE = 15 * 60 * 1000;
 
 function careWords(kind, name, from, every, at) {
   const n = pushNick(name);
@@ -790,6 +806,48 @@ function careWords(kind, name, from, every, at) {
   ];
   const list = kind === "feed" ? FEED : DIAPER;
   return list[Math.floor(Number(at) / 3600000) % list.length];
+}
+
+/* 150 → '2시간 반', 160 → '2시간 40분', 40 → '40분' (10분 단위로 둥글게 · 앱 홈 '다시 졸릴 때' 줄과 같은 말) */
+function softHm(mins) {
+  const m = Math.max(0, Math.round(Number(mins) / 10) * 10), h = Math.floor(m / 60), r = m % 60;
+  return h ? h + "시간" + (r ? (r === 30 ? " 반" : " " + r + "분") : "") : r + "분";
+}
+
+/* 😪 졸릴 때 알림 문구 — j: { name, at(알림 시각), for(졸려할 때), wake(깬 시각), gap(분), night } */
+function sleepyWords(j) {
+  const n = pushNick(j.name);
+  const when = kTime(j.for);
+  const awake = softHm((Number(j.at) - Number(j.wake)) / 60000);
+  const gap = Number(j.gap) > 0 ? softHm(j.gap) : "";
+  const NAP = [
+    [`😪 ${n} 곧 졸려할 거예요`, `${when}쯤이에요. 깬 지 ${awake} 됐어요`],
+    ["😪 슬슬 낮잠 시간이에요", gap ? `이맘때 깨면 보통 ${gap}쯤 뒤에 잤어요` : `${when}쯤 졸려할 거예요`],
+    [`😪 ${n} 눈꺼풀이 무거워질 때예요`, `${when}쯤 졸려할 거예요. 천천히 준비해 주세요`],
+  ];
+  const NIGHT = [
+    [`🌙 ${n} 곧 밤잠 들 때예요`, `${when}쯤이에요. 천천히 준비해 주세요`],
+    ["🌙 슬슬 밤잠 준비할 때예요", gap ? `이맘때 깨면 보통 ${gap}쯤 뒤에 밤잠을 잤어요` : `${when}쯤 밤잠 들 때예요`],
+    [`🌙 곧 ${n} 잘 시간이에요`, `깬 지 ${awake} 됐어요`],
+  ];
+  const list = j.night ? NIGHT : NAP;
+  return list[Math.floor(Number(j.at) / 3600000) % list.length];
+}
+
+/* 깬 뒤에 다시 잠든 기록이 있나 (타이머를 켰거나 잠을 적었다)
+   아기 꼬리표: 첫째는 "main" ↔ 기록 칸 tracker_{코드}, 둘째부터는 "_시각" ↔ tracker_{코드}_시각
+   못 읽으면 앱이 적어 둔 대로 보낸다 (false) */
+async function sleptSince(db, code, key, wake) {
+  if (!/^(main|_[A-Za-z0-9]{1,30})$/.test(String(key))) return false;
+  try {
+    const snap = await db.collection("tracker_" + code + (key === "main" ? "" : key)).doc("status").get();
+    if (!snap.exists) return false;
+    const recs = (snap.data() || {}).records;
+    return Array.isArray(recs) && recs.some((r) => r && r.type === "sleep" && Number(r.timestamp) > Number(wake) + 60000);
+  } catch (e) {
+    logger.warn("[sleepy] 기록 확인 실패", { code, message: e.message });
+    return false;
+  }
 }
 
 /* 이 알림을 받을 사람 */
@@ -821,16 +879,21 @@ exports.careReminder = onSchedule(
     const now = Date.now();
     await beat(db, "care", now);
 
-    const snap = await db.collection("reminders").where("careNext", "<=", now).get();
-    if (snap.empty) return;
+    // 수유 · 기저귀는 careNext, 졸릴 때는 sleepyNext 가 지난 문서 (필드 하나짜리 조건이라 색인을 따로 만들 필요가 없다)
+    const docs = new Map();
+    for (const field of ["careNext", "sleepyNext"]) {
+      const s = await db.collection("reminders").where(field, "<=", now).get();
+      s.forEach((x) => docs.set(x.id, x));
+    }
+    if (!docs.size) return;
 
-    for (const docSnap of snap.docs) {
+    for (const docSnap of docs.values()) {
       const code = docSnap.id;
       const d = docSnap.data() || {};
       const care = d.care || {};
       const updates = {};
       const jobs = [];
-      let next = null;
+      let next = null, snext = null;
 
       Object.keys(care).forEach((key) => {
         const c = care[key] || {};
@@ -847,6 +910,20 @@ exports.careReminder = onSchedule(
             name: c.babyName || d.babyName || "우리 아기",
           });
         });
+
+        // 😪 졸릴 때 — 한 번 깬 것(sleepyFrom)마다 한 번만
+        const sa = Number(c.sleepyAt) || 0, sf = Number(c.sleepyFrom) || 0;
+        if (!sa || !sf || Number(c.sleepyPushed) === sf) return;
+        if (sa > now) { snext = snext === null ? sa : Math.min(snext, sa); return; }
+        updates["care." + key + ".sleepyPushed"] = sf;
+        if (now - sa > SLEEPY_LATE) return;                          // 늦었다 — 이미 잠들었거나 지나갔다
+        jobs.push({
+          kind: "sleepy", key, at: sa, wake: sf,
+          for: Number(c.sleepyFor) || sa + 10 * 60000,
+          gap: Number(c.sleepyGap) || 0,
+          night: c.sleepyNight === true,
+          name: c.babyName || d.babyName || "우리 아기",
+        });
       });
 
       try {
@@ -854,13 +931,16 @@ exports.careReminder = onSchedule(
           const roles = await familyRoles(db, code);
           if (roles) {
             for (const j of jobs) {
+              const sleepy = j.kind === "sleepy";
+              if (sleepy && await sleptSince(db, code, j.key, j.wake)) continue;   // 그새 잠들었다
               const tk = await tokensOf(db, careTargets(d, roles, j.kind, now));
-              const [title, body] = careWords(j.kind, j.name, j.from, j.every, j.at);
-              await sendTo(db, tk, { title, body, tag: "care-" + j.kind, link: "index.html", ttl: TTL.care });
+              const [title, body] = sleepy ? sleepyWords(j) : careWords(j.kind, j.name, j.from, j.every, j.at);
+              await sendTo(db, tk, { title, body, tag: "care-" + j.kind, link: "index.html", ttl: sleepy ? TTL.sleepy : TTL.care });
             }
           }
         }
         updates.careNext = next;                                    // 다음에 볼 시각 (없으면 null)
+        updates.sleepyNext = snext;
         await docSnap.ref.update(updates);
       } catch (e) {
         logger.error("[careReminder] 실패", code, e);
@@ -965,7 +1045,9 @@ exports.pushCheck = onCall(SEOUL, async (request) => {
         out.care = Object.keys(care).slice(0, 5).map((key) => {
           const c = care[key] || {};
           return { key, feedAt: Number(c.feedAt) || 0, feedPushed: Number(c.feedPushed) || 0,
-                   diaperAt: Number(c.diaperAt) || 0, diaperPushed: Number(c.diaperPushed) || 0 };
+                   diaperAt: Number(c.diaperAt) || 0, diaperPushed: Number(c.diaperPushed) || 0,
+                   sleepyAt: Number(c.sleepyAt) || 0, sleepyFor: Number(c.sleepyFor) || 0,
+                   sleepyFrom: Number(c.sleepyFrom) || 0, sleepyPushed: Number(c.sleepyPushed) || 0 };
         });
         out.careStuck = out.care.some((c) => ["feed", "diaper"].some((kind) => {
           const at = c[kind + "At"];
@@ -976,6 +1058,7 @@ exports.pushCheck = onCall(SEOUL, async (request) => {
           out.careMe = {
             feed: careTargets(r, roles, "feed", now).includes(uid),
             diaper: careTargets(r, roles, "diaper", now).includes(uid),
+            sleepy: careTargets(r, roles, "sleepy", now).includes(uid),
             away: !!(Number((r.away || {})[uid]) && now - Number((r.away || {})[uid]) < AWAY_MAX),
           };
         }
@@ -1013,5 +1096,5 @@ exports.pushCheck = onCall(SEOUL, async (request) => {
 
 /* 시험할 때만 꺼내 쓴다 (배포할 때는 이 줄이 아무 일도 안 한다) */
 if (process.env.BAENAET_TEST) {
-  exports.__test = { pushNick, kTime, hm, careWords, bedWords, careTargets, pushMessage, dayKeyOf };
+  exports.__test = { pushNick, kTime, hm, softHm, careWords, sleepyWords, bedWords, careTargets, pushMessage, dayKeyOf, sleptSince };
 }

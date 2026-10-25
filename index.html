@@ -1342,7 +1342,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
                 <div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:var(--text-s);">
                     <span>기록하기</span>
-                    <span onclick="window.openTrackerSettings()" style="cursor:pointer; opacity: 0.7;" title="알림 텀 설정">⚙️</span>
+                    <span onclick="window.openTrackerSettings()" style="cursor:pointer; opacity: 0.7;" title="알림 설정">⚙️</span>
                 </div>
                 <span id="tracker-history-btn" onclick="window.toggleTrackerHistory()" style="font-size: 12px; color: #7F77DD; font-weight: 800; background:#F0EEFB; padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;">통계·기록 보기 ›</span>
             </div>
@@ -2963,9 +2963,9 @@ body.mode-senior #hero-drag-tip { display: none !important; }
         
         <!-- 헤더 영역 -->
         <div style="text-align:center; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
-            <div style="font-size:32px; margin-bottom:8px;">⚙️</div>
-            <div class="sos-choice-title" style="color:var(--text-m); font-size: 18px; font-weight: 900; margin-bottom: 6px;">알림 텀 설정</div>
-            <div class="sos-choice-desc" style="color:var(--text-s); font-size: 13px; font-weight: 600;">우리아기 패턴에 맞게 알림을 설정하세요.</div>
+            <div style="font-size:30px; margin-bottom:8px;">🔔</div>
+            <div class="sos-choice-title" style="color:var(--text-m); font-size: 18px; font-weight: 900; margin-bottom: 6px;">알림 설정</div>
+            <div class="sos-choice-desc" style="color:var(--text-s); font-size: 13px; font-weight: 600;">앱을 닫아 둬도 폰으로 알려 드려요</div>
         </div>
 
         <!-- 입력 영역 -->
@@ -2973,19 +2973,27 @@ body.mode-senior #hero-drag-tip { display: none !important; }
             <!-- 수유 텀 -->
             <div>
                 <label style="font-size:13.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">🍼 수유 알림 텀 (시간 · 0이면 끔)</label>
-                <!-- 🚨 원본 ID(set-feed-interval) 복구 완료 -->
                 <input type="number" id="set-feed-interval" class="box-sub" placeholder="예: 3" style="width: 100%; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--border); background: transparent; font-size: 16px; font-weight: 700; color: var(--text-m); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary)';" onblur="this.style.borderColor='var(--border)';">
             </div>
             
             <!-- 기저귀 텀 -->
             <div>
                 <label style="font-size:13.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">💩 기저귀 확인 텀 (시간 · 0이면 끔)</label>
-                <!-- 🚨 원본 ID(set-diaper-interval) 복구 완료 -->
                 <input type="number" id="set-diaper-interval" class="box-sub" placeholder="예: 2" style="width: 100%; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--border); background: transparent; font-size: 16px; font-weight: 700; color: var(--text-m); outline: none; transition: border 0.2s;" onfocus="this.style.borderColor='var(--primary)';" onblur="this.style.borderColor='var(--border)';">
+            </div>
+
+            <!-- 졸릴 때 (누르면 바뀌고, 저장하기에서 적는다) -->
+            <div>
+                <label style="font-size:13.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">😪 졸릴 때 미리 알림</label>
+                <div id="set-sleepy-row" role="switch" aria-checked="true" data-on="1" onclick="window.toggleSleepySetting()" style="display:flex; align-items:center; gap:12px; padding: 12px 14px 12px 16px; border-radius: 16px; border: 1.5px solid var(--border); cursor: pointer;">
+                    <div style="flex:1; min-width:0; font-size:12.5px; font-weight:600; color:var(--text-s); line-height:1.55; word-break:keep-all;">평소 잠들던 때 10분쯤 전에 알려 드려요<br>잠을 사흘 넘게 적으면 시작해요</div>
+                    <div id="set-sleepy-knob" style="width:46px; height:27px; border-radius:14px; flex-shrink:0; background:#7F77DD; position:relative; transition:0.2s;">
+                        <div style="position:absolute; top:3px; left:22px; width:21px; height:21px; border-radius:50%; background:#FFFFFF; transition:0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 저장 버튼 (원본 클래스와 onclick 기능 완벽 유지) -->
         <button class="btn-main" style="width: 100%; padding: 16px; margin-top: 0; border-radius: 18px; background: var(--text-m) !important; color: var(--bg-card) !important; font-size: 15px; font-weight: 800; border: none; cursor: pointer;" onclick="window.saveTrackerSettings()">저장하기</button>
     </div>
 </div>
@@ -3563,7 +3571,7 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261025-1"></script>
+<script src="script.js?v=20261025-2"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3638,8 +3646,8 @@ body.mode-senior #hero-drag-tip { display: none !important; }
 <!-- 밤사이 — 아침에 홈 위쪽에 어젯밤 한 장 (기록마다 누가 남겼는지도 붙인다) -->
 <script src="./nightcard.js?v=2"></script>
 <script src="./remind.js"></script>
-    <script src="./carealarm.js"></script>
-    <script src="./pushcheck.js"></script>      
+    <script src="./carealarm.js?v=2"></script>
+    <script src="./pushcheck.js?v=2"></script>
 <script src="./memories.js"></script>    
 <script src="./firstwords.js"></script>  
 <script src="./babytab.js"></script> 
