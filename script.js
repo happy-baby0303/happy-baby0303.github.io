@@ -9252,6 +9252,10 @@ window.renderSettingsTab = function() {
             <!-- 고객 지원 및 약관 -->
             <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">고객 지원 및 약관</div>
             <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
+                <div id="feedback-row" onclick="window.openFeedback && window.openFeedback()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
+                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">의견 보내기</div>
+                    <div style="color: #A3958A; font-size: 12px;">›</div>
+                </div>
                 <div onclick="window.open('https://www.instagram.com/ggoom_e2', '_blank')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">인스타그램 DM 문의하기</div>
                     <div style="color: #A3958A; font-size: 12px;">›</div>
