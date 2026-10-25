@@ -1163,7 +1163,7 @@ exports.sendFeedback = onCall(SEOUL, async (request) => {
       await sendTo(db, tk, {
         title: "📮 새 의견이 왔어요",
         body: head.length > 60 ? head.slice(0, 60) + "…" : head,
-        tag: "feedback", link: "index.html", ttl: TTL.family,
+        tag: "feedback", link: "index.html?go=inbox", ttl: TTL.family,   // 누르면 관리자 의견함이 열린다
       });
     } catch (e) {
       logger.warn("[feedback] 관리자 알림 실패", { message: e.message });   // 알림은 못 가도 의견은 남았다

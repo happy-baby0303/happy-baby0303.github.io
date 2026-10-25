@@ -9,12 +9,17 @@
    창 아래에 '보낸 의견' — 관리자가 답장하면 여기 보이고, 폰으로도 알림이 온다
      (알림을 누르면 index.html?go=feedback → 이 창이 열린다)
    관리자 화면 '의견함' (window.openFeedbackInbox) — 읽고 답장한다
+     ('📮 새 의견' 알림을 누르면 index.html?go=inbox → 의견함이 바로 열린다)
+   새 답장을 아직 안 봤으면 설정 '의견 보내기' 줄 오른쪽에 '답장 왔어요'
+     (의견을 보낸 적이 있는 폰만 확인한다 · 창을 열어 보면 사라진다)
 
    index.html 에서 pushcheck.js 다음에 로드하세요.
    ============================================================ */
 (function () {
     'use strict';
     var DRAFT = "tosil_feedback_draft";
+    var SENT = "tosil_feedback_sent";        // 이 폰에서 의견을 보낸 적이 있다
+    var SEEN = "tosil_feedback_seen";        // 여기까지 답장은 봤다 (답장 시각)
     var INK = "#4A413C";
 
     function get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
@@ -82,6 +87,8 @@
             var list = ((r && r.data && r.data.list) || []).slice(0, 5);
             var box = document.getElementById("fb-mine");
             if (!box || !list.length) return;
+            put(SENT, "1");
+            markSeen(list);
             box.innerHTML = '<div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin:24px 2px 8px;">보낸 의견</div>' +
                 list.map(function (x) {
                     return '<div style="border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:8px;">' +
@@ -98,10 +105,44 @@
         } catch (e) { /* 못 불러오면 보내기만 쓴다 */ }
     }
 
-    /* 답장 알림을 눌러 들어왔으면 이 창을 연다 (주소는 script.js 가 곧 지운다 — 불러올 때 미리 본다) */
-    if (/[?&]go=feedback/.test(location.search)) {
+    /* ---------- 새 답장 표시 (설정 '의견 보내기' 줄) ---------- */
+    function newest(list) { return list.reduce(function (m, x) { return Math.max(m, Number(x.repliedAt) || 0); }, 0); }
+    function paintRow(on) {
+        var row = document.getElementById("feedback-row");
+        var tail = row && row.lastElementChild;
+        if (!tail) return;
+        tail.innerHTML = on ? '<span style="display:inline-block; padding:3px 8px; border-radius:8px; background:#F0EEFB; color:#6A61CE; font-size:11.5px; font-weight:900;">답장 왔어요</span>' : "›";
+    }
+    function markSeen(list) {
+        var n = newest(list);
+        if (n > (Number(get(SEEN)) || 0)) put(SEEN, String(n));
+        paintRow(false);
+    }
+    async function checkReplies() {
+        if (get(SENT) !== "1" || !window.functions || typeof window.httpsCallable !== "function") return;
+        try {
+            var r = await window.httpsCallable(window.functions, "myFeedback")({});
+            var list = (r && r.data && r.data.list) || [];
+            paintRow(newest(list) > (Number(get(SEEN)) || 0));
+        } catch (e) { /* 못 보면 그냥 둔다 */ }
+    }
+    (function hookSettings() {
+        var orig = window.renderSettingsTab;
+        if (typeof orig !== "function") { if (!hookSettings.n) { hookSettings.n = 1; window.addEventListener("load", hookSettings); } return; }
+        if (orig.__fb) return;
+        var w = function () { var out = orig.apply(this, arguments); setTimeout(checkReplies, 300); return out; };
+        Object.keys(orig).forEach(function (k) { try { w[k] = orig[k]; } catch (e) {} });
+        w.__fb = true;
+        window.renderSettingsTab = w;
+    })();
+
+    /* 알림을 눌러 들어왔으면 그 창을 연다 (주소는 script.js 가 곧 지운다 — 불러올 때 미리 본다)
+       ?go=feedback — 답장 알림 → 의견 보내기 창 · ?go=inbox — 새 의견 알림(관리자) → 의견함 */
+    var GO = (/[?&]go=(feedback|inbox)\b/.exec(location.search) || [])[1];
+    if (GO) {
         window.addEventListener("load", function () {
             setTimeout(function () {
+                if (GO === "inbox") return window.openFeedbackInbox();
                 try { if (typeof window.switchTab === "function") window.switchTab("settings", document.getElementById("nav-settings")); } catch (e) {}
                 window.openFeedback();
             }, 1500);
@@ -184,6 +225,7 @@
             var d = (r && r.data) || {};
             if (d.ok) {
                 put(DRAFT, "");
+                put(SENT, "1");
                 close();
                 toast("보내 주셔서 고마워요. 꼭 읽어 볼게요");
                 return;
