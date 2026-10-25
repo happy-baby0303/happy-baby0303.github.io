@@ -298,6 +298,13 @@ async function purgeFamilyData(db, code) {
   } catch (e) {
     logger.warn("소식 페이지 정리 실패", { code, message: e.message });
   }
+  // 돌봄 도우미가 엄마 · 아빠에게 보낸 사진 (스토리지 senior_photos/{가족코드}/)
+  // ⚠️ 사람 단위(uid) 폴더가 아니라 가족 단위라서, 방을 정리해도 이 사진들만 남아 있었다
+  try {
+    await admin.storage().bucket(BUCKET).deleteFiles({ prefix: `senior_photos/${code}/`, force: true });
+  } catch (e) {
+    logger.warn("도우미 사진 정리 실패", { code, message: e.message });
+  }
   await db.collection("stagepush").doc(code).delete().catch(() => {});   // 임신 · 신청 알림 장부
   await db.collection("reminders").doc(code).delete().catch(() => {});
   await db.collection("families").doc(code).delete().catch(() => {});
