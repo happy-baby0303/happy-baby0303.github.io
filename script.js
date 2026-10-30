@@ -9278,7 +9278,7 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">의견 보내기</div>
                     <div style="color: #A3958A; font-size: 12px;">›</div>
                 </div>
-                <div onclick="window.open('https://www.instagram.com/ggoom_e2', '_blank')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
+                <div onclick="window.open('https://www.instagram.com/baenaetham_official', '_blank')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">인스타그램 DM 문의하기</div>
                     <div style="color: #A3958A; font-size: 12px;">›</div>
                 </div>
