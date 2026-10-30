@@ -590,7 +590,7 @@
                         (x.sub ? '<div style="margin-top:2px; font-size:11.5px; font-weight:700; ' +
                                  'color:' + GRAY + ';">' + esc(x.sub) + '</div>' : '') +
                     '</div>' +
-                    '<div style="flex-shrink:0; font-size:12px; color:#C4CAD2;">\u3009</div>' +
+                    '<div style="flex-shrink:0; font-size:12px; color:#C4CAD2;">\u203A</div>' +
                 '</div>';
             }).join("") +
 

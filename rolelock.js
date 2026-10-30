@@ -62,6 +62,17 @@
         }
     }
 
+    /* 가족방 사람 수 — 혼자 쓰는 동안엔 홈의 '아기랑 있어요 / 밖에 있어요' 를 숨긴다 (duty.js)
+       짝꿍이나 도우미가 들어오면 바로 다시 보인다 */
+    function noteSize(m) {
+        var n = String(Object.keys(m || {}).length);
+        try {
+            if (localStorage.getItem("tosil_family_size") === n) return;
+            localStorage.setItem("tosil_family_size", n);
+        } catch (e) { return; }
+        if (typeof window.refreshDuty === "function") { try { window.refreshDuty(); } catch (e) {} }
+    }
+
     /* ---------- 켤 때 한 번 물어본다 ---------- */
 
     window.verifyMyRole = async function () {
@@ -81,6 +92,7 @@
 
             if (checkRemoved(m, uid)) return null;
             rememberMyLabel(snap.data() || {});
+            noteSize(m);
             var role = m[uid] || null;
             applyRole(role);
             if (role) registerDevice(role);   // 가족 명단에 '이 폰은 아빠 · 오늘' 을 적는다 (6시간에 한 번)
@@ -108,6 +120,7 @@
             if (!m || Array.isArray(m)) return;
             if (checkRemoved(m, uid)) return;
             rememberMyLabel(snap.data() || {});
+            noteSize(m);
             applyRole(m[uid] || null);
         }, function (e) {
             console.warn("[역할] 실시간 확인 에러", e);

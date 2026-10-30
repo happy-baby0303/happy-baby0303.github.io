@@ -298,7 +298,18 @@
         '</div>';
     }
 
+    /* 아직 말할 때가 아닌 아기(6개월 전 · 배 속)에게는 홈 카드를 띄우지 않는다. 이미 담은 말이 있으면 그대로 둔다
+       ⚠️ 두 달 된 아기 홈에 '처음 한 말을 남겨보세요' 가 떴다 */
+    function tooYoung() {
+        if (sorted().length) return false;
+        var s = localStorage.getItem("tosil_startDate");
+        if (!s) return true;
+        var b = new Date(s + "T00:00:00").getTime();
+        return isNaN(b) || (Date.now() - b) < 183 * DAY;
+    }
+
     function mount() {
+        if (tooYoung()) { var gone = document.getElementById("home-words-card"); if (gone) gone.remove(); return; }
         var anchor = document.getElementById("home-memory-card")
                   || document.getElementById("home-memorybox-card")
                   || document.getElementById("now-status-card");

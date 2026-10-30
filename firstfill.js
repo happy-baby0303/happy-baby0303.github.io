@@ -216,15 +216,17 @@
 
         } else if (step === 1) {
             shell(ask(1, "📷",
-                "오늘의 " + esc(callName("를")) + "<br>한 장만",
-                "잘 찍을 필요 없어요.<br>지금 자고 있는 얼굴이면 충분해요.",
+                unborn() ? "기다리는 지금을<br>한 장만" : "오늘의 " + esc(callName("를")) + "<br>한 장만",
+                unborn() ? "초음파 사진도, 배 사진도 좋아요.<br>잘 찍을 필요 없어요."
+                         : "잘 찍을 필요 없어요.<br>지금 자고 있는 얼굴이면 충분해요.",
                 "사진 고르기", "window.firstFillPhoto()"));
 
         } else if (step === 2) {
             var g = (typeof window.guideWhat === "function") ? window.guideWhat() : "";
             shell(ask(2, "🎙️",
-                "지금 나는 소리를<br>30초만",
-                (g ? esc(g) + "도 좋고, " : "") + "옹알이도, 숨소리도, 하품도 좋아요.<br>두 달 뒤엔 다른 소리를 내요.",
+                unborn() ? esc(callName("에게")) + " 들려줄<br>목소리를 30초만" : "지금 나는 소리를<br>30초만",
+                unborn() ? "인사 한마디도, 자장가 한 소절도 좋아요."
+                         : (g ? esc(g) + "도 좋고, " : "") + "옹알이도, 숨소리도, 하품도 좋아요.<br>두 달 뒤엔 다른 소리를 내요.",
                 "녹음하기", "window.firstFillVoice()"));
 
         } else if (step === 3) {
@@ -256,12 +258,12 @@
             var tail;
             if (c.seal) {
                 var d = daysToTwenty();
-                tail = d ? comma(d) + '일 뒤에<br>' + esc(callName("가")) + ' 그 편지를 엽니다.'
-                         : esc(callName("가")) + ' 언젠가 그 편지를 엽니다.';
+                tail = d ? comma(d) + '일 뒤에<br>' + esc(callName("가")) + ' 그 편지를 열어요.'
+                         : esc(callName("가")) + ' 언젠가 그 편지를 열어요.';
             } else if (got.length) {
-                tail = '오늘부터 하나씩 쌓입니다.';
+                tail = '오늘부터 하나씩 쌓여요.';
             } else {
-                tail = '아무 때나 담기 시작하면 돼요.<br>배냇함은 언제나 열려 있습니다.';
+                tail = '아무 때나 담기 시작하면 돼요.<br>배냇함은 언제든 열려 있어요.';
             }
 
             shell(
@@ -292,6 +294,14 @@
         return localStorage.getItem("tosil_role_locked") === "viewer" || localStorage.getItem("user_role") === "senior";
     }
 
+    /* 예정일을 넣은 집 (배 속 아기) */
+    function unborn() {
+        var s = localStorage.getItem("tosil_startDate");
+        if (!s) return false;
+        var d = new Date(), k = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+        return s > k;
+    }
+
     function shouldShow() {
         if (localStorage.getItem(FLAG)) return false;          // 한 번 보면 다시 안 뜬다
         if (isHelper()) return false;
@@ -316,6 +326,9 @@
             setTimeout(function () { if (shouldShow()) window.openFirstFill(0); }, tries ? 700 : 0);
         }, 2200);
     }
+
+    /* 역할을 고른 직후 첫 담기가 뜰 차례인가 (script.js selectRoleOnboarding — 그때는 알림을 띄우지 않는다) */
+    window.firstFillPending = function () { try { return shouldShow(); } catch (e) { return false; } };
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();

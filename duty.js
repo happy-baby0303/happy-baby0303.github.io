@@ -27,6 +27,11 @@
 
     function toast(m) { if (typeof window.showToast === "function") window.showToast(m); }
     function senior() { return localStorage.getItem("user_role") === "senior"; }
+    /* 가족방에 나 혼자일 때 (짝꿍 · 도우미가 아직 안 들어왔다) — '밖에 있어요' 로 할 일이 없다.
+       ⚠️ 처음 깐 사람 홈에서 이 스위치가 기록 버튼보다 먼저 자리를 차지했다. 밖에 있는 중이면 돌아올 수 있게 남겨 둔다 */
+    function soloHere() {
+        try { return localStorage.getItem("tosil_family_size") === "1" && where() !== "away"; } catch (e) { return false; }
+    }
     function where() { return localStorage.getItem("tosil_where") === "away" ? "away" : "with"; }
     function myWord() { return (typeof window.myRoleWord === "function") ? window.myRoleWord() : (localStorage.getItem("user_role") === "dad" ? "아빠" : "엄마"); }
     function myUid() { return (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || localStorage.getItem("firebase_uid") || ""; }
@@ -166,7 +171,7 @@
         var host = document.getElementById("tab-home");
         if (!host) return;
         var seg = document.getElementById("duty-seg-wrap"), card = document.getElementById("duty-away-card");
-        if (senior()) { if (seg) seg.remove(); if (card) card.remove(); return; }
+        if (senior() || soloHere()) { if (seg) seg.remove(); if (card) card.remove(); return; }
         /* 사진(아기 대시보드) 바로 아래에 둔다 */
         var anchor = document.getElementById("baby-dashboard");
         while (anchor && anchor.parentNode && anchor.parentNode !== host) anchor = anchor.parentNode;
@@ -192,7 +197,7 @@
        스위치나 '내가 나간 뒤로' 카드를 지웠을 수 있다. 그래서 홈 덩어리가 바뀔 때마다
        지금 상태와 화면이 맞는지 보고, 다르면 다시 그린다. (맞으면 아무것도 안 한다) */
     function healIfNeeded() {
-        if (senior()) return;
+        if (senior() || soloHere()) return;
         var w = where(), away = w === "away";
         var seg = document.getElementById("duty-seg-wrap");
         var on = seg ? seg.querySelector(".on") : null;

@@ -273,13 +273,13 @@
 
         // 6. 문답, 한 줄, 소리, 기념일
         if (typeof window.diaryDays === "function") {
-            window.diaryDays().forEach(function (k) { touch(k); });
+            window.diaryDays().forEach(function (k) { touch(k).mine = true; });
         }
         if (typeof window.noteDays === "function") {
-            window.noteDays().forEach(function (k) { touch(k); });
+            window.noteDays().forEach(function (k) { touch(k).mine = true; });
         }
         if (typeof window.voiceDays === "function") {
-            window.voiceDays().forEach(function (k) { touch(k); });
+            window.voiceDays().forEach(function (k) { touch(k).mine = true; });
         }
         if (typeof window.anniversaryDays === "function") {
             window.anniversaryDays().forEach(function (k) { touch(k); });
@@ -898,11 +898,20 @@
 
     function finding() { return mbFilter !== "all" || !!mbQuery; }
 
+    /* 담은 게 있는 날 (기념일 카드만 있는 날은 빼고 센다)
+       ⚠️ 아무것도 안 담은 첫날에 '5일이 담겼어요' 가 떴다. 생후 1개월 · 50일 같은 기념일을 같이 셌다 */
+    function filledDays(timeline) {
+        return timeline.filter(function (d) {
+            return d.mine || d.photos.length || d.milestones.length || d.letter || d.replies.length || d.growth;
+        }).length;
+    }
+
     function chronicleHTML(timeline) {
         if (!timeline.length && !birthTime()) return "";
+        var filled = filledDays(timeline);
         return '<div id="mb-chronicle" style="display:flex; justify-content:space-between; align-items:baseline; margin:26px 4px 18px;">' +
                 '<span style="font-size:12px; font-weight:800; color:var(--text-sub); letter-spacing:2px;">연대기</span>' +
-                (timeline.length ? '<span style="font-size:11px; font-weight:700; color:var(--text-sub); opacity:0.7;">' + timeline.length + '일이 담겼어요</span>' : '') +
+                (filled ? '<span style="font-size:11px; font-weight:700; color:var(--text-sub); opacity:0.7;">' + filled + '일이 담겼어요</span>' : '') +
             '</div>' +
             '<div style="position:relative; padding-left:28px;">' +
                 '<div style="position:absolute; left:5px; top:6px; bottom:24px; width:1px; background:var(--border);"></div>' +
@@ -957,7 +966,7 @@
                 '<img src="./box.webp" alt="" width="104" height="81" style="display:block; width:104px; height:auto; margin:0 auto 18px; opacity:0.95;">' +
                 '<div class="serif-display" style="font-size:19px; font-weight:700; color:var(--text-m); line-height:1.6; margin-bottom:12px;">아직 배냇함이 비어 있어요</div>' +
                 '<div style="font-size:13px; font-weight:500; color:var(--text-sub); line-height:1.8;">' +
-                    '사진 한 장이면 충분해요<br>오늘부터 하나씩 담기기 시작합니다' +
+                    '사진 한 장이면 충분해요<br>오늘부터 하나씩 담아 보세요' +
                 '</div>' +
               '</div>'
             : "";
@@ -966,7 +975,7 @@
         '<div style="padding:0 20px 110px;">' +
             '<div style="padding:26px 0 22px;">' +
                 '<div class="serif-display" style="font-size:25px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px; margin-bottom:8px;">' + esc(name) + '의 배냇함</div>' +
-                '<div style="font-size:13px; font-weight:600; color:var(--text-sub);">간직하고 싶은 순간들을 모아뒀어요</div>' +
+                '<div style="font-size:13px; font-weight:600; color:var(--text-sub);">' + (filledDays(timeline) ? '간직하고 싶은 순간들을 모아 뒀어요' : '간직하고 싶은 순간을 하나씩 모아 두는 곳이에요') + '</div>' +
             '</div>' +
 
             '<div style="display:flex; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:22px 12px; margin-bottom:14px; box-shadow:0 4px 14px rgba(0,0,0,0.03);">' +

@@ -362,7 +362,7 @@
                     '아래 <b>쿨시트 사기 전에</b> 카드를 먼저 보세요. ' +
                     '<a href="https://www.google.com/search?q=' + encodeURIComponent(q) + '" ' +
                     'target="_blank" rel="noopener" style="color:#6A61CE; font-weight:800;">' +
-                    esc(q) + ' 찾아보기 \u3009</a></div>' +
+                    esc(q) + ' 찾아보기 \u203A</a></div>' +
             '</div>';
         }
         return "";
@@ -478,7 +478,7 @@
                 '<div style="font-size:12.5px; font-weight:800; color:#7A6F68;">' +
                     '\uD83D\uDE97 차를 바꾸셨나요?</div>' +
                 '<div style="flex-shrink:0; font-size:12px; font-weight:800; color:' + BLUE + ';">' +
-                    '네 \u3009</div>' +
+                    '네 \u203A</div>' +
             '</div>';
         }
 
@@ -581,7 +581,7 @@
                 'style="display:block; text-align:center; padding:12px; background: #FBF8F3; ' +
                 'border:1px solid #EDE6DE; border-radius:12px; font-size:12.5px; font-weight:800; ' +
                 'color:#7A6F68; text-decoration:none; margin-bottom:6px;">' +
-                '\uD83D\uDCD6 설명서 찾기 \u3009</a>';
+                '\uD83D\uDCD6 설명서 찾기 \u203A</a>';
 
         /* ── 키 ── */
         out += '<div style="margin-top:14px; font-size:12.5px; font-weight:900; color:' + DARK + '; ' +
@@ -777,7 +777,7 @@
                 'target="_blank" rel="noopener" style="display:block; text-align:center; padding:13px; ' +
                 'background: #FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
                 'font-size:12.5px; font-weight:800; color:#7A6F68; text-decoration:none; ' +
-                'margin-bottom:14px;">' + esc(q) + ' 찾아보기 \u3009</a>' +
+                'margin-bottom:14px;">' + esc(q) + ' 찾아보기 \u203A</a>' +
 
             '<div style="font-size:12.5px; font-weight:900; color:' + DARK + '; margin-bottom:7px;">' +
                 '순정이 없어서 다른 걸 사셨다면, 깔고 나서 이 셋을 보세요</div>' +
@@ -816,7 +816,7 @@
             '<a href="../toy/index.html" style="display:block; text-align:center; padding:13px; ' +
                 'background: #FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
                 'font-size:12.5px; font-weight:800; color:#7A6F68; text-decoration:none;">' +
-                '\uD83E\uDDF8 놀이 탭에 카시트에서 버티는 것들을 모아뒀어요 \u3009</a>' +
+                '\uD83E\uDDF8 놀이 탭에 카시트에서 버티는 것들을 모아뒀어요 \u203A</a>' +
         '</div>';
     }
 

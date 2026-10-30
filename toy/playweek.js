@@ -493,7 +493,7 @@
 
             '<div onclick="event.stopPropagation(); window.openPlayFromWeek(\'' + p.id + '\')" ' +
                 'style="margin-top:9px; font-size:12px; font-weight:800; color:' + GRAY + '; cursor:pointer;">' +
-                '놀이 방법 4단계 보기 \u3009</div>' +
+                '놀이 방법 4단계 보기 \u203A</div>' +
 
             '<div style="display:flex; gap:8px; margin-top:15px;">' +
                 btn(done ? "\u2713 놀았어요" : "놀았어요",

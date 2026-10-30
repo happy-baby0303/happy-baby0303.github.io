@@ -4676,7 +4676,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 <div id="feed-ml-area" style="text-align: center; margin-bottom: 20px;">
                     <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
                     <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 16px;">
-                        <input type="number" id="v-feed-amount" placeholder="${uniqueAmounts[0] || 160}" class="feed-amt-input" style="font-size: 46px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 130px; padding: 0; margin: 0; transition: 0.3s;">
+                        <input type="number" id="v-feed-amount" placeholder="${uniqueAmounts[0] || 0}" class="feed-amt-input" style="font-size: 46px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 130px; padding: 0; margin: 0; transition: 0.3s;">
                         <span style="font-size: 17px; font-weight: 800; color: var(--text-s);">ml</span>
                     </div>
                     <div style="display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
@@ -8054,7 +8054,23 @@ window.nextOnboardingStep = function(step) {
         const name = document.getElementById('ob-name').value.trim() || localStorage.getItem('tosil_babyName') || '아기';
         const lc = name.charCodeAt(name.length - 1);
         const jong = lc >= 0xAC00 && lc <= 0xD7A3 && (lc - 0xAC00) % 28 !== 0;
-        document.getElementById('ob-stage-name').innerText = name + (jong ? '이' : ''); 
+        const nick = escName(name + (jong ? '이' : ''));
+
+        /* ⚠️ '아직 태어나기 전이면 예정일을 골라 주세요' 라고 해 놓고, 예정일을 넣으면
+              '지금 꿈이는 무엇을 먹나요?' 를 물었다. 배 속 아기에게는 묻지 않고 만날 날을 세어 준다. */
+        const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+        const left = Math.round((window.parseLocalDate(date).setHours(0, 0, 0, 0) - t0.getTime()) / 86400000);
+        const waiting = left > 0;
+        const title = document.getElementById('ob-step3-title'), sub = document.getElementById('ob-step3-sub');
+        const picks = document.getElementById('ob-feed-picks'), wait = document.getElementById('ob-wait-pick');
+        if (title) title.innerHTML = waiting
+            ? `<span style="color:#7F77DD;">${nick}</span>를 만날 날이<br>${left}일 남았어요`
+            : `지금 <span id="ob-stage-name" style="color:#7F77DD;">${nick}</span>는<br>무엇을 먹나요?`;
+        if (sub) sub.innerHTML = waiting
+            ? '태어나면 맘마 · 기저귀 기록을 바로 쓸 수 있어요.<br>그 전엔 사진과 편지를 배냇함에 담아 두세요.'
+            : '시기에 맞는 정보와 식단을 골라 드릴게요.';
+        if (picks) picks.style.display = waiting ? 'none' : 'flex';
+        if (wait) wait.style.display = waiting ? 'block' : 'none';
         
         document.getElementById('onboarding-step-2').style.display = 'none';
         document.getElementById('onboarding-step-3').style.display = 'flex';
@@ -8411,7 +8427,8 @@ window.renderBabyInfo = function() {
     const wwBadgeEl = document.getElementById('wonderweek-badge');
     if(wwBadgeEl) {
         wwBadgeEl.innerText = badgeText;
-        wwBadgeEl.style.display = 'inline-block';
+        /* ⚠️ 예정일을 넣은 배 속 아기(D-51)에게도 '원더윅스 평온기' 가 떴다. 태어난 뒤부터 센다 */
+        wwBadgeEl.style.display = diffDays < 0 ? 'none' : 'inline-block';
     }
 
     // 4. 시간대별 감성 인사말 띄우기
@@ -9545,7 +9562,9 @@ window.setFeedAmount = function(amount) {
 window.adjustFeedAmount = function(change) {
     const inputEl = document.getElementById('v-feed-amount');
     if(inputEl) {
-        let currentVal = parseInt(inputEl.value) || 0;
+        /* ⚠️ 칸이 비어 있으면 흐린 글씨로 지난번 양(예: 160)이 보이는데, +10 을 누르면 170 이 아니라 10 이 됐다.
+              비어 있을 땐 보이는 그 숫자에서 시작한다 */
+        let currentVal = parseInt(inputEl.value) || parseInt(inputEl.placeholder) || 0;
         let newVal = currentVal + change;
         if(newVal < 0) newVal = 0; // 마이너스로 떨어지지 않게 방어
         
@@ -9588,7 +9607,7 @@ window.showRoleOnboarding = function() {
                     <div style="font-size:16px; font-weight:800; color:var(--text-m, #4A413C);">아빠</div>
                 </button>
             </div>
-            <div style="font-size:12px; font-weight:600; color:var(--text-sub, #A3958A); margin-top:16px; line-height:1.6;">할머니 · 시터 분은 엄마 아빠가 보낸<br>초대 링크로 들어오면 돼요.</div>
+            <div style="font-size:12px; font-weight:600; color:var(--text-sub, #A3958A); margin-top:16px; line-height:1.6;">할머니 · 시터 분은 엄마·아빠가 보낸<br>초대 링크로 들어오면 돼요.</div>
         </div>
         <style>
             @keyframes popIn { 0% { transform: scale(0.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -9604,12 +9623,15 @@ window.selectRoleOnboarding = function(role) {
     const overlay = document.getElementById('role-onboarding-overlay');
     if(overlay) overlay.remove();
     
+    /* ⚠️ 처음 고르는 순간엔 바로 '첫 담기' 화면이 뜬다. 그 위에 '엄마로 시작할게요' 알림이 2초쯤 떠서
+          '첫 담기 시작하기' 단추를 가렸다. 첫 담기가 뜰 때는 알림을 띄우지 않는다 (화면이 바뀌는 게 알림이다) */
+    const quiet = typeof window.firstFillPending === 'function' && window.firstFillPending();
     if (role === 'dad') {
         document.body.classList.add('mode-dad');
-        window.showToast("아빠로 시작할게요");
+        if (!quiet) window.showToast("아빠로 시작할게요");
     } else {
         document.body.classList.remove('mode-dad');
-        window.showToast("엄마로 시작할게요");
+        if (!quiet) window.showToast("엄마로 시작할게요");
     }
     
     if(typeof window.renderSettingsTab === 'function') window.renderSettingsTab();
@@ -14528,7 +14550,7 @@ window.renderParentNotice = function() {
         if (savedNotice.trim() !== '') {
             container.innerHTML = `<div id="senior-memo-text" style="font-size: 17px; font-weight: 900; color: #4A413C; line-height: 1.5; word-break: break-all; overflow-wrap: break-word;">${savedNotice.replace(/\n/g, '<br>')}</div>`;
         } else {
-            container.innerHTML = `<div id="senior-memo-text" style="font-size: 17px; font-weight: 900; color: #A3958A; line-height: 1.5; word-break: break-all; overflow-wrap: break-word;">엄마 아빠가 남긴 말이 아직 없어요</div>`;
+            container.innerHTML = `<div id="senior-memo-text" style="font-size: 17px; font-weight: 900; color: #A3958A; line-height: 1.5; word-break: break-all; overflow-wrap: break-word;">아직 남긴 말이 없어요</div>`;
         }
     }
 };

@@ -101,12 +101,24 @@
                (!!localStorage.getItem("tosil_firstfill") || (localStorage.getItem("tosil_tracker_records") || "[]").length > 2);
     }
 
+    /* 처음 깐 날, 아직 아무것도 안 적었으면 홈 카드를 띄우지 않는다.
+       ⚠️ 첫 화면에 '알림이 아직 꺼져 있어요' 가 기록 버튼보다 먼저 떠서, 기록 버튼이 화면 아래로 밀렸다.
+          첫 기록을 남기면 그 자리에서 묻고(afterSaveAsk), 하루가 지나면 카드로 한 번 더 묻는다. */
+    function tooEarly() {
+        var recs = []; try { recs = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
+        if (recs.length) return false;
+        var since = 0; try { since = Number(localStorage.getItem("tosil_pushask_since")) || 0; } catch (e) {}
+        if (!since) { try { localStorage.setItem("tosil_pushask_since", String(Date.now())); } catch (e) {} return true; }
+        return Date.now() - since < 20 * 3600000;
+    }
+
     /* 홈 카드 — 알림이 꺼져 있을 때만. 닫으면 사흘 뒤 한 번 더, 세 번 닫으면 그만 (설정에서는 언제든 켤 수 있다) */
     function askCardWanted() {
         if (isIOS) return false;                         // 아이폰은 iospush.js 가 따로 안내한다
         var p = perm();
         if (p === "granted" || p === "unsupported") return false;
         if (!ready()) return false;
+        if (tooEarly()) return false;
         var a = readAsk();
         if ((a.n || 0) >= 3) return false;
         if (a.at && Date.now() - a.at < 3 * 86400000) return false;
@@ -187,7 +199,8 @@
             var ok = await window.askPush();
             toast(ok ? "🔔 " + when + "쯤 알려 드릴게요" : (perm() === "denied" ? deniedHelp() : "알림을 켜지 않았어요. 설정에서 언제든 켤 수 있어요"));
         };
-        document.getElementById("pushask-no").onclick = function () { w.remove(); };
+        /* '괜찮아요' 라고 했으면 홈 카드도 사흘 쉰다 (방금 거절했는데 홈에 또 '알림이 꺼져 있어요' 가 떴다) */
+        document.getElementById("pushask-no").onclick = function () { w.remove(); var a2 = readAsk(); a2.at = Date.now(); writeAsk(a2); mountAskCard(); };
     }
     function hookSave() {
         var orig = window.saveTrackerToFirebase;
