@@ -389,6 +389,9 @@ function switchOutingSubTab(type) {
         
         // 지도가 보이도록 블록 처리 후
         if(mapContainer) mapContainer.style.display = 'block';
+        const meBtn = document.getElementById('nursing-me-btn'), mapNote = document.getElementById('nursing-map-note');
+        if (meBtn) meBtn.style.display = 'inline-block';
+        if (mapNote) mapNote.style.display = 'block';
         
         // 🚨 [지도 백지현상 100% 해결] 약간의 딜레이를 주어 DOM이 완전히 펴진 후 지도를 갱신!
         setTimeout(() => {
@@ -409,6 +412,8 @@ function switchOutingSubTab(type) {
         if(filterWrap) filterWrap.style.display = 'flex';
         if(listContainer) listContainer.style.display = 'block';
         if(mapContainer) mapContainer.style.display = 'none';
+        // ⚠️ 지도 위에 붙인 '내 위치로' 단추와 안내 줄은 지도와 같이 숨긴다 (지도 칸 밖에 있어서 혼자 남았다)
+        ['nursing-me-btn', 'nursing-map-note'].forEach(function (id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
         if (currentRegion !== 'all') { 
             generateSubFilters(currentRegion); 
@@ -16498,6 +16503,17 @@ window.initNursingMap = async function() {
         b.onclick = function () { window.nursingLocate(false); };
         container.parentNode.insertBefore(b, container);
     }
+
+    // 지도 위 한 줄 — 이 자료에 무엇이 들었고 무엇이 없는지
+    if (!document.getElementById('nursing-map-note') && container.parentNode) {
+        const n = document.createElement('div');
+        n.id = 'nursing-map-note';
+        n.setAttribute('style', 'margin:0 0 10px; padding:10px 14px; border-radius:12px; background:var(--bg-sub); border:1px solid var(--border); ' +
+            'font-size:12px; font-weight:600; color:var(--text-s); line-height:1.55; word-break:keep-all;');
+        n.innerHTML = '박물관·공연장·관광지 위주의 2023년 공공데이터예요.<br>' +
+            '<span data-nursing-official style="font-weight:800; color:#7F77DD; cursor:pointer;">백화점·역·관공서 수유실은 수유정보 알리미에서 ›</span>';
+        container.parentNode.insertBefore(n, document.getElementById('nursing-me-btn') || container);
+    }
     window.nursingLocate(true);
     window.nursingMapCenter = options.center;
 
@@ -16551,9 +16567,11 @@ window.initNursingMap = async function() {
                     .filter(t => t.indexOf('수유실') === -1)
                     .join(' · ');
 
+                // ⚠️ 줄바꿈(\n)은 화면에서 한 칸 띄우기로 뭉개져서 '무료 주차 2023년 …' 처럼 붙어 보였다
+                //    '바뀌었을 수 있어요' 는 팝업 아래 ⓘ 줄(outingsmart.js)이 이미 말한다. 여기선 전화번호 얘기만.
                 const info = '수유실이 있는 곳이에요.' +
-                    (facil ? '\n' + facil : '') +
-                    '\n\n2023년 공공데이터라 방문 전 전화로 한 번 확인해 주세요.';
+                    (facil ? '<br>' + facil : '') +
+                    '<br><br>2023년 공공데이터라 전화번호가 없어요. 아래 지도 앱에서 찾아 확인해 보세요.';
 
                 openFestivalModal(
                     place.title || '수유실',
@@ -16565,6 +16583,15 @@ window.initNursingMap = async function() {
                     '',
                     false
                 );
+
+                // 전화번호가 없는 자료라 '번호 없음' 칸이 늘 비어 있었다. 그 자리에서 틀린 정보를 알려 받는다.
+                window.__nursingPopupPlace = place;
+                const mb = document.getElementById('modal-dynamic-body');
+                const noTel = mb && mb.querySelector('button[disabled]');
+                if (noTel && typeof window.reportNursing === 'function') {
+                    noTel.outerHTML = '<button onclick="closeFestivalModalForce(); window.reportNursing(window.__nursingPopupPlace);" ' +
+                        'style="flex: 1; padding: 14px 0; background: var(--bg-sub); color: var(--text-m); border-radius: 12px; font-weight: 800; font-size: 14.5px; border: 1px solid var(--border); cursor: pointer;">정보가 달라요</button>';
+                }
             });
             return marker;
         });

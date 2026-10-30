@@ -99,6 +99,8 @@
         { id: "pin-sheet",              close: "__pinCancel" }, // 도우미 화면 숫자 4자리
         { id: "pushask-sheet",          close: null },          // 알림 켜기
         { id: "pushcheck-sheet",        close: null },          // 알림 점검
+        { id: "fb-sheet",               close: null },          // 의견 보내기 (수유실 '정보가 달라요' 도 여기로 연다)
+        { id: "fb-inbox",               close: null },          // 의견함
         { id: "post-action-sheet",      close: null },
         { id: "comment-action-sheet",   close: null },
         { id: "admin-secret-dashboard", close: null },

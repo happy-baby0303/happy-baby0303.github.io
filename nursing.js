@@ -74,30 +74,73 @@
         });
     }
 
-    /* ---------- 목록 렌더링 (초압축 미니멀 디자인) ---------- */
-    function rowHTML(p) {
-        var distanceHtml = p._d !== undefined 
-            ? '<div style="font-size:16px; font-weight:900; color:#7F77DD; margin-bottom:4px;">' + distText(p._d) + '</div>'
-            : '<div style="font-size:12px; font-weight:700; color:var(--text-s); margin-bottom:4px;">거리미상</div>';
-
-        return `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border);">
-            <div style="flex: 1; min-width: 0; padding-right: 12px;">
-                <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${esc(p.title)}
-                </div>
-                <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${esc(p.locText || p.addr || '상세 주소 없음')}
-                </div>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0;">
-                ${distanceHtml}
-                <button data-nursing-go="${esc(p.title)}" style="background: #F6F2EC; color: #7A6F68; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: 0.2s;" onmousedown="this.style.background='#EDE6DE'" onmouseup="this.style.background='#F6F2EC'">
-                    길찾기 ›
-                </button>
-            </div>
-        </div>`;
+    /* ---------- 어떤 곳인가 ----------
+       2023년 자료는 문화시설 목록에서 온 것이라 종류가 넷뿐이다.
+       백화점 · 마트는 '공연장' 으로 적혀 있어서 이름으로 알아본다. */
+    var KIND = { "전시/기념관": "전시·기념관", "영화/연극/공연": "공연장", "관광지": "관광지", "명승지": "명승지", "대형마트": "백화점·마트" };
+    function kindOf(p) {
+        var t = String(p && p.title || "");
+        if (/백화점|몰|스타필드|아울렛|이마트|홈플러스|롯데마트|세이브존|신세계/.test(t)) return "백화점·마트";
+        return KIND[String(p && p.desc || "").split(" · ")[0]] || "";
     }
+
+    // 시간 칸에 '행사별 상이' 같은 말만 있으면 안 적는다
+    function hoursOf(p) {
+        var h = String(p && p.datetime || "").trim();
+        return /\d/.test(h) ? h : "";
+    }
+
+    var shown = [];   // 지금 목록에 보이는 곳 — '정보가 달라요' 는 몇 번째 줄인지로 찾는다
+
+    /* ---------- 목록 한 줄 ----------
+       ⚠️ 예전엔 주소를 '종로구' 까지만 보여 줬다. 어느 건물인지 알 수가 없었다. */
+    function rowHTML(p, i) {
+        var one = "white-space:nowrap; overflow:hidden; text-overflow:ellipsis;";
+        var meta = [kindOf(p), hoursOf(p)].filter(Boolean).join(" · ");
+        var distanceHtml = p._d !== undefined
+            ? '<div style="font-size:16px; font-weight:900; color:#7F77DD; margin-bottom:6px;">' + distText(p._d) + '</div>'
+            : '<div style="font-size:12px; font-weight:700; color:var(--text-s); margin-bottom:6px;">거리 모름</div>';
+
+        return '<div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px 0; border-bottom:1px solid var(--border);">' +
+            '<div style="flex:1; min-width:0;">' +
+                '<div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:4px; ' + one + '">' + esc(p.title) + '</div>' +
+                '<div style="font-size:12.5px; font-weight:600; color:var(--text-s); ' + one + '">' + esc(p.review || p.locText || "주소 정보 없음") + '</div>' +
+                (meta ? '<div style="font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:3px; ' + one + '">' + esc(meta) + '</div>' : '') +
+            '</div>' +
+            '<div style="display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0;">' +
+                distanceHtml +
+                '<button data-nursing-go="' + esc(p.title) + '" style="background:var(--bg-sub); color:var(--text-s); border:1px solid var(--border); border-radius:8px; padding:6px 14px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit;">길찾기 ›</button>' +
+                '<button data-nursing-report="' + i + '" style="background:none; border:none; padding:8px 0 0; font-size:11.5px; font-weight:700; color:var(--text-sub); text-decoration:underline; text-underline-offset:2px; cursor:pointer; font-family:inherit;">정보가 달라요</button>' +
+            '</div>' +
+        '</div>';
+    }
+
+    /* ---------- 정보가 달라요 ----------
+       따로 신고함을 만들지 않고 '의견 보내기' 로 받는다. 답장도 거기서 간다.
+       어느 곳인지는 우리가 적어 둔다 — 쓰는 사람은 뭐가 달랐는지만 적으면 된다. */
+    window.reportNursing = function (p) {
+        if (!p) return;
+        if (typeof window.openFeedback !== "function") return toast("잠시 뒤에 다시 눌러 주세요");
+        var head = "[수유실 정보가 달라요] " + p.title + (p.review ? " · " + p.review : "");
+        var d = {};
+        try { d = JSON.parse(localStorage.getItem("tosil_feedback_draft") || "{}") || {}; } catch (e) {}
+        var text = String(d.text || "");
+        if (text.indexOf(head) === -1) text = head + "\n" + (text ? "\n" + text : "");
+        try { localStorage.setItem("tosil_feedback_draft", JSON.stringify({ text: text, email: d.email || "" })); } catch (e) {}
+        window.openFeedback();
+        toast("뭐가 달랐는지 한 줄만 적어 주세요");
+        setTimeout(function () {
+            var t = document.getElementById("fb-text");
+            if (!t) return;
+            t.focus();
+            try { t.setSelectionRange(head.length + 1, head.length + 1); } catch (e) {}
+        }, 300);
+    };
+
+    /* 백화점 · 역 · 관공서 수유실은 우리 자료에 없다.
+       인구보건복지협회가 운영하는 '수유정보 알리미' 가 전국 시설을 받아서 고친다. 거기로 보낸다. */
+    var OFFICIAL = "https://sooyusil.com/home/23.htm";
+    window.openNursingOfficial = function () { window.open(OFFICIAL, "_blank"); };
 
     window.openNursingMap = function (name) {
         window.open("https://map.naver.com/v5/search/" + encodeURIComponent(name), "_blank");
@@ -114,9 +157,13 @@
           공공데이터라 우리가 이름을 고를 수 없으니, 아예 문자열에 안 넣는다.
           속성에 담아두고 눌릴 때 읽는다. */
     document.addEventListener("click", function (e) {
-        var b = e.target && e.target.closest ? e.target.closest("[data-nursing-go]") : null;
-        if (!b) return;
-        window.openNursingMap(b.getAttribute("data-nursing-go"));
+        var t = e.target && e.target.closest ? e.target : null;
+        if (!t) return;
+        var b = t.closest("[data-nursing-go]");
+        if (b) return window.openNursingMap(b.getAttribute("data-nursing-go"));
+        var r = t.closest("[data-nursing-report]");
+        if (r) return window.reportNursing(shown[+r.getAttribute("data-nursing-report")]);
+        if (t.closest("[data-nursing-official]")) window.openNursingOfficial();
     });
 
     function render(list, hasPos) {
@@ -128,9 +175,10 @@
             return;
         }
 
+        shown = list.slice(0, 50);
         body.innerHTML =
             (hasPos ? '' : '<div style="padding:12px; background:#FFF0F1; border-radius:12px; margin-bottom:16px; font-size:12.5px; font-weight:800; color:#D32F2F; text-align:center;">🚨 위치(GPS) 권한을 허용해야 가장 가까운 곳을 찾을 수 있어요</div>') +
-            list.slice(0, 50).map(rowHTML).join("");
+            shown.map(rowHTML).join("");
     }
 
     /* ---------- 바텀시트 열기 ---------- */
@@ -147,19 +195,27 @@
 
         wrap.innerHTML = `
         <div style="background:#FFFFFF; width:100%; border-radius:24px 24px 0 0; padding:24px 20px 40px; box-sizing:border-box; transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.1, 1, 0.2, 1); display:flex; flex-direction:column; max-height:85vh;">
-            <div style="width:40px; height:5px; background:#EDE6DE; border-radius:3px; margin:0 auto 20px auto;"></div>
+            <div style="width:40px; height:5px; background:var(--border); border-radius:3px; margin:0 auto 20px auto;"></div>
             
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
                 <div>
                     <div style="font-size:13px; font-weight:800; color:#D32F2F; margin-bottom:4px;">가까운 수유실</div>
-                    <div style="font-size:22px; font-weight:900; color:#4A413C; letter-spacing:-0.5px;">${babyName} 주변 수유실</div>
+                    <div style="font-size:22px; font-weight:900; color:var(--text-m); letter-spacing:-0.5px;">${babyName} 주변 수유실</div>
                 </div>
                 <button onclick="document.getElementById('${SHEET_ID}').style.opacity='0'; document.getElementById('${SHEET_ID}').children[0].style.transform='translateY(100%)'; setTimeout(()=>document.getElementById('${SHEET_ID}').remove(), 300); document.body.style.overflow='';" style="background:none; border:none; font-size:24px; color:#A3958A; cursor:pointer; padding:0;">✕</button>
             </div>
             
-            <div style="font-size:12px; font-weight:600; color:#A3958A; margin-bottom:16px; background:#FBF8F3; padding:10px 14px; border-radius:10px; word-break:keep-all; line-height:1.4;">
-                <span id="nursing-total">공공데이터 기준</span><br>오래된 정보가 있을 수 있으니 꼭 전화를 먼저 해보세요
+            <div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-bottom:10px; background:var(--bg-sub); padding:10px 14px; border-radius:10px; word-break:keep-all; line-height:1.5;">
+                <span id="nursing-total" style="font-weight:800; color:var(--text-s);">2023년 공공데이터</span><br>입장해야 쓸 수 있거나 바뀐 곳도 있어요. 가기 전에 전화로 확인해 주세요.
             </div>
+
+            <button data-nursing-official style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer; font-family:inherit; box-sizing:border-box;">
+                <span style="min-width:0;">
+                    <span style="display:block; font-size:13px; font-weight:800; color:var(--text-m); margin-bottom:2px;">백화점·역·관공서 수유실은</span>
+                    <span style="display:block; font-size:11.5px; font-weight:600; color:var(--text-sub);">인구보건복지협회 '수유정보 알리미'에 있어요</span>
+                </span>
+                <span style="flex-shrink:0; font-size:12.5px; font-weight:800; color:#7F77DD;">보러 가기 ›</span>
+            </button>
             
             <div id="nursing-body" style="overflow-y:auto; flex:1; padding-bottom:20px; scrollbar-width:none;">
                 <div style="padding:60px 0; text-align:center; font-size:14px; font-weight:800; color:#A3958A;">가까운 곳을 찾는 중…</div>
@@ -190,9 +246,11 @@
             return t.indexOf("테스트") !== 0;
         });
 
-        /* 실제로 들고 있는 개수를 그대로 적는다. 1,102 는 자료가 늘면 거짓말이 된다. */
+        /* 실제로 들고 있는 개수를 그대로 적는다. 1,102 는 자료가 늘면 거짓말이 된다.
+           ⚠️ '전국 1,093곳' 이라고만 적었더니 전국 수유실이 다 있는 줄 알았다.
+              박물관 · 공연장 · 관광지 목록이다. 무엇이 들었는지까지 적는다. */
         var tot = document.getElementById("nursing-total");
-        if (tot) tot.textContent = "전국 " + list.length.toLocaleString() + "곳 (공공데이터 기준)";
+        if (tot) tot.textContent = "박물관·공연장·관광지 위주 " + list.length.toLocaleString() + "곳 · 2023년 공공데이터";
   
         var pos = myPos || await locate();
         myPos = pos;
