@@ -356,7 +356,7 @@
             card.style.display = 'block';
             var head = card.firstElementChild;
             var spans = head ? head.querySelectorAll('span') : [];
-            if (spans[0]) spans[0].textContent = '📈';
+            if (spans[0]) spans[0].textContent = '📏';   // 📈 은 주식 그래프로 읽혔다. 키 · 몸무게는 자
             if (spans[1]) spans[1].textContent = '성장 기록';
             var old = card.querySelector('#db-fever-text');
             var box = document.createElement('div');

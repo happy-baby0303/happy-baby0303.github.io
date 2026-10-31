@@ -196,7 +196,7 @@
         <section id="view-write" class="view on">
             <article class="card">
                 <div class="card-head">
-                    <span class="qa-meta" id="qa-dayno">1번째 질문</span>
+                    <span class="qa-meta" id="qa-dayno">첫 번째 질문</span>
                     <div class="nav">
                         <button id="qa-prev" onclick="moveQuestion(-1)" aria-label="앞 질문">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -299,7 +299,7 @@
     <script src="data.js"></script>
     <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
     <script src="tenmonths.js?v=2"></script>
-    <script src="qacore.js?v=1"></script>
+    <script src="qacore.js?v=2"></script>
 
     <script>
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
@@ -557,7 +557,7 @@
             window.renderCard = function (o) {
                 o = o || {};
                 var day = window.viewingDay;
-                document.getElementById('qa-dayno').textContent = day + '번째 질문';
+                document.getElementById('qa-dayno').textContent = (QA.nth ? QA.nth(day) : day + '번째') + ' 질문';   // 옛 qacore 가 남아 있어도 안 깨지게
                 document.getElementById('qa-question').textContent = QA.question(day) || '오늘 하루는 어땠나요?';
                 document.getElementById('qa-prev').disabled = day <= 1;
                 var body = document.getElementById('qa-body');
@@ -728,7 +728,7 @@
                     };
                     html += '<div class="page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + '; color:' + t.textTitle + ';">' +
                         '<div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:' + t.textSub + '; border-bottom:1px solid ' + t.line + '; padding-bottom:14px; margin-bottom:30px;">' +
-                            '<span>' + day + '번째 질문</span><span>' + dot(d.date) + '</span></div>' +
+                            '<span>' + (QA.nth ? QA.nth(day) : day + '번째') + ' 질문</span><span>' + dot(d.date) + '</span></div>' +
                         '<div style="font-family:var(--serif); font-size:17px; font-weight:700; line-height:1.7; word-break:keep-all; margin-bottom:34px;">' + esc(QA.question(day)) + '</div>' +
                         '<div style="display:flex; flex-direction:column; gap:28px;">' +
                             '<div>' + label('엄마') + ans(d.wifeAns) + '</div>' +
@@ -847,7 +847,7 @@
     </script>
 
     <!--        100쪽마다 책 한 권이 꽂히는 책장 -->
-    <script src="bookshelf.js?v=3"></script>
+    <script src="bookshelf.js?v=4"></script>
     <!-- 📖 종이책 알림 신청 — 진짜로 남긴다 -->
     <script src="paperbook.js?v=2"></script>
 </body>

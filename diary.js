@@ -209,6 +209,9 @@
 
     var QA_ID = "home-qa-card";
 
+    // ⚠️ '1번째 질문' 은 틀린 말이다. 하나일 때만 '첫 번째'
+    function nth(n) { return Number(n) === 1 ? "첫 번째" : n + "번째"; }
+
     function Q() { return window.QA || null; }
     function qaHidden() {
         if (localStorage.getItem("user_role") === "senior") return true;
@@ -273,7 +276,7 @@
                  : "「" + A.bookTitle(bk.full) + "」 다 채웠어요";
 
         return '<div class="qa-card">' +
-            '<div class="qa-head"><span class="qa-h">우리의 문답</span><span class="qa-meta">' + s.day + '번째 질문</span></div>' +
+            '<div class="qa-head"><span class="qa-h">우리의 문답</span><span class="qa-meta">' + nth(s.day) + ' 질문</span></div>' +
             '<div class="qa-q" style="margin-top:14px;cursor:pointer;" onclick="' + go + '">' + esc(q) + '</div>' +
             A.pillsHTML(d) +
             (note ? '<div class="qa-gold" style="text-align:left;margin-top:12px;">' + esc(note) + '</div>' : '') +
@@ -336,7 +339,7 @@
         body.setAttribute("data-mode", mode);
         body.setAttribute("data-sig", sig);
         body.innerHTML =
-            '<div class="qa-meta">' + day + '번째 질문 · 우리의 문답</div>' +
+            '<div class="qa-meta">' + nth(day) + ' 질문 · 우리의 문답</div>' +
             '<div class="qa-q" style="font-size:20px;margin:8px 0 2px;">' + esc(A.question(day)) + '</div>' +
             A.bodyHTML(day, { pills: false, reveal: reveal });
     }

@@ -198,7 +198,7 @@
         }
 
         return '<div style="font-size:12px; font-weight:800; color:' + GOLD + '; margin-bottom:4px;">엄마·아빠가 오늘 돌봄을 한눈에 봐요</div>' +
-            '<h2 style="font-size:19px; font-weight:900; color:var(--text-m); letter-spacing:-0.5px; margin:0 0 14px;">🧡 오늘 돌봄' + badge + '</h2>' +
+            '<h2 style="font-size:19px; font-weight:900; color:var(--text-m); letter-spacing:-0.5px; margin:0 0 14px;">오늘 돌봄' + badge + '</h2>' +
             body;
     }
 

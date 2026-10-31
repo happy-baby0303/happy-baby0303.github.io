@@ -250,7 +250,7 @@
             rows = mine.map(function (day) {
                 var d = {};
                 try { d = JSON.parse(localStorage.getItem("day_" + day + "_data")) || {}; } catch (e) {}
-                return entryHTML(day + "번째 질문" + (md(d.date) ? " · " + md(d.date) : ""), question(day), d.wifeAns, d.husbandAns);
+                return entryHTML((Number(day) === 1 ? "첫 번째" : day + "번째") + " 질문" + (md(d.date) ? " · " + md(d.date) : ""), question(day), d.wifeAns, d.husbandAns);
             }).join("");
         }
 

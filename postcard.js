@@ -287,7 +287,7 @@
         if (found && !photo) toast("사진을 못 불러와서 엽서만 만들었어요");
 
         bake({
-            badge: rank > 0 ? rank + "번째 기적" : "",
+            badge: rank > 1 ? rank + "번째 기적" : rank === 1 ? "첫 번째 기적" : "",   // '1번째' 는 틀린 말
             title: item.title,
             desc: item.desc,
             caption: found ? (found.photo.caption || "") : "",

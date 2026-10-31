@@ -34,7 +34,7 @@
     <!-- 🧰 안전망: 한 곳이 죽어도 나머지 화면은 살게. 제일 먼저 켜져 있어야 한다 -->
       <script src="./shared/safenet.js?v=3"></script>
     <!-- 📱 플레이 앱에서만 의료 기능을 숨긴다(웹은 그대로). 화면이 그려지기 전에 켜져야 해서 여기 둔다 -->
-      <script src="./playlite.js?v=4"></script>
+      <script src="./playlite.js?v=5"></script>
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
       <script src="./native.js?v=2"></script>
       <script src="./familyhome.js?v=1"></script>
@@ -1245,8 +1245,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
             <!-- 2. 원터치 아기 기록 (6구 버튼 + 전달사항) -->
             <div class="box-main" style="border-radius: 24px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 800; color: #B98A2E; margin-bottom: 4px;">누르면 엄마·아빠 폰에도 바로 떠요</div>
-                <h2 style="font-size: 18px; font-weight: 900; color: var(--text-m); margin: 0 0 16px 0; letter-spacing: -0.5px;">🍼 기록하기</h2>
+                <div style="font-size: 12px; font-weight: 800; color: #B98A2E; margin-bottom: 4px;">누르면 엄마·아빠 폰에도 바로 떠요</div>
+                <!-- ⚠️ 도우미 홈 큰 제목에만 🍼 · 🧡 · 🤝 가 붙어 있고 '지금 꿈이' 에는 없었다. 엄마 홈처럼 제목은 글자만 (버튼 그림은 그대로) -->
+                <h2 style="font-size: 19px; font-weight: 900; color: var(--text-m); margin: 0 0 16px 0; letter-spacing: -0.5px;">기록하기</h2>
                 
                 <!-- 🎨 알록달록 색상 & 이모지 싹 빼고 통일된 미니멀 디자인 적용 -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1284,8 +1285,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
             <!-- 3. 도움이 필요할 때 — 엄마·아빠 전화 · 긴급 SOS · 키오스크 연습 -->
             <div class="box-main" style="border-radius: 24px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
-                <div style="font-size: 13px; font-weight: 800; color: #A3958A; margin-bottom: 4px;">엄마·아빠 연락 · 응급 상황</div>
-                <h2 style="font-size: 18px; font-weight: 900; color: var(--text-m); margin: 0 0 16px 0; letter-spacing: -0.5px;">🤝 도움이 필요할 때</h2>
+                <!-- 머리글은 네 카드 모두 12px 금색 (여기만 회색 13px 이었다) -->
+                <div style="font-size: 12px; font-weight: 800; color: #B98A2E; margin-bottom: 4px;">엄마·아빠 연락 · 응급 상황</div>
+                <h2 style="font-size: 19px; font-weight: 900; color: var(--text-m); margin: 0 0 16px 0; letter-spacing: -0.5px;">도움이 필요할 때</h2>
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <a href="#" data-parent-call="mom" style="flex: 1; background: #FBF8F3; color: #4A413C; padding: 16px 0; border-radius: 14px; text-align: center; text-decoration: none; font-weight: 900; font-size: 14.5px; border: 1px solid #EDE6DE;">
@@ -1350,7 +1352,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px;">
                 <div style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color:var(--text-s);">
                     <span>기록하기</span>
-                    <span onclick="window.openTrackerSettings()" style="cursor:pointer; opacity: 0.7;" title="알림 설정" aria-label="알림 설정">🔔</span>
+                    <!-- ⚠️ 여기엔 🔔 하나만 있었다. 누르면 무엇이 열리는지 몰랐다. '알림' 이라고 적어 둔다 -->
+                    <span onclick="window.openTrackerSettings()" role="button" aria-label="알림 설정" style="display:inline-flex; align-items:center; gap:3px; padding:4px 9px 4px 7px; border-radius:10px; background:var(--bg-sub); border:1px solid var(--border); font-size:11.5px; font-weight:800; color:var(--text-s); cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>알림</span>
                 </div>
                 <span id="tracker-history-btn" onclick="window.toggleTrackerHistory()" style="font-size: 12px; color: #7F77DD; font-weight: 800; background:#F0EEFB; padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: 0.2s;">통계·기록 보기 ›</span>
             </div>
@@ -1423,10 +1426,12 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <div style="font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 3px; letter-spacing: -0.3px;">이번 주 놀이</div>
                     <div style="font-size: 12.5px; font-weight: 600; color: var(--text-sub);">D+<span id="play-dday-badge">0</span> 맞춤</div>
                 </div>
-                <div onclick="window.location.href='diary.html'" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div style="width: 38px; height: 38px; border-radius: 12px; background: #F5F1EA; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;">📖</div>
-                    <div style="font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 3px; letter-spacing: -0.3px;">부부 문답</div>
-                    <div style="font-size: 12.5px; font-weight: 600; color: var(--text-sub);">둘이 쓰는 교환 일기</div>
+                <!-- ⚠️ 여기 '부부 문답' 칸이 있었다. 위 '우리의 문답' 카드와 같은 곳으로 가는데 이름만 달라서 헷갈렸다.
+                     그 자리에 봉인 편지를 둔다. 홈에서 바로 갈 길이 없던 '미래의 아이에게' 편지다. (sealed.js 가 아래 글자를 채운다) -->
+                <div id="home-seal-tile" onclick="window.openSealedBox()" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                    <div style="width: 38px; height: 38px; border-radius: 12px; background: #F5F1EA; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;">🕯️</div>
+                    <div style="font-size: 15px; font-weight: 800; color: var(--text-m); margin-bottom: 3px; letter-spacing: -0.3px;">봉인 편지</div>
+                    <div id="home-seal-sub" style="font-size: 12.5px; font-weight: 600; color: var(--text-sub);">미래로 보내는 편지</div>
                 </div>
                 <div onclick="window.openLetterBox()" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                     <div style="width: 38px; height: 38px; border-radius: 12px; background: #F5F1EA; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;">✉️</div>
@@ -1442,13 +1447,13 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
                 <!-- 스마트 해열 -->
-                <div onclick="directGoToolbox('fever')" style="background: linear-gradient(145deg, #FFFFFF 0%, #FAF7F2 100%); height: 135px; border-radius: 24px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); border: 1px solid #F6F2EC; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; box-sizing: border-box;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div onclick="directGoToolbox('fever')" style="background: var(--bg-card); height: 135px; border-radius: 20px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid var(--border); cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; box-sizing: border-box;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; gap: 6px;">
                             <span style="font-size:18px;">🌡️</span>
                             <span style="font-size:13.5px; font-weight:900; color:var(--text-m);">해열제 기록</span>
                         </div>
-                        <div style="font-size:16px; color:#CBD5E1; line-height: 1;">›</div>
+                        <div style="font-size:16px; color:var(--text-sub); line-height: 1;">›</div>
                     </div>
                     <div id="db-fever-text">
                         <div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">체온을 재면<br>여기에 적어 두세요</div>
@@ -1456,13 +1461,13 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 </div>
 
                 <!-- 목표 저금통 -->
-                <div id="db-ledger-card" onclick="directGoToolbox('money')" style="background: linear-gradient(145deg, #FFFFFF 0%, #FAF7F2 100%); height: 135px; border-radius: 24px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); border: 1px solid #F6F2EC; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; box-sizing: border-box;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div id="db-ledger-card" onclick="directGoToolbox('money')" style="background: var(--bg-card); height: 135px; border-radius: 20px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid var(--border); cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; box-sizing: border-box;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; gap: 6px;">
                             <span style="font-size:18px;">🐷</span>
                             <span style="font-size:13.5px; font-weight:900; color:var(--text-m);">목표 저금통</span>
                         </div>
-                        <div style="font-size:16px; color:#CBD5E1; line-height: 1;">›</div>
+                        <div style="font-size:16px; color:var(--text-sub); line-height: 1;">›</div>
                     </div>
                     <div id="db-ledger-text">
                         <div style="font-size:13px; font-weight:700; color:#A3958A; line-height:1.5;">사고 싶은 걸 정해 두고<br>조금씩 모아요</div>
@@ -3579,7 +3584,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261031-1"></script>
+<script src="script.js?v=20261031-2"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3590,7 +3595,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <script src="./prepstage.js"></script>
 <script src="./outingreturn.js"></script>
 <script src="./rolelock.js?v=4"></script>
-    <script src="./sitterplus.js"></script>
+    <script src="./sitterplus.js?v=2"></script>
     <script src="./duty.js?v=3"></script>
 <script src="./graveyard.js"></script>
 <script src="playdata.js"></script>
@@ -3614,12 +3619,12 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./milestonesync.js"></script>
 <script src="./data.js"></script>
 <script src="./notes.js"></script>
-<script src="./sealed.js"></script>
+<script src="./sealed.js?v=2"></script>
 <script src="./firstfill.js?v=3"></script>
 <!-- 우리의 문답 — 저장 · 알림 · 코인을 문답 화면과 같이 쓴다 (홈에서 바로 쓰기) -->
-<script src="./qacore.js?v=1"></script>
-<script src="./diary.js?v=3"></script>
-<script src="./photobook.js?v=2"></script>
+<script src="./qacore.js?v=2"></script>
+<script src="./diary.js?v=4"></script>
+<script src="./photobook.js?v=3"></script>
 <script src="./premium.js"></script>
     <!-- 🎁 출시 기념 무료 개방 (구글 결제 붙이기 전까지) -->
     <script src="./plusfree.js?v=2"></script>
@@ -3627,7 +3632,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./home.js"></script>
  <script src="./homefix.js?v=8"></script>
 <script src="./weekly.js?v=3"></script>
-<script src="./postcard.js"></script>
+<script src="./postcard.js?v=2"></script>
 <script src="./export.js?v=2"></script>
 <!-- 🕰 시간 바퀴 — 손가락을 직접 따라간다 (아이폰에서 바퀴가 잘 안 돌던 것) -->
 <script src="./timewheel.js?v=1"></script>
@@ -3666,7 +3671,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./settingscards.js"></script>
 <script src="./emoji.js"></script>
 <script src="./feverguard.js"></script> 
-<script src="./mobile.js"></script>
+<script src="./mobile.js?v=2"></script>
 <script src="./fit.js"></script>
 <script src="./emergency119.js?v=3"></script>
 <script src="./libraryplus.js"></script>

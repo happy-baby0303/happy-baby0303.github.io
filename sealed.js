@@ -96,6 +96,7 @@
         if (typeof window.renderMemoryBox === "function") {
             try { window.renderMemoryBox(); } catch (e) {}
         }
+        if (typeof window.paintSealTile === "function") window.paintSealTile();
     }
 
     /* ---------- 봉인 ----------
@@ -133,6 +134,20 @@
     };
 
     window.sealedCount = function () { return load().length; };
+
+    /* 홈 '봉인 편지' 칸 — 지금 몇 통이 기다리는지, 열 수 있는 게 있는지 */
+    window.paintSealTile = function () {
+        var el = document.getElementById("home-seal-sub");
+        if (!el) return;
+        var list = load(), wait = 0, ready = 0;
+        list.forEach(function (l) { if (!l.opened) { wait++; if (daysLeft(l.openAt) <= 0) ready++; } });
+        el.textContent = ready ? "열 수 있는 편지가 있어요" : wait ? wait + "통이 기다려요" : "미래의 " + callName("에게");
+    };
+    setTimeout(function () { try { window.paintSealTile(); } catch (e) {} }, 1200);
+    // 여는 날 자정을 앱을 켜 둔 채로 넘길 수 있다. 다시 열어 볼 때 한 번 더 센다
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) { try { window.paintSealTile(); } catch (e) {} }
+    });
 
     window.sealedReady = function () {
         return load().filter(function (l) { return !l.opened && daysLeft(l.openAt) <= 0; }).length;

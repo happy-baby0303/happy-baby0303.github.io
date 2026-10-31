@@ -455,10 +455,13 @@
             '<div class="qa-who">' + word(k) + (when ? ' · ' + when : '') + '</div>' +
             '<div class="qa-text user-text">' + esc(d[k]) + '</div></div>';
     }
+    /* ⚠️ '1번째 질문' 은 틀린 말이다. 하나일 때만 '첫 번째' (홈 카드 · 책장 · 문답 화면이 같이 쓴다) */
+    function nth(n) { return Number(n) === 1 ? '첫 번째' : n + '번째'; }
+
     function echoHTML(before) {
         var p = read(before);
         if (!(p.husbandAns && p.wifeAns)) return '';
-        return '<div class="qa-echo"><div class="qa-echo-h">' + before + '번째 질문 · 같은 질문, 그때의 우리</div>' +
+        return '<div class="qa-echo"><div class="qa-echo-h">' + nth(before) + ' 질문 · 같은 질문, 그때의 우리</div>' +
             '<div class="qa-who">엄마</div><div class="qa-text user-text">' + esc(p.wifeAns) + '</div>' +
             '<div class="qa-who">아빠</div><div class="qa-text user-text">' + esc(p.husbandAns) + '</div></div>';
     }
@@ -505,7 +508,7 @@
         var h = o.pills === false ? '' : pillsPart(d);
 
         if (!mine || editing) {
-            if (before && !editing) h += '<div class="qa-tag">' + before + '번째 질문과 같은 질문이에요 · 답을 쓰면 그때 우리가 보여요</div>';
+            if (before && !editing) h += '<div class="qa-tag">' + nth(before) + ' 질문과 같은 질문이에요 · 답을 쓰면 그때 우리가 보여요</div>';
             h += notePart(day, d, mk, editing);
             h += '<textarea class="qa-area" id="qa-area" maxlength="1000" placeholder="생각나는 대로 적어 주세요" ' +
                  'oninput="QA.__draft(' + day + ', this.value)">' + esc(getDraft(day) || (editing ? mine : '')) + '</textarea>';
@@ -550,7 +553,7 @@
         css: injectCSS, esc: esc, ig: ig, fmtDate: fmtDate, today: today,
         role: role, myKey: myKey, otherKey: otherKey, atOf: atOf, word: word, linked: function () { return !!code(); },
         read: read, write: write, scan: scan, bust: bust, mergeDay: mergeDay,
-        question: question, echoDay: echoDay, bookTitle: bookTitle, pageOf: pageOf, bookNow: bookNow,
+        question: question, echoDay: echoDay, bookTitle: bookTitle, pageOf: pageOf, bookNow: bookNow, nth: nth,
         isPending: isPending, markPending: markPending, pull: pull, flush: flush, save: save,
         coins: coins, isSeen: isSeen, markSeen: markSeen, recentOpen: recentOpen,
         nudge: nudge, checkPartner: checkPartner, partnerState: partnerState,

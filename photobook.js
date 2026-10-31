@@ -271,10 +271,11 @@
 
     function coverPage(cov, span) {
         return '<div style="width:' + PW + 'px; height:' + PH + 'px; background:linear-gradient(170deg,#FFFFFF 0%,' + PAPER + ' 55%,#F6EFE2 100%); ' +
-            'box-sizing:border-box; padding:130px 100px; display:flex; flex-direction:column; align-items:center; ' +
+            'box-sizing:border-box; padding:198px 100px 130px; display:flex; flex-direction:column; align-items:center; ' +
             'font-family:\'Pretendard\',sans-serif; text-align:center;">' +
 
-            '<div style="font-size:20px; font-weight:600; color:' + GOLD + '; letter-spacing:11px; margin-bottom:44px;">MEMORY BOX</div>' +
+            /* ⚠️ 표지 맨 위에 'MEMORY BOX' 가 있었다. 바로 아래 '○○의 배냇함' 을 영어로 한 번 더 적은 것이라 뺐다.
+               그 줄(글자 24 + 여백 44)만큼 위 여백을 130 → 198 로 늘려서 동그라미와 이름은 원래 자리에 둔다 */
 
             (cov ? '<div style="width:640px; height:640px; border-radius:50%; overflow:hidden; background:#F1ECE8; margin-bottom:56px;">' +
                        '<img src="' + cov + '" style="width:100%; height:100%; object-fit:cover; display:block;">' +
@@ -566,7 +567,7 @@
                     head + '</div>' +
                 '<div style="width:1px; height:110px; background:' + LINE + '; margin:52px auto;"></div>' +
                 '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; line-height:1.9;">' +
-                    '다음 장은 아직 비어 있어요.<br>내일 또 한 줄이 쌓입니다.</div>' +
+                    '다음 장은 아직 비어 있습니다.<br>내일 또 한 줄이 쌓입니다.</div>' +   /* 한 문단에 '-어요' 와 '-ㅂ니다' 가 섞여 있었다 */
                 tail +
                 /* ⚠️ 맨 아래 '배냇함' 에 margin-top:auto 를 주니 가운데 정렬이 풀려서 마지막 장 글이 종이 위쪽에 몰렸다. 바닥에 따로 놓는다 */
                 '<div style="position:absolute; left:0; right:0; bottom:64px; text-align:center; font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:3px;">배냇함</div>' +

@@ -80,6 +80,8 @@ body { overscroll-behavior-y: contain; }
     #tab-home div[style*="grid-template-columns: 1fr 1fr"] { gap: 10px !important; }
     #home-postcard-tile,
     #tab-home div[style*="grid-template-columns: 1fr 1fr"] > div { padding: 18px 12px !important; }
+    /* '챙겨두기' 두 칸의 값(아래 글자)도 같은 여백에서 시작한다. 제목은 12px, 값은 20px 이라 비뚤어 보였다 */
+    #db-fever-text, #db-ledger-text, #db-growth-text { left: 12px !important; right: 12px !important; }
 
     /* ⚠️ 입력창 글씨를 전부 16px 로 강제하던 줄을 뺐다 — 위 fixViewport 설명 참고 */
 

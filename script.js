@@ -13598,7 +13598,7 @@ window.__old_downloadMilestone_unused = function() {
             <div style="text-align: center; margin-bottom: auto; position: relative; z-index: 2;">
                 <div style="font-family: sans-serif; font-size: 14px; font-weight: 600; color: #C4B5A9; letter-spacing: 8px; margin-bottom: 30px;">MY PRECIOUS BABY</div>
                 <div style="font-size: 32px; font-weight: 400; color: #8C827A; margin-bottom: 16px; font-family: 'Gowun Batang', serif; letter-spacing: -1px;">${babyName}의 배냇함에 보관된</div>
-                <div style="font-size: 34px; font-weight: 700; color: #E5989B; font-family: 'Gowun Batang', serif; letter-spacing: -1px;">${achievedIds.length}번째 기적</div>
+                <div style="font-size: 34px; font-weight: 700; color: #E5989B; font-family: 'Gowun Batang', serif; letter-spacing: -1px;">${achievedIds.length === 1 ? '첫 ' : achievedIds.length}번째 기적</div>
             </div>
 
             <!-- 🌟 메인 타이포그래피 (오늘의 도감) -->
