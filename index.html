@@ -30,7 +30,7 @@
     </script>
     <!-- 🎨 색 덧칠은 문서 맨 위에서 시작한다.
          맨 끝에서 불렀더니 그 전까지 화면이 파랗게 그려졌다가 보라로 바뀌었다. -->
-    <script src="./theme.js"></script>
+    <script src="./theme.js?v=2"></script>
     <!-- 🧰 안전망: 한 곳이 죽어도 나머지 화면은 살게. 제일 먼저 켜져 있어야 한다 -->
       <script src="./shared/safenet.js?v=3"></script>
     <!-- 📱 플레이 앱에서만 의료 기능을 숨긴다(웹은 그대로). 화면이 그려지기 전에 켜져야 해서 여기 둔다 -->
@@ -2054,7 +2054,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 </div>
                 <!-- ▲▲▲ 경험치 바 끝 ▲▲▲ -->
 
-                <div class="box-main" style="border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;" data-theme-src="">
+                <!-- ⚠️ data-theme-src="" 를 떼었다. theme.js 가 빈칸을 '원래 모양' 으로 읽고 아래 여백 · 둥근 모서리를 지웠다 -->
+                <div class="box-main" style="border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
                         <div style="font-size: 15px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px;">💌 짝꿍에게 바통 넘기기</div>
                     </div>
@@ -3584,7 +3585,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261031-2"></script>
+<script src="script.js?v=20261031-3"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>

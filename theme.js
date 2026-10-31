@@ -260,7 +260,9 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
         if (el.closest && el.closest("#btn-pill-blue, [data-keep-color]")) return;
 
         var src = el.getAttribute("data-theme-src");
-        if (src === null) {
+        /* ⚠️ 마크업에 data-theme-src="" 를 적어 둔 곳이 있었다 (바통터치 카드 셋). 빈칸을 원본으로 읽으면
+              그 칸의 스타일이 통째로 지워진다. 이 파일은 빈칸을 남기지 않으니, 빈칸은 '없음' 으로 본다 */
+        if (!src) {
             src = el.getAttribute("style") || "";
             if (src.indexOf("#") === -1 && !HAS_RGBA.test(src)) return;   // 색이 없으면 볼 일 없다
             el.setAttribute("data-theme-src", src);

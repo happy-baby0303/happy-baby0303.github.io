@@ -3958,7 +3958,7 @@ function renderBatonTasks() {
 
         // 🚨 글자 잘림 방지 (word-break:keep-all, line-height 조절)
         html += `
-        <div class="timeline-item" style="background:#FFFFFF; border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.01); margin-bottom:8px;" data-theme-src="">
+        <div class="timeline-item" style="background:#FFFFFF; border:1px solid var(--border); padding:16px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.01); margin-bottom:8px;">
             <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
                 <div style="flex:1; min-width:0;">
                     <div style="font-size:15px; font-weight:900; color:var(--text-m); margin-bottom:6px; line-height:1.4; word-break:keep-all;">${window.escapeHTML(String(r.text || ''))}</div>
@@ -4213,6 +4213,9 @@ window.dismissSmartBanner = function(bannerType) {
 };
 
 function updateSmartBanner() {
+    /* ⚠️ 이 배너를 담던 #smart-banner-container 는 홈에서 빠졌다. 지금은 아무것도 그리지 않는다.
+          받은 부탁 → '바통터치 · 받은 부탁' (renderHomeBatonList) · 예방접종 → home-vaccine-card · 도약기 → 사진 카드 배지.
+          다시 살릴 거면 예방접종 카드는 플레이 앱에서 숨겨야 한다 (playlite). */
     const container = document.getElementById('smart-banner-container');
     if(!container) return;
 
@@ -10106,15 +10109,15 @@ window.renderHomeBatonList = function() {
         var subBtn = waiting
             ? '<button onclick="cancelBaton(\'' + r.id + '\')" ' +
                   'style="padding:15px 16px; background:transparent; color:rgb(163, 149, 138) !important; ' +
-                  'border:1px solid rgb(237, 230, 222) !important; border-radius:14px; ' +
+                  'border:1px solid var(--border) !important; border-radius:14px; ' +
                   'font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0; ' +
                   'word-break:keep-all;">지금은 어려워요</button>'
             : '';
 
         html +=
-        '<div style="background:var(--bg-card); border:1px solid rgb(237, 230, 222) !important; ' +
+        '<div style="background:var(--bg-card); border:1px solid var(--border) !important; ' +
              'border-radius:20px; padding:18px 18px 16px; margin-bottom:12px; ' +
-             'box-shadow:0 4px 16px rgba(120,100,80,0.06);" data-theme-src="">' +
+             'box-shadow:0 4px 16px rgba(120,100,80,0.06);">' +   /* ⚠️ 여기 data-theme-src="" 가 붙어 있었다. theme.js 가 그걸 '원래 모양 = 빈칸' 으로 읽고 카드 모양(바탕 · 여백 · 둥근 모서리)을 통째로 지웠다. 받은 부탁이 맨 글자로만 떴다 */
 
             '<div style="font-size:12px; font-weight:700; color:rgb(163, 149, 138) !important; ' +
                  'margin-bottom:10px; letter-spacing:-0.2px;">' + head + '</div>' +
