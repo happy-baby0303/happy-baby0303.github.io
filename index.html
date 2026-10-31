@@ -98,9 +98,10 @@
         } else if (userAgent.indexOf('naver') > -1 || userAgent.indexOf('instagram') > -1) {
             if (userAgent.indexOf('android') > -1) {
                 location.href = 'intent://' + targetUrl.replace(/https?:\/\//i, '') + '#Intent;scheme=https;package=com.android.chrome;end';
-            } else {
-                alert("우측 하단 [⋮] 또는 [⋯] 버튼을 눌러 '기본 브라우저로 열기'를 선택해 주세요.");
             }
+            /* ⚠️ 아이폰은 여기서 alert 를 띄웠다. 화면이 뜨기도 전에 회색 경고창이 먼저 나왔고,
+                  인스타는 메뉴가 '오른쪽 위' 인데 '우측 하단' 이라고 적혀 있었다.
+                  이제 시작 화면에서 inapp.js 가 안내 창(주소 복사 포함)을 띄운다. */
         }
     </script>
     <link rel="stylesheet" href="style.css?v=20260921">
@@ -3656,6 +3657,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <script src="./carealarm.js?v=2"></script>
     <script src="./pushcheck.js?v=3"></script>
     <script src="./feedback.js?v=3"></script>
+    <!-- 인스타 · 페북 · 네이버 앱 안에서 열렸을 때 — 바깥 브라우저로 여는 길 -->
+    <script src="./inapp.js?v=1"></script>
 <script src="./memories.js"></script>    
 <script src="./firstwords.js?v=2"></script>
 <script src="./babytab.js"></script> 
@@ -3675,7 +3678,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <!-- 💩 기저귀 시트 — 옛 이름을 진짜 기록 시트로 보내준다 -->
 <script src="./diapersheet.js?v=1"></script>
 <!-- ← 안드로이드 뒤로가기 — 덮은 화면을 닫는다. 앱이 꺼지지 않게 -->
-<script src="./backbutton.js?v=8"></script>
+<script src="./backbutton.js?v=9"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->
