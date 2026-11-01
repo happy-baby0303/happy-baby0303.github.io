@@ -6399,12 +6399,16 @@ window.updateTrackerDashboard = function() {
                    이유식이 마지막이면 아래에 '이유식 17:35' 와 '분유 15:05' 를 줄을 나눠 적는다 */
                 const hhmm = (ts) => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
                 /* ⚠️ '이유식' 은 세 글자, '분유' 는 두 글자라 가운데 맞춤으로 두 줄을 쓰면 시각이 위아래로 어긋났다.
-                      빈칸을 넣어 맞추면 빈칸이 한글보다 좁아서 안 맞는다. 이름 칸(오른쪽 맞춤) · 시각 칸(왼쪽 맞춤) 두 칸으로 */
+                      '분 유' 처럼 벌려서 '이유식' 과 폭을 같게 한다 (서류의 '성  명' 처럼 균등 배분).
+                      빈칸 하나는 한글 한 글자보다 좁아서 그대로는 안 맞는다. 짧은 이름은 글자 사이에 빈칸을 넣고(분 유),
+                      이름 칸 폭(가장 긴 이름)에 맞춰 양끝 맞춤으로 그 빈칸을 늘린다. 한글은 빈칸이 없으면 양끝 맞춤이 안 벌어진다 */
                 const milkFresh = latestFeed && (nowTime - latestFeed.timestamp) < 12 * 3600000;
                 const milkName = String((latestFeed && latestFeed.subType) || '수유').replace(/[<>&"']/g, '');
+                const longest = (rows) => Math.max.apply(null, rows.map(r => r[0].length));
                 const times = (rows) => '<div style="margin-top:2px;"><div style="display:inline-grid; grid-template-columns:auto auto; column-gap:4px; row-gap:1px; ' +
                     'font-size:11px; font-weight:700; color:var(--text-sub); font-variant-numeric:tabular-nums; line-height:1.45;">' +
-                    rows.map(r => '<span style="text-align:right;">' + r[0] + '</span><span style="text-align:left;">' + r[1] + '</span>').join('') + '</div></div>';
+                    rows.map(r => '<span style="text-align:justify; text-align-last:justify;">' + (r[0].length < longest(rows) ? r[0].split('').join(' ') : r[0]) + '</span>' +
+                                  '<span style="text-align:left;">' + r[1] + '</span>').join('') + '</div></div>';
                 if (latestMeal && latestMeal === latestFood) {
                     const rows = [['이유식', hhmm(latestFood.timestamp)]];
                     if (milkFresh) rows.push([milkName, hhmm(latestFeed.timestamp)]);
