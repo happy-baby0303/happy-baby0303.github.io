@@ -59,7 +59,7 @@
     };
 
     var ORDER = ["newborn", "tummy", "flip", "crawl", "stand"];
-    var NAME  = { newborn: "신생아", tummy: "터미타임", flip: "뒤집기", crawl: "배밀이", stand: "잡고서기" };
+    var NAME  = { newborn: "신생아", tummy: "터미타임", flip: "뒤집기", crawl: "배밀이", stand: "잡고 서기" };
     var MARK  = {
         m17: "뒤집기 첫 시도", m21: "완벽한 뒤집기", m28: "혼자서 앉았어요",
         m29: "배밀이 시작", m30: "네발기기 성공", m34: "잡고 일어서기",
@@ -192,7 +192,7 @@
                     'word-break:keep-all; margin-bottom:6px;">🎯 개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
-                    '배냇함 도감에 <b>뒤집기·배밀이·잡고서기</b> 도장을 찍으시면, ' +
+                    '배냇함 도감에 <b>뒤집기 · 배밀이 · 잡고 서기</b> 도장을 찍으시면, ' +
                     '개월수 대신 그걸 보고 놀이를 골라드려요.<br>' +
                     '지금은 <b>' + mo + '개월</b> 기준으로 <b>' + NAME[ms] + '</b> 놀이를 드리고 있어요.</div>' +
                 /* 한 화면에 검은 막대가 셋이라 무거웠다. 이 칸의 단추는 테두리만. */

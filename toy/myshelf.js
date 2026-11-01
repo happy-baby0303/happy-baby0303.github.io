@@ -71,7 +71,7 @@
 
     /* ---------- 고르는 창 ---------- */
 
-    var MS = { newborn: "신생아", tummy: "터미타임", flip: "뒤집기", crawl: "배밀이", stand: "잡고서기", all: "전체" };
+    var MS = { newborn: "신생아", tummy: "터미타임", flip: "뒤집기", crawl: "배밀이", stand: "잡고 서기", all: "전체" };
     var ORDER = ["newborn", "tummy", "flip", "crawl", "stand", "all"];
 
     window.toggleMyToy = function (id) {

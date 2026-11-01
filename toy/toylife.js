@@ -42,7 +42,7 @@
     };
     var MSNAME = {
         newborn: "신생아", tummy: "터미타임", flip: "뒤집기",
-        crawl: "배밀이", stand: "잡고서기", all: "전 시기"
+        crawl: "배밀이", stand: "잡고 서기", all: "전 시기"
     };
 
     function esc(s) {

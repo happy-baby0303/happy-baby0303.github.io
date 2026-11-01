@@ -86,7 +86,7 @@
     }
     var MSNAME = {
         newborn: "신생아", tummy: "터미타임", flip: "뒤집기",
-        crawl: "배밀이", stand: "잡고서기", all: "전 시기"
+        crawl: "배밀이", stand: "잡고 서기", all: "전 시기"
     };
 
     /* ---------- 다가오는 날 ----------
@@ -160,9 +160,9 @@
         if (typeof Kakao === "undefined" || !Kakao.isInitialized()) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text)
-                    .then(function () { alert("목록이 복사됐어요 붙여넣기 해주세요 🤍"); })
-                    .catch(function () { prompt("아래 내용을 복사해 주세요", text); });
-            } else prompt("아래 내용을 복사해 주세요", text);
+                    .then(function () { window.showToast("목록을 복사했어요. 카톡이나 메모에 붙여 넣어 주세요."); })
+                    .catch(function () { window.showCopySheet(text); });
+            } else window.showCopySheet(text);
             return;
         }
         Kakao.Share.sendDefault({

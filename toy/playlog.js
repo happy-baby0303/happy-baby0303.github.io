@@ -238,8 +238,10 @@
 
             '<div style="font-size:12px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                 'word-break:keep-all; margin-bottom:8px;">' +
-                '지금 할 수 있는 놀이 <b>' + canNow + '개</b> 중에 <b style="color:' + PURPLE + ';">' +
-                doneNow + '개</b> 해보셨어요' +
+                /* ⚠️ 처음엔 '66개 중에 0개 해보셨어요' 라고 떴다. 0개일 때는 있는 놀이 수만 */
+                (doneNow ? '지금 할 수 있는 놀이 <b>' + canNow + '개</b> 중에 <b style="color:' + PURPLE + ';">' +
+                           doneNow + '개</b> 해 보셨어요'
+                         : '지금 할 수 있는 놀이가 <b>' + canNow + '개</b> 있어요') +
                 (nextStage && canNext ? '<br><b>' + nextStage.name + '</b>' + pp(nextStage.name, "이/가") + ' 되면 <b>' + canNext + '개</b>가 더 열려요.' : '') +
             '</div>' +
 

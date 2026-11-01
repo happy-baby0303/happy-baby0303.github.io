@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <script src="../shared/curatorlite.js?v=b7"></script>
+    <!-- 말풍선 · 묻는 창 — 브라우저 기본 창(alert · prompt) 대신 -->
+    <script src="../shared/curatorui.js?v=1"></script>
     <script src="../native.js?v=2"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 놀이와 장난감</title>
@@ -24,10 +26,10 @@
                 홈
             </a>
             <h1 style="font-size: 18px; margin: 0; font-weight: 800;">배냇함 큐레이터</h1>
-            <div class="pro-badge">장난감 93종</div>
+            <div class="pro-badge" id="toy-count-badge">장난감</div>
         </div>
         <nav class="gnb-menu">
-            <a href="../stroller/index.html" class="gnb-item">☀️ 유모차</a>
+            <a href="../stroller/index.html" class="gnb-item">🚼 유모차</a>
             <a href="../carseat/index.html" class="gnb-item">🚘 카시트</a>
             <a href="../bottle/index.html" class="gnb-item">🍼 수유/젖병</a>
             <a href="../food/index.html" class="gnb-item">🥦 이유식</a>
@@ -103,7 +105,8 @@
     <div class="container">
         
         <!-- 타이틀 영역 -->
-        <div class="hero-title" style="text-align: center; margin-bottom: 24px;">
+        <!-- 제휴 안내 아래 · 탭 위 빈 곳을 이유식 큐레이터와 같게 줄인다 -->
+<div class="hero-title" style="text-align: center; margin-bottom: 12px; padding-top: 14px; padding-bottom: 12px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
                 <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
                     <span>놀이 처방전 · 장난감</span>
@@ -150,7 +153,7 @@
                     <button class="play-filter-btn" onclick="filterPlays('zero', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🏠 집에 있는 걸로</button>
                     <button class="play-filter-btn" onclick="filterPlays('dad', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🏋️ 몸으로 크게</button>
                     <button class="play-filter-btn" onclick="filterPlays('toy', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">🧸 장난감으로</button>
-<button class="play-filter-btn" onclick="filterPlays('fav', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #FCA5A5; background: #FFF2F2; color: #E32636; font-weight: 900; font-size: 13.5px; cursor: pointer;">❤️ 찜한 놀이</button>
+<button class="play-filter-btn" onclick="filterPlays('fav', this)" style="flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FFF; color: #7A6F68; font-weight: 800; font-size: 13.5px; cursor: pointer;">❤️ 찜한 놀이</button>
                 </div>
             </div>
             
@@ -200,10 +203,10 @@
                 </div>
             </div>
 
-            <!-- ✨ 까만 패널 밖으로 탈출한 핑크색 찜하기 버튼 -->
+            <!-- 찜한 장난감 — 빨간 알약이던 것을 이유식 큐레이터처럼 흰 바탕으로 (하트만 빨강) -->
             <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
-                <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 12px 18px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(227, 38, 54, 0.15); transition: 0.2s;">
-                    ❤️ 내가 찜한 장난감 모아보기
+                <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFFFFF; color: #4A413C; border: 1px solid #EDE6DE; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: 0.2s;">
+                    ❤️ 찜한 장난감 모아보기
                 </button>
             </div>
 
@@ -216,7 +219,7 @@
                 <button class="ms-chip" data-milestone="newborn" style="flex-shrink: 0; white-space: nowrap;"> 신생아 생존기</button>
                 <button class="ms-chip" data-milestone="tummy" style="flex-shrink: 0; white-space: nowrap;"> 터미타임 연습</button>
                 <button class="ms-chip" data-milestone="flip" style="flex-shrink: 0; white-space: nowrap;"> 엎드려 뒤집기</button>
-                <button class="ms-chip" data-milestone="crawl" style="flex-shrink: 0; white-space: nowrap;"> 배밀이/기어가기</button>
+                <button class="ms-chip" data-milestone="crawl" style="flex-shrink: 0; white-space: nowrap;"> 배밀이 · 기어가기</button>
                 <button class="ms-chip" data-milestone="stand" style="flex-shrink: 0; white-space: nowrap;"> 잡고 일어서기</button>
             </div>
             </div>
@@ -227,13 +230,11 @@
 
             <div id="toy-result-area"></div>
             
-            <!-- 면책 조항 -->
+            <!-- 맨 아래 안내 — '※ 장난감 안전 면책 조항 · 본 큐레이션은 … 바랍니다' 를 앱 말투로 (뜻은 그대로).
+                 쿠팡 파트너스 안내는 화면 맨 위(disclosure.js)에 이미 있어서 여기서는 뺐다 (젖병 · 카시트와 같게) -->
             <div style="background: #FAF7F2; border: 1px solid #EDE6DE; border-radius: 12px; padding: 24px 20px; margin-top: 40px; margin-bottom: 20px; color: #A3958A; font-size: 12.5px; line-height: 1.6; word-break: keep-all;">
-                <div style="font-weight: 700; color: #7A6F68; margin-bottom: 4px;">※ 장난감 안전 면책 조항</div>
-                <div style="margin-bottom: 16px;">본 큐레이션은 일반적인 발달 단계를 기준으로 한 참고용입니다. 구매 전 반드시 제조사의 권장 사용 연령과 주의사항(작은 부품 질식 위험 등)을 직접 확인하시기 바랍니다. 보호자의 세심한 관찰이 필요하며, 부주의나 제품 결함으로 인한 사고에 대해 본 서비스는 법적 책임을 지지 않습니다.</div>
-
-                <div style="font-weight: 700; color: #7A6F68; margin-bottom: 4px;">※ 쿠팡 파트너스 안내</div>
-                            <div>이 페이지는 쿠팡 파트너스 활동의 일환으로, 구매 시 이에 따른 일정액의 수수료를 제공받습니다.</div>
+                <div style="font-weight: 700; color: #7A6F68; margin-bottom: 4px;">배냇함 안내</div>
+                <div>놀이와 장난감은 일반적인 발달 단계를 기준으로 고른 참고용이에요. 사기 전에 제조사의 사용 연령과 주의사항(작은 부품 · 질식 위험)을 꼭 확인해 주세요. 놀 때는 늘 곁에서 지켜봐 주세요. 부주의나 제품 결함으로 생긴 사고는 배냇함이 법적 책임을 지지 않아요.</div>
             </div>
         </div>
     </div> <!-- // container 끝 -->
@@ -242,25 +243,27 @@
     <script src="../shared/safenet.js?v=b7"></script>
      <script src="../shared/babyswitch.js"></script>
      <script src="../shared/babyage.js?v=1"></script>
-    <script src="data.js?v=b8"></script>
-    <script src="app.js?v=b8"></script>
+    <script src="data.js?v=b9"></script>
+    <!-- ⚠️ '장난감 93종' 으로 박아 두었는데 목록은 99종이었다. 이유식 큐레이터처럼 데이터에서 센다 -->
+    <script>try { document.getElementById('toy-count-badge').textContent = '장난감 ' + toyData.length + '종'; } catch (e) {}</script>
+    <script src="app.js?v=b9"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="myshelf.js?v=b7"></script>
+    <script src="myshelf.js?v=b8"></script>
     <script src="playweek.js?v=b9"></script>
     <script src="playlike.js?v=b7"></script>
     <!-- ⏱️ 지금 몇 분 있으세요 — PLUS -->
     <script src="playnow.js?v=b8"></script>
     <!-- 🎯 개월수 말고 도감 도장으로 단계 판단 — PLUS -->
-    <script src="playstage.js?v=b8"></script>
-    <script src="playlog.js?v=b8"></script>
+    <script src="playstage.js?v=b9"></script>
+    <script src="playlog.js?v=b9"></script>
     <script src="bathmold.js?v=b7"></script>
     <!-- 🔋 단추형 전지 · KC · 리콜 — 안전이라 무료 -->
     <script src="toysafety.js?v=b7"></script>
-    <script src="toylife.js?v=b8"></script>
+    <script src="toylife.js?v=b9"></script>
     <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
-    <script src="../shared/curatorback.js"></script>
+    <script src="../shared/curatorback.js?v=3"></script>
     <!-- 📐 놀이 탭 카드 순서 고정 — 맨 끝에 로드해야 다 꽂힌 뒤에 정리한다 -->
     <script src="toyorder.js"></script>
 

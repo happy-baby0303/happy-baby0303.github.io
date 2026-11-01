@@ -148,11 +148,11 @@ function togglePlayFavorite(id, btn, event) {
     if (favs.includes(id)) {
         favs = favs.filter(f => f !== id);
         btn.innerHTML = '🤍';
-        window.showToast ? window.showToast('찜을 풀었어요') : alert('해제됨');
+        window.showToast('찜을 풀었어요');
     } else {
         favs.push(id);
         btn.innerHTML = '❤️';
-        window.showToast ? window.showToast('❤️ 찜했어요. 위의 \'찜한 놀이\'에서 모아 볼 수 있어요') : alert('찜 완료');
+        window.showToast('❤️ 찜했어요. 위의 \'찜한 놀이\'에서 모아 볼 수 있어요');
     }
     localStorage.setItem('favPlays', JSON.stringify(favs));
     
@@ -420,8 +420,8 @@ function sharePlayMission(playId) {
         (toDad && p.dadRole ? `\n🙋 맡아줄 것: ${p.dadRole}` : '') + `\n\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
-            .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
-            .catch(() => prompt("아래 내용을 복사해 주세요", shareText));
+            .then(() => window.showToast('복사했어요. 카톡에 붙여 넣어 보내세요.'))
+            .catch(() => window.showCopySheet(shareText));
         return;
     }
     Kakao.Share.sendDefault({
@@ -450,12 +450,12 @@ function toggleFavView() {
     const btn = document.getElementById('btn-show-fav');
     
     if (isFavViewMode) {
-        btn.innerHTML = '🔙 검색 화면으로 돌아가기';
+        btn.innerHTML = '← 추천 목록으로 돌아가기';
         btn.style.background = '#F6F2EC'; btn.style.color = '#7A6F68'; btn.style.borderColor = '#DCD3C8';
         renderFavorites();
     } else {
-        btn.innerHTML = '❤️ 내가 찜한 장난감 모아보기';
-        btn.style.background = '#FFF2F2'; btn.style.color = '#E32636'; btn.style.borderColor = '#FCA5A5';
+        btn.innerHTML = '❤️ 찜한 장난감 모아보기';
+        btn.style.background = '#FFFFFF'; btn.style.color = '#4A413C'; btn.style.borderColor = '#EDE6DE';
         updateToyView(); // ✨ 에러가 나던 renderList(false)를 올바른 함수로 수정
     }
 }
@@ -682,8 +682,8 @@ function shareToHusbandToy(id) {
     const shareText = `이 장난감 어때?\n${toy.name}${sub ? '\n' + sub : ''}\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)
-            .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
-            .catch(() => prompt("아래 내용을 복사해 주세요", shareText));
+            .then(() => window.showToast('복사했어요. 카톡에 붙여 넣어 보내세요.'))
+            .catch(() => window.showCopySheet(shareText));
         return;
     }
     Kakao.Share.sendDefault({
