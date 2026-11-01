@@ -174,7 +174,7 @@
         var a = readAsk();
         if (a.feed) return;
         var recs = []; try { recs = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
-        var last = recs.filter(function (r) { return r && (r.type === "feed" || r.type === "diaper") && r.subType !== "이유식"; })
+        var last = recs.filter(function (r) { return r && (r.type === "feed" || r.type === "diaper"); })   // 이유식도 맘마 (알림과 같은 규칙)
                        .sort(function (x, y) { return Number(y.timestamp) - Number(x.timestamp); })[0];
         if (!last || Date.now() - Number(last.timestamp) > 30 * 60000) return;   // 방금 적은 게 아니면 묻지 않는다
         var gap = every(last.type === "feed" ? "tosil_feed_interval" : "tosil_diaper_interval");

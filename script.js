@@ -6244,9 +6244,12 @@ window.updateTrackerDashboard = function() {
     const minFormula = babyDays <= 30 ? 10 : (babyDays <= 100 ? 20 : 40);
     const minBreast = babyDays <= 30 ? 2 : (babyDays <= 100 ? 3 : 5);
 
-    /* ⚠️ 이유식도 '수유' 로 쳐서, 이유식을 먹이면 수유 시계가 0으로 돌아갔다.
-          수유 텀(알림 · 맘마 시간)은 모유 · 분유 · 유축으로만 센다.
-          이유식은 따로 들고 있다가 맘마 버튼 아래에 한 줄로 보여준다. */
+    /* ⚠️ 이유식도 '수유' 로 쳐서, 이유식을 먹이면 수유 시계가 0으로 돌아갔다 (분유 시각이 이유식 시각에 묻혔다).
+          그래서 수유(모유 · 분유 · 유축)와 이유식을 따로 든다.
+       ⚠️ 그런데 알림까지 수유로만 세니, 이유식을 먹이고 1시간 반 뒤에 '맘마 먹은 지 4시간 넘었어요' 가 떴다.
+          방금 먹은 아기에게 맘마 알림이다. 알림과 큰 숫자는 '마지막으로 먹은 때' (이유식 포함 · latestMeal) 로 센다.
+          시각은 맘마 칸 아래에 이유식 · 분유를 줄을 나눠 적어서 둘이 섞이지 않게 한다.
+          같은 규칙: carealarm.js (폰 알림) · 도우미 홈 '지금 ○○' · pushcheck.js (다음 맘마 안내) */
     const latestFeed = records.find(r => {
         if (r.type !== 'feed' || r.subType === '이유식') return false;
         const amt = parseInt(r.amount) || 0;
@@ -6254,12 +6257,13 @@ window.updateTrackerDashboard = function() {
         else return amt >= minFormula;
     });
     const latestFood = records.find(r => r.type === 'feed' && r.subType === '이유식');
+    const latestMeal = (latestFood && (!latestFeed || Number(latestFood.timestamp) > Number(latestFeed.timestamp))) ? latestFood : latestFeed;
 
     const latestDiaper = records.find(r => r.type === 'diaper');
     // 🚨 투약 최신 기록 찾기
     const latestMed = records.find(r => r.type === 'med');
 
-    let diffFeedMins = latestFeed ? Math.floor((nowTime - latestFeed.timestamp) / 60000) : 0;
+    let diffFeedMins = latestMeal ? Math.floor((nowTime - latestMeal.timestamp) / 60000) : 0;
 
     let briefBg = "var(--bg-card)";
     let briefColor = "var(--text-m)";
@@ -6280,14 +6284,14 @@ window.updateTrackerDashboard = function() {
     const briefKey = (kind, rec) => kind + ':' + (rec && (rec.id || rec.timestamp));
     const briefHidden = (kind, rec) => { try { return localStorage.getItem('tosil_brief_hide') === briefKey(kind, rec); } catch (e) { return false; } };
     const briefClose = (kind, rec) => `try{localStorage.setItem('tosil_brief_hide','${briefKey(kind, rec)}')}catch(e){}this.parentElement.parentElement.style.display='none'`;
-    if (!isSleeping && feedInterval > 0 && latestFeed && diffFeedMins >= feedInterval && diffFeedMins <= 12 * 60 && !briefHidden('feed', latestFeed)) {
+    if (!isSleeping && feedInterval > 0 && latestMeal && diffFeedMins >= feedInterval && diffFeedMins <= 12 * 60 && !briefHidden('feed', latestMeal)) {
         isFeedAlert = true;
         briefBg = "#F3F1FC"; briefColor = "#4F47A5"; briefBorder = "#E4E0F7";
         briefing = `🍼 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 넘었어요`;
         briefBadge = `
             <div style="display:flex; align-items:center; gap:10px;">
                 <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#7F77DD; padding:6px 14px; border-radius:8px; cursor:pointer;">기록</div>
-                <div onclick="${briefClose('feed', latestFeed)}" aria-label="닫기" style="font-size:16px; color:#9C95E0; cursor:pointer; font-weight:bold;">✕</div>
+                <div onclick="${briefClose('feed', latestMeal)}" aria-label="닫기" style="font-size:16px; color:#9C95E0; cursor:pointer; font-weight:bold;">✕</div>
             </div>
         `;
     }
@@ -6390,13 +6394,17 @@ window.updateTrackerDashboard = function() {
             if(feedBtnSub) feedBtnSub.innerHTML = '<span style="color:#7F77DD; font-weight: 900; animation: pulseSOS 1.5s infinite;">수유 중 </span>';
         } else {
             if (feedBtnSub) {
-                /* 수유가 없고 이유식만 있으면 이유식으로, 이유식이 수유보다 나중이면 아래에 한 줄 */
+                /* 큰 숫자는 마지막으로 먹은 때부터 (이유식 포함 — 위 latestMeal).
+                   ⚠️ 예전엔 큰 숫자는 분유, 아래 줄은 '이유식 17:35' 라서 '맘마 4시간 전 · 이유식 17:35' 처럼 서로 어긋나 보였다.
+                   이유식이 마지막이면 아래에 '이유식 17:35' 와 '분유 15:05' 를 줄을 나눠 적는다 */
                 const hhmm = (ts) => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
-                const foodFresh = latestFood && (nowTime - latestFood.timestamp) < 12 * 3600000;
-                if (!latestFeed && foodFresh) feedBtnSub.innerHTML = '이유식 ' + getRelativeTime(latestFood);
-                else feedBtnSub.innerHTML = getRelativeTime(latestFeed) +
-                    ((foodFresh && latestFeed && latestFood.timestamp > latestFeed.timestamp)
-                        ? '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-top:2px;">이유식 ' + hhmm(latestFood.timestamp) + '</div>' : '');
+                const subLine = (t) => '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-top:2px;">' + t + '</div>';
+                const milkFresh = latestFeed && (nowTime - latestFeed.timestamp) < 12 * 3600000;
+                const milkName = String((latestFeed && latestFeed.subType) || '수유').replace(/[<>&"']/g, '');
+                if (latestMeal && latestMeal === latestFood) {
+                    feedBtnSub.innerHTML = getRelativeTime(latestFood) + subLine('이유식 ' + hhmm(latestFood.timestamp)) +
+                        (milkFresh ? subLine(milkName + ' ' + hhmm(latestFeed.timestamp)) : '');
+                } else feedBtnSub.innerHTML = getRelativeTime(latestFeed);
             }
         }
         
@@ -14479,20 +14487,21 @@ window.updateSeniorBriefing = function() {
     const NONE = '<span style="color:#C4B5A9; font-weight:700;">오늘 기록이 없어요</span>';
 
     let feedMain = NONE, feedSub = '';
-    /* 수유(모유 · 분유 · 유축)와 이유식을 나눈다. '맘마 시간이에요' 는 수유로만 판단한다 */
+    /* 수유(모유 · 분유 · 유축)와 이유식은 줄을 나눠 적는다.
+       큰 숫자와 '맘마 시간이에요' 는 마지막으로 먹은 때부터 (이유식 포함 — 엄마 · 아빠 홈 · 폰 알림과 같은 규칙).
+       ⚠️ 예전엔 수유로만 봐서, 이유식을 먹이고 얼마 안 돼 '맘마 시간이에요' 가 붙었다 */
     const fd = latest('feed', r => r.subType !== '이유식');
     const fo = latest('feed', r => r.subType === '이유식');
-    if (fd && now - fd.timestamp < DAY_MS) {
-        const amt = fd.subType === '모유' ? fd.amount + '분' : fd.amount + (fd.subType === '이유식' ? 'g' : 'ml');
-        feedMain = ago(fd.timestamp);
-        if (feedEvery > 0 && now - fd.timestamp >= feedEvery * 60000)
+    const fresh = (r) => !!r && now - r.timestamp < DAY_MS;
+    const meal = [fd, fo].filter(fresh).sort((a, b) => Number(b.timestamp) - Number(a.timestamp))[0];
+    if (meal) {
+        feedMain = ago(meal.timestamp);
+        if (feedEvery > 0 && now - meal.timestamp >= feedEvery * 60000)
             feedMain += ' <span style="font-size:12px; font-weight:800; color:#B98A2E;">· 맘마 시간이에요</span>';
-        feedSub = clock(fd.timestamp) + ' · ' + esc(fd.subType || '맘마') + (fd.amount ? ' ' + esc(amt) : '');
-    }
-    if (fo && now - fo.timestamp < DAY_MS) {
-        const foodLine = '이유식 ' + clock(fo.timestamp) + (fo.amount ? ' · ' + esc(fo.amount + 'g') : '');
-        if (feedMain === NONE) { feedMain = ago(fo.timestamp); feedSub = foodLine; }
-        else if (!fd || fo.timestamp > fd.timestamp) feedSub += '<br>' + foodLine;
+        const milkLine = fresh(fd) ? clock(fd.timestamp) + ' · ' + esc(fd.subType || '맘마') + (fd.amount ? ' ' + esc(fd.amount + (fd.subType === '모유' ? '분' : 'ml')) : '') : '';
+        const foodLine = fresh(fo) ? clock(fo.timestamp) + ' · 이유식' + (fo.amount ? ' ' + esc(fo.amount + 'g') : '') : '';
+        // 이유식이 마지막이면 이유식 줄 위, 수유 줄 아래. 수유가 마지막이면 수유 줄만 (예전과 같다)
+        feedSub = meal === fo ? [foodLine, milkLine].filter(Boolean).join('<br>') : milkLine;
     }
 
     let diaperMain = NONE, diaperSub = '';

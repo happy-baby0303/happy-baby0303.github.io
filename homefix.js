@@ -131,7 +131,9 @@
     var MS_TITLE = { m17: "뒤집기 연습", m21: "첫 뒤집기", m28: "혼자 앉기", m29: "배밀이", m30: "네발 기기",
                      m34: "잡고 서기", m35: "잡고 옆으로 걷기", m42: "첫걸음" };
     var PLAY_ORDER = ["newborn", "tummy", "flip", "crawl", "stand"];
-    var PLAY_NAME = { tummy: "터미타임", flip: "뒤집기", crawl: "배밀이 · 기기", stand: "잡고 서기" };
+    /* ⚠️ '이제 배밀이 · 기기 시기 놀이를 해 볼 때예요' — 이름을 가운뎃점으로 이어 붙여서 '기기 시기' 가 겹쳐 읽혔다.
+          'N개월 아기 놀이' 처럼 '○○ 아기 놀이' 로 읽히게 쓴다. 기는 시기 놀이 칸에는 혼자 앉기도 들어 있어서 '앉고 기는' */
+    var PLAY_NAME = { tummy: "엎드려 노는", flip: "뒤집는", crawl: "앉고 기는", stand: "잡고 서는" };
     function stampStage() {
         var raw = getJSON("tosil_milestones", []), dates = getJSON("tosil_milestone_dates", {}) || {};
         var best = null;
@@ -523,7 +525,7 @@
             if (PLAY_NAME[stamp.stage] && sd !== null && sd >= 0 && sd <= 21 && !seen("toy_" + stamp.stage)) {
                 var tt = MS_TITLE[stamp.id] || "";
                 /* ⚠️ '…놀이로 바꿔 볼까요' 는 놀이를 이미 하고 있던 집의 말이다. 막 깐 사람에게는 무엇을 바꾸라는 건지 몰랐다 */
-                push("\uD83E\uDDF8", "이제 " + PLAY_NAME[stamp.stage] + " 시기 놀이를 해 볼 때예요",
+                push("\uD83E\uDDF8", "이제 " + PLAY_NAME[stamp.stage] + " 아기 놀이를 해 볼 때예요",
                      "도감에 '" + tt + "'" + josa(tt, "을", "를") + " 찍었어요", "toy/index.html", false, "toy_" + stamp.stage);
             }
         } else {

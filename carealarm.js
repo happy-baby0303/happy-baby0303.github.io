@@ -59,7 +59,8 @@
         var best = null;
         recs().forEach(function (r) {
             if (!r || r.type !== type) return;
-            if (type === "feed" && r.subType === "이유식") return;   // 수유 텀은 모유 · 분유 · 유축으로만
+            /* ⚠️ 예전엔 여기서 이유식을 뺐다 (수유 텀은 수유로만). 그러니 이유식을 먹이고 1시간 반 뒤에
+                  '맘마 시간이에요' 가 울렸다. 알림은 마지막으로 먹은 때부터 센다 (이유식 포함 · 홈 latestMeal 과 같은 규칙) */
             var t = Number(r.timestamp);
             if (t && t <= Date.now() + 5 * 60000 && (!best || t > Number(best.timestamp))) best = r;
         });
