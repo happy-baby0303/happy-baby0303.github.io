@@ -105,8 +105,9 @@
 
             (mins
                 ? '<button onclick="setCookTimer(' + mins + ')" ' +
-                  'style="width:100%; padding:18px; margin-bottom:12px; background:#FFF2F2; ' +
-                  'color:#E32636; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(227,38,54,0.15); ' +
+                  /* ⚠️ 빨강(경고색)이었다. 타이머는 위험이 아니다 — 시작 단추와 같은 보라 */
+                  'style="width:100%; padding:18px; margin-bottom:12px; background:#F0EEFB; ' +
+                  'color:#5B53B8; border:none; border-radius:14px; box-shadow: 0 4px 10px rgba(127,119,221,0.15); ' +
                   'font-size:16px; font-weight:900; cursor:pointer; transition:0.2s;">⏱️ ' + mins + '분 타이머 걸기</button>'
                 : '') +
 

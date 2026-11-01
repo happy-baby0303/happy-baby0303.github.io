@@ -55,7 +55,8 @@
         { id: "install-guide-modal", close: null },
         { id: "cooking-mode-modal",  close: "closeCookingMode" },
         { id: "meal-bottom-sheet",   close: null },
-        { id: "shop-send-sheet",     close: "closeShopSend" },    // 이유식 · 짝꿍한테 장볼 거 보내기
+        { id: "shop-send-sheet",     close: "closeShopSend" },    // 이유식 · 짝꿍한테 장 볼 거 보내기
+        { id: "cur-ask-sheet",       close: "closeCurAsk" },      // 묻는 창 · 숫자 · 복사 (curatorui.js)
         { id: "test-bottom-sheet",   close: null }
     ];
 

@@ -86,15 +86,18 @@
         var v = parseInt(localStorage.getItem(MEAL_KEY), 10);
         return (isFinite(v) && v >= 10 && v <= 400) ? v : defaultMeal();
     }
+    /* 브라우저 입력창(prompt) 대신 아래에서 올라오는 창 (shared/curatorui.js) */
     window.setMealSize = function () {
-        var v = prompt("한 번에 몇 g 정도 먹나요?\n(모르시면 비워두세요. 단계 기준으로 잡아드려요)",
-                       String(mealSize()));
-        if (v === null) return;
-        v = parseInt(String(v).replace(/[^0-9]/g, ""), 10);
-        if (!isFinite(v)) { try { localStorage.removeItem(MEAL_KEY); } catch (e) {} }
-        else if (v < 10 || v > 400) return alert("10~400 사이로 넣어주세요.");
-        else { try { localStorage.setItem(MEAL_KEY, String(v)); } catch (e) {} }
-        paint();
+        window.askNumber({
+            title: "한 번에 몇 g 정도 먹나요?",
+            sub: "모르면 비워 두세요. 지금 단계에 맞춰 잡아 드려요",
+            value: mealSize(), unit: "g", min: 10, max: 400,
+            onDone: function (v) {
+                if (v === null) { try { localStorage.removeItem(MEAL_KEY); } catch (e) {} }
+                else { try { localStorage.setItem(MEAL_KEY, String(v)); } catch (e) {} }
+                paint();
+            }
+        });
     };
 
     /* ==========================================================

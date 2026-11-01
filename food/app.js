@@ -33,6 +33,14 @@ function applyGlobalBabyProfile() {
     const foodAge = document.getElementById('food-age');
     if(foodAge) foodAge.value = ageFilter;
 
+    /* ⚠️ 계량 계산기를 열면 중기 · 후기 아기에게도 '10배죽 (주르륵)' 이 먼저 골라져 있었다.
+          레시피와 같은 단계 농도로 (초기 10배죽 · 중기 7배죽 · 후기부터 진밥 3배죽). 사람이 바꾼 뒤에는 안 건드린다 */
+    const ratioSel = document.getElementById('food-ratio-type');
+    if (ratioSel && !ratioSel.dataset.touched) {
+        ratioSel.value = ({ early: '10', mid: '7', late: '3', done: '3' })[ageFilter] || '10';
+        ratioSel.addEventListener('change', function () { ratioSel.dataset.touched = '1'; }, { once: true });
+    }
+
     // ✂️ 1. 촌스러운 파란 배너 삭제 (다이어트!)
     const banner = document.getElementById('auto-sync-banner');
     if(banner) banner.style.display = 'none';
@@ -40,7 +48,7 @@ function applyGlobalBabyProfile() {
     // ✨ 2. 쿨한 뱃지에 '월령' + '이유식 단계'를 한 방에 쏴주기
     const badges = document.querySelectorAll('.dynamic-age-badge');
     badges.forEach(b => {
-        b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 | ${ageText}`;
+        b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 · ${ageText}`;
     });
 }
 
@@ -90,10 +98,10 @@ function toggleFavView() {
         if(searchBox) searchBox.style.display = 'none';
         renderFavorites();
     } else {
-        btn.innerHTML = '❤️ 내가 찜한 식단 모아보기';
-        btn.style.background = '#FFF2F2';
-        btn.style.color = '#E32636';
-        btn.style.borderColor = '#FCA5A5';
+        btn.innerHTML = '❤️ 찜한 식단 모아보기';
+        btn.style.background = '#FFFFFF';
+        btn.style.color = '#4A413C';
+        btn.style.borderColor = '#EDE6DE';
         if(matrixPanel) matrixPanel.style.display = 'block';
         if(searchBox) searchBox.style.display = 'block';
         runFoodEngine(); 
@@ -404,7 +412,7 @@ function generateCardHTML(item) {
             </div>
 
             <button onclick="shareToHusband('${item.name}', '${item.ingredients}')" style="display:block; width:100%; background:#FFFFFF; border:1px solid #EDE6DE; color:#7A6F68; padding:15px; border-radius:14px; font-weight:800; font-size:14.5px; text-align:center; transition:0.2s; cursor:pointer;">
-                ${typeof window.shopSendLabel === 'function' ? window.shopSendLabel() : '여보한테 장볼 거 보내기'}
+                ${typeof window.shopSendLabel === 'function' ? window.shopSendLabel() : '여보한테 장 볼 거 보내기'}
             </button>
         </div>
     `;
@@ -622,14 +630,14 @@ function shareToHusband(recipeName, ingredients) {
           누구에게 보낼지(남편 · 아내) 보여 주는 창으로 연다 (shoplist.js) */
     if (typeof window.openShopSend === 'function') return window.openShopSend(recipeName, [ingredients], '오늘 이유식은 [' + recipeName + '] 할게요.');
     const items = String(ingredients || '').split(',').map(i => i.trim()).filter(Boolean);
-    let shareText = `여보, 오늘 이유식은 [${recipeName}] 할게요.\n장볼 거 적어서 보내요.\n\n`;
+    let shareText = `여보, 오늘 이유식은 [${recipeName}] 할게요.\n장 볼 거 적어서 보내요.\n\n`;
     items.forEach(item => { shareText += `· ${item}\n`; });
     shareText += `\n(배냇함 이유식에서 보냄)`;
 
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText).then(() => {
-            alert("장볼 거 목록을 복사했어요. 카톡에 붙여 넣어 보내세요.");
-        }).catch(() => prompt("아래 내용을 복사해 주세요", shareText));
+            window.showToast("장 볼 거 목록을 복사했어요. 카톡에 붙여 넣어 보내세요.");
+        }).catch(() => window.showCopySheet(shareText));
         return;
     }
 
@@ -778,82 +786,7 @@ function getFoodEmoji(name) {
     return '🍽️';
 }
 
-function renderSelectedDateRecords() {
-    const listArea = document.getElementById('cal-record-list');
-    const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
-    const dailyRecords = records[selectedDateStr] || [];
-    
-    const dateObj = new Date(selectedDateStr);
-    const titleEl = document.getElementById('cal-selected-date-text');
-    if(titleEl) titleEl.innerText = `${dateObj.getMonth()+1}월 ${dateObj.getDate()}일 기록`;
-
-    if (dailyRecords.length === 0) {
-        listArea.innerHTML = `<div style="text-align: center; padding: 30px 0; color: #A3958A; font-size: 14px; font-weight: 600; background:#FFF; border-radius:14px; border:1px dashed #DCD3C8;">아직 기록이 없어요.</div>`;
-        return;
-    }
-
-    listArea.innerHTML = dailyRecords.map((r, i) => {
-        let contentHtml = '';
-
-        if (r.type === 'meal' || (r.menu && !r.ingredient)) {
-            let amountHtml = ''; let reactionHtml = ''; let actionBtnHtml = '';
-
-            // 💡 [핵심 디테일] 계획됨 상태면 '기록 완료' 파란 버튼 띄우기 (문자열 포함 여부로 확실히 체크!)
-            if (r.amount && r.amount.includes('계획됨')) {
-                amountHtml = `<span style="background:#FFF7ED; border:1px solid #FDBA74; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; color:#9A3412; cursor:pointer;" onclick="openMealSheetForUpdate('${selectedDateStr}', ${i}, '${r.menu}')">⏳ 아직 안 먹었어요 · 눌러서 기록</span>`;
-                /* ⚠️ '계획됨' 일 때는 [기록하기] 만 있고 삭제가 없었다.
-                   식단표가 자동으로 넣어준 계획인데, 그날 안 먹이기로 했거나
-                   메뉴를 바꿨으면 지울 방법이 없다. 달력에 영영 남는다.
-                   이미 먹은 기록에는 삭제가 있는데 계획에만 없었다. */
-                actionBtnHtml = `<button onclick="openMealSheetForUpdate('${selectedDateStr}', ${i}, '${r.menu}')" style="background:#7F77DD; color:#FFF; border:none; border-radius:8px; font-size:12px; font-weight:800; padding:8px 12px; cursor:pointer; box-shadow:0 2px 4px rgba(127, 119, 221,0.2); transition:0.2s;">기록 완료 ✏️</button>`;
-                actionBtnHtml += `<button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:8px; font-size:12px; font-weight:700; color:#A3958A; cursor:pointer; padding:6px 10px; margin-left:6px;">삭제</button>`;
-            } else {
-                // 이미 먹은 기록일 경우 (기존)
-                amountHtml = `<span style="background:#F2F0FC; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#7F77DD;">${r.amount}</span>`;
-                reactionHtml = `<span style="background:#F6F2EC; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; color:#7A6F68;">${r.reaction}</span>`;
-                actionBtnHtml = `<button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:8px; font-size:12px; font-weight:700; color:#A3958A; cursor:pointer; padding:6px 10px;">삭제</button>`;
-            }
-
-            contentHtml = `
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                    <span style="font-size:12px; color:#A3958A; font-weight:700;">${(typeof r.time === 'string' && !/^\d{6,}$/.test(r.time)) ? r.time : ''}</span>
-                    <span style="font-weight: 900; font-size: 16px; color: #4A413C; letter-spacing:-0.5px;">${getFoodEmoji(r.menu)} ${r.menu}</span>
-                </div>
-                <div style="display:flex; gap:6px; align-items:center;">
-                    ${amountHtml} ${reactionHtml}
-                </div>
-            `;
-            
-            return `
-                <div style="background: #FFF; border: 1px solid #EDE6DE; padding: 18px 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                    <div style="display:flex; flex-direction:column;">
-                        ${contentHtml}
-                    </div>
-                    <div>${actionBtnHtml}</div>
-                </div>
-            `;
-        } else {
-            // 재료 테스트용 UI (기존)
-            const isPass = r.status === 'pass';
-            const icon = isPass ? '🟢' : '🚨';
-            contentHtml = `
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                    <span style="font-size:12px; color:#A3958A; font-weight:700;">${(typeof r.time === 'string' && !/^\d{6,}$/.test(r.time)) ? r.time : ''}</span>
-                    <span style="font-weight: 900; font-size: 15px; color: ${isPass ? '#059669' : '#D32F2F'};">${getFoodEmoji(r.ingredient)} ${r.ingredient} 먹여봤어요</span>
-                </div>
-                <span style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'};">
-                    ${icon} ${isPass ? '무사 통과' : '알레르기 반응'}
-                </span>
-            `;
-            return `
-                <div style="background: #FFF; border: 1px solid #EDE6DE; padding: 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div style="display:flex; flex-direction:column;">${contentHtml}</div>
-                    <button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background: #FBF8F3; border: 1px solid #EDE6DE; border-radius: 8px; font-size: 12px; font-weight:700; color: #A3958A; cursor: pointer; padding:6px 10px;">삭제</button>
-                </div>
-            `;
-        }
-    }).join('');
-}
+/* ⚠️ 여기 renderSelectedDateRecords 가 한 벌 더 있었다. 아래쪽 정의가 덮어써서 한 번도 불리지 않았다 (죽은 코드). 아래 것만 남긴다 */
 
 function openFoodSheet() {
     document.getElementById('food-bottom-sheet').style.display = 'flex';
@@ -869,7 +802,7 @@ function closeFoodSheet() {
 
 function saveFoodCalendar(status) {
     const ingredient = document.getElementById('food-ing-input').value.trim();
-    if (!ingredient) return alert("먹인 재료를 적어 주세요 (예: 소고기)");
+    if (!ingredient) return window.showToast("먹인 재료를 적어 주세요 (예: 소고기)");
     
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     if (!records[selectedDateStr]) records[selectedDateStr] = [];
@@ -881,85 +814,13 @@ function saveFoodCalendar(status) {
     renderCalendar();
 }
 
-function deleteFoodRecord(dateStr, index) {
-    /* ⚠️ 예전엔 첫 줄에서 바로 .ingredient 를 읽었다. 두 가지가 터졌다.
-
-         ① 식단 기록(type:'meal')에는 ingredient 가 없다. menu 다.
-            그래서 "undefined 기록을 삭제할까요?" 가 떴다.
-         ② 그 칸이 이미 비었으면 [dateStr][index] 가 undefined 라
-            읽는 순간 통째로 죽었다. 버튼이 아무 반응도 안 한다.
-
-       먼저 꺼내서 확인하고, 이름은 있는 것으로 고른다. */
-    let records = {};
-    try { records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {}; } catch (e) {}
-
-    const row = (records[dateStr] || [])[index];
-    if (!row) { renderSelectedDateRecords(); return; }
-
-    const label = row.ingredient || row.menu || '이 기록';
-    if (!confirm(`'${label}' 기록을 삭제할까요?`)) return;
-    if (records[dateStr]) {
-        records[dateStr].splice(index, 1);
-        if (records[dateStr].length === 0) delete records[dateStr];
-        localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
-    }
-    renderCalendar();
-}
+/* ⚠️ 여기 deleteFoodRecord 가 한 벌 더 있었다. 아래쪽 정의가 덮어써서 한 번도 불리지 않았다 (죽은 코드). 아래 것만 남긴다 */
 
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(renderCalendar, 300);
 });
 
-// ✨ 도감 추출 로직 (메뉴 이름은 거르고, 순수 '재료명(ingredient)'만 추출)
-function renderTotalSummary() {
-    const records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
-    const passedSet = new Set();
-    const failedSet = new Set();
-
-    Object.values(records).forEach(dailyList => {
-        dailyList.forEach(r => {
-            // ingredient 필드가 비어있으면 도감에 넣지 않음!
-            const cleanName = (r.ingredient || "").trim(); 
-            if (cleanName) {
-                if (r.status === 'fail') {
-                    failedSet.add(cleanName);
-                } else {
-                    passedSet.add(cleanName);
-                }
-            }
-        });
-    });
-
-    failedSet.forEach(item => passedSet.delete(item));
-
-    const passListEl = document.getElementById('summary-pass-list');
-    const failListEl = document.getElementById('summary-fail-list');
-    const passCntEl = document.getElementById('summary-pass-cnt');
-    const failCntEl = document.getElementById('summary-fail-cnt');
-
-    if(passCntEl) passCntEl.innerText = passedSet.size;
-    if(failCntEl) failCntEl.innerText = failedSet.size;
-
-    if(passListEl) {
-        if(passedSet.size === 0) {
-            passListEl.innerHTML = '<span style="font-size:12.5px; color:#A3958A;">아직 통과한 재료가 없어요.</span>';
-        } else {
-            passListEl.innerHTML = Array.from(passedSet).map(ing => 
-                `<span style="background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; padding:6px 14px; border-radius:20px; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">${getFoodEmoji(ing)} ${ing}</span>`
-            ).join('');
-        }
-    }
-
-    if(failListEl) {
-        if(failedSet.size === 0) {
-            failListEl.innerHTML = '<span style="font-size:12.5px; color:#A3958A;">알레르기 반응이 나타난 재료가 없어요</span>';
-        } else {
-            failListEl.innerHTML = Array.from(failedSet).map(ing => 
-                `<span style="background:#FFF0F1; color:#D32F2F; border:1px solid #FECACA; padding:6px 14px; border-radius:20px; font-size:13.5px; font-weight:800; display:inline-flex; align-items:center; gap:4px;">${getFoodEmoji(ing)} ${ing}</span>`
-            ).join('');
-        }
-    }
-}
+/* ⚠️ 여기 renderTotalSummary 가 한 벌 더 있었다. 아래쪽 정의가 덮어써서 한 번도 불리지 않았다 (죽은 코드). 아래 것만 남긴다 */
 
 // ==========================================
 // 👨‍🍳 스마트 요리 모드 (프리미엄 디테일 탑재) 엔진
@@ -1066,7 +927,7 @@ function toggleCookTimer() {
         btn.innerHTML = '▶ 계속';
         btn.style.background = '#7F77DD';
     } else {
-        if (cookTimeRemaining <= 0) return alert('먼저 시간을 정해 주세요');
+        if (cookTimeRemaining <= 0) return window.showToast('먼저 시간을 정해 주세요');
         
         isTimerRunning = true;
         btn.innerHTML = '⏸ 일시정지';
@@ -1196,7 +1057,7 @@ window.openMealSheetForUpdate = function(dateStr, index, menuName) {
 
 function openTestSheet() {
     const lb = document.getElementById('test-sheet-label');
-    if (lb) lb.textContent = `${foodDayWord(selectedDateStr)} 처음 먹여본 재료 (1개만)`;
+    if (lb) lb.textContent = `${foodDayWord(selectedDateStr)} 처음 먹여 본 재료 (하나만)`;
     document.getElementById('test-bottom-sheet').style.display = 'flex';
     document.getElementById('test-ing-input').value = '';
     setAllergyStatus('pass');
@@ -1214,7 +1075,7 @@ function saveMealRecord() {
     const amount = document.getElementById('meal-amount-input').value.trim();
     const reaction = document.getElementById('meal-reaction-input').value;
     
-    if (!menu) return alert('메뉴 이름을 적어 주세요 (예: 소고기 미음)');
+    if (!menu) return window.showToast('메뉴 이름을 적어 주세요 (예: 소고기 미음)');
 
     const finalAmount = amount ? `${amount}g` : '양 모름';
     const timeStr = new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'});
@@ -1245,7 +1106,7 @@ function saveMealRecord() {
 
 function saveTestRecord() {
     const ingredient = document.getElementById('test-ing-input').value.trim();
-    if (!ingredient) return alert('처음 먹여본 재료를 적어 주세요');
+    if (!ingredient) return window.showToast('처음 먹여본 재료를 적어 주세요');
 
     saveToCalendarDB({ type: 'test', ingredient, status: currentAllergyStatus });
     closeSheets();
@@ -1331,7 +1192,7 @@ function renderSelectedDateRecords() {
                         <span style="font-weight:900; font-size:15px; color:${isPass ? '#059669' : '#D32F2F'};">${getFoodEmoji(r.ingredient)} ${r.ingredient} 먹여봤어요</span>
                     </div>
                     <span onclick="window.toggleTestStatus && window.toggleTestStatus('${selectedDateStr}', ${i})" style="display:inline-block; font-size:12px; font-weight:800; padding:4px 8px; border-radius:6px; background:${isPass ? '#ECFDF5' : '#FFF0F1'}; color:${isPass ? '#059669' : '#D32F2F'}; cursor:pointer;">
-                        ${isPass ? '🟢 무사 통과' : '🚨 알레르기 반응'} <span style="opacity:.6; font-weight:700;">· 바꾸기</span>
+                        ${isPass ? '🟢 무사 통과' : '🔴 알레르기 반응'} <span style="opacity:.6; font-weight:700;">· 바꾸기</span>
                     </span>
                 </div>
                 <button onclick="deleteFoodRecord('${selectedDateStr}', ${i})" style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:8px; font-size:12px; font-weight:700; color:#A3958A; cursor:pointer; padding:6px 10px;">삭제</button>
@@ -1340,15 +1201,34 @@ function renderSelectedDateRecords() {
 }
 
 function deleteFoodRecord(dateStr, index) {
-    if (!confirm('이 기록을 지울까요?')) return;
-    let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
-    if (records[dateStr]) {
-        records[dateStr].splice(index, 1);
-        if (records[dateStr].length === 0) delete records[dateStr];
-        localStorage.setItem('tosil_food_calendar', JSON.stringify(records));
-    }
-    renderCalendar();
-    renderTotalSummary();
+    /* ⚠️ 위에 있던 다른 한 벌(죽은 코드)에만 지킴이 있었다 — 여기로 모은다.
+          · 식단 기록(type:'meal')에는 ingredient 가 없고 menu 가 있다 ('undefined 기록을 지울까요?')
+          · 그 칸이 이미 비었으면 아무 일도 안 하고 다시 그린다
+       ⚠️ 브라우저 확인창(confirm) 대신 아래에서 올라오는 창 (shared/curatorui.js).
+          창이 떠 있는 사이 기록이 바뀌었을 수 있어서, 지울 때 같은 기록을 다시 찾는다 */
+    let records = {};
+    try { records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {}; } catch (e) {}
+    const row = (records[dateStr] || [])[index];
+    if (!row) { renderSelectedDateRecords(); return; }
+    const label = row.ingredient || row.menu || '';
+    const key = JSON.stringify(row);
+    window.askConfirm({
+        text: label ? `'${label}' 기록을 지울까요?` : '이 기록을 지울까요?',
+        yes: '지우기', danger: true,
+        onYes: function () {
+            let db = {};
+            try { db = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {}; } catch (e) {}
+            const list = db[dateStr] || [];
+            const at = list.findIndex(r => JSON.stringify(r) === key);
+            if (at > -1) {
+                list.splice(at, 1);
+                if (list.length === 0) delete db[dateStr];
+                localStorage.setItem('tosil_food_calendar', JSON.stringify(db));
+            }
+            renderCalendar();
+            renderTotalSummary();
+        }
+    });
 }
 
 // ✨ 도감 추출 로직 (순수 테스트 기록만 도감에 반영)
@@ -1408,7 +1288,7 @@ window.triggerAutoDeduction = function() {
     const menuName = document.getElementById('meal-menu-input').value.trim();
 
     if (!menuName) {
-        return alert('어떤 메뉴를 먹였는지 적어 주세요');
+        return window.showToast('어떤 메뉴를 먹였는지 적어 주세요');
     }
 
     // ✨ 드디어 찾은 진짜 이름표! 'tosil_cube_records' 로 열어봅니다!
@@ -1493,7 +1373,7 @@ window.confirmDeduction = function() {
     document.getElementById('ai-deduction-modal').style.display = 'none';
     
     saveMealRecord();
-    setTimeout(() => { alert("냉장고 큐브 1개를 뺐어요"); }, 300);
+    setTimeout(() => { window.showToast("냉장고 큐브 1개를 뺐어요"); }, 300);
 };
 
 // [건너뛰기] 눌렀을 때
@@ -1544,10 +1424,10 @@ window.downloadCalendarImage = function() {
         btn.style.cssText = originalCss;
         btn.disabled = false;
         
-        setTimeout(() => { alert("이유식 달력을 그림으로 저장했어요"); }, 300);
+        setTimeout(() => { window.showToast("이유식 달력을 그림으로 저장했어요"); }, 300);
     }).catch(err => {
         console.error("캡처 실패:", err);
-        alert("그림을 저장하지 못했어요. 잠시 뒤 다시 해 주세요");
+        window.showToast("그림을 저장하지 못했어요. 잠시 뒤 다시 해 주세요");
         btn.innerHTML = originalText;
         btn.style.cssText = originalCss;
         btn.disabled = false;
@@ -1605,7 +1485,7 @@ function calcBabyFoodWater() {
     const weightVal = document.getElementById('food-base-weight').value;
 
     if (!weightVal || parseFloat(weightVal) <= 0) {
-        alert("넣을 쌀 무게를 숫자로 적어 주세요");
+        window.showToast("넣을 쌀 무게를 숫자로 적어 주세요");
         return;
     }
 
@@ -1694,7 +1574,7 @@ function calcReverseFood() {
     const ratio  = parseFloat(document.getElementById('food-ratio-type').value);
 
     if (!target || target <= 0) {
-        alert("만들 양(g)을 숫자로 적어 주세요");
+        window.showToast("만들 양(g)을 숫자로 적어 주세요");
         return;
     }
 
@@ -1979,7 +1859,7 @@ window.renderAutoPilotUI = function() {
 // 💡 [배냇함 PLUS] 달력 1초 자동 연동 기능 (Killer Feature)
 window.applyPlanToCalendar = function() {
     const plan = window.currentWeeklyPlan;
-    if (!plan || plan.length === 0) return alert("먼저 식단표를 만들어 주세요");
+    if (!plan || plan.length === 0) return window.showToast("먼저 식단표를 만들어 주세요");
 
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
     let today = window.currentPlanStart ? new Date(window.currentPlanStart) : new Date();
@@ -2009,7 +1889,7 @@ window.applyPlanToCalendar = function() {
     
     const t0 = new Date(); t0.setHours(0, 0, 0, 0);
     const s0 = new Date(today); s0.setHours(0, 0, 0, 0);
-    alert((s0 > t0 ? `${s0.getMonth() + 1}월 ${s0.getDate()}일부터` : '오늘부터') + ' 7일 식단을 달력에 넣었어요.');
+    window.showToast((s0 > t0 ? `${s0.getMonth() + 1}월 ${s0.getDate()}일부터` : '오늘부터') + ' 7일 식단을 달력에 넣었어요.');
     // 달력 위치로 스크롤 부드럽게 이동
     document.getElementById('cal-month-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
 };

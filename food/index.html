@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <script src="../shared/curatorlite.js?v=b7"></script>
+    <!-- 말풍선 · 묻는 창 — 브라우저 기본 창(alert · confirm · prompt) 대신 -->
+    <script src="../shared/curatorui.js?v=1"></script>
     <script src="../native.js?v=2"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -51,7 +53,8 @@
     </header>
 
     <main class="container">
-<div id="food-hero" class="hero-title" style="text-align: center; margin-bottom: 24px;">
+<!-- ⚠️ 제휴 안내 아래로 52px, 탭 위로 48px 이 비어 있었다. 첫 화면에 계산기가 안 보였다 -->
+<div id="food-hero" class="hero-title" style="text-align: center; margin-bottom: 12px; padding-top: 14px; padding-bottom: 12px;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
         <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
             <span>이유식 식단</span>
@@ -236,8 +239,8 @@
                 </div>
             </div>
 <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; margin-top: 16px;">
-                <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 2px 8px rgba(227, 38, 54, 0.1); transition: 0.2s;">
-                    ❤️ 내가 찜한 식단 모아보기
+                <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFFFFF; color: #4A413C; border: 1px solid #EDE6DE; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: 0.2s;">
+                    ❤️ 찜한 식단 모아보기
                 </button>
             </div>
 <div id="food-result-area"></div>
@@ -372,14 +375,14 @@
                 </div>
                 
                 <div style="margin-bottom: 24px;">
-                    <label id="test-sheet-label" style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">오늘 처음 먹여본 재료 (1개만)</label>
+                    <label id="test-sheet-label" style="display:block; font-size:13px; font-weight:800; color:#7A6F68; margin-bottom:8px;">오늘 처음 먹여 본 재료 (하나만)</label>
                     <input type="text" id="test-ing-input" placeholder="예: 청경채" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #7F77DD; font-size: 15px; font-weight: 700; outline: none; background:#F2F0FC;">
                 </div>
 
                 <div style="font-size: 13px; font-weight: 800; color: #7A6F68; margin-bottom: 8px;">먹고 나서 어땠나요</div>
                 <div style="display: flex; gap: 8px; margin-bottom: 24px;">
                     <button id="btn-al-pass" onclick="setAllergyStatus('pass')" style="flex: 1; padding: 14px; border-radius: 12px; background: #ECFDF5; color: #059669; border: 2px solid #10B981; font-weight: 800; font-size: 14px; cursor: pointer;">🟢 무사 통과</button>
-                    <button id="btn-al-fail" onclick="setAllergyStatus('fail')" style="flex: 1; padding: 14px; border-radius: 12px; background: #FFF0F1; color: #D32F2F; border: 2px solid transparent; font-weight: 800; font-size: 14px; cursor: pointer;">🚨 발진/알레르기</button>
+                    <button id="btn-al-fail" onclick="setAllergyStatus('fail')" style="flex: 1; padding: 14px; border-radius: 12px; background: #FFF0F1; color: #D32F2F; border: 2px solid transparent; font-weight: 800; font-size: 14px; cursor: pointer;">🔴 발진 · 알레르기</button>
                 </div>
                 <button onclick="saveTestRecord()" style="width: 100%; padding: 16px; border-radius: 14px; background: #4A413C; color: #FFFFFF; font-weight: 900; font-size: 16px; border: none; cursor: pointer;">기록하기</button>
             </div>
@@ -410,7 +413,7 @@
                 </div>
                 <div style="display: flex; justify-content: center; gap: 10px; margin-top: 12px;">
                     <button id="cook-timer-btn" onclick="toggleCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #7F77DD; border: none; font-weight: 800; font-size: 16px; color: #FFFFFF; cursor: pointer;">▶ 시작</button>
-                    <button onclick="resetCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #FFF0F1; border: 1px solid #FECACA; font-weight: 800; font-size: 16px; color: #D32F2F; cursor: pointer;">초기화</button>
+                    <button onclick="resetCookTimer()" style="flex: 1; max-width: 150px; padding: 14px; border-radius: 12px; background: #F6F2EC; border: 1px solid #EDE6DE; font-weight: 800; font-size: 16px; color: #7A6F68; cursor: pointer;">초기화</button>
                 </div>
             </div>
 
@@ -442,8 +445,9 @@
             .alarm-active { animation: alarmFlash 1s infinite !important; }
         </style>
 <div class="legal-footer">
-            <strong>※ 의학적 면책 조항</strong><br>
-            본 서비스의 이유식 정보는 일반적인 소아과 가이드라인을 바탕으로 제작되었으나, 전문의의 의학적 진단을 대신할 수 없습니다. 알레르기 반응은 개인차가 크므로 새로운 식재료 도입 시 반드시 소량으로 시작하여 3일간 관찰하시기 바랍니다.<br><br>
+            <!-- ⚠️ '※ 의학적 면책 조항 · 본 서비스의 … 바랍니다' — 앱 안에서 이 글만 공문서 말투였다. 뜻은 그대로 두고 앱 말투로 -->
+            <strong>배냇함 안내</strong><br>
+            이유식 정보는 일반적인 소아과 지침을 바탕으로 만들었지만, 진료를 대신하지는 않아요. 알레르기 반응은 아이마다 달라서, 새 재료는 꼭 조금만 먹여 보고 사흘 동안 지켜봐 주세요.
         </div>
 </main>
 
@@ -455,25 +459,25 @@
     <script src="../shared/safenet.js?v=b7"></script>
     <script src="../shared/babyswitch.js"></script>
     <script src="../shared/babyage.js?v=1"></script>
-    <script src="data.js?v=b7"></script>
+    <script src="data.js?v=b8"></script>
     <script>try { document.getElementById('food-count-badge').textContent = babyFoodData.length + '종 레시피'; } catch (e) {}</script>
-    <script src="app.js?v=b10"></script>
+    <script src="app.js?v=b11"></script>
     <!-- 토핑 이유식: 재료마다 몇 g · 처음 먹인 재료 (홈 맘마 기록과 같은 칸) -->
     <script src="../shared/topping.js?v=1"></script>
-    <script src="toppingmeal.js?v=1"></script>
+    <script src="toppingmeal.js?v=2"></script>
     <script src="passedfoods.js?v=b8"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="foodguide.js?v=b9"></script>
-    <script src="cookmode.js"></script>
-    <script src="shoplist.js?v=b8"></script>
+    <script src="foodguide.js?v=b10"></script>
+    <script src="cookmode.js?v=2"></script>
+    <script src="shoplist.js?v=b9"></script>
     <script src="planlock.js?v=b7"></script>
-    <script src="nextfood.js?v=b8"></script>
+    <script src="nextfood.js?v=b9"></script>
     <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <!-- 💌 짝꿍 배냇함으로 보내기 (장볼 거) — 누를 때만 서버에 붙는다 -->
     <script src="../shared/familysend.js?v=1"></script>
-    <script src="../shared/curatorback.js?v=2"></script>
+    <script src="../shared/curatorback.js?v=3"></script>
 
 <!-- 🚀 우측 하단 위로 가기 버튼 -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">

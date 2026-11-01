@@ -104,7 +104,7 @@
         window.triggerAutoDeduction = function () {
             if (isTopping()) {
                 var bad = ed.invalid();
-                if (bad) return alert(bad);
+                if (bad) return window.showToast(bad);
                 var menu = document.getElementById('meal-menu-input');
                 if (menu) menu.value = ed.get().map(function (p) { return p.n; }).join(' ');
             }
@@ -141,12 +141,19 @@
         var msg = toFail
             ? name + ' 알레르기 반응으로 바꿀까요?\n반응이 있었던 재료는 레시피 추천에서 빠져요.'
             : name + ' 무사 통과로 바꿀까요?';
-        if (!confirm(msg)) return;
-        r.status = toFail ? 'fail' : 'pass';
-        try { localStorage.setItem('tosil_food_calendar', JSON.stringify(db)); } catch (e) {}
-        if (typeof renderCalendar === 'function') renderCalendar();
-        if (typeof renderSelectedDateRecords === 'function') renderSelectedDateRecords();
-        if (typeof renderTotalSummary === 'function') renderTotalSummary();
+        /* 브라우저 확인창(confirm) 대신 아래에서 올라오는 창 (shared/curatorui.js) */
+        var parts = msg.split('\n');
+        window.askConfirm({
+            text: parts[0], sub: parts.slice(1).join('\n'),
+            yes: toFail ? '반응 있었어요' : '통과로 바꾸기', danger: toFail,
+            onYes: function () {
+                r.status = toFail ? 'fail' : 'pass';
+                try { localStorage.setItem('tosil_food_calendar', JSON.stringify(db)); } catch (e) {}
+                if (typeof renderCalendar === 'function') renderCalendar();
+                if (typeof renderSelectedDateRecords === 'function') renderSelectedDateRecords();
+                if (typeof renderTotalSummary === 'function') renderTotalSummary();
+            }
+        });
     };
 
     var tries = 0;

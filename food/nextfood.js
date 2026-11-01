@@ -154,7 +154,7 @@
                 if (inp) { inp.value = name; inp.focus(); }
             }, 120);
         } else {
-            alert("아래 달력에서 '재료 기록'을 눌러 적어 주세요.");
+            window.showToast("아래 달력에서 '재료 기록'을 눌러 적어 주세요.");
         }
     };
 

@@ -403,7 +403,7 @@
         var r = localStorage.getItem("user_role");
         return r === "mom" ? "남편" : (r === "dad" ? "아내" : "짝꿍");
     };
-    window.shopSendLabel = function () { return window.shopPartnerWord() + "한테 장볼 거 보내기"; };
+    window.shopSendLabel = function () { return window.shopPartnerWord() + "한테 장 볼 거 보내기"; };
     // 남편이 · 아내가 · 짝꿍이 (받침에 따라)
     function iga(w) { var c = w.charCodeAt(w.length - 1); return w + (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? "이" : "가"); }
 
@@ -478,7 +478,7 @@
                 'padding:20px 20px calc(20px + env(safe-area-inset-bottom, 0px)); box-sizing:border-box;">' +
             '<div style="width:40px; height:5px; background:#EDE6DE; border-radius:3px; margin:0 auto 16px;"></div>' +
             '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">' +
-                '<div><div style="font-size:18px; font-weight:900; color:' + DARK + ';">' + esc(who) + '한테 장볼 거</div>' +
+                '<div><div style="font-size:18px; font-weight:900; color:' + DARK + ';">' + esc(who) + '한테 장 볼 거</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; margin-top:4px;">' + esc(SEND.title) + '</div></div>' +
                 '<div onclick="window.closeShopSend()" style="font-size:22px; color:' + GRAY + '; cursor:pointer; line-height:1; padding:2px 4px;">✕</div>' +
             '</div>' +
@@ -507,9 +507,9 @@
                 return;
             } catch (e) {}
         }
-        var done = function () { alert("장볼 거 목록을 복사했어요. 카톡에 붙여 넣어 보내세요."); };
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { prompt("아래 내용을 복사해 주세요", txt); });
-        else prompt("아래 내용을 복사해 주세요", txt);
+        var done = function () { window.showToast("장 볼 거 목록을 복사했어요. 카톡에 붙여 넣어 보내세요."); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { window.showCopySheet(txt); });
+        else window.showCopySheet(txt);
     };
 
     window.sendShopApp = function () {
@@ -571,7 +571,7 @@
             r.have.forEach(function (it) { lines.push("· " + it.name); });
         }
         var txt = lines.join("\n");
-        var done = function () { alert("장보기 목록을 복사했어요. 메모나 카톡에 붙여 넣으세요."); };
+        var done = function () { window.showToast("장보기 목록을 복사했어요. 메모나 카톡에 붙여 넣으세요."); };
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(txt).then(done, function () { fall(txt, done); });
         } else fall(txt, done);
@@ -582,7 +582,7 @@
                 ta.value = t; ta.style.cssText = "position:fixed;top:-1000px;";
                 document.body.appendChild(ta); ta.select();
                 document.execCommand("copy"); document.body.removeChild(ta); ok();
-            } catch (e) {}
+            } catch (e) { window.showCopySheet(t); }
         }
     };
 
