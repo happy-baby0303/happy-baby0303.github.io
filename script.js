@@ -6398,12 +6398,17 @@ window.updateTrackerDashboard = function() {
                    ⚠️ 예전엔 큰 숫자는 분유, 아래 줄은 '이유식 17:35' 라서 '맘마 4시간 전 · 이유식 17:35' 처럼 서로 어긋나 보였다.
                    이유식이 마지막이면 아래에 '이유식 17:35' 와 '분유 15:05' 를 줄을 나눠 적는다 */
                 const hhmm = (ts) => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
-                const subLine = (t) => '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-top:2px;">' + t + '</div>';
+                /* ⚠️ '이유식' 은 세 글자, '분유' 는 두 글자라 가운데 맞춤으로 두 줄을 쓰면 시각이 위아래로 어긋났다.
+                      빈칸을 넣어 맞추면 빈칸이 한글보다 좁아서 안 맞는다. 이름 칸(오른쪽 맞춤) · 시각 칸(왼쪽 맞춤) 두 칸으로 */
                 const milkFresh = latestFeed && (nowTime - latestFeed.timestamp) < 12 * 3600000;
                 const milkName = String((latestFeed && latestFeed.subType) || '수유').replace(/[<>&"']/g, '');
+                const times = (rows) => '<div style="margin-top:2px;"><div style="display:inline-grid; grid-template-columns:auto auto; column-gap:4px; row-gap:1px; ' +
+                    'font-size:11px; font-weight:700; color:var(--text-sub); font-variant-numeric:tabular-nums; line-height:1.45;">' +
+                    rows.map(r => '<span style="text-align:right;">' + r[0] + '</span><span style="text-align:left;">' + r[1] + '</span>').join('') + '</div></div>';
                 if (latestMeal && latestMeal === latestFood) {
-                    feedBtnSub.innerHTML = getRelativeTime(latestFood) + subLine('이유식 ' + hhmm(latestFood.timestamp)) +
-                        (milkFresh ? subLine(milkName + ' ' + hhmm(latestFeed.timestamp)) : '');
+                    const rows = [['이유식', hhmm(latestFood.timestamp)]];
+                    if (milkFresh) rows.push([milkName, hhmm(latestFeed.timestamp)]);
+                    feedBtnSub.innerHTML = getRelativeTime(latestFood) + times(rows);
                 } else feedBtnSub.innerHTML = getRelativeTime(latestFeed);
             }
         }
