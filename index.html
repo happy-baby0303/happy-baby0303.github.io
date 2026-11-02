@@ -256,6 +256,16 @@ body.mode-senior #export-card /* 👈 🚨 요놈이 바로 '배냇함 내려받
     border: 1px solid #EDF0F3 !important;
 }
 
+/* 큐레이터 다섯 줄의 아이콘 칸 — 예전엔 .box-tint-blue · .box-tint-red 를 같이 써서
+   바로 아래 '흰 카드로' 규칙에 걸렸다. 유모차 · 카시트 칸만 하얗고(그림자까지) 나머지 셋만 색이 있었다.
+   유모차 아이콘도 큐레이터 위 탭 · 오늘 챙길 것과 같은 🚼 로 맞춘다 (전에는 👶) */
+.cur-ico { font-size: 26px; width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 14px; }
+.cur-ico-blue   { background: #EEF5FB; border: 1px solid #D6E6F5; }
+.cur-ico-red    { background: #FFF0F1; border: 1px solid #FFE3E3; }
+.cur-ico-yellow { background: #FFF9E6; border: 1px solid #FDE68A; }
+.cur-ico-green  { background: #ECFDF5; border: 1px solid #A7F3D0; }
+.cur-ico-purple { background: #F0EEFB; border: 1px solid #E4E0F8; }
+
 /*  알록달록 배너를 흰 카드로 (아이콘으로만 구분) */
 .box-tint-red,
 .box-tint-blue,
@@ -2388,7 +2398,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 1. 유모차 (아래 연한 실선 추가) -->
     <a href="./stroller/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; text-decoration: none; transition: 0.2s; border-bottom: 1px solid #F7F3ED;">
         <div style="display:flex; align-items:center; gap:14px; flex:1;">
-            <div class="box-tint-blue" style="font-size:26px; width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:14px;">👶</div>
+            <div class="cur-ico cur-ico-blue">🚼</div>
             <div>
                 <div style="font-size:12px; font-weight:700; color: var(--text-sub);">지금 쓸 유모차</div>
                 <div id="main-txt-stroller" style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:2px; letter-spacing:-0.3px;"> 생년월일을 넣으면 골라드려요</div>
@@ -2400,7 +2410,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 2. 카시트 (아래 연한 실선 추가) -->
     <a href="./carseat/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; text-decoration: none; transition: 0.2s; border-bottom: 1px solid #F7F3ED;">
         <div style="display:flex; align-items:center; gap:14px; flex:1;">
-            <div class="box-tint-red" style="font-size:26px; width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:14px;">🚘</div>
+            <div class="cur-ico cur-ico-red">🚘</div>
             <div>
                 <div style="font-size:12px; font-weight:700; color: var(--text-sub);">지금 쓸 카시트</div>
                 <div id="main-txt-carseat" style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:2px; letter-spacing:-0.3px;">생년월일을 넣으면 골라드려요</div>
@@ -2412,7 +2422,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 3. 수유 (아래 연한 실선 추가) -->
     <a href="./bottle/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; text-decoration: none; transition: 0.2s; border-bottom: 1px solid #F7F3ED;">
         <div style="display:flex; align-items:center; gap:14px; flex:1;">
-            <div class="box-tint-yellow" style="font-size:26px; width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:14px;">🍼</div>
+            <div class="cur-ico cur-ico-yellow">🍼</div>
             <div>
                 <div style="font-size:12px; font-weight:700; color: var(--text-sub);">지금 쓸 젖병</div>
                 <div id="main-txt-bottle" style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:2px; letter-spacing:-0.3px;">생년월일을 넣으면 골라드려요</div>
@@ -2424,7 +2434,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 4. 이유식 (아래 연한 실선 추가) -->
     <a href="./food/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; text-decoration: none; transition: 0.2s; border-bottom: 1px solid #F7F3ED;">
         <div style="display:flex; align-items:center; gap:14px; flex:1;">
-            <div class="box-tint-green" style="font-size:26px; width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:14px;">🥦</div>
+            <div class="cur-ico cur-ico-green">🥦</div>
             <div>
                 <div style="font-size:12px; font-weight:700; color: var(--text-sub);">지금 먹일 이유식</div>
                 <div id="main-txt-food" style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:2px; letter-spacing:-0.3px;">생년월일을 넣으면 골라드려요</div>
@@ -2436,7 +2446,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 5. 장난감 (🌟 마지막 항목은 실선 없음!) -->
     <a href="./toy/index.html" class="ai-matrix-card" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; text-decoration: none; transition: 0.2s;">
         <div style="display:flex; align-items:center; gap:14px; flex:1;">
-            <div class="box-tint-purple" style="font-size:26px; width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:14px;">🧸</div>
+            <div class="cur-ico cur-ico-purple">🧸</div>
             <div>
                 <div style="font-size:12px; font-weight:700; color: var(--text-sub);">지금 놀 장난감</div>
                 <div id="main-txt-toy" style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:2px; letter-spacing:-0.3px;">생년월일을 넣으면 골라드려요</div>
