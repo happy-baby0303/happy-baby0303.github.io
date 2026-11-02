@@ -705,7 +705,7 @@
 
         if (!title) {
             return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-                '<div class="matrix-header">\uD83D\uDEBC 우리 유모차</div>' +
+                '<div class="matrix-header">\uD83D\uDC76 우리 유모차</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.8; word-break:keep-all;">' +
                     '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상해요. ' +
@@ -717,7 +717,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDEBC 우리 유모차</div>' +
+            '<div class="matrix-header">\uD83D\uDC76 우리 유모차</div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                 'gap:10px; margin:-16px 0 4px;">' +
                 '<div style="font-size:14px; font-weight:900; color:' + DARK + '; min-width:0; ' +
@@ -742,7 +742,7 @@
 
     function teaseHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDEBC 우리 유모차</div>' +
+            '<div class="matrix-header">\uD83D\uDC76 우리 유모차</div>' +
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
