@@ -335,7 +335,7 @@ const playData = [
             "4. 아기가 칠 때마다 엄마가 '윽', '억' 소리를 내주면 신나서 더 세게 쳐요."
         ],
         dadRole: "엄마 등 다치지 않게 옆에서 북 치는 강도 조절 감시하기",
-        relatedToyId: 25
+        relatedToyId: 74
     },
     { 
         id: "p26", title: "이불 파도타기", category: "lieDown", targetAge: ['tummy', 'flip'], 
@@ -1317,7 +1317,7 @@ const playData = [
 
 
 // ==========================================
-// 🛒 TRACK 2: [육아는 템빨] SOS 상황별 장난감 큐레이션 DB (총 93종)
+// 🛒 TRACK 2: [육아는 템빨] SOS 상황별 장난감 큐레이션 DB (개수는 화면 맨 위 배지가 이 목록에서 센다)
 // ==========================================
 const toyData = [
     // 🍚 [sos-meal] 엄마 밥 먹을 시간 벌어주는 템
@@ -1349,7 +1349,8 @@ const toyData = [
     { id: 22, name: "뽀로로 운전놀이 핸들", imgIcon: "🏎️", freeTime: "25분", milestone: "stand", theme: "sos-out", tags: "#카시트착붙 #베스트드라이버", battery: "AA 2개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "카시트 거부 아기 전용. 아빠 운전할 때 뒤에서 같이 핸들 돌리느라 악쓰고 울지 않아요.", coupangLink: "https://link.coupang.com/a/gDoI3O9yIS", relatedPlayIds: ["p18", "p30"] },
     { id: 23, name: "어스본 사운드북 (동물농장)", imgIcon: "🐷", freeTime: "20분", milestone: "crawl", theme: "sos-out", tags: "#청각발달 #외출템", battery: "AAA 2개", batteryLink: "https://link.coupang.com/a/eHwdWJhAhU", fomo: "버튼 누르는 재미에 빠진 아기, 카시트나 식당에 앉혀두고 이것만 줘도 고막의 평화가 찾아와요.", coupangLink: "https://link.coupang.com/a/gDn0FTM51g", relatedPlayIds: ["p19"] },
     { id: 24, name: "비지베어 조작북 세트", imgIcon: "📖", freeTime: "20분", milestone: "stand", theme: "sos-out", tags: "#영국그림책 #소근육운동", battery: "필요 없음", batteryLink: "", fomo: "밀고 당기고 돌리면서 조용히 집중해요. 외출할 때 기저귀 가방에 1권만 챙기면 든든해요.", coupangLink: "https://link.coupang.com/a/gDn2dqRTHg", relatedPlayIds: ["p01"] },
-    { id: 25, name: "베이비아인슈타인 피아노", imgIcon: "📻", freeTime: "15분", milestone: "all", theme: "sos-out", tags: "#백색소음대체 #카시트수면", battery: "AA 2개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "발로 차거나 손으로 눌러 소리를 내는 피아노예요. 소리가 나는 이유를 스스로 알아채는 시기에 오래 붙어 있어요.", coupangLink: "https://link.coupang.com/a/gEYQ9atbJ6", relatedPlayIds: ["p29"] },
+    /* 25번(베이비아인슈타인 피아노)은 뺐다 — 쿠팡 링크가 74번과 같은 상품(어라운드 위고 쏘서)이었고,
+       태그(#카시트수면 #백색소음대체) · 설명은 그 상품과 맞지 않았다. 찜 · 우리 집 장난감의 25 는 app.js 가 74 로 옮긴다. */
     { id: 26, name: "모윰 포니 손목 치발기", imgIcon: "🦄", freeTime: "20분", milestone: "tummy", theme: "sos-out", tags: "#손목고정 #절대안떨어짐", battery: "필요 없음", batteryLink: "", fomo: "외출 시 바닥에 자꾸 던지는 치발기는 가라 손목에 채워두면 30분은 혼자 쫩쫩 빨아요.", coupangLink: "https://link.coupang.com/a/gDn5h8ybiS", relatedPlayIds: ["p23"] },
 
     // 🚿 [sos-shower] 안전 화장실 보장템 (엄마 씻기 & 아기 목욕)
@@ -1443,7 +1444,7 @@ const toyData = [
     { id: 71, name: "아이팜 볼풀장 & 컬러공 세트", imgIcon: "🎱", freeTime: "40분", milestone: "crawl", theme: "sos-sleep", tags: "#수영장 #던지기놀이", battery: "필요 없음", batteryLink: "", fomo: "거실 한구석에 만들어주면 안에서 뒹굴고 공 던지느라 나올 생각을 안 해요. 에너지 넘치는 아기들 밤에 꿀잠 재우는 1등 공신.", coupangLink: "", relatedPlayIds: ["p06"] },
     { id: 72, name: "폴더 놀이매트 (알집/파크론)", imgIcon: "🧩", freeTime: "상시", milestone: "all", theme: "sos-sleep", tags: "#층간소음제로 #생존베이스", battery: "필요 없음", batteryLink: "", fomo: "장난감은 아니지만 육아의 그라운드. 이거 없으면 아파트에서 장난감 떨어뜨리고 뛰는 소리에 쫓겨나요. 두꺼울수록 엄마 무릎도 보호돼요.", coupangLink: "", relatedPlayIds: ["p04", "p34", "p36"] },
     { id: 73, name: "리틀타익스 코지 쿠페 (지붕카)", imgIcon: "🚙", freeTime: "30분", milestone: "stand", theme: "sos-sleep", tags: "#발구르기 #무한질주", battery: "필요 없음", batteryLink: "", fomo: "걸음마를 막 뗀 아기가 거실을 밀고 다니며 몸을 많이 써요.", coupangLink: "https://link.coupang.com/a/gLDeOdH5EW", relatedPlayIds: ["p10", "p11"] },
-    { id: 74, name: "베이비 아이슈타인 피아노", imgIcon: "🎡", freeTime: "30분", milestone: "stand", theme: "sos-sleep", tags: "#음악놀이 #어라운드위고대체", battery: "AA 3개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "장난감 테이블을 돌며 누르면서 하체 근력과 리듬감을 동시에 키워요.", coupangLink: "https://link.coupang.com/a/gLDg067YK4", relatedPlayIds: ["p11"] },
+    { id: 74, name: "베이비아인슈타인 어라운드 위고 쏘서", imgIcon: "🎹", freeTime: "30분", milestone: "stand", theme: "sos-sleep", tags: "#음악놀이 #쏘서에서테이블까지", battery: "AA 3개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "앉아서 노는 쏘서로 시작해서, 잡고 서면 테이블을 빙 돌며 피아노를 눌러요. 자리를 꽤 차지하니 둘 곳을 먼저 재 보세요.", coupangLink: "https://link.coupang.com/a/gLDg067YK4", relatedPlayIds: ["p11"] },
     { id: 75, name: "머미쿨쿨 유아용 올인원 이불", imgIcon: "🛌", freeTime: "수면", milestone: "newborn", theme: "sos-sleep", tags: "#모로반사방지 #통잠기적", battery: "필요 없음", batteryLink: "", fomo: "신생아 시기 등센서와 모로반사를 잡아주는 생존템. 좁쌀 무게가 가슴을 눌러줘 엄마 품인 줄 알고 깊이 자요.", coupangLink: "https://link.coupang.com/a/gLDls3dBnw", relatedPlayIds: ["p07", "p26"] },
 
     { id: 76, name: "포그내 맥스플로우라이트 3in1 아기띠", imgIcon: "🎒", freeTime: "외출 시", milestone: "all", theme: "sos-out", tags: "#엄마허리구원 #외출필수", battery: "필요 없음", batteryLink: "", fomo: "장난감이 안 먹힐 때 최후의 보루. 아기띠 매고 둥가둥가 걸으면 안에서 조용히 잠들어요. 힙시트 분리형이라 오래 써요.", coupangLink: "https://link.coupang.com/a/gLDvP8Ba3M", relatedPlayIds: ["p30"] },
@@ -1460,7 +1461,7 @@ const toyData = [
     { id: 86, name: "치코 댄싱 오락실", imgIcon: "💃", freeTime: "25분", milestone: "stand", theme: "sos-shower", tags: "#무아지경 #클럽오픈", battery: "AA 3개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "현란한 불빛과 비트로 아기를 춤추게 만들어요. 거실에 틀어두면 음악에 맞춰 씰룩거리느라 화장실로 쫓아오지 않아요.", coupangLink: "", relatedPlayIds: ["p16"] },
 
     { id: 87, name: "노시부 프로 전동 콧물흡입기", imgIcon: "👃", freeTime: "감기 구원", milestone: "newborn", theme: "bath-care", tags: "#생태계파괴자 #육아필수가전", battery: "유선", batteryLink: "", fomo: "20만 원 훌쩍 넘지만 중고로도 잘 팔리는 편. 입으로 빠는 뻥코 쓰다가 숨넘어가는 경험 하신 분들이 결국 돌고 돌아 정착하는 괴물템이에요.", coupangLink: "https://link.coupang.com/a/gLEbIxxKF2", relatedPlayIds: ["p42"] },
-    { id: 88, name: "브라운 체온계 (IRT6520)", imgIcon: "🌡️", freeTime: "상시", milestone: "newborn", theme: "bath-care", tags: "#체온계", battery: "AA 2개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "접종열 오를 때, 감기 걸렸을 때 이게 없으면 엄마 멘탈이 박살 나요. 소아과에서도 쓰는 가장 정확한 고막 체온계.", coupangLink: "", relatedPlayIds: ["p30"] },
+    { id: 88, name: "브라운 체온계 (IRT6520)", imgIcon: "🌡️", freeTime: "상시", milestone: "newborn", theme: "bath-care", tags: "#체온계", battery: "AA 2개", batteryLink: "https://link.coupang.com/a/eHwctLSEI8", fomo: "접종열 오를 때, 감기 걸렸을 때 이게 없으면 엄마 멘탈이 박살 나요. 소아과에서도 많이 쓰는 고막 체온계예요.", coupangLink: "", relatedPlayIds: ["p30"] },
     { id: 89, name: "필립스아벤트 울트라 소프트 노리개젖꼭지", imgIcon: "🍼", freeTime: "수면", milestone: "newborn", theme: "bath-care", tags: "#입막음 #수면의식", battery: "필요 없음", batteryLink: "", fomo: "보챌 때 물려 주면 진정하는 아기가 많아요. 아기마다 잘 무는 모양이 달라서 하나씩 물려 보고 골라요.", coupangLink: "https://link.coupang.com/a/gLEjadgcWy", relatedPlayIds: ["p07", "p31"] },
     { id: 90, name: "그로미미 실리콘 목욕 물총", imgIcon: "🔫", freeTime: "15분", milestone: "crawl", theme: "bath-care", tags: "#분리세척 #곰팡이아웃", battery: "필요 없음", batteryLink: "", fomo: "일반 삑뾱이 물총은 속에 새까만 곰팡이가 피어 아기 입에 들어가면 최악이에요. 쫙 열어서 완전히 말리고 열탕 소독할 수 있는 실리콘 물총이 정답이에요.", coupangLink: "", relatedPlayIds: ["p40"] },
     { id: 91, name: "무스텔라 베이비 오일", imgIcon: "🧴", freeTime: "목욕 후", milestone: "newborn", theme: "bath-care", tags: "#아로마수면 #꿀잠오일", battery: "필요 없음", batteryLink: "", fomo: "헹굴 필요 없이 욕조 물에 몇 방울 풀면 은은한 향이 퍼져요. 목욕 후 아기가 릴렉스되어 바로 수면(기절) 모드로 들어가게 돕는 놀이.", coupangLink: "https://link.coupang.com/a/gLEnsTQ68q", relatedPlayIds: ["p42", "p29"] },

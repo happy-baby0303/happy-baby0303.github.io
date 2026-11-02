@@ -1,21 +1,31 @@
 /* ============================================================
    배냇함 PLUS — 뭐 사줄까 물어보면 (toygift.js)
 
-   돌잔치에 같은 장난감이 세 개 들어온다.
-   그리고 개월수가 안 맞는 걸 받아서 1년을 서랍에 둔다.
-
-   원인은 하나다. 부모가 답을 못 준다.
-   "뭐 사줄까?" 라고 물어보면 "아무거나~" 라고 한다.
+   "뭐 사줄까?" 라고 물어보면 부모는 "아무거나~" 라고 한다.
    목록을 만들려면 지금 뭐가 있는지, 그때쯤 뭘 쓸지를 다 알아야 하는데
-   그걸 앉아서 정리할 시간이 없다.
+   그걸 앉아서 정리할 시간이 없다. 그래서 같은 게 겹치고,
+   개월수가 안 맞는 걸 받아서 서랍에 둔다.
 
-   앱은 안다. 개월수도, 가진 것도, 찜한 것도 다 있다.
+   앱은 안다. 개월수도, 가진 것(우리 집 장난감)도, 찜한 것도 있다.
 
    ⚠️ '지금' 개월수로 고르면 안 된다.
       선물은 지금 사서 그날 받는다. 그날 개월수로 골라야 한다.
-      그래야 돌 선물로 신생아 모빌을 받는 참사가 없다.
-
    ⚠️ 갖고 계신 건 반드시 뺀다. 중복 선물을 막는 게 이 기능의 절반이다.
+   ⚠️ 장난감만 고른다. 목록에는 체온계 · 욕조 · 변기 · 아기띠 같은 살림 · 위생 용품도 섞여 있다
+      (혼자 노는 시간 칸에 '상시' · '목욕 시간' 처럼 적힌 것들 — app.js 의 toyPlayTime 이 거른다).
+   ⚠️ 걸으면 못 쓰는 점퍼 · 쏘서는 그날 10개월이 넘으면 뺀다.
+      그대로 두면 돌 목록 다섯 개 중 두 개가 점퍼였다 (받고 두세 달 쓰고 끝).
+   ⚠️ 찜한 것이 먼저다. 부모가 갖고 싶다고 표시해 둔 게 곧 선물 목록이다.
+
+   날 — 100일 · 돌 · 크리스마스 · 어린이날 중 가장 가까운 날 (그날 18개월 전까지).
+        크리스마스 · 어린이날은 날짜가 해마다 같아서 넣는다. 설 · 추석은 해마다 달라 넣지 않는다.
+        200일은 선물을 주고받는 날이 아니라 뺐다.
+        목록이 잡고 서기(10개월~) 시기까지라, 18개월이 넘으면 맞는 걸 고를 수 없어 띄우지 않는다.
+
+   자리 — 장난감 추천 탭, '이럴 때 필요한 장난감' 바로 아래.
+          처음엔 날짜만 보이게 접어 둔다. 펼치면 목록과 카톡 보내기.
+          놀이 탭 카드 줄 끝에 둘 셈이었는데(toyorder.js), 놀이 목록을 더 밀어내서 이 탭으로 옮겼다.
+          장난감을 사는 이야기라 이 탭이 맞다.
 
    index.html 에서 toylife.js 다음에 로드하세요.
    ============================================================ */
@@ -24,9 +34,10 @@
 
     var HOST = "toy-gift";
     var LINK = "https://happy-baby0303.github.io/toy/index.html";
+    var OPEN_KEY = "tosil_toy_gift_open";
 
-    var BLUE = "#7F77DD", GRAY = "#A3958A", DARK = "#4A413C";
-    var GOLD = "#8A6D00", PURPLE = "#7F77DD";
+    var GRAY = "#A3958A", DARK = "#4A413C", SUB = "#7A6F68", LINE = "#EDE6DE";
+    var GOLD = "#8A6D00";
 
     function esc(s) {
         return String(s == null ? "" : s)
@@ -52,9 +63,19 @@
         return window.toyData || [];
     }
     function mine() {
-        try { return window.myToyIds ? window.myToyIds() : []; } catch (e) { return []; }
+        try { return (window.myToyIds ? window.myToyIds() : []).map(Number); } catch (e) { return []; }
+    }
+    function liked() {
+        try { return (JSON.parse(localStorage.getItem("favToys")) || []).map(Number); } catch (e) { return []; }
+    }
+    /* 혼자 노는 시간 — 놀이 시간이 적힌 '장난감' 만 값이 있다 (app.js 와 같은 규칙) */
+    function playTime(t) {
+        try { if (typeof window.toyPlayTime === "function") return window.toyPlayTime(t); } catch (e) {}
+        var v = String((t && t.freeTime) || "").trim();
+        return (/^\d+분$/.test(v) && [56, 57, 58].indexOf(Number(t.id)) === -1) ? v : "";
     }
 
+    function today() { var t = new Date(); t.setHours(0, 0, 0, 0); return t; }
     function birth() {
         var s = localStorage.getItem("tosil_startDate");
         if (!s) return null;
@@ -64,10 +85,7 @@
         d.setHours(0, 0, 0, 0);
         return isNaN(d.getTime()) ? null : d;
     }
-    function daysTo(d) {
-        var t = new Date(); t.setHours(0, 0, 0, 0);
-        return Math.round((d - t) / 86400000);
-    }
+    function daysTo(d) { return Math.round((d - today()) / 86400000); }
     /* 그날의 개월수 */
     function monthsAt(d) {
         var b = birth();
@@ -77,85 +95,110 @@
         return m < 0 ? 0 : m;
     }
     function msOf(m) {
-        if (m === null) return null;
+        if (m === null || m === undefined) return null;
         if (m < 2) return "newborn";
         if (m < 4) return "tummy";
         if (m < 7) return "flip";
         if (m < 10) return "crawl";
         return "stand";
     }
+    var STAGES = ["newborn", "tummy", "flip", "crawl", "stand"];
     var MSNAME = {
         newborn: "신생아", tummy: "터미타임", flip: "뒤집기",
         crawl: "배밀이", stand: "잡고 서기", all: "전 시기"
     };
+    /* 걸으면 못 쓰는 것 — 졸리점퍼 · 점퍼루 · 엑서쏘서 */
+    var UNTIL_WALK = [9, 10, 16];
+    /* 놀이 시간은 적혀 있지만 선물로 줄 물건은 아닌 것 — 미니 점착 메모지 · 버블 클렌저 · 카시트 후방 거울 */
+    var NOT_GIFT = [21, 42, 77];
 
-    /* ---------- 다가오는 날 ----------
-       명절은 해마다 날짜가 달라 넣지 않는다. 틀린 날짜를 띄우느니 안 띄운다. */
+    /* ---------- 다가오는 날 ---------- */
+    function nextFixed(month, date) {           // 올해 그날이 지났으면 내년
+        var t = today(), d = new Date(t.getFullYear(), month, date);
+        if (d < t) d = new Date(t.getFullYear() + 1, month, date);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
     function nextDay() {
         var b = birth();
-        if (!b) return null;
+        if (!b || daysTo(b) > 0) return null;   // 아직 태어나기 전이면 띄우지 않는다
 
-        var add = function (n) { var d = new Date(b); d.setDate(d.getDate() + n); return d; };
+        var d100 = new Date(b); d100.setDate(d100.getDate() + 99);          // 태어난 날이 1일째
+        var dol = new Date(b); dol.setFullYear(b.getFullYear() + 1);        // 365일 뒤가 아니라 같은 날 (윤년)
+        var xmas = nextFixed(11, 25), kids = nextFixed(4, 5);
+        var first = function (d) { return monthsAt(d) < 12 ? "첫 " : ""; };
+
         var cand = [
-            { name: "100일", at: add(99) },
-            { name: "200일", at: add(199) },
-            { name: "첫 생일 (돌)", at: (function () { var d = new Date(b); d.setFullYear(b.getFullYear() + 1); return d; })() }   // 365일 뒤가 아니라 같은 날 (윤년이면 하루 어긋났다)
+            { name: "100일", gift: "100일", at: d100 },
+            { name: "첫 생일 (돌)", gift: "돌", at: dol },
+            { name: first(xmas) + "크리스마스", gift: first(xmas) + "크리스마스", at: xmas },
+            { name: first(kids) + "어린이날", gift: first(kids) + "어린이날", at: kids }
         ];
-        /* 돌 다음부터는 해마다 생일 */
-        for (var y = 2; y <= 6; y++) {
-            var d = new Date(b); d.setFullYear(b.getFullYear() + y);
-            cand.push({ name: y + "번째 생일", at: d });
-        }
-        var out = cand.filter(function (c) { return daysTo(c.at) >= 0; })
+        var out = cand.filter(function (c) { return c.at >= b && daysTo(c.at) >= 0 && monthsAt(c.at) < 18; })
                       .sort(function (a, c) { return a.at - c.at; })[0];
         if (!out) return null;
         out.left = daysTo(out.at);
         out.months = monthsAt(out.at);
+        out.ms = msOf(out.months);
         return out;
     }
 
     /* ---------- 고르기 ---------- */
-
     function picks(day) {
-        var have = mine();
-        var ms = msOf(day ? day.months : null);
-        var all = toys();
+        if (!day) return [];
+        var have = mine(), fav = liked();
+        var ms = day.ms, next = STAGES[STAGES.indexOf(ms) + 1];
 
-        var fit = all.filter(function (t) {
-            if (have.indexOf(t.id) > -1) return false;              // 갖고 계신 건 뺀다
-            return !ms || t.milestone === ms || t.milestone === "all";
-        });
-        /* ⚠️ '전 시기' 것을 그냥 두면 몇 개월이든 목록이 똑같아 보인다.
-              그날 시기 전용을 앞에 세운다. 선물은 그때 딱 맞는 게 반갑다. */
-        fit.sort(function (a, b) {
-            return (a.milestone === ms ? 0 : 1) - (b.milestone === ms ? 0 : 1);
-        });
-        /* 그때 시기 것이 모자라면 그 다음 시기까지 넓힌다 —
-           선물은 좀 일찍 받아도 괜찮지만 늦으면 못 쓴다. */
-        if (fit.length < 5 && ms) {
-            var order = ["newborn", "tummy", "flip", "crawl", "stand"];
-            var i = order.indexOf(ms);
-            var nx = order[i + 1];
-            if (nx) fit = fit.concat(all.filter(function (t) {
-                return have.indexOf(t.id) === -1 && t.milestone === nx;
-            }));
-        }
-        return fit.slice(0, 5);
+        var ok = function (t) {
+            var id = Number(t.id);
+            if (have.indexOf(id) > -1) return false;                                // 갖고 계신 건 뺀다
+            if (!playTime(t)) return false;                                         // 장난감만
+            if (NOT_GIFT.indexOf(id) > -1) return false;
+            if (day.months >= 10 && UNTIL_WALK.indexOf(id) > -1) return false;     // 곧 못 쓰는 것
+            return true;
+        };
+        /* 작을수록 앞. 그날 시기 것 → 오래 쓰는 것 → 다음 시기 것.
+           찜한 건 각 칸에서 맨 앞. 선물은 좀 일찍 받아도 괜찮지만 늦으면 못 쓴다 —
+           지난 시기 것은 넣지 않는다. */
+        var rank = function (t) {
+            var f = fav.indexOf(Number(t.id)) > -1;
+            if (t.milestone === ms) return f ? 0 : 2;
+            if (t.milestone === "all") return f ? 1 : 3;
+            if (next && t.milestone === next) return f ? 1 : 4;
+            return 9;
+        };
+        return toys().filter(ok)
+            .map(function (t, k) { return { t: t, r: rank(t), k: k }; })
+            .filter(function (x) { return x.r < 9; })
+            .sort(function (a, b) { return a.r - b.r || a.k - b.k; })
+            .slice(0, 5)
+            .map(function (x) { return x.t; });
+    }
+
+    /* 이름 밑 작은 줄 — 왜 이 자리에 있는지만 (찜 · 오래 씀 · 다음 시기).
+       혼자 노는 시간은 오른쪽 칸에 숫자로 (머리글 한 번). 예전엔 '잡고 서기 · 50분' 이라 50분이 뭔지 몰랐다. */
+    function subLine(t, ms) {
+        var parts = [];
+        if (liked().indexOf(Number(t.id)) > -1) parts.push("찜한 것");
+        if (t.milestone === "all") parts.push("오래 써요");
+        else if (t.milestone !== ms) parts.push((MSNAME[t.milestone] || "") + " 시기부터");
+        return parts.join(" · ");
     }
 
     /* ---------- 카톡 ---------- */
-
     window.shareGiftList = function () {
         var day = nextDay(), list = picks(day);
-        if (!list.length) return;
+        if (!day || !list.length) return;
 
-        var text = "🎁 " + nm("의") + " " + (day ? day.name : "선물") + " 뭐 사줄까 물어보셨죠?\n\n" +
-            (day ? "그때쯤이면 " + day.months + "개월이라 이런 게 잘 맞아요.\n\n" : "\n") +
-            list.map(function (t, i) {
-                return (i + 1) + ". " + t.name + (t.freeTime ? "  (" + t.freeTime + ")" : "");
-            }).join("\n") +
-            "\n\n이미 있는 건 빼고 골랐어요. 하나만 골라주셔도 충분해요 🤍\n" +
-            "👉 " + LINK;
+        /* 받는 분(할머니 · 이모)이 읽는 글이라 '혼자 노는 시간' 같은 숫자는 넣지 않는다.
+           ⚠️ 카톡 글 상자(text)는 200자까지다. 주소까지 넣으면 넘쳐서 끝이 잘린다 —
+              카톡에는 주소 대신 아래 단추가 있으니 주소는 복사할 때만 붙인다. */
+        var head = "🎁 " + nm("의") + " " + day.gift + " 선물, 뭐 사줄까 물어보셨죠?\n\n" +
+            "그때쯤이면 " + day.months + "개월이라 이런 게 잘 맞아요.\n\n" +
+            list.map(function (t, i) { return (i + 1) + ". " + t.name; }).join("\n");
+        var body = head + "\n\n이미 있는 건 빼고 골랐어요. 하나만 골라 주셔도 충분해요 🤍";
+        if (body.length > 200) body = head + "\n\n이미 있는 건 빼고 골랐어요.";
+        var text = body + "\n👉 " + LINK;
 
         if (typeof Kakao === "undefined" || !Kakao.isInitialized()) {
             if (navigator.clipboard) {
@@ -166,102 +209,105 @@
             return;
         }
         Kakao.Share.sendDefault({
-            objectType: "text", text: text,
+            objectType: "text", text: body,
             link: { mobileWebUrl: LINK, webUrl: LINK },
-            buttons: [{ title: "목록 보기 🎁", link: { mobileWebUrl: LINK, webUrl: LINK } }]
+            buttons: [{ title: "장난감 추천 보기", link: { mobileWebUrl: LINK, webUrl: LINK } }]
         });
     };
 
+    /* ---------- 펼치기 ---------- */
+    function isOpen() { try { return sessionStorage.getItem(OPEN_KEY) === "1"; } catch (e) { return false; } }
+    window.toggleToyGift = function () {
+        var open = !isOpen();
+        try { sessionStorage.setItem(OPEN_KEY, open ? "1" : "0"); } catch (e) {}
+        paint();
+        if (!open) {
+            var h = document.getElementById(HOST);
+            try { if (h && h.getBoundingClientRect().top < 0) h.scrollIntoView({ block: "start" }); } catch (e) {}
+        }
+    };
+
     /* ---------- 화면 ---------- */
-
     function html() {
-        var b = birth();
-        if (!b) return "";
-
         var day = nextDay();
+        if (!day) return "";
+
         var list = picks(day);
-        var have = mine();
+        var ids = toys().map(function (t) { return Number(t.id); });
+        var have = mine().filter(function (id) { return ids.indexOf(id) > -1; });   // 뺀 번호(25)는 세지 않는다
         var plus = isPlus();
+        var open = isOpen();
         var show = plus ? list : list.slice(0, 1);
 
-        /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) — 흰 상자로 감싸져 있었다 */
         var out = '<div class="bnh-card">' +
-
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
-                '\uD83C\uDF81 뭐 사줄까 물어보면</div>' +
+                '🎁 뭐 사줄까 물어보면</div>' +
+            '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
+                '‘뭐 사줄까?’ 물어보실 때 답할 목록이에요. <b>갖고 계신 건 빼고</b>, 그날 개월수에 맞는 걸로 골랐어요.</div>' +
 
-            '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
-                'line-height:1.7; word-break:keep-all;">' +
-                '돌잔치에 같은 장난감이 세 개 들어와요. ' +
-                '<b>갖고 계신 건 빼고</b>, 그날 개월수에 맞는 걸로 골라드릴게요.</div>';
-
-        if (day) {
-            out += '<div style="display:flex; align-items:center; justify-content:space-between; ' +
-                'gap:10px; margin-top:13px; padding:13px 15px; background:#F3F0FC; ' +
-                'border:1px solid #DDD9F5; border-radius:13px;">' +
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:13px; ' +
+                'padding:13px 15px; background:#F2F0FC; border:1px solid #DDD9F5; border-radius:13px;">' +
                 '<div style="min-width:0;">' +
-                    '<div style="font-size:13.5px; font-weight:900; color:#6A61CE;">' +
+                    '<div style="font-size:13.5px; font-weight:900; color:#6A61CE; word-break:keep-all;">' +
                         esc(nm("의")) + ' ' + esc(day.name) + '</div>' +
                     '<div style="margin-top:2px; font-size:11.5px; font-weight:700; color:' + GRAY + ';">' +
-                        '그때쯤이면 ' + day.months + '개월 \u00b7 ' +
-                        (MSNAME[msOf(day.months)] || "") + ' 시기예요</div>' +
+                        '그때쯤이면 ' + day.months + '개월 · ' + (MSNAME[day.ms] || "") + ' 시기예요</div>' +
                 '</div>' +
                 '<div style="flex-shrink:0; font-size:16px; font-weight:900; color:#6A61CE;">' +
                     (day.left === 0 ? "오늘" : "D-" + day.left) + '</div>' +
             '</div>';
-        }
 
         if (!list.length) {
-            out += '<div style="margin-top:13px; font-size:12.5px; font-weight:700; color:' + GRAY + '; ' +
-                'line-height:1.7;">고를 게 없네요. 갖고 계신 걸 너무 잘 챙기셨어요.</div>';
-            return out + '</div>';
+            return out + '<div style="margin-top:13px; font-size:12.5px; font-weight:700; color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
+                '그날 개월수에 맞는 장난감은 이미 다 갖고 계세요.</div></div>';
         }
 
-        out += '<div style="margin-top:14px; background:#FBF8F3; border:1px solid #F2EDE6; border-radius:14px; padding:2px 16px;">' +
+        if (!open) {
+            return out + '<div role="button" onclick="window.toggleToyGift()" style="margin-top:10px; text-align:center; padding:13px; ' +
+                'background:#FFFFFF; border:1px solid ' + LINE + '; border-radius:12px; color:' + SUB + '; font-size:13.5px; font-weight:800; cursor:pointer;">' +
+                '선물 목록 보기 ▾</div></div>';
+        }
+
+        out += '<div style="margin-top:12px; background:#FBF8F3; border:1px solid #F2EDE6; border-radius:14px; padding:2px 16px;">' +
+            '<div style="display:flex; justify-content:flex-end; padding:10px 0 0; font-size:11px; font-weight:800; color:' + GRAY + ';">혼자 노는 시간</div>' +
             show.map(function (t, i) {
-                return '<div style="display:flex; gap:10px; padding:11px 0; ' +
-                    'border-bottom:1px solid #F6F2EC;">' +
-                    '<div style="flex-shrink:0; width:20px; height:20px; border-radius:6px; ' +
-                        'background:' + DARK + '; color:#FFFFFF; font-size:11px; font-weight:900; ' +
-                        'display:inline-flex; align-items:center; justify-content:center;">' +
-                        (i + 1) + '</div>' +
+                var sub = subLine(t, day.ms);
+                return '<div data-gift-row style="display:flex; align-items:flex-start; gap:10px; padding:11px 0;' + (i < show.length - 1 ? ' border-bottom:1px solid #F2EDE6;' : '') + '">' +
+                    '<div style="flex-shrink:0; width:20px; height:20px; margin-top:1px; border-radius:6px; background:' + DARK + '; color:#FFFFFF; ' +
+                        'font-size:11px; font-weight:900; display:inline-flex; align-items:center; justify-content:center;">' + (i + 1) + '</div>' +
                     '<div style="flex:1; min-width:0;">' +
-                        '<div style="font-size:13px; font-weight:800; color:' + DARK + '; ' +
-                            'word-break:keep-all;">' + esc(t.name) + '</div>' +
-                        '<div style="margin-top:2px; font-size:11.5px; font-weight:700; color:' + GRAY + ';">' +
-                            (MSNAME[t.milestone] || t.milestone) +
-                            (t.freeTime ? ' \u00b7 ' + esc(t.freeTime) : '') + '</div>' +
+                        '<div data-gift-name style="font-size:13px; font-weight:800; color:' + DARK + '; line-height:1.5; word-break:keep-all;">' + esc(t.name) + '</div>' +
+                        (sub ? '<div style="margin-top:2px; font-size:11.5px; font-weight:700; color:' + GRAY + '; word-break:keep-all;">' + esc(sub) + '</div>' : '') +
                     '</div>' +
+                    '<div style="flex-shrink:0; font-size:12px; font-weight:800; color:' + SUB + '; line-height:1.6; white-space:nowrap;">' + esc(playTime(t)) + '</div>' +
                 '</div>';
             }).join("") + '</div>';
 
         if (plus) {
-            out += '<div onclick="window.shareGiftList()" style="margin-top:14px; text-align:center; ' +
-                'padding:15px; background:#FEE500; color:#191919; border-radius:13px; ' +
-                'font-size:13.5px; font-weight:900; cursor:pointer;">' +
-                '\uD83D\uDCAC 카톡으로 이 목록 보내기</div>' +
-                '<div style="margin-top:9px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
-                    'line-height:1.7; word-break:keep-all;">' +
+            out += '<div role="button" onclick="window.shareGiftList()" style="margin-top:12px; text-align:center; padding:15px; ' +
+                    'background:#FEE500; color:#191919; border-radius:13px; font-size:13.5px; font-weight:900; cursor:pointer;">' +
+                    '💬 카톡으로 이 목록 보내기</div>' +
+                '<div style="margin-top:9px; font-size:11.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                     (have.length
-                        ? '등록하신 ' + have.length + '개는 빼고 골랐어요. '
-                        : '<b>우리 집 육아템을 등록하시면</b> 이미 있는 건 빼고 골라드려요. ') +
+                        ? '등록하신 장난감 ' + have.length + '개는 빼고 골랐어요. '
+                        : '<b role="button" onclick="window.openShelfSheet && window.openShelfSheet()" style="color:' + SUB + '; text-decoration:underline; cursor:pointer;">우리 집 장난감</b>에 등록하시면 이미 있는 건 빼고 골라요. ') +
                     '받는 분이 고르기 쉽게 다섯 개까지만 보내요.</div>';
         } else {
-            out += '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #F5E1A4; ' +
-                'border-radius:13px; padding:16px;">' +
+            var rest = list.length - show.length;
+            out += '<div style="margin-top:12px; background:#FFF9E6; border:1px solid #F5E1A4; border-radius:13px; padding:16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:' + GOLD + ';">' +
-                    '나머지 ' + (list.length - show.length) + '개와 카톡 보내기는 PLUS에서</div>' +
-                '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; ' +
-                    'line-height:1.75; word-break:keep-all;">' +
-                    '목록을 그대로 카톡으로 보내시면 돼요. ' +
-                    '<b>"아무거나~" 대신 목록을 보내면 같은 선물이 겹칠 일이 줄어요.</b></div></div>';
+                    (rest > 0 ? '나머지 ' + rest + '개와 카톡 보내기는 PLUS에서' : '카톡 보내기는 PLUS에서') + '</div>' +
+                '<div style="margin-top:5px; font-size:12px; font-weight:600; color:' + GOLD + '; line-height:1.75; word-break:keep-all;">' +
+                    '목록을 그대로 카톡으로 보낼 수 있어요. ‘아무거나~’ 대신 목록을 보내면 같은 선물이 겹칠 일이 줄어요.</div></div>';
         }
+
+        out += '<div role="button" onclick="window.toggleToyGift()" style="margin-top:12px; text-align:center; padding:6px; ' +
+            'color:' + GRAY + '; font-size:12.5px; font-weight:800; cursor:pointer;">접기 ▴</div>';
 
         return out + '</div>';
     }
 
     /* ---------- 자리 ---------- */
-
     function paint() {
         var host = document.getElementById(HOST);
         if (!host) return;
@@ -272,15 +318,13 @@
 
     function mount() {
         if (document.getElementById(HOST)) return;
-        var host = document.getElementById("view-toy-play");
-        if (!host) return;
+        var gear = document.getElementById("view-toy-gear");
+        if (!gear) return;
         var box = document.createElement("div");
         box.id = HOST;
-        var after = document.getElementById("toy-idle") ||
-                    document.getElementById("play-log") ||
-                    document.getElementById("play-week");
-        if (after && after.parentNode === host) host.insertBefore(box, after.nextSibling);
-        else host.appendChild(box);
+        var panel = gear.querySelector(".sos-theme-panel");
+        if (panel && panel.parentNode === gear) gear.insertBefore(box, panel.nextSibling);
+        else gear.insertBefore(box, gear.firstChild);
         paint();
     }
 
@@ -288,7 +332,8 @@
         setTimeout(function () { mount(); paint(); }, 600);
         setTimeout(function () { mount(); paint(); }, 1700);
 
-        ["closeShelfSheet", "switchToyMainTab"].forEach(function (n) {
+        /* 우리 집 장난감을 고치거나 찜을 바꾸면 목록이 바뀐다 */
+        ["closeShelfSheet", "switchToyMainTab", "toggleFavorite"].forEach(function (n) {
             var f = window[n];
             if (typeof f !== "function" || f.__gift) return;
             var w = function () { var o = f.apply(this, arguments); setTimeout(paint, 90); return o; };
@@ -303,12 +348,11 @@
     window.toyGiftDebug = function () {
         var day = nextDay();
         console.log("PLUS:", isPlus(), "· 생년월일:", localStorage.getItem("tosil_startDate"));
-        if (!day) { console.log("생년월일이 없어 다가오는 날을 못 셉니다"); return; }
-        console.log("다가오는 날:", day.name, "D-" + day.left,
-                    "· 그때 개월수:", day.months, "(" + MSNAME[msOf(day.months)] + ")");
-        console.log("갖고 계신 것:", mine().length + "개 (후보에서 뺌)");
+        if (!day) { console.log("띄울 날이 없어요 (생년월일 없음 · 태어나기 전 · 18개월 넘음)"); return; }
+        console.log("다가오는 날:", day.name, "D-" + day.left, "· 그때 개월수:", day.months, "(" + MSNAME[day.ms] + ")");
+        console.log("갖고 계신 것:", mine().length + "개 (후보에서 뺌) · 찜:", liked().length + "개 (앞으로)");
         picks(day).forEach(function (t, i) {
-            console.log("   " + (i + 1) + ". " + t.name + "  [" + MSNAME[t.milestone] + "]");
+            console.log("   " + (i + 1) + ". " + t.name + "  [" + MSNAME[t.milestone] + "] " + playTime(t) + " " + subLine(t, day.ms));
         });
         console.log("붙었나:", !!document.getElementById(HOST));
     };

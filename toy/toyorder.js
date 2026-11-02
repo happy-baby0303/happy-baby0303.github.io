@@ -26,7 +26,8 @@
        2  우리 집 장난감       그걸로 놀려면 뭐가 있는지
        3  잠자는 장난감        꺼내 쓸 것
        4  놀이 기록           놀고 나서
-       5  뭐 사줄까           남이 물어보면
+
+   '뭐 사줄까' (toygift.js) 는 장난감 추천 탭으로 옮겼다 — 놀이 목록을 더 밀어내서.
 
    index.html 맨 끝에서 로드하세요.
    ============================================================ */
@@ -39,7 +40,7 @@
     /* ⚠️ '지금 몇 분' 이 제일 위다.
           주간 처방은 일요일에 한 번 보지만, 이건 하루에 여러 번 연다.
           자주 쓰는 것이 위에 있어야 한다. */
-    var ORDER = ["play-now", "play-stage", "play-week", "my-shelf", "toy-idle", "play-log", "toy-gift"];
+    var ORDER = ["play-now", "play-stage", "play-week", "my-shelf", "toy-idle", "play-log"];
 
     function host() { return document.getElementById(HOST); }
 

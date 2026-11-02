@@ -11,6 +11,21 @@ try {
     console.warn("카카오 SDK 초기화 에러", e);
 }
 
+/* 🔀 뺀 장난감 번호 → 같은 상품 번호. 25번은 74번과 같은 쿠팡 상품이라 뺐다.
+   찜(favToys) · 우리 집 장난감(tosil_my_toys) 에 남은 25 는 74 로 옮기고, 예전에 보낸 링크(?toy=25)도 74 로 간다. */
+const TOY_MOVED = { 25: 74 };
+(function () {
+    ['favToys', 'tosil_my_toys'].forEach(function (key) {
+        try {
+            const a = JSON.parse(localStorage.getItem(key) || 'null');
+            if (!Array.isArray(a) || !a.some(x => TOY_MOVED[Number(x)])) return;
+            const out = [];
+            a.forEach(x => { const n = TOY_MOVED[Number(x)] || Number(x); if (out.indexOf(n) === -1) out.push(n); });
+            localStorage.setItem(key, JSON.stringify(out));
+        } catch (e) {}
+    });
+})();
+
 // ✨ 통합 필터링을 위한 전역 상태 관리
 let globalMilestone = 'all'; 
 let currentToyTheme = 'all';
@@ -241,11 +256,16 @@ function renderPlays() {
         const stepsHtml = p.steps.map(step => `<li style="margin-bottom: 8px;">${String(step).replace(/\((안전 필수|안전|주의)\)\s*(⚠️\s*)?/g, '<b style="color:#B42318;">주의</b> ')}</li>`).join('');
 
         // 🔗 [크로스셀링] 장난감으로 넘어가는 버튼
+        /* ⚠️ 모든 놀이에 '🛒 이 놀이에 쓰는 장난감' 이라고 붙어 있었다.
+              그런데 장난감 놀이(toy) 말고는 엄마 등 · 이불 · 페트병으로 하는 놀이다.
+              '엄마 등 북치기' 에 15만 원짜리 쏘서가 '쓰는 장난감' 으로 붙어 있었다.
+              장난감 놀이만 '쓰는 장난감', 나머지는 '좋아하면' 으로 — 무엇인지 이름도 같이. */
         let linkToToyHtml = '';
-        if (p.relatedToyId) {
+        const relToy = p.relatedToyId ? toyData.find(t => String(t.id) === String(p.relatedToyId)) : null;
+        if (relToy) {
             linkToToyHtml = `
-                <div onclick="jumpToToy('${p.relatedToyId}')" style="background:#FAF7F2; border:1px solid #EDE6DE; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
-                    <div style="flex:1; min-width:0; font-size:13px; font-weight:800; color:#7A6F68; word-break:keep-all;">🛒 이 놀이에 쓰는 장난감</div>
+                <div onclick="jumpToToy('${relToy.id}')" style="background:#FAF7F2; border:1px solid #EDE6DE; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
+                    <div style="flex:1; min-width:0; word-break:keep-all;"><div style="font-size:13px; font-weight:800; color:#7A6F68;">🛒 ${p.category === 'toy' ? '이 놀이에 쓰는 장난감' : '이 놀이를 좋아하면'}</div><div style="margin-top:3px; font-size:12px; font-weight:700; color:#A3958A;">${relToy.name}</div></div>
                     <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#7F77DD; white-space:nowrap; margin-left:10px;">보러 가기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
                 </div>
             `;
@@ -530,6 +550,20 @@ function renderToys(filteredData) {
                            + (left > 0 ? `<button onclick="moreToys()" style="display:block; width:100%; padding:16px; margin:4px 0 24px; background:#FFFFFF; border:1px solid #DCD3C8; border-radius:14px; font-size:14px; font-weight:800; color:#7A6F68; cursor:pointer;">장난감 ${Math.min(left, 8)}개 더 보기 <span style="color:#A3958A; font-weight:700;">· 남은 ${left}개</span></button>` : '');
 }
 
+/* ⏳ 혼자 노는 시간 — '20분' 처럼 놀이 시간이 적힌 장난감만 값이 있다.
+   ⚠️ 목욕 · 위생 · 살림 용품은 이 칸(freeTime)에 '상시' · '목욕 시간' · '엄마 손목 구원' 같은 말이 들어 있다.
+      그대로 '⏳ 혼자 노는 시간 — 보통 상시쯤 · 아이마다 달라요' 로 떴다 (체온계 · 욕조 · 변기 · 아기띠 …).
+      손톱 갈이 · 콧물 흡입기 · 칫솔의 '5분' · '3분' 은 하는 데 걸리는 시간이지 혼자 노는 시간이 아니다.
+   선물 카드(toygift.js)도 이걸로 '장난감인가' 를 가른다. */
+const TOY_NOT_PLAY = [56, 57, 58];   // 전동 손톱 갈이 · 콧물 흡입기 · 첫 칫솔
+function toyPlayTime(toy) {
+    const v = String((toy && toy.freeTime) || '').trim();
+    if (!/^\d+분$/.test(v)) return '';
+    if (TOY_NOT_PLAY.indexOf(Number(toy.id)) > -1) return '';
+    return v;
+}
+window.toyPlayTime = toyPlayTime;
+
 // ==========================================
 // 🛒 장난감 카드 렌더링 (장난감 -> 놀이 연결 추가)
 // ==========================================
@@ -559,13 +593,17 @@ function generateToyHTML(toy, favs) {
     }
 
     // 🔗 2. 이 장난감으로 하는 놀이로 넘어가는 단추
+    /* ⚠️ 모든 카드에 '이 장난감으로 하는 놀이' 라고 붙어 있었는데, 98개 중 그 장난감을 정말 쓰는 놀이는 다섯 개뿐이다.
+          체온계 → '창밖 자동차 카운팅', 콧물 흡입기 → '목욕 끝 로션 마사지' 가 '이 장난감으로 하는 놀이' 였다.
+          장난감 놀이가 이 장난감을 가리킬 때만 그 말을 쓰고, 나머지는 '같이 해 볼 놀이' — 놀이 이름도 같이 보여 준다. */
     let linkToPlayHtml = '';
-    if (toy.relatedPlayIds && toy.relatedPlayIds.length > 0) {
-        // 첫 번째 관련 놀이 ID로 넘어가도록 세팅
+    const relPlay = (toy.relatedPlayIds && toy.relatedPlayIds.length > 0) ? playData.find(p => p.id === toy.relatedPlayIds[0]) : null;
+    if (relPlay) {
+        const usesToy = relPlay.category === 'toy' && String(relPlay.relatedToyId) === String(toy.id);
         linkToPlayHtml = `
-            <div onclick="jumpToPlay('${toy.relatedPlayIds[0]}')" style="background:#F2F0FC; border:1px solid #DDD9F5; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
-                <div style="font-size:13px; font-weight:800; color:#6A61CE;">이 장난감으로 하는 놀이</div>
-                <div style="font-size:13px; font-weight:900; color:#7F77DD;">보러 가기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
+            <div onclick="jumpToPlay('${relPlay.id}')" style="background:#F2F0FC; border:1px solid #DDD9F5; padding:14px; border-radius:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.2s;">
+                <div style="flex:1; min-width:0; word-break:keep-all;"><div style="font-size:13px; font-weight:800; color:#6A61CE;">${usesToy ? '이 장난감으로 하는 놀이' : '같이 해 볼 놀이'}</div><div style="margin-top:3px; font-size:12px; font-weight:700; color:#8C84D9;">${relPlay.title}</div></div>
+                <div style="flex-shrink:0; font-size:13px; font-weight:900; color:#7F77DD; white-space:nowrap; margin-left:10px;">보러 가기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div>
             </div>
         `;
     }
@@ -600,14 +638,14 @@ function generateToyHTML(toy, favs) {
                 <div style="font-size: 13.5px; color: #7A6F68; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
             </div>
 
-            <div style="background: #FBF8F3; padding: 20px 18px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 20px;">
+            ${toyPlayTime(toy) ? `<div style="background: #FBF8F3; padding: 20px 18px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 20px;">
                 <div style="font-weight: 900; color: #4A413C; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                     <span>⏳</span> 혼자 노는 시간
                 </div>
                 <div style="font-size: 14px; color: #059669; font-weight: 800; background: #ECFDF5; display: inline-block; padding: 8px 14px; border-radius: 10px; border: 1px solid #A7F3D0;">
-                    보통 ${toy.freeTime}쯤 · 아이마다 달라요
+                    보통 ${toyPlayTime(toy)}쯤 · 아이마다 달라요
                 </div>
-            </div>
+            </div>` : ''}
 
             ${linkToPlayHtml}
 
@@ -628,6 +666,7 @@ function generateToyHTML(toy, favs) {
 // 🚀 매직 점프 엔진 (놀이 ↔ 장난감 무한 횡단)
 // ==========================================
 window.jumpToToy = function(toyId) {
+    if (TOY_MOVED[Number(toyId)]) toyId = TOY_MOVED[Number(toyId)];
     if (navigator.vibrate) navigator.vibrate(10);
     // 1. 탭을 장난감(템빨) 탭으로 스위치
     switchToyMainTab('gear');
@@ -678,7 +717,7 @@ function shareToHusbandToy(id) {
     const toy = toyData.find(t => t.id == id);
     if (!toy) return;
     const link = 'https://happy-baby0303.github.io/toy/index.html?toy=' + encodeURIComponent(toy.id);
-    const sub = toy.freeTime ? `혼자 노는 시간 보통 ${toy.freeTime}쯤` : '';
+    const sub = toyPlayTime(toy) ? `혼자 노는 시간 보통 ${toyPlayTime(toy)}쯤` : '';   // '보통 상시쯤' 이 가지 않게
     const shareText = `이 장난감 어때?\n${toy.name}${sub ? '\n' + sub : ''}\n${link}`;
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
         navigator.clipboard.writeText(shareText)

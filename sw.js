@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v106';
+const CACHE = 'baenaet-v107';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -228,7 +228,7 @@ const ASSETS = [
     './stroller/index.html',  './stroller/data.js',  './stroller/app.js',  './stroller/style.css',  './stroller/strollerused.js',  './stroller/strollerlimit.js',  './stroller/strollermatch.js',  './stroller/strollertrunk.js',  './stroller/strollergo.js',
     './carseat/index.html',   './carseat/data.js',   './carseat/app.js',   './carseat/style.css',   './carseat/carseatcrash.js',
     './food/index.html',      './food/data.js',      './food/app.js',      './food/style.css',
-    './toy/index.html',       './toy/data.js',       './toy/app.js',       './toy/style.css',       './toy/toysafety.js',       './toy/playnow.js',       './toy/playstage.js',       './toy/toyorder.js',
+    './toy/index.html',       './toy/data.js',       './toy/app.js',       './toy/style.css',       './toy/toysafety.js',       './toy/playnow.js',       './toy/playstage.js',       './toy/toyorder.js',       './toy/toygift.js',
     './shared/babyswitch.js', './shared/disclosure.js', './shared/plusmark.js',
     './shared/plusgate.js',
     './shared/favsync.js',

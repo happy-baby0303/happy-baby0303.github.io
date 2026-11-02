@@ -118,28 +118,42 @@
         return { kind: "now", left: (to === null ? null : to - m + 1) };
     }
 
+    /* ⚠️ 시기(RANGE)는 '제일 많이 갖고 노는 때' 지 '못 쓰게 되는 때' 가 아니다.
+          예전 말로는 7개월 아기에게 오볼 · 흡착 스피너 · 사운드북(뒤집기 4~6개월)이
+             '꿈이는 이 시기를 지났어요. 지금 사면 쓸 날이 얼마 없어요.'
+          였고, 체온계 · 콧물 흡입기 · 손톱 갈이(신생아)에도 같은 말이 붙었다. 몇 년을 쓰는 물건이다.
+            · 살림 · 위생 용품(혼자 노는 시간이 없는 것) → '○○ 때부터 쓰는 물건' 만
+            · 장난감은 시기가 지나고 석 달까지는 '지금도 갖고 놀기 좋을 때', 그 뒤에만 '금방 시시해할 수 있어요'
+            · '앞으로 약 N개월 써요' 도 끝이 정해진 것처럼 들려서 뺐다
+          lifeOf() 의 구분(past · now …)은 그대로 — 잠자는 장난감 고르기가 그걸 쓴다. */
+    function isCare(t) {
+        try { if (typeof window.toyPlayTime === "function") return !window.toyPlayTime(t); } catch (e) {}
+        return !/^\d+분$/.test(String(t.freeTime || "").trim());
+    }
     function lifeLine(t) {
         var L = lifeOf(t);
         var owned = mine().indexOf(t.id) > -1;
+        var since = t.milestone === "newborn" ? "신생아 때부터" : (MSNAME[t.milestone] || "") + " 시기부터";
 
         if (L.kind === "always")
             return { c: GREEN, t: "시기를 안 타는 물건이에요. 오래 써요." };
-
-        if (L.kind === "unknown")
-            return { c: GRAY, t: MSNAME[t.milestone] + " 시기에 쓰는 물건이에요." };
-
-        if (L.kind === "past")
-            return owned
-                ? { c: GRAY, t: "이 시기는 지나갔어요. 정리하거나 물려주기 좋을 때예요." }
-                : { c: GOLD, t: nm("는") + " 이 시기를 지났어요. 지금 사면 쓸 날이 얼마 없어요." };
 
         if (L.kind === "future")
             return { c: GOLD, t: "약 " + L.wait + "개월 뒤부터 쓰는 물건이에요. " +
                                  "지금 사면 그동안 서랍에 있어요." };
 
-        return { c: BLUE, t: L.left
-            ? "지금이 그때예요. 앞으로 약 " + L.left + "개월 써요."
-            : "지금부터 쭉 쓰는 물건이에요." };
+        if (L.kind === "unknown" || isCare(t))
+            return { c: GRAY, t: since + " 쓰는 물건이에요." };
+
+        if (L.kind === "past" && L.over >= 3)
+            return owned
+                ? { c: GRAY, t: "제일 많이 갖고 놀던 시기는 지났어요. 정리하거나 물려주기 좋을 때예요." }
+                : { c: GOLD, t: "주로 " + MSNAME[t.milestone] + " 시기에 갖고 노는 장난감이에요. 지금 사면 금방 시시해할 수 있어요." };
+
+        if (L.kind === "past")
+            return { c: BLUE, t: "지금도 갖고 놀기 좋을 때예요." };
+
+        return { c: BLUE, t: L.left ? "지금이 딱 그 시기예요." : "지금부터 쭉 쓰는 물건이에요." };
     }
 
     /* 카드마다 한 줄. ⚠️ 상자로 만들지 않는다. 93장에 상자가 붙으면 화면이 막힌다. */
