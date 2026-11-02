@@ -67,6 +67,22 @@ function toggleFavorite(id) {
 }
 
 // 🚀 찜 보관함 화면 전환
+/* ⚠️ 돌아올 때 조건 칸(.filter-section)을 display:flex 로 켜고 있었다. 원래는 block 이다.
+      flex 가 되면 '유모차 종류 · 핵심 스펙 · 예산' 줄이 옆으로 한 줄에 붙어 화면 폭이 1040px 이 됐고,
+      찜을 한 번 보고 오면 페이지가 옆으로 밀리고(가로 스크롤), 숫자 창 같은 아래 창도 옆으로 밀려 떴다.
+      숨기기 전 값을 적어 두었다가 그대로 되돌린다. */
+function favHide(el) {
+    if (!el || el.dataset.favHidden) return;
+    el.dataset.favHidden = '1';
+    el.dataset.favPrev = el.style.display || '';
+    el.style.display = 'none';
+}
+function favShow(el) {
+    if (!el || !el.dataset.favHidden) return;
+    el.style.display = el.dataset.favPrev || '';
+    delete el.dataset.favHidden;
+    delete el.dataset.favPrev;
+}
 function toggleFavView() {
     isFavViewMode = !isFavViewMode;
     const btn = document.getElementById('btn-show-fav');
@@ -78,16 +94,16 @@ function toggleFavView() {
         btn.style.background = '#F6F2EC';
         btn.style.color = '#7A6F68';
         btn.style.borderColor = '#DCD3C8';
-        if(matrixPanel) matrixPanel.style.display = 'none';
-        if(filterSection) filterSection.style.display = 'none';
+        favHide(matrixPanel);
+        favHide(filterSection);
         renderFavorites();
     } else {
-        btn.innerHTML = '❤️ 내가 찜한 유모차 모아보기';
-        btn.style.background = '#FFF2F2';
-        btn.style.color = '#E32636';
-        btn.style.borderColor = '#FCA5A5';
-        if(matrixPanel) matrixPanel.style.display = 'block';
-        if(filterSection) filterSection.style.display = 'flex';
+        btn.innerHTML = '❤️ 찜한 유모차 모아보기';   // 빨간 알약 → 흰 바탕 (이유식 · 젖병 · 장난감과 같게)
+        btn.style.background = '#FFFFFF';
+        btn.style.color = '#4A413C';
+        btn.style.borderColor = '#EDE6DE';
+        favShow(matrixPanel);
+        favShow(filterSection);
         renderList(false);
     }
 }
@@ -649,9 +665,8 @@ document.addEventListener('click', function(e) {
     }
 });
 
-function showComingSoon(category) {
-    alert(`💡 ${category}는 아직 준비 중이에요.\n다음 업데이트에서 찾아뵐게요.`);
-}
+/* showComingSoon('준비 중') · shareResult('페이지 주소 보내기') 는 어디서도 안 불러서 뺐다.
+   둘 다 브라우저 기본 창(alert · prompt)을 띄우던 것이다. 보내기는 카드마다 있는 shareStroller 가 한다. */
 
 // 🚀 카카오 SDK 초기화 (안전 보호막 장착)
 try {
@@ -690,9 +705,13 @@ function shareStroller(name) {
         return;
     }
     const txt = `이 유모차 어때?\n${name}${bits ? '\n' + bits : ''}\n${link}`;
-    navigator.clipboard.writeText(txt)
-        .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
-        .catch(() => prompt('아래 내용을 복사해 주세요', txt));
+    /* 브라우저 기본 창(alert · prompt) 대신 말풍선 · 길게 눌러 복사하는 창 (shared/curatorui.js) */
+    const sheet = () => window.showCopySheet(txt);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt)
+            .then(() => window.showToast('복사했어요. 카톡에 붙여 넣어 보내세요.'))
+            .catch(sheet);
+    } else sheet();
 }
 window.shareStroller = shareStroller;
 
@@ -726,30 +745,6 @@ window.shareStroller = shareStroller;
     setTimeout(function () { go(8); }, 900);
 })();
 
-function shareResult() {
-    const shareUrl = window.location.href; 
-    if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
-        Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-                title: '배냇함 유모차 고르기',
-                description: '우리 차 트렁크와 생활에 맞는 유모차를 골라보세요',
-                imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
-                link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
-            },
-            buttons: [
-                { title: '배냇함에서 보기', link: { mobileWebUrl: shareUrl, webUrl: shareUrl } }
-            ],
-        });
-    } else {
-        // 카카오톡이 안 될 때는 그냥 주소를 복사해 줌!
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            alert('주소를 복사했어요. 짝꿍에게 붙여넣기 해주세요 🤍');
-        }).catch(err => {
-            prompt("아래 주소를 복사해서 짝꿍에게 보내주세요", shareUrl);
-        });
-    }
-}
 
 /* ⚠️ 헤더의 "유모차 49종" 이 글자로 박혀 있었다.
       data.js 에 한 종 더 넣는 날 같이 안 고치면 그대로 거짓말이 된다. */

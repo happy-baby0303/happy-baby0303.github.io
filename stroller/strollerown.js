@@ -273,7 +273,7 @@
         var out = '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + '; margin-bottom:10px;">' +
-                '\uD83E\uDDB4 하루에 드시는 무게</div>' +
+                '\uD83E\uDDB4 하루에 들어 올리는 무게</div>' +
 
             '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">' +
                 '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">하루 외출</span>' +
@@ -704,7 +704,7 @@
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.8; word-break:keep-all;">' +
                     '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상해요. ' +
-                    '쓰고 계신 걸 알려 주시면 <b>하루에 몇 kg을 드시는지</b> 알려 드릴게요.</div>' +
+                    '쓰고 계신 걸 알려 주시면 <b>하루에 몇 kg을 들어 올리시는지</b> 알려 드릴게요.</div>' +
                 '<div onclick="window.openStrollerSheet()" style="text-align:center; padding:16px; ' +
                     'background:' + DARK + '; color:#FFFFFF; border-radius:14px; ' +
                     'font-size:14.5px; font-weight:900; cursor:pointer;">유모차 알려주기</div>' +
@@ -741,7 +741,7 @@
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
-                    '하루에 몇 kg을 드시는지 알려 드려요</div>' +
+                    '하루에 몇 kg을 들어 올리시는지 알려 드려요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GOLD + '; ' +
                     'line-height:1.8; word-break:keep-all;">' +
                     '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상해요. ' +

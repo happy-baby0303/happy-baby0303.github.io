@@ -70,22 +70,24 @@
         return (isFinite(v) && v > 0 && v < 60) ? v : null;
     }
 
+    /* ⚠️ 브라우저 기본 창(prompt)이었다 — 아이폰에서는 맨 위에 사이트 주소가 찍힌 회색 창이 떴다.
+          아래에서 올라오는 숫자 창으로 (shared/curatorui.js). 17.5 같은 소수도 받는다. 비우고 저장하면 지운다. */
     window.setStrollerLimit = function () {
         var cur = limit();
-        var a = window.prompt(
-            "설명서나 유모차 프레임에 적힌 최대 사용 체중을 적어주세요.\n" +
-            "보통 15 ~ 22kg 사이예요. (숫자만)",
-            cur === null ? "" : String(cur));
-        if (a === null) return;
-
-        var v = parseFloat(String(a).replace(/[^0-9.]/g, ""));
-        if (!isFinite(v) || v <= 0 || v > 60) {
-            if (String(a).trim() === "") { try { localStorage.removeItem(KEY); } catch (e) {} paint(); }
-            return;
-        }
-        try { localStorage.setItem(KEY, String(v)); } catch (e) {}
-        paint();
+        window.askNumber({
+            title: "최대 사용 체중을 알려 주세요",
+            sub: "설명서나 유모차 프레임에 적혀 있어요. 보통 15~22kg 사이예요.",
+            value: cur === null ? "" : cur, unit: "kg", min: 1, max: 60, decimal: true,
+            onDone: function (v) {
+                try {
+                    if (v === null) localStorage.removeItem(KEY);
+                    else localStorage.setItem(KEY, String(v));
+                } catch (e) {}
+                paint();
+            }
+        });
     };
+
 
     /* ---------- 화면 ---------- */
 

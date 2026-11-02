@@ -12,6 +12,7 @@
      askConfirm({ text: '이 기록을 지울까요?', yes: '지우기', danger: true, onYes: function () { … } })
      askNumber({ title: '한 번에 몇 g 정도 먹나요?', sub: '…', value: 120, unit: 'g', min: 10, max: 400,
                  onDone: function (v) { … } })     // v 가 null 이면 비워서 저장한 것
+                                                    // decimal: true 면 17.5 같은 소수도 받는다 (유모차 최대 체중)
      showCopySheet('복사할 글')                     // 클립보드가 막혔을 때 — 길게 눌러 복사
 
    ⚠️ 뒤로가기는 curatorback.js 의 cur-ask-sheet 칸이 닫는다 (closeCurAsk).
@@ -120,7 +121,7 @@
             '<div style="font-size:16.5px; font-weight:900; color:' + DARK + '; word-break:keep-all;">' + esc(o.title) + '</div>' +
             (o.sub ? '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; line-height:1.6; margin-top:6px; word-break:keep-all;">' + lines(o.sub) + '</div>' : '') +
             '<div style="display:flex; align-items:center; gap:8px; margin-top:14px;">' +
-                '<input id="cur-ask-num" type="number" inputmode="numeric" value="' + esc(o.value == null ? '' : o.value) + '" ' +
+                '<input id="cur-ask-num" type="number"' + (o.decimal ? ' step="any" inputmode="decimal"' : ' inputmode="numeric"') + ' value="' + esc(o.value == null ? '' : o.value) + '" ' +
                     'style="flex:1; min-width:0; box-sizing:border-box; padding:14px 16px; border-radius:14px; border:1px solid ' + LINE + '; ' +
                     'background:#FBF8F3; color:' + DARK + '; font-size:17px; font-weight:800; font-family:inherit;">' +
                 (o.unit ? '<span style="font-size:15px; font-weight:800; color:' + GRAY + ';">' + esc(o.unit) + '</span>' : '') +
@@ -130,8 +131,16 @@
         var input = w.querySelector('#cur-ask-num'), err = w.querySelector('#cur-ask-err');
         w.querySelector('[data-cur="no"]').onclick = function () { window.closeCurAsk(); };
         w.querySelector('[data-cur="yes"]').onclick = function () {
-            var raw = String(input.value || '').replace(/[^0-9]/g, '');
-            var v = raw === '' ? null : parseInt(raw, 10);
+            var raw, v;
+            if (o.decimal) {
+                raw = String(input.value || '').replace(/[^0-9.]/g, '');
+                var dot = raw.indexOf('.');
+                if (dot > -1) raw = raw.slice(0, dot + 1) + raw.slice(dot + 1).replace(/\./g, '');
+                v = (raw === '' || raw === '.') ? null : parseFloat(raw);
+            } else {
+                raw = String(input.value || '').replace(/[^0-9]/g, '');
+                v = raw === '' ? null : parseInt(raw, 10);
+            }
             if (v !== null && ((o.min != null && v < o.min) || (o.max != null && v > o.max))) {
                 err.textContent = o.min + '~' + o.max + ' 사이로 넣어 주세요';
                 err.style.display = 'block';

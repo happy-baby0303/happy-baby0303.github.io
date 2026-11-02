@@ -92,21 +92,24 @@
         return (isFinite(v) && v > 20 && v < 250) ? v : null;
     }
 
+    /* ⚠️ 브라우저 기본 창(prompt)이었다. 아래에서 올라오는 숫자 창으로 (shared/curatorui.js).
+          20cm 아래 · 250cm 위는 잘못 잰 값이라 받지 않는다 (myDepth 가 어차피 버리던 값). 비우고 저장하면 지운다. */
     window.setTrunkDepth = function () {
         var cur = myDepth();
-        var a = window.prompt(
-            "트렁크를 열고 안쪽 깊이를 재주세요.\n" +
-            "뒷좌석 등받이부터 트렁크 문까지, 가장 긴 쪽이에요. (cm, 숫자만)",
-            cur === null ? "" : String(cur));
-        if (a === null) return;
-        var v = parseFloat(String(a).replace(/[^0-9.]/g, ""));
-        if (!isFinite(v) || v <= 0) {
-            if (String(a).trim() === "") { try { localStorage.removeItem(MY_DEPTH); } catch (e) {} paint(); }
-            return;
-        }
-        try { localStorage.setItem(MY_DEPTH, String(v)); } catch (e) {}
-        paint();
+        window.askNumber({
+            title: "트렁크 안쪽 깊이를 알려 주세요",
+            sub: "뒷좌석 등받이부터 트렁크 문까지, 가장 긴 쪽을 줄자로 재 주세요.",
+            value: cur === null ? "" : cur, unit: "cm", min: 20, max: 250,
+            onDone: function (v) {
+                try {
+                    if (v === null) localStorage.removeItem(MY_DEPTH);
+                    else localStorage.setItem(MY_DEPTH, String(v));
+                } catch (e) {}
+                paint();
+            }
+        });
     };
+
 
     window.setStrollerCar = function (key) {
         try {
