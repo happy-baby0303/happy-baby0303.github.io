@@ -5522,7 +5522,7 @@ window.saveTrackerRecord = function() {
     if(records.length > 1500) records.pop();   // 100개면 닷새치였다 (주간 통계 · 육퇴 시계 · 편지가 모자랐다)
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
 
-    // 🌟 바로 이 위치에 추가해 주세요!
+    // 저장한 뒤에 — 수유량 정체기를 넘겼는지 본다
     if (typeof window.checkFeedPlateauBreakthrough === 'function') {
         window.checkFeedPlateauBreakthrough();
     }

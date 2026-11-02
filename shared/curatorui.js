@@ -14,6 +14,7 @@
                  onDone: function (v) { … } })     // v 가 null 이면 비워서 저장한 것
                                                     // decimal: true 면 17.5 같은 소수도 받는다 (유모차 최대 체중)
      showCopySheet('복사할 글')                     // 클립보드가 막혔을 때 — 길게 눌러 복사
+     sendLabel('이 젖병')                           // '남편한테 이 젖병 보내기' · '아내한테 …' · '이 젖병 보내기' 
 
    ⚠️ 뒤로가기는 curatorback.js 의 cur-ask-sheet 칸이 닫는다 (closeCurAsk).
    각 큐레이터 index.html 에서 curatorlite.js 다음에 로드하세요.
@@ -31,6 +32,20 @@
         });
     }
     function lines(s) { return esc(s).replace(/\n/g, '<br>'); }
+
+    /* ---------- 보내기 단추에 적는 받는 사람 ----------
+       테스터 문의: "남편한테 보내기 · 아내한테 보내기 이렇게 거치면 어떨까".
+       엄마 폰이면 '남편한테', 아빠 폰이면 '아내한테', 할머니 · 시터 폰이면 받는 사람 없이 '보내기'.
+       젖병 · 유모차 · 장난감 · 카시트가 같은 말을 쓴다 (이유식 장보기는 shoplist.js 의 shopPartnerWord). */
+    window.partnerWord = function () {
+        var r = '';
+        try { r = localStorage.getItem('user_role') || ''; } catch (e) {}
+        return r === 'mom' ? '남편' : (r === 'dad' ? '아내' : '');
+    };
+    window.sendLabel = function (what) {
+        var w = window.partnerWord();
+        return (w ? w + '한테 ' : '') + (what ? what + ' ' : '') + '보내기';
+    };
 
     /* ---------- 말풍선 (본 앱 showToast 와 같은 모양) ---------- */
     var toastTimer = null;

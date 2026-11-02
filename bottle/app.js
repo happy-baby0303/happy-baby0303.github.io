@@ -298,9 +298,9 @@ function generateCardHTML(item, rank) {
 
             ${purchaseBtn}
 
-            <!-- 받는 사람이 짝꿍만은 아니라서(조부모 · 한부모) 유모차 · 장난감처럼 '보내기' 만 적는다 -->
+            <!-- 받는 사람: 엄마 폰이면 남편, 아빠 폰이면 아내, 그 밖엔 '이 젖병 보내기' (shared/curatorui.js sendLabel · 테스터 문의) -->
             <button onclick="shareToHusband('${item.id}')" style="display:block; width:100%; background:#FBF8F3; border:1px solid #EDE6DE; color:#7A6F68; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
-                이 젖병 보내기
+                ${window.sendLabel ? window.sendLabel('이 젖병') : '이 젖병 보내기'}
             </button>
         </div>
     `;

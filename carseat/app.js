@@ -101,10 +101,10 @@ function toggleFavView() {
         btn.style.borderColor = '#DCD3C8';
         renderFavorites();
     } else {
-        btn.innerHTML = '❤️ 내가 찜한 카시트 모아보기';
-        btn.style.background = '#FFF2F2';
-        btn.style.color = '#E32636';
-        btn.style.borderColor = '#FCA5A5';
+        btn.innerHTML = '❤️ 찜한 카시트 모아보기';   // 빨간 알약 → 흰 바탕 (다른 큐레이터와 같게)
+        btn.style.background = '#FFFFFF';
+        btn.style.color = '#4A413C';
+        btn.style.borderColor = '#EDE6DE';
         runCarseatEngine(); 
     }
 }
@@ -257,7 +257,7 @@ function generateReportHTML(item) {
             ${purchaseBtn}
 
             <button onclick="shareToHusband('${item.id}')" style="display:block; width:100%; background:#FBF8F3; border:1px solid #EDE6DE; color:#7A6F68; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
-                ${csPartnerWord()}한테 이 카시트 보내기
+                ${window.sendLabel ? window.sendLabel('이 카시트') : '이 카시트 보내기'}
             </button>
 
             <div id="own-btn-${item.id}">${ownSeatCta(item.id)}</div>
@@ -376,7 +376,7 @@ function toggleCarseatOthers() {
     } else {
         otherArea.style.display = 'none';
         btn.innerText = `나머지 ${n}개 더 보기 ▾`;
-        // 👇 이 한 줄을 추가해 주세요! (리스트가 접힐 때 시선을 버튼 위치로 부드럽게 올려줌)
+        // 접을 때 버튼 자리로 눈을 데려온다
         btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
@@ -390,11 +390,9 @@ function resetFilters() {
     if (!isFavViewMode) runCarseatEngine();
 }
 
-/* 누구한테 보내나 — 엄마 폰이면 남편, 아빠 폰이면 아내 (테스터 문의: "남편한테 보내기 · 아내한테 보내기") */
-function csPartnerWord() {
-    const r = localStorage.getItem('user_role');
-    return r === 'mom' ? '남편' : (r === 'dad' ? '아내' : '여보');
-}
+/* 누구한테 보내나 — 엄마 폰이면 남편, 아빠 폰이면 아내 (테스터 문의: "남편한테 보내기 · 아내한테 보내기").
+   ⚠️ 그 밖(할머니 · 시터)은 '여보한테 이 카시트 보내기' 였다. 젖병 · 유모차 · 장난감과 같은 shared/curatorui.js sendLabel 로
+      — 받는 사람 없이 '이 카시트 보내기'. */
 
 /* ⚠️ 테스터 문의: "카시트는 검색하면 끝이라 그 기능을 더 안 쓴다".
       고른 다음 3년(어깨끈 · 키 한계 · 겨울 패딩)을 챙기는 '우리 카시트' 가 있는데, 고르기 카드에서 거기로 가는 길이 없었다.
@@ -414,37 +412,77 @@ window.refreshCarseatCards = function () {
     document.querySelectorAll('[id^="own-btn-"]').forEach(el => { el.innerHTML = ownSeatCta(el.id.slice(8)); });
 };
 
-// 🚀 카카오톡 공유 시에도 '자동 검색 링크' 및 '정상 딥링크' 적용!
+/* ⚠️ 예전 메시지: "여보, 이 카시트 어때? …" + "배냇함에서 골라봤어." + 페이지 주소.
+      받는 사람이 늘 '여보' 는 아니고(할머니 · 시터 폰에서도 보낸다), 받은 사람은 14종 목록을 처음부터 다시 훑어야 했다.
+      젖병 · 유모차 · 장난감과 같게 — 무엇인지와, 열면 그 카시트 카드로 바로 가는 링크(?pick=번호)만 보낸다.
+      공유는 쿠팡 주소가 아니라 이 화면 주소로 보낸다 (카톡 공유 링크는 카카오 개발자 콘솔에 등록한 도메인만 열린다).
+      복사가 막힌 폰에서 뜨던 브라우저 기본 창(prompt)은 길게 눌러 복사하는 창으로. */
 function shareToHusband(id) {
     const item = carseatData.find(d => d.id === id);
     if(!item) return;
+    const url = new URL(window.location.href);
+    url.hash = '';
+    url.searchParams.set('pick', item.id);
+    const link = url.toString();
+    const title = `${item.brand} ${item.name}`;
+    const bits = csSpecParts(item).join(' · ');
 
-    /* 공유는 쿠팡 주소가 아니라 이 화면 주소로 보낸다.
-       카톡 공유 링크는 카카오 개발자 콘솔에 등록한 도메인만 열린다. 쿠팡 주소를 넣으면 버튼이 안 먹는다.
-       받는 사람도 카드를 보고 판단할 수 있어야 한다. */
-    const appUrl = window.location.href;
-        
-    // 🚨 [추가된 안전 보험] 카카오가 안 될 경우를 대비한 텍스트 복사 팝업
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
-        navigator.clipboard.writeText(appUrl)
-            .then(() => alert('링크를 복사했어요. 보내고 싶은 분께 붙여 넣어 주세요.'))
-            .catch(() => prompt("아래 주소를 복사해 주세요", appUrl));
+        const txt = `이 카시트 어때?\n${title}${bits ? '\n' + bits : ''}\n${link}`;
+        const sheet = () => (typeof window.showCopySheet === 'function' ? window.showCopySheet(txt) : null);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt)
+                .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
+                .catch(sheet);
+        } else sheet();
         return;
     }
-        
+
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-            title: `여보, 이 카시트 어때? ${item.brand} ${item.name}`,
-            description: `${csSpecParts(item).join(' · ')}\n배냇함에서 골라봤어.`,
+            title: `이 카시트 어때? ${title}`,
+            description: bits,
             imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
-            link: { mobileWebUrl: appUrl, webUrl: appUrl },
+            link: { mobileWebUrl: link, webUrl: link },
         },
         buttons: [
-            { title: '카시트 보러 가기', link: { mobileWebUrl: appUrl, webUrl: appUrl } }
+            { title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }
         ],
     });
 }
+
+/* 보낸 링크(?pick=번호)를 열면 '카시트 고르기' 탭의 그 카드로 데려가 잠깐 테두리를 칠한다. 한 번 가면 주소에서 뺀다.
+   4등부터는 '나머지 N개 더 보기' 안에 접혀 있어서 먼저 펼친다.
+   ⚠️ 지금 아기 개월수에 안 맞는 카시트는 목록에 없을 수 있다 — 그때는 조건을 풀어 전체에서 찾는다. */
+(function () {
+    let id = null;
+    try { id = new URLSearchParams(location.search).get('pick'); } catch (e) {}
+    if (!id) return;
+    function go(tries) {
+        try { if (typeof window.switchCarseatTab === 'function') window.switchCarseatTab('pick'); } catch (e) {}
+        let hit = document.getElementById('card-' + id);
+        if (!hit && tries === 3 && typeof resetFilters === 'function') {
+            try {
+                document.querySelectorAll('.matrix-panel select').forEach(sel => { sel.value = 'all'; });
+                if (!isFavViewMode) runCarseatEngine();
+            } catch (e) {}
+            hit = document.getElementById('card-' + id);
+        }
+        if (!hit) { if (tries > 0) setTimeout(() => go(tries - 1), 400); return; }
+        const other = document.getElementById('carseat-other-area');
+        if (other && other.contains(hit) && other.style.display === 'none' && typeof toggleCarseatOthers === 'function') toggleCarseatOthers();
+        setTimeout(() => {
+            const head = document.querySelector('.app-header');
+            const off = (head ? head.getBoundingClientRect().height : 0) + 12;
+            window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+            hit.style.transition = 'box-shadow .3s'; hit.style.boxShadow = '0 0 0 3px #7F77DD';
+            setTimeout(() => { hit.style.boxShadow = ''; }, 2600);
+        }, 200);
+        try { const u = new URL(location.href); u.searchParams.delete('pick'); history.replaceState(history.state, '', u.toString()); } catch (e) {}
+    }
+    setTimeout(() => go(8), 900);
+})();
 
 document.querySelectorAll('.matrix-panel select').forEach(select => {
     select.addEventListener('change', runCarseatEngine);
@@ -453,6 +491,11 @@ document.querySelectorAll('.matrix-panel select').forEach(select => {
 window.onload = () => { 
     applyGlobalBabyProfile(); 
     runCarseatEngine(); 
+    /* ⚠️ 헤더의 '카시트 14종' 이 글자로(앞에 탭 문자까지) 박혀 있었다. 다른 큐레이터처럼 목록에서 센다. */
+    try {
+        const badge = document.getElementById('carseat-count-badge');
+        if (badge && typeof carseatData !== 'undefined' && carseatData.length) badge.textContent = '카시트 ' + carseatData.length + '종';
+    } catch (e) {}
 };
 
 // 🚀 [추가] 장착 방식 가이드 모달 열기/닫기 함수

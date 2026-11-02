@@ -629,7 +629,7 @@ function generateToyHTML(toy, favs) {
                     ${hIcon}
                 </button>
             <!-- 보내기: 찜하기 바로 밑, 같은 모양 (유모차와 같은 방식) -->
-            <button onclick="shareToHusbandToy('${toy.id}')" style="background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>보내기</button>
+            <button onclick="shareToHusbandToy('${toy.id}')" style="background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>${window.sendLabel ? window.sendLabel() : '보내기'}</button>
             </div>
             </div>
 

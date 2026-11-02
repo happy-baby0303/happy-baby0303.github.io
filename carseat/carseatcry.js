@@ -563,6 +563,7 @@
                        (x.feed ? " · 수유" : ""));
         });
         lines.push("도착  " + clock(p.sh, p.sm, p.total) + "   바로 카시트에서 꺼내기");
+        var coreEnd = lines.length;
         lines.push("");
         lines.push("\u23F0 실제로는 " + Math.floor(p.total / 60) + "시간 " +
                    (p.total % 60 ? (p.total % 60) + "분" : "") + " 걸려요.");
@@ -574,18 +575,23 @@
         lines.push("막히면 시각보다 '얼마마다' 를 지켜주세요.");
 
         var text = lines.join("\n");
-        if (typeof Kakao !== "undefined" && Kakao.isInitialized && Kakao.isInitialized()) {
+        /* ⚠️ 카톡 글 상자(text)는 200자까지다. 시간표 뒤 설명까지 붙이면 넘쳐서 끝이 잘린다.
+              카톡에는 시간표(출발 ~ 도착)까지만 보내고, 그래도 넘치면 통째로 복사한다.
+              복사가 막힌 폰에서 뜨던 브라우저 기본 창(prompt)은 길게 눌러 복사하는 창으로. */
+        var core = lines.slice(0, coreEnd).join("\n");
+        if (core.length <= 200 && typeof Kakao !== "undefined" && Kakao.isInitialized && Kakao.isInitialized()) {
             try {
-                Kakao.Share.sendDefault({ objectType: "text", text: text,
+                Kakao.Share.sendDefault({ objectType: "text", text: core,
                     link: { mobileWebUrl: location.href, webUrl: location.href } });
                 return;
             } catch (e) {}
         }
-        if (navigator.clipboard) {
+        var sheet = function () { if (typeof window.showCopySheet === "function") window.showCopySheet(text, "길게 눌러 복사해 주세요"); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text)
-                .then(function () { alert("주행 계획을 복사했어요 운전하실 분께 보내주세요 \uD83E\uDD0D"); })
-                .catch(function () { prompt("아래 내용을 복사해 주세요", text); });
-        } else prompt("아래 내용을 복사해 주세요", text);
+                .then(function () { alert("주행 계획을 복사했어요. 운전하실 분께 보내 주세요 \uD83E\uDD0D"); })
+                .catch(sheet);
+        } else sheet();
     };
 
     function driveHTML() {
@@ -646,13 +652,17 @@
                 'style="flex:1; min-width:150px; padding:12px; border-radius:11px; border:1px solid #DCD3C8; ' +
                 'background: #FFFFFF; font-size:13px; font-weight:700; color:#4A413C; box-sizing:border-box;">' +
         '</div>' +
-        '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">' +
-            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">출발</span>' +
+        /* ⚠️ 출발 · 걸리는 시간을 한 줄(flex-wrap)에 넣었더니 폰에서 '시간' 이 다음 줄로 넘어가
+              '시간 [30] 분' 처럼 읽혔다. 출발 한 줄, 걸리는 시간 한 줄로 나눈다. */
+        '<div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">' +
+            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68; min-width:64px;">출발</span>' +
             '<input type="time" value="' + esc(d.at || "09:00") + '" ' +
                 'onchange="window.setDrive(\'at\', this.value)" ' +
                 'style="padding:11px; border-radius:11px; border:1px solid #DCD3C8; background: #FFFFFF; ' +
                 'font-size:13px; font-weight:800; color:#4A413C; box-sizing:border-box;">' +
-            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68; margin-left:6px;">걸리는 시간</span>' +
+        '</div>' +
+        '<div style="display:flex; gap:8px; align-items:center;">' +
+            '<span style="font-size:12.5px; font-weight:800; color:#7A6F68; min-width:64px;">걸리는 시간</span>' +
             '<input type="number" value="' + (d.h === 0 || d.h ? d.h : "") + '" placeholder="4" ' +
                 'onchange="window.setDrive(\'h\', this.value)" ' +
                 'style="width:62px; padding:11px; border-radius:11px; border:1px solid #DCD3C8; ' +
