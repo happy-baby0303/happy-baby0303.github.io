@@ -126,6 +126,7 @@ const ASSETS = [
     './babytab.js',
     './bedtime.js',
     './carealarm.js',
+    './nextstep.js',
     './pushcheck.js',
     './feedback.js',
     './inapp.js',

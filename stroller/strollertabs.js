@@ -52,6 +52,11 @@
     var KEY  = "tosil_stroller_tab";
     var BAR  = "stroller-tabbar";
     var PANE = { pick: "view-stroller-pick", use: "view-stroller-use" };
+    /* 알림 · 홈에서 '?tab=use' 로 오면 그 탭부터 연다 (바꿀 때 알림 nextstep.js 가 쓴다) */
+    try {
+        var qTab = new URLSearchParams(location.search).get("tab");
+        if (qTab && PANE[qTab]) localStorage.setItem(KEY, qTab);
+    } catch (e) {}
 
     var TABS = [
         { id: "pick", label: "\uD83D\uDC76 유모차 고르기" },   // 👶 — 위 큐레이터 탭 · 육아정보 탭과 같은 표시 (🚼 는 표지판 같았다)

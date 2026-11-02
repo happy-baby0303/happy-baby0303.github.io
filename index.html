@@ -2981,7 +2981,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
 <!-- ⚙️ 트래커 설정 모달 -->
 <div id="tracker-settings-modal" class="modal-overlay" style="z-index: 6500; display:none;" onclick="window.closeTrackerSettings(event)">
-    <div class="sos-content-box box-main" style="border-radius: 28px; padding: 32px 24px 24px 24px; position: relative;" onclick="event.stopPropagation()">
+    <!-- 작은 폰(360×640)에서 창이 화면보다 길어 위 종 그림과 아래 '저장하기' 가 잘렸다 — 창 안에서 스크롤 -->
+    <div class="sos-content-box box-main" style="border-radius: 28px; padding: 32px 24px 24px 24px; position: relative; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; -webkit-overflow-scrolling: touch;" onclick="event.stopPropagation()">
         
         <!-- 우측 상단 X 닫기 버튼 -->
         <div class="sos-close-btn box-sub" style="position: absolute; top: 16px; right: 16px; border-radius: 50%; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 14px;" onclick="window.closeTrackerSettingsForce()">✕</div>
@@ -3017,6 +3018,19 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                         <div style="position:absolute; top:3px; left:22px; width:21px; height:21px; border-radius:50%; background:#FFFFFF; transition:0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- 바꿀 때 (nextstep.js · 누르면 바뀌고, 저장하기에서 적는다) -->
+            <div>
+                <label style="font-size:13.5px; font-weight:800; color:var(--text-m); display:block; margin-bottom:8px;">🌱 바꿀 때 알림</label>
+                <div id="set-next-row" role="switch" aria-checked="true" data-on="1" onclick="window.toggleNextSetting()" style="display:flex; align-items:center; gap:12px; padding: 12px 14px 12px 16px; border-radius: 16px; border: 1.5px solid var(--border); cursor: pointer;">
+                    <div style="flex:1; min-width:0; font-size:12.5px; font-weight:600; color:var(--text-s); line-height:1.55; word-break:keep-all;">이유식 단계 · 젖꼭지 · 카시트처럼<br>바꿀 때가 된 날 아침 10시에 알려 드려요</div>
+                    <div id="set-next-knob" style="width:46px; height:27px; border-radius:14px; flex-shrink:0; background:#7F77DD; position:relative; transition:0.2s;">
+                        <div style="position:absolute; top:3px; left:22px; width:21px; height:21px; border-radius:50%; background:#FFFFFF; transition:0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                    </div>
+                </div>
+                <!-- 무엇이 언제 오는지 미리 — 알림이 오기 전엔 이 기능이 있는지도 모른다 -->
+                <div id="set-next-preview" style="display:none; margin-top:8px; padding:0 4px; font-size:12px; font-weight:700; color:var(--text-sub); line-height:1.55; word-break:keep-all;"></div>
             </div>
         </div>
 
@@ -3597,7 +3611,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261101-3"></script>
+<script src="script.js?v=20261102-1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3673,7 +3687,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./nightcard.js?v=2"></script>
 <script src="./remind.js"></script>
     <script src="./carealarm.js?v=3"></script>
-    <script src="./pushcheck.js?v=4"></script>
+    <!-- 바꿀 때 알림 — 이유식 단계 · 컵 · 젖꼭지 · 카시트 어깨끈을 그날 아침 폰으로 (서버 nextStepDaily 가 보낸다) -->
+    <script src="./nextstep.js?v=1"></script>
+    <script src="./pushcheck.js?v=5"></script>
     <script src="./feedback.js?v=3"></script>
     <!-- 인스타 · 페북 · 네이버 앱 안에서 열렸을 때 — 바깥 브라우저로 여는 길 -->
     <script src="./inapp.js?v=1"></script>

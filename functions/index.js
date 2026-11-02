@@ -9,6 +9,7 @@
  *  - countWaitlist    : asia-northeast3 (대기명단 카운터)
  *  - stageDaily       : asia-northeast3 (서울 / 매일 아침 9시) ← 임신 주차 · 신청 마감
  *  - careReminder     : asia-northeast3 (서울 / 5분마다)    ← 수유 · 기저귀 · 졸릴 때 알림
+ *  - nextStepDaily    : asia-northeast3 (서울 / 매일 아침 10시) ← 바꿀 때 알림 (이유식 단계 · 컵 · 젖꼭지 · 카시트)
  *  - pushCheck        : asia-northeast3 (서울)              ← 앱의 '알림 점검'
  *  - sendFeedback     : asia-northeast3 (서울)              ← 앱의 '의견 보내기'
  *  - myFeedback       : asia-northeast3 (서울)              ← 의견 보내기 창 아래 '보낸 의견과 답장'
@@ -455,7 +456,7 @@ exports.deleteUserAccount = onCall(SEOUL, async (request) => {
  *    알림 글 자체가 잘못되면(너무 길다 등) 모든 토큰이 이 코드로 실패하는데,
  *    그걸 죽은 토큰으로 보고 지우면 가족 전원의 알림 주소가 한 번에 날아간다.
  * ================================================================== */
-const SERVER_VERSION = "2026-10-25";   // 앱의 '알림 점검' 이 새 서버 코드가 올라갔는지 이 값으로 본다
+const SERVER_VERSION = "2026-11-02";   // 앱의 '알림 점검' 이 새 서버 코드가 올라갔는지 이 값으로 본다 (11-02: 바꿀 때 알림)
 const DEAD_CODES = new Set([
   "messaging/registration-token-not-registered",
   "messaging/invalid-registration-token",
@@ -967,6 +968,137 @@ exports.careReminder = onSchedule(
 );
 
 /* ==================================================================
+ * 🌱 바꿀 때 알림 (매일 아침 10시 · 서울)
+ * ------------------------------------------------------------------
+ * 큐레이터는 고를 때 한 번 열고 끝나는 기능이었다. 진짜 도움이 되는 건 그 다음 —
+ * 이유식 중기로 넘어갈 때, 컵을 쥐여 줄 때, 젖꼭지를 바꿀 때, 카시트 어깨끈을 올릴 때.
+ * 앱(nextstep.js)이 reminders/{가족코드} 에 아기별 · 폰별로 그 날짜를 적어 둔다.
+ *   next: { main: { name, u: { uid: { at, items: [{ id, at, t, b, link }], skip: [id] } } } }
+ *   nextAt: 아직 안 보낸 것 중 가장 이른 시각 (이 시각이 지난 문서만 본다)
+ *   nextSent: { main: { id: 보낸 항목의 at } } — 같은 날짜의 같은 항목은 한 번만
+ *   nextLastTs: 마지막으로 보낸 시각
+ *   mute.{uid}.next — 이 사람은 바꿀 때 알림을 껐다
+ * 폰마다 따로 적는 이유: 큐레이터 기록(젖꼭지 바꾼 날 · 우리 카시트)은 적은 폰에만 있다.
+ *   같은 항목이 두 폰에 있으면 더 최근에 적은 폰의 날짜를 쓴다. 한 폰이라도 '봤다(skip)' 면 보내지 않는다.
+ * · 하루에 하나, 앞 알림과 이틀은 띄운다 — 여러 개가 같은 날이면 하나씩 밀린다
+ * · 열흘 넘게 지난 건 보내지 않고 보낸 걸로 친다 (처음 켠 날 지난 일이 한꺼번에 오지 않게)
+ * · 엄마 · 아빠 폰만 (할머니 · 돌봄 선생님 폰은 뺀다)
+ * · 문구는 앱이 적은 것을 쓰되 길이를 자르고, 링크는 홈과 큐레이터 다섯 곳만 받는다
+ * ================================================================== */
+const NEXT_LATE = 10 * 86400000;
+const NEXT_GAP = 2 * 86400000 - 3600000;   // 이틀 — 정기 작업이 조금 늦게 깨도 하루가 밀리지 않게 한 시간 덜
+const NEXT_LINK = /^(index\.html|(food|bottle|toy|stroller|carseat)\/index\.html)(\?(tab|go)=[a-z]{2,10})?$/;
+const NEXT_ID = /^[a-z0-9_]{1,30}$/;
+const NEXT_KEY = /^(main|_[A-Za-z0-9]{1,30})$/;
+const NEXT_FAMILY = /^(winter_\d{4}|stroller_seat)$/;   // 아이가 아니라 집 물건 · 계절 이야기 — 아이가 둘이어도 한 번만
+
+/* 이 시각 이후 첫 아침 10시 (한국) — 정기 작업이 실제로 보는 때 */
+function next10(ms) {
+  const k = kstOf(ms);
+  let t = Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate(), 1, 0);   // 그날 10:00 KST = 01:00 UTC
+  if (t < ms) t += 86400000;
+  return t;
+}
+
+/* 문서에 적힌 목록을 아기마다 합친다 → [{ key, id, at, t, b, link }] (이미 보낸 것 · 본 것은 뺀다) */
+function nextItems(d) {
+  const out = [];
+  const next = d.next || {}, done = d.nextSent || {};
+  Object.keys(next).forEach((key) => {
+    if (!NEXT_KEY.test(key)) return;
+    const u = (next[key] && next[key].u) || {};
+    const skip = new Set(), best = new Map();
+    Object.keys(u).forEach((uid) => {
+      const s = u[uid] || {};
+      (Array.isArray(s.skip) ? s.skip : []).forEach((x) => skip.add(String(x)));
+      const upAt = Number(s.at) || 0;
+      (Array.isArray(s.items) ? s.items : []).slice(0, 30).forEach((it) => {
+        if (!it || !NEXT_ID.test(String(it.id || ""))) return;
+        const at = Number(it.at) || 0;
+        const t = String(it.t || "").trim().slice(0, 40), b = String(it.b || "").trim().slice(0, 90);
+        if (!at || !t) return;
+        const prev = best.get(it.id);
+        if (prev && prev.upAt >= upAt) return;
+        const link = String(it.link || "");
+        best.set(it.id, { key, id: it.id, at, t, b, link: NEXT_LINK.test(link) ? link : "index.html", upAt });
+      });
+    });
+    best.forEach((x) => {
+      if (skip.has(x.id)) return;
+      if (Number((done[key] || {})[x.id]) === x.at) return;
+      out.push(x);
+    });
+  });
+  return out;
+}
+
+/* 이 문서로 지금 할 일 — { pick, updates } (보내는 건 부르는 쪽에서) */
+function nextPlan(d, now) {
+  const all = nextItems(d);
+  const updates = {};
+  const late = all.filter((x) => x.at <= now && now - x.at > NEXT_LATE);
+  late.forEach((x) => { updates[`nextSent.${x.key}.${x.id}`] = x.at; });
+  const due = all.filter((x) => x.at <= now && now - x.at <= NEXT_LATE).sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
+  const lastTs = Number(d.nextLastTs) || 0;
+  const wait = lastTs && now - lastTs < NEXT_GAP;
+  const pick = (due.length && !wait) ? due[0] : null;
+  /* 한 번에 같이 보내는 것 — 쌍둥이(같은 날 같은 항목) · 집 물건(유모차 · 겨울 카시트는 아이가 둘이어도 한 번) */
+  const fam = !!pick && NEXT_FAMILY.test(pick.id);
+  const group = pick ? all.filter((x) => x.id === pick.id && (x === pick || fam || x.at === pick.at) && late.indexOf(x) < 0) : [];
+  if (pick) {
+    group.forEach((x) => { updates[`nextSent.${x.key}.${x.id}`] = x.at; });
+    updates.nextLastTs = now;
+    /* 아이가 둘 이상인 집은 누구 이야기인지 제목에 이름을 넣는다 (집 물건은 빼고) */
+    const kids = Object.keys(d.next || {}).filter((k) => NEXT_KEY.test(k) && Object.values((d.next[k] && d.next[k].u) || {})
+      .some((s) => s && Array.isArray(s.items) && s.items.length));
+    if (kids.length > 1 && !fam) {
+      const names = [...new Set(group.map((x) => pushNick(((d.next[x.key] || {}).name || "").trim() || "우리 아기")))].join(" · ");
+      pick.title = pick.t.replace(/^([^\s가-힣A-Za-z0-9]+\s+)?/, (m) => (m || "") + names + " ").slice(0, 60);   // 🥣 꿈이 이유식 중기로…
+    }
+  }
+  const rest = all.filter((x) => group.indexOf(x) < 0 && late.indexOf(x) < 0);
+  let na = rest.length ? Math.min(...rest.map((x) => x.at)) : null;
+  if (na !== null) na = Math.max(na, (pick ? now : lastTs) + NEXT_GAP, now + 3600000);   // 오늘은 다시 안 본다
+  updates.nextAt = na;
+  return { pick, updates };
+}
+
+exports.nextStepDaily = onSchedule(
+  { schedule: "0 10 * * *", timeZone: "Asia/Seoul", region: "asia-northeast3", maxInstances: 1 },
+  async () => {
+    const db = admin.firestore();
+    const now = Date.now();
+    await beat(db, "next", now);
+    const snap = await db.collection("reminders").where("nextAt", "<=", now).get();
+    let sent = 0, families = 0;
+    for (const docSnap of snap.docs) {
+      const code = docSnap.id;
+      const d = docSnap.data() || {};
+      try {
+        const { pick, updates } = nextPlan(d, now);
+        if (pick) {
+          const roles = await familyRoles(db, code);
+          if (roles) {
+            const mute = d.mute || {};
+            const uids = Object.keys(roles).filter((u) => roles[u] !== "viewer" && !(mute[u] && mute[u].next === true));
+            const tk = await tokensOf(db, uids);
+            if (tk.list.length) {
+              const r = await sendTo(db, tk, { title: pick.title || pick.t, body: pick.b, tag: "next-" + pick.id, link: pick.link, ttl: TTL.stage });
+              sent += r.sent;
+              families++;
+            }
+          }
+        }
+        await docSnap.ref.update(updates);
+      } catch (e) {
+        logger.error("[nextStepDaily] 실패", code, e);
+      }
+    }
+    if (snap.size) logger.info("바꿀 때 알림", { checked: snap.size, families, sent });
+  }
+);
+
+/* ==================================================================
  * 🩺 알림 점검 (앱 설정 → '알림이 안 오나요?')
  * ------------------------------------------------------------------
  * "알림이 안 와요" 만으로는 어디가 끊겼는지 알 수 없다.
@@ -993,8 +1125,8 @@ exports.pushCheck = onCall(SEOUL, async (request) => {
     try {
       const hb = await db.collection("ops").doc("heartbeat").get();
       const h = hb.exists ? (hb.data() || {}) : {};
-      out.beat = { care: Number(h.care) || 0, bed: Number(h.bed) || 0 };
-    } catch (e) { out.beat = { care: 0, bed: 0 }; }
+      out.beat = { care: Number(h.care) || 0, bed: Number(h.bed) || 0, next: Number(h.next) || 0 };
+    } catch (e) { out.beat = { care: 0, bed: 0, next: 0 }; }
 
     /* 1. 이 폰 토큰이 서버에 있나 */
     const mine = await db.collection("users").where("firebase_uid", "==", uid).get();
@@ -1070,6 +1202,16 @@ exports.pushCheck = onCall(SEOUL, async (request) => {
           const at = c[kind + "At"];
           return at && at < now - 15 * 60000 && at > now - LATE_MAX && c[kind + "Pushed"] !== at;
         }));
+        // 바꿀 때 알림 — 이 폰이 목록을 적었나 · 다음에 갈 것과 그날 (아침 10시 작업 · 이틀 간격을 따진 날)
+        const nx = r.next || {};
+        const lastNext = Number(r.nextLastTs) || 0;
+        const first = nextItems(r).filter((x) => now - x.at <= NEXT_LATE).sort((a, b) => a.at - b.at)[0] || null;
+        out.next = {
+          mine: Object.keys(nx).some((key) => !!(nx[key] && nx[key].u && nx[key].u[uid])),
+          at: Number(r.nextAt) || 0,
+          lastTs: lastNext,
+        };
+        if (first) out.next.first = { t: first.t, at: first.at, when: next10(Math.max(first.at, lastNext ? lastNext + NEXT_GAP : 0, now)) };
         // 이 폰 주인이 지금 수유 · 기저귀 알림을 받는 사람인가 (껐거나 '밖에 있어요' 면 아니다)
         if (roles) {
           out.careMe = {

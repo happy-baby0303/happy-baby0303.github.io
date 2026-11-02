@@ -27,6 +27,11 @@
     var KEY = "tosil_bottle_tab";
     var BAR = "bottle-tabbar";
     var PANE = { pick: "view-bottle-pick", tools: "view-bottle-tools" };
+    /* 알림 · 홈에서 '?tab=tools' 로 오면 그 탭부터 연다 (바꿀 때 알림 nextstep.js 가 쓴다) */
+    try {
+        var qTab = new URLSearchParams(location.search).get("tab");
+        if (qTab && PANE[qTab]) localStorage.setItem(KEY, qTab);
+    } catch (e) {}
 
     var TABS = [
         { id: "pick",  label: "\uD83C\uDF7C 젖병 고르기" },

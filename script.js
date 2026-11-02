@@ -5740,6 +5740,21 @@ window.toggleSleepySetting = function () {
     const row = document.getElementById('set-sleepy-row');
     paintSleepySetting(!(row && row.getAttribute('data-on') === '1'));
 };
+/* 🌱 바꿀 때 알림 스위치 (nextstep.js) — 졸릴 때 스위치와 같은 모양 · 같은 방식 */
+function paintNextSetting(on) {
+    const row = document.getElementById('set-next-row'), knob = document.getElementById('set-next-knob');
+    if (!row || !knob) return;
+    row.setAttribute('aria-checked', on ? 'true' : 'false');
+    row.setAttribute('data-on', on ? '1' : '0');
+    knob.style.background = on ? '#7F77DD' : 'var(--border)';
+    if (knob.firstElementChild) knob.firstElementChild.style.left = on ? '22px' : '3px';
+    const pv = document.getElementById('set-next-preview');      // 끄면 '다음 알림' 줄도 숨긴다
+    if (pv) pv.style.display = (on && pv.textContent) ? 'block' : 'none';
+}
+window.toggleNextSetting = function () {
+    const row = document.getElementById('set-next-row');
+    paintNextSetting(!(row && row.getAttribute('data-on') === '1'));
+};
 
 window.openTrackerSettings = function() {
     const feedMins = localStorage.getItem('tosil_feed_interval') || 180;
@@ -5748,6 +5763,20 @@ window.openTrackerSettings = function() {
     document.getElementById('set-feed-interval').value = parseFloat((feedMins / 60).toFixed(2));
     document.getElementById('set-diaper-interval').value = parseFloat((diaperMins / 60).toFixed(2));
     paintSleepySetting(localStorage.getItem('tosil_sleepy_push') !== 'off');
+    /* 다음에 올 '바꿀 때 알림' 하나 — '12월 25일 · 빨대컵으로 물을 줘 볼 때예요' (이미 때가 됐으면 '곧') */
+    const pv = document.getElementById('set-next-preview');
+    /* 이 폰에서 눌러 본 것 · 서버가 이미 보낸 것은 빼고 (nextstep.js). 서버 장부를 한 번 읽고 나서 다시 그린다 */
+    const nextLine = function (n) {
+        if (!pv) return;
+        pv.textContent = (n && typeof window.nextStepWhen === 'function') ? '다음 알림 · ' + window.nextStepWhen(n) + ' · ' + String(n.t).replace(/^\S+\s+/, '') : '';
+        const r = document.getElementById('set-next-row');
+        paintNextSetting(!!(r && r.getAttribute('data-on') === '1'));
+    };
+    if (pv) {
+        try { nextLine(typeof window.nextStepUpcoming === 'function' ? window.nextStepUpcoming()[0] || null : null); } catch (e) { nextLine(null); }
+        if (typeof window.nextStepPeek === 'function') window.nextStepPeek().then(nextLine).catch(function () {});
+    }
+    paintNextSetting(localStorage.getItem('tosil_next_push') !== 'off');
     document.getElementById('tracker-settings-modal').style.display = 'flex';
 };
 window.closeTrackerSettingsForce = function() { document.getElementById('tracker-settings-modal').style.display = 'none'; };
@@ -5762,10 +5791,13 @@ window.saveTrackerSettings = function() {
     localStorage.setItem('tosil_diaper_interval', dHour * 60);
     const sleepyRow = document.getElementById('set-sleepy-row');
     if (sleepyRow) localStorage.setItem('tosil_sleepy_push', sleepyRow.getAttribute('data-on') === '1' ? 'on' : 'off');
+    const nextRow = document.getElementById('set-next-row');
+    if (nextRow) localStorage.setItem('tosil_next_push', nextRow.getAttribute('data-on') === '1' ? 'on' : 'off');
     window.closeTrackerSettingsForce();
     window.updateTrackerDashboard();
     window.showToast("알림 설정을 저장했어요");
     if (typeof window.refreshCareAlarm === "function") window.refreshCareAlarm(true);
+    if (typeof window.refreshNextStep === "function") window.refreshNextStep(true);
 };
 // ==========================================
 // 👑 [엄마 모드 고도화] 초직관적 하이엔드 트래커 대시보드 (수면 엇갈림 완벽 자가치유 패치)

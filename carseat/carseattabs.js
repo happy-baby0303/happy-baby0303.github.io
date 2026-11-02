@@ -39,6 +39,11 @@
     var KEY  = "tosil_carseat_tab";
     var BAR  = "carseat-tabbar";
     var PANE = { pick: "view-carseat-pick", use: "view-carseat-use" };
+    /* 알림 · 홈에서 '?tab=use' 로 오면 그 탭부터 연다 (바꿀 때 알림 nextstep.js 가 쓴다) */
+    try {
+        var qTab = new URLSearchParams(location.search).get("tab");
+        if (qTab && PANE[qTab]) localStorage.setItem(KEY, qTab);
+    } catch (e) {}
 
     var TABS = [
         { id: "pick", label: "\uD83D\uDE98 카시트 고르기" },
