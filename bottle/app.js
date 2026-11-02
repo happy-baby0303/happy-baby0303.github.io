@@ -29,6 +29,31 @@ function getUvSafety(item) {
     return 'unknown';   // UV 언급 자체가 없는 제품
 }
 
+/* 🧼 소독 칸 — data.js 의 '열탕(O) / UV(변색주의)' 같은 표 기호를 읽는 말로 바꿔 보여 준다.
+   ⚠️ data.js 글자는 그대로 둔다. 위 getUvSafety() 가 그 글자('비권장' · '주의' · 'UV' …)로 조건을 거른다.
+   ⚠️ UV 이야기가 없는 제품은 '안 된다' 가 아니라 '모른다' 다 — 확인이 필요하다고만 쓴다. */
+const BOTTLE_STERIL = {
+    "열탕(O)": "열탕 소독 돼요 (UV는 확인이 필요해요)",
+    "열탕(O) / UV(O)": "열탕 · UV 소독 다 돼요",
+    "열탕(O) / 식세기(O) / UV(O)": "열탕 · 식기세척기 · UV 다 돼요",
+    "열탕(O) / 식세기(O)": "열탕 · 식기세척기 돼요 (UV는 확인이 필요해요)",
+    "열탕(O) / UV(변색주의)": "열탕 · UV 돼요 (UV는 변색 주의)",
+    "열탕(O) / 식세기(O) / UV(변색주의)": "열탕 · 식기세척기 · UV 돼요 (UV는 변색 주의)",
+    "열탕(권장) / UV(제조사 비권장)": "열탕 소독을 권해요 · UV는 제조사가 권하지 않아요",
+    "열탕(권장) / UV(변색주의)": "열탕 소독을 권해요 · UV도 되지만 변색 주의",
+    "전자레인지(O, 물 넣고 3분)": "전자레인지 소독 돼요 (물 넣고 3분)",
+    "열탕(O) / 전자레인지(O) / UV(오래 돌리면 끈적해짐)": "열탕 · 전자레인지 · UV 돼요 (UV를 오래 돌리면 끈적해져요)",
+    "열탕(O) / UV(특화-변색 거의 없음)": "열탕 · UV 돼요 (UV에도 변색이 거의 없어요)",
+    "열탕(O) / UV(장기사용시 끈적임 주의)": "열탕 · UV 돼요 (UV를 오래 쓰면 끈적해질 수 있어요)",
+    "열탕(O) / UV(소재 특성상 비권장)": "열탕 소독 돼요 · UV는 소재 특성상 권하지 않아요",
+    "열탕(O) / UV(가능하나 변색 올 수 있음)": "열탕 · UV 돼요 (UV는 변색될 수 있어요)"
+};
+function bottleSterilLabel(t) {
+    const k = String(t || '').trim();
+    if (BOTTLE_STERIL[k]) return BOTTLE_STERIL[k];
+    return k.replace(/\(O\)/g, '').replace(/\s*\/\s*/g, ' · ');   // 새로 들어온 표기 — 기호만 걷어 낸다
+}
+
 function applyGlobalBabyProfile() {
     const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     if(!birthStr) return; 
@@ -92,10 +117,10 @@ function toggleFavView() {
         btn.style.borderColor = '#DCD3C8';
         renderFavorites();
     } else {
-        btn.innerHTML = '❤️ 내가 찜한 젖병 모아보기';
-        btn.style.background = '#FFF2F2';
-        btn.style.color = '#E32636';
-        btn.style.borderColor = '#FCA5A5';
+        btn.innerHTML = '❤️ 찜한 젖병 모아보기';
+        btn.style.background = '#FFFFFF';
+        btn.style.color = '#4A413C';
+        btn.style.borderColor = '#EDE6DE';
         runBottleEngine(); 
     }
 }
@@ -236,7 +261,7 @@ function generateCardHTML(item, rank) {
     }
 
     return `
-        <div class="stroller-card" style="border-top: 4px solid ${cardBorderColor}; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
+        <div id="bottle-card-${item.id}" class="stroller-card" style="border-top: 4px solid ${cardBorderColor}; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
             
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
                 <div style="flex: 1; min-width: 0;">
@@ -267,14 +292,15 @@ function generateCardHTML(item, rank) {
                 <ul style="margin: 0; padding-left: 20px; font-size: 13.5px; color: #7A6F68; line-height: 1.6; font-weight: 600;">
                     <li style="margin-bottom:6px;"><b>젖병 거부:</b> ${item.rejection === 'super' ? '거부가 심할 때 많이 바꿔보는 제품이에요' : '무난한 편이에요'}</li>
                     <li style="margin-bottom:6px;"><b>젖꼭지 호환:</b> ${item.compatible === 'yes' ? '더블하트·모유실감 젖꼭지와 맞아요' : '전용 젖꼭지를 쓰세요'}</li>
-                    <li><b>소독·세척:</b> ${item.sterilization}</li>
+                    <li><b>소독·세척:</b> ${bottleSterilLabel(item.sterilization)}</li>
                 </ul>
             </div>
 
             ${purchaseBtn}
 
+            <!-- 받는 사람이 짝꿍만은 아니라서(조부모 · 한부모) 유모차 · 장난감처럼 '보내기' 만 적는다 -->
             <button onclick="shareToHusband('${item.id}')" style="display:block; width:100%; background:#FBF8F3; border:1px solid #EDE6DE; color:#7A6F68; padding:16px; border-radius:14px; font-weight:800; font-size:14px; text-align:center; transition:0.2s; margin-top:16px; cursor:pointer;">
-                ${(() => { const r = localStorage.getItem('user_role'); return r === 'mom' ? '남편' : (r === 'dad' ? '아내' : '여보'); })()}한테 이 젖병 보내기
+                이 젖병 보내기
             </button>
         </div>
     `;
@@ -427,33 +453,72 @@ if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
     Kakao.init('68bca10ddfe2ec67112b07eb9a08da2b');
 }
 
+/* ⚠️ 예전 메시지: "여보, 이 젖병 어때?" + "배냇함에서 골라봤어. 이걸로 두 개만 사보자 🤍" + 페이지 주소.
+      앱이 대신 조르는 말이었고, 받는 사람은 40종 목록을 처음부터 다시 훑어야 했다.
+      유모차 · 장난감과 같게 — 무엇인지와, 열면 그 젖병 카드로 바로 가는 링크(?pick=번호)만 보낸다.
+      복사가 막힌 폰에서 뜨던 브라우저 기본 창(prompt)은 길게 눌러 복사하는 창으로. */
 function shareToHusband(id, brand, name) {
     // 이름에 ' 가 든 제품(예: Dr. Brown's)은 onclick 문자열이 깨져 버튼이 먹통이 된다.
     // 그래서 카드에서는 id 만 넘기고 이름은 여기서 찾는다. 예전처럼 셋 다 넘겨도 동작한다.
     const found = (typeof bottleData !== 'undefined') ? bottleData.find(x => String(x.id) === String(id)) : null;
     if (found) { brand = found.brand; name = found.name; }
-    const appUrl = window.location.href;
-    
+    const title = `${brand || ''} ${name || ''}`.trim();
+    const url = new URL(window.location.href);
+    url.hash = '';
+    url.searchParams.set('pick', found ? found.id : id);
+    const link = url.toString();
+    const bits = found ? [bottleMaterialLabel(found.material),
+                          found.antiColic === 'super' ? '배앓이 방지 설계' : '',
+                          found.compatible === 'yes' ? '더블하트·모유실감 젖꼭지와 맞아요' : ''].filter(Boolean).join(' · ') : '';
+
     if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
-        navigator.clipboard.writeText(appUrl)
-            .then(() => alert('링크를 복사했어요. 보내고 싶은 분께 붙여 넣어 주세요.'))
-            .catch(() => prompt("아래 주소를 복사해 주세요", appUrl));
+        const txt = `이 젖병 어때?\n${title}${bits ? '\n' + bits : ''}\n${link}`;
+        const sheet = () => (typeof window.showCopySheet === 'function' ? window.showCopySheet(txt) : null);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt)
+                .then(() => alert('복사했어요. 카톡에 붙여 넣어 보내세요.'))
+                .catch(sheet);
+        } else sheet();
         return;
     }
 
     Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
-            title: `여보, 이 젖병 어때? ${brand || ''} ${name || ''}`.trim(),
-            description: `배냇함에서 골라봤어. 이걸로 두 개만 사보자 🤍`,
+            title: `이 젖병 어때? ${title}`,
+            description: bits,
             imageUrl: 'https://happy-baby0303.github.io/icon-512.png',
-            link: { mobileWebUrl: appUrl, webUrl: appUrl },
+            link: { mobileWebUrl: link, webUrl: link },
         },
         buttons: [
-            { title: '젖병 보러 가기', link: { mobileWebUrl: appUrl, webUrl: appUrl } }
+            { title: '배냇함에서 보기', link: { mobileWebUrl: link, webUrl: link } }
         ],
     });
 }
+
+/* 보낸 링크(?pick=번호)를 열면 '젖병 고르기' 탭의 그 카드로 데려가 잠깐 테두리를 칠한다. 한 번 가면 주소에서 뺀다.
+   4등부터는 '나머지 N개 더 보기' 안에 접혀 있어서 먼저 펼친다. */
+(function () {
+    let id = null;
+    try { id = new URLSearchParams(location.search).get('pick'); } catch (e) {}
+    if (!id) return;
+    function go(tries) {
+        try { if (typeof window.switchBottleTab === 'function') window.switchBottleTab('pick'); } catch (e) {}
+        const hit = document.getElementById('bottle-card-' + id);
+        if (!hit) { if (tries > 0) setTimeout(() => go(tries - 1), 400); return; }
+        const other = document.getElementById('bottle-other-area');
+        if (other && other.contains(hit) && other.style.display === 'none' && typeof toggleBottleOthers === 'function') toggleBottleOthers();
+        setTimeout(() => {
+            const head = document.querySelector('.app-header');
+            const off = (head ? head.getBoundingClientRect().height : 0) + 12;
+            window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+            hit.style.transition = 'box-shadow .3s'; hit.style.boxShadow = '0 0 0 3px #7F77DD';
+            setTimeout(() => { hit.style.boxShadow = ''; }, 2600);
+        }, 200);
+        try { const u = new URL(location.href); u.searchParams.delete('pick'); history.replaceState(history.state, '', u.toString()); } catch (e) {}
+    }
+    setTimeout(() => go(8), 900);
+})();
 
 // ==========================================
 // 필터를 바꾸면 짧은 진동 + 결과 쪽으로 스크롤

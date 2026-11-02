@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <script src="../shared/curatorlite.js?v=b7"></script>
+    <!-- 말풍선 · 복사 창 (브라우저 기본 창 대신) — 이유식 · 놀이와 같은 것 -->
+    <script src="../shared/curatorui.js?v=1"></script>
     <script src="../native.js?v=2"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -54,10 +56,11 @@
     </header>
 
     <main class="container">
-        <div class="hero-title" style="text-align: center; margin-bottom: 24px;">
+        <!-- 제휴 안내 아래 · 탭 위 빈 곳을 이유식 · 놀이 큐레이터와 같게 줄인다 -->
+        <div class="hero-title" style="text-align: center; margin-bottom: 12px; padding-top: 14px; padding-bottom: 12px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
                 <h2 style="margin: 0; font-size: 20px; font-weight: 900; color: #4A413C;">
-                    <span>젖병 고르기·챙기기</span>
+                    <span>젖병 고르기 · 챙기기</span>
                 </h2>
                 <span id="dynamic-age-badge" style="background: #F0EEFB; color: #7F77DD; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; white-space: nowrap;">
                 </span>
@@ -180,8 +183,9 @@
         </div>
 
         <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
-            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFF2F2; color: #E32636; border: 1px solid #FCA5A5; padding: 12px 18px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(227, 38, 54, 0.15); transition: 0.2s;">
-                ❤️ 내가 찜한 젖병 모아보기
+            <!-- 찜한 젖병 — 빨간 알약이던 것을 이유식 · 장난감처럼 흰 바탕으로 (하트만 빨강) -->
+            <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFFFFF; color: #4A413C; border: 1px solid #EDE6DE; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: 0.2s;">
+                ❤️ 찜한 젖병 모아보기
             </button>
         </div>
 
@@ -193,8 +197,9 @@
 
 
         <div class="legal-footer">
-            <p><strong>※ 면책 조항</strong><br>
-            본 서비스의 호환성 및 소재 정보는 제조사 스펙을 기준으로 제공되나, 제품 리뉴얼에 따라 변경될 수 있습니다. 구매 전 한 번 더 확인하시기 바랍니다.</p>
+            <!-- '※ 면책 조항 · 본 서비스의 … 바랍니다' 를 앱 말투로 (뜻은 그대로) — 이유식 · 놀이와 같게 -->
+            <p><strong>배냇함 안내</strong><br>
+            호환성과 소재 정보는 제조사 스펙을 기준으로 정리했어요. 제품이 바뀌면 달라질 수 있으니, 사기 전에 한 번 더 확인해 주세요. 수유 · 소독 안내는 일반적인 기준이라 진료를 대신하지는 않아요.</p>
 
             <!-- ⚠️ 여기 제휴 고지를 넣었다가 뺐습니다.
      ../shared/disclosure.js 가 이미 화면 맨 위에 같은 고지를 띄웁니다.
@@ -209,7 +214,7 @@
     <script src="../shared/babyswitch.js"></script>
     <script src="../shared/babyage.js?v=1"></script>
     <script src="data.js?v=b7"></script>
-    <script src="app.js?v=b10"></script>
+    <script src="app.js?v=b11"></script>
     <script src="../shared/disclosure.js"></script>
     <script src="bottleguide.js?v=b9"></script>
     <script src="pacifier.js?v=b8"></script>
@@ -223,7 +228,7 @@
     <!-- ❤️ 찜을 부부가 같이 본다 -->
     <script src="../shared/favsync.js"></script>
     <!-- ← 뒤로가기: 시트 닫기 → 첫 탭으로 → 본 앱으로 -->
-    <script src="../shared/curatorback.js"></script> 
+    <script src="../shared/curatorback.js?v=3"></script> 
 
 <!-- 🚀 우측 하단 위로 가기 버튼 -->
         <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">
