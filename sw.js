@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v112';
+const CACHE = 'baenaet-v113';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -235,6 +235,7 @@ const ASSETS = [
     './shared/favsync.js',
     './shared/curatorback.js',
     './shared/familysend.js',
+    './shared/handoff.js', './shared/handoffcards.js',   /* 다 쓴 물건 보내기 (큐레이터 넷) */
     './carseat/carseatown.js',
     './shared/curatorlite.js', './shared/curatorui.js'
 ];

@@ -57,6 +57,8 @@
         { id: "meal-bottom-sheet",   close: null },
         { id: "shop-send-sheet",     close: "closeShopSend" },    // 이유식 · 짝꿍한테 장 볼 거 보내기
         { id: "cur-ask-sheet",       close: "closeCurAsk" },      // 묻는 창 · 숫자 · 복사 (curatorui.js)
+        /* ⚠️ 복사 창(cur-ask-sheet)이 이 창 위에 뜰 수 있다 — 위에 뜬 것부터 닫게 그 뒤에 둔다 */
+        { id: "handoff-sheet",       close: "closeHandoff" },     // 다 쓴 물건 보내기 (handoff.js)
         { id: "test-bottom-sheet",   close: null }
     ];
 
