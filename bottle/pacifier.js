@@ -310,7 +310,9 @@
 
     function safetyHTML() {
         var d = daysOld(), m = monthsOld();
-        var early = (d !== null && d < 28);
+        /* 배 속 아기(생일 칸에 예정일)는 d 가 음수다 — '아직 생후 -69일이에요' 로 나왔다 */
+        var unborn = (d !== null && d < 0);
+        var early = (d !== null && d >= 0 && d < 28);
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">\uD83D\uDEE1\uFE0F 쪽쪽이 쓰기 전에</div>' +
@@ -319,8 +321,15 @@
                 ? '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                   'padding:15px 16px; margin:-10px 0 14px; font-size:13px; font-weight:600; ' +
                   'color:var(--gd-gold,#8A6D00); line-height:1.75; word-break:keep-all;">' +
-                  esc(nm("는")) + ' 아직 생후 ' + d + '일이에요. 수유가 자리잡기 전에 쪽쪽이를 시작하면 ' +
+                  esc(nm("는")) + (d < 1 ? ' 이제 막 태어났어요. ' : ' 아직 생후 ' + d + '일이에요. ') +
+                  '수유가 자리잡기 전에 쪽쪽이를 시작하면 ' +
                   '젖 먹는 게 흔들릴 수 있어서, <b>먹는 게 안정된 뒤</b>에 시작하는 걸 권하는 편이에요.</div>'
+                : unborn
+                ? '<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; ' +
+                  'padding:15px 16px; margin:-10px 0 14px; font-size:13px; font-weight:600; ' +
+                  'color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
+                  '쪽쪽이는 태어나서 <b>수유가 자리잡은 뒤</b>에 시작하는 걸 권하는 편이에요. ' +
+                  '모유 수유라면 보통 3~4주쯤이에요. 아기마다 맞는 모양이 달라서, 미리 산다면 0~6개월용 한두 개만요.</div>'
                 : '') +
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +

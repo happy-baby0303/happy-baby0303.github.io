@@ -143,8 +143,7 @@
                 'line-height:1.75; word-break:keep-all;">' + body + '</div>' +
             '<div style="margin-top:14px; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
                 'padding:14px 15px; font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.75; word-break:keep-all;">' +
-                '카시트 안전에서 제일 크게 갈리는 게 이 하나예요. 어떤 제품을 사느냐보다 ' +
-                '<b>얼마나 오래 뒤를 보게 하느냐</b>가 더 많은 걸 좌우해요.</div>' +
+                '어떤 카시트를 사느냐보다 <b>뒤보기를 얼마나 오래 하느냐</b>가 더 중요해요.</div>' +
         '</div>';
     }
 

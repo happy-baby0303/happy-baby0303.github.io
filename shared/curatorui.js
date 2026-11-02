@@ -15,6 +15,7 @@
                                                     // decimal: true 면 17.5 같은 소수도 받는다 (유모차 최대 체중)
      showCopySheet('복사할 글')                     // 클립보드가 막혔을 때 — 길게 눌러 복사
      sendLabel('이 젖병')                           // '남편한테 이 젖병 보내기' · '아내한테 …' · '이 젖병 보내기' 
+     paintAgeBadge(real, '이유식 중기')             // 맨 위 보라 뱃지 — '생후 7개월 맞춤' · '출산 준비' · '신생아 맞춤'
 
    ⚠️ 뒤로가기는 curatorback.js 의 cur-ask-sheet 칸이 닫는다 (closeCurAsk).
    각 큐레이터 index.html 에서 curatorlite.js 다음에 로드하세요.
@@ -45,6 +46,42 @@
     window.sendLabel = function (what) {
         var w = window.partnerWord();
         return (w ? w + '한테 ' : '') + (what ? what + ' ' : '') + '보내기';
+    };
+
+    /* ---------- 맨 위 보라 뱃지에 적는 나이 ----------
+       '생후 0개월 맞춤' 이 두 집에서 나왔다 — 배 속 아기(생일 칸에 예정일을 넣은 집)와 태어난 지 한 달이 안 된 아기.
+         배 속 아기 → '출산 준비' · 한 달 전 → '신생아' · 이른둥이 → 교정 나이(BabyAge.label) · 그 밖 → '생후 N개월'
+       real 이 true 면 실제 나이로 센다 — 카시트는 법 · 안전 기준이라 교정 나이를 쓰지 않는다.
+       생일이 없으면(카톡으로 받은 링크를 배냇함 없이 연 사람) 뱃지를 숨긴다.
+       빈 뱃지가 보라색 작은 네모(16×8)로 제목 옆에 남아 있었다.
+       extra 는 이유식처럼 나이 뒤에 붙일 말 ('생후 7개월 · 이유식 중기'). 없으면 '맞춤'. */
+    window.curatorAgeText = function (real) {
+        var k = '';
+        try { k = localStorage.getItem('tosil_startDate') || ''; } catch (e) {}
+        var p = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(k);
+        if (!p) return '';
+        var b = new Date(+p[1], +p[2] - 1, +p[3]), t = new Date();
+        if (isNaN(b.getTime())) return '';
+        t.setHours(0, 0, 0, 0);
+        if (b > t) return '출산 준비';
+        if (!real && window.BabyAge && window.BabyAge.on()) {
+            var l = window.BabyAge.label();
+            if (l) return l;
+        }
+        var m = (t.getFullYear() - b.getFullYear()) * 12 + (t.getMonth() - b.getMonth());
+        if (t.getDate() < b.getDate()) m--;
+        return m < 1 ? '신생아' : '생후 ' + m + '개월';
+    };
+    window.paintAgeBadge = function (real, extra) {
+        var a = window.curatorAgeText(real);
+        var age = /^(생후|교정) |^신생아$/.test(a);   // '출산 준비' · '예정일까지 12일' 은 뒤에 아무것도 안 붙인다
+        var text = !a ? '' : (!age ? a : a + (extra ? ' · ' + extra : ' 맞춤'));
+        var els = document.querySelectorAll('.dynamic-age-badge, #dynamic-age-badge');
+        for (var i = 0; i < els.length; i++) {
+            els[i].textContent = text;
+            els[i].style.display = text ? '' : 'none';
+        }
+        return text;
     };
 
     /* ---------- 말풍선 (본 앱 showToast 와 같은 모양) ---------- */

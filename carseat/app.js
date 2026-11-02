@@ -23,17 +23,25 @@ function csSpecParts(item) {
     return String(item.bodySpec || '').split('/').map(s => {
         let t = s.replace(/\uD83D\uDCCF|\u2696\uFE0F?/g, '').replace(/체중\s*:\s*/, '').trim();
         if (/cm/.test(t) && !/개월|세/.test(t)) t = '키 ' + t;
-        else if (/kg/.test(t) && !/개월|세/.test(t)) t = '몸무게 ' + t;
+        else if (/kg/.test(t) && !/개월|세/.test(t)) {
+            /* '⚖️ 18kg' · '체중: ~36kg' 이 '몸무게 18kg' · '몸무게 ~36kg' 으로 떠서 아기 몸무게처럼 읽혔다 */
+            t = t.replace(/^~\s*/, '최대 ');
+            if (/^\d+(\.\d+)?\s*kg$/.test(t)) t = '최대 ' + t;
+            t = '몸무게 ' + t;
+        }
         return t;
     }).filter(Boolean);
 }
 
 let isFavViewMode = false; 
 
-// 🚀 1. 글로벌 데이터 자동 동기화 (다이어트 & 뱃지 동기화 완료)
+// 아기 개월로 단계를 고르고, 맨 위 뱃지에 나이를 적는다
+// 카시트는 법 · 안전 기준이라 이른둥이도 교정 나이가 아니라 태어난 날로 센다
 function applyGlobalBabyProfile() {
     const birthStr = localStorage.getItem('tosil_startDate');
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
+    /* 맨 위 뱃지 — 배 속 아기는 '출산 준비', 한 달 전은 '신생아 맞춤', 생일이 없으면 숨김 (shared/curatorui.js) */
+    if (window.paintAgeBadge) window.paintAgeBadge(true);
     if(!birthStr) return; 
     
     const [y, m, d] = birthStr.split('-').map(Number);
@@ -52,15 +60,12 @@ function applyGlobalBabyProfile() {
     const ageSelect = document.getElementById('filter-age');
     if(ageSelect) ageSelect.value = ageFilter;
 
-    // ✂️ 1. 촌스러운 파란색 대형 배너는 과감히 숨김 (다이어트!)
     const banner = document.getElementById('auto-sync-banner');
     if(banner) {
         banner.style.display = 'none'; 
     }
 
-    // ✨ 2. 화면에 있는 모든 쿨한 뱃지(class)를 싹 다 찾아서 개월 수 쏴주기!
-    const badges = document.querySelectorAll('.dynamic-age-badge');
-    badges.forEach(b => {
+    if (!window.paintAgeBadge) document.querySelectorAll('.dynamic-age-badge').forEach(b => {
         b.innerText = `생후 ${months}개월 맞춤`;
     });
 }
@@ -498,6 +503,6 @@ window.onload = () => {
     } catch (e) {}
 };
 
-// 🚀 [추가] 장착 방식 가이드 모달 열기/닫기 함수
+// 장착 방식 안내 창 열기 · 닫기
 window.openInstallGuide = function() { document.getElementById('install-guide-modal').style.display = 'flex'; };
 window.closeInstallGuide = function() { document.getElementById('install-guide-modal').style.display = 'none'; };

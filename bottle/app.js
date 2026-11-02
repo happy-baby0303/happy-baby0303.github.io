@@ -56,6 +56,8 @@ function bottleSterilLabel(t) {
 
 function applyGlobalBabyProfile() {
     const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
+    /* 맨 위 뱃지 — 배 속 아기는 '출산 준비', 한 달 전은 '신생아 맞춤', 생일이 없으면 숨김 (shared/curatorui.js) */
+    if (window.paintAgeBadge) window.paintAgeBadge(false);
     if(!birthStr) return; 
     
     const [y, m, d] = birthStr.split('-').map(Number);
@@ -77,7 +79,7 @@ function applyGlobalBabyProfile() {
     if(banner) banner.style.display = 'none'; 
 
     const badge = document.getElementById('dynamic-age-badge');
-    if(badge) badge.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
+    if (badge && !window.paintAgeBadge) badge.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
 }
 
 function toggleFavorite(id) {
@@ -529,7 +531,7 @@ document.querySelectorAll('.matrix-panel select').forEach(select => {
         
         if (navigator.vibrate) navigator.vibrate(10);
         
-        // 🚨 필터 누르면 부드럽게 결과창 쪽으로 화면을 끌어올려줌 (버그 수정 완료)
+        // 필터를 누르면 결과 쪽으로 화면을 부드럽게 올린다
         const resultHeader = document.getElementById('bottle-result-area');
         if(resultHeader && window.scrollY < 200) { 
              const yOffset = resultHeader.getBoundingClientRect().top + window.pageYOffset - 100;

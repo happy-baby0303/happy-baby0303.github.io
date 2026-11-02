@@ -1,5 +1,5 @@
 // ==========================================
-// 🧸 육아메이트 장난감 & 놀이 AI 엔진 V2.0 (버그 픽스 및 통합 필터링 완료)
+// 🧸 배냇함 장난감 · 놀이 큐레이터 (toy/app.js)
 // ==========================================
 let isFavViewMode = false; 
 
@@ -12,15 +12,22 @@ try {
 }
 
 /* 🔀 뺀 장난감 번호 → 같은 상품 번호. 25번은 74번과 같은 쿠팡 상품이라 뺐다.
-   찜(favToys) · 우리 집 장난감(tosil_my_toys) 에 남은 25 는 74 로 옮기고, 예전에 보낸 링크(?toy=25)도 74 로 간다. */
+   찜(favToys) · 우리 집 장난감(tosil_my_toys) 에 남은 25 는 74 로 옮기고, 예전에 보낸 링크(?toy=25)도 74 로 간다.
+   TOY_GONE 은 옮길 곳 없이 뺀 번호 — 75번(무게로 눌러 재우는 신생아 이불, 아기 잠 안전 기준에 어긋남).
+   남겨 두면 찜 보관함이 '(0개)' 로 비어 보이거나 우리 집 장난감에 빈 칸이 생긴다. */
 const TOY_MOVED = { 25: 74 };
+const TOY_GONE = [75];
 (function () {
     ['favToys', 'tosil_my_toys'].forEach(function (key) {
         try {
             const a = JSON.parse(localStorage.getItem(key) || 'null');
-            if (!Array.isArray(a) || !a.some(x => TOY_MOVED[Number(x)])) return;
+            if (!Array.isArray(a) || !a.some(x => TOY_MOVED[Number(x)] || TOY_GONE.indexOf(Number(x)) > -1)) return;
             const out = [];
-            a.forEach(x => { const n = TOY_MOVED[Number(x)] || Number(x); if (out.indexOf(n) === -1) out.push(n); });
+            a.forEach(x => {
+                if (TOY_GONE.indexOf(Number(x)) > -1) return;
+                const n = TOY_MOVED[Number(x)] || Number(x);
+                if (out.indexOf(n) === -1) out.push(n);
+            });
             localStorage.setItem(key, JSON.stringify(out));
         } catch (e) {}
     });
@@ -71,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function applyGlobalBabyProfile() {
     const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     let autoMilestone = 'all'; 
+    /* 맨 위 뱃지 — 배 속 아기는 '출산 준비', 한 달 전은 '신생아 맞춤', 생일이 없으면 숨김 (shared/curatorui.js) */
+    if (window.paintAgeBadge) window.paintAgeBadge(false);
 
     if (birthStr) {
         const [by, bm, bd] = birthStr.split('-').map(Number);
@@ -81,7 +90,7 @@ function applyGlobalBabyProfile() {
         if (today.getDate() < birthDate.getDate()) months--;
         if (months < 0) months = 0;
 
-        document.querySelectorAll('.dynamic-age-badge').forEach(b => {
+        if (!window.paintAgeBadge) document.querySelectorAll('.dynamic-age-badge').forEach(b => {
             b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
         });
 
@@ -545,7 +554,13 @@ function renderToys(filteredData) {
     window.__toyList = filteredData;
     const show = Math.min(window.__toyShow || 8, filteredData.length);
     const left = filteredData.length - show;
+    /* 식당 · 외출 테마에는 사운드북 · 핸들처럼 딱딱한 것도 있다.
+       카시트 큐레이터가 '차 안에서는 천 · 말랑한 것만' 이라고 하는데, 이 테마 이름이 '식당·카시트' 였다. */
+    const carNote = currentToyTheme === 'sos-out'
+        ? `<div style="background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:11px 13px; margin:-6px 0 16px; font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.7; word-break:keep-all;">🚘 차 안에서는 <b>천이나 말랑한 것</b>만 손에 쥐여 주세요. 급정거하면 딱딱한 장난감이 날아올 수 있어요.</div>`
+        : '';
     resultArea.innerHTML = `<div style="font-weight:800; color:#4A413C; margin-bottom:16px;">지금 맞는 장난감 ${filteredData.length}개</div>` 
+                           + carNote
                            + filteredData.slice(0, show).map(item => generateToyHTML(item, favs)).join('')
                            + (left > 0 ? `<button onclick="moreToys()" style="display:block; width:100%; padding:16px; margin:4px 0 24px; background:#FFFFFF; border:1px solid #DCD3C8; border-radius:14px; font-size:14px; font-weight:800; color:#7A6F68; cursor:pointer;">장난감 ${Math.min(left, 8)}개 더 보기 <span style="color:#A3958A; font-weight:700;">· 남은 ${left}개</span></button>` : '');
 }
@@ -554,8 +569,9 @@ function renderToys(filteredData) {
    ⚠️ 목욕 · 위생 · 살림 용품은 이 칸(freeTime)에 '상시' · '목욕 시간' · '엄마 손목 구원' 같은 말이 들어 있다.
       그대로 '⏳ 혼자 노는 시간 — 보통 상시쯤 · 아이마다 달라요' 로 떴다 (체온계 · 욕조 · 변기 · 아기띠 …).
       손톱 갈이 · 콧물 흡입기 · 칫솔의 '5분' · '3분' 은 하는 데 걸리는 시간이지 혼자 노는 시간이 아니다.
+   카시트 후방 거울의 '30분' 도 혼자 노는 시간이 아니다 (차에 다는 물건).
    선물 카드(toygift.js)도 이걸로 '장난감인가' 를 가른다. */
-const TOY_NOT_PLAY = [56, 57, 58];   // 전동 손톱 갈이 · 콧물 흡입기 · 첫 칫솔
+const TOY_NOT_PLAY = [56, 57, 58, 77];   // 전동 손톱 갈이 · 콧물 흡입기 · 첫 칫솔 · 카시트 후방 거울
 function toyPlayTime(toy) {
     const v = String((toy && toy.freeTime) || '').trim();
     if (!/^\d+분$/.test(v)) return '';
@@ -621,7 +637,8 @@ function generateToyHTML(toy, favs) {
                     <div class="toy-img-placeholder" style="flex-shrink: 0; font-size: 32px;">${toy.imgIcon}</div>
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.4;">${toy.name}</div>
-                        <div style="color: #7F77DD; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${toy.tags}</div>
+                        <!-- 태그 하나씩 묶는다 — '#스마트폰도둑 #' 다음 줄에 '안전대체재' 로 '#' 만 떨어져 남았다 -->
+                        <div style="color: #7F77DD; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${String(toy.tags || '').split(/\s+/).filter(Boolean).map(t => `<span style="white-space:nowrap;">${t}</span>`).join(' ')}</div>
                     </div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">

@@ -135,8 +135,7 @@
 
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
-                '출처마다 조금씩 달라요. 여기서는 <b>짧은 쪽</b>으로 적었어요. ' +
-                '짧게 잡아 손해 보는 건 모유 몇 팩이고, 길게 잡아 손해 보는 건 아기니까요.</div>' +
+                '출처마다 조금씩 달라요. 헷갈리지 않게 여기서는 <b>짧은 쪽</b>으로 적었어요.</div>' +
 
             '<div style="border:1px solid #EDE6DE; border-radius:14px; overflow:hidden;">' +
             [["실온", "4시간", "짜두고 바로 안 먹일 거면 냉장으로"],

@@ -305,7 +305,7 @@
             var heavy = rk.rank <= Math.ceil(rk.total * 0.3);
             out += '<div style="margin-top:12px; padding-top:12px; border-top:1px solid #EDE6DE; ' +
                 'font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
-                '50종 중 <b>무거운 쪽에서 ' + rk.rank + '번째</b>예요.' +
+                rk.total + '종 중 <b>무거운 쪽에서 ' + rk.rank + '번째</b>예요.' +   // '50종 중' 으로 박혀 있었다 — 목록이 늘거나 줄면 틀린다
                 (heavy && light
                     ? ' 같은 ' + esc(byName(o.name).type) + ' 중에 제일 가벼운 건 ' +
                       '<b>' + esc(light.name) + ' ' + weightOf(light) + 'kg</b>이에요. ' +
@@ -317,9 +317,11 @@
         }
 
         var s = byName(o.name);
+        /* '⚠️ 가벼워요' 처럼 좋은 말에도 경고 표시가 붙었다. 조심할 말일 때만 ⚠️ */
         if (s && s.joint) {
-            out += '<div style="margin-top:11px; font-size:12px; font-weight:700; color:' + GOLD + '; ' +
-                'line-height:1.7;">\u26A0\uFE0F ' + esc(s.joint) + '</div>';
+            var jWarn = /무거|힘이|뻑뻑|조심|부담|숙여|두 손|튕기|손목에/.test(s.joint);
+            out += '<div style="margin-top:11px; font-size:12px; font-weight:700; color:' + (jWarn ? GOLD : GRAY) + '; ' +
+                'line-height:1.7;">' + (jWarn ? '\u26A0\uFE0F ' : '\uD83E\uDDB4 접고 들 때 \u00b7 ') + esc(s.joint) + '</div>';
         }
 
         /* \u26a0\ufe0f 늘 보이면 카드가 무거워진다. 아플 때만 펴보면 되는 내용이다. */
@@ -484,7 +486,8 @@
             });
         } else if (g.want === "cabin") {
             f.sort(function (a, b) {
-                var ok = function (x) { return x.cabin.indexOf("\u2b55") > -1 ? 0 : x.cabin.indexOf("\u26a0") > -1 ? 1 : 2; };
+                /* △(항공사 확인) 도 ⚠️ 와 같은 뜻이다 — 기내 불가(❌)와 같이 줄 세우고 있었다 */
+                var ok = function (x) { return x.cabin.indexOf("\u2b55") > -1 ? 0 : (x.cabin.indexOf("\u26a0") > -1 || x.cabin.indexOf("\u25b3") > -1) ? 1 : 2; };
                 return ok(a) - ok(b) || a.kg - b.kg;
             });
         } else {   // comfort \u2014 무거운 쪽이 대개 서스펜션이 좋다. 다만 단정하지 않는다
@@ -498,7 +501,9 @@
         else if (g.want === "small" && pick.vol && other.vol) reason =
             pick.dims.join("\u00d7") + "cm \u00b7 " + other.name + "보다 부피가 " +
             Math.round((1 - pick.vol / other.vol) * 100) + "% 작아요";
-        else if (g.want === "cabin") reason = pick.cabin || "기내 여부는 항공사마다 달라요";
+        else if (g.want === "cabin") reason = pick.cabin.indexOf("\u2b55") > -1 ? "기내 반입 대부분 돼요"   // '기내 ⭕' 기호가 그대로 떴다
+            : (pick.cabin.indexOf("\u26a0") > -1 || pick.cabin.indexOf("\u25b3") > -1) ? "기내 반입은 항공사마다 달라요"
+            : pick.cabin ? "기내 반입은 안 돼요" : "기내 여부는 항공사마다 달라요";
         else reason = pick.kg + "kg \u00b7 " + (pick.road || "승차감 정보 없음");
 
         out += '<div style="margin-top:14px; background: #FFFFFF; border:1.5px solid #DDD9F5; ' +
@@ -522,7 +527,7 @@
         else if (g.want === "comfort" && pick.kg > other.kg)
             weak = "다만 <b>" + (Math.round((pick.kg - other.kg) * 10) / 10) +
                    "kg 더 무거워요.</b> 계단이 있으면 " + esc(other.name) + " 쪽이 몸이 편해요.";
-        else if (g.want === "cabin" && pick.cabin.indexOf("\u26a0") > -1)
+        else if (g.want === "cabin" && (pick.cabin.indexOf("\u26a0") > -1 || pick.cabin.indexOf("\u25b3") > -1))
             weak = "\u26a0\ufe0f 항공사마다 규정이 달라요. <b>타시기 전에 꼭 확인</b>하세요.";
 
         if (weak) {

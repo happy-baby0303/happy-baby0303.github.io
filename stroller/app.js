@@ -1,22 +1,24 @@
 // ==========================================
-// 🛒 배냇함 유모차 AI 엔진 V16.2 (수익 극대화 & 모바일 최적화 패치 완료!)
+// 🛒 배냇함 유모차 큐레이터 (stroller/app.js)
 // ==========================================
 
 let isFavViewMode = false;
 
-// 🚀 유모차 글로벌 데이터 자동 동기화
+// 아기 개월로 무게 기준을 고르고, 맨 위 뱃지에 나이를 적는다
 function applyGlobalBabyProfile() {
     const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
+    /* 맨 위 뱃지 — 배 속 아기는 '출산 준비', 한 달 전은 '신생아 맞춤', 생일이 없으면 숨김 (shared/curatorui.js) */
+    if (window.paintAgeBadge) window.paintAgeBadge(false);
     if (!birthStr) return; 
 
-    // 날짜 쏠림(UTC) 버그 방지용 파싱
+    // 'YYYY-MM-DD' 를 그날 0시(한국 시각)로 읽는다 — new Date('2026-03-25') 는 UTC 라 하루 밀릴 수 있다
     const [y, m, d] = birthStr.split('-').map(Number);
     const birthDate = new Date(y, m - 1, d);
     const today = new Date();
     
     let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
     
-    // 🚨 이번 달 생일(일)이 아직 안 지났으면 1개월 차감! (정확한 개월 수 계산)
+    // 그달 생일이 아직 안 지났으면 한 달 덜
     if (today.getDate() < birthDate.getDate()) {
         months--;
     }
@@ -25,7 +27,7 @@ function applyGlobalBabyProfile() {
     const banner = document.getElementById('auto-sync-banner');
     if (banner) banner.style.display = 'none';
 
-    document.querySelectorAll('.dynamic-age-badge').forEach(b => {
+    if (!window.paintAgeBadge) document.querySelectorAll('.dynamic-age-badge').forEach(b => {
         b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
     });
 
@@ -202,7 +204,7 @@ function toggleOthers() {
     }
 }
 
-// 🌟 카드 렌더링 엔진 (대기업 템플릿 + 악세사리 수익화 통합 완료!)
+// 카드 한 장 그리기
 function generateCardHtml(item) {
     const cId = item.originalIndex !== undefined ? item.originalIndex : Math.floor(Math.random() * 10000);
     const itemId = item.id || item.name; 
@@ -218,6 +220,13 @@ function generateCardHtml(item) {
     const weightPercent = Math.min((item.specs.weight / 15) * 100, 100);
     const weightColor = item.specs.weight > 10 ? '#E32636' : (item.specs.weight > 6.5 ? '#F59E0B' : '#7F77DD');
     let cabinStyle = item.specs.cabin.includes('⭕') ? 'color:#6A61CE; background:#F0EEFB;' : ((item.specs.cabin.includes('⚠️') || item.specs.cabin.includes('△')) ? 'color:#C46C00; background:#FFF9E6;' : 'color:#E32636; background:#FEECEF;');
+    /* 기내 반입 칸 — 데이터의 '기내 ❌' · '기내 ⚠️' · '기내 △ 항공사 확인 (세 변 합 121cm)' 이 그대로 떴다.
+       ⚠️ 와 △ 는 같은 뜻(항공사마다 다름)인데 기호가 둘이었다. 화면에서는 말로 적는다.
+       기호는 찾기 · 비교(strollerown · strollergo)가 그대로 쓰니 데이터는 건드리지 않는다. */
+    const dimSum = (item.foldedDims || []).reduce((a, b) => a + (Number(b) || 0), 0);
+    const cabinWord = item.specs.cabin.includes('⭕') ? '대부분 돼요'
+        : (item.specs.cabin.includes('⚠️') || item.specs.cabin.includes('△')) ? ('항공사마다 달라요' + (dimSum ? ` · 세 변 합 ${dimSum}cm` : ''))
+        : '안 돼요';
 
     const maxStrollerDim = Math.max(...item.foldedDims);
     let targetName = "20인치 기내용"; let targetDim = 55;
@@ -226,10 +235,14 @@ function generateCardHtml(item) {
     const maxGraphHeight = Math.max(maxStrollerDim, targetDim) + 10;
     const strollerHeightPct = (maxStrollerDim / maxGraphHeight) * 100;
     const carrierHeightPct = (targetDim / maxGraphHeight) * 100;
-    let diffDesc = maxStrollerDim > targetDim ? `<div class="size-visual-desc warn">${targetName}보다 <b>${maxStrollerDim - targetDim}cm 더 큼</b></div>` : `<div class="size-visual-desc">${targetName}보다 <b>${targetDim - maxStrollerDim}cm 더 작음</b></div>`;
+    /* 같은 길이면 '0cm 더 작음' 으로 나왔다 (55cm 휴대용 · 20인치 기내용) */
+    const gap = maxStrollerDim - targetDim;
+    let diffDesc = gap > 0 ? `<div class="size-visual-desc warn">${targetName}보다 <b>${gap}cm 커요</b></div>`
+                 : gap < 0 ? `<div class="size-visual-desc">${targetName}보다 <b>${-gap}cm 작아요</b></div>`
+                 : `<div class="size-visual-desc">${targetName}${/용$/.test(targetName) ? '과' : '와'} <b>길이가 같아요</b></div>`;   // 기내용과 · 캐리어와
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
-    // 3. AI 리포트
+    // 3. 고른 조건에 맞는지
     let aiReportHtml = '';
     if (!isFavViewMode && item.matchRate !== null) {
         let reasonLi = '';
@@ -282,7 +295,9 @@ function generateCardHtml(item) {
     taxHtml += `<div class="receipt-total"><span>합치면</span><span style="color:#7F77DD;">${realPrice.toLocaleString()}원</span></div></div>`;
 
     const asClass = item.asInfo?.status === 'good' ? 'as-good' : (item.asInfo?.status === 'warn' ? 'as-warn' : 'as-bad');
-    const asTitle = item.asInfo?.status === 'good' ? 'A/S 무난한 편' : (item.asInfo?.status === 'warn' ? 'A/S 체크포인트' : 'A/S 주의');
+    /* 'A/S 무난한 편' 제목 밑에 '글로벌 4년 보증 우수' 가 붙어 제목과 내용이 따로 놀았다 */
+    const asTitle = item.asInfo?.status === 'good' ? 'A/S' : (item.asInfo?.status === 'warn' ? 'A/S 미리 볼 것' : 'A/S 주의');
+    const asText = String(item.asInfo?.text || '').trim();
     const asIcon = item.asInfo?.status === 'good' ? '🛡️' : (item.asInfo?.status === 'warn' ? '👀' : '⚠️');
 
     // 6. 구매 버튼 ('최저가' 는 입증할 수 없는 말이라 쓰지 않는다)
@@ -385,8 +400,8 @@ function generateCardHtml(item) {
                 <div class="spec-list">
                     <div class="spec-row"><span class="spec-label">👶 2인 확장성</span><span class="spec-val" style="color:${String(item.expand || '').indexOf('가능') === 0 ? '#1F9D6B' : '#A3958A'};">${String(item.expand || '').replace(/\s*[⭕❌]\s*/g, ' ').replace(/\s+/g, ' ').trim()}</span></div>
                     <div class="spec-row"><span class="spec-label">본체 실측 무게</span><div style="text-align:right; width:60%;"><div class="spec-val" style="color:${weightColor};">${item.specs.weight}kg</div><div class="meter-container"><div class="meter-fill" data-width="${weightPercent}%" style="width:0%; background:${weightColor};"></div></div></div></div>
-                    <div class="spec-row"><span class="spec-label">폴딩 메커니즘</span><span class="spec-val">${item.specs.folding}</span></div>
-                    <div class="spec-row"><span class="spec-label">정규 기내반입</span><span style="${cabinStyle} padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800;">${item.specs.cabin}</span></div>
+                    <div class="spec-row"><span class="spec-label">접는 방식</span><span class="spec-val">${item.specs.folding}</span></div>
+                    <div class="spec-row"><span class="spec-label">기내 반입</span><span style="${cabinStyle} padding:6px 10px; border-radius:8px; font-size:12px; font-weight:800; text-align:right; word-break:keep-all;">${cabinWord}</span></div>
                     ${gateHtml}
                     ${visualGraphHtml}
                 </div>
@@ -395,15 +410,17 @@ function generateCardHtml(item) {
             <!-- 써보면 탭 -->
             <div id="content-${cId}-fact" class="tab-content" style="display:none;">
                 <div class="fact-list">
+                    <!-- 제목과 내용이 맞게: '비행기·카페에서' 밑에 '구형 개찰구 턱걸이', '미는 사람 손목·허리' 밑에 '디럭스치고 가벼움' 이 떴다.
+                         '아쉬운 점' 칸에는 장점과 아쉬운 점이 섞여 있어서 '한 줄 정리' 로 부른다 -->
                     <div class="fact-item"><div class="fact-icon">🛣️</div><div class="fact-info"><div class="fact-title">보도블럭에서</div><div class="fact-desc">${item.road}</div></div></div>
-                    <div class="fact-item"><div class="fact-icon">🧼</div><div class="fact-info"><div class="fact-title">분리 세척 난이도</div><div class="fact-desc">${item.wash}</div></div></div>
-                    <div class="fact-item"><div class="fact-icon">✈️</div><div class="fact-info"><div class="fact-title">비행기·카페에서</div><div class="fact-desc">${item.flight}</div></div></div>
-                    <div class="fact-item"><div class="fact-icon">🦴</div><div class="fact-info"><div class="fact-title">미는 사람 손목·허리</div><div class="fact-desc">${item.joint}</div></div></div>
-                    <div class="fact-item ${asClass}"><div class="fact-icon">${asIcon}</div><div class="fact-info"><div class="fact-title">${asTitle}</div><div class="fact-desc">${item.asInfo?.text || ''}</div></div></div>
+                    <div class="fact-item"><div class="fact-icon">🧼</div><div class="fact-info"><div class="fact-title">분리 세척</div><div class="fact-desc">${item.wash}</div></div></div>
+                    <div class="fact-item"><div class="fact-icon">🚪</div><div class="fact-info"><div class="fact-title">좁은 곳 · 외출</div><div class="fact-desc">${item.flight}</div></div></div>
+                    <div class="fact-item"><div class="fact-icon">🦴</div><div class="fact-info"><div class="fact-title">접고 들 때</div><div class="fact-desc">${item.joint}</div></div></div>
+                    ${asText && asText !== '-' ? `<div class="fact-item ${asClass}"><div class="fact-icon">${asIcon}</div><div class="fact-info"><div class="fact-title">${asTitle}</div><div class="fact-desc">${asText}</div></div></div>` : ''}
                 </div>
                 
                 <div class="insight-box" style="margin-top: 16px;">
-                    <div class="title">아쉬운 점</div>
+                    <div class="title">한 줄 정리</div>
                     <div class="text">${item.flaw}</div>
                 </div>
             </div>
@@ -482,7 +499,7 @@ function renderList(isUserAction = false) {
         if (car === 'flight') {
             if (item.specs.cabin.includes('❌')) { 
                 score -= 50; reasons.push('기내 반입이 안 돼요 (화물로 부쳐야 해요)'); 
-            } else if (item.specs.cabin.includes('⚠️')) { 
+            } else if (item.specs.cabin.includes('⚠️') || item.specs.cabin.includes('△')) {   // △(항공사 확인)도 같은 뜻 — 감점이 없었다
                 score -= 15; reasons.push('저가 항공사는 기내 반입을 거절할 수 있어요'); 
             }
         } else if (car !== 'all' && typeof carDB !== 'undefined' && carDB[car]) {

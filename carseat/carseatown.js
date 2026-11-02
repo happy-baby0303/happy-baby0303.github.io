@@ -807,16 +807,13 @@
                     '배고파서 우는 거면 <b>차를 세우세요.</b> 5분 서는 게 제일 빠른 길이에요.</div>' +
             '</div>' +
 
+            /* 여기 있던 '놀이 탭에 카시트에서 버티는 것들을 모아뒀어요 ›' 는 장난감 큐레이터로 갔다.
+               거기 '식당·카시트' 테마에는 플라스틱 사운드북 · 운전 핸들이 있어서 바로 위 말과 반대였다. 그래서 뺐다. */
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
-                'word-break:keep-all; margin-bottom:12px;">' +
+                'word-break:keep-all;">' +
                 '\u26A0\uFE0F 급정거하면 <b>딱딱한 건 흉기가 돼요.</b> ' +
                 '플라스틱 사운드북, 태블릿 거치대는 빼세요. ' +
-                '천이나 말랑한 것만 손에 쥐여주시고요.</div>' +
-
-            '<a href="../toy/index.html" style="display:block; text-align:center; padding:13px; ' +
-                'background: #FBF8F3; border:1px solid #EDE6DE; border-radius:12px; ' +
-                'font-size:12.5px; font-weight:800; color:#7A6F68; text-decoration:none;">' +
-                '\uD83E\uDDF8 놀이 탭에 카시트에서 버티는 것들을 모아뒀어요 \u203A</a>' +
+                '천 책, 헝겊 인형, 말랑한 치발기처럼 <b>천이나 말랑한 것</b>만 손에 쥐여 주세요.</div>' +
         '</div>';
     }
 
@@ -844,7 +841,7 @@
             '<div style="margin-top:11px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
                 '보상 여부는 보험사와 약관이 정해요. ' +
-                '우리는 <b>물어볼 것만</b> 정리해드려요.</div>' +
+                '여기에는 <b>물어볼 것만</b> 적어 두었어요.</div>' +
         '</div>';
     }
 

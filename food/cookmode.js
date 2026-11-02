@@ -54,9 +54,9 @@
             `<span style="display:inline-block; background:#FFF0F1; color:#D32F2F; border:1px solid #FECACA; padding:2px 6px; border-radius:6px; font-size:11.5px; font-weight:900; margin-right:4px; transform:translateY(-1px);">주의</span>`
         );
         
-        // 💡[초보핵심] 태그 ➔ 노란 꿀팁 뱃지로 변환
+        // 💡[초보핵심] 표시 ➔ 노란 '알아 두면' 딱지 (지금 레시피에는 쓰는 곳이 없다)
         formatted = formatted.replace(/💡\[초보핵심\]/g, 
-            `<span style="display:inline-block; background:#FFF9E6; color:#B45309; border:1px solid #FDE68A; padding:2px 6px; border-radius:6px; font-size:11.5px; font-weight:900; margin-right:4px; transform:translateY(-1px);">💡 초보꿀팁</span>`
+            `<span style="display:inline-block; background:#FFF9E6; color:#B45309; border:1px solid #FDE68A; padding:2px 6px; border-radius:6px; font-size:11.5px; font-weight:900; margin-right:4px; transform:translateY(-1px);">💡 알아 두면</span>`
         );
 
         return formatted;

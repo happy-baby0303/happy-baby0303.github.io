@@ -167,7 +167,8 @@
                 (hardFold ? " 이 제품은 <b>" + esc(fold) + "</b> 이라 버스 안에서는 어려워요." : ""));
 
         } else if (where === "park") {
-            if (st.road) add(GREEN, "노면", esc(st.road) + " · 산책로에 잘 맞아요.");
+            /* ' · 산책로에 잘 맞아요' 를 늘 붙였더니 '과속방지턱 같은 턱에서는 아주 조심해야 해요 · 산책로에 잘 맞아요' 가 됐다 */
+            if (st.road) add(/조심|주의|튀어|실내|고른 길|대리석|전해지/.test(st.road) ? GOLD : GREEN, "노면", esc(st.road));
             add(GRAY, "챙길 것",
                 "그늘이 없는 구간에서는 <b>차양을 펴고</b> 다니세요. " +
                 "담요로 덮으면 안쪽 온도가 빠르게 올라가요.");
@@ -198,10 +199,16 @@
                 add(GRAY, "카시트", "카시트가 얹히면 <b>잠든 아기를 안 깨우고</b> 옮길 수 있어요.");
 
         } else if (where === "trip") {
-            add(cab.indexOf("⭕") > -1 ? GOLD : RED,
-                "기내 " + esc(cab || "정보 없음"),
-                cab.indexOf("⭕") > -1
-                    ? "표시는 기내 가능이지만 <b>항공사마다 규격이 달라요.</b> 표를 끊기 전에 물어보세요."
+            /* 제목이 '기내 기내 ❌' 로 두 번 나왔다 (cab 에 이미 '기내' 가 들어 있다).
+               ⚠️ · △(항공사마다 다름) 도 '게이트에서 부치셔야 해요' 로 나와서 셋으로 나눈다 */
+            var fdSum = fd ? fd.reduce(function (a, b) { return a + (Number(b) || 0); }, 0) : 0;
+            var cabOk = cab.indexOf("\u2B55") > -1, cabMaybe = cab.indexOf("\u26A0") > -1 || cab.indexOf("\u25B3") > -1;
+            add(cabOk ? GREEN : cabMaybe ? GOLD : RED,
+                cabOk ? "기내 반입 대부분 돼요" : cabMaybe ? "기내 반입 항공사마다 달라요" : cab ? "기내 반입 안 돼요" : "기내 반입 정보 없음",
+                cabOk
+                    ? "그래도 <b>항공사마다 규격이 달라요.</b> 표를 끊기 전에 물어보세요."
+                    : cabMaybe
+                    ? (fdSum ? "접으면 세 변 합이 " + fdSum + "cm예요. 국내 항공사 기내 짐은 보통 115cm까지라 " : "") + "<b>표를 끊기 전에 항공사에 물어보세요.</b>"
                     : "<b>게이트에서 부치셔야</b> 해요. 유모차는 화물칸에서 제일 잘 망가지는 물건이에요. " +
                       "<b>커버를 씌우면</b> 손상이 줄어들어요.");
             if (st.flight) add(GRAY, "현지에서", esc(st.flight));

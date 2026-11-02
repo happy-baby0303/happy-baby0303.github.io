@@ -6,13 +6,14 @@
 
 let isFavViewMode = false;
 
-// 🚀 1. 이유식 데이터 자동 동기화 (군더더기 삭제)
+// 아기 개월로 단계 · 농도를 고르고, 맨 위 뱃지에 나이와 단계를 적는다
 function applyGlobalBabyProfile() {
     const birthStr = window.BabyAge ? window.BabyAge.key() : localStorage.getItem('tosil_startDate');   // 이른둥이는 교정 나이로 (shared/babyage.js)
     const babyName = localStorage.getItem('tosil_babyName') || '우리 아기';
+    if (window.paintAgeBadge) window.paintAgeBadge(false);   // 생일이 없으면 뱃지를 숨긴다 (아래에서 단계를 붙여 다시 적는다)
     if(!birthStr) return;
 
-    // 👇 교체된 완벽한 월령 계산 로직
+    // 달력으로 센 개월 — 그달 생일이 아직 안 지났으면 한 달 덜
     const [by, bm, bd] = birthStr.split('-').map(Number);
     const birthDate = new Date(by, bm - 1, bd);
     const today = new Date();
@@ -22,7 +23,7 @@ function applyGlobalBabyProfile() {
     if (today.getDate() < birthDate.getDate()) months--;
     if (months < 0) months = 0;
 
-    // 👶 이유식 월령 단계 (로직은 그대로 유지)
+    // 이유식 단계
     let ageFilter = '', ageText = '';
     if (months < 4) { ageFilter = 'early'; ageText = '이유식 준비기'; }
     else if (months <= 6) { ageFilter = 'early'; ageText = '이유식 초기'; }
@@ -41,18 +42,18 @@ function applyGlobalBabyProfile() {
         ratioSel.addEventListener('change', function () { ratioSel.dataset.touched = '1'; }, { once: true });
     }
 
-    // ✂️ 1. 촌스러운 파란 배너 삭제 (다이어트!)
     const banner = document.getElementById('auto-sync-banner');
     if(banner) banner.style.display = 'none';
 
-    // ✨ 2. 쿨한 뱃지에 '월령' + '이유식 단계'를 한 방에 쏴주기
-    const badges = document.querySelectorAll('.dynamic-age-badge');
-    badges.forEach(b => {
+    /* 맨 위 뱃지 — '생후 7개월 · 이유식 중기'. 배 속 아기는 '출산 준비', 한 달 전은 '신생아 · 이유식 준비기'
+       ('생후 0개월 · 이유식 준비기' 로 나왔다 — shared/curatorui.js paintAgeBadge) */
+    if (window.paintAgeBadge) window.paintAgeBadge(false, ageText);
+    else document.querySelectorAll('.dynamic-age-badge').forEach(b => {
         b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 · ${ageText}`;
     });
 }
 
-// 🚀 [NEW 2] 찜하기 하트 토글 로직
+// 찜하기 (하트 누르기)
 function toggleFavorite(id) {
     let favorites = JSON.parse(localStorage.getItem('favFoods')) || [];
     let isFav = false; 
@@ -79,7 +80,7 @@ function toggleFavorite(id) {
     }
 }
 
-// 🚀 [NEW 3] 찜 보관함 화면 전환
+// 찜 보관함 보기 · 돌아오기
 function toggleFavView() {
     isFavViewMode = !isFavViewMode;
     const btn = document.getElementById('btn-show-fav');
@@ -655,7 +656,7 @@ window.onload = () => {
     runFoodEngine(); 
 };
 
-// 🚀 [NEW 4] 이유식 탭 전환 로직 (식단 추천 vs 캘린더 완벽 분리)
+// 이유식 탭 바꾸기 (식단 추천 · 달력)
 function switchFoodTab(tabName) {
     const btnCuration = document.getElementById('tab-btn-curation');
     const btnCalendar = document.getElementById('tab-btn-calendar');
@@ -1044,7 +1045,7 @@ function openMealSheet() {
     document.getElementById('meal-reaction-input').selectedIndex = 0;
 }
 
-// 💡 [니치 디테일] 계획된 식단을 실제 먹은 기록으로 업데이트 창 열기!
+// 계획해 둔 식단을 실제로 먹은 기록으로 바꾸는 창
 window.openMealSheetForUpdate = function(dateStr, index, menuName) {
     editingDate = dateStr;
     editingIndex = index;
@@ -1082,7 +1083,7 @@ function saveMealRecord() {
     let records = JSON.parse(localStorage.getItem('tosil_food_calendar')) || {};
 
     if (editingIndex !== -1 && editingDate) {
-        // 💡 [니치 디테일] '계획됨' 상태를 현재 입력한 섭취량/반응으로 완벽히 덮어쓰기!
+        // '계획됨' 을 지금 넣은 양 · 반응으로 바꾼다
         records[editingDate][editingIndex].menu = menu;
         records[editingDate][editingIndex].amount = finalAmount;
         records[editingDate][editingIndex].reaction = reaction;
@@ -1567,7 +1568,7 @@ function saveEvapCalibration() {
     document.getElementById('food-actual-yield').value = '';
 }
 
-// 🔄 역방향: 이만큼 만들고 싶어요 (육수 큐브 호환 패치 완료)
+// 🔄 거꾸로 셈: 이만큼 만들고 싶어요 (육수 큐브도 된다)
 function calcReverseFood() {
     const target = parseFloat(document.getElementById('food-target-yield').value);
     const type   = document.getElementById('food-base-type').value;
@@ -1622,7 +1623,7 @@ function calcReverseFood() {
 }
 
 // ==========================================
-// 🥦 [배냇함 PLUS] 우리아기 맞춤 식단 엔진 & UI (V8.0 극강의 락인 에디션)
+// 🥦 [배냇함 PLUS] 우리 아기 맞춤 식단
 // ==========================================
 
 window.currentWeeklyPlan = [];
@@ -1810,7 +1811,7 @@ window.generatePremiumMealPlan = function() {
     return weeklyPlan;
 };
 
-// 💡 단일 메뉴 교체 (애니메이션 제거, 극강의 미니멀리즘 유지)
+// 메뉴 하나만 바꾸기
 window.swapDailyRecipe = function(dayIndex) {
     const currentRecipeNames = window.currentWeeklyPlan.map(p => p.recipe.name);
     let freshRecipes = window.availableRecipePool.filter(r => !currentRecipeNames.includes(r.name));

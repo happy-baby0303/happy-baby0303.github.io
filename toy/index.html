@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <script src="../shared/curatorlite.js?v=b7"></script>
     <!-- 말풍선 · 묻는 창 — 브라우저 기본 창(alert · prompt) 대신 -->
-    <script src="../shared/curatorui.js?v=3"></script>
+    <script src="../shared/curatorui.js?v=4"></script>
     <script src="../native.js?v=2"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>배냇함 | 놀이와 장난감</title>
@@ -189,8 +189,8 @@
                         <div class="theme-text">오늘 밤 푹 자게<br><b>체력 빼주는 것들</b></div>
                     </button>
                     <button class="theme-card" data-theme="sos-out">
-                        <div class="theme-emoji">🚘</div>
-                        <div class="theme-text">식당·카시트<br><b>버텨주는 것들</b></div>
+                        <div class="theme-emoji">🍽️</div>
+                        <div class="theme-text">식당·외출<br><b>버텨주는 것들</b></div>
                     </button>
                                       <button class="theme-card" data-theme="sos-shower">
                         <div class="theme-emoji">🚿</div>
@@ -243,10 +243,10 @@
     <script src="../shared/safenet.js?v=b7"></script>
      <script src="../shared/babyswitch.js"></script>
      <script src="../shared/babyage.js?v=1"></script>
-    <script src="data.js?v=b10"></script>
+    <script src="data.js?v=b11"></script>
     <!-- ⚠️ '장난감 93종' 으로 박아 두었는데 목록은 99종이었다. 이유식 큐레이터처럼 데이터에서 센다 -->
     <script>try { document.getElementById('toy-count-badge').textContent = '장난감 ' + toyData.length + '종'; } catch (e) {}</script>
-    <script src="app.js?v=b11"></script>
+    <script src="app.js?v=b12"></script>
     <script src="../shared/disclosure.js"></script>
     <script src="myshelf.js?v=b8"></script>
     <script src="playweek.js?v=b9"></script>
@@ -254,7 +254,7 @@
     <!-- ⏱️ 지금 몇 분 있으세요 — PLUS -->
     <script src="playnow.js?v=b8"></script>
     <!-- 🎯 개월수 말고 도감 도장으로 단계 판단 — PLUS -->
-    <script src="playstage.js?v=b9"></script>
+    <script src="playstage.js?v=b10"></script>
     <script src="playlog.js?v=b9"></script>
     <script src="bathmold.js?v=b7"></script>
     <!-- 🔋 단추형 전지 · KC · 리콜 — 안전이라 무료 -->
@@ -269,7 +269,7 @@
     <!-- 📐 놀이 탭 카드 순서 고정 — 맨 끝에 로드해야 다 꽂힌 뒤에 정리한다 -->
     <script src="toyorder.js"></script>
 
-<!-- 🚀 우측 하단 위로 가기 버튼 (높이 30px로 정상화 완료!) -->
+<!-- 오른쪽 아래 '맨 위로' 단추 -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">
         ↑
     </button>

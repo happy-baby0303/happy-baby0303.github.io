@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <script src="../shared/curatorlite.js?v=b7"></script>
     <!-- 말풍선 · 숫자 창 · 복사 창 (브라우저 기본 창 대신) — 이유식 · 놀이 · 젖병과 같은 것 -->
-    <script src="../shared/curatorui.js?v=3"></script>
+    <script src="../shared/curatorui.js?v=4"></script>
     <script src="../native.js?v=2"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <!-- 🚀 찜 보관함 토글 버튼 (위치 이동 완료!) -->
+        <!-- 찜 보관함 단추 -->
         <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; margin-top: 16px;">
             <!-- 찜한 유모차 — 빨간 알약이던 것을 이유식 · 젖병 · 장난감처럼 흰 바탕으로 (하트만 빨강) -->
             <button id="btn-show-fav" onclick="toggleFavView()" style="background: #FFFFFF; color: #4A413C; border: 1px solid #EDE6DE; padding: 10px 16px; border-radius: 20px; font-weight: 800; font-size: 13.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: 0.2s;">
@@ -227,11 +227,11 @@
     <script src="../shared/safenet.js?v=b7"></script>
     <script src="../shared/babyswitch.js"></script>
     <script src="../shared/babyage.js?v=1"></script>
-    <script src="data.js?v=b7"></script>
-    <script src="app.js?v=b11"></script>
+    <script src="data.js?v=b8"></script>
+    <script src="app.js?v=b12"></script>
     <script src="../shared/disclosure.js"></script>
     <script src="strollerguide.js?v=b8"></script>
-    <script src="strollerown.js?v=b9"></script>
+    <script src="strollerown.js?v=b10"></script>
     <!-- ⚠️ strollerused.js 가 폴더에 있는데 이 줄이 없어서
          통째로 안 돌고 있었습니다. 중고 확인 · 리콜 안내가 전부 그 안에 있습니다. -->
     <script src="strollerused.js?v=b7"></script>
@@ -242,14 +242,14 @@
     <!-- 🚗 우리 차에 들어가나 — 차 바꿨을 때 · 렌터카 · 친정 차 -->
     <script src="strollertrunk.js?v=b8"></script>
     <!-- 🧭 오늘 어디 가세요 — 나가기 전에 보는 것. PLUS 의 중심 -->
-    <script src="strollergo.js?v=b8"></script>
+    <script src="strollergo.js?v=b9"></script>
     <script src="strollertabs.js?v=b7"></script>
     <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <script src="../shared/curatorback.js?v=3"></script>
 
-<!-- 🚀 우측 하단 위로 가기 버튼 (공유 버튼과 안 겹치게 bottom: 100px 로 수정 완료!) -->
+<!-- 오른쪽 아래 '맨 위로' 단추 (보내기 단추와 안 겹치게 bottom: 100px) -->
     <button id="scrollToTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display: none; position: fixed; bottom: 30px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: #FFFFFF; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; z-index: 9999; font-size: 20px; color: #7A6F68; justify-content: center; align-items: center; transition: opacity 0.3s;">
         ↑
     </button>
