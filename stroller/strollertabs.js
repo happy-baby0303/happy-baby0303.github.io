@@ -367,10 +367,17 @@
             if (el.id === "stroller-extra") { extra.push(el); return false; }
             return true;
         });
+        /* 다 쓴 물건 보내기(handoffcards.js · data-tail)는 물건의 마지막이라 늘 맨 아래.
+           ⚠️ 무료로 쳤더니 미구독자 화면에서 이 탭 맨 위에 떴다 (다른 무료 카드가 나중에 붙어서) */
+        var tail = [];
+        free = free.filter(function (el) {
+            if (el.getAttribute && el.getAttribute("data-tail")) { tail.push(el); return false; }
+            return true;
+        });
 
-        var want = plusFirst
+        var want = (plusFirst
             ? plus.concat(free).concat(extra)
-            : free.concat(extra).concat(plus);
+            : free.concat(extra).concat(plus)).concat(tail);
         var same = want.every(function (el, i) { return kids[i] === el; });
         if (same) return;
         want.forEach(function (el) { pane.appendChild(el); });

@@ -130,7 +130,7 @@ function renderFavorites() {
     let favItems = strollerData.filter(item => favorites.includes(item.id || item.name));
 
     let htmlOutput = `<div style="font-size: 18px; font-weight: 900; color: #E32636; margin-bottom: 16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>`;
-    htmlOutput += favItems.map(item => generateCardHtml(item)).join('');
+    htmlOutput += favItems.map(item => generateCardHtml(item)).join('') + strollerExtrasHtml();
     topArea.innerHTML = htmlOutput;
 
     setTimeout(() => { document.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);
@@ -322,54 +322,6 @@ function generateCardHtml(item) {
         </div>` : ''}
     `;
 
-    // 7. 같이 많이 사는 것
-    /* ⚠️ 셋째 칸이 '유모차 가방걸이 고리' 였다. 같은 화면 맨 위 안전 카드(strollerguide.js)가
-          '손잡이에 가방을 걸지 마세요 · 뒤로 넘어가는 가장 흔한 원인' 이라고 하는데, 바로 그걸 팔고 있었다.
-          레인커버로 바꾼다. 선풍기는 날개 없는 것으로 찾게 한다 (손가락 끼임). */
-    /* ⚠️ 10월에도 '날개 없는 선풍기' 를 권했다. 첫 칸은 계절을 따른다.
-          6~8월 선풍기 · 4 · 5 · 9월 모기장 · 10~3월 방한 커버 */
-    const accMon = new Date().getMonth() + 1;
-    const accSeason = (accMon >= 6 && accMon <= 8) ? { icon: '🌬️', name: '날개 없는 선풍기', q: '유모차 날개없는 선풍기' }
-        : (accMon >= 4 && accMon <= 9) ? { icon: '🦟', name: '유모차 모기장', q: '유모차 모기장' }
-        : { icon: '🧣', name: '방한 커버', q: '유모차 방한커버' };
-    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent(accSeason.q)}&lptag=${partnerCode}`;
-    const accBagUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 정리함 이너백')}&lptag=${partnerCode}`;
-    const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 레인커버')}&lptag=${partnerCode}`;
-
-    const accessoryHtml = `
-        <div style="background: #FBF8F3; padding: 18px; border-radius: 16px; margin-top: 24px; border: 1px solid #EDE6DE;">
-            <!-- 타이틀도 가운데 정렬 및 이모지 변경(🎁) -->
-            <div style="font-size: 13.5px; font-weight: 900; color: #4A413C; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                같이 많이 사는 것
-            </div>
-            
-            <!-- 박스들 가운데 정렬 (justify-content: center; 추가) -->
-            <!-- ⚠️ 가운데 정렬 + 가로 스크롤을 같이 쓰면, 넘칠 때 끝이 잘리고 스크롤도 안 닿는다.
-                 (플립처럼 좁은 화면에서 세 번째 칸이 반 잘렸다) 세 칸 격자로 고정한다. -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                <!-- 1. 계절 (선풍기 · 모기장 · 방한 커버) -->
-                <a href="${accFanUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">${accSeason.icon}</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">${accSeason.name}</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
-                </a>
-                <!-- 2. 정리함 -->
-                <a href="${accBagUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">🧺</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 정리함</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
-                </a>
-                <!-- 3. 레인커버 -->
-                <a href="${accHookUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">☔</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">레인커버</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
-                </a>
-            </div>
-        </div>
-    `;
-
-    const crossSellHtml = `<a href="../carseat/index.html" style="display:block; width:100%; background:#FFFBEB; border:1px solid #FDE68A; color:#B45309; padding:16px; border-radius:14px; font-weight:800; font-size:13.5px; text-align:center; text-decoration:none; transition:0.2s; margin-top:16px;">카시트도 같이 보기 ›</a>`;
 
     // 8. 최종 렌더링
     return `
@@ -440,10 +392,66 @@ function generateCardHtml(item) {
         </div>
 
         ${purchaseAreaHtml}
-        ${accessoryHtml}
-        ${crossSellHtml}
     </div>
     `;
+}
+
+/* 같이 챙기면 좋은 것 · 카시트도 보기 — 목록에 한 번만.
+   ⚠️ 예전엔 유모차 카드마다 같은 세 칸과 '카시트도 같이 보기' 가 붙어 있었다.
+      다섯 장이면 다섯 번 — 카드 한 장이 화면 두 장 길이가 됐고, 첫 다섯 장에만 쿠팡 단추가 20개였다.
+      그리고 제목 '같이 많이 사는 것' 은 우리가 세어 본 적이 없는 말이었다 (근거 없는 인기 표현). */
+function strollerExtrasHtml() {
+    const partnerCode = "AF9932454";
+    /* ⚠️ 셋째 칸이 '유모차 가방걸이 고리' 였다. 같은 화면 맨 위 안전 카드(strollerguide.js)가
+          '손잡이에 가방을 걸지 마세요 · 뒤로 넘어가는 가장 흔한 원인' 이라고 하는데, 바로 그걸 팔고 있었다.
+          레인커버로 바꾼다. 선풍기는 날개 없는 것으로 찾게 한다 (손가락 끼임). */
+    /* ⚠️ 10월에도 '날개 없는 선풍기' 를 권했다. 첫 칸은 계절을 따른다.
+          6~8월 선풍기 · 4 · 5 · 9월 모기장 · 10~3월 방한 커버 */
+    const accMon = new Date().getMonth() + 1;
+    const accSeason = (accMon >= 6 && accMon <= 8) ? { icon: '🌬️', name: '날개 없는 선풍기', q: '유모차 날개없는 선풍기' }
+        : (accMon >= 4 && accMon <= 9) ? { icon: '🦟', name: '유모차 모기장', q: '유모차 모기장' }
+        : { icon: '🧣', name: '방한 커버', q: '유모차 방한커버' };
+    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent(accSeason.q)}&lptag=${partnerCode}`;
+    const accBagUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 정리함 이너백')}&lptag=${partnerCode}`;
+    const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 레인커버')}&lptag=${partnerCode}`;
+
+    const accessoryHtml = `
+        <div style="background: #FBF8F3; padding: 18px; border-radius: 16px; margin-top: 24px; border: 1px solid #EDE6DE;">
+            <!-- 제목 가운데 -->
+            <div style="font-size: 13.5px; font-weight: 900; color: #4A413C; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                같이 챙기면 좋은 것
+            </div>
+            
+            <!-- 박스들 가운데 정렬 (justify-content: center; 추가) -->
+            <!-- ⚠️ 가운데 정렬 + 가로 스크롤을 같이 쓰면, 넘칠 때 끝이 잘리고 스크롤도 안 닿는다.
+                 (플립처럼 좁은 화면에서 세 번째 칸이 반 잘렸다) 세 칸 격자로 고정한다. -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <!-- 1. 계절 (선풍기 · 모기장 · 방한 커버) -->
+                <a href="${accFanUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                    <div style="font-size: 24px; margin-bottom: 6px;">${accSeason.icon}</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">${accSeason.name}</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
+                </a>
+                <!-- 2. 정리함 -->
+                <a href="${accBagUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                    <div style="font-size: 24px; margin-bottom: 6px;">🧺</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 정리함</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
+                </a>
+                <!-- 3. 레인커버 -->
+                <a href="${accHookUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
+                    <div style="font-size: 24px; margin-bottom: 6px;">☔</div>
+                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">레인커버</div>
+                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
+                </a>
+            </div>
+        </div>
+    `;
+
+    const crossSellHtml = `<a href="../carseat/index.html" style="display:block; width:100%; background:#FFFBEB; border:1px solid #FDE68A; color:#B45309; padding:16px; border-radius:14px; font-weight:800; font-size:13.5px; text-align:center; text-decoration:none; transition:0.2s; margin-top:16px;">카시트도 같이 보기 ›</a>`;
+    /* 카드 밖에 홀로 서면 크림색 바탕 위 베이지 상자가 된다 — 유모차 카드와 같은 모양의 흰 카드에 담는다.
+       ⚠️ class 에 stroller-card 를 쓰지 않는다. 다른 모듈(트렁크 · 카시트 호환 · ?pick=)이 그 이름으로 유모차를 센다 */
+    return `<div class="stroller-extras" style="background:#FFFFFF; border:1px solid #F7F3ED; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); padding:6px 20px 20px;">${accessoryHtml}${crossSellHtml}</div>`;
 }
 
 // 🧠 깐깐한 감점(Penalty) AI 리포팅 엔진
@@ -581,16 +589,16 @@ function renderList(isUserAction = false) {
     window.__strollerRest = null;
     if (isMatrixActive && processedData.length > 3) {
         topTitle.style.display = 'flex'; showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `나머지 ${processedData.length - 3}개 더 보기 ▾`; otherArea.style.display = 'none';
-        topArea.innerHTML = processedData.slice(0, 3).map(generateCardHtml).join('');
+        topArea.innerHTML = processedData.slice(0, 3).map(x => generateCardHtml(x)).join('') + strollerExtrasHtml();
         otherArea.innerHTML = processedData.slice(3).map(generateCardHtml).join('');
     } else if (processedData.length > 5) {
         topTitle.style.display = 'none'; otherArea.style.display = 'none'; otherArea.innerHTML = '';
-        topArea.innerHTML = processedData.slice(0, 5).map(generateCardHtml).join('');
+        topArea.innerHTML = processedData.slice(0, 5).map(x => generateCardHtml(x)).join('') + strollerExtrasHtml();
         window.__strollerRest = processedData.slice(5);
         showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `유모차 ${processedData.length - 5}개 더 보기 ▾`;
     } else {
         topTitle.style.display = 'none'; showMoreBtn.style.display = 'none'; otherArea.innerHTML = '';
-        topArea.innerHTML = processedData.map(generateCardHtml).join('');
+        topArea.innerHTML = processedData.map(x => generateCardHtml(x)).join('') + strollerExtrasHtml();
     }
 
     setTimeout(() => { document.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);

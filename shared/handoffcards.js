@@ -56,8 +56,9 @@
         return m < 0 ? 0 : m;
     }
 
+    /* data-tail — 탭 정리(○○tabs.js)가 이 카드를 늘 맨 아래에 둔다. 물건의 마지막이라서 */
     function card(id, title, text, btns) {
-        return '<div class="matrix-panel" id="' + id + '" style="margin-bottom:20px;">' +
+        return '<div class="matrix-panel" id="' + id + '" data-tail="1" style="margin-bottom:20px;">' +
             '<div class="matrix-header">' + esc(title) + '</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; margin:-16px 0 14px; line-height:1.75; word-break:keep-all;">' + text + '</div>' +
             '<div style="display:flex; gap:8px;">' + btns + '</div>' +
@@ -334,6 +335,11 @@
         if (document.getElementById("view-stroller-use") && !document.getElementById("stroller-handoff")) put("view-stroller-use", "stroller-handoff", strollerHTML());
         if (document.getElementById("view-bottle-tools") && !document.getElementById("bottle-handoff")) put("view-bottle-tools", "bottle-handoff", bottleHTML());
         if (document.getElementById("my-shelf") && !document.getElementById("toy-handoff")) putToy();
+        /* 카시트 · 유모차 · 젖병 — 다른 카드가 나중에 붙어도 늘 그 탭 맨 아래 */
+        [["view-carseat-use", "carseat-handoff"], ["view-stroller-use", "stroller-handoff"], ["view-bottle-tools", "bottle-handoff"]].forEach(function (x) {
+            var pane = document.getElementById(x[0]), el = document.getElementById(x[1]);
+            if (pane && el && el.parentNode === pane && pane.lastElementChild !== el) pane.appendChild(el);
+        });
         /* 놀이 기록 카드(playlog.js)가 나중에 '이번 주 놀이' 밑으로 끼어들면 우리 집 장난감과 떨어진다. 바로 밑으로 다시 */
         var th = document.getElementById("toy-handoff"), sh = document.getElementById("my-shelf");
         if (th && sh && sh.parentNode && th.previousElementSibling !== sh) sh.parentNode.insertBefore(th, sh.nextSibling);
