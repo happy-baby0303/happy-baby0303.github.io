@@ -131,7 +131,7 @@
                 'border-radius:14px; padding:14px 16px; margin-top:12px; font-size:12.5px; ' +
                 'font-weight:600; color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '놀고 나서 <b>놀았어요</b>를 누르면 어땠는지 물어봐요. ' +
-                '세 번만 쌓이면 다음 주 처방전이 ' + esc(nm("")) + ' 취향으로 바뀌어요. ' +
+                '세 번만 쌓이면 다음 주 놀이가 ' + esc(nm("")) + ' 취향으로 바뀌어요. ' +
                 '지금 ' + s.count + '번 눌렀어요.</div>';
         }
 
@@ -151,7 +151,7 @@
                 '🎯 ' + s.count + '번 눌러주신 걸로 알아낸 것</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.7; ' +
                 'word-break:keep-all;">' + line + '<br>' +
-                '다음 주 처방전에 이런 놀이를 더 넣어드릴게요.</div>' +
+                '다음 주에 이런 놀이를 더 넣어드릴게요.</div>' +
         '</div>';
     }
 

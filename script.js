@@ -5302,23 +5302,24 @@ window.selectTrackerBtn = function(btn, category) {
 
         if (category === 'status_golden') { 
             activeBg = '#D2A340'; activeColor = '#000'; window.trackerState.status = '황금색'; 
-            warningTxt = '🟢 흔히 보는 건강한 색이에요<br>평소와 다르거나 걱정되면 소아과에 물어보세요.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
+            warningTxt = '🟢 흔히 보는 색이에요<br>평소와 다르거나 걱정되면 소아과에 물어보세요.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
         } else if (category === 'status_green') { 
             activeBg = '#4ADE80'; activeColor = '#FFF'; window.trackerState.status = '녹색'; 
-            warningTxt = '🟢 지극히 정상입니다<br>담즙, 철분 분유 또는 녹색 채소의 영향일 수 있습니다.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
+            warningTxt = '🟢 흔히 보는 색이에요<br>담즙 · 철분 든 분유 · 초록 채소 때문에 초록빛이 돌 수 있어요.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)';
         } else if (category === 'status_brown') { 
             activeBg = '#B45309'; activeColor = '#FFF'; window.trackerState.status = '갈색'; 
-            if (isSolidFood) { warningTxt = '🟢 건강한 갈색 변입니다'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)'; }
-            else { warningTxt = '⚠️ 수분 부족 / 변비 의심'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)'; }
+            /* ⚠️ 이유식 전 갈색 변에 '⚠️ 수분 부족 / 변비 의심' 이 빨갛게 떴다. 갈색은 흔한 색이다 (분유면 더). */
+            if (isSolidFood) { warningTxt = '🟢 이유식을 먹으면 흔히 보는 색이에요'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)'; }
+            else { warningTxt = '🟢 흔히 보는 색이에요<br>변이 딱딱하거나 아기가 힘들어하면 소아과에 물어보세요.'; warningColor = 'var(--success)'; warningBg = 'rgba(185, 138, 46, 0.1)'; }
         } else if (category === 'status_white') { 
             activeBg = 'var(--bg-sub)'; activeColor = 'var(--text-m)'; window.trackerState.status = '흰/회색';
-            warningTxt = '🚨 소아과 방문 요망 담도폐쇄증 의심'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
+            warningTxt = '🚨 흰색 · 회색 변은 바로 소아과에 보여 주세요<br>미루면 안 되는 색이에요. 기저귀를 사진으로 찍어 가세요.'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
         } else if (category === 'status_red') { 
             activeBg = 'var(--danger)'; activeColor = '#FFF'; window.trackerState.status = '붉은색';
-            warningTxt = '🚨 혈변 주의 소아과 진료 권장'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
+            warningTxt = '🚨 피가 섞인 것 같으면 소아과에 보여 주세요<br>기저귀를 사진으로 찍어 두세요.'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
         } else if (category === 'status_black') { 
             activeBg = '#1F2937'; activeColor = '#FFF'; window.trackerState.status = '검은색';
-            warningTxt = '🚨 위장 출혈 의심 진료 권장'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
+            warningTxt = '🚨 까만 변이 계속되면 소아과에 보여 주세요<br>태어나고 처음 며칠은 태변이라 까매요.'; warningColor = 'var(--danger)'; warningBg = 'rgba(240, 68, 82, 0.1)';
         }
         const warningArea = document.getElementById('poop-warning-msg');
         if(warningArea) {
@@ -9774,13 +9775,15 @@ window.renderDadQuests = function() {
     let momHpText = ""; let momHpColor = "";
     
     if (todayFever) {
-        momHpText = "🚨 멘탈 붕괴 직전 (아기가 아파요 칼퇴 요망)"; momHpColor = "var(--danger, #EF4444)";
+        /* ⚠️ '🚨 멘탈 붕괴 직전 (아기가 아파요 칼퇴 요망)' · '지침 😮‍💨 (따뜻한 말 한마디 필수)' 였다.
+              제목이 '오늘 이것만 해도 충분해요' 인데 상태만 말하고 할 일을 말하지 않았다. */
+        momHpText = "아기가 열이 나요. 오늘은 일찍 들어가서 밤을 같이 봐 주세요"; momHpColor = "var(--danger, #EF4444)";
     } else if (todayEvents >= 15) { 
-        momHpText = "많이 지치셨어요 (오늘은 좀 쉬세요)"; momHpColor = "var(--danger, #EF4444)"; 
+        momHpText = "오늘 기록이 많았어요. 들어가면 30분이라도 혼자 쉴 시간을 드려 주세요"; momHpColor = "var(--danger, #EF4444)"; 
     } else if (todayEvents >= 8) { 
-        momHpText = "지침 😮‍💨 (따뜻한 말 한마디 필수)"; momHpColor = "var(--accent, #B98A2E)"; 
+        momHpText = "바쁜 하루였어요. 들어가서 수고했다고 한마디 해 주세요"; momHpColor = "var(--accent, #B98A2E)"; 
     } else { 
-        momHpText = "보통 🙂 (퇴근 후 육아 교대는 필수)"; momHpColor = "var(--success, #B98A2E)"; 
+        momHpText = "들어가면 한 번은 육아를 바꿔 맡아 주세요"; momHpColor = "var(--success, #B98A2E)"; 
     }
 
     const isHeroToday = localStorage.getItem('tosil_hero_mode_date') === new Date().toDateString();

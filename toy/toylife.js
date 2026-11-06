@@ -317,7 +317,7 @@
                 ? '<div onclick="window.planWithIdleToys()" style="margin-top:14px; text-align:center; ' +
                   'padding:15px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #DCD3C8; ' +
                   'border-radius:13px; font-size:13.5px; font-weight:900; cursor:pointer;">' +
-                  '이걸로 다음 주 처방전 짜기</div>'
+                  '이걸로 다음 주 놀이 짜기</div>'
 
                 : '<div style="margin-top:14px; background:#FFF9E6; border:1px solid #FDE68A; ' +
                   'border-radius:13px; padding:15px 16px;">' +
