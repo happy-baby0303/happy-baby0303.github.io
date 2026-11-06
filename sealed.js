@@ -497,7 +497,7 @@
             ? list.map(sealCard).join("")
             : '<div style="text-align:center; padding:70px 24px;">' +
                   '<div style="font-family:\'Nanum Pen Script\',cursive; font-size:26px; color:var(--text-sub); line-height:1.7;">' +
-                      '아직 봉인한 편지가 없어요<br>지금의 마음은 지금밖에 못 씁니다' +
+                      '아직 봉인한 편지가 없어요<br>지금의 마음은 지금밖에 못 써요' +
                   '</div></div>';
 
         wrap.innerHTML =

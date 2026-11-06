@@ -209,13 +209,13 @@
                 '</div>';
               }).join('<div style="height:1px; background:var(--border); opacity:0.5;"></div>')
             : '<div style="padding:34px 0; text-align:center; font-size:13px; font-weight:700; color:var(--text-sub); line-height:1.7;">' +
-                  '아직 담긴 사진이 없어요<br>배냇함에 한 장 담으면 엽서가 됩니다' +
+                  '아직 담긴 사진이 없어요<br>배냇함에 한 장 담으면 엽서가 돼요' +
               '</div>';
 
         wrap.innerHTML =
         '<div style="width:100%; max-width:520px; max-height:78vh; overflow-y:auto; background:var(--bg-card); border-radius:26px 26px 0 0; padding:24px 20px 34px;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-                '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">💌 추억 엽서</span>' +
+                '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">추억 엽서</span>' +
                 '<span onclick="document.getElementById(\'postcard-picker\').remove()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:16px;">한 장 고르면 바로 이미지로 저장돼요</div>' +

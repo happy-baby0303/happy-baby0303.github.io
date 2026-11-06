@@ -781,7 +781,7 @@ function filterPlaces() {
             let timeInfo = p.datetime || '운영시간 확인 필요';
             let fullAddr = p.addr || realLocation; 
             let safeTitle = (p.title || '').replace(/'/g, "\\'");
-            let safeReview = (p.review || '맞춤형 주말 안전 인프라입니다.').replace(/'/g, "\\'");
+            let safeReview = (p.review || '').replace(/'/g, "\\'");
             let safeQuery = (p.query || p.title || '').replace(/'/g, "\\'");
 
             // 🚨 [중요] 핫플 탭에서는 마지막에 false를 보냅니다! (절대 행사로 안 뜸)
@@ -885,10 +885,13 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
                 </div>
             </div>
 
-            <div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
+            <!-- ⚠️ 행사 112곳은 소개 글이 전부 비어 있어서, 모든 행사에 똑같이
+                 "주말에 아이와 방문하기 좋은 안전한 인프라를 갖추고 있습니다." 가 따옴표까지 달고 떴다.
+                 확인한 적 없는 말을 후기처럼 보여 주면 안 된다. 적힌 게 있을 때만 칸을 그린다. -->
+            ${review ? `<div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
                 <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 6px;">${isEvent ? '가기 전에 알아두면' : '이곳은요'}</div>
-                <div style="font-size: 13.5px; font-weight: 600; color: var(--text-m); line-height: 1.4; word-break: keep-all;">"${review || '주말에 아이와 방문하기 좋은 안전한 인프라를 갖추고 있습니다.'}"</div>
-            </div>
+                <div style="font-size: 13.5px; font-weight: 600; color: var(--text-m); line-height: 1.5; word-break: keep-all;">${review}</div>
+            </div>` : ''}
 
             <div style="display: flex; gap: 8px; margin-bottom: 20px;">
                 <button onclick="window.openMap('naver', '${safeQuery}')" style="flex: 1; padding: 12px 0; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 13px;">
