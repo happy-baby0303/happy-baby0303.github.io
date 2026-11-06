@@ -404,7 +404,6 @@
         if (!(mixOpen === null ? mixStartsOpen() : mixOpen)) {
             return '<div class="matrix-panel" onclick="window.toggleMixCard()" style="margin-bottom:16px; padding:18px 20px; cursor:pointer;">' +
                 '<div style="display:flex; align-items:center; gap:11px;">' +
-                    '<div style="font-size:19px;">🥄</div>' +
                     '<div style="flex:1; min-width:0;">' +
                         '<div style="font-size:14.5px; font-weight:900; color:' + DARK + ';">미음 만들기</div>' +
                         '<div style="font-size:11.5px; font-weight:700; color:' + GRAY + '; margin-top:2px;">초기에 쓰던 쌀가루 : 물 비율</div>' +

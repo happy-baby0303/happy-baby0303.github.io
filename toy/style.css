@@ -407,3 +407,18 @@ html, body {
     overflow-wrap: break-word;
     max-width: 100%;
 }
+
+/* ========================================== */
+/* 장난감 카드 — 한 줄 칩 · 설명 · 자세히 보기 (유모차 카드와 같은 방식) */
+/* ========================================== */
+.toy-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.toy-chip { display: inline-block; font-size: 12.5px; font-weight: 800; padding: 6px 10px; border-radius: 9px; border: 1px solid; line-height: 1.3; }
+.toy-chip-time { color: #047857; background: #ECFDF5; border-color: #A7F3D0; }
+.toy-chip-batt { color: #B45309; background: #FFFBEB; border-color: #FDE68A; }
+.toy-desc { font-size: 14px; color: #7A6F68; line-height: 1.65; font-weight: 600; word-break: keep-all; margin: 0 0 16px; }
+.toy-more-btn { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 13px 0; background: #FFFFFF; border: 1px solid #EDE6DE; border-radius: 12px; font-family: inherit; font-size: 13.5px; font-weight: 800; color: #7A6F68; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.toy-more-btn:active { background: #F6F2EC; }
+.toy-more-btn svg { transition: transform .2s; flex-shrink: 0; }
+.toy-more-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.toy-more { margin-top: 16px; }
+.toy-more[hidden] { display: none !important; }

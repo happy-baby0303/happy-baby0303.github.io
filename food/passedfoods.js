@@ -622,7 +622,6 @@
 
         var inner =
             '<div style="display:flex; align-items:center; gap:11px;">' +
-                '<div style="font-size:18px; flex-shrink:0;">🥄</div>' +
                 '<div style="flex:1; min-width:0;">' +
                     '<div style="font-size:13.5px; font-weight:900; color:' +
                         (p.length ? "#1F6F52" : DARK) + ';">' +

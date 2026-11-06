@@ -589,16 +589,13 @@ function generateToyHTML(toy, favs) {
 
     const partnerCode = "AF9932454"; 
 
-    // ⚡ 건전지 — 따로 사야 하는지만 알려 준다
+    // ⚡ 한눈에 — 혼자 노는 시간 · 건전지 (큰 상자 두 개였던 것을 이름 밑 한 줄로)
     /* ⚠️ 여기 '쿠팡에서 건전지 보기' 가 있었다. 장난감 하나에 쿠팡 링크가 둘이었다 — 상품마다 가격 링크 하나만 둔다.
           '유선' · '유선 충전' (콧물흡입기 · 코코지) 에도 '건전지가 따로 필요해요 (유선)' 이 떴다. */
-    let batteryHtml = '';
-    if (toy.battery && !/없음|유선/.test(toy.battery)) {
-        batteryHtml = `
-            <div style="background:#FFFBEB; padding:14px 16px; border-radius:14px; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
-                <b style="color:#D97706; font-size: 13.5px;">건전지가 따로 필요해요 (${toy.battery})</b>
-            </div>`;
-    }
+    const chips = [];
+    if (toyPlayTime(toy)) chips.push(`<span class="toy-chip toy-chip-time">혼자 노는 시간 보통 ${toyPlayTime(toy)}쯤</span>`);
+    if (toy.battery && !/없음|유선/.test(toy.battery)) chips.push(`<span class="toy-chip toy-chip-batt">건전지 따로 · ${toy.battery}</span>`);
+    const chipsHtml = chips.length ? `<div class="toy-chips">${chips.join('')}</div>` : '';
 
     // 🔗 2. 이 장난감으로 하는 놀이로 넘어가는 단추
     /* ⚠️ 모든 카드에 '이 장난감으로 하는 놀이' 라고 붙어 있었는데, 98개 중 그 장난감을 정말 쓰는 놀이는 다섯 개뿐이다.
@@ -624,7 +621,7 @@ function generateToyHTML(toy, favs) {
 
     return `
         <div id="toy-card-${toy.id}" class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px; gap: 12px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px; gap: 12px;">
                 <div style="display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0;">
                     <div class="toy-img-placeholder" style="flex-shrink: 0; font-size: 32px;">${toy.imgIcon}</div>
                     <div style="flex: 1; min-width: 0;">
@@ -642,20 +639,14 @@ function generateToyHTML(toy, favs) {
             </div>
             </div>
 
-            <div style="background: #FBF8F3; padding: 16px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 16px;">
-                <div style="font-size: 13px; font-weight: 800; color: #4A413C; margin-bottom: 6px;">💡 알아두실 것</div>
-                <div style="font-size: 13.5px; color: #7A6F68; line-height: 1.5; font-weight: 600; word-break: keep-all;">${toy.fomo}</div>
-            </div>
+            ${chipsHtml}
+            <!-- 설명 — 안전 경고(⚠️ 자석 · 삼킴)도 여기 있어서 접지 않는다 -->
+            <div class="toy-desc">${toy.fomo}</div>
 
-            ${toyPlayTime(toy) ? `<div style="background: #FBF8F3; padding: 20px 18px; border-radius: 14px; border: 1px solid #EDE6DE; margin-bottom: 20px;">
-                <div style="font-weight: 900; color: #4A413C; font-size: 14.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                    <span>⏳</span> 혼자 노는 시간
-                </div>
-                <div style="font-size: 14px; color: #059669; font-weight: 800; background: #ECFDF5; display: inline-block; padding: 8px 14px; border-radius: 10px; border: 1px solid #A7F3D0;">
-                    보통 ${toyPlayTime(toy)}쯤 · 아이마다 달라요
-                </div>
-            </div>` : ''}
+            <button type="button" class="toy-more-btn" aria-expanded="false" onclick="toggleToyMore(this)"><span class="more-label">자세히 보기</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
 
+            <!-- 자세히 보기: 같이 해 볼 놀이 · 가격 보기 · KC 안내 -->
+            <div class="toy-more" hidden>
             ${linkToPlayHtml}
 
             <a href="${finalLink}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:8px; width:100%; background:#4A413C; color:#FFFFFF; border:none; padding:18px 16px; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.1); margin-bottom: 12px; text-decoration: none; transition: 0.2s;">
@@ -665,11 +656,30 @@ function generateToyHTML(toy, favs) {
             <div style="font-size: 11.5px; color: #A3958A; font-weight: 600; text-align: center; margin-top: 16px; line-height: 1.5; word-break: keep-all;">
                 ※ 입에 들어가는 장난감은 <b>KC 마크와 사용 연령</b>을 꼭 확인하세요.
             </div>
-
-            ${batteryHtml}
+            </div>
         </div>
     `;
 }
+
+/* 장난감 카드도 유모차처럼 — 이름 · 혼자 노는 시간 · 건전지 · 설명만 보이고 나머지는 '자세히 보기' 안에.
+   ⚠️ 카드 한 장이 평균 660px, '장난감 고르기' 탭이 화면 8.9장이었다.
+      '혼자 노는 시간' 하나에 큰 상자, 건전지에 또 상자, 카드마다 같은 KC 안내 문장. */
+function toggleToyMore(btn, open) {
+    const card = btn && btn.closest('[id^="toy-card-"]');
+    const box = card && card.querySelector('.toy-more');
+    if (!box) return;
+    const willOpen = typeof open === 'boolean' ? open : box.hidden;
+    box.hidden = !willOpen;
+    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    const label = btn.querySelector('.more-label');
+    if (label) label.textContent = willOpen ? '접기' : '자세히 보기';
+}
+window.toggleToyMore = toggleToyMore;
+function openToyCard(card) {
+    const b = card && card.querySelector('.toy-more-btn');
+    if (b && b.getAttribute('aria-expanded') !== 'true') toggleToyMore(b, true);
+}
+window.openToyCard = openToyCard;
 
 // ==========================================
 // 🚀 매직 점프 엔진 (놀이 ↔ 장난감 무한 횡단)
@@ -694,6 +704,7 @@ window.jumpToToy = function(toyId) {
     setTimeout(() => {
         const targetCard = document.getElementById(`toy-card-${toyId}`);
         if(targetCard) {
+            openToyCard(targetCard);
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             // 번쩍! 하이라이트 효과
             targetCard.style.transition = 'box-shadow 0.3s, transform 0.3s';
@@ -764,6 +775,7 @@ function shareToHusbandToy(id) {
             if (all) all.click();
         }
         if (!hit) { if (tries > 0) setTimeout(function () { go(tries - 1); }, 450); return; }
+        try { window.openToyCard(hit); } catch (e) {}
         setTimeout(function () {
             var head = document.querySelector('.app-header');
             var off = (head ? head.getBoundingClientRect().height : 0) + 12;

@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v117';
+const CACHE = 'baenaet-v118';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -232,6 +232,7 @@ const ASSETS = [
     './toy/index.html',       './toy/data.js',       './toy/app.js',       './toy/style.css',       './toy/toysafety.js',       './toy/playnow.js',       './toy/playstage.js',       './toy/toyorder.js',       './toy/toygift.js',
     './shared/babyswitch.js', './shared/disclosure.js', './shared/plusmark.js',
     './shared/plusgate.js',
+    './shared/settle.js',
     './shared/favsync.js',
     './shared/curatorback.js',
     './shared/familysend.js',

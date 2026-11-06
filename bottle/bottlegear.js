@@ -580,12 +580,14 @@
         '</div>';
     }
 
-    /* ---------- 다음에 준비할 것 (PLUS) ---------- */
+    /* ---------- 다음에 준비할 것 (무료) ----------
+       ⚠️ PLUS 였다. 무료 사용자는 설명 한 줄과 '언제 뭘 준비하면 되는지 PLUS에서 짚어드려요' 만 봤다.
+          컵 → 빨대컵 → 젖병 졸업 · 생우유 시기는 누구나 아는 순서라, 숨겨서 팔면 정보를 잠그는 앱이 된다.
+          그때가 되면 알려 주는 '바꿀 때 알림'(nextstep.js)도 무료라서 PLUS 로 남길 게 없다 — 통째로 푼다. */
 
     function roadHTML() {
         var m = monthsOld();
         if (m === null) return "";
-        var plus = isPlus();
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">다음에 준비할 것</div>' +
@@ -594,8 +596,7 @@
                 '정해진 날짜가 아니라 <b>이 무렵에 많이들 시작한다</b>는 뜻이에요. ' +
                 esc(nm("의")) + ' 속도에 맞추시면 돼요.</div>' +
 
-            (plus
-                ? ROAD.map(function (r, i) {
+            (ROAD.map(function (r, i) {
                     var now = (m >= r.at) && (i === ROAD.length - 1 || m < ROAD[i + 1].at);
                     var past = m >= r.at && !now;
                     var left = r.at - m;
@@ -614,16 +615,7 @@
                                 'line-height:1.6; word-break:keep-all;">' + esc(r.note) + '</div>' +
                         '</div>' +
                     '</div>';
-                  }).join("") + milkHTML()
-
-                : '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
-                  'padding:16px;">' +
-                  '<div style="font-size:13.5px; font-weight:900; color:#8A6D00;">' +
-                      '언제 뭘 준비하면 되는지 PLUS에서 짚어드려요</div>' +
-                  '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#8A6D00; ' +
-                      'line-height:1.75; word-break:keep-all;">' +
-                      '컵으로 넘어가는 때, 젖병 졸업, 생우유 시작 시기까지 ' +
-                      esc(nm("의")) + ' 개월수에 맞춰 알려드려요.</div></div>') +
+                  }).join("") + milkHTML()) +
         '</div>';
     }
 

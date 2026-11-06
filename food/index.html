@@ -69,13 +69,14 @@
 </div>
 
         <style>
-            .food-tabs { display:flex; gap:6px; background:#F6F2EC; border:1px solid #EDE6DE; border-radius:14px;
-                         padding:5px; margin:2px 0 16px; }
-            .food-tab  { flex:1; border:none; background:transparent; cursor:pointer;
-                         padding:11px 4px; border-radius:11px; font-size:13px; font-weight:700;
+            /* 탭 모양은 다른 네 큐레이터(유모차 · 카시트 · 젖병 · 놀이)와 같게 — 이모지 없이, 같은 여백 · 글자 */
+            .food-tabs { display:flex; gap:4px; background:#F6F2EC; border:1px solid #EDE6DE; border-radius:14px;
+                         padding:4px; margin:2px 0 20px; }
+            .food-tab  { flex:1; border:none; background:transparent; cursor:pointer; white-space:nowrap;
+                         padding:12px 8px; border-radius:11px; font-size:13.5px; font-weight:800;
                          color:#A3958A; font-family:inherit; transition:0.15s; }
-            .food-tab.on { background:#FFFFFF; color:#4A413C; font-weight:900;
-                           box-shadow:0 2px 6px rgba(0,0,0,0.07); }
+            .food-tab.on { background:#FFFFFF; color:#4A413C; font-weight:800;
+                           box-shadow:0 2px 8px rgba(0,0,0,0.06); }
             body.dark-mode .food-tabs { background:#1E222A; }
             body.dark-mode .food-tab.on { background:#2A2F3A; color:#F0F2F5; }
             .food-pane { display:none; }
@@ -84,15 +85,14 @@
 
         <!-- ▼ 세 갈래 탭 — 쓰는 때가 다른 것을 갈라 놓는다 -->
         <div class="food-tabs" id="food-tabs">
-            <button class="food-tab on" data-tab="recipe"  onclick="foodTabGo('recipe')">🍚 레시피</button>
-            <button class="food-tab"    data-tab="plan"    onclick="foodTabGo('plan')">📅 식단표</button>
-            <button class="food-tab"    data-tab="allergy" onclick="foodTabGo('allergy')">🚦 알레르기</button>
+            <button class="food-tab on" data-tab="recipe"  onclick="foodTabGo('recipe')">레시피</button>
+            <button class="food-tab"    data-tab="plan"    onclick="foodTabGo('plan')">식단표</button>
+            <button class="food-tab"    data-tab="allergy" onclick="foodTabGo('allergy')">알레르기</button>
         </div>
         <div class="food-pane on" id="tab-recipe">
 <div style="margin-bottom: 24px; background: #FFFFFF; border-radius: 16px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden;">
                 <div onclick="toggleFoodCalc()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; background: #F7F5FD; transition: 0.2s;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="font-size: 22px; background: #FFFFFF; width: 40px; height: 40px; border-radius: 12px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(127, 119, 221,0.1);">💧</div>
                         <div>
                             <div style="font-size: 15px; font-weight: 800; color: #6A61CE;">이유식 계량 계산기</div>
                             <div style="font-size: 12px; font-weight: 600; color: #7F77DD; margin-top: 2px;">몇 g 넣으면 몇 g 나오는지 계산해요</div>
@@ -465,14 +465,14 @@
     <!-- 토핑 이유식: 재료마다 몇 g · 처음 먹인 재료 (홈 맘마 기록과 같은 칸) -->
     <script src="../shared/topping.js?v=1"></script>
     <script src="toppingmeal.js?v=2"></script>
-    <script src="passedfoods.js?v=b9"></script>
+    <script src="passedfoods.js?v=b10"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="foodguide.js?v=b11"></script>
+    <script src="foodguide.js?v=b12"></script>
     <script src="cookmode.js?v=3"></script>
     <script src="shoplist.js?v=b10"></script>
     <script src="planlock.js?v=b7"></script>
     <script src="nextfood.js?v=b9"></script>
-    <script src="../shared/plusmark.js?v=b7"></script>
+    <script src="../shared/plusmark.js?v=b8"></script>
     <script src="../shared/plusgate.js?v=3"></script>
     <script src="../shared/favsync.js"></script>
     <!-- 💌 짝꿍 배냇함으로 보내기 (장볼 거) — 누를 때만 서버에 붙는다 -->
