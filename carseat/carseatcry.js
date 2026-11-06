@@ -184,7 +184,7 @@
         var plus = isPlus();
 
         var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDE2D 카시트만 타면 울어요</div>';
+            '<div class="matrix-header">카시트만 타면 울어요</div>';
 
         /* 병원 신호를 먼저. 우는 게 방법 문제가 아닐 수도 있다. */
         out += '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
@@ -307,7 +307,7 @@
         if (m !== null && m < 14) return "";        // 아직 못 푸는 나이면 안 띄운다
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDD13 하네스를 스스로 풀 때</div>' +
+            '<div class="matrix-header">하네스를 스스로 풀 때</div>' +
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +
@@ -353,7 +353,7 @@
         var young = (m !== null && m < 4);
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDEE3\uFE0F 장거리 \u00b7 귀성길에 지킬 것</div>' +
+            '<div class="matrix-header">장거리 \u00b7 귀성길에 지킬 것</div>' +
 
             '<div style="background:' + (young ? "#FFF2F2" : "#FFF9E6") + '; ' +
                 'border:1px solid ' + (young ? "#FCA5A5" : "#F5E1A4") + '; border-radius:14px; ' +
@@ -601,7 +601,7 @@
         var m = monthsOld();
 
         var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDDD3\uFE0F 이번 주 여행 계획</div>';
+            '<div class="matrix-header">이번 주 여행 계획</div>';
 
         if (!plus) {
             return out +

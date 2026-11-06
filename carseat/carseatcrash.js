@@ -177,7 +177,7 @@
         var any = Object.keys(state()).length > 0;
 
         return '<div class="matrix-panel" id="crash-card" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🚨 사고가 났다면</div>' +
+            '<div class="matrix-header">사고가 났다면</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.6; word-break:keep-all;">' +
                 '가벼운 접촉사고였어도 카시트는 바꿔야 할 수 있어요.<br>' +
@@ -207,7 +207,7 @@
 
     function recallHTML() {
         return '<div class="matrix-panel" id="recall-card" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">📢 리콜된 제품인지 확인하기</div>' +
+            '<div class="matrix-header">리콜된 제품인지 확인하기</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 '카시트도 리콜이 나와요. 사고 나서 아는 것보다 지금 한 번 보는 게 나아요.<br>' +

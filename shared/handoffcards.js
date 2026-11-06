@@ -110,12 +110,12 @@
         var name = seatName(o);
         if (!name) return "";
         if (o.expireAt && window.handoffExpired && window.handoffExpired(o.expireAt)) {
-            return card("carseat-handoff", "🥕 다 쓰면 팔거나 물려주기",
+            return card("carseat-handoff", "다 쓰면 팔거나 물려주기",
                 '<b class="ho-red" style="color:' + RED + ';">유효기간이 지난 카시트예요 (' + esc(ym(o.expireAt)) + '까지).</b> ' +
                 '팔거나 물려주지 말고 버려 주세요. 버리는 법을 알려 드려요.',
                 btn("버리는 법", "window.openSeatHandoff('sell')", true));
         }
-        return card("carseat-handoff", "🥕 다 쓰면 팔거나 물려주기",
+        return card("carseat-handoff", "다 쓰면 팔거나 물려주기",
             '작아지면 당근에 올릴 글이나 물려줄 말을 바로 만들어 드려요. ' +
             '<b>사고 이력 · 유효기간</b>까지 넣어서요.', two("openSeatHandoff"));
     }

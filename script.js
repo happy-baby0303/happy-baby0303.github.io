@@ -1683,19 +1683,19 @@ function calcHotDeal() {
     verdictEl.style.color = "#FFF";
     const hdRes = document.getElementById('hd-result'); if(hdRes) hdRes.style.display = 'block';
     
-    // 🎯 쿠팡 스마트 링크 매칭 시스템
+    // 품목마다 쿠팡 링크 하나 ('최저가' 는 확인할 수 없는 말이라 쓰지 않는다)
     let coupangLink = ''; 
     let btnText = '';
 
     if (cat === 'diaper') {
         coupangLink = 'https://link.coupang.com/a/fPSpeiTAD6'; 
-        btnText = '로켓배송 기저귀 최저가 비교하기';
+        btnText = '쿠팡에서 기저귀 값 보기';
     } else if (cat === 'wipe') {
         coupangLink = 'https://link.coupang.com/a/fPSk40HKOi';
-        btnText = '로켓배송 물티슈 최저가 비교하기';
+        btnText = '쿠팡에서 물티슈 값 보기';
     } else if (cat === 'milk') {
         coupangLink = 'https://link.coupang.com/a/fPSqFEMPcq';
-        btnText = '로켓배송 우리아기 분유 최저가 보기';
+        btnText = '쿠팡에서 분유 값 보기';
     }
 
    document.getElementById('hd-action-area').innerHTML = `

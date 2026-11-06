@@ -592,19 +592,14 @@ function generateToyHTML(toy, favs) {
 
     const partnerCode = "AF9932454"; 
 
-    // ⚡ 건전지 자동 할당
+    // ⚡ 건전지 — 따로 사야 하는지만 알려 준다
+    /* ⚠️ 여기 '쿠팡에서 건전지 보기' 가 있었다. 장난감 하나에 쿠팡 링크가 둘이었다 — 상품마다 가격 링크 하나만 둔다.
+          '유선' · '유선 충전' (콧물흡입기 · 코코지) 에도 '건전지가 따로 필요해요 (유선)' 이 떴다. */
     let batteryHtml = '';
-    if (toy.battery && !toy.battery.includes("없음")) {
-        let actualBatteryLink = "";
-        if (toy.battery.includes("C형")) actualBatteryLink = "https://link.coupang.com/a/fnbuI6bwpU"; 
-        else if (toy.battery.includes("AAA")) actualBatteryLink = "https://link.coupang.com/a/fnb4qGk95o"; 
-        else if (toy.battery.includes("AA")) actualBatteryLink = "https://link.coupang.com/a/fnbqrsnU2C"; 
-        else actualBatteryLink = toy.batteryLink || `https://www.coupang.com/np/search?q=건전지&lptag=${partnerCode}`;
-
+    if (toy.battery && !/없음|유선/.test(toy.battery)) {
         batteryHtml = `
-            <div style="background:#FFFBEB; padding:16px; border-radius:14px; font-size:13px; color:#B45309; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
-                <b style="color:#D97706; font-size: 13.5px; display:block; margin-bottom:4px;">건전지가 따로 필요해요 (${toy.battery})</b>
-                <a href="${actualBatteryLink}" target="_blank" style="display:inline-block; margin-top:4px; color:#D97706; font-weight:800; text-decoration:underline;">쿠팡에서 건전지 보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-left:2px;" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+            <div style="background:#FFFBEB; padding:14px 16px; border-radius:14px; border: 1px solid #FDE68A; line-height: 1.5; margin-top:16px;">
+                <b style="color:#D97706; font-size: 13.5px;">건전지가 따로 필요해요 (${toy.battery})</b>
             </div>`;
     }
 

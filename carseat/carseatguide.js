@@ -136,7 +136,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px; border:2px solid var(' + tone + ');">' +
-            '<div class="matrix-header" style="color:var(' + tone + ');">🔄 뒤보기 · 앞보기</div>' +
+            '<div class="matrix-header" style="color:var(' + tone + ');">뒤보기 · 앞보기</div>' +
             '<div style="font-size:15.5px; font-weight:900; color:' + DARK + '; ' +
                 'margin:-14px 0 10px; line-height:1.45; word-break:keep-all;">' + head + '</div>' +
             '<div style="font-size:13.5px; font-weight:600; color:#7A6F68; ' +
@@ -196,7 +196,7 @@
         }).join("");
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">📋 태우기 전 3분 점검</div>' +
+            '<div class="matrix-header">태우기 전 3분 점검</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 6px; line-height:1.6; word-break:keep-all;">' +
                 '사고 피해는 <b>어떤 카시트를 샀느냐</b>보다 <b>어떻게 맸느냐</b>로 더 크게 갈려요</div>' +
@@ -213,7 +213,7 @@
 
     function adacCard() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">📊 ADAC 점수, 낮을수록 좋아요</div>' +
+            '<div class="matrix-header">ADAC 점수, 낮을수록 좋아요</div>' +
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 '독일 자동차협회(ADAC)가 실제로 충돌시켜 매기는 점수예요. ' +
@@ -340,7 +340,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🙋 어떤 상황이신가요?</div>' +
+            '<div class="matrix-header">어떤 상황이신가요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '장착 방식이나 인증 이름은 배냇함이 볼게요. 지금 상황만 눌러 주세요</div>' +
@@ -355,7 +355,7 @@
 
     function usedCard() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🥕 중고로 사기 전에</div>' +
+            '<div class="matrix-header">중고로 사기 전에</div>' +
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-10px 0 12px; font-size:13.5px; font-weight:700; ' +
                 'color:var(--cg-red); line-height:1.75; word-break:keep-all;">' +
@@ -476,7 +476,7 @@
         if (head && !head.getAttribute("data-folded")) {
             head.setAttribute("data-folded", "1");
             head.style.cursor = "pointer";
-            head.innerHTML = '🔍 직접 조건 고르기 <span id="cg-fold" style="margin-left:auto; ' +
+            head.innerHTML = '직접 조건 고르기 <span id="cg-fold" style="margin-left:auto; ' +
                              'font-size:13px; font-weight:800; color:' + GRAY + ';">펼치기 ▾</span>';
             var grid = panel.querySelector(".matrix-grid");
             if (grid) {

@@ -91,13 +91,13 @@
         <!-- 🗂️ 탭 막대 — JS 가 만들지 않고 여기 박아둔다.
              그래야 처음부터 제자리에 있어서 화면이 안 튄다. -->
         <div id="carseat-tabbar" style="display:flex; gap:4px; background:#F6F2EC; border:1px solid #EDE6DE; border-radius:14px; padding:4px; margin:0 0 20px;">
-            <div id="ctab-pick" onclick="window.switchCarseatTab && window.switchCarseatTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#4A413C; box-shadow:0 2px 8px rgba(0,0,0,0.06);">🚘 카시트 고르기</div>
-            <div id="ctab-use" onclick="window.switchCarseatTab && window.switchCarseatTab('use')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:transparent; color:#A3958A;">🧰 쓰면서 챙길 것</div>
+            <div id="ctab-pick" onclick="window.switchCarseatTab && window.switchCarseatTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#4A413C; box-shadow:0 2px 8px rgba(0,0,0,0.06);">카시트 고르기</div>
+            <div id="ctab-use" onclick="window.switchCarseatTab && window.switchCarseatTab('use')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:transparent; color:#A3958A;">쓰면서 챙길 것</div>
         </div>
 
         <div id="view-carseat-pick">
 <div class="matrix-panel">
-            <div class="matrix-header">🔍 맞춤 카시트 상세 조건</div>
+            <div class="matrix-header">맞춤 카시트 상세 조건</div>
             <div class="matrix-grid">
                 
                 <div class="matrix-item">
@@ -197,7 +197,7 @@
             <div style="background: #FFF; width: 100%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); word-break: keep-all;">
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-size: 18px; color: #4A413C; font-weight: 900; letter-spacing: -0.5px;">🚘 내 차에 맞는 장착 방식은?</h3>
+                    <h3 style="margin: 0; font-size: 18px; color: #4A413C; font-weight: 900; letter-spacing: -0.5px;">내 차에 맞는 장착 방식은?</h3>
                     <button onclick="closeInstallGuide()" style="background: transparent; border: none; font-size: 20px; color: #A3958A; cursor: pointer; font-weight: bold;">✕</button>
                 </div>
                 
@@ -259,18 +259,18 @@
     <script src="data.js?v=b7"></script>
     <script src="app.js?v=b11"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="carseatguide.js?v=b9"></script>
+    <script src="carseatguide.js?v=b10"></script>
     <!-- 🚨 사고 후 교체 판단 + 리콜 확인 -->
-    <script src="carseatcrash.js?v=b7"></script>
-    <script src="carseatown.js?v=b10"></script>
-    <script src="carseatcry.js?v=b8"></script>
-    <script src="carseattabs.js?v=3"></script>
+    <script src="carseatcrash.js?v=b8"></script>
+    <script src="carseatown.js?v=b11"></script>
+    <script src="carseatcry.js?v=b9"></script>
+    <script src="carseattabs.js?v=4"></script>
     <script src="../shared/plusmark.js?v=b7"></script>
     <script src="../shared/plusgate.js"></script>
     <script src="../shared/favsync.js"></script>
     <!-- 다 쓴 물건 보내기 — 당근 글 · 물려줄 말 (쓰면서 챙길 것 맨 아래 카드) -->
     <script src="../shared/handoff.js?v=1"></script>
-    <script src="../shared/handoffcards.js?v=2"></script>
+    <script src="../shared/handoffcards.js?v=3"></script>
     <script src="../shared/curatorback.js?v=4"></script> 
    
 <!-- 🚀 우측 하단 위로 가기 버튼 -->
@@ -291,9 +291,13 @@
     </script>
 
     <script>
-    if (localStorage.getItem('tosil_dark_mode') === 'on') {
-        document.body.classList.add('dark-mode');
-    }
+    /* ⚠️ 다크모드는 본 앱에서 뺐다. 여기만 옛 설정을 보고 까맣게 켜고 있어서,
+          예전에 켠 적 있는 사람은 큐레이터 중 카시트만 까맣게 떴다. 다른 네 곳과 같게 옛 키를 지운다. */
+    try {
+        if (localStorage.getItem('tosil_dark_mode') === 'on') {
+            localStorage.removeItem('tosil_dark_mode');
+        }
+    } catch (e) {}
 </script>
 </body> <!-- 기존에 있던 바디 닫는 태그 -->
 </html>

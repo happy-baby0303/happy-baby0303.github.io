@@ -158,7 +158,7 @@ function renderFavorites() {
                         <tr style="border-bottom: 1px solid #EDE6DE;">
                             <td style="padding: 8px; font-weight: 700;">${i.brand}</td>
                             <td style="padding: 8px; color: #7F77DD;">${bottleMaterialLabel(i.material)}</td>
-                            <td style="padding: 8px;">${i.price === 'low' ? '가성비' : (i.price === 'mid' ? '보통' : '고급')}</td>
+                            <td style="padding: 8px;">${i.price === 'low' ? '1만 원대' : (i.price === 'mid' ? '2만 원대' : '3만 원 이상')}</td>
                             <td style="padding: 8px;">${i.antiColic === 'super' ? '전용 설계' : (bottleColicMid(i.antiColic) ? '있음' : '기본')}</td>
                         </tr>
                     `).join('')}

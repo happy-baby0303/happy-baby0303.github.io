@@ -130,7 +130,7 @@ function renderFavorites() {
     let favItems = strollerData.filter(item => favorites.includes(item.id || item.name));
 
     let htmlOutput = `<div style="font-size: 18px; font-weight: 900; color: #E32636; margin-bottom: 16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>`;
-    htmlOutput += favItems.map(item => generateCardHtml(item)).join('') + strollerExtrasHtml();
+    htmlOutput += favItems.map(item => generateCardHtml(item)).join('');
     topArea.innerHTML = htmlOutput;
 
     setTimeout(() => { document.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);
@@ -242,23 +242,14 @@ function generateCardHtml(item) {
                  : `<div class="size-visual-desc">${targetName}${/용$/.test(targetName) ? '과' : '와'} <b>길이가 같아요</b></div>`;   // 기내용과 · 캐리어와
     const visualGraphHtml = `<div class="size-visual-box"><div class="size-visual-title">📐 캐리어 대비 체감 크기</div><div class="visual-chart"><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill carrier-color" data-height="${carrierHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🧳 ${targetName}<br><b>${targetDim}cm</b></div></div><div class="v-bar-group"><div class="v-bar-bg"><div class="v-bar-fill stroller-color" data-height="${strollerHeightPct}%" style="height:0%;"></div></div><div class="v-bar-label">🛒 이 모델<br><b>${maxStrollerDim}cm</b></div></div></div>${diffDesc}</div>`;
 
-    // 3. 고른 조건에 맞는지
-    let aiReportHtml = '';
+    // 3. 고른 조건에 맞는지 — 카드 위 한 줄
+    /* ⚠️ 조건을 골라도 맞는지 안 맞는지가 세 번째 탭 '카시트 호환' 안에 있었다. 누르기 전엔 안 보였다. */
+    let verdictHtml = '';
     if (!isFavViewMode && item.matchRate !== null) {
-        let reasonLi = '';
-        if (item.matchRate === 100) {
-            reasonLi = `<li style="margin-bottom:4px;">${item.matchReasons[0]}</li>`;
-        } else if (item.matchReasons && item.matchReasons.length > 0) {
-            reasonLi = item.matchReasons.map(r => `<li style="margin-bottom:4px; color: #7A6F68;"><b>${r}</b></li>`).join('');
-        }
-        let reportTitle = item.matchRate >= 80 ? '조건에 잘 맞아요' : (item.matchRate >= 50 ? '일부만 맞아요' : '조건에 안 맞아요');
-        let titleColor = item.matchRate >= 80 ? '#7F77DD' : (item.matchRate >= 50 ? '#F59E0B' : '#E32636');
-
-        aiReportHtml = `
-            <div style="background:#FBF8F3; border:1px solid #EDE6DE; padding:16px; border-radius:14px; margin-bottom:16px;">
-                <h4 style="color:${titleColor}; margin:0 0 10px 0; font-size:14px; font-weight: 800;">${reportTitle}</h4>
-                <ul style="margin:0; padding-left:20px; font-size:13px; color:#7A6F68; line-height:1.5; font-weight: 600;">${reasonLi}</ul>
-            </div>`;
+        const reportTitle = item.matchRate === 100 ? '고르신 조건에 다 맞아요' : (item.matchRate >= 80 ? '조건에 잘 맞아요' : (item.matchRate >= 50 ? '일부만 맞아요' : '조건에 안 맞아요'));
+        const titleColor = item.matchRate >= 80 ? '#7F77DD' : (item.matchRate >= 50 ? '#B45309' : '#E32636');
+        const why = item.matchRate === 100 ? '' : (item.matchReasons || []).join(' · ');
+        verdictHtml = `<div class="stroller-verdict"><b style="color: ${titleColor};">${reportTitle}</b>${why ? ' · ' + why : ''}</div>`;
     }
 
     // 4. KTX 및 게이트 
@@ -323,6 +314,17 @@ function generateCardHtml(item) {
     `;
 
 
+    // 7. 한눈에 — 가격(따로 사는 것까지 합친 값) · 무게 · 접은 크기
+    const dimsTxt = (item.foldedDims || []).length ? item.foldedDims.join('×') + 'cm' : '-';
+    const extraCost = item.hiddenTax?.cost > 0 ? item.hiddenTax.cost : 0;
+    const keyHtml = `
+        <div class="receipt-box stroller-key">
+            <div class="receipt-row"><span>가격</span><span class="key-val" style="color: #7F77DD;">${realPrice.toLocaleString()}원</span></div>
+            ${extraCost ? `<div class="receipt-desc key-note">따로 사야 하는 것 ${extraCost.toLocaleString()}원 포함</div>` : ''}
+            <div class="receipt-row"><span>무게</span><span class="key-val">${item.specs.weight}kg</span></div>
+            <div class="receipt-row"><span>접은 크기</span><span class="key-val">${dimsTxt}</span></div>
+        </div>`;
+
     // 8. 최종 렌더링
     return `
     <div class="stroller-card" id="card-${cId}" data-name="${String(item.name).replace(/"/g, '&quot;')}">
@@ -343,6 +345,12 @@ function generateCardHtml(item) {
                 </div>
             </div>
 
+        ${verdictHtml}
+        ${keyHtml}
+        <button type="button" class="stroller-more-btn" aria-expanded="false" onclick="toggleStrollerMore(this)"><span class="more-label">자세히 보기</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+
+        <!-- 자세히 보기: 출고가 내역 · 기본 스펙 · 써보면 · 카시트 호환 · 가격 보기 -->
+        <div class="stroller-more" hidden>
         ${taxHtml}
         ${tabsHtml}
         
@@ -379,7 +387,6 @@ function generateCardHtml(item) {
             
             <!-- 카시트 호환 탭 -->
             <div id="content-${cId}-sim" class="tab-content" style="display:none;">
-                ${aiReportHtml}
                 ${ktxAlertHtml}
                 <div class="adapter-container">
                     <div class="adapter-title">🔩 카시트 트래블 호환 부품</div>
@@ -392,69 +399,34 @@ function generateCardHtml(item) {
         </div>
 
         ${purchaseAreaHtml}
+        </div>
     </div>
     `;
 }
 
-/* 같이 챙기면 좋은 것 · 카시트도 보기 — 목록에 한 번만.
-   ⚠️ 예전엔 유모차 카드마다 같은 세 칸과 '카시트도 같이 보기' 가 붙어 있었다.
-      다섯 장이면 다섯 번 — 카드 한 장이 화면 두 장 길이가 됐고, 첫 다섯 장에만 쿠팡 단추가 20개였다.
-      그리고 제목 '같이 많이 사는 것' 은 우리가 세어 본 적이 없는 말이었다 (근거 없는 인기 표현). */
-function strollerExtrasHtml() {
-    const partnerCode = "AF9932454";
-    /* ⚠️ 셋째 칸이 '유모차 가방걸이 고리' 였다. 같은 화면 맨 위 안전 카드(strollerguide.js)가
-          '손잡이에 가방을 걸지 마세요 · 뒤로 넘어가는 가장 흔한 원인' 이라고 하는데, 바로 그걸 팔고 있었다.
-          레인커버로 바꾼다. 선풍기는 날개 없는 것으로 찾게 한다 (손가락 끼임). */
-    /* ⚠️ 10월에도 '날개 없는 선풍기' 를 권했다. 첫 칸은 계절을 따른다.
-          6~8월 선풍기 · 4 · 5 · 9월 모기장 · 10~3월 방한 커버 */
-    const accMon = new Date().getMonth() + 1;
-    const accSeason = (accMon >= 6 && accMon <= 8) ? { icon: '🌬️', name: '날개 없는 선풍기', q: '유모차 날개없는 선풍기' }
-        : (accMon >= 4 && accMon <= 9) ? { icon: '🦟', name: '유모차 모기장', q: '유모차 모기장' }
-        : { icon: '🧣', name: '방한 커버', q: '유모차 방한커버' };
-    const accFanUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent(accSeason.q)}&lptag=${partnerCode}`;
-    const accBagUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 정리함 이너백')}&lptag=${partnerCode}`;
-    const accHookUrl = `https://www.coupang.com/np/search?q=${encodeURIComponent('유모차 레인커버')}&lptag=${partnerCode}`;
-
-    const accessoryHtml = `
-        <div style="background: #FBF8F3; padding: 18px; border-radius: 16px; margin-top: 24px; border: 1px solid #EDE6DE;">
-            <!-- 제목 가운데 -->
-            <div style="font-size: 13.5px; font-weight: 900; color: #4A413C; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                같이 챙기면 좋은 것
-            </div>
-            
-            <!-- 박스들 가운데 정렬 (justify-content: center; 추가) -->
-            <!-- ⚠️ 가운데 정렬 + 가로 스크롤을 같이 쓰면, 넘칠 때 끝이 잘리고 스크롤도 안 닿는다.
-                 (플립처럼 좁은 화면에서 세 번째 칸이 반 잘렸다) 세 칸 격자로 고정한다. -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                <!-- 1. 계절 (선풍기 · 모기장 · 방한 커버) -->
-                <a href="${accFanUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">${accSeason.icon}</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">${accSeason.name}</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
-                </a>
-                <!-- 2. 정리함 -->
-                <a href="${accBagUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">🧺</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">유모차 정리함</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
-                </a>
-                <!-- 3. 레인커버 -->
-                <a href="${accHookUrl}" target="_blank" style="min-width: 0; background: #FFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 12px 8px; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">☔</div>
-                    <div style="font-size: 12px; font-weight: 800; color: #5A4D44;">레인커버</div>
-                    <div style="font-size: 10.5px; font-weight: 600; color: #7F77DD; margin-top: 4px;">쿠팡에서 보기</div>
-                </a>
-            </div>
-        </div>
-    `;
-
-    const crossSellHtml = `<a href="../carseat/index.html" style="display:block; width:100%; background:#FFFBEB; border:1px solid #FDE68A; color:#B45309; padding:16px; border-radius:14px; font-weight:800; font-size:13.5px; text-align:center; text-decoration:none; transition:0.2s; margin-top:16px;">카시트도 같이 보기 ›</a>`;
-    /* 카드 밖에 홀로 서면 크림색 바탕 위 베이지 상자가 된다 — 유모차 카드와 같은 모양의 흰 카드에 담는다.
-       ⚠️ class 에 stroller-card 를 쓰지 않는다. 다른 모듈(트렁크 · 카시트 호환 · ?pick=)이 그 이름으로 유모차를 센다 */
-    return `<div class="stroller-extras" style="background:#FFFFFF; border:1px solid #F7F3ED; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); padding:6px 20px 20px;">${accessoryHtml}${crossSellHtml}</div>`;
+/* 카드는 가격 · 무게 · 접은 크기만 보이고, 나머지는 '자세히 보기' 안에 둔다.
+   ⚠️ 카드 한 장이 1,150px — 휴대폰 화면 두 장 길이였다. 다섯 장을 보려면 열 화면을 내려야 했다. */
+function toggleStrollerMore(btn, open) {
+    const card = btn && btn.closest('.stroller-card');
+    const box = card && card.querySelector('.stroller-more');
+    if (!box) return;
+    const willOpen = typeof open === 'boolean' ? open : box.hidden;
+    box.hidden = !willOpen;
+    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    const label = btn.querySelector('.more-label');
+    if (label) label.textContent = willOpen ? '접기' : '자세히 보기';
+    if (!willOpen) return;
+    // 막대(무게 · 캐리어 대비 크기)는 열 때 0 에서 자란다
+    const bars = box.querySelectorAll('.meter-fill, .v-bar-fill');
+    bars.forEach(el => { if (el.getAttribute('data-height')) el.style.height = '0%'; if (el.getAttribute('data-width')) el.style.width = '0%'; });
+    setTimeout(() => bars.forEach(el => { const h = el.getAttribute('data-height'), w = el.getAttribute('data-width'); if (h) el.style.height = h; if (w) el.style.width = w; }), 60);
 }
+window.toggleStrollerMore = toggleStrollerMore;
 
-// 🧠 깐깐한 감점(Penalty) AI 리포팅 엔진
+/* ⚠️ 목록 끝에 '같이 챙기면 좋은 것' (계절 용품 · 정리함 · 레인커버) 과 '카시트도 같이 보기' 가 있었다.
+      유모차를 고르는 화면에 유모차가 아닌 쿠팡 링크 세 개 — 쇼핑몰처럼 보였다. 상품마다 가격 링크 하나만 둔다. */
+
+// 고른 조건에 맞는 순서로 줄 세우기
 function renderList(isUserAction = false) {
     const topArea = document.getElementById('result-top-area');
     const otherArea = document.getElementById('result-other-area');
@@ -589,16 +561,16 @@ function renderList(isUserAction = false) {
     window.__strollerRest = null;
     if (isMatrixActive && processedData.length > 3) {
         topTitle.style.display = 'flex'; showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `나머지 ${processedData.length - 3}개 더 보기 ▾`; otherArea.style.display = 'none';
-        topArea.innerHTML = processedData.slice(0, 3).map(x => generateCardHtml(x)).join('') + strollerExtrasHtml();
+        topArea.innerHTML = processedData.slice(0, 3).map(x => generateCardHtml(x)).join('');
         otherArea.innerHTML = processedData.slice(3).map(generateCardHtml).join('');
     } else if (processedData.length > 5) {
         topTitle.style.display = 'none'; otherArea.style.display = 'none'; otherArea.innerHTML = '';
-        topArea.innerHTML = processedData.slice(0, 5).map(x => generateCardHtml(x)).join('') + strollerExtrasHtml();
+        topArea.innerHTML = processedData.slice(0, 5).map(x => generateCardHtml(x)).join('');
         window.__strollerRest = processedData.slice(5);
         showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `유모차 ${processedData.length - 5}개 더 보기 ▾`;
     } else {
         topTitle.style.display = 'none'; showMoreBtn.style.display = 'none'; otherArea.innerHTML = '';
-        topArea.innerHTML = processedData.map(x => generateCardHtml(x)).join('') + strollerExtrasHtml();
+        topArea.innerHTML = processedData.map(x => generateCardHtml(x)).join('');
     }
 
     setTimeout(() => { document.querySelectorAll('.meter-fill, .v-bar-fill').forEach(el => { const height = el.getAttribute('data-height'); if(height) el.style.height = height; const width = el.getAttribute('data-width'); if(width) el.style.width = width; }); }, 50);
@@ -753,6 +725,8 @@ window.shareStroller = shareStroller;
             hit = [].slice.call(document.querySelectorAll('.stroller-card')).filter(function (c) { return c.getAttribute('data-name') === pick; })[0];
         }
         if (!hit) { if (tries > 0) setTimeout(function () { go(tries - 1); }, 400); return; }
+        var mb = hit.querySelector('.stroller-more-btn');
+        if (mb && mb.getAttribute('aria-expanded') !== 'true') toggleStrollerMore(mb, true);
         var other = document.getElementById('result-other-area');
         if (other && other.contains(hit) && getComputedStyle(other).display === 'none') {
             var more = document.getElementById('show-more-btn'); if (more) more.click();

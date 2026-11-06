@@ -1930,10 +1930,6 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
         }
     });
     
-    let uniqueRequired = [...new Set(allRequiredIngredients)].filter(ing => !ing.includes('물') && !ing.includes('쌀') && !ing.includes('진밥'));
-    const inventory = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
-    const fridgeItemNames = inventory.map(item => item.name);
-    let missingIngredients = uniqueRequired.filter(ing => !fridgeItemNames.some(fItem => ing.includes(fItem)));
 
     let prepCounts = {};
     allRequiredIngredients.forEach(item => {
@@ -1948,9 +1944,6 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
             .swapped-card { animation: cardPulse 0.4s ease-out forwards; }
             details > summary::-webkit-details-marker { display: none; }
             details[open] summary .arrow { transform: rotate(180deg); }
-            /* 💡 장바구니 체크리스트용 CSS */
-            .shop-tag { display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:6px 12px; border-radius:20px; color:#FFF; font-weight:700; font-size:13px; margin-bottom:6px; margin-right:6px; cursor:pointer; transition:0.2s; }
-            .shop-tag.checked { background:rgba(255,255,255,0.05); color:#A3958A; text-decoration:line-through; border-color:transparent; }
         </style>
 
                       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; padding: 0 4px;">
@@ -2096,31 +2089,9 @@ window.drawAutoPilotUI = function(highlightIndex = -1) {
         </details>
     `;
 
-    // 💡 [니치 디테일 3] 마트 갈 때 쓰는 '터치형 체크리스트' 장바구니!!
-    const missingCount = missingIngredients.length;
-    const missingTagsHtml = missingCount > 0 
-        ? missingIngredients.map(ing => `<span class="shop-tag" onclick="this.classList.toggle('checked')">${ing}</span>`).join('')
-        : '<div style="color:#4ADE80; font-size:14px; font-weight:800; text-align:center; padding:10px 0;">필요한 재료가 냉장고에 모두 있어요 🎉</div>';
-
-    html += `
-        <div style="background: #4A413C; border-radius: 16px; padding: 24px; text-align: left; box-shadow: 0 4px 16px rgba(0,0,0,0.05); position: relative; overflow: hidden; margin-bottom: 32px;">
-            <div style="font-size: 12px; font-weight: 900; color: #7F77DD; margin-bottom: 8px;">스마트 장보기 비서</div>
-            <div style="font-size: 15.5px; font-weight: 800; color: #FFFFFF; margin-bottom: 6px; line-height:1.4;">
-                이번 주 식단을 완성하려면<br><span style="color:#4ADE80;">총 ${missingCount}개의 식재료</span>가 부족해요.
-            </div>
-            <div style="font-size: 12px; color: #A3958A; font-weight: 600; margin-bottom: 20px;">
-                💡 장 보실 때 재료를 터치해서 하나씩 지워보세요
-            </div>
-            
-            <div style="margin-bottom: 24px;">
-                ${missingTagsHtml}
-            </div>
-            
-            <a href="https://link.coupang.com/a/e2f58ZVlhQ" target="_blank" style="display: flex; justify-content:center; align-items:center; gap:8px; width: 100%; background: #7F77DD; color: #FFFFFF; padding: 16px 0; border-radius: 12px; font-weight: 900; font-size: 15px; text-decoration: none; transition: 0.2s;">
-                부족한 재료 로켓프레시로 한 번에 담기 ›
-            </a>
-        </div>
-    `;
+    /* ⚠️ 여기 '스마트 장보기 비서' 카드가 있었다 — 부족한 재료 목록과 '로켓프레시로 한 번에 담기' (쿠팡 고정 링크).
+          쿠팡은 여러 상품을 밖에서 한 번에 담게 해 주지 않아서 그 말은 맞지 않았고,
+          같은 일을 shoplist.js 의 '몇 개 사면 되나' 가 재료마다 한다 (그래서 이 카드는 그려지자마자 숨겨졌다). */
 
     container.innerHTML = html;
 };

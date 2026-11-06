@@ -609,3 +609,20 @@ body.dark-mode .size-visual-desc {
     border: 1px solid #5A4D44 !important;
     color: #EDE6DE !important;
 }
+
+/* ========================================== */
+/* 카드 한눈에 — 가격 · 무게 · 접은 크기 + 자세히 보기 */
+/* ========================================== */
+.stroller-verdict { font-size: 13px; font-weight: 700; color: #7A6F68; line-height: 1.55; margin: 0 0 12px; word-break: keep-all; }
+.stroller-key { margin: 0 0 12px; padding: 14px 16px; }
+.stroller-key .receipt-row { align-items: baseline; font-size: 13.5px; margin-bottom: 10px; }
+.stroller-key .receipt-row:last-child { margin-bottom: 0; }
+.stroller-key .key-val { font-size: 16px; font-weight: 900; color: #4A413C; letter-spacing: -0.3px; }
+.stroller-key .key-note { text-align: right; margin: -6px 0 10px; }
+.stroller-more-btn { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 13px 0; background: #FFFFFF; border: 1px solid #EDE6DE; border-radius: 12px; font-family: inherit; font-size: 13.5px; font-weight: 800; color: #7A6F68; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.stroller-more-btn:active { background: #F6F2EC; }
+.stroller-more-btn svg { transition: transform .2s; flex-shrink: 0; }
+.stroller-more-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.stroller-more[hidden] { display: none !important; }
+body.dark-mode .stroller-verdict { color: #C4B5A9 !important; }
+body.dark-mode .stroller-more-btn { background: #554A43 !important; border-color: #5A4D44 !important; color: #EDE6DE !important; }

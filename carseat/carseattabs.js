@@ -46,8 +46,8 @@
     } catch (e) {}
 
     var TABS = [
-        { id: "pick", label: "\uD83D\uDE98 카시트 고르기" },
-        { id: "use",  label: "\uD83E\uDDF0 쓰면서 챙길 것" }
+        { id: "pick", label: "카시트 고르기" },
+        { id: "use",  label: "쓰면서 챙길 것" }
     ];
 
     function cur() {
@@ -474,7 +474,7 @@
             "cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
         head.innerHTML =
             '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
-                '\uD83D\uDCD6 알아두면 좋은 것</span>' +
+                '알아두면 좋은 것</span>' +
             '<span class="cs-extra-n" style="font-size:12.5px; font-weight:800; color:#A3958A;">' + targets.length + '</span>' +
             '<span id="cse-mark" style="margin-left:auto; font-size:13px; font-weight:800; ' +
                 'color:#A3958A;">펼치기 \u25BE</span>';

@@ -204,6 +204,26 @@
         setTimeout(function () { if (t.parentNode) t.remove(); }, 3200);
     }
 
+    /* 날짜 칸 — 글자를 보여 주는 상자 위에 투명한 날짜 칸을 덮는다.
+       ⚠️ 빈 <input type=month> 는 '-------' 로, 폭 44px 짜리 date 는 'mn' 처럼 잘려서 고장 난 칸처럼 보였다.
+          보냄 시트(shared/handoff.js)의 monthField 와 같은 방식. */
+    function ymText(v) {
+        var p = String(v || "").split("-");
+        return p.length >= 2 ? p[0] + "년 " + Number(p[1]) + "월" : String(v || "");
+    }
+    function pickField(type, val, label, max, onchange, aria, tall) {
+        return '<div style="position:relative; flex-shrink:0; display:inline-flex; align-items:center; gap:6px; ' +
+                'padding:' + (tall ? '13px 14px' : '10px 12px') + '; border-radius:' + (tall ? '13px' : '10px') + '; ' +
+                'border:1px solid #DCD3C8; background: #FFFFFF; font-size:13px; font-weight:800; ' +
+                'color:' + (val && !tall ? DARK : GRAY) + '; white-space:nowrap; cursor:pointer;">' +
+                esc(label) + '<span aria-hidden="true" style="font-size:10px; color:' + GRAY + ';">\u25BE</span>' +
+                '<input type="' + type + '" value="' + esc(val || "") + '"' + (max ? ' max="' + max + '"' : '') +
+                    ' aria-label="' + esc(aria) + '" onchange="' + onchange + '" ' +
+                    'style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; ' +
+                    'border:0; margin:0; padding:0; font-size:16px;">' +
+            '</div>';
+    }
+
     /* '우리 카시트' 카드 — carseattabs.js 가 그릇(#carseat-own)에서 카드를 꺼내 '쓰면서 챙길 것' 에 바로 놓는다 */
     function ownPanel() {
         var list = document.querySelectorAll('[data-from="' + HOST + '"]');
@@ -543,7 +563,7 @@
 
         if (!title) {
             return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-                '<div class="matrix-header">\uD83D\uDE98 우리 카시트</div>' +
+                '<div class="matrix-header">우리 카시트</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.75; word-break:keep-all;">' +
                     '쓰고 계신 카시트를 알려주시면 <b>언제까지 쓸 수 있는지</b> 알려드려요. ' +
@@ -562,7 +582,7 @@
         var m = monthsOld();
 
         var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDE98 우리 카시트</div>' +
+            '<div class="matrix-header">우리 카시트</div>' +
 
             /* 계절 경고는 제일 위. 겨울 패딩은 실제로 사고가 나는 항목이다. */
             '<div style="margin-top:-16px;"></div>' + seasonHTML() +
@@ -650,11 +670,7 @@
 
             '<div style="display:flex; align-items:center; gap:8px;">' +
                 '<span style="flex:1; font-size:12px; font-weight:800; color:#7A6F68;">만료일 (옆면 스티커)</span>' +
-                '<input type="month" value="' + esc(o.expireAt || "") + '" ' +
-                    'onchange="window.setSeatField(\'expireAt\', this.value)" ' +
-                    'style="padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
-                    'background: #FFFFFF; font-size:12.5px; font-weight:800; color:#7A6F68; ' +
-                    'box-sizing:border-box;">' +
+                pickField("month", o.expireAt, o.expireAt ? ymText(o.expireAt) : "고르기", "", "window.setSeatField(\'expireAt\', this.value)", "만료일 고르기") +
             '</div>' +
         '</div>';
 
@@ -714,12 +730,7 @@
                 '<div onclick="window.markHarness()" style="flex:1; text-align:center; ' +
                     'padding:13px; background:#FFFFFF; color:' + DARK + '; border:1.5px solid #DCD3C8; border-radius:13px; ' +
                     'font-size:13.5px; font-weight:900; cursor:pointer;">오늘 어깨끈 맞췄어요</div>' +
-                '<input type="date" value="' + esc(o.harnessAt || "") + '" max="' + today() + '" ' +
-                    'onchange="window.markHarness(this.value)" ' +
-                    'title="예전에 맞췄으면 그 날짜를 고르세요" ' +
-                    'style="flex-shrink:0; width:44px; padding:15px 6px; border-radius:13px; ' +
-                    'border:1px solid #DCD3C8; background: #FFFFFF; color:' + GRAY + '; ' +
-                    'font-size:11px; cursor:pointer;">' +
+                pickField("date", o.harnessAt, "다른 날", today(), "window.markHarness(this.value)", "예전에 맞췄으면 그 날짜를 고르세요", true) +
             '</div>' +
 
             '<div style="margin-top:11px; font-size:11.5px; font-weight:600; color:' + GRAY + '; ' +
@@ -733,7 +744,7 @@
 
     function teaseHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDE98 우리 카시트</div>' +
+            '<div class="matrix-header">우리 카시트</div>' +
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
@@ -759,7 +770,7 @@
         var q = brand ? (brand + " 정품 쿨시트") : "카시트 순정 쿨시트";
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\u2744\uFE0F 쿨시트 · 방한커버 사기 전에</div>' +
+            '<div class="matrix-header">쿨시트 · 방한커버 사기 전에</div>' +
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 12px; font-size:13px; font-weight:600; ' +
@@ -794,7 +805,7 @@
 
     function carRideHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83E\uDDF8 차에서 뭘 쥐여줄까</div>' +
+            '<div class="matrix-header">차에서 뭘 쥐여줄까</div>' +
 
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 12px;">' +
@@ -821,7 +832,7 @@
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             /* ⚠️ carseatcrash.js 에도 '사고가 났다면' 카드가 있다 (바꿔야 하나를 다섯 가지로 묻는 것).
                   같은 탭에 같은 제목이 두 번 뜨고 있었다. 여긴 '그 다음에 할 일' 이라 이름을 나눈다. */
-            '<div class="matrix-header">\uD83D\uDCC4 사고 뒤에 챙길 것</div>' +
+            '<div class="matrix-header">사고 뒤에 챙길 것</div>' +
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '\u26A0\uFE0F <b>가벼운 접촉사고라도 카시트는 교체 대상일 수 있어요.</b> ' +
@@ -847,7 +858,7 @@
 
     function washHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83E\uDDFC 토했을 때</div>' +
+            '<div class="matrix-header">토했을 때</div>' +
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '<b>하네스에 세제를 쓰지 마세요.</b> 세제나 유연제가 닿으면 섬유가 약해져요. ' +
