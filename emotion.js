@@ -1334,7 +1334,7 @@
             body =
             '<div style="text-align:center; padding:80px 24px;">' +
                 '<div style="font-family:\'Nanum Pen Script\', cursive; font-size:26px; color:var(--text-sub); line-height:1.6;">' +
-                    '아직 받은 편지가 없어요<br>오늘 기록을 남기면<br>침대 맡 편지가 도착해요' +
+                    '아직 받은 편지가 없어요<br>오늘 기록을 남기면<br>밤에 편지가 도착해요' +
                 '</div>' +
             '</div>';
         } else {
@@ -1641,7 +1641,7 @@ wrap.innerHTML =
         var summary = "";
         if (st.have < 3) {
             summary = '<div style="text-align:center; padding:26px 20px; font-size:13px; font-weight:600; color:var(--text-sub); line-height:1.7;">' +
-                '아직 ' + st.have + '일치뿐이에요<br>사흘이 모이면 무늬가 보이기 시작해요' +'</div>';
+                (st.have ? '아직 ' + st.have + '일치만 있어요' : '아직 잠 기록이 없어요') + '<br>사흘치가 모이면 무늬가 보이기 시작해요' +'</div>';
         } else {
             var cells = [];
             if (st.avgBed !== null) cells.push(["잠드는 시간", bedWords(st.avgBed)]);
@@ -1674,7 +1674,7 @@ wrap.innerHTML =
                     '<div>' +
                         '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' + esc(name) + '의 일주일 잠</div>' +
                         '<div style="font-size:13px; font-weight:600; color:var(--text-sub); margin-top:6px;">날마다 언제 잤는지, 하루에 얼마나 잤는지</div>' +
-                        '<div style="font-size:11px; font-weight:600; color:var(--text-sub); margin-top:4px; opacity:0.8;">하루를 새벽 ' + SLEEP_DAY_START_H + '시부터 셉니다 · 밤잠이 안 잘리게요</div>' +
+                        '<div style="font-size:11px; font-weight:600; color:var(--text-sub); margin-top:4px; opacity:0.8;">새벽 ' + SLEEP_DAY_START_H + '시를 하루의 시작으로 봐요 · 밤잠이 안 잘리게요</div>' +
                     '</div>' +
                     '<div onclick="window.closeSleepMap()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; padding:2px 8px; line-height:1;">×</div>' +
                 '</div>' +

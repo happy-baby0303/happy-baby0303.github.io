@@ -678,7 +678,7 @@
             'style="background:var(--bg-card); border:1px solid var(--border); ' +
             'border-radius:18px; padding:15px 16px; margin-bottom:16px;">' +
             '<div style="font-size:11.5px; font-weight:900; color:' + GOLD + '; ' +
-                'letter-spacing:0.3px; margin-bottom:5px; word-break:keep-all;">📚 ' + esc(head) + '</div>' +
+                'letter-spacing:0.3px; margin-bottom:5px; word-break:keep-all;">' + esc(head) + '</div>' +
             rows +
             '<div id="info-all-btn" onclick="window.toggleInfoLibrary()" ' +
                 'style="text-align:center; margin-top:11px; padding-top:11px; ' +

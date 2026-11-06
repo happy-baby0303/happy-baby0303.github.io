@@ -1351,8 +1351,8 @@ window.addDailyExpense = async function(type) {
     const amount = parseInt(input.value.replace(/,/g, '')) || 0;
     
     if(amount <= 0) {
-        if(typeof showToast === 'function') return showToast("⚠️ 금액을 정확히 입력해주세요");
-        else return alert("⚠️ 금액을 정확히 입력해주세요");
+        if(typeof showToast === 'function') return showToast("금액을 적어 주세요");
+        else return alert("금액을 적어 주세요");
     }
 
     let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "", goalAmount: 100000, history: [], categories: { diaper: 0, food: 0, etc: 0 } };
@@ -1926,8 +1926,8 @@ function toggleCheck(e) { if(e.target.tagName !== 'INPUT') { const cb = document
 function calcFever() {
     // 🚨 체크박스 검사 로직 완전히 걷어냈습니다!
     const w = Number(document.getElementById('v-weight').value);
-    if(!w) return window.showToast("체중을 입력해주세요.");
-    if(w < 1 || w > 40) return window.showToast("체중을 다시 확인해주세요.");
+    if(!w) return window.showToast("몸무게를 적어 주세요");
+    if(w < 1 || w > 40) return window.showToast("몸무게를 다시 확인해 주세요");
 
     // 소아과 리포트에서 쓰는 최신 체중은 그대로 저장한다
     localStorage.setItem('tosil_latest_weight', w);
@@ -1955,7 +1955,7 @@ async function addFeverRecord() {
     // 🚨 투약 기록 시 체크박스 깐깐하게 검사하는 로직 삭제 완료!
 
     const temp = parseFloat(document.getElementById('v-temp').value);
-    if(!temp || !selectedPillType) return window.showToast('⚠️ 체온과 약 종류를 명확히 지정해주세요');
+    if(!temp || !selectedPillType) return window.showToast('체온과 약 종류를 골라 주세요');
     
     /* 기록을 막지 않는다.
        이미 먹였는데 앱이 거부하면 '마지막 투약 시각'이 틀리게 남고,
@@ -2358,7 +2358,7 @@ window.openChecklistModal = function(theme = 'basic') {
         );
     } else {
         baseData.push(
-            { id: 'c_snack', label: '외식 통제용 아기 과자 및 간식', checked: false },
+            { id: 'c_snack', label: '아기 과자 · 간식 (식당에서 기다릴 때)', checked: false },
             { id: 'c_bib', label: '실리콘 턱받이 및 이유식 숟가락', checked: false }
         );
     }
@@ -2403,7 +2403,7 @@ window.openChecklistModal = function(theme = 'basic') {
     } else if (theme === 'stay') {
         baseData.push(
             { id: 'c_bottle_wash', label: '휴대용 젖병 세제 및 세척솔 (숙소 비치 안됨)', checked: false },
-            { id: 'c_bedding', label: '낯선 환경 수면 의식용 애착 인형 및 이불', checked: false },
+            { id: 'c_bedding', label: '애착 인형 · 집에서 덮던 이불 (낯선 데서도 잠들기 쉬워요)', checked: false },
             { id: 'c_wash_travel', label: '아기 전용 세면도구 (어메니티 사용 주의)', checked: false }
         );
     }
@@ -2425,18 +2425,17 @@ window.openChecklistModal = function(theme = 'basic') {
         );
     }
 
-   // 🚨 4. 신규 마케팅 니치: 현관문 단속 (육아 현실 200% 반영 피눈물 방지용)
-    baseData.push({ isHeader: true, label: '🏠 현관문 나서기 전 집안 단속' });
+   // 4. 현관 나서기 전 — 짐이 아니라 집에 두고 가면 안 되는 것
+    baseData.push({ isHeader: true, label: '나가기 전에 마지막으로' });
     
-    // 테마별 생명줄 분리 (외출 vs 숙박)
+    // ⚠️ 숙박이면 애착 인형 · 이불이 위 '테마별' 칸(c_bedding)에 이미 있다. 여기서 또 물으면 두 번이 된다.
     if (theme === 'stay') {
         baseData.push(
-            { id: 'c_doll_stay', label: '🚨 아기 최애 애착 인형 & 수면 이불 (없으면 오늘 밤 아무도 못 잠)', checked: false },
-            { id: 'c_laundry', label: '🧺 세탁기 안 젖은 빨래 널기 (다녀오면 쉰내 나서 처음부터 다시 빨아야 함)', checked: false }
+            { id: 'c_laundry', label: '세탁기 안 빨래 널기 (며칠 두면 쉰내가 나서 다시 빨아야 해요)', checked: false }
         );
     } else {
         baseData.push(
-            { id: 'c_doll_out', label: '🚨 아기 최애 장난감 & 쪽쪽이 (차 막힐 때 터지는 오열 방지용 생명줄)', checked: false }
+            { id: 'c_doll_out', label: '좋아하는 장난감 · 쪽쪽이 (차가 막혀 보챌 때 꺼내요)', checked: false }
         );
     }
 
@@ -2490,9 +2489,9 @@ window.openChecklistModal = function(theme = 'basic') {
 
     // 공통 깜빡병 리스트
     baseData.push(
-        { id: 'c_home_trash', label: '💩 기저귀 매직캔 & 이유식 음쓰 비우기 (귀가 후 냄새 지옥 100% 확정)', checked: false },
-        { id: 'c_home_robot', label: '🧸 바닥 장난감 치우기 (로봇청소기 쓰시면 이때 켜두면 좋아요)', checked: false },
-        { id: 'c_home_window', label: '💨 에어컨 전원 끄기 및 창문 닫기 (갑작스러운 소나기·미세먼지 테러 방지)', checked: false }
+        { id: 'c_home_trash', label: '기저귀 통 · 음식물 쓰레기 비우기 (돌아오면 집에 냄새가 배어 있어요)', checked: false },
+        { id: 'c_home_robot', label: '바닥 장난감 치우기 (로봇청소기를 돌릴 거면 지금 켜 두기)', checked: false },
+        { id: 'c_home_window', label: '에어컨 끄고 창문 닫기 (갑자기 비가 오거나 미세먼지가 심해질 수 있어요)', checked: false }
     );
 
     window.checklistData = baseData;
@@ -2567,7 +2566,7 @@ window.renderChecklist = function() {
     `;
     
           const themes = [
-        { key: 'basic',  name: '기본 외출' }, { key: 'comeback', name: '🏠 돌아와서' },
+        { key: 'basic',  name: '기본 외출' }, { key: 'comeback', name: '돌아와서' },
         { key: 'water',  name: '물놀이' }, { key: 'winter', name: '한파 및 겨울' },
         { key: 'picnic', name: '야외 피크닉' }, { key: 'indoor', name: '실내 키즈카페' },
         { key: 'stay',   name: '1박 2일' }
@@ -2985,7 +2984,7 @@ document.getElementById('growth-insight').innerHTML = insightMsg;
         
         // 돋보기 아이콘과 함께 로딩 멘트 노출
         if(typeof showToast === 'function') showToast("또래 표준 성장 도표와 비교하고 있어요");
-        else alert("분석 중입니다...");
+        else alert("또래 표준 성장 도표와 비교하고 있어요");
 
         // 0.8초 뒤에 짠! 하고 나타나면서 스크롤 부드럽게 이동
         setTimeout(() => {
@@ -3002,9 +3001,9 @@ async function saveGrowthRecord() {
     // 🚨 방어 1: 저장할 데이터가 제대로 안 넘어왔을 때
     if (!window.tempGrowthData || (window.tempGrowthData.height === 0 && window.tempGrowthData.weight === 0)) {
         if (typeof showToast === 'function') {
-            return showToast("⚠️ 먼저 '분석하기' 버튼을 눌러주세요.");
+            return showToast("먼저 '또래 100명 중 어디쯤인지 보기'를 눌러 주세요");
         } else {
-            alert("⚠️ 먼저 '분석하기' 버튼을 눌러주세요.");
+            alert("먼저 '또래 100명 중 어디쯤인지 보기'를 눌러 주세요");
             return;
         }
     }
@@ -3492,7 +3491,7 @@ async function addCubeRecord() {
     const qty = parseInt(document.getElementById('cube-qty').value);
 
     if (!name || !date || isNaN(qty) || qty <= 0) {
-        return showToast("⚠️ 큐브 이름, 날짜, 수량을 정확히 입력해주세요"); // 👈 교체
+        return showToast("큐브 이름 · 날짜 · 개수를 적어 주세요"); // 👈 교체
     }
 
     const newCube = { id: "cube_" + new Date().getTime(), cat: cat, name: name, date: date, qty: qty, timestamp: new Date().getTime() };
@@ -3831,7 +3830,7 @@ async function createBatonTask(text, reward) {
     let records = JSON.parse(localStorage.getItem('tosil_baton_records')) || [];
     
     const isDuplicate = records.some(r => r.text === text);
-    if (isDuplicate) return showToast("🚨 이미 똑같은 부탁이 대기 중입니다"); 
+    if (isDuplicate) return showToast("같은 부탁을 이미 보냈어요"); 
 
     const now = new Date(), timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         // 누가 보냈는지 남긴다. 이게 없으면 내가 보낸 걸 내가 접수하게 된다.
@@ -4445,7 +4444,7 @@ window.copySymptomMemo = function() {
     }
     
     navigator.clipboard.writeText(text).then(() => {
-        window.showToast("📋 브리핑 텍스트가 복사되었어요 의사 선생님께 보여주세요 🤍");
+        window.showToast("진료 메모를 복사했어요. 진료실에서 보여 주세요");
     });
 };
 
@@ -4610,7 +4609,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
     `;
 
     if (type === 'feed') {
-        title.innerHTML = '🍼 맘마 기록하기';
+        title.innerHTML = '맘마 기록하기';
         
         // 🚨 [직수 패치] 수유를 누르고 시작했으면 스와이프(드럼)를 아예 숨기고 깔끔하게 띄웁니다!
         if (localStorage.getItem('tosil_breast_start')) {
@@ -4745,7 +4744,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         if(saveBtn) saveBtn.style.display = 'block';
     }
     else if (type === 'diaper') {
-        title.innerHTML = '💩 기저귀 기록하기';
+        title.innerHTML = '기저귀 기록하기';
         body.innerHTML = baseTimeInputHtml + `
             <div style="display: flex; gap: 8px; margin-bottom: 24px;">
                 <button class="btn-main" onclick="window.selectTrackerBtn(this, 'diaper_pee')" style="flex: 1; background: var(--bg-sub); color: #A3958A; border: none; box-shadow: none; margin:0; transition:0.2s; padding:16px 0; border-radius:16px; font-weight:700; font-size: 14.5px;">💧 소변</button>
@@ -4784,6 +4783,8 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         let sleepEndT = currentTimeStr;
         let activeSubType = ''; 
         window.trackerState.isSleeping = false; 
+        window.trackerState.timerRunning = false;   // 이미 재고 있는 잠을 연 것 (할 일은 '방금 깼어요')
+        window.trackerState.showWake = !!window.editingTrackerId;   // 새로 적을 땐 깬 시간을 처음엔 접어 둔다
 
         if (window.editingTrackerId) {
             let r = records.find(x => x.id === window.editingTrackerId);
@@ -4795,6 +4796,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 
                 if (r.amount === 0) {
                     window.trackerState.isSleeping = true;
+                    window.trackerState.timerRunning = true;
                 } else {
                     const eDate = new Date(r.endTs ? Number(r.endTs) : r.timestamp + (r.amount * 60000));
                     sleepEndD = window.getSafeDateStr(eDate.getTime());   // ⚠️ 시작 날짜를 넣어서 밤을 넘긴 잠은 고칠 수가 없었다
@@ -4804,6 +4806,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         } 
         else if (activeStartTime) {
             window.trackerState.isSleeping = true;
+            window.trackerState.timerRunning = true;
             const sDate = new Date(parseInt(activeStartTime));
             sleepStartD = window.getSafeDateStr(sDate.getTime());   // ⚠️ toISOString 은 UTC 날짜 — 새벽 0~9시에 재운 잠이 '어제' 로 잡혀 24시간짜리 잠이 됐다
             sleepStartT = `${String(sDate.getHours()).padStart(2,'0')}:${String(sDate.getMinutes()).padStart(2,'0')}`;
@@ -4884,7 +4887,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         ];
         const randomTip = medTips[Math.floor(Math.random() * medTips.length)];
 
-        title.innerHTML = '💊 투약(감기/약) 기록';
+        title.innerHTML = '약 기록하기';
         body.innerHTML = baseTimeInputHtml + `
             <div style="background: var(--bg-card); padding: 24px 20px; border-radius: 24px; border: none; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
                 <label style="font-size: 14px; font-weight: 900; color: var(--text-m); display: block; margin-bottom: 16px; text-align:center;">어떤 약/영양제를 먹이셨나요?</label>
@@ -5489,20 +5492,20 @@ window.saveTrackerRecord = function() {
     let record = { id: recordId, time: timeStr, timestamp: timestamp, type: window.trackerState.type };
 
     if (window.trackerState.type === 'feed') {
-        if(!window.trackerState.subType) return alert('🍼 분유, 모유, 유축 중 하나를 선택해주세요');
+        if(!window.trackerState.subType) return alert('분유 · 모유 · 유축 중 하나를 골라 주세요');
         const amt = document.getElementById('v-feed-amount').value;
-        if(!amt) return alert('🍼 먹은 양(ml)을 입력해주세요');
+        if(!amt) return alert('먹은 양(ml)을 적어 주세요');
         record.subType = window.trackerState.subType;
         record.amount = parseInt(amt);
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) return alert('💩 소변인지 대변인지 선택해주세요');
+        if(!window.trackerState.subType) return alert('소변인지 대변인지 골라 주세요');
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
     else if (window.trackerState.type === 'sleep') {
         const amt = document.getElementById('v-sleep-amount');
-        if(!amt || !amt.value) return alert('💤 수면 시간(분)을 정확히 입력해주세요');
+        if(!amt || !amt.value) return alert('잔 시간(분)을 적어 주세요');
         record.amount = parseInt(amt.value);
         if (window.editingTrackerId) {
             const originalRecord = records.find(r => r.id === window.editingTrackerId);
@@ -6246,9 +6249,12 @@ window.updateTrackerDashboard = function() {
     
     todayRecords.forEach(r => {
         if(r.type === 'feed') { 
-            if (r.subType === '모유') todayBreastMins += r.amount; 
-            else if (r.subType === '이유식') todayFoodAmt += r.amount;
-            else todayFormulaAmt += r.amount; 
+            /* ⚠️ amount 가 글자('150')로 들어온 기록이 하나라도 있으면 0 + '150' + '150' 이 되어
+                  '오늘 먹은 양 · 분유 0150150ml' 가 찍힌다. 아래 통계 쪽처럼 숫자로 바꿔서 더한다. */
+            const amt = parseInt(r.amount) || 0;
+            if (r.subType === '모유') todayBreastMins += amt; 
+            else if (r.subType === '이유식') todayFoodAmt += amt;
+            else todayFormulaAmt += amt; 
         }
         if(r.type === 'sleep') {
             const sr = window.getSleepRange(r);
@@ -6999,7 +7005,7 @@ window.saveTrackerRecord = async function() {
             const foodAmt = document.getElementById('v-food-amount').value;
             if(!foodAmt) {
                 if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
-                return window.showToast('⚠️ 먹은 이유식 양을 입력해주세요');
+                return window.showToast('먹은 이유식 양을 적어 주세요');
             }
             record.type = 'feed'; 
             record.subType = '이유식';
@@ -7015,12 +7021,12 @@ window.saveTrackerRecord = async function() {
         else {
             if(!window.trackerState.subType) {
                 if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
-                return window.showToast('⚠️ 분유, 모유, 유축 중 하나를 선택해주세요');
+                return window.showToast('분유 · 모유 · 유축 중 하나를 골라 주세요');
             }
             if (window.trackerState.subType === '모유') {
                 const bAmt = document.getElementById('v-breast-amount').value;
-                if(!bAmt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 수유 시간(분)을 입력해주세요'); }
-                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 방향(왼쪽/오른쪽/양쪽)을 선택해주세요'); }
+                if(!bAmt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('수유한 시간(분)을 적어 주세요'); }
+                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('왼쪽 · 오른쪽 · 양쪽 중 하나를 골라 주세요'); }
                 
                 record.type = 'feed';
                 record.subType = '모유';
@@ -7028,7 +7034,7 @@ window.saveTrackerRecord = async function() {
                 record.status = window.trackerState.status; 
             } else {
                 const amt = document.getElementById('v-feed-amount').value;
-                if(!amt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 먹은 양(ml)을 입력해주세요'); }
+                if(!amt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('먹은 양(ml)을 적어 주세요'); }
                 record.type = 'feed';
                 record.subType = window.trackerState.subType; 
                 record.amount = parseInt(amt);
@@ -7037,7 +7043,7 @@ window.saveTrackerRecord = async function() {
         }
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('⚠️ 소변인지 대변인지 선택해주세요'); }
+        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('소변인지 대변인지 골라 주세요'); }
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
@@ -7047,7 +7053,7 @@ window.saveTrackerRecord = async function() {
         if (!medName) medName = window.trackerState.subType;
         if (!medName) {
             if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; }
-            return window.showToast('⚠️ 어떤 약을 먹였는지 선택하거나 직접 입력해주세요');
+            return window.showToast('어떤 약인지 고르거나 적어 주세요');
         }
         record.subType = medName;
         record.amount = 0; // 약은 용량보다 시간이 중요하므로 amount는 0 고정
@@ -7057,7 +7063,7 @@ window.saveTrackerRecord = async function() {
     else if (window.trackerState.type === 'sleep') {
         if (!window.trackerState.subType) {
             if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
-            return window.showToast('⚠️ 낮잠인지 밤잠인지 선택해주세요');
+            return window.showToast('낮잠인지 밤잠인지 골라 주세요');
         }
 
         const amt = document.getElementById('v-sleep-amount');
@@ -7680,7 +7686,7 @@ window.downloadReceipt = function() {
     
     // 🚨 1번 원인 방어: 라이브러리가 로드되지 않았을 때
     if (typeof html2canvas === 'undefined') {
-        return alert("이미지 저장 라이브러리가 필요합니다. HTML 파일에 html2canvas 스크립트가 있는지 확인해주세요");
+        return alert("그림 만들 준비가 아직 안 됐어요. 잠시 뒤 다시 해 주세요.");
     }
 
     // 캡처하는 동안 저장 버튼 임시 숨김 (버튼까지 사진에 찍히는 것 방지)
@@ -7902,7 +7908,7 @@ window.calcSleepToNow = function() {
         amountInput.style.color = 'var(--text-m)';
     }, 300);
 
-    window.showToast(`✅ ${diffMins}분 수면으로 계산되었습니다`);
+    window.showToast(`${diffMins}분 잔 걸로 적었어요`);
 };
 
 // ==========================================
@@ -8534,7 +8540,7 @@ function calcFormulaAmount() {
     const wVal = document.getElementById('calc-weight').value;
     const cntVal = document.getElementById('calc-count').value;
     
-    if (!wVal || !cntVal) return showToast("⚠️ 아기 몸무게와 수유 횟수를 입력해주세요");
+    if (!wVal || !cntVal) return showToast("아기 몸무게와 수유 횟수를 적어 주세요");
 
     const weight = parseFloat(wVal);
     const count = parseInt(cntVal);
@@ -8707,7 +8713,7 @@ window.addOpenRecord = function() {
     
     const dateVal = dateInput.value;
     
-    if (!dateVal) return showToast("⚠️ 뜯은 날짜를 선택해주세요");
+    if (!dateVal) return showToast("뜯은 날짜를 골라 주세요");
 
     // 권장 유통기한(일수) 맵핑
     const limitMap = {
@@ -8790,7 +8796,7 @@ window.clearExpiredRecords = function() {
 
         localStorage.setItem('tosil_open_records', JSON.stringify(validRecords));
         window.renderOpenRecords();
-        showToast(`🧹 ${deletedCount}개의 만료템을 깔끔하게 치웠습니다`);
+        showToast(`기한 지난 ${deletedCount}개를 치웠어요`);
     }, "🧹", "비우기", "#D32F2F");
 };
 
@@ -9071,18 +9077,10 @@ function gainMateExp(amount) {
         }
     }
 
-    // 🚀 만약 레벨이 올랐다면 축하 팝업 띄우기!
-    if (newLevel > oldLevel) {
-        setTimeout(() => {
-            let congratsMsg = `🎊 레벨업 [Lv.${newLevel}] 달성 🎊`;
-            if (newReward && (mateLevelData[newLevel-1].reward !== null)) {
-                congratsMsg += `\n\n🎁 특별 보상 언락:\n[${newReward}]\n지금 바로 배우자에게 청구하세요`;
-            } else {
-                congratsMsg += `\n\n육아 마스터를 향해 한 걸음 더 나아갔습니다`;
-            }
-            alert(congratsMsg);
-        }, 300); // 게이지 차는 거 보여주고 0.3초 뒤에 팝업 띄움
-    }
+    /* ⚠️ 레벨 · 경험치 화면은 숨겼다 (index.html '아빠 레벨 & 경험치 바 — 숨김').
+          그런데 이 자리에서 '🎊 레벨업 [Lv.2] 달성 🎊 · 🎁 특별 보상 언락' 을 띄우고 있었다.
+          alert 가 토스트로 바뀌어 있어서, 바통을 다섯 번 끝내면 '끝냈어요' 토스트를 덮어썼다.
+          보이는 게 없는 숫자는 조용히 쌓기만 한다. */
 }
 
 document.addEventListener("DOMContentLoaded", () => { updateMateLevelUI(); });
@@ -9591,7 +9589,7 @@ window.calcSleepToNow = function() {
         setTimeout(() => { minsInput.style.transform = 'scale(1)'; minsInput.style.color = 'var(--text-m)'; }, 300);
     }
 
-    window.showToast(`✅ 방금 깬 시간으로 자동 셋팅되었습니다`);
+    window.showToast(`깬 시간을 지금으로 맞췄어요`);
 };
 
 // ==========================================
@@ -9861,7 +9859,7 @@ window.toggleDadDashboard = function() {
 window.activateHeroMode = function() {
     localStorage.setItem('tosil_hero_mode_date', new Date().toDateString());
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    if (typeof window.showToast === 'function') window.showToast("👨‍🍼 멋진 아빠 등장 아내에게 자유시간을 선물하세요. (+50 EXP)");
+    if (typeof window.showToast === 'function') window.showToast("오늘은 아빠가 맡을게요. 엄마는 쉬어요");
     
     window.updateMateExp(50);
     window.renderDadQuests();
@@ -10046,7 +10044,7 @@ window.updateDadBriefing = function() {
                 <div style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
                         <div style="width: 8px; height: 8px; border-radius: 50%; background: ${missionBg};"></div>
-                        <div style="font-size: 12px; font-weight: 800; color: var(--text-s);">1순위 미션</div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--text-s);">지금 하면 좋은 것</div>
                     </div>
                     <div style="font-size: 14px; font-weight: 800; color: var(--text-m); line-height: 1.5; word-break: keep-all; padding-left: 14px;">
                         ${missionMsg}
@@ -10255,7 +10253,7 @@ window.completeTopMission = function(btnElement, missionText) {
     }, 200);
 
     if (navigator.vibrate) navigator.vibrate(50);
-    window.showToast("💖 멋져요 아내의 스트레스가 감소했습니다.");
+    window.showToast("끝냈어요. 고생했어요");
 
     // ✨ 핵심 패치: 방금 완료한 미션의 내용과 시간을 브라우저에 콱 박아둡니다.
     localStorage.setItem('tosil_cleared_mission', JSON.stringify({
@@ -13253,7 +13251,7 @@ window.checkFeedPlateauBreakthrough = function() {
         if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
 
         const diff = todayFeedTotal - yesterdayFeedTotal;
-        window.showToast(`🎉 <b>우리 아기 뱃골이 늘어나고 있어요</b><br>어제 이 시간보다 벌써 <b>+${diff}ml</b> 든든하게 채우는 중 🤍`);
+        window.showToast(`어제 이 시간보다 <b>${diff}ml</b> 더 먹었어요`);
     }
 };
 
@@ -13592,7 +13590,7 @@ window.toggleMilestone = function(id) {
 // ==========================================
 window.__old_downloadMilestone_unused = function() {
     if (typeof html2canvas === 'undefined') {
-        return alert("이미지 저장 라이브러리가 필요합니다.");
+        return alert("그림 만들 준비가 아직 안 됐어요. 잠시 뒤 다시 해 주세요.");
     }
     
     let achievedData = JSON.parse(localStorage.getItem('tosil_milestones')) || [];
@@ -13850,9 +13848,38 @@ window.calcSleepRange = function() {
     
     totalText.style.background = "#F2F0FC";
     totalText.style.color = "#7F77DD";
-    totalText.innerHTML = `총 <span style="font-size:20px; margin:0 2px;">${h}</span>시간 <span style="font-size:20px; margin:0 2px;">${m}</span>분 수면 💤`;
+    totalText.innerHTML = h ? `총 <span style="font-size:20px; margin:0 2px;">${h}</span>시간` + (m ? ` <span style="font-size:20px; margin:0 2px;">${m}</span>분` : '') + ' 잤어요'
+                            : `총 <span style="font-size:20px; margin:0 2px;">${m}</span>분 잤어요`;
     
     amountHidden.value = diffMins; 
+    window.paintSleepChoice(startObj, diffMins);
+};
+
+/* 깬 시간을 아직 안 적은 새 잠 — 할 일은 하나 ('방금 잠들었어요' = 저장 단추).
+     · 막 연 창 (잠든 시간 = 지금, 깬 시간을 안 건드림): 깬 시간 칸 · 총 시간을 접고 '이미 깼으면 깬 시간 적기 ›' 만
+     · 잠든 시간을 앞으로 돌렸으면: 깬 시간 칸이 열리고 저장 단추는 'N분 남기기',
+       아직 자고 있으면 '아직 자요 · 20:30부터 재기' (예전 '자는 중으로 변경 (타이머 켜기)' 자리) */
+window.paintSleepChoice = function (startObj, diffMins) {
+    const st = window.trackerState || {};
+    const endArea = document.getElementById('sleep-end-area');
+    const controlBox = document.getElementById('sleep-control-box');
+    const totalText = document.getElementById('v-sleep-total-text');
+    if (!endArea || !controlBox || st.isSleeping) return;
+    const nowish = Math.abs(Date.now() - startObj.getTime()) <= 5 * 60000;
+    const fresh = diffMins === 0 && nowish && !window.editingTrackerId && !st.showWake;
+    endArea.style.display = fresh ? 'none' : 'block';
+    if (totalText && totalText.parentNode) totalText.parentNode.style.display = fresh ? 'none' : '';
+    const hm = `${String(startObj.getHours()).padStart(2, '0')}:${String(startObj.getMinutes()).padStart(2, '0')}`;
+    const html = fresh
+        ? `<button type="button" onclick="window.showSleepWake()" style="width:100%; background:none; color:#A3958A; padding:12px; border:none; font-size:13.5px; font-weight:800; cursor:pointer; font-family:inherit;">이미 깼으면 깬 시간 적기 ›</button>`
+        : (diffMins > 0 && !window.editingTrackerId
+            ? `<button type="button" onclick="window.toggleIsSleeping(true)" style="width:100%; background:#F7F3ED; color:#7A6F68; padding:15px; border-radius:14px; font-size:14px; font-weight:800; border:none; cursor:pointer; font-family:inherit;">아직 자요 · ${nowish ? '지금' : hm}부터 재기</button>`
+            : '');
+    if (controlBox.innerHTML !== html) controlBox.innerHTML = html;
+};
+window.showSleepWake = function () {
+    window.trackerState.showWake = true;
+    window.calcSleepRange();
 };
 
 // ==========================================
@@ -13879,15 +13906,11 @@ window.toggleIsSleeping = function(forceState = null) {
             `;
         }
     } else {
-        // [깼을 때 화면] -> 일어난 시간 박스가 나오고 "타이머 켜기" 버튼 1개만 보임!
-        if(endArea) endArea.style.display = 'block'; // 일어난 시간 보이기
-        if(controlBox) {
-            controlBox.innerHTML = `
-                <button onclick="window.toggleIsSleeping(true)" style="width:100%; background:#F7F3ED; color:#A3958A; padding:16px; border-radius:14px; font-size:14px; font-weight:800; border:none; cursor:pointer; transition:0.2s;">
-                    💤 자는 중으로 변경 (타이머 켜기)
-                </button>
-            `;
-        }
+        /* [깼을 때 화면] 깬 시간 칸 · 아래 단추는 calcSleepRange 가 정한다.
+           ⚠️ 여기 늘 '💤 자는 중으로 변경 (타이머 켜기)' 가 있었다. 창을 막 열면 저장 단추도 '방금 잠들었어요'
+              (= 타이머 켜기) 라서 같은 일을 하는 단추가 둘이었고, 깬 시간 칸에는 잠든 시간과 같은 시각 · '총 0시간 0분 수면' 이 떴다. */
+        if(endArea) endArea.style.display = 'block';
+        if(controlBox) controlBox.innerHTML = '';
     }
     window.calcSleepRange();
 };
@@ -13937,7 +13960,7 @@ window.getDailySummaryHtml = function(dailyRecords) {
             else if (r.subType === '모유') breastMins += amt;
             else formulaAmt += amt; 
         } else if (r.type === 'sleep' && r.amount > 0) {
-            totalSleepMins += r.amount; 
+            totalSleepMins += (parseInt(r.amount) || 0); 
         } else if (r.type === 'diaper') {
             if (r.subType === '소변') pee++;
             else if (r.subType === '대변') poop++;
@@ -14032,7 +14055,7 @@ window.downloadSyncTicket = function() {
     const target = document.getElementById('ticket-capture-area');
     if (!target || typeof html2canvas === 'undefined') return alert("지금은 저장할 수 없어요. 잠시 뒤 다시 해 주세요.");
     
-    window.showToast("📸 티켓을 예쁘게 굽고 있어요...");
+    window.showToast("초대 티켓을 만드는 중이에요");
     
     html2canvas(target, { scale: 2, backgroundColor: null, useCORS: true }).then(canvas => {
         canvas.toBlob(function(blob) {
@@ -14046,7 +14069,7 @@ window.downloadSyncTicket = function() {
                     title: '배냇함 가족 티켓',
                     text: '우리 아기 육아 기록 같이 공유하자 🤍 아래 링크를 눌러줘'
                 }).then(() => {
-                    window.showToast("🎉 티켓 전송 완료 짝꿍에게 보내보세요 ✈️");
+                    window.showToast("티켓을 만들었어요. 짝꿍에게 보내 보세요");
                 }).catch((error) => {
                     console.log('공유 취소됨', error);
                 });
@@ -14058,7 +14081,7 @@ window.downloadSyncTicket = function() {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                window.showToast("🎉 티켓 저장 완료 짝꿍에게 보내보세요 ✈️");
+                window.showToast("티켓을 저장했어요. 짝꿍에게 보내 보세요");
             }
         });
     }).catch(err => {
@@ -14111,7 +14134,7 @@ window.quickSaveSenior = async function(actionType) {
         
         record.type = 'sleep'; record.subType = '낮잠'; record.amount = 0; 
         if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        window.showToast("💤 아기가 잠들었어요. (엄마 폰으로 전송 완료)");
+        window.showToast("💤 잠들었다고 남겼어요");
     } 
     else if (actionType === 'sleep_end') {
         const startStr = localStorage.getItem('tosil_sleep_start');
@@ -14136,7 +14159,7 @@ window.quickSaveSenior = async function(actionType) {
             const sd = new Date(record.timestamp);
             record.time = `${String(sd.getHours()).padStart(2,'0')}:${String(sd.getMinutes()).padStart(2,'0')}`;
         }
-        window.showToast(`☀️ 일어났어요 (${duration}분 수면 전송 완료)`); 
+        window.showToast(`☀️ ${duration}분 자고 일어났다고 남겼어요`); 
         }  
     const idx = records.findIndex(r => r.id === record.id); 
     if(idx !== -1) records[idx] = record;
@@ -14388,7 +14411,7 @@ window.kioskProcessPayment = function(method) {
 window.kioskDirectAdd = function(name, price) {
     if (navigator.vibrate) navigator.vibrate(10);
     window.kioskAddToCart(name, price);
-    window.showToast(`🛒 ${name} 담겼습니다`);
+    window.showToast(`🛒 ${name} 담았어요`);
 };
 
 window.kioskOpenOption = function(name, price, icon) {
@@ -14466,7 +14489,7 @@ window.kioskAddOptionToCart = function() {
 
     window.kioskAddToCart(finalName, finalPrice);
     document.getElementById('kiosk-option-modal').style.display = 'none';
-    window.showToast(`🛒 ${finalName} 담겼습니다`);
+    window.showToast(`🛒 ${finalName} 담았어요`);
 };
 
 window.kioskAddToCart = function(name, price) {
@@ -14498,7 +14521,7 @@ window.kioskUpdateCartUI = function() {
 };
 
 window.kioskCheckoutProcess = function() {
-    if (window.kioskCart.length === 0) return window.showToast('⚠️ 메뉴를 하나라도 선택해 주세요');
+    if (window.kioskCart.length === 0) return window.showToast('메뉴를 하나 이상 골라 주세요');
     window.kioskNextStep(3);
 };
 
@@ -14800,7 +14823,7 @@ window.deleteBabyProfile = function(targetId, babyName) {
     // 방어막: 아기가 1명밖에 없으면 삭제 불가!
         // 방어막: 아기가 1명밖에 없으면 삭제 불가!
     if (profiles.length <= 1) {
-        return window.showToast("⚠️ 최소 1명의 아기 프로필은 유지해야 합니다.");
+        return window.showToast("아기 프로필은 하나는 남겨 둬야 해요");
     }
 
     // 🚨 첫째(접미사 없는 아기)는 원본 칸을 쓴다.
@@ -14860,7 +14883,7 @@ window.deleteBabyProfile = function(targetId, babyName) {
             refs.forEach(function (r) { window.deleteDoc(r).catch(function () {}); });
         })();
 
-        window.showToast(`🗑️ ${babyName}의 기록이 모두 삭제되었습니다.`);
+        window.showToast(`${babyName}의 기록을 모두 지웠어요`);
         
         // 🚨 만약 방금 삭제한 아기가 '현재 보고 있던 아기'라면?
         if (window.currentBabySuffix === targetId) {
@@ -15055,7 +15078,7 @@ window.closeTrackerSheet = function() {
 // 🤱 모유수유 수면 방식 엔진 (시작 시간만 로컬에 저장)
 // ==========================================
 window.startBreastTimer = function() {
-    if (!window.trackerState.status) return window.showToast('⚠️ 방향(왼쪽/오른쪽/양쪽)을 먼저 선택해주세요');
+    if (!window.trackerState.status) return window.showToast('왼쪽 · 오른쪽 · 양쪽 중 먼저 골라 주세요');
     
     // 파이어베이스 통신 없이 기기 메모장에 시간만 쾅 찍습니다. (용량 소모 0)
     localStorage.setItem('tosil_breast_start', new Date().getTime().toString());
@@ -15092,7 +15115,7 @@ window.stopBreastTimer = function() {
     localStorage.removeItem('tosil_breast_start');
     localStorage.removeItem('tosil_breast_dir'); 
     window.closeTrackerSheet();
-    window.showToast(`✅ 모유 수유(${dir}, ${durationMins}분) 기록이 저장되었습니다`);
+    window.showToast(`모유 수유 ${dir} ${durationMins}분 남겼어요`);
 };
 
 window.cancelBreastTimer = function() {
@@ -15688,7 +15711,7 @@ window.downloadPediatricianReport = function() {
     setTimeout(() => {
         if(typeof html2canvas === 'undefined') {
             reportDiv.remove();
-            return alert("이미지 변환 엔진이 필요합니다.");
+            return alert("그림 만들 준비가 아직 안 됐어요. 잠시 뒤 다시 해 주세요.");
         }
         
             html2canvas(reportDiv, { scale: 2, backgroundColor: '#FFFFFF', useCORS: true }).then(canvas => {
@@ -15724,7 +15747,7 @@ window.downloadMonthlyGrowthCard = function() {
     // 체험 도장 쾅!
     if (!window.isPremiumUser()) localStorage.setItem('tosil_trial_card', 'used');
 
-    window.showToast("🎨 인스타 감성 월간 성장 카드를 굽고 있어요...");
+    window.showToast("지난달 성장 카드를 만드는 중이에요");
 
     const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
     const trackers = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
@@ -15807,7 +15830,7 @@ window.downloadMonthlyGrowthCard = function() {
             window.showToast("🎉 이달의 성장 카드를 저장했어요");
         }).catch(e => {
             cardDiv.remove();
-            window.showToast("❌ 카드 생성 실패");
+            window.showToast("카드를 만들지 못했어요. 잠시 뒤 다시 해 주세요");
         });
     }, 800);
 };
@@ -15825,7 +15848,7 @@ window.downloadPediatricianPDF = function() {
     // 체험 도장 쾅!
     if (!window.isPremiumUser()) localStorage.setItem('tosil_trial_report', 'used');
 
-    if (typeof html2canvas === 'undefined') return window.showToast("이미지 라이브러리 로딩 중입니다.");
+    if (typeof html2canvas === 'undefined') return window.showToast("그림 만들 준비 중이에요. 잠시 뒤 다시 눌러 주세요");
 
     const babyName = localStorage.getItem('tosil_babyName') || '우리아기';
     const birth = localStorage.getItem('tosil_startDate');
@@ -15962,7 +15985,7 @@ window.downloadPediatricianPDF = function() {
         </div>`;
 
     document.body.appendChild(box);
-    window.showToast("📄 리포트를 만드는 중입니다...");
+    window.showToast("리포트를 만드는 중이에요");
 
     setTimeout(() => {
         html2canvas(box, { scale: 2, backgroundColor: '#FFFFFF', useCORS: true }).then(canvas => {
@@ -16024,7 +16047,7 @@ window.startNightDuty = async function() {
     window.renderNightDuty();
     window.updateTrackerDashboard && window.updateTrackerDashboard();
 
-    window.showToast("🌙 야간 당번 시작<br>오늘 밤은 엄마를 푹 재워주세요 🤍");
+    window.showToast("오늘 밤 당번을 시작했어요<br>엄마는 푹 자게 해 주세요");
 
     // 아내에게 카톡으로 알리기
     if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {

@@ -116,31 +116,31 @@
             icon: "📷",
             title: "하루 사진 무제한",
             free: "하루 " + PLAN.free.photoPerDay + "장",
-            line: "무료도 하루 " + PLAN.free.photoPerDay + "장까지 담깁니다. 플러스는 장수를 안 셉니다."
+            line: "무료도 하루 " + PLAN.free.photoPerDay + "장까지 담겨요. 플러스는 장수를 세지 않아요."
         },
         voice: {
             icon: "🎙️",
             title: "목소리 무제한",
             free: PLAN.free.voiceTotal + "개까지",
-            line: "무료로 " + PLAN.free.voiceTotal + "개까지 담을 수 있어요. 옹알이는 두 달이면 사라집니다."
+            line: "무료로 " + PLAN.free.voiceTotal + "개까지 담을 수 있어요. 옹알이는 두 달이면 사라져요."
         },
         seal: {
             icon: "🕯️",
             title: "봉인 편지 무제한",
             free: PLAN.free.sealedTotal + "통까지",
-            line: "무료로 " + PLAN.free.sealedTotal + "통까지 봉인할 수 있어요. 지금의 마음은 지금밖에 못 씁니다."
+            line: "무료로 " + PLAN.free.sealedTotal + "통까지 봉인할 수 있어요. 지금의 마음은 지금밖에 못 써요."
         },
         family: {
             icon: "👵",
             title: "가족 " + PLAN.pro.familySize + "명까지",
             free: "가족 " + PLAN.free.familySize + "명",   // 부모 둘 + 한 명. "부모 3명" 이라고 적혀 있었다
-                      line: PLAN.free.familySize + "명까지는 무료예요. 할머니 할아버지까지 " + babyName() + "의 배냇함을 보려면 다섯 자리가 필요합니다."
+                      line: PLAN.free.familySize + "명까지는 무료예요. 할머니 할아버지까지 " + babyName() + "의 배냇함을 보려면 다섯 자리가 필요해요."
         },
         book: {
             icon: "📖",
             title: "배냇함 포토북",
             free: "—",
-            line: "지금까지 담긴 걸 한 권으로 내보냅니다. 인쇄해서 책장에 꽂을 수 있어요."
+            line: "지금까지 담긴 걸 한 권으로 내보내요. 인쇄해서 책장에 꽂을 수 있어요."
         },
         /* ⚠️ 큐레이터 다섯 곳의 PLUS 가 여기 빠져 있었다.
               열아홉 개를 만들어놓고 안내 시트에는 한 줄도 없었다.
@@ -150,7 +150,7 @@
             title: "큐레이터 다섯 곳",
             free: "고르는 건 무료",
             line: "이유식 7일 식단표, 일주일 놀이 계획, 젖병 소모품, 카시트·유모차 관리까지. " +
-                  "고르는 건 원래 무료고, 플러스는 대신 세고 대신 짜드립니다."
+                  "고르는 건 원래 무료예요. 플러스는 대신 세고, 대신 짜 드려요."
         },
                 baby: {
             icon: "👶",
@@ -162,13 +162,13 @@
             icon: "🎧",
             title: "소리 모아듣기",
             free: "처음과 마지막",
-            line: "담긴 소리를 처음부터 끝까지 이어서 듣습니다. 목소리는 나란히 놓기 전에는 변한 걸 못 알아채요."
+            line: "담긴 소리를 처음부터 끝까지 이어서 들어요. 목소리는 나란히 놓기 전에는 변한 걸 못 알아채요."
         },
         month: {
             icon: "🎁",
             title: "이달의 배냇함",
             free: "한 장",
-            line: "달이 바뀌면 지난달이 카드 한 장으로 도착합니다. 첫 장은 선물이고, 그 뒤로는 매달이에요."
+            line: "달이 바뀌면 지난달이 카드 한 장으로 도착해요. 첫 장은 선물이고, 그 뒤로는 매달이에요."
         }
     };
 

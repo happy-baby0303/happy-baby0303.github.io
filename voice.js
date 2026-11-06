@@ -573,8 +573,8 @@
                     '<div onclick="window.voiceStart()" style="width:88px; height:88px; margin:0 auto; border-radius:50%; background:#7F77DD; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 8px 22px rgba(127,119,221,0.32);">' +
                         '<span style="font-size:34px;">🎙️</span>' +
                     '</div>' +
-                    '<div style="font-size:13px; font-weight:700; color:var(--text-sub); margin-top:16px;">눌러서 녹음을 시작하세요</div>' +
-                    '<div style="font-size:11.5px; font-weight:600; color:var(--text-sub); opacity:0.7; margin-top:5px;">최대 ' + MAX_SEC + '초까지 담깁니다</div>' +
+                    '<div style="font-size:13px; font-weight:700; color:var(--text-sub); margin-top:16px;">눌러서 녹음을 시작해요</div>' +
+                    '<div style="font-size:11.5px; font-weight:600; color:var(--text-sub); opacity:0.7; margin-top:5px;">최대 ' + MAX_SEC + '초까지 담겨요</div>' +
 
                     '<div style="text-align:left; background:var(--bg-sub); border-radius:16px; padding:16px 17px; margin-top:22px;">' +
                         '<div style="font-size:10px; font-weight:800; color:#7F77DD; letter-spacing:2px; margin-bottom:9px;">지금 담으면 좋은 것</div>' +
@@ -630,7 +630,7 @@
         wrap.innerHTML =
         '<div style="width:100%; max-width:480px; background:var(--bg-card); border-radius:26px 26px 0 0; padding:22px 20px calc(30px + env(safe-area-inset-bottom, 0px));">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">' +
-                '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">🎙️ ' + esc(babyName()) + '의 목소리</span>' +
+                '<span style="font-size:16px; font-weight:900; color:var(--text-m); letter-spacing:-0.3px;">' + esc(babyName()) + '의 목소리</span>' +
                 '<span onclick="window.closeVoiceSheet()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1; padding:0 4px;">×</span>' +
             '</div>' +
             '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-bottom:8px;">D+' + ddays() + '일 · ' + esc(g.what) + eulReul(g.what) + ' 담아보세요</div>' +
