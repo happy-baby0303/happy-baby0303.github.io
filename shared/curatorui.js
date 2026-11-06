@@ -217,3 +217,41 @@
         setTimeout(function () { try { var t = w.querySelector('#cur-copy-text'); t.focus(); t.select(); } catch (e) {} }, 60);
     };
 })();
+
+/* ============================================================
+   보낸 링크(?pick=)로 연 카드에 데려다 놓기 — curLand(찾기, 위 여백)
+
+   ⚠️ 카톡으로 받은 유모차 · 카시트 링크가 조금 느린 폰(CPU 2배)에서 카드에 한 번도 닿지 못했다.
+      · 유모차: 카드로 내려간 직후, 카드를 다시 그리는 쪽(strollerown.js)이 '화면이 튀지 않게' 스크롤을 0으로 되돌렸다.
+      · 카시트: 카드로 내려간 뒤에 위쪽 카드들이 늦게 붙어서 카드가 3,000px 아래로 밀려났다.
+      젖병은 CPU 4배에서 같은 일이 났다. 빠른 폰에서는 순서가 맞아서 안 보였다.
+   그래서 한 번 내려가고 끝내지 않는다. 6초 동안 0.25초마다 카드가 제자리에 있는지 보고, 벗어났으면 다시 맞춘다.
+   손가락을 대거나 휠을 굴리면 그 순간 손을 뗀다 (사람이 움직이는 화면을 끌어당기지 않는다).
+   그동안은 window.__curLandUntil 이 켜져 있어서, 스크롤을 되돌리는 코드들이 이걸 보고 물러선다.
+   ============================================================ */
+(function () {
+    'use strict';
+    window.curLand = function (find, offOf) {
+        var get = typeof find === 'function' ? find : function () { return find; };
+        var off = typeof offOf === 'function' ? offOf : function () { return offOf || 0; };
+        var until = Date.now() + 6000, stop = false;
+        window.__curLandUntil = until;
+        var quit = function () { stop = true; window.__curLandUntil = 0; };
+        ['touchstart', 'wheel', 'keydown', 'pointerdown'].forEach(function (ev) {
+            try { window.addEventListener(ev, quit, { passive: true, once: true, capture: true }); } catch (e) {}
+        });
+        var fit = function () {
+            var el = get();
+            if (!el || !el.isConnected) return;
+            var top = el.getBoundingClientRect().top, want = off();
+            if (Math.abs(top - want) > 24) window.scrollTo(0, Math.max(0, (window.scrollY || 0) + top - want));
+        };
+        fit();
+        (function check() {
+            if (stop) return;
+            if (Date.now() > until) { if (window.__curLandUntil === until) window.__curLandUntil = 0; return; }
+            fit();
+            setTimeout(check, 250);
+        })();
+    };
+})();

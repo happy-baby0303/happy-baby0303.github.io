@@ -733,9 +733,11 @@ window.shareStroller = shareStroller;
         }
         setTimeout(function () {
             /* 위에 붙어 있는 머리(헤더·탭 막대)만큼 덜 내려가야 카드 이름이 가려지지 않는다 */
-            var head = document.querySelector('.app-header');
-            var off = (head ? head.getBoundingClientRect().height : 0) + 12;
-            window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+            var offOf = function () { var head = document.querySelector('.app-header'); return (head ? head.getBoundingClientRect().height : 0) + 12; };
+            /* 느린 폰에서는 내려간 뒤에 화면이 되돌려지거나 카드가 밀려났다 — 몇 초 동안 제자리를 지킨다 (shared/curatorui.js) */
+            var find = function () { return [].slice.call(document.querySelectorAll('.stroller-card')).filter(function (c) { return c.getAttribute('data-name') === pick; })[0] || hit; };
+            if (typeof window.curLand === 'function') window.curLand(find, offOf);
+            else window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - offOf(), behavior: 'smooth' });
             hit.style.transition = 'box-shadow .3s'; hit.style.boxShadow = '0 0 0 3px #7F77DD';
             setTimeout(function () { hit.style.boxShadow = ''; }, 2600);
         }, 120);

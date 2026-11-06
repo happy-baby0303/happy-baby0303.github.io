@@ -640,7 +640,7 @@
                 window.addEventListener("wheel", off, { passive: true, once: true });
             } catch (e) {}
             var tick = function () {
-                if (stop || n++ > 13) return;
+                if (stop || n++ > 13 || Date.now() < (window.__curLandUntil || 0)) return;   // 링크로 연 카드로 데려가는 중
                 if (Math.abs((window.scrollY || 0) - _y) > 8) window.scrollTo(0, _y);
                 setTimeout(tick, 60);
             };

@@ -478,9 +478,10 @@ function shareToHusband(id) {
         const other = document.getElementById('carseat-other-area');
         if (other && other.contains(hit) && other.style.display === 'none' && typeof toggleCarseatOthers === 'function') toggleCarseatOthers();
         setTimeout(() => {
-            const head = document.querySelector('.app-header');
-            const off = (head ? head.getBoundingClientRect().height : 0) + 12;
-            window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+            const offOf = () => { const head = document.querySelector('.app-header'); return (head ? head.getBoundingClientRect().height : 0) + 12; };
+            /* 느린 폰에서는 내려간 뒤에 카드가 밀려났다 — 몇 초 동안 제자리를 지킨다 (shared/curatorui.js) */
+            if (typeof window.curLand === 'function') window.curLand(() => document.getElementById('card-' + id) || hit, offOf);
+            else window.scrollTo({ top: hit.getBoundingClientRect().top + window.scrollY - offOf(), behavior: 'smooth' });
             hit.style.transition = 'box-shadow .3s'; hit.style.boxShadow = '0 0 0 3px #7F77DD';
             setTimeout(() => { hit.style.boxShadow = ''; }, 2600);
         }, 200);
