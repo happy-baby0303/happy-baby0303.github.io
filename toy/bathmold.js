@@ -87,7 +87,7 @@
 
             '<div style="font-size:18px; font-weight:900; color:' + (over ? RED : GREEN) + '; ' +
                 'letter-spacing:-0.4px; margin-bottom:8px;">' +
-                (over ? "🦠 목욕 장난감 속을 볼 때가 됐어요" : "✅ 목욕 장난감 씻긴 지 " + d + "일") + '</div>' +
+                (over ? "목욕 장난감 속을 볼 때가 됐어요" : "목욕 장난감 씻긴 지 " + d + "일") + '</div>' +
 
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' +

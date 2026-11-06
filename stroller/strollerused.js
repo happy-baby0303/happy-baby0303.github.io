@@ -97,7 +97,7 @@
 
     function html() {
         return '<div class="matrix-panel" id="' + ID + '" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🥕 유모차 중고로 사고팔기</div>' +
+            '<div class="matrix-header">유모차 중고로 사고팔기</div>' +
 
             /* ⚠️ 카시트와 반대라는 걸 먼저 말한다.
                   카시트 카드만 읽은 부모가 유모차도 위험한 줄 안다. */

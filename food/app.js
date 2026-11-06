@@ -121,7 +121,7 @@ function renderFavorites() {
     // 이유식은 데이터에 고유 id가 없을 수 있으므로 name을 고유 식별자로 사용합니다.
     let favItems = babyFoodData.filter(item => favorites.includes(item.name));
     
-    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #E32636; margin-bottom: 16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>`;
+    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">❤️ 찜한 식단 ${favItems.length}개</div>`;
     htmlOutput += favItems.map(item => generateCardHTML(item)).join('');
     resultArea.innerHTML = htmlOutput;
 }
@@ -382,7 +382,7 @@ function generateCardHTML(item) {
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px; gap: 12px;">
                 <div style="flex: 1; min-width: 0;">
                     <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.4;">
-                        🍲 ${item.name}
+                        ${item.name}
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 10px;">
@@ -1032,7 +1032,7 @@ function foodDayWord(dateStr) {
 }
 function setMealSheetTitle(dateStr) {
     const h = document.getElementById('meal-sheet-title');
-    if (h) h.textContent = `🍲 ${foodDayWord(dateStr)} 식단 기록`;
+    if (h) h.textContent = `${foodDayWord(dateStr)} 식단 기록`;
 }
 
 function openMealSheet() {

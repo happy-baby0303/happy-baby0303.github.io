@@ -267,7 +267,7 @@
               유모차 큐레이터의 다른 칸(우리 유모차 · 트렁크 · 중고 · 최대 체중)은 전부
               .matrix-panel 흰 상자다. 여기도 같은 모양으로 맞춘다. */
         return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header" data-plus-head>🧭 오늘 어디 가세요</div>' +
+            '<div class="matrix-header" data-plus-head>오늘 어디 가세요</div>' +
 
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 0; line-height:1.75; word-break:keep-all;">' +

@@ -200,7 +200,7 @@
         if (!plus && seat) {
             return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:14px;">' +
                 '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                    'color:' + DARK + ';">🔗 우리 카시트가 이 유모차에 얹히나</div>' +
+                    'color:' + DARK + ';">우리 카시트가 이 유모차에 얹히나</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '<b>' + esc(seat) + '</b>' + pp(seat, "과/와") + ' <b>' + esc(st.name) + '</b>.<br>' +
@@ -221,7 +221,7 @@
         return '<div id="' + ID + '" class="matrix-panel" style="background:' + bg + '; ' +
             'border:1px solid ' + bd + '; margin-bottom:14px;">' +
             '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                'color:' + tone + ';">🔗 ' + esc(head) + '</div>' +
+                'color:' + tone + ';">' + esc(head) + '</div>' +
             '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' + body + '</div>' +
             (seat

@@ -387,7 +387,7 @@
             (liteNow() ? "" : fold("sign",  "🚨", "알레르기 이상 신호", "언제 병원에 가야 하는지", signBody()));
     }
 
-    /* ---------- 🥄 미음 만들기 — 셋을 하나로 ---------- */
+    /* ---------- 미음 만들기 — 셋을 하나로 ---------- */
 
     /* 7개월이 지나면(중기부터) '초기 미음' 카드가 레시피 탭 맨 위를 다 차지했다.
        그때는 한 줄로 접어 두고 누르면 편다. 늦게 시작해서 '초기 이유식' 으로 적어 둔 집은 8개월까지 펴 둔다. */
@@ -439,9 +439,9 @@
         return '<div class="matrix-panel" style="margin-bottom:16px;">' +
 
             (mixStartsOpen()
-                ? '<div class="matrix-header">🥄 미음 만들기</div>'
+                ? '<div class="matrix-header">미음 만들기</div>'
                 : '<div class="matrix-header" onclick="window.toggleMixCard()" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">' +
-                    '<span>🥄 미음 만들기</span><span style="font-size:13px; font-weight:800; color:' + GRAY + ';">접기 ▴</span></div>') +
+                    '<span>미음 만들기</span><span style="font-size:13px; font-weight:800; color:' + GRAY + ';">접기 ▴</span></div>') +
 
             '<div style="text-align:center; padding:2px 0 16px;">' +
                 '<div style="font-size:21px; font-weight:900; color:' + BLUE + '; letter-spacing:-0.8px;">' +

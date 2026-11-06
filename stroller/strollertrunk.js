@@ -175,7 +175,7 @@
         if (!plus) {
             return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:14px;">' +
                 '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                    'color:' + DARK + ';">🚗 우리 차에 들어가나</div>' +
+                    'color:' + DARK + ';">우리 차에 들어가나</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '차를 바꿨거나, 렌터카를 빌렸거나, 친정 차로 갈 때.<br>' +
@@ -251,14 +251,14 @@
             return '<div id="' + ID + '" class="matrix-panel" style="background:' + bg + '; ' +
                 'border:1px solid ' + bd + '; margin-bottom:14px;">' +
                 '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                    'color:' + tone + ';">🚗 ' + esc(head) + '</div>' +
+                    'color:' + tone + ';">' + esc(head) + '</div>' +
                 '<div style="margin-top:6px;">' + body + '</div>' +
             '</div>';
         }
 
         return '<div id="' + ID + '" class="matrix-panel" style="margin-bottom:14px;">' +
             '<div class="matrix-header" data-plus-head style="font-size:14.5px; font-weight:900; ' +
-                'color:' + DARK + ';">🚗 우리 차에 들어가나</div>' +
+                'color:' + DARK + ';">우리 차에 들어가나</div>' +
             '<div style="margin-top:6px;">' + body + '</div>' +
         '</div>';
     }

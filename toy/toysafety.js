@@ -69,7 +69,7 @@
         return '<div id="' + ID + '" class="bnh-card">' +
 
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + RED + '; ' +
-                'letter-spacing:-0.4px; margin-bottom:8px;">🔋 단추형 전지, 이것만은 알아두세요</div>' +
+                'letter-spacing:-0.4px; margin-bottom:8px;">단추형 전지, 이것만은 알아두세요</div>' +
 
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.8; word-break:keep-all;">' +

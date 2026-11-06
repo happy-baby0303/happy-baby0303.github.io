@@ -131,7 +131,7 @@
 
     function guideHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\u23F3 유축 모유, 언제까지 먹여도 되나요?</div>' +
+            '<div class="matrix-header">유축 모유, 언제까지 먹여도 되나요?</div>' +
 
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
@@ -247,7 +247,7 @@
         a.forEach(function (r) { byPlace[r.place] = (byPlace[r.place] || 0) + (r.n || 1); });
 
         var out = '<div id="milk-stock-card" class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83E\uDDCA 우리 집 모유 재고</div>';
+            '<div class="matrix-header">우리 집 모유 재고</div>';
 
         if (!a.length) {
             out += '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
@@ -304,7 +304,7 @@
 
     function teaseHTML() {
         return '<div id="milk-stock-card" class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83E\uDDCA 우리 집 모유 재고</div>' +
+            '<div class="matrix-header">우리 집 모유 재고</div>' +
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +

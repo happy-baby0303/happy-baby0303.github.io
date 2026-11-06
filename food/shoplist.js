@@ -720,7 +720,7 @@
             'border-radius:20px; padding:20px; margin-top:16px;">' +
 
             '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">' +
-                                '<div data-plus-head style="font-size:16px; font-weight:900; color:' + DARK + ';">🛒 몇 개 사면 되나</div>' +
+                                '<div data-plus-head style="font-size:16px; font-weight:900; color:' + DARK + ';">몇 개 사면 되나</div>' +
             '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'margin-bottom:14px; line-height:1.6;">' +

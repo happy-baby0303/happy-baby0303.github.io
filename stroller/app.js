@@ -129,7 +129,7 @@ function renderFavorites() {
 
     let favItems = strollerData.filter(item => favorites.includes(item.id || item.name));
 
-    let htmlOutput = `<div style="font-size: 18px; font-weight: 900; color: #E32636; margin-bottom: 16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>`;
+    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">❤️ 찜한 유모차 ${favItems.length}개</div>`;
     htmlOutput += favItems.map(item => generateCardHtml(item)).join('');
     topArea.innerHTML = htmlOutput;
 

@@ -283,7 +283,7 @@
             /* 칸은 상자 없이 18px 제목 (놀이 탭 전체가 같은 모양) */
             return '<div id="' + ID + '" class="bnh-card">' +
                 '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
-                    '\u2705 사두신 것 ' + have.length + '개, 다 쓰고 계세요</div>' +
+                    '사두신 것 ' + have.length + '개, 다 쓰고 계세요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.7; word-break:keep-all;">' +
                     '한 달 안에 전부 한 번씩은 나왔어요. 이거 쉬운 일 아니에요.</div>' +
@@ -298,7 +298,7 @@
         return '<div id="' + ID + '" class="bnh-card">' +
 
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
-                '\uD83D\uDE34 잠자고 있는 장난감 ' + list.length + '개</div>' +
+                '잠자고 있는 장난감 ' + list.length + '개</div>' +
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.7; word-break:keep-all;">' +
                 '등록하신 ' + have.length + '개 중 ' + list.length + '개가 한 달 넘게 안 나왔어요. ' +

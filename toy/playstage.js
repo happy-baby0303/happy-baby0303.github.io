@@ -168,7 +168,7 @@
         if (!plus) {
             return '<div id="' + ID + '" class="bnh-card">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
-                    'word-break:keep-all; margin-bottom:6px;">🎯 개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
+                    'word-break:keep-all; margin-bottom:6px;">개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '지금은 <b>' + mo + '개월</b>이라서 <b>' + NAME[ms] + '</b> 놀이를 드리고 있어요.<br>' +
@@ -190,7 +190,7 @@
         if (!st) {
             return '<div id="' + ID + '" class="bnh-card">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
-                    'word-break:keep-all; margin-bottom:6px;">🎯 개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
+                    'word-break:keep-all; margin-bottom:6px;">개월수 말고 ' + esc(nm("")) + ' 기준으로</div>' +
                 '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '배냇함 도감에 <b>뒤집기 · 배밀이 · 잡고 서기</b> 도장을 찍으시면, ' +

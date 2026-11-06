@@ -241,7 +241,7 @@
 
         var out = '<div class="bnh-card">' +
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px;">' +
-                '🎁 뭐 사줄까 물어보면</div>' +
+                '뭐 사줄까 물어보면</div>' +
             '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '‘뭐 사줄까?’ 물어보실 때 답할 목록이에요. <b>갖고 계신 건 빼고</b>, 그날 개월수에 맞는 걸로 골랐어요.</div>' +
 

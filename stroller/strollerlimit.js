@@ -149,7 +149,7 @@
         return '<div id="' + ID + '" class="matrix-panel" style="background:' + bg + '; ' +
             'border:1px solid ' + bd + '; border-radius:16px; padding:16px; margin-bottom:14px;">' +
             '<div class="matrix-header" style="font-size:14px; font-weight:900; color:' + tone + '; ' +
-                'margin-bottom:6px;">⚖️ ' + esc(head) + '</div>' +
+                'margin-bottom:6px;">' + esc(head) + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.75; word-break:keep-all;">' + body + '</div>' +
             '<div onclick="window.setStrollerLimit()" style="margin-top:11px; font-size:11.5px; ' +

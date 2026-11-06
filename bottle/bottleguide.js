@@ -194,7 +194,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🙋 어떤 상황이신가요?</div>' +
+            '<div class="matrix-header">어떤 상황이신가요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '스펙은 배냇함이 볼게요. 지금 겪고 계신 것만 눌러 주세요</div>' +
@@ -302,7 +302,7 @@
         };
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">🍼 몇 개 사면 될까요?</div>' +
+            '<div class="matrix-header">몇 개 사면 될까요?</div>' +
 
             '<div style="display:flex; gap:7px; margin:-10px 0 16px;">' +
                 chip("breast",  "모유 위주") + chip("mixed", "모유 + 젖병") + chip("formula", "분유 위주") +
@@ -410,7 +410,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDCCF 젖꼭지, 지금 단계 맞나요?</div>' +
+            '<div class="matrix-header">젖꼭지, 지금 단계 맞나요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '개월수로 정하는 게 아니에요. 브랜드마다 이름이 다르고(SS·S·M / 1구멍·2구멍) ' +
@@ -503,7 +503,7 @@
         if (head && !head.getAttribute("data-folded")) {
             head.setAttribute("data-folded", "1");
             head.style.cursor = "pointer";
-            head.innerHTML = '🔍 직접 조건 고르기 <span id="fold-mark" style="margin-left:auto; ' +
+            head.innerHTML = '직접 조건 고르기 <span id="fold-mark" style="margin-left:auto; ' +
                              'font-size:13px; font-weight:800; color:' + GRAY + ';">펼치기 ▾</span>';
                       var grid = panel.querySelector(".matrix-grid");
             if (grid) {

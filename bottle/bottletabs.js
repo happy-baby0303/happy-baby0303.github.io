@@ -12,8 +12,8 @@
    유무료로 나눈 게 아니라 '쓸 때 / 살 때' 로 나눈 것이다.
 
    젖병도 똑같이 나눈다.
-       🍼 젖병 고르기      아직 안 샀을 때
-       🧰 쓰면서 챙길 것    이미 사고 나서
+       젖병 고르기      아직 안 샀을 때
+       쓰면서 챙길 것    이미 사고 나서
 
    ⚠️ 만들어진 패널을 옮기기만 한다. index.html 은 한 줄도 안 고친다.
    ⚠️ 각 모듈이 자기 그릇 안을 다시 그리는 건 그대로 돌아간다.
@@ -34,8 +34,8 @@
     } catch (e) {}
 
     var TABS = [
-        { id: "pick",  label: "\uD83C\uDF7C 젖병 고르기" },
-        { id: "tools", label: "\uD83E\uDDF0 쓰면서 챙길 것" }
+        { id: "pick",  label: "젖병 고르기" },
+        { id: "tools", label: "쓰면서 챙길 것" }
     ];
 
     function cur() {
@@ -236,7 +236,7 @@
             "cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
         head.innerHTML =
             '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
-                '\uD83D\uDCD6 알아두면 좋은 것</span>' +
+                '알아두면 좋은 것</span>' +
             '<span class="bt-extra-n" style="font-size:12.5px; font-weight:800; color:#A3958A;">' +
                 targets.length + '</span>' +
             '<span class="bt-extra-mark" style="margin-left:auto; font-size:13px; ' +

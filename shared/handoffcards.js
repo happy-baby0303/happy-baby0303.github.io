@@ -174,7 +174,7 @@
                       (on ? "✓ " : "") + esc(n) + '</div>';
               }).join("") + '</div>'
             : "";
-        var html = card("stroller-handoff", "🥕 다 타면 팔거나 물려주기",
+        var html = card("stroller-handoff", "다 타면 팔거나 물려주기",
             '작아지면 당근에 올릴 글이나 물려줄 말을 바로 만들어 드려요. ' +
             (names.length ? '<b>접은 크기 · 무게</b>까지 넣어서요.' : '<b>우리 유모차</b>에 쓰는 걸 알려 주시면 접은 크기 · 무게까지 넣어 드려요.'),
             two("openStrollerHandoff"));
@@ -241,7 +241,7 @@
         var names = list.slice(0, 3).map(function (t) { return t.name; }).join(" · ") + (list.length > 3 ? " 외 " + (list.length - 3) + "개" : "");
         return '<div id="toy-handoff" class="bnh-card">' +
             '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
-                '🥕 시기가 지난 장난감 ' + list.length + '개</div>' +
+                '시기가 지난 장난감 ' + list.length + '개</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:' + SUB + '; line-height:1.7; margin-bottom:12px; word-break:keep-all;">' +
                 esc(names) + '<br>제일 많이 갖고 놀던 때가 석 달 넘게 지났어요. 정리하거나 물려주기 좋을 때예요.</div>' +
             '<div style="display:flex; gap:8px;">' + two("openToyHandoff") + '</div>' +
@@ -300,7 +300,7 @@
     function bottleHTML() {
         var m = monthsDev();
         if (m === null || m < 12) return "";
-        return card("bottle-handoff", "🥕 다 쓴 젖병 팔거나 물려주기",
+        return card("bottle-handoff", "다 쓴 젖병 팔거나 물려주기",
             '젖병을 떼면 당근에 올릴 글이나 물려줄 말을 만들어 드려요. ' +
             '<b>젖꼭지 · 쪽쪽이는 보내지 말고</b> 버려요. 입에 닿는 거라 새로 쓰는 게 맞아요.',
             two("openBottleHandoff"));

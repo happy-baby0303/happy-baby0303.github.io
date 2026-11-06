@@ -373,7 +373,7 @@ function startPlayTimer(playId, minutes) {
     if (playTimers[playId]) {
         clearInterval(playTimers[playId].id);
         delete playTimers[playId];
-        btn.innerHTML = `⏱️ ${minutes}분 버티기 시작`;
+        btn.innerHTML = `⏱️ ${minutes}분 타이머`;   // 처음 단추와 같은 말 ('버티기 시작' 이었다)
         btn.style.background = '#4A413C'; btn.style.color = '#FFF';
         btn.style.border = 'none'; btn.style.boxShadow = 'none'; btn.style.opacity = '1';
         return;
@@ -404,19 +404,16 @@ function startPlayTimer(playId, minutes) {
             liveBtn.style.border = '1px solid #FCA5A5';
         }
 
-        liveBtn.innerHTML = `⏳ <b>${m}:${s}</b> 버티는 중... (터치 시 정지)`;
+        liveBtn.innerHTML = `⏳ <b>${m}:${s}</b> 남았어요 · 누르면 멈춰요`;
 
         if (secondsLeft <= 0) {
             clearInterval(playTimers[playId].id);
             delete playTimers[playId];
 
-            let successText = '🎉 오늘 미션 끝 · 엄마 아빠 수고하셨어요 💖';
-            if (p) {
-                if (p.category === 'dad')           successText = '🎉 오늘 미션 끝 · 아빠 체력 대단하세요 💪';
-                else if (p.category === 'lieDown')  successText = '🎉 눕육아 성공 엄마 체력 충전 완료 🔋';
-                else if (p.category === 'poop')     successText = '🎉 미션 완료 쾌변 기저귀 확인 요망 💩';
-                else if (p.category === 'sick')     successText = '🎉 미션 완료 아기 컨디션 회복 💖';
-            }
+            /* ⚠️ '오늘 미션 끝 · 아빠 체력 대단하세요 💪' · '눕육아 성공 엄마 체력 충전 완료 🔋' ·
+                  '미션 완료 쾌변 기저귀 확인 요망 💩' · '미션 완료 아기 컨디션 회복 💖' 이었다.
+                  놀이를 숙제처럼 부르고, 아픈 날 놀이가 컨디션을 되찾아 준다고 말하고 있었다. */
+            const successText = '✓ 다 놀았어요 · 수고하셨어요';
 
             liveBtn.innerHTML = successText;
             liveBtn.style.background = '#059669';
@@ -531,7 +528,7 @@ function renderFavorites() {
         return;
     }
     const favItems = toyData.filter(item => favs.includes(item.id));
-    resultArea.innerHTML = `<div style="font-weight:900; color:#E32636; margin-bottom:16px; margin-top:16px; font-size:16px;">❤️ 내 찜 보관함 (${favItems.length}개)</div>` 
+    resultArea.innerHTML = `<div style="font-weight:800; color:#4A413C; margin-bottom:16px; margin-top:16px; font-size:16px;">❤️ 찜한 장난감 ${favItems.length}개</div>` 
                            + favItems.map(item => generateToyHTML(item, favs)).join('');
 }
 

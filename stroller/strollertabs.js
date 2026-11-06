@@ -8,7 +8,7 @@
    젖병에서 겪은 그 벽이다. 같은 방식으로 나눈다.
 
        🚘 카시트 고르기     아직 안 샀을 때
-       🧰 쓰면서 챙길 것     이미 사고 나서
+       쓰면서 챙길 것     이미 사고 나서
 
    \u26a0\ufe0f 유무료로 나누지 않는다.
       PLUS 만 모아둔 탭은 미구독자에게 자물쇠 벽이 된다.
@@ -59,8 +59,8 @@
     } catch (e) {}
 
     var TABS = [
-        { id: "pick", label: "\uD83D\uDC76 유모차 고르기" },   // 👶 — 위 큐레이터 탭 · 육아정보 탭과 같은 표시 (🚼 는 표지판 같았다)
-        { id: "use",  label: "\uD83E\uDDF0 쓰면서 챙길 것" }
+        { id: "pick", label: "유모차 고르기" },   // 👶 — 위 큐레이터 탭 · 육아정보 탭과 같은 표시 (🚼 는 표지판 같았다)
+        { id: "use",  label: "쓰면서 챙길 것" }
     ];
 
     function cur() {
@@ -446,7 +446,7 @@
             "cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
         head.innerHTML =
             '<span style="font-size:15px; font-weight:900; color:#4A413C;">' +
-                '\uD83D\uDCD6 알아두면 좋은 것</span>' +
+                '알아두면 좋은 것</span>' +
             '<span class="st-extra-n" style="font-size:12.5px; font-weight:800; color:#A3958A;">' + targets.length + '</span>' +
             '<span id="sse-mark" style="margin-left:auto; font-size:13px; font-weight:800; ' +
                 'color:#A3958A;">펼치기 \u25BE</span>';

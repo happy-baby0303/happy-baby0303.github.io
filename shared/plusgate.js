@@ -66,18 +66,49 @@
         return storedPlus();
     }
 
-    /* 잠긴 안내는 전부 금색 상자(#FFF9E6)에 'PLUS' 라는 글자가 들어 있다.
-       그 상자를 찾아 맨 아래에 문을 단다. */
+    /* 잠긴 안내는 전부 금색 상자(#FFF9E6)에 'PLUS' 라는 글자가 들어 있다. */
     function boxes() {
         var out = [];
         var all = document.querySelectorAll('div[style*="FFF9E6"], div[style*="fff9e6"]');
         for (var i = 0; i < all.length; i++) {
             var t = all[i].textContent || "";
             if (t.indexOf("PLUS") === -1 && t.indexOf("플러스") === -1) continue;
-            if (all[i].querySelector(".bnh-plus-go")) continue;
             out.push(all[i]);
         }
         return out;
+    }
+
+    /* 한 탭(view-…)에 잠긴 상자가 둘 이상이면 상자마다 달지 않고, PLUS 카드 묶음 바로 밑에 한 번만 단다.
+       ⚠️ 상자마다 달았더니 무료 사용자의 젖병 '쓰면서 챙길 것' 에 금색 단추가 세 개 이어졌다.
+          카드마다 무료로 보이는 부분은 그대로 두고, 단추는 맨 아래 한 번만.
+          그 칸은 data-tail — 탭 정리(bottletabs · carseattabs · strollertabs)가 맨 뒤 무리에 둔다
+          (무료 사용자는 PLUS 카드가 맨 아래라, 묶음 바로 밑 = 탭 맨 아래 · 보내기 카드 위). */
+    function paneOf(el) {
+        return (el.closest && el.closest('[id^="view-"]')) || document.body;
+    }
+    function plusCards(pane) {
+        var out = [];
+        for (var i = 0; i < pane.children.length; i++) {
+            var el = pane.children[i];
+            /* ⚠️ offsetParent 로 보면 안 보이는 탭의 카드는 다 빠진다 (탭을 바꿔도 다시 그리지 않는다). 자기 display 만 본다 */
+            if (el.querySelector && el.querySelector(".plus-badge") && getComputedStyle(el).display !== "none") out.push(el);
+        }
+        return out;
+    }
+    function footer() {
+        var d = document.createElement("div");
+        d.className = "bnh-plus-foot";
+        d.setAttribute("data-tail", "1");
+        d.style.cssText = "background:#FFFFFF; border:1px solid #F7F3ED; border-radius:24px; padding:20px; " +
+            "margin-bottom:20px; box-shadow:0 4px 16px rgba(0,0,0,0.04);";
+        var t = document.createElement("div");
+        t.className = "bnh-plus-foot-t";
+        t.style.cssText = "font-size:13px; font-weight:700; color:#7A6F68; line-height:1.6; text-align:center; word-break:keep-all;";
+        d.appendChild(t);
+        var b = button();
+        b.style.marginTop = "12px";
+        d.appendChild(b);
+        return d;
     }
 
     function button() {
@@ -107,10 +138,30 @@
         return a;
     }
 
+    function drop(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+
     function paint() {
         if (isPlus()) return;
-        var list = boxes();
-        for (var i = 0; i < list.length; i++) list[i].appendChild(button());
+        var list = boxes(), panes = [], groups = [];
+        for (var i = 0; i < list.length; i++) {
+            var p = paneOf(list[i]), k = panes.indexOf(p);
+            if (k === -1) { panes.push(p); groups.push([list[i]]); } else groups[k].push(list[i]);
+        }
+        for (var g = 0; g < panes.length; g++) {
+            var pane = panes[g], bs = groups[g], cards = pane === document.body ? [] : plusCards(pane);
+            var foot = pane.querySelector(":scope > .bnh-plus-foot");
+            if (bs.length >= 2 && cards.length) {
+                for (var j = 0; j < bs.length; j++) drop(bs[j].querySelector(".bnh-plus-go"));
+                if (!foot) foot = footer();
+                var t = foot.querySelector(".bnh-plus-foot-t"), msg = "PLUS 표시가 있는 카드 " + cards.length + "개는 플러스에서 다 열려요";
+                if (t && t.textContent !== msg) t.textContent = msg;
+                var lastCard = cards[cards.length - 1];
+                if (lastCard.nextElementSibling !== foot) pane.insertBefore(foot, lastCard.nextSibling);
+            } else {
+                drop(foot);
+                for (var m = 0; m < bs.length; m++) if (!bs[m].querySelector(".bnh-plus-go")) bs[m].appendChild(button());
+            }
+        }
     }
 
     window.repaintPlusGate = paint;
@@ -137,7 +188,7 @@
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 
-    window.plusGateVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
+    window.plusGateVersion = '2026-11-06';   // 다섯 폴더가 같은 날짜여야 한다
 
     /* 점검용 */
     window.plusGateDebug = function () {

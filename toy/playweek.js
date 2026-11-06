@@ -667,7 +667,7 @@
             /* ⚠️ '6개월 서준이의 이번 주 놀이' 옆에 PLUS 배지와 접어두기가 같이 서서 제목이 세 줄로 접혔다.
                   제목은 짧게, 개월수·이름은 아랫줄로 내리고 접어두기를 그 줄 오른쪽에 둔다. */
             '<div data-plus-head style="font-size:18px; font-weight:900; color:' + DARK + '; ' +
-                'min-width:0; word-break:keep-all;">\uD83D\uDCC5 이번 주 놀이</div>' +
+                'min-width:0; word-break:keep-all;">이번 주 놀이</div>' +
             '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 12px;">' +
                 '<div style="font-size:12.5px; font-weight:700; color:' + GRAY + '; min-width:0;">' +
                     (m === null ? '' : esc((window.BabyAge ? window.BabyAge.pre() : "") + m + "개월 " + nm("") + " 맞춤")) + '</div>' +

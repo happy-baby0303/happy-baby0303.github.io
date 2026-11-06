@@ -491,7 +491,7 @@
         wrap.innerHTML =
         '<div style="max-width:480px; margin:0 auto; padding:20px 20px 130px;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">🥄 지금까지 먹여본 재료</div>' +
+                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">지금까지 먹여본 재료</div>' +
                 '<span onclick="window.closePassedSheet()" style="font-size:24px; font-weight:300; ' +
                     'color:' + GRAY + '; cursor:pointer; line-height:1; padding:0 4px;">×</span>' +
             '</div>' +
@@ -566,7 +566,7 @@
         return '<div id="' + ID + '" style="background:#FFF9E6; border:1px solid #FDE68A; ' +
             'border-radius:14px; padding:16px; margin:20px 0 14px;">' +
             '<div style="font-size:14px; font-weight:900; color:#8A6D00; margin-bottom:6px;">' +
-                (p.length ? '🥄 먹여본 재료가 더 있나요?' : '🥄 지금까지 먹여본 재료가 있나요?') + '</div>' +
+                (p.length ? '먹여본 재료가 더 있나요?' : '지금까지 먹여본 재료가 있나요?') + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                 'line-height:1.7; margin-bottom:12px; word-break:keep-all;">' +
                 (p.length ? '지금 아는 건 <b>' + esc(p.slice(0, 4).join(' · ')) + (p.length > 4 ? ' 외 ' + (p.length - 4) + '가지' : '') + '</b>' + copulaOf(p.length > 4 ? '가지' : p[p.length - 1]) + '.<br>' : '') +

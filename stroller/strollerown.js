@@ -161,7 +161,7 @@
         w.innerHTML =
         '<div style="max-width:480px; margin:0 auto; padding:20px 20px 40px;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">\uD83C\uDF7C 쓰고 계신 유모차</div>' +
+                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">쓰고 계신 유모차</div>' +
                 '<span onclick="window.closeStrollerSheet()" style="font-size:24px; font-weight:300; ' +
                     'color:' + GRAY + '; cursor:pointer; line-height:1; padding:0 4px;">\u00d7</span>' +
             '</div>' +
@@ -648,7 +648,7 @@
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
             '<div class="matrix-header">' +
-                '\uD83D\uDD27 유모차 볼 때가 된 것' +
+                '유모차 볼 때가 된 것' +
                 (over ? ' <span style="color:' + GOLD + ';">' + over + '개</span>' : '') + '</div>' +
             '<div style="margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
@@ -705,7 +705,7 @@
 
         if (!title) {
             return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-                '<div class="matrix-header">\uD83D\uDC76 우리 유모차</div>' +
+                '<div class="matrix-header">우리 유모차</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.8; word-break:keep-all;">' +
                     '유모차는 아기보다 <b>미는 사람의 몸</b>이 먼저 상해요. ' +
@@ -717,7 +717,7 @@
         }
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDC76 우리 유모차</div>' +
+            '<div class="matrix-header">우리 유모차</div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                 'gap:10px; margin:-16px 0 4px;">' +
                 '<div style="font-size:14px; font-weight:900; color:' + DARK + '; min-width:0; ' +
@@ -742,7 +742,7 @@
 
     function teaseHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDC76 우리 유모차</div>' +
+            '<div class="matrix-header">우리 유모차</div>' +
             '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +
                 'padding:17px 16px; margin-top:-16px;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + ';">' +
@@ -763,7 +763,7 @@
 
     function rainHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\u2614 비 오는 날 레인커버</div>' +
+            '<div class="matrix-header">비 오는 날 레인커버</div>' +
             '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
                 'padding:15px 16px; margin:-16px 0 12px; font-size:12.5px; font-weight:600; ' +
                 'color:#7A6F68; line-height:1.8; word-break:keep-all;">' +
@@ -783,7 +783,7 @@
     function sleepHTML() {
         var m = monthsOld();
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDE34 유모차에서 잠들었을 때</div>' +
+            '<div class="matrix-header">유모차에서 잠들었을 때</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
                 'margin:-16px 0 12px; word-break:keep-all;">' +
                 '유모차는 <b>잠자리가 아니라 이동 수단</b>이에요. 등받이가 서 있으면 고개가 앞으로 꺾여요. ' +
@@ -930,7 +930,7 @@
         var m = monthsOld();
 
         var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDE2B 유모차를 안 타려고 해요</div>';
+            '<div class="matrix-header">유모차를 안 타려고 해요</div>';
 
         out += '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
             'padding:15px 16px; margin:-16px 0 14px; font-size:12.5px; font-weight:600; ' +

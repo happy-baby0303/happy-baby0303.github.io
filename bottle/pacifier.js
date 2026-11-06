@@ -287,7 +287,7 @@
 
     function guideHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDC76 쪽쪽이, 자꾸 뱉나요?</div>' +
+            '<div class="matrix-header">쪽쪽이, 자꾸 뱉나요?</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 18px; line-height:1.6; word-break:keep-all;">' +
                 '아기가 쪽쪽이를 싫어하는 게 아니라 <b>모양이 안 맞는 것</b>일 때가 많아요. ' +
@@ -315,7 +315,7 @@
         var early = (d !== null && d >= 0 && d < 28);
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDEE1\uFE0F 쪽쪽이 쓰기 전에</div>' +
+            '<div class="matrix-header">쪽쪽이 쓰기 전에</div>' +
 
             (early
                 ? '<div style="background:#FFF9E6; border:1px solid #F5E1A4; border-radius:14px; ' +

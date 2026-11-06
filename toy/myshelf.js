@@ -129,7 +129,7 @@
         wrap.innerHTML =
         '<div style="max-width:480px; margin:0 auto; padding:20px 20px 120px;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">' +
-                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">🧸 우리 집 육아템</div>' +
+                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">우리 집 육아템</div>' +
                 '<span onclick="window.closeShelfSheet()" style="font-size:24px; font-weight:300; ' +
                     'color:' + GRAY + '; cursor:pointer; line-height:1; padding:0 4px;">×</span>' +
             '</div>' +
@@ -164,7 +164,7 @@
 
         return '<div id="' + ID + '" class="bnh-card">' +
             '<div style="font-size:18px; font-weight:900; color:' + DARK + '; letter-spacing:-0.4px; margin-bottom:6px;">' +
-                '\uD83E\uDDF8 우리 집 장난감' + (have.length ? ' ' + have.length + '개' : '') + '</div>' +
+                '우리 집 장난감' + (have.length ? ' ' + have.length + '개' : '') + '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; line-height:1.7; ' +
                 'margin-bottom:12px; word-break:keep-all;">' +
                 (have.length

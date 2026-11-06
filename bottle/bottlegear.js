@@ -355,7 +355,7 @@
         w.innerHTML =
         '<div style="max-width:480px; margin:0 auto; padding:20px 20px 120px;">' +
             '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">\uD83C\uDF7C 우리 집 수유 장비</div>' +
+                '<div style="font-size:18px; font-weight:900; color:' + DARK + ';">우리 집 수유 장비</div>' +
                 '<span onclick="window.closeGearSheet()" style="font-size:24px; font-weight:300; ' +
                     'color:' + GRAY + '; cursor:pointer; line-height:1; padding:0 4px;">\u00d7</span>' +
             '</div>' +
@@ -414,7 +414,7 @@
 
         if (!mt || !have.length) {
             return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-                '<div class="matrix-header">\uD83C\uDF7C 우리 집 수유 장비</div>' +
+                '<div class="matrix-header">우리 집 수유 장비</div>' +
                 '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                     'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                     '소독 방식과 쓰시는 젖병만 알려주시면, <b>안 맞는 조합</b>을 찾아드리고 ' +
@@ -440,7 +440,7 @@
                     t: "지금 조합은 괜찮아요" };
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF7C 우리 집 수유 장비</div>' +
+            '<div class="matrix-header">우리 집 수유 장비</div>' +
             '<div style="display:flex; justify-content:space-between; align-items:center; ' +
                 'margin:-16px 0 16px; gap:10px;">' +
                 '<div style="font-size:13px; font-weight:700; color:#7A6F68; min-width:0; ' +
@@ -522,7 +522,7 @@
         var rest = list.slice(show.length).map(function (r) { return r.p.label; });
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDD01 갈 때가 된 것</div>' +
+            '<div class="matrix-header">갈 때가 된 것</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 (over ? '<b>' + over + '개</b>는 한 번 볼 때가 됐어요. '
@@ -588,7 +588,7 @@
         var plus = isPlus();
 
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83D\uDCC5 다음에 준비할 것</div>' +
+            '<div class="matrix-header">다음에 준비할 것</div>' +
             '<div style="font-size:13px; font-weight:600; color:' + GRAY + '; ' +
                 'margin:-16px 0 16px; line-height:1.7; word-break:keep-all;">' +
                 '정해진 날짜가 아니라 <b>이 무렵에 많이들 시작한다</b>는 뜻이에요. ' +

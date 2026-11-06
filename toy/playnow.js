@@ -234,7 +234,7 @@
             return '<div id="' + ID + '" class="bnh-card">' +
                 '<div data-plus-head style="font-size:18px; font-weight:900; ' +
                     'color:' + DARK + '; word-break:keep-all; margin-bottom:6px;">' +
-                    '⏱️ 지금 몇 분 있으세요</div>' +
+                    '지금 몇 분 있으세요</div>' +
                 '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                     'line-height:1.75; word-break:keep-all;">' +
                     '밥 올려놓고 10분, 설거지하는 5분.<br>' +
@@ -258,7 +258,7 @@
         return '<div id="' + ID + '" class="bnh-card">' +
             '<div data-plus-head style="font-size:18px; font-weight:900; ' +
                 'color:' + DARK + '; word-break:keep-all; margin-bottom:6px;">' +
-                '⏱️ 지금 몇 분 있으세요</div>' +
+                '지금 몇 분 있으세요</div>' +
             '<div style="margin-top:6px; font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
                 'line-height:1.75; word-break:keep-all;">' +
                 (n ? '오늘 <b>' + n + '개</b> 하셨어요. 한 건 빼고 골랐어요.'

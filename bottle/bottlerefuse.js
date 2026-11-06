@@ -179,7 +179,7 @@
 
     function idleHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF7C 젖병을 안 물어요</div>' +
+            '<div class="matrix-header">젖병을 안 물어요</div>' +
             /* \u26a0\ufe0f 병원 신호는 시작 화면에도 있어야 한다.
                   여기 없으면 구독자는 '시작하기' 를 누르기 전까지 이걸 못 본다.
                   돈 낸 사람이 안전 안내를 늦게 보는 건 말이 안 된다. */
@@ -212,7 +212,7 @@
         var dLeft = back ? daysBetween(today(), back) : null;
 
         var out = '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF7C 젖병을 안 물어요</div>';
+            '<div class="matrix-header">젖병을 안 물어요</div>';
 
         /* 복직 D-day */
         out += '<div style="display:flex; align-items:center; justify-content:space-between; ' +
@@ -341,7 +341,7 @@
     /* 무료 사용자에게 보이는 것 — 첫 방법 하나는 그냥 드린다 */
     function teaseHTML() {
         return '<div class="matrix-panel" style="margin-bottom:20px;">' +
-            '<div class="matrix-header">\uD83C\uDF7C 젖병을 안 물어요</div>' +
+            '<div class="matrix-header">젖병을 안 물어요</div>' +
             warnHTML() +
             '<div style="background: #FFFFFF; border:1.5px solid #DDD9F5; border-radius:16px; padding:18px;">' +
                 '<div style="font-size:15.5px; font-weight:900; color:#4A413C;">' +
