@@ -832,7 +832,16 @@ function festIsFree(fi) { return !!(fi && /^\s*무료/.test(String(fi.usetimefes
 function festInfoHTML(fi) {
     if (!fi) return '';
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    /* 요금 · 시간 · 연령 · 행사장 칸은 글자는 그대로 두고 줄만 나눈다.
+       API 글이 '- 성인 11,000원 - 국가유공자 5,500 - 아동 무료' · '50,000원※ 자세한 사항은' · '17:30[11월8일]- 10:00' 처럼 한 줄로 붙어 온다.
+       ※ 와 [ 앞, 그리고 글자로 시작하는 '- 항목' 앞에서만 바꾼다. '10:00 - 18:00' 처럼 숫자가 이어지는 건 안 건드린다.
+       소개 글(overview)은 손대지 않는다. */
+    const tidy = (s) => String(s == null ? '' : s)
+        .replace(/(\S)\s*※/g, '$1\n※')
+        .replace(/(\S)\[/g, '$1\n[')
+        .replace(/(\S)\s*-\s(?=[가-힣A-Za-z(\[])/g, '$1\n- ');
     const nl = (s) => esc(s).replace(/\n/g, '<br>');
+    const nlRow = (s) => nl(tidy(s));
     const all = [fi.overview, fi.subevent, fi.placeinfo, fi.eventplace].filter(Boolean).join('\n');
     const chips = [];
     if (/유모차\s*(무료\s*)?대여/.test(all) && !/유모차[^\n.]{0,30}(불가|금지|제한|않|없|안\s*(해|함|돼|됨))/.test(all)) chips.push('유모차 대여');
@@ -845,7 +854,7 @@ function festInfoHTML(fi) {
     return `<div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
                 <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 10px;">행사 안내</div>
                 ${chips.length ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">${chips.map(c => `<span style="font-size:11.5px; font-weight:800; color:#5B53B8; background:#FFFFFF; border:1px solid rgba(127,119,221,0.25); border-radius:8px; padding:4px 9px;">${c}</span>`).join('')}</div>` : ''}
-                ${rows.length ? `<div style="display:grid; grid-template-columns:58px 1fr; gap:7px 10px; font-size:13px; line-height:1.45;">${rows.map(r => `<div style="color:var(--text-s); font-weight:700;">${r[0]}</div><div style="color:var(--text-m); font-weight:700; word-break:keep-all; ${clamp(3)}">${nl(r[1])}</div>`).join('')}</div>` : ''}
+                ${rows.length ? `<div style="display:grid; grid-template-columns:58px 1fr; gap:7px 10px; font-size:13px; line-height:1.45;">${rows.map(r => `<div style="color:var(--text-s); font-weight:700;">${r[0]}</div><div style="color:var(--text-m); font-weight:700; word-break:keep-all; ${clamp(6)}">${nlRow(r[1])}</div>`).join('')}</div>` : ''}
                 ${ov ? `<div style="margin-top:${rows.length ? 12 : 0}px; font-size:13px; font-weight:500; color:var(--text-m); line-height:1.6; word-break:keep-all; ${long ? clamp(4) : ''}">${nl(ov)}</div>
                 ${long ? `<button type="button" onclick="var o=this.previousElementSibling; o.style.display='block'; o.style.webkitLineClamp='unset'; this.remove();" style="margin-top:6px; padding:4px 0; background:none; border:none; color:#7F77DD; font-size:12.5px; font-weight:800; cursor:pointer; font-family:inherit;">더 보기</button>` : ''}` : ''}
                 <div style="margin-top:10px; font-size:11px; font-weight:600; color:var(--text-sub);">출처: 한국관광공사 (공공누리 제3유형)</div>

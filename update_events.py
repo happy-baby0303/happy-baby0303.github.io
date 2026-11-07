@@ -35,6 +35,8 @@ BAD_TITLE = ["산업", "포럼", "세미나", "심포지엄", "콘퍼런스", "�
 # 관람 가능 연령이 성인만인 행사
 ADULT_ONLY = re.compile(r"(19|20)\s*세\s*이상|성인\s*(만|전용|관람)")
 ALL_AGES = re.compile(r"누구나|전\s*연령|제한\s*없|연령\s*무관")
+# '만 13세 이상' 처럼 아기가 못 들어가는 행사 — 네 살부터인 행사는 뺀다 (만 3세 이하는 부모가 보고 고르게 남긴다)
+MIN_AGE = re.compile(r"(\d+)\s*세\s*이상")
 
 # 상세 창에 쓰는 칸 (TourAPI 이름 그대로 저장한다)
 INTRO_KEYS = ["usetimefestival", "agelimit", "playtime", "eventplace", "placeinfo", "subevent"]
@@ -136,8 +138,12 @@ def keep(item):
     if any(w in title for w in BAD_TITLE):
         return False
     age = item.get("agelimit", "")
-    if age and ADULT_ONLY.search(age) and not ALL_AGES.search(age):
-        return False
+    if age and not ALL_AGES.search(age):
+        if ADULT_ONLY.search(age):
+            return False
+        mins = [int(n) for n in MIN_AGE.findall(age)]
+        if mins and min(mins) >= 4:
+            return False
     return True
 
 
