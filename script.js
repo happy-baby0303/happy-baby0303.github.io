@@ -722,7 +722,9 @@ function filterPlaces() {
             
             // 🚨 [중요] 행사 탭에서는 마지막에 true를 보냅니다!
             card.onclick = () => openFestivalModal(title, dateText, addr, item.tel || '정보없음', item.review || '', title, rawImg || '⚙️GRAPHIC', true);
-            card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">${tagOf(item)}</span>${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${dateText}</div><div class="fest-card-meta" style="margin-top:2px;">${shortAddr}</div></div>`;
+            /* 요금이 '무료' 로 시작하면 사진 오른쪽 위에 붙인다 (공식 요금 칸 그대로) */
+            const freeTag = festIsFree(item) ? '<span style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.94); color:#4A413C; font-size:11px; font-weight:800; padding:4px 8px; border-radius:8px; z-index:10;">무료</span>' : '';
+            card.innerHTML = `<div class="fest-card-img-wrap"><span class="fest-dday-tag">${tagOf(item)}</span>${freeTag}${imgHtml}</div><div class="fest-card-info"><div class="fest-card-title">${title}</div><div class="fest-card-meta">${dateText}</div><div class="fest-card-meta" style="margin-top:2px;">${shortAddr}</div></div>`;
             return card;
         };
         /* ⚠️ '전국 전체' 면 행사가 200개 가까이 한 번에 그려졌다. 사진도 한꺼번에 받아서 느리고 데이터도 많이 썼다.
@@ -811,6 +813,45 @@ function filterPlaces() {
 // ==========================================
 // 🎪 행사/핫플 모달창: 스마트 짐싸기 자동 매칭 엔진 (초정밀 타격 패치)
 // ==========================================
+/* ============================================================
+   행사 상세 — 관광공사 공식 정보 (update_events.py 가 매주 받아 온다)
+
+   ⚠️ 행사 목록만 받아 와서 소개 칸이 비어 있었고, 거기에 지어낸 문장이 들어가 있었다.
+      이제 행사마다 요금(usetimefestival) · 관람 연령(agelimit) · 시간(playtime) · 행사장(eventplace) ·
+      소개 글(overview)을 같이 받아 온다. 주최 측이 적은 그대로 보여 준다.
+   ⚠️ 공공누리 제3유형(출처 표시 · 변경 금지)이라 소개 글을 줄이거나 고쳐 쓰지 않는다.
+      화면에서 네 줄만 보이고 '더 보기' 로 펼친다. 상자 아래에 출처를 적는다.
+   ⚠️ '유모차 대여' · '수유실' 은 공식 글에 그 말이 있을 때만 붙인다.
+      '유모차 반입 불가' · '유모차 대여는 하지 않습니다' · '수유실 없음' 같은 말에 붙지 않게,
+      같은 문장 안에 부정어가 있으면 붙이지 않는다 (없는 걸 있다고 보여 주느니 안 보여 준다).
+   ============================================================ */
+function festInfoOf(title) {
+    try { return (Array.isArray(apiFestivals) ? apiFestivals : []).find(f => f && f.title === title) || null; } catch (e) { return null; }
+}
+function festIsFree(fi) { return !!(fi && /^\s*무료/.test(String(fi.usetimefestival || ''))); }
+function festInfoHTML(fi) {
+    if (!fi) return '';
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const nl = (s) => esc(s).replace(/\n/g, '<br>');
+    const all = [fi.overview, fi.subevent, fi.placeinfo, fi.eventplace].filter(Boolean).join('\n');
+    const chips = [];
+    if (/유모차\s*(무료\s*)?대여/.test(all) && !/유모차[^\n.]{0,30}(불가|금지|제한|않|없|안\s*(해|함|돼|됨))/.test(all)) chips.push('유모차 대여');
+    if (/수유실/.test(all) && !/수유실[^\n.]{0,20}(없|미운영|않|불가)/.test(all)) chips.push('수유실');
+    const rows = [['요금', fi.usetimefestival], ['관람 연령', fi.agelimit], ['시간', fi.playtime], ['행사장', fi.eventplace]].filter(r => r[1]);
+    const ov = String(fi.overview || '');
+    if (!rows.length && !ov && !chips.length) return '';
+    const clamp = (n) => `display:-webkit-box; -webkit-line-clamp:${n}; -webkit-box-orient:vertical; overflow:hidden;`;
+    const long = ov.length > 110 || (ov.match(/\n/g) || []).length >= 3;
+    return `<div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
+                <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 10px;">행사 안내</div>
+                ${chips.length ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">${chips.map(c => `<span style="font-size:11.5px; font-weight:800; color:#5B53B8; background:#FFFFFF; border:1px solid rgba(127,119,221,0.25); border-radius:8px; padding:4px 9px;">${c}</span>`).join('')}</div>` : ''}
+                ${rows.length ? `<div style="display:grid; grid-template-columns:58px 1fr; gap:7px 10px; font-size:13px; line-height:1.45;">${rows.map(r => `<div style="color:var(--text-s); font-weight:700;">${r[0]}</div><div style="color:var(--text-m); font-weight:700; word-break:keep-all; ${clamp(3)}">${nl(r[1])}</div>`).join('')}</div>` : ''}
+                ${ov ? `<div style="margin-top:${rows.length ? 12 : 0}px; font-size:13px; font-weight:500; color:var(--text-m); line-height:1.6; word-break:keep-all; ${long ? clamp(4) : ''}">${nl(ov)}</div>
+                ${long ? `<button type="button" onclick="var o=this.previousElementSibling; o.style.display='block'; o.style.webkitLineClamp='unset'; this.remove();" style="margin-top:6px; padding:4px 0; background:none; border:none; color:#7F77DD; font-size:12.5px; font-weight:800; cursor:pointer; font-family:inherit;">더 보기</button>` : ''}` : ''}
+                <div style="margin-top:10px; font-size:11px; font-weight:600; color:var(--text-sub);">출처: 한국관광공사 (공공누리 제3유형)</div>
+            </div>`;
+}
+
 function openFestivalModal(title, dateText, addr, tel, review, query, image, isEvent = true) {
     const body = document.getElementById('modal-dynamic-body');
     if(!body) return;
@@ -888,6 +929,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
             <!-- ⚠️ 행사 112곳은 소개 글이 전부 비어 있어서, 모든 행사에 똑같이
                  "주말에 아이와 방문하기 좋은 안전한 인프라를 갖추고 있습니다." 가 따옴표까지 달고 떴다.
                  확인한 적 없는 말을 후기처럼 보여 주면 안 된다. 적힌 게 있을 때만 칸을 그린다. -->
+            ${isEvent ? festInfoHTML(festInfoOf(title)) : ''}
             ${review ? `<div style="background: rgba(127, 119, 221, 0.05); padding: 16px; border-radius: 14px; margin-bottom: 28px; border: 1px solid rgba(127, 119, 221, 0.1);">
                 <div style="font-size: 12.5px; font-weight: 900; color: #7F77DD; margin-bottom: 6px;">${isEvent ? '가기 전에 알아두면' : '이곳은요'}</div>
                 <div style="font-size: 13.5px; font-weight: 600; color: var(--text-m); line-height: 1.5; word-break: keep-all;">${review}</div>
