@@ -9325,12 +9325,14 @@ window.renderSettingsTab = function() {
                  ⚠️ '단 한 번의 결제로 우리 가족 평생 육아 기록실' 이라고 적혀 있었다.
                     예정 요금은 달마다 / 1년치이고, 지금은 결제를 받지도 않는다. 사실과 다른 말이라 걷어냈다.
                     누르면 옛 안내창(vip-modal-overlay — '다둥이 무제한' 같은 지금과 다른 말이 적힌)이 떴다. 지금 결제 안내로 잇는다.
-                    무료 개방 중엔 바로 아래 PLUS 칸(plusfree.js)이 같은 이야기를 하므로 숨긴다. -->
+                    무료 개방 중엔 바로 아래 PLUS 칸(plusfree.js)이 같은 이야기를 하므로 숨긴다.
+                 ⚠️ '포토북, 목소리 녹음, 소아과 리포트까지' 라고 적혀 있었다. 목소리는 10개까지 무료이고,
+                    소아과 리포트는 플레이 앱에서 숨긴 기능이다. 두 앱에 다 있는 것만 적는다. -->
             ${(typeof window.isFreeOpen === 'function' && window.isFreeOpen()) ? '' : `
             <div onclick="window.showPaywall()" style="background: linear-gradient(135deg, #4A403A 0%, #3B322C 100%); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; transition: 0.2s;">
                 <div>
                     <div style="font-size: 13px; font-weight: 900; color: #A9A2EA; margin-bottom: 6px;">배냇함 PLUS</div>
-                    <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">포토북, 목소리 녹음,<br>소아과 리포트까지</div>
+                    <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">사진 · 목소리 무제한,<br>포토북과 이달의 배냇함까지</div>
                 </div>
                 <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; font-weight: 700;">›</div>
             </div>`}
@@ -9430,10 +9432,8 @@ window.changeUserRole = function(role) {
         return window.showToast("돌봄 도우미 계정은 역할을 바꿀 수 없어요");
     }
 
-    if (role === 'senior' && !window.isPremiumUser()) {
-        if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
-        return window.showPaywall();
-    }
+    /* ⚠️ 여기서 '돌봄 화면' 을 PLUS 로 막고 있었다 (무료 개방이 끝나면 결제 안내가 떴다).
+          설정의 PLUS 약속(plusfree.js)과 sitterplus.js 는 '돌봄 화면은 계속 무료' 라고 적어 두었다. 막지 않는다. */
 
     localStorage.setItem('user_role', role); 
     /* ⚠️ 설정을 먼저 다시 그리고 나서 화면 표시(mode-senior)를 바꿨다. 그래서 도우미 화면에서 엄마로 돌아오면
@@ -15181,7 +15181,7 @@ window.cancelBreastTimer = function() {
 };
 
 // ==========================================
-// 👑 [배냇함 플러스] 프리미엄 판독 및 동기화 엔진
+// 👑 [배냇함 PLUS] 프리미엄 판독 및 동기화 엔진
 // ==========================================
 
 // 1. 로그인/동기화 시 families 문서에서 plan(요금제) 읽어와서 캐시 저장
@@ -15200,7 +15200,7 @@ if (until) localStorage.setItem('tosil_plan_until', until);
     }
 };
 
-// 2. 유저가 프리미엄인지 확인하는 판독기 (수익 방어막 + 최고관리자 프리패스)
+// 2. PLUS 인지 확인 (요금제 캐시 · 얼리버드 · 관리자)
 window.isPremiumUser = function() {
     // 로컬스토리지 임의 조작 방지: firebase_uid가 없으면 무조건 컷
     const myUid = localStorage.getItem('firebase_uid');
@@ -15222,151 +15222,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 💎 하이엔드 페이월 (상실 회피 + 3단 앵커링 프라이싱)
+// PLUS 안내 — 창은 하나 (premium.js 의 openUpsell)
 // ==========================================
+/* ⚠️ 여기에 PLUS 결제 화면(어두운 창)이 따로 있었다. 안내 시트(premium.js)와 목록이 달랐다.
+      시트에 있는 '하루 사진 무제한 · 봉인 편지 · 가족 5명 · 소리 모아듣기' 가 여기엔 없었고,
+      여기엔 '큐레이터 다섯 곳 전부 보기'(고르는 건 무료다) · '그날의 목소리 녹음'(10개까지 무료다) ·
+      '소아과에 보여 줄 A4 리포트'(플레이 앱에서는 숨긴 기능이다)가 있었다.
+      시트에서 '플러스 보러가기' 를 누르면 같은 PLUS 를 다른 말로 한 번 더 들었다.
+      이제 premium.js 의 표 하나로 한 창에서 말한다. 예정 가격과 알림 신청도 그 창 아래에 있다. */
 window.showPaywall = function() {
-    let existing = document.getElementById('premium-paywall-modal');
-    if (existing) existing.remove();
-
-    // 🚨 [상실 회피 자극 엔진] 지금까지 쌓은 기록 개수 연산
-    const lossAversionHtml = (() => {
-        const t = (JSON.parse(localStorage.getItem('tosil_tracker_records'))||[]).length;
-        const f = (JSON.parse(localStorage.getItem('tosil_fever_records'))||[]).length;
-        const g = (JSON.parse(localStorage.getItem('tosil_growth_records'))||[]).length;
-        const total = t + f + g;
-        if (total < 10) return '';
-        return `
-            <div style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.25); border-radius:16px; padding:18px; margin-bottom:24px; text-align:center;">
-                <div style="font-size:11.5px; font-weight:800; color:#D2A340; margin-bottom:8px;">지금까지 남긴 기록</div>
-                <div style="font-size:32px; font-weight:900; color:#FFF; margin-bottom:8px;">${total}건</div>
-                <div style="font-size:12.5px; font-weight:700; color:#B3A498; line-height:1.5; word-break:keep-all;">
-    이 기록은 PLUS가 아니어도 계속 볼 수 있어요.<br>PLUS에선 이 기록으로 포토북과 소아과 리포트를 만들어요.
-</div>
-            </div>`;
-    })();
-
-    const paywallHtml = `
-        <div id="premium-paywall-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(10px); opacity: 0; transition: opacity 0.3s;">
-            
-            <div style="background: linear-gradient(145deg, #3B322C 0%, #4A403A 100%); width: 100%; max-width: 380px; border-radius: 28px; padding: 36px 24px 28px 24px; box-shadow: 0 24px 50px rgba(0,0,0,0.5); position: relative; transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); border: 1px solid rgba(255,255,255,0.1); max-height: 90vh; overflow-y: auto;">
-                
-                <button onclick="document.getElementById('premium-paywall-modal').style.opacity='0'; setTimeout(()=>document.getElementById('premium-paywall-modal').remove(),300);" style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; font-weight: 900; color: #B3A498; cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s;">✕</button>
-
-                <!-- 👑 타이틀 영역 -->
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: linear-gradient(135deg, #FDE047 0%, #B98A2E 100%); border-radius: 20px; font-size: 32px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(245,158,11,0.3);">💎</div>
-                    <!-- ⚠️ 자간 4px 를 벌려 '배 냇 함 플 러 스' 로 보였다. 한글은 자간을 벌리면 흩어져 읽힌다 -->
-                    <div style="font-size: 12.5px; font-weight: 800; color: #D2A340; margin-bottom: 8px;">배냇함 PLUS</div>
-                    <div style="font-size: 24px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">
-                        PLUS에서 더 쓸 수 있는 것들
-                    </div>
-                </div>
-
-                <!-- 🚨 상실 회피 자극 박스 삽입 -->
-                ${lossAversionHtml}
-
-                <!-- 🌟 프리미엄 핵심 기능 요약 -->
-                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">포토북 PDF 만들기</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">그날의 목소리 녹음</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">큐레이터 다섯 곳 전부 보기</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">소아과에 보여 줄 A4 리포트</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">매달 오는 이달의 배냇함 카드</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">아기 프로필 3명까지 (둘째, 셋째)</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="color:#7F77DD; font-size:16px;">✓</span>
-                        <span style="color:#E2E8F0; font-size:14px; font-weight:700;">돌봄 도우미 두 명부터 (한 명은 무료)</span>
-                    </div>
-                </div>
-
-                <!-- 💰 3단 프라이싱 앵커링 (연간 유도) -->
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
-                    
-                    <!-- ⚠️ 여기 요금제 카드 두 장이 있었다.
-                         ₩4,900 / ₩39,000 을 걸어놓고 눌러도 테두리 색만 바뀌었다.
-                         결제 연동이 한 줄도 없다 (포트원·토스·구글 결제 전부 0곳).
-                         아래 버튼은 '첫 1개월 무료 체험 시작하기' 인데
-                         실제로는 대기자 명단에 이름만 올라간다.
-
-                         받지도 않을 돈을 받는다고 적어둔 화면이다.
-                         심사자가 누르면 반려 사유가 되고, 무엇보다 거짓말이다.
-
-                         결제가 붙기 전까지는 '예정 가격' 으로만 말한다.
-                         숫자는 그대로 보여준다 — 얼마일지 궁금한 건 당연하니까. -->
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; padding: 18px 16px;">
-                        <div style="font-size: 11.5px; font-weight: 800; color: #8C8079; margin-bottom: 13px;">예정 가격</div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
-                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">달마다</span>
-                            <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩4,900</span>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="font-size: 14px; font-weight: 700; color: #E2E8F0;">1년치 한 번에<span style="font-size: 11px; font-weight: 800; color: #7F77DD; margin-left: 6px;">34% 저렴</span></span>
-                            <span style="font-size: 16px; font-weight: 900; color: #FFFFFF;">₩39,000</span>
-                        </div>
-
-                        <div style="font-size: 11.5px; color: #8C8079; margin-top: 14px; line-height: 1.65;">
-                            아직 확정된 값이 아니고, 지금은 결제를 받지 않습니다.
-                        </div>
-                    </div>
-
-                    <div style="background: rgba(185,138,46,0.10); border: 1px solid rgba(185,138,46,0.32); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 14px; font-weight: 800; color: #D2A340; margin-bottom: 2px;">📖 실물 포토북</div>
-                            <div style="font-size: 12px; color: #B3A498;">담긴 걸 한 권으로 인쇄해서 배송</div>
-                        </div>
-                                                <div style="text-align: right;">
-                            <!-- 🚨 제작 원가(B2B 단가)를 확정하기 전까지 금액을 걸지 않는다.
-                                 한 번 걸어둔 가격은 내리기가 어렵고,
-                                 원가를 모른 채 정하면 손해를 보거나 바가지가 된다. -->
-                            <div style="font-size: 15px; font-weight: 900; color: #D2A340;">준비 중</div>
-                            <div style="font-size: 10px; font-weight: 700; color: #B3A498; margin-top: 3px;">곧 만나요</div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- 🚀 최종 액션 버튼 -->
-                <div style="text-align: center;">
-                    <button onclick="window.applyPremiumWaitlist(this)" style="width: 100%; padding: 18px; background: linear-gradient(135deg, #7F77DD 0%, #6A61CE 100%); color: #FFF; border: none; border-radius: 16px; font-size: 16px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: transform 0.2s;" onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'">
-                        열리면 제일 먼저 알려주세요
-                    </button>
-                    <div style="font-size: 12px; color: #B3A498; margin-top: 14px; line-height: 1.7;">
-                        아직 결제를 받지 않습니다.<br>여는 날 미리 신청하신 분께 먼저 알려드려요.
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', paywallHtml);
-    setTimeout(() => {
-        const modal = document.getElementById('premium-paywall-modal');
-        if(modal) {
-            modal.style.opacity = '1';
-            modal.firstElementChild.style.transform = 'translateY(0)';
-        }
-    }, 10);
+    if (typeof window.openUpsell === 'function') return window.openUpsell();
+    if (typeof window.showToast === 'function') window.showToast('잠시 뒤 다시 눌러 주세요');
 };
 
 // 💡 3단 요금제 클릭 시 토글되는 애니메이션 엔진
@@ -15399,11 +15265,14 @@ window.selectPlan = function(planId) {
     circle.style.borderColor = '#7F77DD';
 };
 
-// 5. 프리미엄 웨이트리스트(대기자 명단) 신청 함수
+// 5. PLUS 알림 신청 — 결제가 열리는 날, 신청한 분께 먼저 알린다
+/* ⚠️ '이미 얼리버드 탑승을 완료하셨어요 🤍' · '탑승 처리 중... ⏳' 처럼 이 앱과 안 맞는 말이 섞여 있었다.
+      부르는 곳은 PLUS 안내(premium.js openUpsell)의 아래 단추다. 끝나면 그 창을 닫는다. */
 window.applyPremiumWaitlist = function(btn) {
     if(localStorage.getItem('tosil_premium_applied')) {
-        return window.showToast('이미 얼리버드 탑승을 완료하셨어요 🤍');
+        return window.showToast('이미 신청하셨어요. 여는 날 먼저 알려 드릴게요');
     }
+    const closePlus = () => { if (typeof window.closeUpsell === 'function') window.closeUpsell(); };
 
    // 저장 경로가 곧 권한이다. 캐시된 값이 아니라 '지금 로그인된' UID 를 쓴다.
     // 규칙이 request.auth.uid 와 문서 ID 를 대조하기 때문에,
@@ -15412,80 +15281,65 @@ window.applyPremiumWaitlist = function(btn) {
    const myUid = liveUid;   // 캐시로는 시도하지 않는다. 어차피 규칙이 거부한다.
     if (liveUid) localStorage.setItem('firebase_uid', liveUid);
     const myNickname = localStorage.getItem('community_nickname') || localStorage.getItem('kakao_nickname') || '익명엄빠';
-    
-    if(!myUid) {
-        // 로그인 알림창이 뒤로 숨는 걸 막기 위해, 페이월을 먼저 닫아버립니다!
-        const paywall = document.getElementById('premium-paywall-modal');
-        if(paywall) paywall.remove();
 
-        return window.showConfirm("혜택을 받으시려면 먼저 로그인해주세요", function() {
+    if(!myUid) {
+        // 로그인 창이 PLUS 안내 뒤로 숨지 않게 안내를 먼저 닫는다
+        closePlus();
+        return window.showConfirm("알림을 받으려면 먼저 로그인해 주세요", function() {
             if(typeof window.switchTab === 'function') window.switchTab('settings');
-        }, "💬", "로그인 하러가기", "#7F77DD");
+        }, "", "로그인하러 가기", "#7F77DD");
     }
 
-  // 서버로 혜택 신청 기록 보내기
+    // 서버에 신청 기록 남기기 (문서 ID = 내 UID — Firestore 규칙과 같게)
     if (typeof db !== 'undefined' && typeof setDoc === 'function' && typeof doc === 'function') {
-        btn.innerText = "탑승 처리 중... ⏳";
-        btn.disabled = true;
+        if (btn) { btn.innerText = "신청하는 중…"; btn.disabled = true; }
 
-        // UID 기반으로 저장하여 Firestore 규칙 통과!
         setDoc(doc(db, "waitlist_premium", String(myUid)), {
             uid: myUid,
             nickname: myNickname,
             appliedAt: new Date().toISOString()
         }, {merge: true}).then(() => {
             localStorage.setItem('tosil_premium_applied', 'true');
-            btn.innerText = "✅ 신청 완료";
-            btn.style.background = "#B98A2E"; 
-            btn.style.color = "#FFFFFF";
-            btn.style.boxShadow = "none";
-            
+            if (btn) {
+                btn.innerText = "신청했어요";
+                btn.style.background = "var(--bg-sub)";
+                btn.style.color = "var(--text-m)";
+            }
             if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-            
-            // 🚨 1. 성공 시 토스트 알림 텍스트 변경 (1개월 무료 강조)
             /* ⚠️ 30일 무료를 약속하지 않는다. 결제가 아직 없어서 31일째에 못 받는다.
-              그러면 '무료 30일' 이 아니라 '무기한 무료' 가 된다. */
-        window.showToast('🤍 명단에 담아두었어요. 열리는 날 제일 먼저 알려드릴게요');
-            
-            setTimeout(() => {
-                const paywall = document.getElementById('premium-paywall-modal');
-                if(paywall) paywall.remove();
-            }, 1500);
-
-      }).catch((e) => {
-            console.error("얼리버드 저장 실패:", e);
-            
-            // 🚨 2. 에러 나서 튕겼을 때 원래대로 돌아가는 버튼 텍스트 변경
-            btn.innerText = "열리면 제일 먼저 알려주세요";
-            btn.disabled = false;
-            
+                  그러면 '무료 30일' 이 아니라 '무기한 무료' 가 된다. */
+            window.showToast('신청했어요. 여는 날 먼저 알려 드릴게요');
+            setTimeout(closePlus, 1200);
+        }).catch((e) => {
+            console.error("PLUS 알림 신청 실패:", e);
+            if (btn) { btn.innerText = "열리면 제일 먼저 알려 주세요"; btn.disabled = false; }
             window.showToast(
                 (e && e.code === 'permission-denied')
-                    ? "권한이 없습니다. 앱을 재실행하거나 다시 로그인해주세요."
-                    : "앗, 통신 지연이 발생했어요. 다시 시도해주세요."
+                    ? "신청이 안 됐어요. 다시 로그인한 뒤 눌러 주세요"
+                    : "연결이 느려서 신청이 안 됐어요. 잠시 뒤 다시 눌러 주세요"
             );
-           });
+        });
     } else {
         window.showToast("인터넷이 끊겨 있어요. 연결되면 다시 해 주세요.");
     }
-}; // <- applyPremiumWaitlist 함수 닫는 괄호
+};
 
 // ==========================================
-// 🚨 기존 핵심 함수들을 가로채서 자물쇠(Lock) 걸기!
+// PLUS 자리 — 아기 추가 (premium.js 가 한 겹 더 감싼다)
 // ==========================================
 
-// 1. 다둥이 추가 자물쇠 및 로직
+// 1. 아기 추가
 window.addNewBabyProfile = function() {
     const profiles = window.getBabyProfiles();
     
     // 무료 유저는 1명(배열길이 1) 이상 추가 불가능!
     if (profiles.length >= 1 && !window.isPremiumUser()) {
         if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
-        return window.showPaywall();
+        return window.openPlus('baby');
     }
     
     // VIP라도 최대 3명까지만
-    if (profiles.length >= 3) return alert("\uD83D\uDC76 아기는 3명까지 담을 수 있어요");
+    if (profiles.length >= 3) return alert("아기는 3명까지 담을 수 있어요");
     
     // 즉석에서 예쁜 이름을 물어봄
     /* ⚠️ prompt() 도 alert() 와 같은 시스템 창이다.
@@ -15609,7 +15463,7 @@ document.addEventListener("DOMContentLoaded", () => {
       그래서 시터가 설정에서 '엄마' 를 누르면 넘어갔다. 하나(위쪽)만 남긴다. */
 
 // ==========================================
-// 🏥 [프리미엄] 의사가 극찬하는 소아과 제출용 A4 종합 리포트 생성기
+// 소아과 제출용 A4 종합 리포트 — 부르는 곳이 없다 (지금은 아래 downloadPediatricianPDF 를 쓴다)
 // ==========================================
 window.downloadPediatricianReport = function() {
     if (!window.isPremiumUser()) {
@@ -15756,7 +15610,7 @@ window.downloadPediatricianReport = function() {
         
         <div style="margin-top:60px; text-align:center; color:#C4B5A9; font-size:14px; font-weight:700; border-top:1px solid #F6F2EC; padding-top:20px;">
             본 리포트는 보호자의 앱 기록을 바탕으로 자동 추출되었으며, 의료진의 빠르고 정확한 진료를 돕기 위한 참고 자료입니다.<br>
-            Powered by 배냇함 플러스
+            Powered by 배냇함 PLUS
         </div>
     `;
 
@@ -15789,16 +15643,16 @@ window.downloadPediatricianReport = function() {
 };
 
 // ==========================================
-// 📸 [프리미엄] 월간 성장 카드 생성기 (인스타 공유 마케팅용)
+// 지난달 성장 카드 — 홈 배너 자리(monthly-card-banner)가 index.html 에 없어서 지금은 안 뜬다
 // ==========================================
 window.downloadMonthlyGrowthCard = function() {
-    // 🚨 1회 무료 체험 방어막!
+    // 무료는 한 번
     const used = localStorage.getItem('tosil_trial_card') === 'used';
     if (!window.isPremiumUser() && used) {
         if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
         return window.showPaywall();
     }
-    // 체험 도장 쾅!
+    // 한 번 썼다고 적어 둔다
     if (!window.isPremiumUser()) localStorage.setItem('tosil_trial_card', 'used');
 
     window.showToast("지난달 성장 카드를 만드는 중이에요");
@@ -15860,12 +15714,12 @@ window.downloadMonthlyGrowthCard = function() {
 
        ${window.isPremiumUser() ? '' : `
         <div style="text-align:center; padding:14px; background:rgba(255,255,255,0.6); border:1px dashed #D5D1F4; border-radius:16px; margin-bottom:16px; font-size:13px; font-weight:800; color:#7F77DD;">
-            🔒 체험판으로 생성된 카드입니다 · 배냇함 플러스
+            🔒 체험판으로 생성된 카드입니다 · 배냇함 PLUS
         </div>`}
 
         <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid rgba(0,0,0,0.05); padding-top:24px; margin-top:20px;">
             <div style="font-size:18px; font-weight:800; color:#A3958A;">우리 가족 프라이빗 육아 기록실</div>
-            <div style="font-size:24px; font-weight:900; color:#4A413C;">배냇함 플러스</div>
+            <div style="font-size:24px; font-weight:900; color:#4A413C;">배냇함 PLUS</div>
         </div>
     `;
 
@@ -15890,16 +15744,16 @@ window.downloadMonthlyGrowthCard = function() {
 };
 
 // ==========================================
-// 👨‍⚕️ [프리미엄] 소아과 제출용 A4 리포트
+// 소아과 제출용 A4 리포트 (PLUS · 무료는 한 번)
 // ==========================================
 window.downloadPediatricianPDF = function() {
-    // 🚨 1회 무료 체험 방어막!
+    // 무료는 한 번 — 그 한 장에는 '체험판' 표시가 붙는다
     const used = localStorage.getItem('tosil_trial_report') === 'used';
     if (!window.isPremiumUser() && used) {
         if(navigator.vibrate) navigator.vibrate([20, 50, 20]);
-        return window.showPaywall();
+        return window.openPlus('report');
     }
-    // 체험 도장 쾅!
+    // 한 번 썼다고 적어 둔다
     if (!window.isPremiumUser()) localStorage.setItem('tosil_trial_report', 'used');
 
     if (typeof html2canvas === 'undefined') return window.showToast("그림 만들 준비 중이에요. 잠시 뒤 다시 눌러 주세요");
@@ -16030,7 +15884,7 @@ window.downloadPediatricianPDF = function() {
 
        ${window.isPremiumUser() ? '' : `
         <div style="text-align:center; padding:14px; background:#FFF9E6; border:1px dashed #B98A2E; border-radius:12px; margin-bottom:16px; font-size:12px; font-weight:800; color:#B45309;">
-            🔒 체험판으로 생성된 리포트입니다 · 배냇함 플러스
+            🔒 체험판으로 생성된 리포트입니다 · 배냇함 PLUS
         </div>`}
 
         <div style="border-top:1px solid #EDE6DE;padding-top:16px;font-size:10.5px;color:#A3958A;line-height:1.6;">

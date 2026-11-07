@@ -120,7 +120,7 @@
             "margin-top:14px; padding:14px; border-radius:13px; text-align:center; cursor:pointer; " +
             "background:" + GOLD + "; color:#FFFFFF; font-size:13.5px; font-weight:900; " +
             "letter-spacing:-0.3px; box-shadow:0 4px 12px rgba(185,138,46,0.22);";
-        a.textContent = "플러스 보러 가기";
+        a.textContent = "PLUS 둘러보기";
 
         var go = function () {
             /* 본 앱 안에서 열렸다면 그 자리에서 연다 */
@@ -153,7 +153,7 @@
             if (bs.length >= 2 && cards.length) {
                 for (var j = 0; j < bs.length; j++) drop(bs[j].querySelector(".bnh-plus-go"));
                 if (!foot) foot = footer();
-                var t = foot.querySelector(".bnh-plus-foot-t"), msg = "PLUS 표시가 있는 카드 " + cards.length + "개는 플러스에서 다 열려요";
+                var t = foot.querySelector(".bnh-plus-foot-t"), msg = "PLUS 표시가 있는 카드 " + cards.length + "개는 PLUS에서 다 열려요";
                 if (t && t.textContent !== msg) t.textContent = msg;
                 var lastCard = cards[cards.length - 1];
                 if (lastCard.nextElementSibling !== foot) pane.insertBefore(foot, lastCard.nextSibling);

@@ -370,7 +370,7 @@
                       '<div style="font-size:12.5px; font-weight:800; color:' + GOLD + '; word-break:keep-all;">' +
                           '지금은 첫 소리와 마지막 소리만 이어져요</div>' +
                       '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin-top:4px;">' +
-                          '그 사이 ' + hidden + '개까지 전부 이어들으려면 플러스</div>' +
+                          '그 사이 ' + hidden + '개까지 전부 이어 들으려면 PLUS</div>' +
                   '</div>'
                 : '') +
 

@@ -169,6 +169,9 @@
         '</div>';
     }
 
+    /* PLUS 안내 창(premium.js openUpsell)이 맨 위에 넣는다 */
+    window.plusFreeBanner = banner;
+
     function paintSheetBanner() {
         if (!freeOpen()) return;
         /* 결제 안내 창(showPaywall)이 열릴 때마다 맨 위에 한 번

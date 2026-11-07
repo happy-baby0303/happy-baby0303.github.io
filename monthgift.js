@@ -118,7 +118,7 @@
                           그래서 늘 아래 toast 로 떨어지고 결제창이 안 열렸다.
                           script.js 의 창구(openPlus)를 쓴다. */
                     if (typeof window.openPlus === "function") window.openPlus("month");
-                    else toast("이달의 카드는 플러스에서 매달 받을 수 있어요");
+                    else toast("이달의 카드는 PLUS에서 매달 받을 수 있어요");
                     return;
                 }
                 try { localStorage.setItem(FREE_KEY, tag); } catch (e) {}

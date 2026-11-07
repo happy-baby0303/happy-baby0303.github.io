@@ -532,7 +532,7 @@
         var have = window.voiceCount();
         if (have >= voiceCap()) {
             if (typeof window.openUpsell === "function") return window.openUpsell("voice");
-            return toast("목소리는 플러스에서 더 담을 수 있어요");
+            return toast("목소리는 PLUS에서 더 담을 수 있어요");
         }
 
         target = { key: key || todayKey(), msId: msId || null };
