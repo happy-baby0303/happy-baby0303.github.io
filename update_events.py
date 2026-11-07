@@ -66,17 +66,27 @@ def items_of(data):
 
 
 def call(key, op, **params):
+    """한 번 실패하면 잠깐 쉬고 한 번 더. 실패 이유(응답 첫머리)를 로그에 남긴다 — 키는 Actions 가 *** 로 가린다."""
     p = dict(APP)
     p.update(params)
     p["serviceKey"] = key
-    r = requests.get(BASE + op, params=p, timeout=15)
-    if r.status_code != 200:
-        raise RuntimeError("%s HTTP %s" % (op, r.status_code))
-    try:
-        return r.json()
-    except ValueError:
-        # 키가 틀리면 JSON 대신 XML 오류문이 온다
-        raise RuntimeError("%s 응답이 JSON 이 아님: %s" % (op, r.text[:120]))
+    last = None
+    for attempt in range(2):
+        try:
+            r = requests.get(BASE + op, params=p, timeout=20)
+        except requests.RequestException as e:
+            last = "%s 연결 실패: %s" % (op, type(e).__name__)
+        else:
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError:
+                    # 키 · 신청 문제는 JSON 대신 XML 오류문으로 온다
+                    last = "%s 응답이 JSON 이 아님: %s" % (op, " ".join(r.text.split())[:200])
+            else:
+                last = "%s HTTP %s: %s" % (op, r.status_code, " ".join(r.text.split())[:200])
+        time.sleep(1.5)
+    raise RuntimeError(last)
 
 
 def fetch_list(key):
@@ -108,7 +118,7 @@ def add_details(key, item):
                     item[k] = v
     except Exception as e:
         print("  상세(요금 · 연령) 실패 %s: %s" % (item.get("title"), e))
-    time.sleep(0.15)
+    time.sleep(0.35)
     try:
         common = items_of(call(key, "detailCommon2", contentId=cid))
         if common:
@@ -117,7 +127,7 @@ def add_details(key, item):
                 item["overview"] = ov
     except Exception as e:
         print("  상세(소개 글) 실패 %s: %s" % (item.get("title"), e))
-    time.sleep(0.15)
+    time.sleep(0.35)
     return item
 
 
@@ -145,7 +155,18 @@ def main():
 
     first = [it for it in items if not any(w in it.get("title", "") for w in BAD_TITLE)]
     print("전국 %d개 중 제목으로 거른 뒤 %d개 — 상세 정보를 받습니다" % (len(items), len(first)))
-    detailed = [add_details(key, it) for it in first]
+    # 상세가 연달아 실패하면(신청 · 한도 · 서버 문제) 나머지는 묻지 않는다 — 목록 정보만으로 저장한다
+    detailed, fails_in_row = [], 0
+    for it in first:
+        if fails_in_row >= 6:
+            detailed.append(it)
+            continue
+        before = len(it)
+        it = add_details(key, it)
+        fails_in_row = fails_in_row + 1 if len(it) == before else 0
+        if fails_in_row == 6:
+            print("상세 정보가 여섯 번 연달아 비어서 나머지 행사는 목록 정보만 저장합니다.")
+        detailed.append(it)
     final = [it for it in detailed if keep(it)]
     with_overview = sum(1 for it in final if it.get("overview"))
     print("최종 %d개 (소개 글 있는 행사 %d개)" % (len(final), with_overview))
