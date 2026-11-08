@@ -346,7 +346,7 @@
             box.innerHTML =
                 '<div style="padding:50px 20px; text-align:center; font-size:13px; font-weight:700; ' +
                     'color:var(--text-sub); line-height:1.7; word-break:keep-all;">' +
-                    '조건에 맞는 곳이 없어요.<br>위의 조건을 하나 꺼보시면 더 보입니다</div>';
+                    '조건에 맞는 곳이 없어요.<br>위 조건을 하나 끄면 더 보여요</div>';
             return;
         }
         box.innerHTML = all.map(cardHTML).join("") + noteHTML();

@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="125">
+    <meta name="baenaet-build" content="126">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1413,7 +1413,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 📊 3. 데이터 요약: 아기 하루 패턴 -->
         <div id="tracker-stats-container">
             <div id="tracker-stats-inline"></div>
-            <div style="padding:10px 0; text-align:center; font-size:13px; color:var(--text-s); font-weight:700;">아직 기록된 트래커 데이터가 없습니다.</div>
+            <div style="padding:10px 0; text-align:center; font-size:13px; color:var(--text-s); font-weight:700;">아직 기록이 없어요</div>
         </div>
 
       
@@ -3338,21 +3338,21 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                          })
                          .catch((error) => {
                              console.error("Firebase Auth Error:", error);
-                             alert("로그인 처리 중 에러가 발생했습니다.");
+                             alert("로그인이 안 됐어요. 다시 한 번 눌러 주세요");
                              document.getElementById('onboarding-step-loading').style.display = 'none';
                              document.getElementById('onboarding-step-0').style.display = 'flex';
                          });
                  })
                  .catch((error) => {
                      console.error("Cloud Function Error:", error);
-                     alert("서버 연결에 실패했습니다.");
+                     alert("서버에 연결이 안 됐어요. 인터넷을 확인하고 다시 눌러 주세요");
                      document.getElementById('onboarding-step-loading').style.display = 'none';
                      document.getElementById('onboarding-step-0').style.display = 'flex';
                  });
          },
          fail: function(err) {
              console.error("Kakao SDK Login Fail:", err);
-             alert("카카오 로그인 창을 여는 데 실패했습니다.");
+             alert("카카오 로그인 창이 안 열렸어요. 다시 눌러 주세요");
          }
      });
  };
@@ -3460,14 +3460,14 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 codeArea.style.display = 'block';
                 codeArea.querySelector('div').innerText = existing;
             }
-            return alert(`🎟️ 우리 가족 코드는 [${existing}] 입니다\n이 코드를 짝꿍에게 알려주세요.`);
+            return alert(`우리 가족 코드는 ${existing} 예요. 짝꿍에게 알려 주세요`);
         }
     };
 
     window.connectSyncCode = async (autoCode) => {
         const inputCode = (typeof autoCode === 'string') ? autoCode : document.getElementById('partner-sync-code').value.trim().toUpperCase();
-        if (!inputCode || inputCode.length < 5 || !inputCode.startsWith("TS-")) return alert("🚨 올바른 가족 코드를 입력해주세요.");
-        if (inputCode === localStorage.getItem('family_sync_code')) return alert("이미 참여 중인 가족 코드입니다.");
+        if (!inputCode || inputCode.length < 5 || !inputCode.startsWith("TS-")) return alert("가족 코드를 다시 확인해 주세요. TS- 로 시작해요");
+        if (inputCode === localStorage.getItem('family_sync_code')) return alert("이미 들어와 있는 가족방이에요");
 
         /* ⚠️ 새 폰에도 브라우저 확인창(confirm)으로 '이 기기의 기존 기록이 대체됩니다' 를 물었다.
               대체될 게 없는 폰이고, 앱에서는 사이트 주소가 제목으로 붙어 나와 낯설었다.
@@ -3502,7 +3502,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             alert(T[0] + "\n\n" + T[1].replace(/<br>/g, "\n"));
         };
         if (typeof window.showJoinScreen === 'function') window.showJoinScreen('loading');
-        else alert("⏳ 코드를 확인 중입니다...");
+        else alert("가족 코드를 확인하고 있어요");
         try {
             const docSnap = await getDoc(doc(window.db, "families", inputCode));
             if (docSnap.exists()) {
@@ -3628,7 +3628,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261108-1"></script>
+<script src="script.js?v=20261108-2"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3653,7 +3653,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./toolbrief.js"></script> 
 <script src="./placefilter.js?v=2"></script> 
 <script src="./nursing.js?v=3"></script>
-<script src="./outingsmart.js?v=2"></script>
+<script src="./outingsmart.js?v=3"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
 <script src="./voice.js?v=4"></script>

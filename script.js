@@ -880,7 +880,8 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
         </div>`;
     }
 
-    const safeQuery = query.replace(/'/g, "\\'");
+    // 장소 자료에 검색어 칸이 없어도 멈추지 않게 (이름으로 대신 찾는다)
+    const safeQuery = String(query || title || '').replace(/'/g, "\\'");
 
   // 나들이 종류 — 이름 · 소개 글에 든 말로 짐 목록을 고른다
     let suggestedTheme = 'basic';
@@ -3340,7 +3341,7 @@ window.uploadPhoto = function(input) {
                             return;
                         }
 
-                        if(typeof window.showToast === 'function') window.showToast("⏳ 프로필 사진을 안전하게 서버에 저장 중입니다...");
+                        if(typeof window.showToast === 'function') window.showToast("아기 사진을 올리고 있어요");
                         
                         // 🚨 2. 파일명 고정 (새로 올릴 때마다 기존 사진을 덮어써서 용량 폭탄 방지!)
                                                /* 🚨 2. 아기마다 파일을 따로 둔다.
@@ -5720,11 +5721,20 @@ window.toggleTrackerHistory = function() {
     }
 
     window.isHistoryView = true;
+    window.__histFilter = 'all';                       // 종류별로 보기는 열 때마다 '전체' 로 시작
     overlay.style.display = 'flex';
     document.body.style.overflow = 'hidden';          // 뒤쪽 스크롤 잠금
     setTimeout(() => { content.style.transform = 'translateY(0)'; }, 10);
 
     window.updateTrackerDashboard();                   // 내용 채우기
+};
+
+// 📊 기록 · 통계 — 종류별로 보기 (전체 · 수유 · 잠 · 기저귀 · 약)
+window.setHistFilter = function(k) {
+    window.__histFilter = k || 'all';
+    window.updateTrackerDashboard();
+    const l = document.getElementById('hist-list');
+    if (l) l.scrollTop = 0;
 };
 
 // 📊 바텀시트 닫기
@@ -5983,22 +5993,55 @@ window.updateTrackerDashboard = function() {
                     <div style="font-size: 13px; font-weight: 900; color: #7F77DD; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
                         지난 7일 평균
                     </div>
+                    <!-- ⚠️ 칸 이름이 '평균 수유량 825ml' 였다. 한 번에 먹는 양으로 읽혀서 '하루' 라고 적는다 (기록한 날 수로 나눈 하루 평균) -->
                     <div style="display: flex; justify-content: space-between; text-align: center; gap: 8px;">
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">평균 수유량</div>
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">하루 수유량</div>
                             <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgFeed) ? avgFeed + '<span style="font-size:11px; margin-left:2px;">ml</span>' : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">평균 수면</div>
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">하루 수면</div>
                             <div style="font-size:14px; font-weight:900; color:#5A4D44;">${(Number(avgSleepH) || Number(avgSleepM)) ? `${avgSleepH}<span style="font-size:11px; margin-left:2px; margin-right:2px;">시간</span>${avgSleepM}<span style="font-size:11px; margin-left:2px;">분</span>` : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">기저귀</div>
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">하루 기저귀</div>
                             <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgDiaper) ? avgDiaper + '<span style="font-size:11px; margin-left:2px;">회</span>' : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                     </div>
                 </div>
             `;
+
+            /* 종류별로 보기 — '마지막 대변이 언제였지' · '수유 간격이 어떻게 되지' 를 긴 목록을 훑지 않고 본다.
+               날짜 칸의 하루 합계는 종류와 상관없이 그대로 둔다. */
+            const F = window.__histFilter || 'all';
+            const FILTERS = [['all', '전체'], ['feed', '수유'], ['sleep', '잠'], ['diaper', '기저귀']]
+                .concat(records.some(r => r.type === 'med') ? [['med', '약']] : []);
+            historyHtml += '<div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; -webkit-overflow-scrolling:touch;">' +
+                FILTERS.map(([k, label]) => {
+                    const on = (F === k);
+                    return `<button type="button" onclick="window.setHistFilter('${k}')" style="flex-shrink:0; padding:8px 15px; border-radius:20px; border:1px solid ${on ? '#4A413C' : 'var(--border)'}; background-color:${on ? '#4A413C' : 'var(--bg-card)'}; color:${on ? '#FFF' : 'var(--text-s)'}; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit;">${label}</button>`;
+                }).join('') + '</div>';
+
+            // 수유만 볼 때 — 앞 수유와의 간격 (이유식은 빼고 분유 · 모유 · 유축끼리, 하루가 넘게 벌어진 건 안 적는다)
+            const gapOf = {};
+            const fmtMin = (m) => { m = Math.round(m); const h = Math.floor(m / 60), mm = m % 60; return h ? (h + '시간' + (mm ? ' ' + mm + '분' : '')) : (mm + '분'); };
+            let insight = '';
+            if (F === 'feed') {
+                const milk = records.filter(r => r.type === 'feed' && r.subType !== '이유식').sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+                for (let i = 0; i < milk.length - 1; i++) {
+                    const g = (Number(milk[i].timestamp) - Number(milk[i + 1].timestamp)) / 60000;
+                    if (g > 0 && g < 24 * 60) gapOf[milk[i].id] = g;
+                }
+                const day = milk.filter(r => Number(r.timestamp) >= nowTime - 86400000);
+                const gaps = day.map(r => gapOf[r.id]).filter(Boolean);
+                if (day.length) insight = `지난 24시간 수유 ${day.length}번` + (gaps.length ? ` · 평균 간격 ${fmtMin(gaps.reduce((a, b) => a + b, 0) / gaps.length)}` : '');
+            } else if (F === 'diaper') {
+                const day = records.filter(r => r.type === 'diaper' && Number(r.timestamp) >= nowTime - 86400000);
+                const poo = day.filter(r => r.subType !== '소변').length;
+                if (day.length) insight = `지난 24시간 기저귀 ${day.length}번` + (poo ? ` · 대변 ${poo}번` : '');
+            }
+            // 한 줄 요약이 있으면 '왼쪽으로 밀면' 안내 자리에 둔다 (창 높이가 그대로라 목록이 안 줄어든다)
+            if (insight) historyHtml += `<div id="hist-insight" style="font-size:13px; font-weight:800; color:var(--text-m); background:var(--bg-sub); padding:10px 12px; border-radius:12px; margin-bottom:12px; text-align:center;">${insight}</div>`;
 
             let grouped = {};
             records.forEach(r => {
@@ -6009,14 +6052,18 @@ window.updateTrackerDashboard = function() {
             });
             
             historyHtml += `
-                <div style="background:var(--bg-sub); color:var(--text-s); font-size:12px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:12px; text-align:center; border: 1px dashed var(--border);">
+                ${insight ? '' : `<div style="background:var(--bg-sub); color:var(--text-s); font-size:12px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:12px; text-align:center; border: 1px dashed var(--border);">
                     리스트를 <span style="color:var(--text-m);">왼쪽으로 밀면</span> 고치거나 지울 수 있어요
-                </div>
-                <div style="max-height:350px; overflow-y:auto; padding-right:4px;">
+                </div>`}
+                <div id="hist-list" style="max-height:max(200px, calc(88vh - 420px)); overflow-y:auto; overscroll-behavior:contain; padding-right:4px;">
             `;
 
+            let shownAny = false;
            // 🚨 [수정됨] 아래 트래커 카드들과 동일하게 둥글고 하얀 예쁜 카드로 렌더링!
             for(let date in grouped) {
+                const shown = (F === 'all') ? grouped[date] : grouped[date].filter(r => r.type === F);
+                if (!shown.length) continue;                   // 그날 그 종류가 없으면 날짜 칸도 안 그린다
+                shownAny = true;
                 historyHtml += `
                     <div style="position: sticky; top: -1px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
                         <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}</div>
@@ -6024,7 +6071,7 @@ window.updateTrackerDashboard = function() {
                     </div>
                 `;
                 
-                grouped[date].forEach(r => {
+                shown.forEach(r => {
                     let icon = '✨';
                     // 🚨 [패치됨] 투약 기록 아이콘 추가!
                     if (r.type === 'feed') icon = (r.subType === '이유식') ? '🥄' : '🍼';
@@ -6108,6 +6155,7 @@ window.updateTrackerDashboard = function() {
                                     <div style="min-width:0;">
                                         <div style="font-weight:900; color:var(--text-m); font-size:14px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${txt}</div>
                                         ${subLine ? `<div style="color:#A3958A; font-weight:700; font-size:12px; line-height:1.45; word-break:keep-all;">${subLine}</div>` : ''}
+                                        ${gapOf[r.id] ? `<div style="color:#A3958A; font-weight:700; font-size:11.5px;">수유 간격 ${fmtMin(gapOf[r.id])}</div>` : ''}
                                         ${displayTime.includes('~') ? `<div style="color:#C4B5A9; font-weight:700; font-size:11.5px;">${displayTime}</div>` : ''}
                                     </div>
                                 </div>
@@ -6118,6 +6166,7 @@ window.updateTrackerDashboard = function() {
                     `;
                 });
             }
+            if (!shownAny) historyHtml += `<div style="padding:28px 12px; text-align:center; font-size:13px; font-weight:700; color:var(--text-s);">이 종류는 아직 기록이 없어요</div>`;
             historyHtml += '</div>';
 
             historyHtml += `
@@ -15059,7 +15108,7 @@ window.deleteBabyProfile = function(targetId, babyName) {
         return window.showToast("첫 아이 프로필은 삭제할 수 없어요. 정보 수정으로 바꿔주세요.");
     }
 
-    window.showConfirm(`정말 <b>${babyName}</b>의 프로필을 삭제하시겠습니까?<br><span style="font-size:12px; color:#D32F2F;">기록된 모든 데이터가 영구히 삭제됩니다.</span>`, function() {
+    window.showConfirm(`<b>${babyName}</b> 프로필을 지울까요?<br><span style="font-size:12px; color:#D32F2F;">이 아기의 기록이 모두 지워지고, 되돌릴 수 없어요.</span>`, function() {
                 // 프로필 배열에서 해당 아기 제거
         const newProfiles = profiles.filter(p => p.id !== targetId);
         
