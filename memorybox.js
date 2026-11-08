@@ -368,13 +368,14 @@
         if (typeof window.noteCount === "function")  n += window.noteCount();
         if (n < 1) return "";                       // 담긴 게 없으면 겁줄 일도 없다
 
-        return '<div onclick="window.openFamilySync && window.openFamilySync()" ' +
+        // ⚠️ 없는 함수(openFamilySync)를 불러서 눌러도 아무 일이 없었다 — 가족 연동 창(openFamilySyncModal)을 연다
+        return '<div onclick="window.openFamilySyncModal && window.openFamilySyncModal()" ' +
             'style="background:rgba(240,68,82,0.07); border:1px solid rgba(240,68,82,0.20); ' +
             'border-radius:18px; padding:15px 17px; margin-bottom:14px; cursor:pointer;">' +
             '<div style="font-size:12.5px; font-weight:800; color:#D93B48; letter-spacing:-0.3px;">' +
                 '지금 담긴 ' + n + '개가 이 폰에만 있어요</div>' +
             '<div style="font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:5px; line-height:1.6; word-break:keep-all;">' +
-                '폰을 바꾸거나 브라우저를 정리하면 사라집니다. 가족 연동을 하면 안전하게 보관돼요.</div>' +
+                '폰을 바꾸거나 브라우저를 정리하면 사라져요. 가족 연동을 하면 안전하게 보관돼요 ›</div>' +
         '</div>';
     }
 
@@ -999,9 +1000,9 @@
 
             (timeline.length ? '<div style="text-align:center; font-size:11.5px; font-weight:600; color:var(--text-sub); margin-top:36px; line-height:1.8;">' +
                 (localStorage.getItem("family_sync_code")
-                    ? '가족 연동이 되어 있어 안전하게 보관됩니다'
+                    ? '가족 연동이 되어 있어서 안전하게 보관돼요'
                     : '여기 담긴 건 이 기기에만 있어요') +
-                '<br>' + esc(callName("가")) + ' 자라는 만큼 배냇함도 무거워집니다' +
+                '<br>' + esc(callName("가")) + ' 자라는 만큼 배냇함도 무거워져요' +
             '</div>' : '') +
         '</div>';
     };

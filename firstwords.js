@@ -249,7 +249,7 @@
               }).join("")
             : '<div style="padding:60px 0; text-align:center; font-size:13.5px; font-weight:700; color:var(--text-sub); line-height:1.9;">' +
                   '아직 담긴 말이 없어요<br>' +
-                  '옹알이도 괜찮아요. 들린 대로 적으면 됩니다' +
+                  '옹알이도 괜찮아요. 들린 대로 적으면 돼요' +
               '</div>';
 
         wrap.innerHTML =

@@ -1002,6 +1002,18 @@ function updateCookTimerDisplay() {
 
 // (같이 쓰기 좋은 재료는 data.js 의 pairDB 로 옮겼다)
 
+// 식단 카드의 '⚠️ 계란주의' 딱지
+// ⚠️ 누르는 모양인데 부르는 함수(showAllergyInfo)가 없어서 눌러도 아무 일이 없었다 (오류만 났다).
+//    재료 사전 빈 칸(이 파일 310줄 부근)과 같은 말로 알려 준다.
+window.showAllergyInfo = function (name) {
+    const n = String(name || '이 재료').replace(/[<>&"']/g, '');
+    const c = n.charCodeAt(n.length - 1);
+    const josa = (c >= 0xAC00 && c <= 0xD7A3) ? (((c - 0xAC00) % 28) ? '은' : '는') : '은(는)';
+    const msg = n + josa + ' 알레르기가 잘 생기는 재료예요. 처음이면 아침에 조금만 먹여 보고 사흘 동안 지켜봐 주세요';
+    if (typeof window.foodToast === 'function') window.foodToast(msg);
+    else if (typeof window.showToast === 'function') window.showToast(msg);
+};
+
 // ==========================================
 // 📅 캘린더 기록 엔진 (식단/테스트 완벽 분리형)
 // ==========================================

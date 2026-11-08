@@ -1316,9 +1316,9 @@ window.analyzeMoney = function() {
 
     let insightText = "지출이 고르게 나뉘어 있어요.";
     if (detailsTotal > 0) {
-        if (maxLabel === '기저귀/위생용품') insightText = "기저귀는 쟁여둘수록 개당 값이 내려갑니다. 핫딜 때 몰아 사두세요.";
-        else if (maxLabel === '분유/식비') insightText = "이 시기엔 흔한 비중이에요. 잘 먹는 게 먼저입니다.";
-        else insightText = "중고로 사고파는 걸 섞으면 지출이 꽤 줄어듭니다.";
+        if (maxLabel === '기저귀/위생용품') insightText = "기저귀는 쟁여 둘수록 하나당 값이 내려가요. 쌀 때 몰아 사 두세요.";
+        else if (maxLabel === '분유/식비') insightText = "이 시기엔 흔한 비중이에요. 잘 먹는 게 먼저예요.";
+        else insightText = "중고로 사고파는 걸 섞으면 지출이 꽤 줄어요.";
     }
 
     let statusHtml = `<strong>안정</strong> · 무난한 비율이에요.`;
@@ -6926,7 +6926,11 @@ window.toggleRoutine = async function(id) {
      · 합친 결과가 서버와 다르면 다시 올린다 (짝꿍이 덮어쓴 걸 되돌린다)
      · 서버는 기다리지 않는다 — 이 폰에 먼저 남기고 화면은 바로 닫힌다
    ========================================================== */
-const TRK_MAX = 100;
+/* ⚠️ 100 이었다. 하루 스무 개쯤 남기면 닷새치라 기록 · 통계 창은 닷새만 보였고,
+      주간 카드의 '지난주' 숫자는 거의 비어서 이번 주와 견줄 수가 없었다.
+      저장하는 곳(1500)은 예전에 늘렸는데 여기(합치기)서 다시 100 으로 잘렸다.
+      500 이면 3주 남짓이다. 저장마다 통째로 올리는 크기도 100KB 안쪽이고, 창 그리기도 빠르다 */
+const TRK_MAX = 500;
 // 지운 기록 목록은 한 번만 읽는다 (기록 100개마다 저장소를 다시 읽으면 느리다)
 function trkGrave() { return (window.Grave && typeof window.Grave.peek === 'function') ? window.Grave.peek('trk') : {}; }
 // 고친 시각(mt)을 뺀 내용 — '내용이 바뀌었나' 를 볼 때 쓴다
