@@ -303,11 +303,17 @@
         r[slot] = a; r.at = Date.now(); p.routine[k] = r; save(p);
         var o = { routine: {} }; o.routine[k] = r; push(o); refresh();
     };
+    // ⚠️ 브라우저 기본 입력창(prompt)이었다 — 앱 안의 입력창(script.js askText)으로
     window.__prepAddItem = function (slot) {
-        var t = prompt((slot === "dad" ? "아빠" : "엄마") + "가 챙길 것 (예: 일찍 자기)");
-        if (!t || !t.trim()) return;
-        var p = load(); p.items[slot] = (p.items[slot] || []).concat([{ id: slot[0] + Date.now().toString(36), t: t.trim().slice(0, 20) }]);
-        p.itemsAt = Date.now(); save(p); push({ items: p.items, itemsAt: p.itemsAt }); refresh();
+        var who = (slot === "dad" ? "아빠" : "엄마") + "가 챙길 것";
+        var ask = (typeof window.askText === "function")
+            ? window.askText({ title: who, placeholder: "예: 일찍 자기", yes: "넣기", max: 20 })
+            : Promise.resolve(prompt(who + " (예: 일찍 자기)"));
+        ask.then(function (t) {
+            if (!t || !String(t).trim()) return;
+            var p = load(); p.items[slot] = (p.items[slot] || []).concat([{ id: slot[0] + Date.now().toString(36), t: String(t).trim().slice(0, 20) }]);
+            p.itemsAt = Date.now(); save(p); push({ items: p.items, itemsAt: p.itemsAt }); refresh();
+        });
     };
 
     /* ---------- 생리 시작 · 두 줄 ---------- */

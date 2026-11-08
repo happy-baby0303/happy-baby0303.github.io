@@ -122,7 +122,10 @@
                맨 위에 스무 살이 있으면 다들 스무 살을 고르고,
                그러면 아무도 편지가 열리는 걸 못 본다. */
             var soon = window.sealSoonPresets();
-            return soon.concat(far);
+            /* ⚠️ 가까운 넷을 앞에 붙이기만 했더니 '오백일(271일 뒤)' 이 '첫 생일(137일 뒤)' 보다 위에 왔다.
+                  가까운 것이 앞이라는 뜻 그대로, 전부 날짜 순으로 놓는다. */
+            return soon.concat(far).filter(function (p) { return p && p.at; })
+                .sort(function (a, b) { return a.at < b.at ? -1 : (a.at > b.at ? 1 : 0); });
         };
         wrapped.__soon = true;
         window.sealPresets = wrapped;

@@ -128,7 +128,13 @@
         else window.__newsCopy();
     };
     window.__newsRotate = function () {
-        if (!confirm("지금 링크를 닫고 새 링크를 만들까요?\n예전 링크로는 더 이상 볼 수 없어요.")) return;
+        // ⚠️ 브라우저 기본 확인 창(confirm)이었다 — 앱 창으로
+        if (typeof window.showConfirm === "function") {
+            return window.showConfirm("지금 링크를 닫고 새 링크를 만들까요?\n예전 링크로는 더 이상 볼 수 없어요", rotate, "🔗", "새 링크 만들기", "#4A413C");
+        }
+        if (confirm("지금 링크를 닫고 새 링크를 만들까요?\n예전 링크로는 더 이상 볼 수 없어요.")) rotate();
+    };
+    function rotate() {
         var old = newsId(), code = localStorage.getItem("family_sync_code");
         if (old && code && window.db && typeof window.setDoc === "function") {
             window.setDoc(window.doc(window.db, "news", old), { family: code, off: true, updatedAt: Date.now() }).catch(function () {});   // 비워서 닫는다
@@ -137,7 +143,7 @@
         var id = ensureNewsId(), all = load(), weeks = {};
         Object.keys(all).forEach(function (wk) { if (all[wk] && all[wk].sent) weeks[wk] = weekEntry(all[wk]); });
         publish({ weeks: weeks }, id).then(function () { toast("새 링크를 만들었어요"); window.openNewsLink(); });
-    };
+    }
 
     /* ---------- 홈 카드 ---------- */
     function cardHTML(w) {

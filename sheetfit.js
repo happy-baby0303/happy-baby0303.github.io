@@ -12,6 +12,9 @@
    ⚠️ 이미 다 보이는 창은 건드리지 않는다. 화면보다 긴 창에만 '최대 높이 + 안에서 스크롤' 을 준다.
    ⚠️ 언제 재나: 창이 열리고 닫힐 때(body 바로 아래가 바뀔 때), 열린 창 안의 내용이 바뀔 때,
       화면 크기가 바뀔 때(키보드 · 가로). 탭 화면 안에서 숫자가 바뀌는 건 보지 않는다 (배터리).
+   ⚠️ 창의 style 을 직접 고치지 않는다. el.style 을 건드리면 브라우저가 style 글을 다시 쓰면서
+      'background:var(--bg-card)' 가 'background: var(--bg-card)' 가 되고, index.html 공통 카드 규칙
+      (테두리 · 네 모서리 둥글게 · 누르면 줄어듦)에 걸린다. 표시(data-sheetfit)만 달고 규칙은 아래 CSS 가 준다.
 
    맨 마지막 쪽에 로드하세요.
    ============================================================ */
@@ -44,10 +47,7 @@
             var spill = !/(auto|scroll|hidden)/.test(c.overflowY) &&
                         card.scrollHeight > card.clientHeight + 1;            // 내용이 창 밖으로 넘친다
             if (!tall && !spill) continue;
-            card.style.setProperty('max-height', '100%', 'important');
-            card.style.setProperty('overflow-y', 'auto', 'important');
-            card.style.setProperty('overscroll-behavior', 'contain');
-            card.setAttribute('data-sheetfit', '1');
+            if (card.getAttribute('data-sheetfit') !== '1') card.setAttribute('data-sheetfit', '1');
         }
     }
 
@@ -83,8 +83,17 @@
         return false;
     }
 
+    function addCss() {
+        if (document.getElementById('sheetfit-css')) return;
+        var st = document.createElement('style');
+        st.id = 'sheetfit-css';
+        st.textContent = 'html body [data-sheetfit="1"]{max-height:100% !important;overflow-y:auto !important;overscroll-behavior:contain !important;}';
+        (document.head || document.documentElement).appendChild(st);
+    }
+
     function boot() {
         if (!document.body || !window.MutationObserver) return;
+        addCss();
         new MutationObserver(function (list) { if (relevant(list)) queue(); }).observe(document.body, {
             childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class']
         });

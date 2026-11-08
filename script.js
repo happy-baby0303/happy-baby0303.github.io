@@ -1562,7 +1562,17 @@ window.updateLedgerUI = function() {
 };
 
 window.resetMoneyAll = async function() {
-    if(!confirm("가계부에 기록된 모든 달의 지출 내역을 지울까요?\n(설정하신 예산과 목표는 그대로 둡니다)")) return;
+    /* ⚠️ 브라우저 기본 확인 창을 두 번 띄웠다 ('모든 달 지출을 지울까요' → '과거 월별 통계까지 지울까요').
+          한 창에서 고른다. 예산 · 목표는 어느 쪽이든 그대로 둔다. */
+    const how = await window.askChoice({
+        title: '가계부를 비울까요?',
+        sub: '예산과 목표는 그대로 둬요',
+        options: [
+            { label: '지출 기록만 지우기', value: 'spend' },
+            { label: '지난 달 통계까지 모두 지우기', value: 'all', danger: true }
+        ]
+    });
+    if (!how) return;
     
     let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
     ledger.total = 0;
@@ -1581,7 +1591,7 @@ window.resetMoneyAll = async function() {
         localStorage.setItem('TosilBabyApp', JSON.stringify(localHistory));
     }
 
-    if(confirm("입력된 '과거 월별 통계(지난달 등)' 기록까지 전부 다 삭제할까요?")) {
+    if (how === 'all') {
         localStorage.removeItem('TosilBabyApp');
     }
     
@@ -2036,12 +2046,14 @@ async function addFeverRecord() {
        어느 이유든 막지 않는다. 크게 경고하고, 확인받고, 사실대로 남긴다. */
     const lock = checkPillLock(selectedPillType);
     if (lock.locked) {
-        const ok = confirm(
-            String(lock.reason || '') + '\n\n' +
-            '이미 먹이셨나요?\n' +
-            '먹였다면 사실대로 남겨야 다음 계산이 맞습니다.\n\n' +
-            '[확인] 기록할게요   [취소] 안 먹였어요'
-        );
+        // ⚠️ 기본 확인 창에 '[확인] 기록할게요 · [취소] 안 먹였어요' 라고 적어 읽게 했다 — 앱 창에서 고른다
+        const ok = (typeof window.askChoice === 'function')
+            ? await window.askChoice({
+                title: '이미 먹이셨나요?',
+                sub: String(lock.reason || '') + '\n먹였다면 사실대로 남겨야 다음 계산이 맞아요',
+                options: [{ label: '먹였어요 · 기록할게요', value: 'yes' }, { label: '안 먹였어요', value: 'no' }]
+              }) === 'yes'
+            : confirm(String(lock.reason || '') + '\n\n이미 먹이셨나요?');
         if (!ok) return;
     }
 
@@ -2738,11 +2750,12 @@ window.toggleCheckItem = function(index) {
     if (after && keepTop) after.scrollTop = keepTop;
 };
 
-window.resetChecklist = function() { 
-    if(confirm("체크 내역을 모두 초기화할까요?")) {
-        localStorage.removeItem('tosil_checklist_' + window.currentChecklistTheme); 
-        window.openChecklistModal(window.currentChecklistTheme); 
-    }
+window.resetChecklist = function() {
+    // ⚠️ 브라우저 기본 확인 창(confirm)이었다 — 앱 창으로
+    window.showConfirm("체크 표시를 모두 지울까요?", function() {
+        localStorage.removeItem('tosil_checklist_' + window.currentChecklistTheme);
+        window.openChecklistModal(window.currentChecklistTheme);
+    }, "🔄", "초기화", "#4A413C");
 };
 
 window.closeChecklistForce = function() { document.getElementById('checklist-modal').style.display = 'none'; };
@@ -3741,15 +3754,21 @@ function deleteCubeQuick(index) {
 window.addCubeRecord = addCubeRecord;
 window.deleteCubeQuick = deleteCubeQuick;
 
-function addCubeQuick() {
-    const name = prompt("추가할 자주 쓰는 재료의 이름을 입력하세요.\n(예: 단호박, 대구살, 오트밀 등)");
-    if(!name || !name.trim()) return;
-    
-    const isMeat = confirm(`[${name}]\n이 재료는 고기/단백질류 인가요?\n\n- 고기면 [확인]\n- 채소면 [취소]를 눌러주세요.`);
-    const cat = isMeat ? 'meat' : 'veg';
+/* ⚠️ 이름은 기본 입력창(prompt), 종류는 기본 확인 창(confirm)으로 '고기면 [확인] · 채소면 [취소]' 라고 받았다.
+      한 창에서 이름을 적고 종류를 고른다. */
+async function addCubeQuick() {
+    const got = await window.askText({
+        title: '자주 쓰는 재료',
+        placeholder: '예: 단호박, 대구살, 오트밀',
+        chips: [{ value: 'meat', label: '고기 · 생선' }, { value: 'veg', label: '채소 · 곡물' }],
+        yes: '넣기', max: 12
+    });
+    // 이름은 단추의 onclick 글자 안에 그대로 들어간다 — 따옴표 · 꺾쇠는 뺀다
+    const name = got && String(got.text || '').replace(/[<>"'`\\]/g, '').trim();
+    if (!name) return;
     
     let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks')) || [];
-    quicks.push({cat: cat, name: name.trim()});
+    quicks.push({cat: got.chip === 'meat' ? 'meat' : 'veg', name: name});
     localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
     renderCubeQuicks();
 }
@@ -4480,7 +4499,12 @@ window.openPediatricianReport = function() {
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:17px;">📄</span> A4 종합 건강 리포트 발급
                 </div>
-                <span style="background: #FEE500; color: #4A413C; padding: 4px 8px; border-radius: 6px; font-size: 10px;">PREMIUM</span>
+                ${(() => {
+                    // ⚠️ 'PREMIUM' 이었다. 무료로도 한 장은 받을 수 있는데 그 말이 없었다 (downloadPediatricianPDF)
+                    if (window.isPremiumUser && window.isPremiumUser()) return '';
+                    const first = localStorage.getItem('tosil_trial_report') !== 'used';
+                    return '<span style="background: rgba(255,255,255,0.22); color: #FFF; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; white-space: nowrap;">' + (first ? '처음 한 장 무료' : 'PLUS') + '</span>';
+                })()}
             </button>
             
             <button onclick="window.copySymptomMemo()" style="width: 100%; padding: 16px; border-radius: 16px; background: var(--bg-sub); color: #7A6F68; font-weight: 800; font-size: 14.5px; border: 1px solid var(--border); cursor: pointer;">
@@ -5654,19 +5678,26 @@ window.deleteTrackerRecord = function(id) {
     }, "🗑️", "삭제", "#D32F2F");
 };
 
-// 2. 전체 삭제 (모두 싹 지우기) - ✨ 퀄리티업 완료 ✨
+// 2. 전체 삭제 ('기록 · 통계' 창 맨 아래) — '삭제' 라고 적어야 눌린다
+/* ⚠️ 같은 이름의 함수가 아래쪽에 한 벌 더 있었고 그쪽이 이겼다. 거기서 없는 함수(flushTrackerSync)를 불러서
+      기록은 지워졌는데 '모두 지웠어요' 도 안 뜨고 오류가 났다. 하나로 합쳤다.
+   ⚠️ 가족과 같이 쓰면 지운 기록은 묘비가 되어 가족 모두의 폰에서 사라진다. 묻는 말에 그걸 적는다. */
 window.resetTrackerRecords = function() {
-    showConfirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)", async function() {
-        localStorage.removeItem('tosil_sleep_start');
+    const shared = !!localStorage.getItem('family_sync_code');
+    const msg = shared
+        ? "기록을 모두 지울까요?\n가족 모두의 폰에서도 지워지고, 되돌릴 수 없어요"
+        : "기록을 모두 지울까요?\n지우면 되돌릴 수 없어요";
+    showConfirm(msg, async function() {
+        localStorage.removeItem('tosil_sleep_start');   // 재고 있던 잠도 멈춘다
         localStorage.removeItem('tosil_sleep_type');
-        if (typeof saveTrackerToFirebase === 'function') {
-            await saveTrackerToFirebase([]);
-            window.flushOfflineQueue(); // 🚨 여기도 치료 완료
+        if (typeof window.saveTrackerToFirebase === 'function') {
+            await window.saveTrackerToFirebase([]);
+            if (typeof window.flushOfflineQueue === 'function') window.flushOfflineQueue();
         } else {
             localStorage.removeItem('tosil_tracker_records');
             window.updateTrackerDashboard();
         }
-        showToast("🧹 기록을 모두 지웠어요");
+        showToast("기록을 모두 지웠어요");
     }, "⚠️", "전체 삭제", "#D32F2F", "삭제");
 };
 
@@ -5989,7 +6020,7 @@ window.updateTrackerDashboard = function() {
                 historyHtml += `
                     <div style="position: sticky; top: -1px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
                         <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}</div>
-                        ${window.getDailySummaryHtml(grouped[date])}
+                        ${window.getDailySummaryHtml(grouped[date], { dayStart: new Date(Number(grouped[date][0].timestamp)).setHours(0, 0, 0, 0), all: records })}
                     </div>
                 `;
                 
@@ -6007,7 +6038,10 @@ window.updateTrackerDashboard = function() {
 
                     let txt = '';
                     let subLine = '';   // 둘째 줄 (토핑 이유식 재료)
-                    let displayTime = r.time; 
+                    /* ⚠️ time("14:10") 칸이 없는 기록이 하나라도 있으면 아래 split 에서 멈췄고, 안전망이 오류를 삼켜서
+                          '기록 · 통계' 창이 제목만 남은 빈 창이 됐다. 시각은 timestamp 로 채운다. */
+                    const hhmmOf = (ts) => { const d = new Date(Number(ts)); return isNaN(d.getTime()) ? '' : String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+                    let displayTime = r.time || hhmmOf(r.timestamp); 
                     
                     if(r.type === 'feed') {
                         if (r.subType === '모유') txt = `모유 (${r.status}) ${r.amount}분`;
@@ -6035,9 +6069,10 @@ window.updateTrackerDashboard = function() {
                             let m = r.amount % 60;
                             let durText = h > 0 ? `${h}시간 ${m}분` : `${m}분`;
                             txt = `${r.subType || '낮잠'} <span style="color:#7F77DD;">${durText}</span>`;
-                            let dEnd = new Date(r.timestamp + (r.amount * 60000));
+                            // timestamp 가 글자로 들어 있으면 '+' 가 이어 붙이기가 된다 — 숫자로 바꿔서 더한다
+                            let dEnd = new Date(Number(r.timestamp) + (Number(r.amount) * 60000));
                             let endStr = `${String(dEnd.getHours()).padStart(2,'0')}:${String(dEnd.getMinutes()).padStart(2,'0')}`;
-                            displayTime = `${r.time} ~ ${endStr}`; 
+                            displayTime = `${r.time || hhmmOf(r.timestamp)} ~ ${endStr}`; 
                         }
                     }
                     // 🚨 [패치됨] 투약 기록 텍스트 추가!
@@ -6065,7 +6100,7 @@ window.updateTrackerDashboard = function() {
                                  ontouchend="window.handleSwipeEnd(event, this)">
                                 
                                 <div style="width: 50px; font-size:13px; font-weight:800; color:#A3958A; text-align:left; flex-shrink:0; padding-left:4px;">
-                                    ${displayTime.split(' ~ ')[0]} 
+                                    ${String(displayTime || '').split(' ~ ')[0]} 
                                 </div>
                                 
                                 <div style="display:flex; gap:12px; align-items:center; flex:1; min-width:0;">
@@ -7650,7 +7685,7 @@ window.openReceiptModal = function(dayKey) {
                 <div style="font-weight: 900; font-size: 23px; letter-spacing: 2px; margin-bottom: 3px;">BAENAET CAFE</div>
                 <div style="font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: #444;">BABY CARE ROASTERS</div>
                 <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #666; margin-top: 1px;">HOME SWEET HOME, KOREA</div>
-                <div style="font-size: 10px; font-weight: 800; color: #7F77DD; margin-top: 3px; font-family: 'Pretendard', sans-serif; text-transform: none;">📶 WI-FI: LOVE0303*#</div>
+                <div style="font-size: 10px; font-weight: 800; color: #7F77DD; margin-top: 3px; font-family: 'Pretendard', sans-serif; text-transform: none;">📶 WI-FI: LOVE1004*#</div>
             </div>
 
             <div class="rcpt-dash"></div>
@@ -7695,10 +7730,12 @@ window.openReceiptModal = function(dayKey) {
                 <span style="font-size: 22px; font-weight: 900; letter-spacing: -1px; color: #000;">∞ LOVE</span>
             </div>
 
-            <!-- 하단 푸터 (바코드) -->
+            <!-- 하단 푸터 (바코드)
+                 ⚠️ 와이파이 · 카드 · 바코드 숫자는 모든 집에 같은 1004(천사).
+                    아기 생일처럼 집마다 다른 숫자는 넣지 않는다 — 날짜와 같이 찍혀서 나누면 생일이 드러난다. -->
             <div style="text-align: center; font-size: 11px; font-weight: 800; margin-bottom: 10px; line-height: 1.45; color: #444;">
                 <div>PAID BY: PARENTS SOUL</div>
-                <div>CARD: ****-****-****-0303</div>
+                <div>CARD: ****-****-****-1004</div>
                 <div>AUTH CODE: 77777777</div>
             </div>
 
@@ -7710,7 +7747,7 @@ window.openReceiptModal = function(dayKey) {
                     seq.map((w, i) => `<span style="flex:${w} 0 0; ${i % 2 ? '' : 'background:#111;'}"></span>`).join('') + '</div>';
             })()}
             <div style="text-align: center; font-size: 10px; margin-top: 7px; letter-spacing: 5px; font-weight: 900; color: #111;">
-                0303-BAENAET-BABY
+                1004-BAENAET-BABY
             </div>
             
             <!-- 🚨 여기에 있던 쓸데없는 까만색 닫기 버튼 삭제 완료! -->
@@ -7888,9 +7925,13 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
         inputEl.value = '';
         btnOk.style.opacity = '0.3';
         btnOk.style.pointerEvents = 'none'; // 입력 전엔 클릭 금지
-        
-        inputEl.onkeyup = function() {
-            if (this.value === requireKeyword) {
+        /* ⚠️ 안내 글이 늘 '삭제' 라고 적혀 있었다 ('탈퇴' · '해제' 를 받을 때도). 받을 말을 그대로 적는다.
+              한글은 글자를 조합하는 동안 keyup 이 안 오는 폰이 있어서 input 으로도 본다 */
+        const hint = document.getElementById('confirm-keyword-hint');
+        if (hint) hint.textContent = "아래 칸에 '" + requireKeyword + "' 라고 적어 주세요";
+        inputEl.placeholder = requireKeyword;
+        inputEl.onkeyup = inputEl.oninput = function() {
+            if (String(this.value || '').trim() === requireKeyword) {
                 btnOk.style.opacity = '1';
                 btnOk.style.pointerEvents = 'auto'; // 똑같이 쳐야만 활성화
             } else {
@@ -7916,21 +7957,106 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
     };
 };
 
-// 트래커 전체 삭제에 안전장치 걸기!
-window.resetTrackerRecords = function() {
-    showConfirm("모든 트래커 기록을 싹 지우시겠습니까?\n(진행 중인 수면 타이머도 리셋됩니다)", async function() {
-        localStorage.removeItem('tosil_sleep_start');
-        localStorage.removeItem('tosil_sleep_type');
-        if (typeof saveTrackerToFirebase === 'function') {
-            await saveTrackerToFirebase([]);
-            flushTrackerSync(); 
-        } else {
-            localStorage.removeItem('tosil_tracker_records');
-            window.updateTrackerDashboard();
-        }
-        showToast("🧹 기록을 모두 지웠어요");
-    }, "⚠️", "전체 삭제", "#D32F2F", "삭제"); // 👈 끝에 "삭제" 추가
-};
+/* ==========================================
+   앱 안에서 묻기 — 브라우저 기본 창(prompt · confirm) 자리
+   ==========================================
+   ⚠️ prompt() · confirm() 은 시스템 창이다. 아이폰에서는 창 맨 위에 사이트 주소(happy-baby0303.github.io)가
+      찍히고, 회색 창이라 다른 앱이 끼어든 것처럼 보였다. '[확인] 고기 · [취소] 채소' 처럼
+      확인 · 취소 단추에 다른 뜻을 얹어 읽게 한 곳도 있었다. 앱의 다른 창과 같은 모양으로 묻는다 (큐레이터는 curatorui.js).
+   쓰는 법
+     const name = await window.askText({ title: '새 아기 이름', placeholder: '이름 또는 태명', yes: '추가하기' });
+         → 적은 글 (닫으면 null). chips: [{ value, label }] 를 주면 { text, chip } 로 돌려준다 (하나는 꼭 골라야 한다)
+     const v = await window.askChoice({ title, sub, options: [{ label, value }, { label, value, danger: true }], no: '닫기' });
+         → 고른 value (닫으면 null)
+   뒤로가기는 backbutton.js 의 ask-sheet 칸이 닫는다 (__askCancel). */
+(function () {
+    let resolver = null;
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const lines = (s) => esc(s).replace(/\n/g, '<br>');
+    const BTN = 'width:100%; padding:15px; border-radius:14px; border:none; font-size:14.5px; font-weight:800; cursor:pointer; font-family:inherit;';
+
+    function finish(v) {
+        const w = document.getElementById('ask-sheet');
+        if (w) w.remove();
+        const r = resolver; resolver = null;
+        if (r) r(v === undefined ? null : v);
+    }
+    window.__askCancel = function () { finish(null); };
+
+    function open(inner) {
+        if (resolver) finish(null);                       // 앞에 열린 건 닫힌 걸로
+        const old = document.getElementById('ask-sheet'); if (old) old.remove();
+        const w = document.createElement('div');
+        w.id = 'ask-sheet';
+        // ⚠️ background: var(--bg-card) 로 적으면 공통 카드 규칙(테두리 · 누르면 줄어듦)에 걸린다 — background-color
+        w.setAttribute('style', 'position:fixed; inset:0; z-index:1000000; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;');
+        w.innerHTML = '<div role="dialog" aria-modal="true" style="width:100%; max-width:340px; max-height:100%; overflow-y:auto; background-color:var(--bg-card); border-radius:22px; padding:24px 20px 16px; box-sizing:border-box; box-shadow:0 10px 30px rgba(0,0,0,0.15);">' + inner + '</div>';
+        w.addEventListener('click', (e) => { if (e.target === w) finish(null); });
+        document.body.appendChild(w);
+        return { w: w, p: new Promise((res) => { resolver = res; }) };
+    }
+    const head = (o) =>
+        '<div style="font-size:16.5px; font-weight:900; color:var(--text-m); line-height:1.45; word-break:keep-all;">' + lines(o.title) + '</div>' +
+        (o.sub ? '<div style="font-size:12.5px; font-weight:600; color:var(--text-s); line-height:1.6; margin-top:6px; word-break:keep-all;">' + lines(o.sub) + '</div>' : '');
+
+    window.askChoice = function (o) {
+        o = o || {};
+        const opts = Array.isArray(o.options) ? o.options : [];
+        const r = open(head(o) +
+            '<div style="display:flex; flex-direction:column; gap:8px; margin-top:18px;">' +
+                opts.map((x, i) => '<button type="button" data-i="' + i + '" style="' + BTN +
+                    (x.danger ? ' background:#FFF0F1; color:#D32F2F;' : (i === 0 ? ' background:#4A413C; color:#FFF;' : ' background:var(--bg-sub); color:var(--text-m);')) +
+                    '">' + esc(x.label) + '</button>').join('') +
+                '<button type="button" data-no="1" style="' + BTN + ' background:transparent; color:var(--text-s); padding:12px;">' + esc(o.no || '닫기') + '</button>' +
+            '</div>');
+        r.w.querySelectorAll('[data-i]').forEach((b) => { b.onclick = () => finish(opts[Number(b.getAttribute('data-i'))].value); });
+        r.w.querySelector('[data-no]').onclick = () => finish(null);
+        return r.p;
+    };
+
+    window.askText = function (o) {
+        o = o || {};
+        const chips = Array.isArray(o.chips) ? o.chips : [];
+        let chip = (o.chip != null) ? String(o.chip) : null;
+        const r = open(head(o) +
+            '<input id="ask-text-input" type="text" maxlength="' + (Number(o.max) || 20) + '" autocomplete="off" placeholder="' + esc(o.placeholder || '') + '" value="' + esc(o.value || '') + '" ' +
+                'style="width:100%; box-sizing:border-box; margin-top:14px; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:#FBF8F3; color:var(--text-m); font-size:16px; font-weight:800; font-family:inherit; outline:none;">' +
+            (chips.length ? '<div data-chips="1" style="display:flex; gap:8px; margin-top:10px; border-radius:14px;">' + chips.map((c) =>
+                '<button type="button" data-chip="' + esc(c.value) + '" style="flex:1; padding:12px 6px; border-radius:12px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap;">' + esc(c.label) + '</button>').join('') + '</div>' : '') +
+            '<div style="display:flex; gap:10px; margin-top:16px;">' +
+                '<button type="button" data-no="1" style="' + BTN + ' flex:1; background:var(--bg-sub); color:var(--text-s);">' + esc(o.no || '닫기') + '</button>' +
+                '<button type="button" data-yes="1" style="' + BTN + ' flex:1; background:#4A413C; color:#FFF;">' + esc(o.yes || '확인') + '</button>' +
+            '</div>');
+        const w = r.w, input = w.querySelector('#ask-text-input');
+        const paint = () => w.querySelectorAll('[data-chip]').forEach((b) => {
+            const on = b.getAttribute('data-chip') === chip;
+            b.style.background = on ? '#F0EEFB' : 'var(--bg-sub)';
+            b.style.color = on ? '#7F77DD' : 'var(--text-s)';
+            b.style.border = on ? '1px solid #7F77DD' : '1px solid transparent';
+        });
+        w.querySelectorAll('[data-chip]').forEach((b) => { b.onclick = () => { chip = b.getAttribute('data-chip'); paint(); }; });
+        paint();
+        const ok = () => {
+            const v = String(input.value || '').trim();
+            if (!v) { input.style.borderColor = '#D32F2F'; try { input.focus(); } catch (e) {} return; }
+            if (chips.length && chip == null) {                // 둘 중 하나는 골라야 한다
+                const box = w.querySelector('[data-chips]');
+                if (box && box.animate) box.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 260 });
+                w.querySelectorAll('[data-chip]').forEach((b) => { b.style.border = '1px solid #D32F2F'; });
+                return;
+            }
+            finish(chips.length ? { text: v, chip: chip } : v);
+        };
+        w.querySelector('[data-yes]').onclick = ok;
+        w.querySelector('[data-no]').onclick = () => finish(null);
+        input.addEventListener('input', () => { input.style.borderColor = ''; });
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) ok(); });
+        setTimeout(() => { try { input.focus(); } catch (e) {} }, 80);
+        return r.p;
+    };
+})();
+
+// (트래커 전체 삭제는 위쪽 resetTrackerRecords 한 곳에 있다)
 
 // ⚙️ (설정 탭) 기록 데이터 초기화 버튼
 window.clearAllData = function() {
@@ -9265,7 +9391,7 @@ window.renderSettingsTab = function() {
             <div style="background: var(--bg-card); padding: 24px 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); text-align: center; box-sizing: border-box; width: 100%;">
                 <div style="width: 56px; height: 56px; border-radius: 50%; background: #F7F3ED; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px auto;">👤</div>
                 <div style="font-size: 12px; font-weight: 800; color: #A3958A; margin-bottom: 4px;">내 정보 안전하게 보관하기</div>
-                <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); margin-bottom: 16px;">로그인이 필요합니다</div>
+                <div style="font-size: 15.5px; font-weight: 900; color: var(--text-m); margin-bottom: 16px;">로그인이 필요해요</div>
                 <button onclick="window.loginWithKakao()" style="width: 100%; padding: 14px; border-radius: 12px; background: #FEE500; color: #4A413C; font-size: 14.5px; font-weight: 900; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(254,229,0,0.2);">
                     💬 카카오로 시작하기
                 </button>
@@ -9286,7 +9412,7 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 16px; font-weight: 900; color: var(--text-m); letter-spacing: -0.3px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <span>☁️</span> 안심 클라우드
                     </div>
-                    <span style="background: rgba(127, 119, 221, 0.1); color: #7F77DD; font-size: 11.5px; font-weight: 800; padding: 5px 10px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;">연동 중 ✨</span>
+                    <span style="background: rgba(127, 119, 221, 0.1); color: #7F77DD; font-size: 11.5px; font-weight: 800; padding: 5px 10px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;">연동 중</span>
                 </div>
                 
                 <!-- 🚨 텍스트 3줄 나오던 것 2줄로 강제 다이어트! -->
@@ -9434,8 +9560,9 @@ window.renderSettingsTab = function() {
                 </div>
             ` : ''}
             
-            <div style="text-align: center; color: var(--text-s); font-size: 11px; font-weight: 700; margin-bottom: 40px;">
-                Made with <span style="color:var(--primary);">♥</span> for our baby
+            <!-- ⚠️ 'Made with ♥ for our baby' 였다. 남의 앱 틀에서 흔히 보는 영어 꼬리말이라 우리 말로 -->
+            <div style="text-align: center; color: var(--text-s); font-size: 11.5px; font-weight: 700; margin-bottom: 40px;">
+                우리 아기를 위해 만들었어요
             </div>
         </div>
     `;
@@ -9515,7 +9642,7 @@ window.openPoopAI = function(type) {
 // ==========================================
 window.unlinkFamilySync = function() {
     window.showConfirm(
-        "정말 가족 연동을 해지하시겠습니까?<br><span style='font-size:12px; color:#A3958A; font-weight:600;'>해지하면 옛날 코드는 영구 폐기되며 새 코드로 시작합니다.</span>",
+        "가족 연결을 끊을까요?<br><span style='font-size:12px; color:#A3958A; font-weight:600;'>끊으면 서로 기록이 더는 오가지 않아요. 다시 이으려면 초대를 새로 받아야 해요.</span>",
         async function() {
             /* ⚠️ 이 폰에서 코드만 지웠다. 서버 가족 명단(families)에는 그대로 남아서
                   · 나간 사람 폰으로 수유 · 바통 같은 가족 알림이 계속 갔고
@@ -9550,31 +9677,22 @@ window.unlinkFamilySync = function() {
             
             // 3. 1초 뒤에 앱을 새로고침해서 완전 초기화된 상태로 만듦
             setTimeout(() => {
-                location.reload(); 
+                location.reload();
             }, 1000);
         },
-        "🔗", "해지하기", "#D32F2F" 
+        "🔗", "연결 끊기", "#D32F2F", "해제"
     );
 };
 // ==========================================
 // 🛡️ [가족 연동 해제 안전장치] 실수 방지용 3중 자물쇠
 // ==========================================
+/* ⚠️ 브라우저 기본 입력창(prompt)으로 '해제' 를 받은 뒤, 앱 창으로 '정말 해지할까요' 를 한 번 더 물었다.
+      이제 앱 창 하나에서 '해제' 를 적어야 '연결 끊기' 가 눌린다 (unlinkFamilySync). */
 window.safeUnlinkFamilySync = function() {
-    const answer = prompt("⚠️ 정말 짝꿍과의 가족 연동을 끊으시겠습니까?\n해제하시려면 아래 입력창에 '해제'라고 정확히 적어주세요.");
-    
-    if (answer === '해제') {
-        // 기존 해제 함수가 있으면 안전하게 호출
-        if (typeof window.unlinkFamilySync === 'function') {
-            window.unlinkFamilySync(); 
-        } else {
-            // 강제 해제 로직 (Fallback)
-            localStorage.removeItem('family_sync_code');
-            alert("가족 연결을 끊었어요.");
-            window.renderSettingsTab();
-        }
-    } else if (answer !== null) {
-        alert("적은 말이 달라서 취소했어요.");
-    }
+    if (typeof window.unlinkFamilySync === 'function') return window.unlinkFamilySync();
+    localStorage.removeItem('family_sync_code');
+    window.showToast("가족 연결을 끊었어요");
+    window.renderSettingsTab();
 };
 
 // ==========================================
@@ -12179,57 +12297,76 @@ window.logoutKakao = function() {
 };
 
 // 💔 카카오 회원 탈퇴 (서버 데이터까지 완벽 파기)
+/* ⚠️ 예전: 이 창 다음에 브라우저 기본 입력창(prompt)으로 '탈퇴' 를 한 번 더 받았고,
+      가족이 있으면 기본 확인 창으로 '[확인] 전부 삭제합니다 / [취소] 짝꿍의 배냇함에는 남겨둡니다' 를 물었다.
+      아이폰은 창 위에 사이트 주소가 찍혔고, '취소' 를 눌러야 남는다는 게 헷갈렸다.
+      이제 '탈퇴' 는 이 창 안에서 적고, 사진 · 목소리는 단추 두 개 중에서 고른다.
+   서버(deleteUserAccount): 가족방에 나 혼자면 방째 지우고, 가족이 남아 있으면 나만 빠진다 (같이 쓴 기록은 가족에게 남는다). */
 window.unlinkKakao = function() {
-    window.showConfirm("정말 회원 탈퇴를 진행하시겠습니까?<br><span style='font-size:12px; color:#A3958A;'>모든 데이터가 삭제되며 복구할 수 없습니다.</span>", async function() {
-        const answer = prompt("탈퇴하시려면 아래 입력창에 '탈퇴'라고 정확히 적어주세요.");
-        if (answer === '탈퇴') {
-            
-            // 🚨 1. 파이어베이스 서버 청소부 호출! (계정 및 명부 삭제)
-            if (window.functions && window.httpsCallable) {
-                try {
-                    const deleteUserAccount = window.httpsCallable(window.functions, 'deleteUserAccount');
-                    const myKakaoId = localStorage.getItem('kakao_id');
-
-                    // 짝꿍이 있으면, 내가 올린 사진까지 지울지 물어본다.
-                    // 지우면 짝꿍의 배냇함에서도 사라진다.
-                    let purgeUploads = false;
-                    if (localStorage.getItem('family_sync_code')) {
-                        purgeUploads = confirm(
-                            "내가 올린 사진과 목소리도 함께 지울까요?\n\n" +
-                            "[확인]  전부 삭제합니다 (짝꿍의 배냇함에서도 사라져요)\n" +
-                            "[취소]  짝꿍의 배냇함에는 남겨둡니다"
-                        );
-                    }
-
-                    await deleteUserAccount({ kakaoId: myKakaoId, purgeUploads: purgeUploads });
-                    console.log("✅ 서버 계정 삭제 완료");
-                } catch(e) {
-                    console.error("서버 계정 삭제 실패:", e);
-                }
-            }
-
-            // 2. 카카오 연결 끊기 요청
-            if (typeof Kakao !== 'undefined' && Kakao.Auth.getAccessToken()) {
-                Kakao.API.request({
-                    url: '/v1/user/unlink',
-                    success: function(res) { console.log('카카오 연결 끊기 성공'); },
-                    fail: function(err) { console.error('카카오 연결 끊기 실패'); }
-                });
-            }
-
-            // 3. 앱 로컬 데이터 완전 초기화
-            if (typeof window.wipeAllRecordsSafely === 'function') {
-                window.wipeAllRecordsSafely();
-            } else {
-                localStorage.clear();
-            }
-            
-            window.showToast("탈퇴했어요. 그동안 함께해 주셔서 고마웠어요");
-            setTimeout(() => location.reload(), 1500);
-        } else if (answer !== null) {
-            alert("적은 말이 달라서 취소했어요.");
+    const family = !!localStorage.getItem('family_sync_code');
+    const sub = family
+        ? "내 계정이 지워지고 되돌릴 수 없어요.<br>가족과 같이 쓰던 기록은 가족에게 남아요."
+        : "기록과 계정이 모두 지워지고, 되돌릴 수 없어요.";
+    window.showConfirm("탈퇴할까요?<br><span style='font-size:12px; color:#A3958A;'>" + sub + "</span>", async function() {
+        // 가족이 있으면, 내가 올린 사진 · 목소리까지 지울지 묻는다. 지우면 가족 배냇함에서도 사라진다.
+        let purgeUploads = false;
+        if (family && typeof window.askChoice === 'function') {
+            const pick = await window.askChoice({
+                title: '내가 올린 사진과 목소리는\n어떻게 할까요?',
+                sub: '남겨 두면 가족이 배냇함에서 계속 볼 수 있어요',
+                options: [
+                    { label: '가족 배냇함에 남겨 두기', value: 'keep' },
+                    { label: '모두 지우기', value: 'purge', danger: true }
+                ],
+                no: '탈퇴 그만두기'
+            });
+            if (!pick) return window.showToast("탈퇴를 그만뒀어요");
+            purgeUploads = (pick === 'purge');
         }
-    }, "🚨", "탈퇴하기", "#D32F2F");
+
+        // 🚨 1. 서버에서 계정 · 명부 · 파일 지우기 (deleteUserAccount)
+        /* ⚠️ 서버에서 못 지웠는데도(인터넷 끊김 · 서버 오류 — 서버는 오류를 { success: false } 로 답한다)
+              이 폰만 비우고 '탈퇴했어요' 라고 했다. 계정은 서버에 그대로 남아 있었다.
+              서버가 지웠다고 답할 때만 다음으로 간다. */
+        if (!window.functions || !window.httpsCallable || navigator.onLine === false) {
+            return window.showToast("인터넷이 끊겨 있어서 탈퇴가 안 됐어요. 연결되면 다시 해 주세요");
+        }
+        window.showToast("탈퇴하는 중이에요");
+        try {
+            const deleteUserAccount = window.httpsCallable(window.functions, 'deleteUserAccount');
+            const myKakaoId = localStorage.getItem('kakao_id');
+            const res = await deleteUserAccount({ kakaoId: myKakaoId, purgeUploads: purgeUploads });
+            if (!res || !res.data || res.data.success !== true) throw new Error((res && res.data && res.data.error) || 'no success');
+            console.log("✅ 서버 계정 삭제 완료");
+        } catch(e) {
+            console.error("서버 계정 삭제 실패:", e);
+            return window.showToast("탈퇴가 안 됐어요. 잠시 뒤 다시 해 주세요");
+        }
+
+        // 2. 카카오 연결 끊기 요청
+        if (typeof Kakao !== 'undefined' && Kakao.Auth.getAccessToken()) {
+            Kakao.API.request({
+                url: '/v1/user/unlink',
+                success: function(res) { console.log('카카오 연결 끊기 성공'); },
+                fail: function(err) { console.error('카카오 연결 끊기 실패'); }
+            });
+        }
+
+        // 3. 이 폰의 파이어베이스 로그인도 끊는다
+        /* ⚠️ 이 줄이 없었다. 새로고침하면 로그인 감지(onAuthStateChanged)가 남아 있던 로그인으로 카카오 번호를 되살려서,
+              탈퇴한 뒤에도 로그인된 채로 열렸다 (로그아웃에서 고친 것과 같은 일) */
+        try { if (window.auth && typeof window.auth.signOut === 'function') await window.auth.signOut(); } catch (e) {}
+
+        // 4. 앱 로컬 데이터 완전 초기화
+        if (typeof window.wipeAllRecordsSafely === 'function') {
+            window.wipeAllRecordsSafely();
+        } else {
+            localStorage.clear();
+        }
+
+        window.showToast("탈퇴했어요. 그동안 함께해 주셔서 고마웠어요");
+        setTimeout(() => location.reload(), 1500);
+    }, "🚨", "탈퇴하기", "#D32F2F", "탈퇴");
 };
 
 // ==========================================
@@ -12351,7 +12488,11 @@ window.adminClickTimer = null;
 // 1. 다다닥! 5번 터치 감지 로직
 /* 설정 '앱 버전' — 1.0.0 뒤에 언제 판인지 붙인다 (script.js?v=20261025-4 → 1.0.0 · 10.25)
    의견을 보낼 때 같이 가는 판과 같은 값이라, 받은 의견이 어느 판 이야기인지 맞춰 볼 수 있다 */
+/* ⚠️ script.js 를 고친 날짜만 보여서, 다른 파일만 고쳐 올린 날에는 옛 날짜(11.6)가 그대로 떴다.
+      index.html 의 판 번호(sw.js 의 baenaet-vN 과 같은 수)를 붙인다 — 받은 의견이 어느 판인지 정확히 맞춰 볼 수 있다. */
 window.appBuildLabel = function () {
+    const b = document.querySelector('meta[name="baenaet-build"]');
+    if (b && /^\d+$/.test(b.content || '')) return '1.0.0 (' + b.content + ')';
     const el = document.querySelector('script[src*="script.js?v="]');
     const m = el && /v=\d{4}(\d{2})(\d{2})/.exec(el.getAttribute('src') || '');
     return '1.0.0' + (m ? ' · ' + Number(m[1]) + '.' + Number(m[2]) : '');
@@ -12652,7 +12793,7 @@ window.saveNoticeToDB = async function() {
 // ==========================================
 window.reportContent = async function(type, targetId, reportedUserId) {
     const myUid = localStorage.getItem('kakao_id');
-    if (!myUid) return window.showToast("로그인이 필요합니다.");
+    if (!myUid) return window.showToast("로그인이 필요해요");
     if (!window.db) return window.showToast("❌ DB 연결이 되지 않았습니다.");
 
     try {
@@ -14018,7 +14159,10 @@ window.setWakeTimeNow = function() {
 // ==========================================
 // 💡 [일간 통계 요약 엔진 V5] 스크린샷 뚱뚱이 버그 완벽 다이어트 패치!
 // ==========================================
-window.getDailySummaryHtml = function(dailyRecords) {
+/* opts = { dayStart, all } 를 주면 잠은 그날 0시~24시 안에 든 분만 센다 (홈 '오늘 하루' · 영수증과 같은 셈).
+   ⚠️ 시작한 날로만 셌더니 홈은 '잠 7시간' 인데 기록 · 통계의 같은 날은 '수면 1시간 10분' 이었다
+      (어젯밤 잠이 전부 전날 몫으로 갔다). 두 화면 숫자가 달라지면 안 된다. */
+window.getDailySummaryHtml = function(dailyRecords, opts) {
     if (!dailyRecords || dailyRecords.length === 0) return '';
 
     let formulaAmt = 0;   
@@ -14034,13 +14178,22 @@ window.getDailySummaryHtml = function(dailyRecords) {
             else if (r.subType === '모유') breastMins += amt;
             else formulaAmt += amt; 
         } else if (r.type === 'sleep' && r.amount > 0) {
-            totalSleepMins += (parseInt(r.amount) || 0); 
+            if (!(opts && opts.all)) totalSleepMins += (parseInt(r.amount) || 0); 
         } else if (r.type === 'diaper') {
             if (r.subType === '소변') pee++;
             else if (r.subType === '대변') poop++;
             else if (r.subType === '둘 다' || r.subType === '소변+대변') { pee++; poop++; }
         }
     });
+
+    if (opts && opts.all && window.getSleepRange && window.minsInRange) {
+        const d0 = Number(opts.dayStart), d1 = d0 + 86400000;
+        opts.all.forEach(r => {
+            if (r.type !== 'sleep' || !(Number(r.amount) > 0)) return;
+            const sr = window.getSleepRange(r);
+            if (sr.end - sr.start <= 20 * 3600000) totalSleepMins += window.minsInRange(sr.start, sr.end, d0, d1);
+        });
+    }
 
     let summaryItems = [];
     
@@ -14052,7 +14205,7 @@ window.getDailySummaryHtml = function(dailyRecords) {
     if (totalSleepMins > 0) {
         let h = Math.floor(totalSleepMins / 60);
         let m = totalSleepMins % 60;
-        let sleepText = h > 0 ? `수면 ${h}시간 ${m}분` : `수면 ${m}분`;
+        let sleepText = h > 0 ? (m ? `수면 ${h}시간 ${m}분` : `수면 ${h}시간`) : `수면 ${m}분`;   // '7시간 0분' 이 아니라 '7시간'
         summaryItems.push(`<span style="color:#7F77DD; font-weight:800;">${sleepText}</span>`);
     }
     if (pee > 0 || poop > 0) summaryItems.push(`<span style="color:#2FA584; font-weight:800;">기저귀 ${pee+poop}번</span>`);
@@ -15361,20 +15514,15 @@ window.addNewBabyProfile = function() {
     // VIP라도 최대 3명까지만
     if (profiles.length >= 3) return alert("아기는 3명까지 담을 수 있어요");
     
-    // 즉석에서 예쁜 이름을 물어봄
-    /* ⚠️ prompt() 도 alert() 와 같은 시스템 창이다.
-          안드로이드에서 도메인 주소가 그대로 뜬다.
-          답을 받아야 해서 토스트로는 못 바꾼다.
-          앱에 입력창(showPrompt)이 있으면 그걸 쓰고, 없으면 그대로 간다. */
-    var newName;
-    if (typeof window.showPrompt === "function") {
-        newName = window.showPrompt("추가할 아기의 이름을 알려주세요");
-    } else {
-        newName = prompt("추가할 아기의 이름을 알려주세요");
-    }
-    if (!newName || !newName.trim()) return;
-    
-    const cleanName = newName.trim();
+    /* ⚠️ 이름을 브라우저 기본 입력창(prompt)으로 받았다. 아이폰은 창 위에 사이트 주소가 찍혔다.
+          앱 안의 입력창(askText)으로 받는다. */
+    window.askText({ title: '새 아기 이름', sub: '아기마다 기록이 따로 쌓여요', placeholder: '이름 또는 태명', yes: '추가하기', max: 12 })
+        .then(function (newName) { if (newName) addBabyNamed(profiles, newName); });
+};
+
+function addBabyNamed(profiles, newName) {
+    const cleanName = String(newName).trim();
+    if (!cleanName) return;
     const newId = '_' + (new Date().getTime()); // 고유 ID 생성
     
     profiles.push({ id: newId, name: cleanName });

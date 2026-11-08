@@ -531,7 +531,9 @@
             var self = this, args = arguments, cur = localStorage.getItem("user_role") || "mom";
             if (window.isViewerLocked()) return orig.apply(self, args);               // 서버가 정한 도우미 — script.js 쪽 자물쇠가 막는다
             if (role === "senior" && cur !== "senior") {
-                if (typeof window.isPremiumUser === "function" && !window.isPremiumUser()) return orig.apply(self, args);   // 결제 안내가 먼저
+                /* ⚠️ PLUS 가 아니면 숫자를 묻지 않고 넘겼다 (그쪽에서 결제 안내가 떴기 때문).
+                      돌봄 화면이 무료가 된 뒤로는(v123) 숫자 없이 도우미 화면으로 바뀌어서, 무료 개방이 끝나면
+                      도우미가 엄마 · 아빠 화면으로 그냥 돌아올 수 있게 된다. 누구에게나 숫자를 정하게 한다. */
                 askNew(function () { orig.apply(self, args); });
                 return;
             }

@@ -66,6 +66,8 @@
          폰이 다크모드인 사람은 앱은 크림색인데 상태바만 새까맣게 뜬다.
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
+    <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
+    <meta name="baenaet-build" content="125">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -488,6 +490,20 @@ div[style*="background: var(--bg-card)"]:active,
     transform: scale(0.98);
     box-shadow: 0 4px 12px rgba(139, 126, 116, 0.04) !important;
 }
+
+/* 바닥에 붙는 창(위 두 모서리만 둥근 것) — 아래 모서리는 각지게, 눌러도 창 전체가 줄어들지 않게.
+   ⚠️ 위 '모서리 둥글기 통일'([style*="border-radius: 24px"]) 과 공통 카드 규칙이 '24px 24px 0 0' 까지
+      네 모서리 다 둥글게 만들어서, 기록 넣기 · 기저귀 · 기록·통계 · 초대 창 아래 모서리 틈으로 뒤 화면이 비쳤다.
+      기저귀 창은 공통 카드라서 안의 단추를 누를 때마다 창 전체가 98% 로 줄었다가 돌아왔다.
+   ⚠️ 이 규칙은 공통 카드 규칙(div[style*=...], 같은 세기)보다 뒤에 있어야 이긴다 */
+div[style*="border-radius: 20px 20px 0"],
+div[style*="border-radius: 24px 24px 0"],
+div[style*="border-radius: 28px 28px 0"] { border-radius: 20px 20px 0 0 !important; }
+div[style*="border-radius: 26px 26px 0"] { border-radius: 26px 26px 0 0 !important; }
+.box-main[style*="border-radius: 24px 24px 0"]:active,
+div[style*="background: var(--bg-card)"][style*="radius: 20px 20px 0"]:active,
+div[style*="background: var(--bg-card)"][style*="radius: 24px 24px 0"]:active,
+div[style*="background: var(--bg-card)"][style*="radius: 26px 26px 0"]:active { transform: none; }
 
 /* 3. 텍스트 감성 최적화 (다크 브라운 & 웜 그레이) */
 div[style*="color: var(--text-m)"], 
@@ -1877,7 +1893,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <!-- ✨👇 여기에 새로 추가! (성장 탭 전용 리포트 버튼) 👇✨ -->
 <button class="btn-main" style="background: linear-gradient(135deg, #7F77DD 0%, #6A61CE 100%) !important; color: #FFF !important; border:none !important; box-shadow:0 6px 16px rgba(124, 58, 237, 0.25) !important; padding:16px; font-size:15px; font-weight:900; border-radius:14px; width:100%; display:flex; justify-content:center; align-items:center; gap:8px; margin-top: 12px; cursor: pointer; transition: 0.2s;" onclick="window.openPediatricianReport()">
     <span style="font-size:18px;">📄</span> 영유아 검진/소아과 종합 리포트 
-    <span style="background: #FEE500; color: #4A413C; padding: 2px 6px; border-radius: 6px; font-size: 10px; margin-left: 4px;">PREMIUM</span>
+    <!-- ⚠️ 'PREMIUM' (카카오 노란색) 이었다. 다른 곳은 다 'PLUS' 라서 이름을 맞춘다 -->
+    <span style="background: rgba(255,255,255,0.22); color: #FFF; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; margin-left: 4px;">PLUS</span>
 </button>
             
                         <!-- 🗓️ 원더윅스 & 예방접종 브리핑 -->
@@ -3611,17 +3628,17 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261106-8"></script>
+<script src="script.js?v=20261108-1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
     <script src="./tenmonths.js?v=2"></script>
-    <script src="./familynews.js"></script>
+    <script src="./familynews.js?v=2"></script>
     <script src="./applycal.js"></script>
     <script src="./readylist.js"></script>
-    <script src="./prepstage.js"></script>
+    <script src="./prepstage.js?v=2"></script>
 <script src="./outingreturn.js"></script>
-<script src="./rolelock.js?v=4"></script>
+<script src="./rolelock.js?v=5"></script>
     <script src="./sitterplus.js?v=2"></script>
     <script src="./duty.js?v=3"></script>
 <script src="./graveyard.js"></script>
@@ -3639,7 +3656,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./outingsmart.js?v=2"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
-<script src="./voice.js?v=3"></script>
+<script src="./voice.js?v=4"></script>
 <script src="./waveform.js"></script>
 <script src="./voicereel.js?v=2"></script> 
 <script src="./milestonebook.js"></script>
@@ -3690,7 +3707,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 바꿀 때 알림 — 이유식 단계 · 컵 · 젖꼭지 · 카시트 어깨끈을 그날 아침 폰으로 (서버 nextStepDaily 가 보낸다) -->
     <script src="./nextstep.js?v=1"></script>
     <script src="./pushcheck.js?v=5"></script>
-    <script src="./feedback.js?v=3"></script>
+    <script src="./feedback.js?v=4"></script>
     <!-- 인스타 · 페북 · 네이버 앱 안에서 열렸을 때 — 바깥 브라우저로 여는 길 -->
     <script src="./inapp.js?v=1"></script>
 <script src="./memories.js"></script>    
@@ -3712,13 +3729,13 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <!-- 💩 기저귀 시트 — 옛 이름을 진짜 기록 시트로 보내준다 -->
 <script src="./diapersheet.js?v=1"></script>
 <!-- ← 안드로이드 뒤로가기 — 덮은 화면을 닫는다. 앱이 꺼지지 않게 -->
-<script src="./backbutton.js?v=9"></script>
+<script src="./backbutton.js?v=10"></script>
 <!-- 창이 화면보다 길어지면 창 안에서 스크롤되게 — 큰 글씨 폰 · 작은 폰 · 가로 화면의 마지막 안전망 -->
-<script src="./sheetfit.js?v=1"></script>
+<script src="./sheetfit.js?v=2"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->
-<script src="./sealsoon.js?v=1"></script>
+<script src="./sealsoon.js?v=2"></script>
 <!-- 🎨 하단 탭 아이콘(icons.js)은 탭 줄(</nav>) 바로 다음으로 옮겼다 -->
 
 <!-- 💩 기저귀 바텀시트 모달 -->
@@ -3860,7 +3877,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         
         <!-- 👇 안전 잠금 입력창 추가! -->
         <div id="confirm-input-area" style="display: none; margin-bottom: 20px;">
-            <div style="font-size: 12px; color: var(--danger); margin-bottom: 8px; font-weight: 700;">진행하시려면 아래 칸에 '삭제'라고 입력해주세요.</div>
+            <div id="confirm-keyword-hint" style="font-size: 12px; color: var(--danger); margin-bottom: 8px; font-weight: 700;">아래 칸에 '삭제' 라고 적어 주세요</div>
             <input type="text" id="confirm-keyword-input" placeholder="삭제" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FBF8F3; text-align: center; font-weight: 900; font-size: 16px; outline: none; color: #4A413C;">
         </div>
 
@@ -4364,8 +4381,10 @@ body { overflow-x: hidden !important; } /* 가로로 튀어나오는 모든 찌�
 <!-- 📊 기록·통계 바텀시트 -->
 <div id="stats-sheet-overlay" onclick="if(event.target === this) window.closeStatsSheet()"
      style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; align-items: flex-end; justify-content: center;">
+    <!-- ⚠️ background: var(--bg-card) 로 적으면 위쪽 공통 카드 규칙(테두리 · 그림자 · 네 모서리 24px, !important)에 걸린다.
+            창은 카드가 아니라서 background-color 로 적는다. 아래 모서리는 '바닥에 붙는 창' 규칙이 각지게 둔다 -->
     <div id="stats-sheet-content"
-         style="width: 100%; max-width: 480px; background: var(--bg-card); border-radius: 24px 24px 0 0; padding: 8px 20px 32px 20px; max-height: 88vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);">
+         style="width: 100%; max-width: 480px; background-color: var(--bg-card); border-radius: 24px 24px 0 0; padding: 8px 20px 32px 20px; max-height: 88vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);">
 
         <!-- 손잡이 -->
         <div style="width: 40px; height: 4px; background: #D1D6DB; border-radius: 2px; margin: 8px auto 16px auto; flex-shrink: 0;"></div>

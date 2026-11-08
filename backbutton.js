@@ -97,6 +97,7 @@
         { id: "duty-sheet",             close: null },          // 오늘 당번
         { id: "who-sheet",              close: null },          // 누구를 초대할까요
         { id: "pin-sheet",              close: "__pinCancel" }, // 도우미 화면 숫자 4자리
+        { id: "ask-sheet",              close: "__askCancel" }, // 앱 안에서 묻기 (이름 적기 · 둘 중 고르기 — script.js askText · askChoice)
         { id: "pushask-sheet",          close: null },          // 알림 켜기
         { id: "pushcheck-sheet",        close: null },          // 알림 점검
         { id: "fb-sheet",               close: null },          // 의견 보내기 (수유실 '정보가 달라요' 도 여기로 연다)

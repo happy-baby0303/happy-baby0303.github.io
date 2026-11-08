@@ -35,10 +35,12 @@
         var sa = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
         return sa ? "pwa" : "web";
     }
+    // 판 번호(index.html meta · sw.js CACHE 와 같은 수)를 앞에 붙인다 — script.js 날짜만으로는 어느 판인지 몰랐다
     function version() {
+        var b = document.querySelector('meta[name="baenaet-build"]');
         var el = document.querySelector('script[src*="script.js?v="]');
         var m = el && /v=([\w.-]+)/.exec(el.getAttribute("src") || "");
-        return m ? m[1] : "";
+        return (b && b.content ? "b" + b.content + " " : "") + (m ? m[1] : "");
     }
     function close() { var w = document.getElementById("fb-sheet"); if (w) w.remove(); }
 

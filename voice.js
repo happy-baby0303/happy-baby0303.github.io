@@ -868,7 +868,8 @@
         if (!total) {
             body = '<div style="text-align:center; padding:80px 24px;">' +
                 '<div style="font-family:\'Nanum Pen Script\', cursive; font-size:26px; color:var(--text-sub); line-height:1.6;">' +
-                    '아직 담긴 소리가 없어요<br>지금 내는 소리는<br>두 달 뒤면 안 나요' +
+                    '아직 담긴 소리가 없어요<br>지금 내는 소리는<br>금방 다른 소리가 돼요' +   // '두 달 뒤면 안 나요' — 근거 없는 숫자라 뺐다 (PLUS 안내와 같게)
+
                 '</div></div>';
         } else {
             var lastYm = "";
