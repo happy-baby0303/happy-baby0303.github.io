@@ -2254,9 +2254,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 
               <!-- 🚨 [패치 완료] 탭 버튼: 3분할 (행사 / 리스트 / 맵) -->
                 <div style="display: flex; background: var(--bg-sub); border-radius: 16px; padding: 4px; margin-bottom: 16px;">
-                    <button id="seg-event" onclick="switchOutingSubTab('event')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: #FFF; color: var(--text-m); box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s; cursor: pointer; white-space: nowrap;">📅 주말 행사</button>
-                    <button id="seg-list" onclick="switchOutingSubTab('list')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: var(--text-s); transition: 0.2s; cursor: pointer; white-space: nowrap;">📍 핫플 리스트</button>
-                    <button id="seg-map" onclick="switchOutingSubTab('map')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: var(--text-s); transition: 0.2s; cursor: pointer; white-space: nowrap;">🍼 수유실 맵</button>
+                    <button id="seg-event" onclick="switchOutingSubTab('event')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: #FFF; color: var(--text-m); box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s; cursor: pointer; white-space: nowrap;">주말 행사</button>
+                    <button id="seg-list" onclick="switchOutingSubTab('list')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: var(--text-s); transition: 0.2s; cursor: pointer; white-space: nowrap;">가볼 만한 곳</button>
+                    <button id="seg-map" onclick="switchOutingSubTab('map')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: var(--text-s); transition: 0.2s; cursor: pointer; white-space: nowrap;">수유실 지도</button>
                 </div>
 
                 <!-- 🚨 [추가됨] 수유실 카카오맵이 그려질 도화지 (기본은 숨김) -->
@@ -2270,7 +2270,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
 <!-- 🚀 [UI 업그레이드] 지역 필터: 최신 앱 스타일 (가로 스와이프) -->
 <div class="filter-wrap" style="display: flex; flex-wrap: nowrap !important; overflow-x: auto; gap: 8px; padding-bottom: 8px; margin-bottom: 16px; scrollbar-width: none;">
-    <button class="filter-btn active" style="flex-shrink: 0; white-space: nowrap;" onclick="setRegion('all', this)">전국 전체</button>
+    <button class="filter-btn active" style="flex-shrink: 0; white-space: nowrap;" onclick="setRegion('all', this)">전국</button>
     <button class="filter-btn" style="flex-shrink: 0; white-space: nowrap;" onclick="setRegion('seoul', this)">서울</button>
     <button class="filter-btn" style="flex-shrink: 0; white-space: nowrap;" onclick="setRegion('gyeonggi', this)">경기/인천</button>
     <button class="filter-btn" style="flex-shrink: 0; white-space: nowrap;" onclick="setRegion('chungcheong', this)">충청/대전/세종</button>
@@ -3611,7 +3611,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261106-7"></script>
+<script src="script.js?v=20261106-8"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3634,9 +3634,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./monthgift.js?v=2"></script>
 <script src="./expiryalert.js"></script>
 <script src="./toolbrief.js"></script> 
-<script src="./placefilter.js"></script> 
+<script src="./placefilter.js?v=2"></script> 
 <script src="./nursing.js?v=3"></script>
-<script src="./outingsmart.js"></script>
+<script src="./outingsmart.js?v=2"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
 <script src="./voice.js?v=3"></script>
@@ -3713,6 +3713,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./diapersheet.js?v=1"></script>
 <!-- ← 안드로이드 뒤로가기 — 덮은 화면을 닫는다. 앱이 꺼지지 않게 -->
 <script src="./backbutton.js?v=9"></script>
+<!-- 창이 화면보다 길어지면 창 안에서 스크롤되게 — 큰 글씨 폰 · 작은 폰 · 가로 화면의 마지막 안전망 -->
+<script src="./sheetfit.js?v=1"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
 <script src="./vaccine.js?v=1"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->

@@ -867,11 +867,10 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
 
     const dateLabel = isEvent ? '진행 기간' : '운영 정보';
     const locLabel = isEvent ? '방문 장소' : '위치 정보';
-    const topIcon = isEvent ? '🚩' : '📍';
 
     const telBtn = tel && tel !== '정보없음' 
-        ? `<button onclick="window.location.href='tel:${tel}'" style="flex: 1; padding: 14px 0; background: var(--bg-sub); color: var(--text-m); border-radius: 12px; font-weight: 800; font-size: 14.5px; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;">📞 전화 문의</button>` 
-        : `<button disabled style="flex: 1; padding: 14px 0; background: var(--bg-main); color: #C4B5A9; border-radius: 12px; font-weight: 800; font-size: 14.5px; border: none;">📞 번호 없음</button>`;
+        ? `<button onclick="window.location.href='tel:${tel}'" style="flex: 1; padding: 14px 0; background: var(--bg-sub); color: var(--text-m); border-radius: 12px; font-weight: 800; font-size: 14.5px; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;">전화 문의</button>` 
+        : `<button disabled style="flex: 1; padding: 14px 0; background: var(--bg-main); color: #C4B5A9; border-radius: 12px; font-weight: 800; font-size: 14.5px; border: none;">번호 없음</button>`;
         
     let modalImgHtml = '';
     if (image && image.trim() !== '' && !image.startsWith('⚙️')) {
@@ -883,7 +882,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
 
     const safeQuery = query.replace(/'/g, "\\'");
 
-  // 💡 [니치 엔진 고도화] 축제, 행사, 갯벌 등 육아 현실에 맞춘 초정밀 키워드 판독기
+  // 나들이 종류 — 이름 · 소개 글에 든 말로 짐 목록을 고른다
     let suggestedTheme = 'basic';
     let themeName = '기본 외출';
     const keywordStr = `${title} ${query} ${review}`.toLowerCase();
@@ -909,18 +908,17 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
         suggestedTheme = 'basic'; themeName = '기본 외출';
     }
 
+    /* ⚠️ '🎒 야외 축제/피크닉 맞춤 짐싸기 시작' 이라고 적혀 있었다. 무엇을 하는 단추인지만 적는다 */
+    const packLabel = { stay: '1박 2일 짐 챙기기', water: '물놀이 짐 챙기기', picnic: '야외 나들이 짐 챙기기',
+                        indoor: '키즈카페 짐 챙기기', basic: '외출 짐 챙기기' }[suggestedTheme] || '외출 짐 챙기기';
     const smartChecklistBtn = `
-        <button onclick="closeFestivalModalForce(); window.openChecklistModal('${suggestedTheme}');" style="width: 100%; padding: 16px 0; background: linear-gradient(135deg, #F2F0FC 0%, #F2F0FC 100%); color: #7F77DD; border-radius: 12px; font-weight: 900; font-size: 14.5px; border: 1px solid #D5D1F4; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; transition: 0.2s; box-shadow: 0 4px 10px rgba(127, 119, 221, 0.15);">
-            🎒 ${themeName} 맞춤 짐싸기 시작
-        </button>
+        <button onclick="closeFestivalModalForce(); window.openChecklistModal('${suggestedTheme}');" style="width: 100%; padding: 15px 0; background: #F2F0FC; color: #7F77DD; border-radius: 12px; font-weight: 900; font-size: 14.5px; border: 1px solid #D5D1F4; cursor: pointer;">${packLabel}</button>
     `;
 
     body.innerHTML = `
-        <div style="padding: 0 4px;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                <div style="width: 32px; height: 32px; background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">${topIcon}</div>
-                <div style="font-size: 20px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</div>
-            </div>
+        <div>
+            <!-- ⚠️ 제목 앞 🚩 · 📍 상자를 뺐다. 긴 행사 이름이 '…' 로 잘려서 두 줄까지 보이게 했다 -->
+            <div style="font-size: 19px; font-weight: 900; color: var(--text-m); letter-spacing: -0.5px; line-height: 1.35; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 2px 0 16px;">${title}</div>
 
             ${modalImgHtml}
 
@@ -944,7 +942,7 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
                 <div style="font-size: 13.5px; font-weight: 600; color: var(--text-m); line-height: 1.5; word-break: keep-all;">${review}</div>
             </div>` : ''}
 
-            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <div data-fest-maps style="display: flex; gap: 8px; margin-bottom: 10px;">
                 <button onclick="window.openMap('naver', '${safeQuery}')" style="flex: 1; padding: 12px 0; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 13px;">
                     <span style="color: #03C75A; font-size: 16px; font-weight: 900;">N</span> 네이버
                 </button>
@@ -956,11 +954,14 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
                 </button>
             </div>
             
-            <!-- 🚨 새로 추가된 AI 짐싸기 연동 버튼 -->
+            <!-- 짐 챙기기 — 나들이 종류에 맞춘 목록으로 -->
             ${smartChecklistBtn}
 
-            <!-- 🚀 하단 액션 버튼 -->
-            <div style="display: flex; gap: 8px;">
+            <!-- 아래 단추 — 창 아래에 붙어 있다.
+                 ⚠️ 창 높이를 막아 두지 않아서(max-height: none) 소개 글 '더 보기' 를 누르면 창이 화면보다 길어졌다.
+                    닫기 단추가 화면 밖으로 밀렸고 창이 스크롤도 안 돼서, 닫을 방법이 없었다.
+                    이제 창은 화면의 88% 까지만 크고 안에서 스크롤된다. 전화 · 닫기 단추는 늘 보인다. -->
+            <div data-fest-foot style="position: sticky; bottom: 0; z-index: 2; display: flex; gap: 8px; margin: 16px -22px 0; padding: 12px 22px calc(14px + env(safe-area-inset-bottom, 0px)); background-color: var(--bg-card); border-top: 1px solid var(--border);">
                 ${telBtn}
                 <button onclick="closeFestivalModalForce()" style="flex: 1.5; padding: 14px 0; background: var(--text-m); color: var(--bg-card); border-radius: 12px; font-weight: 800; font-size: 14.5px; border: none; cursor: pointer;">닫기</button>
             </div>
@@ -968,40 +969,55 @@ function openFestivalModal(title, dateText, addr, tel, review, query, image, isE
     `;
 
     const modalWrap = document.getElementById('premium-modal');
-    if(modalWrap) {
-        document.body.style.overflow = 'hidden'; 
+    if (modalWrap) {
+        /* 창은 아래에서 올라오는 시트 — 화면의 88% 까지, 안에서 스크롤.
+           ⚠️ 예전엔 가운데 카드에 max-height: none 을 걸어서, 내용이 길면 위아래가 화면 밖으로 나갔다.
+           ⚠️ 이 틀(premium-modal)은 새벽 근무 · 수유실 지도 · 소아과 리포트 창도 같이 쓴다.
+              처음 모양을 적어 두었다가 닫을 때 돌려놓는다 (closeFestivalModalForce). */
+        const box = modalWrap.querySelector('.modal-content') || modalWrap.querySelector('.box-main');
+        if (modalWrap.dataset.base === undefined) {
+            modalWrap.dataset.base = modalWrap.getAttribute('style') || '';
+            if (box) box.dataset.base = box.getAttribute('style') || '';
+        }
+        if (modalWrap.dataset.fest !== '1') modalWrap.dataset.bodyOverflow = document.body.style.overflow || '';
+        modalWrap.dataset.fest = '1';
+        document.body.style.overflow = 'hidden';
         modalWrap.style.cssText = `
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            position: fixed !important;
-            top: 0 !important; left: 0 !important;
-            width: 100vw !important; height: 100vh !important;
-            background: rgba(0, 0, 0, 0.7) !important;
-            z-index: 999999 !important;
-            padding: 20px !important;
-            box-sizing: border-box !important;
+            display: flex !important; justify-content: center !important; align-items: flex-end !important;
+            position: fixed !important; top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important;
+            width: auto !important; height: auto !important;
+            background: rgba(0, 0, 0, 0.55) !important; z-index: 999999 !important;
+            padding: 0 !important; box-sizing: border-box !important; overflow: hidden !important;
         `;
-
-        const modalBox = modalWrap.querySelector('.modal-content') || modalWrap.querySelector('.box-main');
-        if (modalBox) {
-            modalBox.style.cssText = `
-                width: 100% !important; max-width: 380px !important; max-height: none !important; 
-                border-radius: 24px !important; margin: auto !important; transform: none !important;
-                background: var(--bg-card, #FFF) !important; box-shadow: 0 24px 48px rgba(0,0,0,0.2) !important;
-                padding: 28px 24px !important; box-sizing: border-box !important; border: none !important;
+        if (box) {
+            // transform: none — .box-main:active 의 '눌리는 효과' 가 스크롤하려고 손댈 때마다 창을 줄였다
+            box.style.cssText = `
+                width: 100% !important; max-width: 480px !important; max-height: 88% !important;
+                overflow-y: auto !important; overflow-x: hidden !important; overscroll-behavior: contain;
+                border-radius: 24px 24px 0 0 !important; margin: 0 !important; transform: none !important;
+                background-color: var(--bg-card, #FFFFFF) !important; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18) !important;
+                padding: 22px 22px 0 !important; box-sizing: border-box !important; border: none !important;
             `;
+            box.scrollTop = 0;
         }
     }
 }
 
-// 👇 절대 지우면 안 되는 모달 닫기 함수들! (안전하게 같이 둡니다)
-function closeFestivalModalForce() { 
-    const m = document.getElementById('premium-modal'); 
-    if(m) {
-        m.style.display = 'none'; 
-        document.body.style.overflow = 'auto'; // 👈 핵심 패치: 닫을 때 스크롤 잠금 강제 해제
+// 행사 · 장소 창 닫기 — 새벽 근무 · 수유실 지도 창도 이걸로 닫는다
+function closeFestivalModalForce() {
+    const m = document.getElementById('premium-modal');
+    if (!m) return;
+    if (m.dataset.fest === '1') {
+        // 행사 창 모양을 걷어 내고 처음 모양으로 (같은 틀을 쓰는 다른 창이 이 모양을 물려받지 않게)
+        const box = m.querySelector('.modal-content') || m.querySelector('.box-main');
+        m.setAttribute('style', m.dataset.base || '');
+        if (box) box.setAttribute('style', box.dataset.base || '');
+        document.body.style.overflow = m.dataset.bodyOverflow || '';
+        m.dataset.fest = '';
+    } else {
+        document.body.style.overflow = '';
     }
+    m.style.display = 'none';
 }
 function closeFestivalModal(e) { if(e.target.className === 'modal-overlay') closeFestivalModalForce(); }
 
@@ -2582,7 +2598,10 @@ window.renderChecklist = function() {
     }
 
     // 메인 컨테이너도 베이지색으로 완벽 통일
-    container.style.cssText = `display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 0; overflow: hidden; background: ${bgBase} !important; border: none !important; border-radius: 0 0 24px 24px;`;
+    /* ⚠️ overflow: hidden 이었다. 화면이 낮거나(작은 폰 · 가로) 글자를 크게 해 둔 폰에서는
+          위쪽(제목 · 외출 시간 · 진행 막대)만으로 창이 차서, 아래 '초기화' 단추가 잘린 채 스크롤도 안 됐다.
+          보통 폰에서는 목록만 안에서 스크롤되고(아래 checklist-scroll), 모자랄 때만 창 전체가 스크롤된다. */
+    container.style.cssText = `display: flex; flex-direction: column; height: 100%; min-height: 0; padding: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; background: ${bgBase} !important; border: none !important; border-radius: 0 0 24px 24px;`;
 
     let totalItems = 0; let checkedItems = 0;
     window.checklistData.forEach(item => {
@@ -2647,7 +2666,8 @@ window.renderChecklist = function() {
     `;
 
     // 🚨 3. 리스트 영역 (배경 투명화 -> 베이지색 통일)
-    let listHtml = `<div id="checklist-scroll" style="flex: 1; overflow-y: auto; padding: 0 20px 20px 20px; display: flex; flex-direction: column; background: transparent !important; border: none !important;">`;
+    // min-height: 창이 모자랄 때 목록이 0 으로 접혀 사라지지 않게
+    let listHtml = `<div id="checklist-scroll" style="flex: 1; min-height: 140px; overflow-y: auto; padding: 0 20px 20px 20px; display: flex; flex-direction: column; background: transparent !important; border: none !important;">`;
     
     window.checklistData.forEach((item, index) => {
         if (item.isHeader) {

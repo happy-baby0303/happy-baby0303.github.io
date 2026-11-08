@@ -273,8 +273,11 @@
                  : "var(--bg-sub)";
         var badge = ageBadge(p);
 
+        /* ⚠️ 태그마다 그림이 붙어 있었다 (🍼 기저귀 교환대 · 🎈 전용 키즈존 · 🎫 네이버 사전예약).
+              카드 왼쪽 종류 그림까지 한 장에 그림이 넷이었다. 태그는 글자만 보인다 (자료는 그대로). */
         var tags = (p.tags || []).slice(0, 3).map(function (t) {
             var s = (typeof t === "string") ? t : (t && t.t) || "";
+            s = String(s).replace(/^[^\s가-힣A-Za-z0-9(]+\s+/, "");
             return '<span style="font-size:10.5px; font-weight:800; color:var(--text-sub); ' +
                    'background:var(--bg-sub); border-radius:7px; padding:4px 8px; ' +
                    'max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' +
@@ -651,7 +654,7 @@
                         'style="flex:1; height:48px; display:flex; align-items:center; justify-content:center; ' +
                         'background:var(--bg-sub); color:var(--text-m); border:1px solid var(--border); ' +
                         'border-radius:14px; font-size:14px; font-weight:800; letter-spacing:-0.3px; ' +
-                        'cursor:pointer;">다른 곳 보여줘</div>' +
+                        'cursor:pointer;">다른 곳 보기</div>' +
                 '</div>' +
                 '<div style="text-align:center; font-size:10.5px; font-weight:700; ' +
                     'color:var(--text-sub); margin-top:9px;">' +
@@ -785,7 +788,7 @@
             (F.near && myPos
                 ? '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin:-3px 0 9px;">' +
                   '내 위치에서 가까운 차례로 놓았어요' +
-                  (regionNow() !== "all" ? ' · 더 넓게 보려면 위에서 <b>전국 전체</b>' : '') + '</div>'
+                  (regionNow() !== "all" ? ' · 더 넓게 보려면 위에서 <b>전국</b>' : '') + '</div>'
                 : '') +
             (tooEarly
                 ? '<div style="font-size:11px; font-weight:700; color:var(--text-sub); margin:-3px 0 9px; ' +
@@ -850,7 +853,10 @@
             "font-size:11px; font-weight:700; color:var(--text-sub); line-height:1.65; word-break:keep-all;";
         d.innerHTML = "ⓘ 운영시간 · 휴관일 · 수유실은 <b>바뀌었을 수 있어요.</b> " +
                       "특히 멀리 가시는 길이면 전화로 한 번 확인하고 출발하세요.";
-        body.appendChild(d);
+        // ⚠️ 창 맨 끝(닫기 단추 밑)에 붙고 있었다. 길찾기 단추 바로 위가 이 말을 할 자리다
+        var maps = body.querySelector("[data-fest-maps]");
+        if (maps && maps.parentNode) { d.style.marginTop = "0"; d.style.marginBottom = "10px"; maps.parentNode.insertBefore(d, maps); }
+        else body.appendChild(d);
     }
 
     /* ---------- 시작 ---------- */
