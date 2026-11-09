@@ -4956,6 +4956,13 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             <!-- 하단 컨트롤 박스 -->
             <div id="sleep-control-box" style="display: flex; gap: 10px; margin-bottom: 0;">
             </div>
+
+            <!-- 재우기 소리 (sleepsound.js) — 이 창을 닫고 소리 고르기 창을 연다. 지난 기록을 고칠 때는 안 보인다 -->
+            ${!window.editingTrackerId && typeof window.openSleepSounds === 'function' ? `
+            <button type="button" onclick="window.openSleepSounds()" style="width:100%; margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:13px 16px; border-radius:14px; border:none; background:#F4F2FC; cursor:pointer; font-family:inherit;">
+                <span style="font-size:14px; font-weight:800; color:#4F47A5;">🎵 재우기 소리</span>
+                <span style="font-size:12px; font-weight:700; color:#7F77DD; white-space:nowrap;">백색소음 · 비 · 배 속 · 오르골 ›</span>
+            </button>` : ''}
             
             <input type="hidden" id="v-sleep-amount" value="0">
         `;

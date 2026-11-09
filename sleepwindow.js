@@ -14,6 +14,7 @@
           이맘때 깨면 보통 4시간쯤 뒤에 밤잠을 잤어요 · 지난 7일
      그때가 되면 '지금쯤 졸려할 때예요', 지나면 '평소보다 20분 더 깨어 있어요'.
      돌봄 도우미 화면 · '밖에 있어요' 카드의 잠 줄에도 짧게 붙는다 (window.sleepyGuess).
+     줄 끝 '재우기 소리 ›' 는 소리 고르기 창을 연다 (sleepsound.js).
 
    어떻게 세나
      잠 기록을 시각 순으로 늘어놓고, 한 잠이 끝난 때부터 다음 잠이 시작한 때까지를 '깨어 있던 시간' 으로 본다.
@@ -166,6 +167,8 @@
                 '<div style="font-size:14px;font-weight:800;color:' + tone + ';letter-spacing:-0.2px;">' + esc(g.title) + '</div>' +
                 '<div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-top:3px;line-height:1.45;word-break:keep-all;">' + esc(g.sub) + '</div>' +
             '</div>';
+        if (typeof window.openSleepSounds === 'function')   // 재우기 소리 (sleepsound.js)
+            html += '<button type="button" onclick="window.openSleepSounds()" style="flex-shrink:0;background:none;border:none;padding:8px 0 8px 2px;font-size:12.5px;font-weight:800;color:' + tone + ';cursor:pointer;font-family:inherit;white-space:nowrap;">재우기 소리 ›</button>';
         var el = old;
         if (!el) {
             el = document.createElement('div');
