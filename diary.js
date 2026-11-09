@@ -245,7 +245,11 @@
         'body.dark-mode #home-qa-card .qa-h,body.dark-mode #home-qa-card .qa-q{color:var(--text-m);}' +
         'body.dark-mode #home-qa-card .qa-pill.on{background:var(--bg-sub);border-color:var(--bg-sub);color:var(--text-m);}' +
         'body.dark-mode #home-qa-card .qa-btn.solid{background:#FBF8F3;color:#1E2024;}' +
-        'body.dark-mode #home-qa-card .qa-btn.line{background:transparent;border-color:var(--border);color:var(--text-m);}';
+        'body.dark-mode #home-qa-card .qa-btn.line{background:transparent;border-color:var(--border);color:var(--text-m);}' +
+        /* 지난 문답에서 — 1년 전 · 100일 전 · 한 달 전 오늘 */
+        '#home-qa-card .qa-flash{margin-top:12px;padding:12px 14px;border-radius:14px;background:#FFFAF1;border:1px dashed #E3D9CC;cursor:pointer;-webkit-tap-highlight-color:transparent;}' +
+        '#home-qa-card .qa-flash-h{font-size:12px;font-weight:800;color:#B98A2E;}' +
+        '#home-qa-card .qa-flash-q{font-family:\'Gowun Batang\',\'Noto Serif KR\',\'Noto Serif CJK KR\',serif;font-size:14.5px;font-weight:700;color:#3B322C;margin-top:5px;line-height:1.6;word-break:keep-all;}';
 
     function qaCSS() {
         if (document.getElementById("home-qa-css")) return;
@@ -253,6 +257,33 @@
         s.id = "home-qa-css";
         s.textContent = CARD_CSS;
         document.head.appendChild(s);
+    }
+
+    /* 지난 문답에서 — 오늘이 그 문답을 나눈 날로부터 1년 · 100일 · 한 달째면 그 문답을 꺼내 보여 준다.
+       배냇함은 다시 꺼내 보는 앱이다. 쓰기만 하고 다시 안 읽으면 책장에 꽂힌 책일 뿐이다.
+       (둘 다 답한 문답만. 같은 날 셋이 겹치면 오래된 쪽이 먼저) */
+    function flashback(skipDay) {
+        var list = [];
+        try { list = window.diaryEntries ? window.diaryEntries() : []; } catch (e) {}
+        if (!list.length) return null;
+        var byKey = {};
+        list.forEach(function (e) { if (e.day !== skipDay) byKey[e.key] = e; });
+        var t = new Date(), y = t.getFullYear(), m = t.getMonth(), d = t.getDate();
+        var cands = [["1년 전 오늘", new Date(y - 1, m, d)], ["100일 전 오늘", new Date(y, m, d - 100)], ["한 달 전 오늘", new Date(y, m - 1, d)]];
+        for (var i = 0; i < cands.length; i++) {
+            var at = cands[i][1];
+            if (i !== 1 && at.getDate() !== d) continue;      // 3월 31일의 '한 달 전' 은 없다 (2월 31일 → 3월 3일이 되지 않게)
+            var e = byKey[keyOf(at.getTime())];
+            if (e && e.q) return { label: cands[i][0], e: e };
+        }
+        return null;
+    }
+    function flashHTML(skipDay) {
+        var f = flashback(skipDay);
+        if (!f) return "";
+        return '<div class="qa-flash" role="button" tabindex="0" onclick="window.openQaSheet(' + f.e.day + ')">' +
+            '<div class="qa-flash-h">' + esc(f.label) + ', 우리는 ›</div>' +
+            '<div class="qa-flash-q">' + esc(f.e.q) + '</div></div>';
     }
 
     function qaCardHTML(s) {
@@ -283,6 +314,7 @@
             '<button type="button" class="qa-btn ' + (solid ? 'solid' : 'line') + '" onclick="' + go + '">' + esc(btn) + '</button>' +
             '<div class="qa-foot"><span class="qa-meta">' + esc(foot) + '</span>' +
                 '<span class="qa-meta" style="cursor:pointer;" onclick="location.href=\'diary.html?tab=read#past\'">지난 문답 보기 ›</span></div>' +
+            flashHTML(s.day) +
         '</div>';
     }
 
