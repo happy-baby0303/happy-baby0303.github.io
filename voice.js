@@ -1036,6 +1036,6 @@ window.downloadVoiceAudio = async function(key, id) {
         console.error("[음성 다운로드 에러]", e);
         // CORS(보안)에 걸려 다운로드가 막히면, 최후의 수단으로 새 창에서 오디오를 틀어줍니다.
         window.open(v.url, '_blank');
-        window.showToast("보안 설정으로 인해 새 창에서 오디오를 엽니다.");
+        window.showToast("이 폰에서는 바로 저장이 안 돼서 새 창으로 열었어요. 거기서 저장해 주세요");
     }
 };

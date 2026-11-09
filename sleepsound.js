@@ -17,6 +17,7 @@
        '잠들었어요' = 잠 기록 창의 시작 단추와 같다 (startSleepTimer). 낮잠 · 밤잠은 빠른 기록과 같은 셈.
        소리가 끝나도 밝은 화면으로 돌아가지 않는다 — 한밤에 방이 환해지면 안 된다.
        홈 화면 앱(크롬)의 맨 위 상태 줄 색(theme-color)도 밤 화면 동안만 까맣게.
+       밤 화면 동안 밝은 안내(토스트)는 띄우지 않고 밤 화면 아래 작은 줄에 어둡게 적는다 (가족 폰의 '재우기 시작했어요' 등).
      창을 닫아도 소리는 계속 — 아래 탭 위에 작은 줄 (소리 이름 · 남은 시간 · 밤 화면 · 끄기).
 
    어떻게 — 소리 파일이 없다
@@ -567,7 +568,7 @@
         return '<button type="button" data-kind="' + o.k + '" aria-pressed="false" style="' + BTN + ' position:relative; text-align:left; padding:14px 12px 13px; border-radius:16px; min-height:98px;">' +
           '<div style="font-size:20px; line-height:1;">' + o.icon + '</div>' +
           '<div data-t="1" style="font-size:14.5px; font-weight:900; margin-top:9px; letter-spacing:-0.3px;">' + esc(o.name) + '</div>' +
-          '<div style="font-size:11.5px; font-weight:700; color:var(--text-s); margin-top:3px; line-height:1.4; word-break:keep-all;">' + esc(o.sub) + '</div>' +
+          '<div style="font-size:11.5px; font-weight:700; color:var(--text-s); margin-top:3px; line-height:1.4; word-break:keep-all; text-wrap:balance;">' + esc(o.sub) + '</div>' +
           '<div data-st="1" style="position:absolute; top:13px; right:12px; font-size:11px; font-weight:800; color:#7F77DD;"></div>' +
         '</button>';
       }).join('') + '</div>' +
@@ -641,14 +642,38 @@
         '<div data-ss="sub" style="font-size:12.5px; font-weight:700; color:#5F5A84; margin-top:6px; min-height:18px; line-height:1.5; word-break:keep-all;"></div>' +
         '<div data-ss="slot" style="margin-top:40px; min-height:54px;"></div>' +
         '<button type="button" data-ss="off" style="' + BTN + ' width:100%; margin-top:10px; padding:15px; border-radius:16px; border:none; background:transparent; color:#6E6895; font-size:15px; font-weight:800;"></button>' +
+        '<div data-ss="note" role="status" style="font-size:12.5px; font-weight:700; color:#5F5A84; margin-top:14px; min-height:18px; line-height:1.5; word-break:keep-all;"></div>' +
       '</div>';
     // 흐려진 화면을 처음 건드리면 밝히기만 (어둠 속에서 더듬다 '끄기' 를 누르지 않게)
     n.addEventListener('pointerdown', function () { if (dimmed) woke = Date.now(); wakeUp(); }, true);
     n.addEventListener('click', function (e) { if (Date.now() - woke < 700) { e.stopPropagation(); e.preventDefault(); } }, true);
     n.querySelector('[data-ss="off"]').onclick = function () { if (cur || S.loading) stop(); window.closeSleepNight(); };
     document.body.appendChild(n);
+    document.body.classList.add('ss-night');
     themeDark(true);
     ended = false; wakeUp(); lockWake(); paint();
+  }
+  /* 밤 화면 위로 밝은 안내(토스트)가 뜨지 않게 — 가족 폰에서 '아빠가 재우기 시작했어요' 같은 안내가 한밤에 화면을 밝혔다.
+     밤 화면이 떠 있는 동안 안내는 밤 화면 아래쪽 작은 줄에 어둡게 적는다 (8초). 직접 만든 토스트도 CSS 로 가린다. */
+  var muteNote = false, noteT = null;
+  (function () {
+    var st = document.createElement('style');
+    st.textContent = 'body.ss-night #super-toast-msg{display:none !important;}';
+    (document.head || document.documentElement).appendChild(st);
+    var orig = window.showToast;
+    if (typeof orig !== 'function' || orig.__ssNight) return;
+    var wrapped = function (m) {
+      if (night()) { nightNote(m); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped.__ssNight = true;
+    window.showToast = wrapped;
+  })();
+  function nightNote(m) {
+    var n = $('sleepsound-night'), el = n && n.querySelector('[data-ss="note"]');
+    if (!el || muteNote) return;
+    el.textContent = String(m == null ? '' : m).replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    clearTimeout(noteT); noteT = setTimeout(function () { el.textContent = ''; }, 8000);
   }
   // 홈 화면 앱(크롬)에서는 맨 위 상태 줄 색도 이 값을 따른다 — 밤 화면 동안만 까맣게
   var themeWas = null;
@@ -662,7 +687,7 @@
     dimmed = false; w.style.opacity = '1';
     clearTimeout(dimT); dimT = setTimeout(function () { if (!w.isConnected) return; dimmed = true; w.style.opacity = '0.14'; }, 10000);
   }
-  window.closeSleepNight = function () { var n = $('sleepsound-night'); if (n) n.remove(); clearTimeout(dimT); dimmed = false; themeDark(false); unlockWake(); paint(); };
+  window.closeSleepNight = function () { var n = $('sleepsound-night'); if (n) n.remove(); document.body.classList.remove('ss-night'); clearTimeout(dimT); clearTimeout(noteT); dimmed = false; themeDark(false); unlockWake(); paint(); };
   function paintNight() {
     var n = $('sleepsound-night'); if (!n) return;
     var l = left(), it = info(S.kind) || KINDS[0], q = function (k) { return n.querySelector('[data-ss="' + k + '"]'); };
@@ -678,8 +703,10 @@
     } else {
       slot.innerHTML = '<button type="button" style="' + BTN + ' width:100%; padding:16px; border-radius:16px; border:1px solid #26243A; background:#121119; color:#B3ADDB; font-size:15.5px; font-weight:800;">잠들었어요</button>';
       slot.firstChild.onclick = function () {
+        muteNote = true;      // '잠든 시각을 남겼어요' 는 바로 위 줄에 '…부터 자는 중이에요' 로 적으니 안내 줄에는 안 적는다
         try { window.startSleepTimer(sleepKind(Date.now())); } catch (e) {}
-        var t = $('super-toast-msg'); if (t) t.remove();      // 까만 화면 위에 밝은 안내가 뜨지 않게 (자는 중이라고 이 화면에 적는다)
+        muteNote = false;
+        var t = $('super-toast-msg'); if (t) t.remove();
         paint();
       };
     }

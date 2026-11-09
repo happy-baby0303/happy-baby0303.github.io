@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="129">
+    <meta name="baenaet-build" content="130">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -106,7 +106,7 @@
                   이제 시작 화면에서 inapp.js 가 안내 창(주소 복사 포함)을 띄운다. */
         }
     </script>
-    <link rel="stylesheet" href="style.css?v=20261108">
+    <link rel="stylesheet" href="style.css?v=20261109">
     <link rel="stylesheet" href="tune.css?v=3">
 
 <style>
@@ -3582,7 +3582,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 localStorage.setItem('tosil_joined_at', String(Date.now()));
                 localStorage.setItem('tosil_join_hello', '1');
                 if (typeof window.showJoinScreen === 'function') window.showJoinScreen('done', { name: data.babyName || '우리 아기' });
-                else alert(`🎉 [${data.babyName || '우리아기'}]네 가족 연동 완료`);
+                else alert(`${data.babyName || '우리 아기'}네 가족과 이어졌어요`);
                 setTimeout(() => location.reload(), 900);
             } else {
                 failJoin('nofamily');
@@ -3628,7 +3628,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261109-2"></script>
+<script src="script.js?v=20261109-3"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3656,7 +3656,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./outingsmart.js?v=3"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
-<script src="./voice.js?v=4"></script>
+<script src="./voice.js?v=5"></script>
 <script src="./waveform.js"></script>
 <script src="./voicereel.js?v=2"></script> 
 <script src="./milestonebook.js"></script>
@@ -3692,7 +3692,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./sleepguard.js?v=1"></script>
 <script src="./sleepwindow.js?v=2"></script>
 <!-- 재우기 소리 — 백색소음 · 빗소리 · 엄마 배 속 · 오르골 자장가. 폰이 직접 만든다 (소리 파일 없음). 까만 밤 화면 · 잠들었어요 -->
-<script src="./sleepsound.js?v=1"></script>
+<script src="./sleepsound.js?v=2"></script>
 <!-- 방금 기록 되돌리기 — 저장 뒤 5초 동안 '되돌리기' (저장을 제일 바깥에서 감싼다) -->
 <script src="./recundo.js?v=2"></script>
 <!-- 이유식 달력(식단 · 새 재료 · 알레르기)을 부부 폰에 같이 -->

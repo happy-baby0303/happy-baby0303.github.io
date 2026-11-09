@@ -3208,6 +3208,13 @@ function deleteGrowthRecord(dateStr) {
 }
 window.deleteGrowthRecord = deleteGrowthRecord;
 
+// 성장 기록 날짜는 앱의 다른 곳처럼 '11월 9일' (올해가 아니면 '2025년 11월 9일')
+function growthDayLabel(ds) {
+    const m = String(ds || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return String(ds || '');
+    const y = +m[1], md = `${+m[2]}월 ${+m[3]}일`;
+    return y === new Date().getFullYear() ? md : `${y}년 ${md}`;
+}
 // ✨ 저장된 기록으로 차트 & 리스트 그리기 (마지막 계측일 배지 추가!)
 function renderGrowthHistory() {
     let records = JSON.parse(localStorage.getItem('tosil_growth_records')) || [];
@@ -3228,7 +3235,7 @@ function renderGrowthHistory() {
         if(growthChartObj) growthChartObj.destroy(); 
         
         // 데이터 전처리 (0인 값은 차트에서 끊어지게 null 처리)
-        const labels = records.map(r => r.date.substring(5)); // MM-DD
+        const labels = records.map(r => { const m = String(r.date).match(/^\d{4}-(\d{2})-(\d{2})/); return m ? `${+m[1]}/${+m[2]}` : r.date; });   // '10/3' (예전 '10-03')
         const hData = records.map(r => r.height > 0 ? r.height : null);
         const wData = records.map(r => r.weight > 0 ? r.weight : null);
 
@@ -3272,11 +3279,11 @@ function renderGrowthHistory() {
         let badgeHtml = '';
         if (diffDays === 0) {
             // 오늘 쟀을 땐 똑똑하게 계산된 증감폭 멘트 출력!
-            badgeHtml = `<div style="background:#FAF4E6; color:#A07722; border:1px solid #A7F3D0; padding:10px 12px; border-radius:12px; font-size:13px; margin-bottom:16px; text-align:center;">${smartMessage}</div>`;
+            badgeHtml = `<div style="background:#FAF4E6; color:#A07722; border:1px solid #EBDDB8; padding:10px 12px; border-radius:12px; font-size:13px; font-weight:700; line-height:1.5; margin-bottom:16px; text-align:center; word-break:keep-all;">${smartMessage}</div>`;
         } else if (diffDays <= 14) {
-            badgeHtml = `<div style="background:#FAF7F2; color:#A3958A; border:1px solid #EDE6DE; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center;">마지막 계측: ${diffDays}일 전</div>`;
+            badgeHtml = `<div style="background:#FAF7F2; color:#A3958A; border:1px solid #EDE6DE; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center;">마지막으로 잰 날: ${diffDays}일 전</div>`;
         } else {
-            badgeHtml = `<div style="background:#FFF0F1; color:#D32F2F; border:1px dashed #D32F2F; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center;">🚨 앗 계측한 지 ${diffDays}일이나 지났어요. 오늘 한 번 재볼까요?</div>`;
+            badgeHtml = `<div style="background:#FAF7F2; color:#A07722; border:1px dashed #E3D3B1; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:800; margin-bottom:16px; text-align:center; word-break:keep-all;">키 · 몸무게를 잰 지 ${diffDays}일 지났어요. 오늘 한 번 재 볼까요?</div>`;
         }
         
         html += badgeHtml; // 배지를 리스트 맨 위에 삽입
@@ -3286,13 +3293,13 @@ function renderGrowthHistory() {
             html += `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#FAF7F2; border-radius:12px; border:1px solid #EDE6DE; margin-bottom:8px;">
                     <div>
-                        <div style="font-size:12px; color:var(--text-s); font-weight:800;">${r.date} (생후 ${r.month}개월)</div>
+                        <div style="font-size:12px; color:var(--text-s); font-weight:800;">${growthDayLabel(r.date)} · 생후 ${r.month}개월</div>
                         <div style="font-size:14px; font-weight:900; color:var(--text-m); margin-top:2px;">
                             ${r.height > 0 ? `<span style="color:#7F77DD;">키 ${r.height}cm</span> ` : ''} 
                             ${r.weight > 0 ? `<span style="color:#B98A2E;">몸무게 ${r.weight}kg</span>` : ''}
                         </div>
                     </div>
-                    <button onclick="deleteGrowthRecord('${r.date}')" style="background:none; border:none; font-size:14px; color:#D1D6DB; cursor:pointer;">❌</button>
+                    <button onclick="deleteGrowthRecord('${r.date}')" aria-label="이 기록 지우기" style="background:none; border:none; font-size:16px; color:#C9BFB5; cursor:pointer; padding:4px 2px;">✕</button>
                 </div>
             `;
         });
@@ -10787,25 +10794,31 @@ window.initDrumPicker = function(timeStr) {
 // 📊 [UX 패치] 직전 기록과 비교해서 증감폭 알려주는 멘트 생성기
 // ==========================================
 function getGrowthDeltaMessage(records) {
-    if (!records || records.length < 2) return "✨ 첫 계측 완료 앞으로의 폭풍 성장이 기대돼요 🌱";
-    const latest = records[0]; 
-    const prev = records[1];   
-    let messages = [];
+    /* ⚠️ '✨ 첫 계측 완료 앞으로의 폭풍 성장이 기대돼요 🌱', 달라진 게 없어도 '폭풍 성장 중' 이라고 했다.
+          잰 값 그대로, 달라진 만큼만 말한다. 지난번 날짜를 붙여 언제와 견준 건지 보이게. */
+    if (!records || records.length < 2) return "처음 잰 키 · 몸무게를 남겼어요. 다음에 재면 얼마나 컸는지 같이 보여 드릴게요";
+    const latest = records[0];
+    const prev = records[1];
+    let messages = [], same = 0;
 
     if (latest.height && prev.height) {
         const diffH = (latest.height - prev.height).toFixed(1);
-        if (diffH > 0) messages.push(`키 <span style="color:#7F77DD;">+${diffH}cm</span> 쑥쑥🦒`);
+        if (diffH > 0) messages.push(`키 <span style="color:#7F77DD;">+${diffH}cm</span>`);
         else if (diffH < 0) messages.push(`키 <span style="color:#A3958A;">${diffH}cm</span>`);
+        else same++;
     }
 
     if (latest.weight && prev.weight) {
         const diffW = (latest.weight - prev.weight).toFixed(2);
-        if (diffW > 0) messages.push(`몸무게 <span style="color:#B98A2E;">+${diffW}kg</span> 튼튼🐻`);
+        if (diffW > 0) messages.push(`몸무게 <span style="color:#B98A2E;">+${diffW}kg</span>`);
         else if (diffW < 0) messages.push(`몸무게 <span style="color:#A3958A;">${diffW}kg</span>`);
+        else same++;
     }
 
-    if (messages.length === 0) return "✨ 오늘 계측 완료 폭풍 성장 중 🌿";
-    return `✨ 지난번보다 <strong>${messages.join(', ')}</strong>`;
+    if (messages.length === 0) return same ? "지난번과 같아요" : "오늘 잰 값을 남겼어요";
+    const m = String(prev.date || '').match(/^\d{4}-(\d{2})-(\d{2})/);
+    const when = m ? `${parseInt(m[1], 10)}월 ${parseInt(m[2], 10)}일` : '지난번';
+    return `${when}보다 <strong>${messages.join(' · ')}</strong>`;
 }
 
 window.closeWriteModal = function() {
