@@ -168,7 +168,7 @@
             toast('되돌렸어요. 방금 기록을 지웠어요');
         } catch (e) {
             console.warn('[되돌리기] 실패', e);
-            toast('되돌리지 못했어요. 통계·기록 보기에서 지워 주세요');
+            toast('되돌리지 못했어요. 기록 · 통계에서 지워 주세요');
         } finally { undoing = false; }
     }
 

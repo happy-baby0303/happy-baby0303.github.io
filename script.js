@@ -6014,7 +6014,8 @@ window.updateTrackerDashboard = function() {
             /* 종류별로 보기 — '마지막 대변이 언제였지' · '수유 간격이 어떻게 되지' 를 긴 목록을 훑지 않고 본다.
                날짜 칸의 하루 합계는 종류와 상관없이 그대로 둔다. */
             const F = window.__histFilter || 'all';
-            const FILTERS = [['all', '전체'], ['feed', '수유'], ['sleep', '잠'], ['diaper', '기저귀']]
+            // '맘마' 는 앱 전체에서 쓰는 이름 (홈 · 기록 단추 · 주간 카드) — 수유와 이유식을 같이 담는다
+            const FILTERS = [['all', '전체'], ['feed', '맘마'], ['sleep', '잠'], ['diaper', '기저귀']]
                 .concat(records.some(r => r.type === 'med') ? [['med', '약']] : []);
             historyHtml += '<div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; -webkit-overflow-scrolling:touch;">' +
                 FILTERS.map(([k, label]) => {
@@ -6059,15 +6060,26 @@ window.updateTrackerDashboard = function() {
             `;
 
             let shownAny = false;
+            // 날짜 칸 옆 생후일수 — 홈의 D+228일 과 같은 셈 (태어난 날이 D-Day). 태어나기 전 날짜에는 안 붙인다
+            const birth0 = (() => {
+                const v = localStorage.getItem('tosil_startDate');
+                if (!v || typeof window.parseLocalDate !== 'function') return null;
+                const d = window.parseLocalDate(v);
+                if (!d || isNaN(d.getTime())) return null;
+                d.setHours(0, 0, 0, 0);
+                return d.getTime();
+            })();
            // 🚨 [수정됨] 아래 트래커 카드들과 동일하게 둥글고 하얀 예쁜 카드로 렌더링!
             for(let date in grouped) {
                 const shown = (F === 'all') ? grouped[date] : grouped[date].filter(r => r.type === F);
                 if (!shown.length) continue;                   // 그날 그 종류가 없으면 날짜 칸도 안 그린다
                 shownAny = true;
+                const dayStart = new Date(Number(grouped[date][0].timestamp)).setHours(0, 0, 0, 0);
+                const dNum = (birth0 != null) ? Math.round((dayStart - birth0) / 86400000) : -1;
                 historyHtml += `
                     <div style="position: sticky; top: -1px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                        <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}</div>
-                        ${window.getDailySummaryHtml(grouped[date], { dayStart: new Date(Number(grouped[date][0].timestamp)).setHours(0, 0, 0, 0), all: records })}
+                        <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}${dNum >= 0 ? `<span data-dplus style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-left: 6px;">· ${dNum === 0 ? '태어난 날' : 'D+' + dNum}</span>` : ''}</div>
+                        ${window.getDailySummaryHtml(grouped[date], { dayStart: dayStart, all: records })}
                     </div>
                 `;
                 
