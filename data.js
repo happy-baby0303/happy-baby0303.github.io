@@ -146,7 +146,8 @@ window.questionDB = questionDB;
         var list = questionDB;
         if (!list || !list.length) return "";
         day = Math.max(1, parseInt(day, 10) || 1);
-        var it = list[(day - 1) % list.length];
+        var sp = window.diarySpecialOf(day);
+        var it = sp ? { question: specialText(sp) } : list[(day - 1) % list.length];
         if (!it) return "";
         var named = rawName() !== "우리 아기";
         return String(it.question)
@@ -162,6 +163,82 @@ window.questionDB = questionDB;
     window.diaryEchoDay = function (day) {
         var n = questionDB.length;
         day = parseInt(day, 10) || 0;
-        return day > n ? day - n : 0;
+        if (day <= n) return 0;
+        // 특별한 날의 질문은 다시 만나는 질문이 아니다 — 이 쪽이든 그때 쪽이든
+        if (window.diarySpecialOf(day) || window.diarySpecialOf(day - n)) return 0;
+        return day - n;
+    };
+
+    /* ── 특별한 날의 질문 ──────────────────────────────────────────────
+       열 달의 문답은 주수마다 그 주에 맞는 걸 묻는다. 우리의 문답은 100개를 차례로 돌기만 해서,
+       백일에도 돌에도 '오늘 고생한 서로에게…' 를 물었다. 아기가 자라는 날엔 그날에 맞는 질문을 묻는다.
+       · 날짜는 기념일(anniversaries.js)과 같은 셈 — 백일 = 태어난 날 + 99일, 개월 · 생일은 만으로.
+       · 그날 '아직 아무도 답하지 않은 새 쪽' 에만 들어간다. 쓰고 있던 질문을 바꾸지 않는다.
+       · 누가 먼저 답하면 그 쪽에 sp(날 이름)가 남고 짝꿍 폰에도 같이 간다(qacore.js) — 다음 날 열어도 그 질문 그대로.
+         그날 아무도 안 쓰면 다음 날엔 원래 차례의 질문으로 돌아간다.
+       · 태어나기 전(임신 단계)에는 묻지 않는다 — 그때는 열 달의 문답이 있다. */
+    var SPECIAL = {
+        "오십일": "{babyName}의 오십일이에요. 쉰 밤 동안 {babyName}에게 제일 많이 한 말은 뭐였어요?",
+        "백일": "오늘은 {babyName}의 백일이에요. 처음 안았던 날과 지금, 제일 달라진 건 뭐예요?",
+        "이백일": "이백일이에요. 요즘 {babyName}의 어떤 모습이 제일 사랑스러워요?",
+        "삼백일": "삼백일이에요. 지난 삼백 밤 가운데 꼭 기억하고 싶은 밤이 있어요?",
+        "오백일": "오백일이에요. {babyName}에게 배운 게 있다면 하나만 꼽아 볼까요?",
+        "천일": "천일이에요. 천 밤을 함께 건넌 서로에게, 지금 꼭 하고 싶은 말은요?",
+        "첫 번째 생일": "{babyName}의 첫 생일이에요. 1년 전 오늘, 우리는 어떤 마음이었어요?",
+        "첫 설날": "{babyName}와 맞는 첫 설이에요. 우리 집 설날이 어떤 풍경이었으면 좋겠어요?",
+        "첫 추석": "{babyName}와 맞는 첫 추석이에요. 보름달에 {babyName}를 위해 빌고 싶은 건요?",
+        "첫 크리스마스": "{babyName}의 첫 크리스마스예요. {babyName}에게 주고 싶은 선물은요? 물건이 아니어도 좋아요",
+        "첫 어린이날": "{babyName}의 첫 어린이날이에요. {babyName}가 어떤 어린이로 자랐으면 좋겠어요?"
+    };
+    function specialText(label) {
+        if (SPECIAL[label]) return SPECIAL[label];
+        var m = /^생후 (\d+)개월$/.exec(label || "");
+        if (m) return +m[1] === 6
+            ? "{babyName}가 태어난 지 반년이에요. 지난 여섯 달, 서로에게 제일 고마웠던 순간은요?"
+            : "{babyName}가 생후 " + m[1] + "개월이 됐어요. 지난 한 달 사이 제일 많이 달라진 건 뭐예요?";
+        m = /^(\d+)번째 생일$/.exec(label || "");
+        if (m) return "{babyName}의 " + m[1] + "번째 생일이에요. 올해 {babyName}에게 꼭 해 주고 싶은 말은요?";
+        return "";
+    }
+    // 같은 날 둘이 겹치면 (예: 첫 생일 = 생후 12개월은 이미 빠짐, 백일과 생후 3개월) 앞의 것
+    var RANK = ["첫 번째 생일", "백일", "천일", "오백일", "첫 크리스마스", "첫 어린이날", "첫 설날", "첫 추석", "이백일", "삼백일", "오십일"];
+    function rank(l) { var i = RANK.indexOf(l); return i > -1 ? i : (/번째 생일$/.test(l) ? 0 : 50); }
+    function pad2(n) { return (n < 10 ? "0" : "") + n; }
+    window.diarySpecialToday = function () {
+        try {
+            var st = localStorage.getItem("tosil_stage");
+            if (st && st !== "born") return "";
+            if (typeof window.anniversariesOn !== "function") return "";
+            var t = new Date(), key = t.getFullYear() + "-" + pad2(t.getMonth() + 1) + "-" + pad2(t.getDate());
+            var labels = (window.anniversariesOn(key) || []).map(function (a) { return a && a.label; })
+                .filter(function (l) { return !!specialText(l); });
+            labels.sort(function (a, b) { return rank(a) - rank(b); });
+            return labels[0] || "";
+        } catch (e) { return ""; }
+    };
+    var memo = null;
+    function pages() {      // 아직 아무도 답하지 않은 첫 쪽 + 이미 쓴 특별한 날 이름들 (이번 차례 동안만 기억)
+        if (memo) return memo;
+        var last = 0, used = {};
+        for (var i = 1; i <= 2000; i++) {
+            var raw = null; try { raw = localStorage.getItem("day_" + i + "_data"); } catch (e) {}
+            if (!raw) continue;
+            try { var d = JSON.parse(raw) || {}; if (d.husbandAns || d.wifeAns) last = i; if (d.sp) used[d.sp] = i; } catch (e) {}
+        }
+        memo = { fresh: last + 1, used: used }; setTimeout(function () { memo = null; }, 0);
+        return memo;
+    }
+    /* 이 쪽이 특별한 날의 질문이면 그 날 이름('백일' · '생후 7개월' …), 아니면 '' */
+    window.diarySpecialOf = function (day) {
+        day = parseInt(day, 10) || 0;
+        if (day < 1) return "";
+        var d = {}; try { d = JSON.parse(localStorage.getItem("day_" + day + "_data")) || {}; } catch (e) {}
+        if (d.sp) return specialText(d.sp) ? d.sp : "";
+        if (d.husbandAns || d.wifeAns) return "";
+        var sp = window.diarySpecialToday();
+        if (!sp) return "";
+        var pg = pages();
+        // ⚠️ 백일 질문에 답하고 나면 그다음 새 쪽도 '새 쪽' 이라 또 백일 질문이 됐다. 그날 이름은 한 번만.
+        return day === pg.fresh && !pg.used[sp] ? sp : "";
     };
 })();

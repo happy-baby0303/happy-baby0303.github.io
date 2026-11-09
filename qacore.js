@@ -142,7 +142,7 @@
 
     /* 칸마다 비어 있지 않은 쪽을 쓴다. 둘 다 있으면 서버가 기준이다.
        단, 아직 못 올린 내 글은 이 폰이 맞다 (서버엔 옛 글이 있을 수 있다). */
-    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date'];
+    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp'];   // sp = 특별한 날의 질문 (data.js)
     function mergeDay(day, local, server) {
         var out = Object.assign({}, local || {});
         var mk = isPending(day) ? myKey() : '';
@@ -196,6 +196,7 @@
                 var up = {}; up[mk] = d[mk];
                 if (d[atOf(mk)]) up[atOf(mk)] = d[atOf(mk)];
                 if (d.date) up.date = d.date;
+                if (d.sp) up.sp = d.sp;
                 return window.setDoc(window.doc(window.db, 'diary_' + c, 'day_' + day), up, { merge: true })
                     .then(function () { markPending(day, false); n++; })
                     .catch(function (e) { console.warn('[문답] 못 올린 답 다시 올리기 실패', day, e); });
@@ -347,8 +348,11 @@
         var d = read(day);
         var wasComplete = !!(d.husbandAns && d.wifeAns);
         var editing = !!d[mk];
+        /* 백일 · 생일 같은 날 새 쪽에 처음 답하면, 그 쪽이 그날의 질문이었다고 남긴다 (짝꿍 폰 · 책장 · 내보내기가 같은 질문을 본다) */
+        var sp = (!d.sp && typeof window.diarySpecialOf === 'function') ? window.diarySpecialOf(day) : '';
         d[mk] = text;
         var up = {}; up[mk] = text;
+        if (sp) { d.sp = sp; up.sp = sp; }
         if (!editing && !d[atOf(mk)]) { d[atOf(mk)] = new Date().toISOString(); up[atOf(mk)] = d[atOf(mk)]; }
         /* ⚠️ 고칠 때마다 date 를 오늘로 덮어써서 3일째 답을 40일째에 고치면
               배냇함 연대기에서 40일째로 옮겨갔다. date 는 '그 대화가 이뤄진 날' 이다. */
@@ -457,6 +461,11 @@
     }
     /* ⚠️ '1번째 질문' 은 틀린 말이다. 하나일 때만 '첫 번째' (홈 카드 · 책장 · 문답 화면이 같이 쓴다) */
     function nth(n) { return Number(n) === 1 ? '첫 번째' : n + '번째'; }
+    /* 특별한 날의 질문이면 ' · 백일' 같은 금빛 꼬리 (홈 카드 · 문답 화면 · 책 쪽이 같이 쓴다) */
+    function spTag(day) {
+        var l = (typeof window.diarySpecialOf === 'function') ? window.diarySpecialOf(day) : '';
+        return l ? ' · <span style="color:' + T.GOLD + '; font-weight:800;">' + esc(l) + '</span>' : '';
+    }
 
     function echoHTML(before) {
         var p = read(before);
@@ -553,7 +562,7 @@
         css: injectCSS, esc: esc, ig: ig, fmtDate: fmtDate, today: today,
         role: role, myKey: myKey, otherKey: otherKey, atOf: atOf, word: word, linked: function () { return !!code(); },
         read: read, write: write, scan: scan, bust: bust, mergeDay: mergeDay,
-        question: question, echoDay: echoDay, bookTitle: bookTitle, pageOf: pageOf, bookNow: bookNow, nth: nth,
+        question: question, echoDay: echoDay, bookTitle: bookTitle, pageOf: pageOf, bookNow: bookNow, nth: nth, spTag: spTag,
         isPending: isPending, markPending: markPending, pull: pull, flush: flush, save: save,
         coins: coins, isSeen: isSeen, markSeen: markSeen, recentOpen: recentOpen,
         nudge: nudge, checkPartner: checkPartner, partnerState: partnerState,

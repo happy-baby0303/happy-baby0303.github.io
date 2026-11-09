@@ -296,10 +296,11 @@
         </div>
     </div>
 
-    <script src="data.js"></script>
+    <script src="anniversaries.js"></script>   <!-- 특별한 날의 질문 (백일 · 생일) 날짜 셈 -->
+    <script src="data.js?v=2"></script>
     <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
     <script src="tenmonths.js?v=2"></script>
-    <script src="qacore.js?v=2"></script>
+    <script src="qacore.js?v=3"></script>
 
     <script>
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
@@ -557,7 +558,7 @@
             window.renderCard = function (o) {
                 o = o || {};
                 var day = window.viewingDay;
-                document.getElementById('qa-dayno').textContent = (QA.nth ? QA.nth(day) : day + '번째') + ' 질문';   // 옛 qacore 가 남아 있어도 안 깨지게
+                document.getElementById('qa-dayno').innerHTML = (QA.nth ? QA.nth(day) : day + '번째') + ' 질문' + (QA.spTag ? QA.spTag(day) : '');   // 옛 qacore 가 남아 있어도 안 깨지게 · 특별한 날이면 ' · 백일'
                 document.getElementById('qa-question').textContent = QA.question(day) || '오늘 하루는 어땠나요?';
                 document.getElementById('qa-prev').disabled = day <= 1;
                 var body = document.getElementById('qa-body');
@@ -728,7 +729,7 @@
                     };
                     html += '<div class="page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + '; color:' + t.textTitle + ';">' +
                         '<div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:' + t.textSub + '; border-bottom:1px solid ' + t.line + '; padding-bottom:14px; margin-bottom:30px;">' +
-                            '<span>' + (QA.nth ? QA.nth(day) : day + '번째') + ' 질문</span><span>' + dot(d.date) + '</span></div>' +
+                            '<span>' + (QA.nth ? QA.nth(day) : day + '번째') + ' 질문' + (QA.spTag ? QA.spTag(day) : '') + '</span><span>' + dot(d.date) + '</span></div>' +
                         '<div style="font-family:var(--serif); font-size:17px; font-weight:700; line-height:1.7; word-break:keep-all; margin-bottom:34px;">' + esc(QA.question(day)) + '</div>' +
                         '<div style="display:flex; flex-direction:column; gap:28px;">' +
                             '<div>' + label('엄마') + ans(d.wifeAns) + '</div>' +
