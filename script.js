@@ -14895,7 +14895,7 @@ window.updateSeniorBriefing = function() {
         .filter(r => r && r.type === type && Number(r.timestamp) <= now && (!extra || extra(r)))
         .sort((a, b) => Number(b.timestamp) - Number(a.timestamp))[0];
     const feedEvery = (function (v) { v = parseInt(v, 10); return isNaN(v) ? 180 : v; })(localStorage.getItem('tosil_feed_interval'));
-    const NONE = '<span style="color:#C4B5A9; font-weight:700;">오늘 기록이 없어요</span>';
+    const NONE = '<span style="color:#9A8C80; font-weight:700;">오늘 기록이 없어요</span>';   // 연한 회색(#C4B5A9)은 어르신 눈에 안 읽혔다
 
     let feedMain = NONE, feedSub = '';
     /* 수유(모유 · 분유 · 유축)와 이유식은 줄을 나눠 적는다.

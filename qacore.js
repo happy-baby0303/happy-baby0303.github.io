@@ -10,7 +10,8 @@
    저장 모양 — 예전 그대로에 칸 두 개를 더했다
      day_N_data = { husbandAns, wifeAns, date,
                     husbandAt, wifeAt,       ← 새 칸: 각자 처음 답한 때 (ISO)
-                    sp, cq, cqBy }           ← 특별한 날 이름 · 고른 질문과 고른 사람 (data.js 가 읽는다)
+                    sp, cq, cqBy,            ← 특별한 날 이름 · 고른 질문과 고른 사람 (data.js 가 읽는다)
+                    husbandNote, wifeNote }  ← 서로의 답이 열린 뒤 짝꿍 답에 남긴 한마디 (쓴 사람 쪽 칸)
      서버: diary_가족코드/day_N  (칸마다 merge — 둘이 동시에 써도 안 지운다)
 
    ⚠️ 내 답을 먼저 써야 짝꿍 답이 보인다. 먼저 보면 따라 쓰게 된다.
@@ -74,6 +75,7 @@
     function myKey() { var r = role(); return r ? (r === 'husband' ? 'husbandAns' : 'wifeAns') : ''; }
     function otherKey(k) { return k === 'husbandAns' ? 'wifeAns' : 'husbandAns'; }
     function atOf(k) { return k === 'husbandAns' ? 'husbandAt' : 'wifeAt'; }
+    function noteOf(k) { return k === 'husbandAns' ? 'husbandNote' : 'wifeNote'; }      // 그 사람이 '쓴' 한마디
     function word(k) { return k === 'husbandAns' ? '아빠' : '엄마'; }
     function code() { return localStorage.getItem('family_sync_code') || ''; }
 
@@ -143,12 +145,12 @@
 
     /* 칸마다 비어 있지 않은 쪽을 쓴다. 둘 다 있으면 서버가 기준이다.
        단, 아직 못 올린 내 글은 이 폰이 맞다 (서버엔 옛 글이 있을 수 있다). */
-    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp', 'cq', 'cqBy'];   // sp = 특별한 날의 질문 · cq/cqBy = 고른 질문과 고른 사람 (data.js)
+    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp', 'cq', 'cqBy', 'husbandNote', 'wifeNote', 'husbandNoteAt', 'wifeNoteAt'];   // sp = 특별한 날의 질문 · cq/cqBy = 고른 질문과 고른 사람 (data.js)
     function mergeDay(day, local, server) {
         var out = Object.assign({}, local || {});
         var mk = isPending(day) ? myKey() : '';
         FIELDS.forEach(function (k) {
-            if (mk && (k === mk || k === atOf(mk)) && out[k]) return;
+            if (mk && (k === mk || k === atOf(mk) || k === noteOf(mk) || k === noteOf(mk) + 'At') && out[k]) return;
             if (server && server[k]) out[k] = server[k];
         });
         return out;
@@ -199,6 +201,7 @@
                 if (d.date) up.date = d.date;
                 if (d.sp) up.sp = d.sp;
                 if (d.cq) { up.cq = d.cq; if (d.cqBy) up.cqBy = d.cqBy; }
+                if (d[noteOf(mk)]) { up[noteOf(mk)] = d[noteOf(mk)]; if (d[noteOf(mk) + 'At']) up[noteOf(mk) + 'At'] = d[noteOf(mk) + 'At']; }
                 return window.setDoc(window.doc(window.db, 'diary_' + c, 'day_' + day), up, { merge: true })
                     .then(function () { markPending(day, false); n++; })
                     .catch(function (e) { console.warn('[문답] 못 올린 답 다시 올리기 실패', day, e); });
@@ -391,6 +394,47 @@
         });
     }
 
+    /* ---------- 한마디 ----------
+       ⚠️ 서로의 답이 열리면 읽고 끝이었다. 짝꿍 답에 한 줄을 남긴다 (열린 뒤에만 · 60자 · 고칠 수 있다).
+          내가 쓴 한마디는 내 쪽 칸(husbandNote/wifeNote)에 들어가고 짝꿍 답 아래에 보인다. */
+    function say(day, text) {
+        day = Number(day);
+        var mk = myKey(), d = read(day);
+        var t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim().slice(0, 60);
+        if (!mk || !(d.husbandAns && d.wifeAns)) return Promise.resolve({ ok: false, why: 'closed' });
+        if (!t) return Promise.resolve({ ok: false, why: 'empty' });
+        var nk = noteOf(mk), first = !d[nk], up = {};
+        d[nk] = t; d[nk + 'At'] = new Date().toISOString();
+        up[nk] = t; up[nk + 'At'] = d[nk + 'At'];
+        write(day, d);
+        var c = code();
+        if (!c) return Promise.resolve({ ok: true, first: first });
+        markPending(day, true);
+        var job = waitAuth(2500).then(function () {
+            if (!authed() || !canWrite()) return false;
+            return window.setDoc(window.doc(window.db, 'diary_' + c, 'day_' + day), up, { merge: true })
+                .then(function () { markPending(day, false); return true; }).catch(function () { return false; });
+        });
+        if (first) call({ title: '💬 ' + word(mk) + '가 한마디 남겼어요', body: '「' + (t.length > 40 ? t.slice(0, 39) + '…' : t) + '」', link: 'diary.html?day=' + day });
+        return Promise.race([job, new Promise(function (r) { setTimeout(function () { r('slow'); }, 5000); })])
+            .then(function (ok) { return { ok: true, first: first, queued: ok !== true }; });
+    }
+    var sayEdit = {};
+    function sayPart(day, d, mk) {      // 짝꿍 답 아래: 내가 남긴 한마디 또는 쓰는 칸
+        var nk = noteOf(mk), you = word(otherKey(mk));
+        if (d[nk] && !sayEdit[day]) {
+            return '<div class="qa-say"><span class="qa-say-w">' + word(mk) + '의 한마디</span>' + esc(d[nk]) +
+                   '<button type="button" class="qa-say-e" onclick="QA.__sayEdit(' + day + ')">고치기</button></div>';
+        }
+        return '<div class="qa-sayf"><input type="text" class="qa-sayi" id="qa-say-in" maxlength="60" value="' + esc(sayEdit[day] ? d[nk] || '' : '') + '" ' +
+               'placeholder="' + you + ' 답에 한마디 남기기" onkeydown="if(event.key===\'Enter\'){QA.__say(' + day + ')}">' +
+               '<button type="button" class="qa-sayb" onclick="QA.__say(' + day + ')">남기기</button></div>';
+    }
+    function saidPart(d, k) {           // 내 답 아래: 짝꿍이 남긴 한마디
+        var nk = noteOf(otherKey(k));
+        return d[nk] ? '<div class="qa-say"><span class="qa-say-w">' + word(otherKey(k)) + '의 한마디</span>' + esc(d[nk]) + '</div>' : '';
+    }
+
     /* ---------- 내가 고른 질문 ----------
        코인 300개로 '내가 묻고 싶은 질문' 을 아직 아무도 답하지 않은 첫 쪽에 넣는다.
        그 쪽에 cq(질문) · cqBy(husband/wife)가 남고, 질문은 data.js diaryCustomOf 가 읽는다.
@@ -535,6 +579,13 @@
         '.qa-link{display:block;width:100%;margin:6px 0 0;padding:12px;background:none;border:none;font-family:inherit;' +
             'font-size:13.5px;font-weight:700;color:' + T.SUB + ';text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}' +
         '.qa-link + .qa-btn{margin-top:2px;}' +
+        '.qa-say{margin:6px 4px 0 14px;padding:9px 12px;border-left:2px solid ' + T.DASH + ';font-size:14px;font-weight:500;color:' + T.INK + ';line-height:1.6;word-break:keep-all;overflow-wrap:anywhere;text-align:left;}' +
+        '.qa-say-w{display:block;font-size:11.5px;font-weight:700;color:' + T.GOLD + ';margin-bottom:2px;}' +
+        '.qa-say-e{margin-left:8px;padding:0;border:none;background:none;font-family:inherit;font-size:12px;font-weight:700;color:' + T.SUB + ';text-decoration:underline;cursor:pointer;}' +
+        '.qa-sayf{display:flex;gap:8px;margin:8px 0 0 14px;}' +
+        '.qa-sayi{flex:1;min-width:0;box-sizing:border-box;padding:11px 13px;border:1px solid ' + T.LINE + ';border-radius:12px;background:#FFF;color:' + T.INK + ';font-family:inherit;font-size:14.5px;outline:none;-webkit-appearance:none;}' +
+        '.qa-sayi::placeholder{color:#C4B9AE;}' +
+        '.qa-sayb{flex-shrink:0;padding:0 15px;border-radius:12px;border:none;background:' + T.TINT + ';color:' + T.INK + ';font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;}' +
         '.qa-reveal{animation:qaReveal 1.1s cubic-bezier(.2,.7,.2,1) both;}' +
         '@keyframes qaReveal{0%{filter:blur(9px);opacity:.35;transform:translateY(4px);}100%{filter:blur(0);opacity:1;transform:none;}}' +
         '@media (prefers-reduced-motion:reduce){.qa-reveal{animation:none;}}';
@@ -634,8 +685,10 @@
 
         if (yours) {
             /* 엄마 · 아빠 순서는 어디서나 같다 (책 · 미리보기 · 열 달의 문답) */
-            h += box(d, 'wifeAns', o.reveal && yk === 'wifeAns' ? 'qa-reveal' : '') +
-                 box(d, 'husbandAns', o.reveal && yk === 'husbandAns' ? 'qa-reveal' : '');
+            /* 답 아래에 한마디 — 짝꿍 답 아래엔 내가 쓰는 칸, 내 답 아래엔 짝꿍이 남긴 말 */
+            ['wifeAns', 'husbandAns'].forEach(function (k) {
+                h += box(d, k, o.reveal && yk === k ? 'qa-reveal' : '') + (k === yk ? sayPart(day, d, mk) : saidPart(d, k));
+            });
             if (before) h += echoHTML(before);
             var pg = pageOf(day);
             if (pg) h += '<div class="qa-gold">' + (o.reveal ? '💌 서로의 답이 열렸어요 · ' : '') +
@@ -672,7 +725,7 @@
         isPending: isPending, markPending: markPending, pull: pull, flush: flush, save: save,
         coins: coins, isSeen: isSeen, markSeen: markSeen, recentOpen: recentOpen,
         nudge: nudge, checkPartner: checkPartner, partnerState: partnerState,
-        ASK_PRICE: ASK_PRICE, askState: askState, sendQuestion: sendQuestion, cleanQuestion: cleanQ,
+        say: say, ASK_PRICE: ASK_PRICE, askState: askState, sendQuestion: sendQuestion, cleanQuestion: cleanQ,
         bodyHTML: bodyHTML, pillsHTML: pillsPart,
         editing: function (day) { return !!edit[day]; },
         setHost: function (h) { host = h; }
@@ -684,6 +737,16 @@
     QA.__next = function (day) {
         edit[day] = false;
         if (host && typeof host.next === 'function') host.next(Number(day) + 1);
+    };
+    QA.__sayEdit = function (day) { sayEdit[day] = true; rerender(day, { force: true }); setTimeout(function () { var i = document.getElementById('qa-say-in'); if (i) i.focus(); }, 60); };
+    QA.__say = function (day) {
+        var i = document.getElementById('qa-say-in'), t = ((i && i.value) || '').trim();
+        if (!t) { toast('한 줄만 적어도 괜찮아요'); if (i) i.focus(); return; }
+        say(day, t).then(function (r) {
+            if (!r.ok) { toast('남기지 못했어요. 다시 해 주세요'); return; }
+            sayEdit[day] = false; rerender(day, { force: true });
+            toast(r.first ? '한마디를 남겼어요' : '고쳤어요');
+        });
     };
     QA.__nudge = function (day, el) {
         if (el) { el.disabled = true; el.textContent = '보내는 중…'; }
