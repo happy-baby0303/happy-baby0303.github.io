@@ -142,10 +142,36 @@ window.questionDB = questionDB;
     var SOFT = { "이가": "가", "가": "가", "은": "는", "는": "는", "을": "를", "를": "를",
                  "과": "와", "와": "와", "이라": "라", "라": "라", "아": "야", "야": "야", "의": "의" };
 
+    /* ── 내가 고른 질문 ──────────────────────────────────────────────
+       코인으로 '내가 묻고 싶은 질문' 을 다음 새 쪽에 넣는다 (qacore.js QA.sendQuestion).
+       그 쪽에 cq(질문) · cqBy(husband/wife)가 남고 짝꿍 폰에도 같이 간다 — 홈 카드 · 책장 · 미리보기 · 내보내기가 같은 질문을 본다.
+       쓴 그대로 보여 준다. {babyName} 같은 칸을 바꾸지 않는다 (사람이 쓴 글이다). */
+
+    /* ⚠️ 사람이 쓴 글이라 화면에 그대로 꽂히면 안 된다. 꺾쇠 · 따옴표를 글자로 바꿔 둔다 —
+          어느 화면이 esc 를 빼먹어도 태그나 속성이 되지 못한다. 한 줄 · 60자. 보낼 때도, 읽을 때도 거친다. */
+    window.diaryCleanQuestion = function (t) {
+        return String(t == null ? "" : t)
+            .replace(/[\u0000-\u001F\u007F\u2028\u2029]+/g, " ")
+            .replace(/</g, "‹").replace(/>/g, "›")
+            .replace(/(^|[\s(\[‹“‘])"/g, "$1“").replace(/"/g, "”")
+            .replace(/(^|[\s(\[‹“‘])'/g, "$1‘").replace(/'/g, "’")
+            .replace(/\s+/g, " ").trim().slice(0, 60);
+    };
+    window.diaryCustomOf = function (day) {
+        day = parseInt(day, 10) || 0;
+        if (day < 1) return null;
+        var d = {}; try { d = JSON.parse(localStorage.getItem("day_" + day + "_data")) || {}; } catch (e) {}
+        var q = window.diaryCleanQuestion(d.cq);
+        if (!q) return null;
+        return { q: q, by: (d.cqBy === "husband" || d.cqBy === "wife") ? d.cqBy : "" };
+    };
+
     window.diaryQuestion = function (day) {
         var list = questionDB;
         if (!list || !list.length) return "";
         day = Math.max(1, parseInt(day, 10) || 1);
+        var cq = window.diaryCustomOf(day);
+        if (cq) return cq.q;
         var sp = window.diarySpecialOf(day);
         var it = sp ? { question: specialText(sp) } : list[(day - 1) % list.length];
         if (!it) return "";
@@ -166,6 +192,8 @@ window.questionDB = questionDB;
         if (day <= n) return 0;
         // 특별한 날의 질문은 다시 만나는 질문이 아니다 — 이 쪽이든 그때 쪽이든
         if (window.diarySpecialOf(day) || window.diarySpecialOf(day - n)) return 0;
+        // 엄마 · 아빠가 고른 질문도 그렇다 — 그 쪽은 100개 차례의 질문이 아니었다
+        if (window.diaryCustomOf(day) || window.diaryCustomOf(day - n)) return 0;
         return day - n;
     };
 
@@ -219,13 +247,15 @@ window.questionDB = questionDB;
     var memo = null;
     function pages() {      // 아직 아무도 답하지 않은 첫 쪽 + 이미 쓴 특별한 날 이름들 (이번 차례 동안만 기억)
         if (memo) return memo;
-        var last = 0, used = {};
+        var last = 0, used = {}, asked = {};
         for (var i = 1; i <= 2000; i++) {
             var raw = null; try { raw = localStorage.getItem("day_" + i + "_data"); } catch (e) {}
             if (!raw) continue;
-            try { var d = JSON.parse(raw) || {}; if (d.husbandAns || d.wifeAns) last = i; if (d.sp) used[d.sp] = i; } catch (e) {}
+            try { var d = JSON.parse(raw) || {}; if (d.husbandAns || d.wifeAns) last = i; if (d.sp) used[d.sp] = i; if (d.cq) asked[i] = 1; } catch (e) {}
         }
-        memo = { fresh: last + 1, used: used }; setTimeout(function () { memo = null; }, 0);
+        // 고른 질문이 먼저 들어가 있는 쪽은 건너뛴다 — 그날의 질문은 그다음 새 쪽에 들어간다
+        var fresh = last + 1; while (asked[fresh]) fresh++;
+        memo = { fresh: fresh, used: used }; setTimeout(function () { memo = null; }, 0);
         return memo;
     }
     /* 이 쪽이 특별한 날의 질문이면 그 날 이름('백일' · '생후 7개월' …), 아니면 '' */
@@ -233,6 +263,7 @@ window.questionDB = questionDB;
         day = parseInt(day, 10) || 0;
         if (day < 1) return "";
         var d = {}; try { d = JSON.parse(localStorage.getItem("day_" + day + "_data")) || {}; } catch (e) {}
+        if (d.cq) return "";                                   // 고른 질문이 들어간 쪽
         if (d.sp) return specialText(d.sp) ? d.sp : "";
         if (d.husbandAns || d.wifeAns) return "";
         var sp = window.diarySpecialToday();

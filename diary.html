@@ -135,6 +135,9 @@
         .use { border: 1px solid var(--line); background: #FFF; color: var(--ink); }
         .using { display: inline-block; font-size: 13px; font-weight: 700; color: var(--gold); padding: 8px 4px; }
         .shop-foot { font-size: 11.5px; color: var(--mute); text-align: center; margin-top: 18px; }
+        /* 내가 고른 질문 (ask-modal) */
+        .ask-count { font-size: 12px; font-weight: 600; color: var(--mute); text-align: right; margin-top: 8px; }
+        #ask-area:disabled { background: transparent; color: var(--mute); }
 
         .pv-wrap { position: fixed; inset: 0; z-index: 9100; background: rgba(43,36,30,0.55); display: none; align-items: center;
                    justify-content: center; padding: 18px; opacity: 0; transition: opacity .25s; }
@@ -209,6 +212,13 @@
                 <h2 class="qa-q" id="qa-question">질문을 불러오는 중…</h2>
                 <div id="qa-body"></div>
             </article>
+            <!-- 코인을 쓰는 두 번째 자리 — 묻고 싶은 걸 다음 질문으로 보낸다 (qacore.js QA.sendQuestion).
+                 엄마 · 아빠에게만 보인다 (updateCoinUI 가 켠다) -->
+            <div class="rows" id="ask-rows" style="margin-top:18px; display:none;">
+                <button class="row" onclick="openAskModal()">
+                    <span class="row-t">내가 고른 질문 보내기</span><span class="qa-meta" id="row-ask">300코인 ›</span>
+                </button>
+            </div>
         </section>
 
         <!-- 📖 우리의 책장 — bookshelf.js 가 맨 위에 책장(#bookshelf-box)을 꽂는다 -->
@@ -241,9 +251,38 @@
             </div>
             <div class="cover-stage" id="store-preview-area"></div>
             <div class="shop">
-                <div class="shop-note">질문에 답할 때마다 코인이 100개씩 쌓여요. 모은 코인으로 책 표지 색을 바꿀 수 있어요.</div>
+                <div class="shop-note">질문에 답할 때마다 코인이 100개씩 쌓여요. 모은 코인으로 책 표지 색을 바꾸거나, 묻고 싶은 질문을 보낼 수 있어요.</div>
+                <!-- 위의 코인 단추를 누르면 여기가 열린다 — 코인을 쓰는 다른 자리로 가는 길도 여기 둔다 -->
+                <button class="row" id="store-ask-row" style="display:none;" onclick="closeStoreModalForce(); setTimeout(openAskModal, 280);">
+                    <span class="row-t">내가 고른 질문 보내기</span><span class="qa-meta" id="store-ask-meta">300코인 ›</span>
+                </button>
                 <div id="store-grid-container"></div>
                 <div class="shop-foot">* 화면과 실제 종이 색은 조금 다를 수 있어요.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💬 내가 고른 질문 -->
+    <div id="ask-modal" class="sheet-wrap" onclick="closeAskModal(event)">
+        <div class="sheet" onclick="event.stopPropagation()">
+            <div class="sheet-head">
+                <div class="sheet-title">내가 고른 질문</div>
+                <div style="display:flex; align-items:center; gap:4px;">
+                    <span class="coin" style="cursor:default;"><span class="coin-dot"></span><span id="ask-coin-count">0</span><span class="coin-unit">코인</span></span>
+                    <button class="x" onclick="closeAskModalForce()" aria-label="닫기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="shop" style="padding-top:0;">
+                <div class="shop-note" id="ask-note" style="border-bottom:none; padding-bottom:0;"></div>
+                <div id="ask-form">
+                    <textarea class="qa-area" id="ask-area" maxlength="60" style="min-height:104px; margin-top:14px;"
+                              placeholder="예) 요즘 나한테 제일 고마웠던 순간은 언제야?" oninput="askCount()"></textarea>
+                    <div class="ask-count" id="ask-count">0 / 60</div>
+                </div>
+                <button type="button" class="qa-btn solid" id="ask-send" onclick="sendAsk()">보내기</button>
+                <div class="shop-foot" id="ask-foot" style="margin-top:12px;"></div>
             </div>
         </div>
     </div>
@@ -297,10 +336,10 @@
     </div>
 
     <script src="anniversaries.js"></script>   <!-- 특별한 날의 질문 (백일 · 생일) 날짜 셈 -->
-    <script src="data.js?v=2"></script>
+    <script src="data.js?v=3"></script>
     <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
     <script src="tenmonths.js?v=2"></script>
-    <script src="qacore.js?v=3"></script>
+    <script src="qacore.js?v=4"></script>
 
     <script>
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
@@ -348,11 +387,20 @@
 
         window.updateCoinUI = function () {
             var c = window.QA ? QA.coins() : 0;
-            ['header-coin-count', 'modal-coin-count'].forEach(function (id) {
+            ['header-coin-count', 'modal-coin-count', 'ask-coin-count'].forEach(function (id) {
                 var el = document.getElementById(id); if (el) el.textContent = c.toLocaleString('ko-KR');
             });
             var row = document.getElementById('row-coin');
             if (row) row.textContent = '코인 ' + c.toLocaleString('ko-KR') + ' ›';
+            /* 내가 고른 질문 — 엄마 · 아빠에게만. 보낸 질문이 아직 열려 있으면 그렇다고 적는다 */
+            var ar = document.getElementById('ask-rows');
+            if (ar && window.QA && QA.askState) {
+                var st = QA.askState(), meta = st.why === 'open' ? '보낸 질문이 있어요 ›' : st.price.toLocaleString('ko-KR') + '코인 ›';
+                ar.style.display = st.why === 'norole' ? 'none' : '';
+                var sr = document.getElementById('store-ask-row');
+                if (sr) sr.style.display = st.why === 'norole' ? 'none' : '';
+                ['row-ask', 'store-ask-meta'].forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = meta; });
+            }
         };
 
         window.openStoreModal = function () {
@@ -433,6 +481,89 @@
                     localStorage.setItem('tosil_inventory', JSON.stringify(inv));
                     apply();
                     window.showToast('새 표지로 바꿨어요');
+                });
+        };
+
+        /* ---------- 내가 고른 질문 ----------
+           코인을 쓰는 두 번째 자리. 묻고 싶은 걸 적어 보내면 아직 아무도 답하지 않은 첫 쪽의 질문이 된다 (qacore.js QA.sendQuestion).
+           ⚠️ 창이 바닥에 붙어 있어서 자판이 올라오면 글칸과 단추가 가려진다. 보이는 높이(visualViewport)에 창을 맞춘다. */
+        function askFit() {
+            var w = document.getElementById('ask-modal'), vv = window.visualViewport;
+            if (!w || !vv || !w.classList.contains('on')) return;
+            w.style.top = vv.offsetTop + 'px'; w.style.bottom = 'auto'; w.style.height = vv.height + 'px';
+        }
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', askFit);
+            window.visualViewport.addEventListener('scroll', askFit);
+        }
+        /* 글자를 칠 때마다는 글자 수만 고친다 (창 전체를 다시 따지면 2000쪽을 훑는다) */
+        window.askCount = function () {
+            document.getElementById('ask-count').textContent = QA.cleanQuestion(document.getElementById('ask-area').value).length + ' / 60';
+        };
+        window.renderAsk = function () {
+            var st = QA.askState();
+            var area = document.getElementById('ask-area'), btn = document.getElementById('ask-send');
+            var note = document.getElementById('ask-note'), foot = document.getElementById('ask-foot');
+            document.getElementById('ask-coin-count').textContent = (st.coins || 0).toLocaleString('ko-KR');
+            window.askCount();
+            document.getElementById('ask-form').style.display = st.why === 'open' ? 'none' : '';
+            btn.disabled = false; btn.className = 'qa-btn solid';
+            if (st.why === 'open') {
+                note.textContent = QA.linked() ? '보낸 질문에 둘 다 답하면 다음 질문을 보낼 수 있어요.' : '보낸 질문에 답하면 다음 질문을 보낼 수 있어요.';
+                btn.textContent = '보낸 질문 보러 가기'; btn.className = 'qa-btn line'; foot.textContent = '';
+                return;
+            }
+            note.textContent = '묻고 싶은 걸 적어 보내면 다음 질문이 돼요. 둘 다 답해야 서로의 답이 열리는 건 똑같아요.';
+            area.disabled = st.why === 'short';
+            if (st.why === 'short') {
+                btn.textContent = '코인이 ' + (st.price - st.coins).toLocaleString('ko-KR') + '개 더 필요해요'; btn.disabled = true;
+                foot.textContent = '질문 하나에 답하면 100코인이 쌓여요.';
+            } else {
+                btn.textContent = st.price.toLocaleString('ko-KR') + '코인으로 보내기';
+                foot.textContent = '보낸 뒤에는 고칠 수 없어요.';
+            }
+        };
+        window.openAskModal = function () {
+            var w = document.getElementById('ask-modal');
+            window.renderAsk();
+            w.classList.add('on');
+            setTimeout(function () { w.classList.add('show'); askFit(); }, 10);
+        };
+        window.closeAskModalForce = function () {
+            var w = document.getElementById('ask-modal');
+            try { document.getElementById('ask-area').blur(); } catch (e) {}
+            w.classList.remove('show');
+            setTimeout(function () { w.classList.remove('on'); w.style.top = ''; w.style.bottom = ''; w.style.height = ''; }, 260);
+        };
+        window.closeAskModal = function (e) { if (e.target.id === 'ask-modal') window.closeAskModalForce(); };
+        window.sendAsk = function () {
+            var st = QA.askState();
+            if (st.why === 'open') { window.closeAskModalForce(); window.goDiaryDay(st.day); return; }
+            if (!st.ok) return;
+            var area = document.getElementById('ask-area'), btn = document.getElementById('ask-send');
+            var q = QA.cleanQuestion(area.value);
+            if (q.length < 4) { window.showToast('질문을 조금만 더 적어 주세요'); try { area.focus(); } catch (e) {} return; }
+            try { area.blur(); } catch (e) {}       // 자판이 내려가야 묻는 창이 가려지지 않는다
+            window.qaConfirm('이 질문을 보낼까요?',
+                '「' + QA.esc(q) + '」<br>' + st.price.toLocaleString('ko-KR') + '코인을 써요. 보낸 뒤에는 고칠 수 없어요.',
+                '보내기', function () {
+                    btn.disabled = true; btn.textContent = '보내는 중…';
+                    QA.sendQuestion(q).then(function (r) {
+                        if (r && r.ok) {
+                            area.value = '';
+                            window.closeAskModalForce();
+                            window.updateCoinUI();
+                            window.goDiaryDay(r.day);
+                            window.showToast(QA.linked() ? '질문을 보냈어요. 먼저 답해 볼까요' : '질문을 넣었어요. 답해 볼까요');
+                            return;
+                        }
+                        window.renderAsk();
+                        var why = r && r.why;
+                        window.showToast(why === 'offline' ? '연결이 안 돼서 보내지 못했어요. 코인은 그대로예요'
+                                       : why === 'open' ? '보낸 질문에 먼저 답해 주세요'
+                                       : why === 'short' ? '코인이 모자라요'
+                                       : '보내지 못했어요. 잠시 뒤 다시 해 주세요');
+                    });
                 });
         };
     </script>
@@ -826,6 +957,7 @@
                     { id: 'qa-confirm',        close: function () { var el = document.getElementById('qa-confirm'); if (el) el.remove(); } },
                     { id: 'bs-volume',         close: function () { var el = document.getElementById('bs-volume'); if (el) el.remove(); document.body.style.overflow = ''; } },
                     { id: 'pdf-preview-modal', close: function () { window.closePdfPreview(); } },
+                    { id: 'ask-modal',         close: function () { window.closeAskModalForce(); } },
                     { id: 'store-modal',       close: function () { window.closeStoreModalForce(); } }
                 ];
                 function open(id) {

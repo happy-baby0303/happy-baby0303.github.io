@@ -12,9 +12,10 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css?v=b8">
-    <!-- 카드가 다 붙을 때까지 이 탭은 잠깐 가린다 (shared/settle.js). 스크립트가 안 떠도 2.4초 뒤엔 CSS 가 보여 준다 -->
+    <!-- 카드가 다 붙을 때까지 이 탭은 잠깐 가린다 (shared/settle.js). 그 파일을 못 받으면 바로 보여 주고(onerror), 무엇이 잘못돼도 8초 뒤엔 CSS 가 보여 준다.
+         ⚠️ 2.4초였는데, 통신이 느린 곳에서는 카드가 다 붙기 전에 CSS 가 먼저 열어 버려서 밀리는 게 그대로 보였다 -->
     <style>
-        html.cur-settle #view-toy-play, html.cur-settle #view-toy-gear { opacity: 0; animation: curSettleShow 0s linear 2.4s forwards; }
+        html.cur-settle #view-toy-play, html.cur-settle #view-toy-gear { opacity: 0; animation: curSettleShow 0s linear 8s forwards; }
         #view-toy-play, #view-toy-gear { transition: opacity .18s ease; }
         @keyframes curSettleShow { to { opacity: 1; } }
         .cur-skel { position: relative; height: 0; overflow: visible; z-index: 1; }
@@ -23,7 +24,7 @@
         @keyframes curSkel { from { opacity: .45; } to { opacity: .9; } }
     </style>
     <script>document.documentElement.classList.add('cur-settle'); document.documentElement.setAttribute('data-settle', 'view-toy-play,view-toy-gear');</script>
-    <script src="../shared/settle.js?v=1"></script>
+    <script src="../shared/settle.js?v=2" onerror="document.documentElement.classList.remove('cur-settle')"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 </head>
 <body>

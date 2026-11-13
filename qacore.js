@@ -9,7 +9,8 @@
 
    저장 모양 — 예전 그대로에 칸 두 개를 더했다
      day_N_data = { husbandAns, wifeAns, date,
-                    husbandAt, wifeAt }      ← 새 칸: 각자 처음 답한 때 (ISO)
+                    husbandAt, wifeAt,       ← 새 칸: 각자 처음 답한 때 (ISO)
+                    sp, cq, cqBy }           ← 특별한 날 이름 · 고른 질문과 고른 사람 (data.js 가 읽는다)
      서버: diary_가족코드/day_N  (칸마다 merge — 둘이 동시에 써도 안 지운다)
 
    ⚠️ 내 답을 먼저 써야 짝꿍 답이 보인다. 먼저 보면 따라 쓰게 된다.
@@ -142,7 +143,7 @@
 
     /* 칸마다 비어 있지 않은 쪽을 쓴다. 둘 다 있으면 서버가 기준이다.
        단, 아직 못 올린 내 글은 이 폰이 맞다 (서버엔 옛 글이 있을 수 있다). */
-    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp'];   // sp = 특별한 날의 질문 (data.js)
+    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp', 'cq', 'cqBy'];   // sp = 특별한 날의 질문 · cq/cqBy = 고른 질문과 고른 사람 (data.js)
     function mergeDay(day, local, server) {
         var out = Object.assign({}, local || {});
         var mk = isPending(day) ? myKey() : '';
@@ -197,6 +198,7 @@
                 if (d[atOf(mk)]) up[atOf(mk)] = d[atOf(mk)];
                 if (d.date) up.date = d.date;
                 if (d.sp) up.sp = d.sp;
+                if (d.cq) { up.cq = d.cq; if (d.cqBy) up.cqBy = d.cqBy; }
                 return window.setDoc(window.doc(window.db, 'diary_' + c, 'day_' + day), up, { merge: true })
                     .then(function () { markPending(day, false); n++; })
                     .catch(function (e) { console.warn('[문답] 못 올린 답 다시 올리기 실패', day, e); });
@@ -353,6 +355,8 @@
         d[mk] = text;
         var up = {}; up[mk] = text;
         if (sp) { d.sp = sp; up.sp = sp; }
+        /* 고른 질문은 답과 같이 올라간다 — 혼자 쓰다 나중에 짝꿍과 이어져도 같은 질문이 보인다 */
+        if (d.cq) { up.cq = d.cq; if (d.cqBy) up.cqBy = d.cqBy; }
         if (!editing && !d[atOf(mk)]) { d[atOf(mk)] = new Date().toISOString(); up[atOf(mk)] = d[atOf(mk)]; }
         /* ⚠️ 고칠 때마다 date 를 오늘로 덮어써서 3일째 답을 40일째에 고치면
               배냇함 연대기에서 40일째로 옮겨갔다. date 는 '그 대화가 이뤄진 날' 이다. */
@@ -385,6 +389,105 @@
             return { day: day, complete: complete, wasComplete: wasComplete, editing: editing,
                      coin: coin, linked: !!c, queued: !!c && ok !== true };
         });
+    }
+
+    /* ---------- 내가 고른 질문 ----------
+       코인 300개로 '내가 묻고 싶은 질문' 을 아직 아무도 답하지 않은 첫 쪽에 넣는다.
+       그 쪽에 cq(질문) · cqBy(husband/wife)가 남고, 질문은 data.js diaryCustomOf 가 읽는다.
+
+       ⚠️ 짝꿍과 이어진 방은 서버에 먼저 놓는다. 이 폰만 보고 넣으면, 짝꿍이 방금 답한 쪽에 질문이 얹혀서
+          '다른 질문에 쓴 답' 이 그 질문 아래에 붙는다. 연결이 안 될 땐 보내지 않고 코인도 그대로 둔다.
+       ⚠️ 한 번에 하나만. 보낸 질문에 둘 다 답해야 다음 질문을 보낸다 — 연달아 보내면 차례 질문이 계속 밀린다.
+       ⚠️ 보낸 뒤에는 못 고친다. 칸마다 '비어 있지 않은 쪽' 으로 합치는 방식이라(mergeDay) 지운 것은 짝꿍 폰으로 건너가지 못한다. */
+    var ASK_PRICE = 300, ASK_MIN = 4, asking = false;
+    function cleanQ(t) { return (typeof window.diaryCleanQuestion === 'function') ? window.diaryCleanQuestion(t) : ''; }
+    function askOpenDay() {     // 내가 보낸 질문 가운데 아직 끝나지 않은 쪽 (혼자 쓰는 방은 내가 답하면 끝)
+        var me = role(), mk = myKey(), linked = !!code();
+        if (!me) return 0;
+        for (var i = 1; i <= MAX_DAY; i++) {
+            var raw = null;
+            try { raw = localStorage.getItem('day_' + i + '_data'); } catch (e) {}
+            if (!raw || raw.indexOf('"cq"') < 0) continue;
+            var d; try { d = JSON.parse(raw) || {}; } catch (e) { continue; }
+            if (!d.cq || d.cqBy !== me) continue;
+            if (linked ? !(d.husbandAns && d.wifeAns) : !d[mk]) return i;
+        }
+        return 0;
+    }
+    function askState() {
+        if (!role()) return { ok: false, why: 'norole', price: ASK_PRICE, coins: 0 };
+        var open = askOpenDay(), c = coins();
+        if (open) return { ok: false, why: 'open', day: open, price: ASK_PRICE, coins: c };
+        if (c < ASK_PRICE) return { ok: false, why: 'short', price: ASK_PRICE, coins: c };
+        return { ok: true, price: ASK_PRICE, coins: c };
+    }
+    function freeFrom(from) {   // 아무도 답하지 않았고 고른 질문도 없는 첫 쪽
+        for (var i = Math.max(1, from); i <= MAX_DAY; i++) {
+            var d = read(i);
+            if (!d.husbandAns && !d.wifeAns && !d.cq) return i;
+        }
+        return 0;
+    }
+    function sendQuestion(text) {
+        var q = cleanQ(text), me = role();
+        if (!me) return Promise.resolve({ ok: false, why: 'norole' });
+        if (q.length < ASK_MIN) return Promise.resolve({ ok: false, why: 'empty' });
+        var st = askState();
+        if (!st.ok) return Promise.resolve(st);
+        if (asking) return Promise.resolve({ ok: false, why: 'busy' });
+        var c = code();
+        if (c && typeof navigator !== 'undefined' && navigator.onLine === false) return Promise.resolve({ ok: false, why: 'offline' });
+        asking = true;
+
+        function done(day) {
+            var d = read(day); d.cq = q; d.cqBy = me; write(day, d);
+            try { localStorage.setItem(K.coins, String(Math.max(0, coins() - ASK_PRICE))); } catch (e) {}
+            try { window.dispatchEvent(new CustomEvent('qa:coins')); } catch (e) {}
+            if (c) call({ title: '💌 ' + word(myKey()) + '가 물어보고 싶은 게 있대요', body: '「' + q + '」 둘 다 쓰면 서로 보여요',
+                          link: 'diary.html?day=' + day });
+            return { ok: true, day: day, question: q, price: ASK_PRICE, coins: coins() };
+        }
+        var job;
+        if (!c) {
+            var d0 = freeFrom(1);
+            job = Promise.resolve(d0 ? done(d0) : { ok: false, why: 'nopage' });
+        } else {
+            var work = waitAuth(3000).then(function () {
+                if (!authed() || !canWrite() || typeof window.getDoc !== 'function') throw new Error('offline');
+                var tries = 0;
+                function attempt(day) {
+                    if (!day || ++tries > 8) throw new Error('nopage');
+                    var ref = window.doc(window.db, 'diary_' + c, 'day_' + day);
+                    return window.getDoc(ref).then(function (snap) {
+                        var sv = (snap && snap.exists()) ? (snap.data() || {}) : {};
+                        if (sv.husbandAns || sv.wifeAns || sv.cq) {        // 짝꿍이 먼저 쓴 쪽 — 받아 두고 다음 쪽으로
+                            write(day, mergeDay(day, read(day), sv));
+                            return attempt(freeFrom(day + 1));
+                        }
+                        return window.setDoc(ref, { cq: q, cqBy: me }, { merge: true })
+                            .then(function () { return window.getDoc(ref); })
+                            .then(function (s2) {
+                                var v = (s2 && s2.exists()) ? (s2.data() || {}) : {};
+                                if (v.cq !== q || v.cqBy !== me) {         // 같은 순간 짝꿍도 질문을 보냈다 — 그 쪽은 짝꿍 것, 내 질문은 다음 쪽
+                                    write(day, mergeDay(day, read(day), v));
+                                    return attempt(freeFrom(day + 1));
+                                }
+                                return done(day);
+                            });
+                    });
+                }
+                return attempt(freeFrom(1));
+            });
+            var late = new Promise(function (_, rej) { setTimeout(function () { rej(new Error('offline')); }, 12000); });
+            job = Promise.race([work, late]).then(null, function (e) {
+                return { ok: false, why: (e && e.message === 'nopage') ? 'nopage' : 'offline' };
+            });
+        }
+        return job.then(function (r) {
+            asking = false;
+            if (r && r.ok) rerender(r.day, { force: true });
+            return r;
+        }, function () { asking = false; return { ok: false, why: 'offline' }; });
     }
 
     /* ============================================================
@@ -461,9 +564,12 @@
     }
     /* ⚠️ '1번째 질문' 은 틀린 말이다. 하나일 때만 '첫 번째' (홈 카드 · 책장 · 문답 화면이 같이 쓴다) */
     function nth(n) { return Number(n) === 1 ? '첫 번째' : n + '번째'; }
-    /* 특별한 날의 질문이면 ' · 백일' 같은 금빛 꼬리 (홈 카드 · 문답 화면 · 책 쪽이 같이 쓴다) */
+    /* 특별한 날의 질문이면 ' · 백일', 엄마나 아빠가 고른 질문이면 ' · 엄마의 질문' 같은 금빛 꼬리
+       (홈 카드 · 문답 화면 · 책 쪽이 같이 쓴다) */
     function spTag(day) {
-        var l = (typeof window.diarySpecialOf === 'function') ? window.diarySpecialOf(day) : '';
+        var c = (typeof window.diaryCustomOf === 'function') ? window.diaryCustomOf(day) : null;
+        var l = c ? (c.by ? word(c.by + 'Ans') + '의 질문' : '고른 질문')
+                  : ((typeof window.diarySpecialOf === 'function') ? window.diarySpecialOf(day) : '');
         return l ? ' · <span style="color:' + T.GOLD + '; font-weight:800;">' + esc(l) + '</span>' : '';
     }
 
@@ -566,6 +672,7 @@
         isPending: isPending, markPending: markPending, pull: pull, flush: flush, save: save,
         coins: coins, isSeen: isSeen, markSeen: markSeen, recentOpen: recentOpen,
         nudge: nudge, checkPartner: checkPartner, partnerState: partnerState,
+        ASK_PRICE: ASK_PRICE, askState: askState, sendQuestion: sendQuestion, cleanQuestion: cleanQ,
         bodyHTML: bodyHTML, pillsHTML: pillsPart,
         editing: function (day) { return !!edit[day]; },
         setHost: function (h) { host = h; }

@@ -52,6 +52,16 @@
         return q || window.questionDB || [];
     }
 
+    /* ⚠️ 특별한 날 · 고른 질문 쪽에도 그 차례 질문의 꼬리말이 붙었다 (배냇함 연대기 '우리의 문답 14일차 · …').
+          그 쪽의 진짜 이름을 쓴다 — 백일 · 엄마의 질문 */
+    function tagOf(day, fallback, blank) {
+        var cq = (typeof window.diaryCustomOf === "function") ? window.diaryCustomOf(day) : null;
+        if (cq) return blank ? "" : (cq.by === "husband" ? "아빠의 질문" : cq.by === "wife" ? "엄마의 질문" : "고른 질문");
+        var sp = (typeof window.diarySpecialOf === "function") ? window.diarySpecialOf(day) : "";
+        if (sp) return blank ? "" : sp;
+        return fallback;
+    }
+
     function questionOf(day) {
         var list = questions();
         if (!list.length) return null;
@@ -62,8 +72,8 @@
             text: (typeof window.diaryQuestion === "function")
                 ? window.diaryQuestion(day)
                 : String(it.question || "").replace(/{babyName}/g, babyName()),
-            context: it.context || "",
-            category: it.category || ""
+            context: tagOf(day, it.context || ""),
+            category: tagOf(day, it.category || "", true)
         };
     }
 

@@ -553,6 +553,31 @@ function toggleAccordion(index) {
 
 function openGoogleForm() { window.open('https://forms.gle/gWYhuNrwiKNvyCEQA', '_blank'); }
 
+/* 행사 주소(관광공사 addr1)에서 시·도와 시·군·구를 읽는다.
+   ⚠️ 주소에 '세종' · '광주' 가 들어 있는지만 봤더니, 서울 세종대로(광화문)에서 하는 행사 여섯 개가 충청에도 떴고
+      경기도 광주시 행사는 전라에 뜨게 돼 있었다. 주소 첫 낱말(시·도)만 본다.
+   ⚠️ 카드에는 첫 두 낱말에서 '특별' · '광역' 만 지워 적어서 '강원자치도 춘천시' · '세종자치시 한누리대로' ·
+      '전남광주통합시 서구' 가 됐다. 흔히 부르는 짧은 이름으로 적는다 (강원 춘천시 · 세종 · 광주 서구).
+   2026년 7월부터 광주 · 전남 주소는 '전남광주통합특별시' 로 온다 — 구는 광주, 시 · 군은 전남으로 읽는다. */
+const FEST_SIDO = [['서울', '서울', 'seoul'], ['부산', '부산', 'gyeongsang'], ['대구', '대구', 'gyeongsang'], ['인천', '인천', 'gyeonggi'],
+    ['광주', '광주', 'jeolla'], ['대전', '대전', 'chungcheong'], ['울산', '울산', 'gyeongsang'], ['세종', '세종', 'chungcheong'],
+    ['경기', '경기', 'gyeonggi'], ['강원', '강원', 'gangwon'], ['충청북', '충북', 'chungcheong'], ['충북', '충북', 'chungcheong'],
+    ['충청남', '충남', 'chungcheong'], ['충남', '충남', 'chungcheong'], ['전라북', '전북', 'jeolla'], ['전북', '전북', 'jeolla'],
+    ['전라남', '전남', 'jeolla'], ['전남', '전남', 'jeolla'], ['경상북', '경북', 'gyeongsang'], ['경북', '경북', 'gyeongsang'],
+    ['경상남', '경남', 'gyeongsang'], ['경남', '경남', 'gyeongsang'], ['제주', '제주', 'jeju']];
+/* 직접 넣은 행사(places.json 의 isEvent)는 region 칸으로 */
+const FEST_FIELD_GROUP = { seoul: 'seoul', gyeonggi: 'gyeonggi', incheon: 'gyeonggi', chungcheong: 'chungcheong', daejeon: 'chungcheong', gangwon: 'gangwon',
+    jeolla: 'jeolla', gwangju: 'jeolla', gyeongsang: 'gyeongsang', daegu: 'gyeongsang', busan: 'gyeongsang', ulsan: 'gyeongsang', jeju: 'jeju' };
+function festRegionOf(addr) {
+    const parts = String(addr || '').trim().split(/\s+/), first = parts[0] || '';
+    const sgg = /[시군구]$/.test(parts[1] || '') ? parts[1] : '';      // 세종은 둘째 낱말이 길 이름이다
+    let sido = '', group = '';
+    if (first.indexOf('전남광주') === 0 || first.indexOf('광주전남') === 0) { sido = /구$/.test(sgg) ? '광주' : '전남'; group = 'jeolla'; }
+    else { for (const [head, short, g] of FEST_SIDO) { if (first.indexOf(head) === 0) { sido = short; group = g; break; } } }
+    return { sido, sgg, group, key: sido + ' ' + sgg, label: sido ? (sgg ? sido + ' ' + sgg : sido) : parts.slice(0, 2).join(' ') };
+}
+window.festRegionOf = festRegionOf;
+
 // 🚨 [패치 완료] 핫플 탭에서도 세부 지역 필터 나오게 수정 + 행사 없는 지역 빼기 로직 추가!
 function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row');
@@ -587,7 +612,14 @@ function generateSubFilters(mainRegion) {
     }
 
     // 2. 남은 유효한 데이터들을 돌면서 지역 필터를 생성합니다.
+    const festSubs = new Map();
     source.forEach(item => {
+        /* 행사는 주소 첫 낱말(시·도)로 가르고, 칩은 '시·도 + 시·군·구' 로 기억한다 (festRegionOf) */
+        if (currentSubTab === 'event') {
+            const R = festRegionOf(item.addr1 || item.addr || item.locText || '');
+            if ((R.group || FEST_FIELD_GROUP[item.region] || '') === mainRegion && R.sgg) festSubs.set(R.key, R);
+            return;
+        }
         const addr = item.locText || item.addr1 || item.addr || '';
         let isMatched = false;
 
@@ -616,7 +648,7 @@ function generateSubFilters(mainRegion) {
     });
 
     // 🚨 3. 만약 살아남은 세부 지역이 하나도 없다면 가로 스크롤 막대를 아예 숨깁니다!
-    if (subRegions.size === 0) { 
+    if (subRegions.size === 0 && festSubs.size === 0) { 
         subRow.style.display = 'none'; 
         return; 
     }
@@ -632,6 +664,14 @@ function generateSubFilters(mainRegion) {
     Array.from(subRegions).sort().forEach(sub => { 
         html += `<button class="filter-btn ${currentSubRegion === sub ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('${sub}', this)">${sub}</button>`; 
     });
+    /* 행사 칩 — 구 이름은 도시마다 겹친다 (부산 남구 · 울산 남구, 부산 서구 · 강서구).
+       '남구' 가 들어 있는지만 보면 둘이 섞이니 '시·도 + 시·군·구' 가 똑같은 것만 고르고,
+       그 지역에 시·도가 둘 이상이면 구 앞에 도시 이름을 붙여 적는다. */
+    const festList = Array.from(festSubs.values());
+    const manySido = new Set(festList.map(r => r.sido)).size > 1;
+    festList.map(r => ({ key: r.key, label: (manySido && /구$/.test(r.sgg)) ? r.key : r.sgg }))
+        .sort((x, y) => x.label.localeCompare(y.label, 'ko'))
+        .forEach(c => { html += `<button class="filter-btn ${currentSubRegion === c.key ? 'active' : ''}" style="padding:6px 12px; font-size:12px; flex-shrink:0; white-space:nowrap;" onclick="setSubRegion('${c.key}', this)">${c.label}</button>`; });
     
     subRow.innerHTML = html;
 }
@@ -671,18 +711,10 @@ function filterPlaces() {
             if (eDate && eDate < todayNum) return false; 
             if (sMonth && sMonth > currentMonthNum) return false;
 
-            let matchesRegion = false;
-            if (currentRegion === 'all') { matchesRegion = true; } 
-            else {
-                if (currentRegion === 'seoul') matchesRegion = addr.includes('서울');
-                if (currentRegion === 'gyeonggi') matchesRegion = addr.includes('경기') || addr.includes('인천');
-                if (currentRegion === 'chungcheong') matchesRegion = addr.includes('충청') || addr.includes('충북') || addr.includes('충남') || addr.includes('대전') || addr.includes('세종');
-                if (currentRegion === 'gangwon') matchesRegion = addr.includes('강원');
-                if (currentRegion === 'jeolla') matchesRegion = addr.includes('전라') || addr.includes('전북') || addr.includes('전남') || addr.includes('광주');
-                if (currentRegion === 'gyeongsang') matchesRegion = addr.includes('경상') || addr.includes('경북') || addr.includes('경남') || addr.includes('부산') || addr.includes('대구') || addr.includes('울산');
-                if (currentRegion === 'jeju') matchesRegion = addr.includes('제주');
-            }
-            return matchesRegion && (currentSubRegion === 'all' || addr.includes(currentSubRegion)) && `${title} ${addr}`.toLowerCase().includes(keyword);
+            /* 지역은 주소 첫 낱말(시·도)로만, 세부 지역은 '시·도 + 시·군·구' 가 똑같을 때만 (festRegionOf) */
+            const R = festRegionOf(addr);
+            const matchesRegion = currentRegion === 'all' || (R.group || FEST_FIELD_GROUP[p.region] || '') === currentRegion;
+            return matchesRegion && (currentSubRegion === 'all' || R.key === currentSubRegion) && `${title} ${addr}`.toLowerCase().includes(keyword);
         });
         
         if(filteredEvents.length === 0) { container.innerHTML = `<p style="text-align:center; padding:50px 0; color:var(--text-sub); font-size:14px; font-weight:700;">🔍 이번 달에 열리는 행사가 없어요.</p>`; return; }
@@ -716,7 +748,7 @@ function filterPlaces() {
             let sd = item.eventstartdate || item.datetime || '', ed = item.eventenddate || '';
             if(sd.length >= 8) sd = `${sd.substring(4,6)}.${sd.substring(6,8)}`; if(ed.length >= 8) ed = `${ed.substring(4,6)}.${ed.substring(6,8)}`;
             /* 하루짜리 행사가 '10.24 ~ 10.24' 로 나왔다 */
-            const dateText = ed ? (ed === sd ? `${sd} 하루` : `${sd} ~ ${ed}`) : sd, shortAddr = `${addr.split(' ')[0] || ''} ${addr.split(' ')[1] || ''}`.replace('특별', '').replace('광역', '');
+            const dateText = ed ? (ed === sd ? `${sd} 하루` : `${sd} ~ ${ed}`) : sd, shortAddr = festRegionOf(addr).label;
             const card = document.createElement('div'); card.className = 'fest-card';
             let imgHtml = rawImg ? `<img src="${rawImg}" loading="lazy" decoding="async" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:var(--bg-main); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
             
