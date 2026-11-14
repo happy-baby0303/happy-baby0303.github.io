@@ -92,6 +92,7 @@
         { id: "sealed-box",             close: "closeSealedBox" },         // 봉인함
         { id: "sealed-view",            close: "closeSealedView" },        // 봉인 편지 읽기
         { id: "vaccine-sheet",          close: null },                     // 예방접종 일정표
+        { id: "leap-sheet",             close: null },                     // 원더윅스 (홈 사진의 딱지 — growth.js)
         { id: "voice-reel",             close: "closeVoiceReel" },         // 소리 모아듣기
         { id: "navi-nudge",             close: null },                     // 내비 켜기 전 '기저귀 가방' 확인
 

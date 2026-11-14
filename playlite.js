@@ -504,6 +504,9 @@
         }
     }
 
+    /* 짝꿍 폰에서 잰 키 · 몸무게가 들어오면 홈 카드도 바로 (growthsync.js) */
+    window.plGrowthCard = function () { try { growthCard(); } catch (e) {} };
+
     function scrub() {
         try { hideEmergencyBlock(); } catch (e) {}
         try { hideVaccineBox(); } catch (e) {}

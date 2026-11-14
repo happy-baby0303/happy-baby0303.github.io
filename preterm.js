@@ -255,10 +255,8 @@
             try { if (typeof window.renderBabyInfo === 'function') window.renderBabyInfo(); } catch (e) {}
             try { if (typeof window.refreshInfoPick === 'function') window.refreshInfoPick(); } catch (e) {}
             chip();
-            var gr = document.getElementById('growth-result');
-            if (gr && gr.style.display !== 'none' && typeof window.calcHealthMaster === 'function') {
-                try { window.calcHealthMaster(true); } catch (e) {}
-            }
+            /* 성장 화면 — 교정 나이로 그래프 · 백분위를 다시 (growth.js) */
+            try { if (window.Growth) window.Growth.render(); } catch (e) {}
         }
         var sub = document.getElementById('edit-preterm-sub');
         if (sub && sub.getAttribute('data-sfx') === String(sfx == null ? cur() : sfx)) {
