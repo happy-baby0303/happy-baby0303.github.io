@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="135">
+    <meta name="baenaet-build" content="136">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1571,6 +1571,10 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                             <span style="font-size: 20px; font-weight: 800; color: var(--text-s); margin-left: 8px;">원</span>
                         </div>
 
+                        <!-- 한마디 — 나중에 봐도 뭘 샀는지 알게 (안 적어도 된다) -->
+                        <input type="text" id="v-input-memo" maxlength="20" autocomplete="off" placeholder="무엇을 샀나요? (안 적어도 돼요)"
+                               style="display:block; width:100%; max-width:260px; box-sizing:border-box; margin:0 auto 22px; padding:11px 14px; border:1px solid var(--border); border-radius:12px; background:var(--bg-sub); font-family:inherit; font-size:14px; font-weight:700; color:var(--text-m); text-align:center; outline:none;">
+
                         <!-- 카테고리 버튼들 -->
                         <div id="expense-category-area" style="opacity: 0.3; pointer-events: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(10px);">
                             <div style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">어디에 썼나요? 누르면 바로 남아요</div>
@@ -1599,7 +1603,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                         </div>
                     </div>
                     <!-- 달성률 -->
-                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #FAF4E6; padding: 12px 14px; border-radius: 16px; border: 1px solid #A7F3D0; flex-shrink: 0; min-width: 65px; box-sizing: border-box;">
+                    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #FAF4E6; padding: 12px 14px; border-radius: 16px; border: 1px solid #EBDDB8; flex-shrink: 0; min-width: 65px; box-sizing: border-box;">
                         <div style="font-size: 11px; font-weight: 900; color: #A07722; margin-bottom: 4px;">달성률</div>
                         <div style="font-size: 18px; font-weight: 900; color:#B98A2E; line-height: 1;" id="v-goal-percent">0%</div>
                     </div>
@@ -1609,7 +1613,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 <div class="box-main" style="border-radius:24px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); margin-bottom: 24px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                         <div style="font-size: 16px; font-weight: 900; color: var(--text-m);"><span id="money-month-title">이번 달</span>에 쓴 돈</div>
-                        <button onclick="window.resetMoneyAll()" style="background: #FFF0F1; color: #D32F2F; border: 1px solid #FFE3E3; padding: 6px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer;">초기화</button>
+                        <!-- ⚠️ 빨간 '초기화' 가 제목 옆에 있어서 제일 눈에 띄었다. 한 줄 지우기는 목록에서 하고, 전부 비우기는 조용히 둔다 -->
+                        <button onclick="window.resetMoneyAll()" style="background: none; color: var(--text-s); border: none; padding: 6px 2px; font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer;">전부 비우기</button>
                     </div>
 
                     <!-- 🍩 결과 차트 영역 -->
@@ -1642,7 +1647,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     
     <!-- 타이틀 & 지난달 내역 버튼을 박스 안으로 쏙 집어넣음 -->
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; padding: 0 4px;">
-        <div style="font-size: 16px; font-weight: 900; color: var(--text-m);">최근 내역</div>
+        <div><div style="font-size: 16px; font-weight: 900; color: var(--text-m);">최근 내역</div><div style="font-size: 12px; font-weight: 600; color: var(--text-s); margin-top: 3px;">잘못 적은 줄은 눌러서 지울 수 있어요</div></div>
         <div style="display: flex; gap: 12px; align-items: center;">
             <button onclick="window.toggleHistory()" style="background: transparent; color: #A3958A; border: none; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0;">지난달 내역 ›</button>
         </div>
@@ -3628,7 +3633,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261109-3"></script>
+<script src="script.js?v=20261114-1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>

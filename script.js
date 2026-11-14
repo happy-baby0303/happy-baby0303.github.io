@@ -1341,42 +1341,36 @@ window.analyzeMoney = function() {
         }
     }
 
-    // 2. 인사이트 문구 & 여백 시원하게 뚫어주기 (flex와 gap 사용)
-    let maxLabel = '기저귀/위생용품';
-    if (Math.max(d, f, e) === f) maxLabel = '분유/식비';
-    if (Math.max(d, f, e) === e) maxLabel = '장난감/기타';
-
-    let insightText = "지출이 고르게 나뉘어 있어요.";
-    if (detailsTotal > 0) {
-        if (maxLabel === '기저귀/위생용품') insightText = "기저귀는 쟁여 둘수록 하나당 값이 내려가요. 쌀 때 몰아 사 두세요.";
-        else if (maxLabel === '분유/식비') insightText = "이 시기엔 흔한 비중이에요. 잘 먹는 게 먼저예요.";
-        else insightText = "중고로 사고파는 걸 섞으면 지출이 꽤 줄어요.";
+    /* 2. 숫자로 말한다.
+       ⚠️ '🏆 기저귀/위생용품 지출 비중이 가장 높아요 · 쌀 때 몰아 사 두세요' · '💡 예산 진단 결과 · 여유' 는
+          누구에게나 같은 말이라 볼 게 없었다. 남은 예산과 하루에 쓸 수 있는 돈, 어디에 얼마 썼는지를 적는다. */
+    const won = (n) => Math.round(n).toLocaleString() + '원';
+    const parts = [['위생', d], ['식비', f], ['기타', e]].filter(x => x[1] > 0).sort((x, y) => y[1] - x[1]);
+    const left = userBudget - detailsTotal;
+    let head, sub;
+    if (ym === window.moneyThisYM()) {
+        const now = new Date(), last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(), daysLeft = last - now.getDate() + 1;
+        if (left >= 0) { head = '남은 예산 ' + won(left); sub = '이번 달이 ' + daysLeft + '일 남았어요. 하루 ' + won(Math.floor(left / daysLeft / 100) * 100) + '쯤 쓸 수 있어요.'; }
+        else { head = '예산보다 ' + won(-left) + ' 더 썼어요'; sub = '이번 달이 ' + daysLeft + '일 남았어요.'; }
+    } else {
+        head = left >= 0 ? '예산에서 ' + won(left) + ' 남겼어요' : '예산보다 ' + won(-left) + ' 더 썼어요';
+        sub = window.moneyMonthLabel(ym) + ' 한 달 동안 ' + won(detailsTotal) + ' 썼어요.';
     }
-
-    let statusHtml = `<strong>안정</strong> · 무난한 비율이에요.`;
-    if (budgetPercent > 100) statusHtml = `<span style="color:var(--danger)"><strong>주의</strong> · 예산을 넘었어요. 항목을 한 번 보세요.</span>`;
-    else if (budgetPercent < 80) statusHtml = `<span style="color:var(--success)"><strong>여유</strong> · 예산 안에서 쓰고 계세요.</span>`;
+    const partLine = parts.map(x => x[0] + ' ' + won(x[1]) + ' (' + Math.round(x[1] / detailsTotal * 100) + '%)').join(' · ');
+    const saveLine = sums.saved > 0 ? '<div style="font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5; margin-top: 4px;">저축 ' + won(sums.saved) + '</div>' : '';
 
     const moneyInsightEl = document.getElementById('money-insight-detail');
     if(moneyInsightEl) {
         moneyInsightEl.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div>
-                    <div style="font-size: 14px; font-weight: 800; color: var(--text-m); margin-bottom: 4px;">
-                        🏆 ${maxLabel} 지출 비중이 가장 높아요
-                    </div>
-                    <div style="font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.4;">
-                        ${insightText}
-                    </div>
+                    <div style="font-size: 15px; font-weight: 900; color: ${left >= 0 ? 'var(--text-m)' : 'var(--danger)'}; margin-bottom: 4px;">${head}</div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5; word-break: keep-all;">${sub}</div>
                 </div>
                 <div style="height: 1px; background: var(--border); width: 100%;"></div>
                 <div>
-                    <div style="font-size: 14px; font-weight: 800; color: var(--text-m); margin-bottom: 4px;">
-                        💡 예산 진단 결과
-                    </div>
-                    <div style="font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.4;">
-                        ${statusHtml}
-                    </div>
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-m); margin-bottom: 4px;">어디에 썼나</div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5; word-break: keep-all;">${partLine}</div>${saveLine}
                 </div>
             </div>
         `;
@@ -1467,10 +1461,15 @@ window.addDailyExpense = async function(type) {
     const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     const ymNow = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');   // 달로 나누려면 연도가 있어야 한다
     let typeName = "";
+    /* ⚠️ 기록이 '위생 38,000원' 뿐이라 나중에 보면 뭘 샀는지 알 수 없었다. 한마디를 같이 남긴다 (안 적어도 된다).
+          id 는 한 줄만 골라 지우려고 붙인다 (잘못 적으면 전부 지우는 것밖에 없었다). */
+    const memoEl = document.getElementById('v-input-memo');
+    const memo = memoEl ? String(memoEl.value || '').replace(/\s+/g, ' ').trim().slice(0, 20) : '';
+    const rid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
     if(type === 'saving') {
         ledger.savedTotal += amount;
-        ledger.history.unshift({ time: timeStr, ym: ymNow, amount: amount, type: 'saving', catName: '저축' });
+        ledger.history.unshift({ id: rid, time: timeStr, ym: ymNow, amount: amount, type: 'saving', catName: '저축', memo: memo });
         if(typeof showToast === 'function') showToast(`🎉 목표 달성을 위해 ${amount.toLocaleString()}원 저금했어요`);
     } else {
         ledger.total += amount;
@@ -1478,7 +1477,7 @@ window.addDailyExpense = async function(type) {
         else if(type === 'food') { ledger.categories.food += amount; typeName = "🍼 식비"; }
         else if(type === 'etc') { ledger.categories.etc += amount; typeName = "🧸 기타"; }
         
-        ledger.history.unshift({ time: timeStr, ym: ymNow, amount: amount, type: 'expense', catName: typeName });
+        ledger.history.unshift({ id: rid, time: timeStr, ym: ymNow, amount: amount, type: 'expense', catName: typeName, memo: memo });
         if(typeof showToast === 'function') showToast(`✅ ${typeName} ${amount.toLocaleString()}원 적었어요`);
     }
     
@@ -1495,6 +1494,7 @@ window.addDailyExpense = async function(type) {
 
     // UI 리셋 및 업데이트 (버튼 다시 숨기기)
     input.value = '';
+    if (memoEl) memoEl.value = '';
     window.toggleCategoryButtons(input);
     window.resizeInput(input);
 
@@ -1584,14 +1584,46 @@ window.updateLedgerUI = function() {
                 const badge = `<span style="background:${bgColor}; color:${textColor}; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:900;">${h.catName || (isSave ? '💰 저축' : '💸 지출')}</span>`;
                 const amountColor = isSave ? '#7F77DD' : 'var(--text-m)';
 
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:16px; background:#FFF; border-radius:16px; font-size:13.5px; border:1px solid #EDE6DE; margin-bottom:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                            <div style="display:flex; align-items:center; gap:10px;">${badge} <span style="color:var(--text-s); font-size:12px; font-weight:700;">${h.time}</span></div>
-                            <span style="font-weight:900; color:${amountColor}; font-size:16px;">${Number(h.amount).toLocaleString()}원</span>
+                const escM = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+                const idx = (ledger.history || []).indexOf(h);
+                const memoLine = h.memo ? `<div style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:7px; word-break:keep-all; overflow-wrap:anywhere;">${escM(h.memo)}</div>` : '';
+                html += `<div role="button" onclick="window.ledgerRowMenu(${idx})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:16px; background:#FFF; border-radius:16px; font-size:13.5px; border:1px solid #EDE6DE; margin-bottom:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); cursor:pointer;">
+                            <div style="min-width:0;"><div style="display:flex; align-items:center; gap:10px;">${badge} <span style="color:var(--text-s); font-size:12px; font-weight:700;">${h.time}</span></div>${memoLine}</div>
+                            <span style="font-weight:900; color:${amountColor}; font-size:16px; flex-shrink:0;">${Number(h.amount).toLocaleString()}원</span>
                          </div>`;
             });
         }
         listContainer.innerHTML = html;
     }
+};
+
+/* 한 줄만 지우기 — 목록의 줄을 누르면 묻는다. 합계 · 저축 · 달 통계를 같이 되돌린다 */
+window.ledgerRowMenu = async function (idx) {
+    let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
+    const h = (ledger.history || [])[idx];
+    if (!h || typeof window.askChoice !== 'function') return;
+    const amt = Number(h.amount) || 0, isSave = h.type === 'saving';
+    const what = String(h.catName || (isSave ? '저축' : '지출')).replace(/^[^가-힣]+/, '') + ' ' + amt.toLocaleString() + '원' + (h.memo ? ' · ' + h.memo : '');
+    const how = await window.askChoice({ title: '이 기록을 지울까요?', sub: what, options: [{ label: '지우기', value: 'del', danger: true }] });
+    if (how !== 'del') return;
+    ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
+    const i = (ledger.history || []).findIndex(x => h.id ? x.id === h.id : (x.time === h.time && Number(x.amount) === amt && x.catName === h.catName && x.type === h.type));
+    if (i < 0) return;
+    ledger.history.splice(i, 1);
+    if (isSave) ledger.savedTotal = Math.max(0, (Number(ledger.savedTotal) || 0) - amt);
+    else {
+        ledger.total = Math.max(0, (Number(ledger.total) || 0) - amt);
+        const cat = String(h.catName || ''), k = cat.indexOf('위생') > -1 ? 'diaper' : cat.indexOf('식비') > -1 ? 'food' : 'etc';
+        if (ledger.categories) ledger.categories[k] = Math.max(0, (Number(ledger.categories[k]) || 0) - amt);
+    }
+    if (typeof saveLedgerToFirebase === 'function') await saveLedgerToFirebase(ledger);
+    localStorage.setItem('tosil_money_total', ledger.total);
+    const now = new Date(), monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+    const localHistory = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
+    if (localHistory[monthKey] != null) { localHistory[monthKey] = ledger.total; localStorage.setItem('TosilBabyApp', JSON.stringify(localHistory)); }
+    window.updateLedgerUI(); window.analyzeMoney();
+    if (typeof updateHomeDashboard === 'function') updateHomeDashboard();
+    if (typeof showToast === 'function') showToast('지웠어요');
 };
 
 window.resetMoneyAll = async function() {
