@@ -348,7 +348,15 @@
     function syncCode() { return localStorage.getItem("family_sync_code"); }
     function suffix() { return window.currentBabySuffix || ""; }
 
+    /* ⚠️ 할머니와 시터 선생님이 같은 '도우미' 라서 배냇함 사진 목록이 시터 폰에도 내려갔다 (화면엔 없어도 폰 안에는 있었다).
+          초대할 때 고른 이름이 할머니 · 할아버지 · 가족일 때만 받는다. 그 밖의 도우미 폰에서는 받지 않고, 받아 둔 것도 지운다.
+          도우미 폰은 어느 쪽이든 목록을 올리지 않는다 (보기만 한다). 서버 규칙도 같이 막는다 (firestore.rules isSitter). */
+    function helperPhone() { return localStorage.getItem("user_role") === "senior"; }
+    function familyHelper() { return ["할머니", "할아버지", "가족"].indexOf(localStorage.getItem("tosil_helper_label") || "") > -1; }
+    window.photoSyncAllowed = function () { return !helperPhone() || familyHelper(); };
+
     window.syncPhotosToFirebase = async function () {
+        if (helperPhone()) return;
         var code = syncCode();
         if (!code || !window.db || typeof window.setDoc !== "function" || typeof window.doc !== "function") return;
         try {
@@ -361,6 +369,13 @@
 
     var photoUnsub = null, repushTimer = null;
     window.startPhotoRealtimeSync = function () {
+        if (!window.photoSyncAllowed()) {
+            if (photoUnsub) { try { photoUnsub(); } catch (e) {} photoUnsub = null; }
+            window.__photoSyncOn = false;
+            try { if (localStorage.getItem(IDX_KEY)) localStorage.removeItem(IDX_KEY); } catch (e) {}
+            return;
+        }
+        window.__photoSyncOn = true;
         var code = syncCode();
         if (!code || !window.db || typeof window.onSnapshot !== "function" || typeof window.doc !== "function") return;
         if (photoUnsub) { try { photoUnsub(); } catch (e) {} }

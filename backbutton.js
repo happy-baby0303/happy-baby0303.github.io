@@ -59,7 +59,8 @@
         { id: "invite-bottom-sheet",    close: "hide" },   // ⚠️ index.html 에 박힌 창이다. 뒤로가기가 지워 버려서 다시 못 열었다
         { id: "milestone-bottom-sheet", close: "closeMilestoneModal" },   // 첫 순간 도감 (지우면 다시 못 연다)
         { id: "mb-photo-viewer",        close: "closePhotoViewer" },
-        { id: "gh-viewer",              close: "closeGrandViewer" },   // 할머니 · 할아버지 화면의 사진 크게 보기
+        { id: "gh-viewer",              close: "closeGrandViewer" },
+        { id: "gh-helper-sheet",        close: "closeHelperSheet" },   // 설정의 '돌봄 도우미' 창   // 할머니 · 할아버지 화면의 사진 크게 보기
         { id: "note-sheet",             close: "closeNoteSheet" },
         { id: "seal-sheet",             close: "closeSealSheet" },
         { id: "voice-sheet",            close: "closeVoiceSheet" },
