@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="139">
+    <meta name="baenaet-build" content="140">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2025,80 +2025,51 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             <!-- 🍼 퐁당맘마 (분유/수유 계산기) 패널 -->
             <!-- ========================================== -->
             <div id="panel-formula" class="panel-block" style="display:none; padding-top: 24px; padding-bottom: 24px;">
-                <!-- 1. 수유량 계산기 카드 -->
-                <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
-                    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 20px 0; color: #4A413C; letter-spacing: -0.5px;">아기 몸무게별 권장 수유량</h2>
-                    <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                        <div style="flex: 1;">
-                            <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">아기 몸무게</label>
-                            <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                                <input type="number" id="calc-weight" placeholder="0.0" step="0.1" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
-                                <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">kg</span>
-                            </div>
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">하루 몇 번 먹나요</label>
-                            <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                                <input type="number" id="calc-count" placeholder="6" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
-                                <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">회</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn-main" onclick="calcFormulaAmount()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 14px; border: none; background: rgb(127, 119, 221) !important; color: #FFFFFF !important; cursor: pointer; box-shadow: 0 4px 12px rgba(127, 119, 221, 0.25) !important;">권장량 계산하기</button>
-                    
-                    <div id="formula-amount-result" style="display: none; margin-top: 20px; background: #FBF8F3; padding: 20px; border-radius: 20px; border: 1px solid #EDE6DE; text-align: center;">
-                        <div style="font-size: 13.5px; font-weight: 800; color: #A3958A; margin-bottom: 12px;">적정 수유량 (참고용 범위)</div>
-                        <div style="font-size: 14px; font-weight: 800; color: #4A413C; margin-bottom: 4px;">하루 총 <span id="res-total-ml" style="font-size: 24px; font-weight: 900; color: #7F77DD;">0</span> ml</div>
-                        <div style="font-size: 13.5px; font-weight: 800; color: #4A413C;">1회 권장 <strong style="font-size: 18px; color: #7F77DD;" id="res-one-ml">0</strong> ml</div>
-                        <div id="formula-info-box" style="margin-top: 20px; padding: 14px; background: #FFFFFF; border-radius: 14px; border: 1px solid #EDE6DE; text-align: left;">
-                            <div id="formula-warning" style="display:none; font-size: 12px; font-weight: 900; color: #D32F2F; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #EDE6DE;">
-                                하루 1,000ml는 넘기지 않는 게 좋다고 해요. 더 먹고 싶어 하면 소아과에서 한 번 물어봐 주세요.
-                            </div>
-                            <p style="font-size: 11px; font-weight: 700; color: #A3958A; line-height: 1.5; word-break: keep-all; margin: 0;">
-                                <strong>계산 기준:</strong> 흔히 쓰는 '몸무게 1kg에 하루 130~150ml' 예요. 아기마다 먹는 양이 다르니 <strong>참고로만</strong> 봐 주세요. 또래와 견줘 보려면 툴박스 '성장' 에서 키 · 몸무게를 적어 보세요.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+<!-- ⚠️ 퐁당맘마를 다시 짰다 (formula.js 머리말) — 나이에 맞는 하루 양 · 어제 먹은 양 · 갈아타기는 시작한 날로 -->
+<div style="background: #FFFFFF; border-radius: 20px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px;">
+    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C; letter-spacing: -0.5px;">하루 분유 얼마나</h2>
+    <div id="fm-who" class="fm-who"></div>
+    <div style="display: flex; gap: 12px;">
+        <div id="fm-w-row" style="flex: 1;">
+            <label for="calc-weight" style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">아기 몸무게</label>
+            <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F0EAE2; border-radius: 14px; padding-right: 14px; box-sizing: border-box;"><input type="number" id="calc-weight" placeholder="0.0" step="0.1" oninput="window.Formula && window.Formula.paintGuide()" style="flex: 1; width: 100%; min-width: 0; padding: 15px 10px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px; font-family: inherit;"><span style="font-size: 14px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">kg</span></div>
+            <div id="fm-w-hint" style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-top: 6px; word-break: keep-all;"></div>
+        </div>
+        <div style="flex: 1;">
+            <label for="calc-count" style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">하루 몇 번 먹나요</label>
+            <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F0EAE2; border-radius: 14px; padding-right: 14px; box-sizing: border-box;"><input type="number" id="calc-count" placeholder="6" oninput="window.Formula && window.Formula.paintGuide()" style="flex: 1; width: 100%; min-width: 0; padding: 15px 10px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px; font-family: inherit;"><span style="font-size: 14px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">번</span></div>
+        </div>
+    </div>
+    <div class="fm-card-in"><div id="fm-guide"></div></div>
+    <div id="fm-yesterday" class="fm-card-in" style="display: none; text-align: left;"></div>
+</div>
 
-                <!-- 2. 분유 갈아타기 (퐁당퐁당) 카드 -->
-                <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-                    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C; letter-spacing: -0.5px;">분유 갈아타기 (퐁당퐁당)</h2>
-                    <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #F7F3ED; padding: 4px; border-radius: 14px;">
-                        <button id="pong-tab-ratio" onclick="switchPongTab('ratio')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: #FFFFFF; color: #4A413C; box-shadow: 0 2px 6px rgba(0,0,0,0.05); cursor:pointer; transition:0.2s;">비율 섞기 (조유량 같음)</button>
-<button id="pong-tab-count" onclick="switchPongTab('count')" style="flex:1; padding: 12px 0; border-radius: 10px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: #A3958A; cursor:pointer; transition:0.2s;">교차 수유 (조유량 다름)</button>
-                    </div>
-                    <div id="pong-desc" style="background: #FFF9E6; padding: 14px; border-radius: 14px; margin-bottom: 20px; font-size: 12.5px; font-weight: 700; color: #B78103; line-height: 1.5; word-break: keep-all; text-align: center;">
-                        💡 <strong>스푼당 물 양(조유량)이 같은 분유끼리</strong> 바꿀 때 써요.<br>한 젖병에 두 분유 가루를 비율대로 섞어 먹여요.
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label id="pong-input-label" style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">한 번에 먹는 양</label>
-                        <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                            <input type="number" id="pong-input-val" placeholder="예: 160" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 18px;">
-                            <span id="pong-input-unit" style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">ml</span>
-                        </div>
-                    </div>
-                    <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">바꾼 지 며칠째예요</label>
-                    <div style="display: flex; gap: 8px; margin-bottom: 24px;">
-                        <button onclick="calcPong(1, this)" class="pong-btn box-main" style="flex:1; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-m); cursor:pointer;">1~2일차</button>
-                        <button onclick="calcPong(2, this)" class="pong-btn box-main" style="flex:1; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-m); cursor:pointer;">3~4일차</button>
-                        <button onclick="calcPong(3, this)" class="pong-btn box-main" style="flex:1; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-m); cursor:pointer;">5~6일차</button>
-                    </div>
-                    <div id="pong-result" style="display: none; background: #FBF8F3; padding: 20px; border-radius: 16px; border: 1px solid #EDE6DE; text-align: center;">
-                        <div id="pong-res-title" style="font-size: 13.5px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">이렇게 타주세요</div>
-                        <div style="display: flex; justify-content: center; gap: 16px; align-items: center;">
-                            <div style="flex: 1;">
-                                <div style="font-size: 12px; font-weight: 800; color: #A3958A;">기존 분유</div>
-                                <div style="font-size: 20px; font-weight: 900; color: var(--text-m);"><span id="pong-old-val">0</span><span id="pong-old-unit" style="font-size: 13px; margin-left: 2px;">ml</span></div>
-                            </div>
-                            <div style="font-size: 18px; color: #D1D6DB; font-weight: 900;">+</div>
-                            <div style="flex: 1;">
-                                <div style="font-size: 12px; font-weight: 800; color: #7F77DD;">새 분유</div>
-                                <div style="font-size: 20px; font-weight: 900; color: #7F77DD;"><span id="pong-new-val">0</span><span id="pong-new-unit" style="font-size: 13px; margin-left: 2px;">ml</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 16px 0; color: #4A413C; letter-spacing: -0.5px;">분유 갈아타기 (퐁당퐁당)</h2>
+    <div id="fm-plan" style="display: none;"></div>
+    <div id="fm-start-box">
+        <p style="font-size: 13.5px; font-weight: 700; color: #7A6F68; line-height: 1.6; word-break: keep-all; margin: 0 0 16px 0;">
+            새 분유는 며칠에 걸쳐 조금씩 바꿔요 (기존 : 새 = 3:1 → 1:1 → 1:3 → 새 분유만). 시작한 날을 남겨 두면 오늘 비율을 알려 드리고, 짝꿍 폰에도 같이 보여요.
+        </p>
+        <div class="fm-seg">
+            <button type="button" id="fm-m-mix" class="on" onclick="window.Formula && window.Formula.method('mix')">한 병에 섞어서</button>
+            <button type="button" id="fm-m-alt" onclick="window.Formula && window.Formula.method('alt')">병째로 번갈아</button>
+        </div>
+        <div id="pong-desc" style="font-size: 12.5px; font-weight: 700; color: #7A6F68; line-height: 1.55; word-break: keep-all; margin: 0 0 16px;"></div>
+        <label id="pong-input-label" for="pong-input-val" style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s);">한 번에 먹는 양</label>
+        <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F0EAE2; border-radius: 14px; padding-right: 14px; box-sizing: border-box;"><input type="number" id="pong-input-val" placeholder="160" style="flex: 1; width: 100%; min-width: 0; padding: 15px 10px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px; font-family: inherit;"><span id="pong-input-unit" style="font-size: 14px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">ml</span></div>
+        <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s); margin-top: 16px;">얼마나 천천히</label>
+        <div class="fm-seg">
+            <button type="button" id="fm-p-1" class="on" onclick="window.Formula && window.Formula.pace(1)">하루씩 (3일)</button>
+            <button type="button" id="fm-p-2" onclick="window.Formula && window.Formula.pace(2)">이틀씩 (6일)</button>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;">
+            <label for="fm-start-date" style="font-size: 13.5px; font-weight: 800; margin-bottom: 8px; display: block; color: var(--text-s); margin: 0;">시작한 날</label>
+            <input type="date" id="fm-start-date" style="padding: 11px 12px; border: 1px solid #EDE6DE; border-radius: 12px; background: #FFF; color: var(--text-m); font-size: 14px; font-weight: 800; font-family: inherit;">
+        </div>
+        <button class="btn-main" onclick="window.Formula && window.Formula.start()" style="width: 100%; margin-top: 18px; padding: 17px; font-size: 15.5px; font-weight: 800; border-radius: 14px; border: none !important; background: #7F77DD !important; color: #FFF !important; box-shadow: none !important; cursor: pointer;">갈아타기 시작</button>
+    </div>
+</div>
             </div> <!-- panel-formula 닫기 -->
 
             <!-- ========================================== -->
@@ -3522,7 +3493,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261114-5"></script>
+<script src="script.js?v=20261114-6"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
     <script src="./heartbeat.js"></script>
@@ -3542,6 +3513,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./growthsync.js?v=1"></script>   <!-- 성장: 두 폰이 같은 키 · 몸무게 -->
 <script src="./growth.js?v=1"></script>       <!-- 성장 화면 · 원더윅스 창 -->
 <script src="./hotdeal.js?v=1"></script>      <!-- 핫딜: 1장 · 100g 값 · 산 값을 두 폰이 같이 -->
+<script src="./formula.js?v=1"></script>      <!-- 퐁당맘마: 나이에 맞는 하루 양 · 갈아타기 계획 -->
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=2"></script>
 <script src="./emotion.js?v=3"></script>

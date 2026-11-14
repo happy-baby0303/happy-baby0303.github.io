@@ -24,7 +24,7 @@ const BABY_SPECIFIC_KEYS = [
     // 단계 (stage.js) — 기다림 · 임신 중 · 태어남. 둘째만 임신 중일 수 있으니 아기마다 따로
     'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since', 'tosil_preg_qa', 'tosil_preg_weeks', 'tosil_apply', 'tosil_ready', 'tosil_news_id', 'tosil_prep',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
-    'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_milestones', 'tosil_routine_data',
+    'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',
     // 👶 배냇함도 아이별로 갈라야 한다.
     //    이게 빠져 있어서 둘째 배냇함에 첫째 사진이 그대로 보였다.
@@ -479,6 +479,10 @@ function switchTool(panelId, el) {
     /* 핫딜 — 산 값 목록 (hotdeal.js) */
     if (panelId === 'hotdeal') {
         try { if (window.Hotdeal) window.Hotdeal.open(); } catch (e) {}
+    }
+    /* 퐁당맘마 — 몸무게 · 하루 몇 번을 기록에서 먼저 채운다 (formula.js) */
+    if (panelId === 'formula') {
+        try { if (window.Formula) window.Formula.open(); } catch (e) {}
     }
 }
 
@@ -6970,6 +6974,7 @@ window.initRealtimeSync = () => {
     if (typeof startLedgerRealtimeSync === 'function') startLedgerRealtimeSync();
     if (window.GrowthSync) window.GrowthSync.listen();   // 키 · 몸무게 (예전엔 올리기만 하고 받지 않았다)
     if (window.Hotdeal) window.Hotdeal.listen();         // 핫딜 산 값 (예전엔 이 폰에만)
+    if (window.Formula) window.Formula.listen();         // 분유 갈아타기 계획 (밤에 타는 짝꿍도 오늘 비율을)
     
     if (typeof startTrackerRealtimeSync === 'function') startTrackerRealtimeSync();
     if (typeof startRoutineRealtimeSync === 'function') startRoutineRealtimeSync();
@@ -8265,155 +8270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ==========================================
-// 🍼 [툴박스] 퐁당맘마 (수유량/갈아타기) 모듈
-// ==========================================
-function calcFormulaAmount() {
-    const wVal = document.getElementById('calc-weight').value;
-    const cntVal = document.getElementById('calc-count').value;
-    
-    if (!wVal || !cntVal) return showToast("아기 몸무게와 수유 횟수를 적어 주세요");
-
-    const weight = parseFloat(wVal);
-    const count = parseInt(cntVal);
-    
-    // ✨ 범위 계산 (몸무게 * 130 ~ 150ml)
-    let minMl = Math.round(weight * 130);
-    let maxMl = Math.round(weight * 150);
-    const warningEl = document.getElementById('formula-warning');
-    
-    let displayTotal = "";
-    let displayOne = "";
-    
-    // 🚨 1,000ml 안전 잠금장치 및 텍스트 유연화
-    if (minMl >= 1000) {
-        // 1. 최소량조차 1000을 넘는 우량아 (약 7.7kg 이상) -> 무조건 최대 1000으로 고정
-        warningEl.style.display = 'block';
-        displayTotal = "최대 1,000";
-        displayOne = `최대 ${Math.round(1000 / count).toLocaleString()}`;
-    } else if (maxMl > 1000) {
-        // 2. 최대량만 1000을 넘는 경우 (약 6.7kg ~ 7.6kg) -> 최소치 ~ 최대 1000
-        warningEl.style.display = 'block';
-        displayTotal = `${minMl.toLocaleString()} ~ 최대 1,000`;
-        displayOne = `${Math.round(minMl / count).toLocaleString()} ~ 최대 ${Math.round(1000 / count).toLocaleString()}`;
-    } else {
-        // 3. 1000을 넘지 않는 뽀시래기 시절 -> 정상 범위 출력
-        warningEl.style.display = 'none';
-        displayTotal = `${minMl.toLocaleString()} ~ ${maxMl.toLocaleString()}`;
-        displayOne = `${Math.round(minMl / count).toLocaleString()} ~ ${Math.round(maxMl / count).toLocaleString()}`;
-    }
-
-    // ✨ 결과 출력
-    document.getElementById('res-total-ml').innerText = displayTotal;
-    document.getElementById('res-one-ml').innerText = displayOne;
-    
-    document.getElementById('formula-amount-result').style.display = 'block';
-    
-    // 몸무게 동기화
-    localStorage.setItem('tosil_latest_weight', weight);
-}
-
-// 퐁당퐁당 상태 변수
-let currentPongMode = 'ratio'; // 'ratio'(비율 섞기) or 'count'(횟수 섞기)
-
-function switchPongTab(mode) {
-    currentPongMode = mode;
-    const tabRatio = document.getElementById('pong-tab-ratio');
-    const tabCount = document.getElementById('pong-tab-count');
-    const desc = document.getElementById('pong-desc');
-    const label = document.getElementById('pong-input-label');
-    const input = document.getElementById('pong-input-val');
-    const unit = document.getElementById('pong-input-unit');
-
-    // 🚨 탭 바꿀 때 무조건 입력값 리셋! (200회 버그 해결)
-    input.value = '';
-
-    // 탭 디자인 및 안내 문구 변경
-    if (mode === 'ratio') {
-        tabRatio.style.background = '#FFFFFF'; tabRatio.style.color = '#4A413C'; tabRatio.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
-        tabCount.style.background = 'transparent'; tabCount.style.color = '#A3958A'; tabCount.style.boxShadow = 'none';
-        
-        desc.innerHTML = '💡 <strong>스푼당 물 양(조유량)이 같은 분유끼리</strong> 바꿀 때 써요.<br>한 젖병에 두 분유 가루를 비율대로 섞어 먹여요.';
-        label.innerText = '한 번에 먹는 양';
-        input.placeholder = '예: 160';
-        unit.innerText = 'ml';
-    } else {
-        tabCount.style.background = '#FFFFFF'; tabCount.style.color = '#4A413C'; tabCount.style.boxShadow = '0 2px 6px rgba(0,0,0,0.05)';
-        tabRatio.style.background = 'transparent'; tabRatio.style.color = '#A3958A'; tabRatio.style.boxShadow = 'none';
-        
-        desc.innerHTML = '💡 <strong>스푼당 물 양(조유량)이 다른 분유끼리</strong> 바꿀 때 써요.<br>가루를 한 병에 섞으면 농도가 맞지 않아요. 병째로 번갈아 먹여요.';
-        label.innerText = '하루 몇 병 먹나요';
-        input.placeholder = '예: 5';
-        unit.innerText = '회 (병)';
-    }
-
-    // 결과창 숨기기 & 칩 리셋
-    document.getElementById('pong-result').style.display = 'none';
-    document.querySelectorAll('.pong-btn').forEach(b => {
-        b.style.background = 'var(--bg-card)';
-        b.style.color = 'var(--text-m)';
-        b.style.border = '1px solid var(--border)';
-    });
-}
-
-function calcPong(step, btnEl) {
-    // 버튼 UI 업데이트
-    document.querySelectorAll('.pong-btn').forEach(b => {
-        b.style.background = 'var(--bg-card)';
-        b.style.color = 'var(--text-m)';
-        b.style.border = '1px solid var(--border)';
-    });
-    btnEl.style.background = '#F2F0FC';
-    btnEl.style.color = '#7F77DD';
-    btnEl.style.border = '1px solid #7F77DD';
-
-    const inputVal = parseInt(document.getElementById('pong-input-val').value);
-    
-    if (!inputVal) {
-        return showToast(currentPongMode === 'ratio' ? "⚠️ 1회 수유량(ml)을 입력해주세요" : "⚠️ 하루 총 수유 횟수를 입력해주세요");
-    }
-
-    const titleEl = document.getElementById('pong-res-title');
-    const oldValEl = document.getElementById('pong-old-val');
-    const newValEl = document.getElementById('pong-new-val');
-    const oldUnitEl = document.getElementById('pong-old-unit');
-    const newUnitEl = document.getElementById('pong-new-unit');
-
-    if (currentPongMode === 'ratio') {
-        // [비율 가루 섞기]
-        let newRatio = step === 1 ? 0.3 : (step === 2 ? 0.5 : 0.7);
-        const newMl = Math.round(inputVal * newRatio);
-        const oldMl = inputVal - newMl;
-
-        titleEl.innerText = "한 젖병에 이렇게 가루를 타주세요";
-        oldValEl.innerText = oldMl; newValEl.innerText = newMl;
-        oldUnitEl.innerText = 'ml'; newUnitEl.innerText = 'ml';
-    } else {
-        // [병 횟수 교차하기]
-        let newCount = 0;
-        if (inputVal === 4) {
-            newCount = step === 1 ? 1 : (step === 2 ? 2 : 3);
-        } else if (inputVal === 5) {
-            newCount = step === 1 ? 1 : (step === 2 ? 2 : 4);
-        } else if (inputVal >= 6) {
-            newCount = step === 1 ? 2 : (step === 2 ? 3 : inputVal - 1);
-        } else {
-            newCount = step; // 수유 횟수가 너무 적을 경우 예외처리
-        }
-        
-        const oldCount = Math.max(inputVal - newCount, 0);
-
-        titleEl.innerText = `오늘 하루 총 ${inputVal}회 중, 이렇게 교차로 먹이세요`;
-        oldValEl.innerText = oldCount; newValEl.innerText = newCount;
-        oldUnitEl.innerText = '회'; newUnitEl.innerText = '회';
-    }
-
-    document.getElementById('pong-result').style.display = 'block';
-}
-
-window.calcFormulaAmount = calcFormulaAmount;
-window.calcPong = calcPong;
-window.switchPongTab = switchPongTab;
+// 🍼 퐁당맘마 (하루 분유 얼마나 · 분유 갈아타기) — formula.js 로 옮겼다
 
 // ==========================================
 // 🗓️ [툴박스] 언제깠지 (개봉일 추적기) 모듈 + 편의성 마스터 패치
