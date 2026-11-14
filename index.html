@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="138">
+    <meta name="baenaet-build" content="139">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1842,82 +1842,61 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 </div> <!-- panel-growth 닫기 -->
 
             <div id="panel-hotdeal" class="panel-block" style="display:none; padding-top: 24px; padding-bottom: 24px;">
-    
-    <!-- 🛍️ 메인 카드: 핫딜 계산기 전체를 감싸는 둥근 흰색 쟁반 -->
-    <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-        
-    <!-- 타이틀 -->
-<h2 style="font-size: 20px; font-weight: 900; margin: 0 0 8px 0; color: #4A413C; letter-spacing: -0.5px;">핫딜 계산기</h2>
+<!-- ⚠️ 핫딜 계산기를 다시 짰다 (hotdeal.js 머리말) — 1장 · 100g 값으로 견주고, 산 값은 두 폰이 같이 본다 -->
+<div style="background: #FFFFFF; border-radius: 20px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+    <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 8px 0; color: #4A413C; letter-spacing: -0.5px;">핫딜 계산기</h2>
+    <div style="font-size: 12.5px; font-weight: 600; color: #7A6F68; margin: 0 0 14px 0; line-height: 1.4; word-break: keep-all;">
+        📢 본 서비스는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+    </div>
+    <p style="font-size: 13.5px; font-weight: 700; color: #7A6F68; line-height: 1.6; word-break: keep-all; margin: 0 0 20px 0;">
+        묶음마다 장수가 달라도 1장 값(분유는 100g 값)으로 견줘요. 산 값을 남겨 두면 다음에 이번이 싼지 알려 드려요.
+    </p>
 
-<!-- 쿠팡 파트너스 안내 문구 (안전한 가독성 + 깔끔한 토스 스타일) -->
-<div style="font-size: 12.5px; font-weight: 600; color: #7A6F68; margin: 0 0 18px 0; line-height: 1.4; word-break: keep-all;">
-    📢 본 서비스는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-</div>
+    <label class="hd-lab">무엇을 사나요</label>
+    <div id="hd-seg" class="hd-seg" role="tablist">
+        <button type="button" data-k="diaper" class="on" onclick="window.Hotdeal && window.Hotdeal.item('diaper')">기저귀</button>
+        <button type="button" data-k="wipe" onclick="window.Hotdeal && window.Hotdeal.item('wipe')">물티슈</button>
+        <button type="button" data-k="milk" onclick="window.Hotdeal && window.Hotdeal.item('milk')">분유</button>
+    </div>
+    <div id="hd-stages" class="hd-stages"></div>
 
-<!-- 무엇을 하는 칸인지 (따옴표 상자 대신 한 줄) -->
-<p style="font-size: 13.5px; font-weight: 700; color: #7A6F68; line-height: 1.6; word-break: keep-all; margin: 0 0 24px 0;">
-    낸 돈과 개수를 적으면 하나당 값을 계산해요. 전에 제일 싸게 산 값을 기억해 두었다가, 이번이 더 싼지 알려 드려요.
-</p>
-        
-        <!-- 1. 품목 선택 (모던한 회색 박스 입력칸) -->
-        <div style="margin-bottom: 24px;">
-            <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">무엇을 샀나요</label>
-            <!-- 브라우저 기본 화살표를 남겨두기 위해 appearance는 건드리지 않음 -->
-            <select id="hd-category" onchange="loadPastPrice()" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 700; outline: none; background: #FBF8F3; border: 1px solid #F7F3ED; color: var(--text-m);">
-                <option value="diaper" selected>🧻 기저귀 (1장 값으로)</option>
-                <option value="wipe">🫧 물티슈 (1팩 값으로)</option>
-                <option value="milk">🍼 분유 (1통 값으로)</option>
-            </select>
+    <div style="margin-top: 22px;">
+        <label class="hd-lab" for="hd-total-price">낸 돈</label>
+        <div class="hd-box"><input type="text" id="hd-total-price" inputmode="numeric" placeholder="45,000" onkeyup="formatNum(this)"><span>원</span></div>
+    </div>
+    <div style="margin-top: 18px;">
+        <label class="hd-lab" for="hd-qty-a">얼마나</label>
+        <div class="hd-qty">
+            <div class="hd-box"><input type="number" inputmode="numeric" id="hd-qty-a" placeholder="60"><span id="hd-unit-a">장</span></div>
+            <span class="hd-x">×</span>
+            <div class="hd-box"><input type="number" inputmode="numeric" id="hd-qty-b" placeholder="3"><span id="hd-unit-b">팩</span></div>
         </div>
-        
-        <!-- 2. 결제액 / 3. 수량 -->
-        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-            <div style="flex: 1;">
-                <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">낸 돈</label>
-                <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                    <input type="text" id="hd-total-price" inputmode="numeric" placeholder="45,000" onkeyup="formatNum(this)" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: #FF823A; font-size: 16px;">
-                    <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">원</span>
-                </div>
-            </div>
-            <div style="flex: 1;">
-                <label style="font-size: 14px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">개수</label>
-                <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                    <input type="number" id="hd-count" placeholder="180" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
-                    <span id="hd-unit-label" style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">장</span>
-                </div>
-            </div>
+        <div id="hd-qty-hint" class="hd-hint"></div>
+    </div>
+
+    <!-- ⚠️ .btn-main 의 미색 배경(index.html 5번 규칙)이 !important 라, 이 단추가 눌리지 않는 단추처럼 미색 · 회색 글씨로 나왔다.
+         주황은 색 원칙(theme.js — 주황은 금색으로)에 없어서 금색으로 -->
+    <button class="btn-main" onclick="calcHotDeal()" style="width: 100%; margin-top: 22px; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none !important; background: #B98A2E !important; color: #FFF !important; box-shadow: 0 4px 12px rgba(185, 138, 46, 0.22) !important; cursor: pointer;">
+        하나당 값 보기
+    </button>
+
+    <div id="hd-result" style="display: none; margin-top: 22px; border-top: 1px solid #F7F3ED; padding-top: 22px;">
+        <div style="background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 20px; padding: 22px 18px; text-align: center;">
+            <div id="hd-unit-of" style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 6px;">1장에</div>
+            <div id="hd-unit-price" style="font-size: 36px; font-weight: 900; color: #B98A2E; letter-spacing: -1px;">0원</div>
+            <div id="hd-verdict" class="hd-verdict"></div>
+            <p id="hd-comment" style="font-size: 13.5px; line-height: 1.6; color: var(--text-m); word-break: keep-all; font-weight: 600; margin: 0 0 14px;"></p>
+            <div id="hd-action-area"></div>
         </div>
-        
-        <!-- 4. 나의 역대 최저가 -->
-        <div style="margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <label style="font-size: 14px; font-weight: 800; margin: 0; color: #FF823A;">전에 제일 싸게 산 값 (하나당)</label>
-                <span id="hd-past-badge" style="font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 800; background: #FFF4ED; color: #E65100; border: 1px solid #FFE4D6; display: none;">지난번 값</span>
-            </div>
-            <div style="display: flex; align-items: center; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 14px; padding-right: 16px; box-sizing: border-box;">
-                <input type="number" id="hd-standard-price" placeholder="처음 계산하면 저절로 적혀요" style="flex: 1; width: 100%; min-width: 0; padding: 16px 12px; border: none; outline: none; font-weight: 900; text-align: right; background: transparent; color: var(--text-m); font-size: 16px;">
-                <span style="font-size: 15px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">원</span>
-            </div>
-        </div>
-        
-        <!-- 핫딜 판독 버튼 (디자인 평탄화) -->
-        <button class="btn-main" onclick="calcHotDeal()" style="width: 100%; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none; background: #FF823A; color: white; box-shadow: 0 4px 12px rgba(255, 130, 58, 0.25); cursor: pointer; transition: 0.2s;">
-            🔍 하나당 값 계산하기
-        </button>
-        
-        <!-- 핫딜 결과창 (처음엔 숨김 처리됨) -->
-        <div id="hd-result" style="display: none; margin-top: 24px; border-top: 1px solid #F7F3ED; padding-top: 24px;">
-            <div style="background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 20px; padding: 24px; text-align: center;">
-                <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">하나당 값은</div>
-                <div id="hd-unit-price" style="font-size: 38px; font-weight: 900; color: #FF823A; margin-bottom: 12px; letter-spacing: -1px;">0원</div>
-                <div id="hd-verdict" style="font-size: 15px; font-weight: 800; padding: 14px; border-radius: 12px; margin-bottom: 16px;"></div>
-                <p id="hd-comment" style="font-size: 13.5px; line-height: 1.6; color: var(--text-m); word-break: keep-all; font-weight: 600; margin-bottom: 16px;"></p>
-                <div id="hd-action-area"></div>
-            </div>
-        </div>
-        
     </div>
 </div>
+
+<div id="hd-log-card" style="display:none; background: #FFFFFF; border-radius: 20px; padding: 22px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-top: 14px;">
+    <div id="hd-log-title" style="font-size: 15px; font-weight: 900; color: #4A413C; margin-bottom: 4px;">산 값</div>
+    <div style="font-size: 12px; font-weight: 700; color: #8A7F78; margin-bottom: 14px;">엄마 · 아빠가 남긴 값이 같이 보여요</div>
+    <div id="hd-log"></div>
+</div>
+            </div>
 
            <div id="panel-cube" class="panel-block" style="display:none; padding-top: 24px; padding-bottom: 24px;">
     
@@ -3543,7 +3522,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261114-4"></script>
+<script src="script.js?v=20261114-5"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
     <script src="./heartbeat.js"></script>
@@ -3562,6 +3541,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./growthref.js?v=1"></script>    <!-- 성장: WHO 또래 기준 (백분위 · 곡선) -->
 <script src="./growthsync.js?v=1"></script>   <!-- 성장: 두 폰이 같은 키 · 몸무게 -->
 <script src="./growth.js?v=1"></script>       <!-- 성장 화면 · 원더윅스 창 -->
+<script src="./hotdeal.js?v=1"></script>      <!-- 핫딜: 1장 · 100g 값 · 산 값을 두 폰이 같이 -->
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=2"></script>
 <script src="./emotion.js?v=3"></script>

@@ -476,6 +476,10 @@ function switchTool(panelId, el) {
     if (panelId === 'growth') {
         try { if (window.Growth) window.Growth.open(); } catch (e) {}
     }
+    /* 핫딜 — 산 값 목록 (hotdeal.js) */
+    if (panelId === 'hotdeal') {
+        try { if (window.Hotdeal) window.Hotdeal.open(); } catch (e) {}
+    }
 }
 
 function navigateToPanel(targetPanel) {
@@ -1764,201 +1768,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 500);
 });
 
-// ==========================================
-// 🛍️ 스마트 핫딜 판독기 (역대 최저가 자유 수정 및 완벽 분리 엔진)
-// ==========================================
-
-const ITEM_UNITS = { diaper: '장', wipe: '팩', milk: '통' };
-
-// 카테고리 변경 시 내가 저장한 '최저가' 불러오기
-function loadPastPrice(isFromCalc = false) {
-    const catSelect = document.getElementById('hd-category');
-    if (!catSelect) return;
-    const cat = catSelect.value;
-    
-    let pastPrice = localStorage.getItem('tosil_hd_best_' + cat);
-    if (pastPrice && Number(pastPrice) < 50) { 
-        localStorage.removeItem('tosil_hd_best_' + cat);
-        pastPrice = null;
-    }
-
-    const inputEl = document.getElementById('hd-standard-price');
-    const badgeEl = document.getElementById('hd-past-badge');
-    
-    // ✨ 단위(장, 팩, 통) 변경
-    const unitLabelEl = document.getElementById('hd-unit-label');
-    if (unitLabelEl && ITEM_UNITS[cat]) {
-        unitLabelEl.innerText = ITEM_UNITS[cat];
-    }
-
-    // 🎯 카테고리별 현실적인 배경 숫자(Placeholder) 자동 변경
-    const priceInput = document.getElementById('hd-total-price'); 
-    const qtyInput = document.getElementById('hd-count'); 
-    const hdRes = document.getElementById('hd-result');
-
-    if (priceInput && qtyInput) {
-        if (!isFromCalc) {
-            priceInput.value = '';
-            qtyInput.value = '';
-            if (hdRes) hdRes.style.display = 'none';
-        }
-
-        if (cat === 'diaper') {
-            priceInput.placeholder = "45,000";
-            qtyInput.placeholder = "180";
-        } else if (cat === 'wipe') {
-            priceInput.placeholder = "15,000";
-            qtyInput.placeholder = "10";
-        } else if (cat === 'milk') {
-            priceInput.placeholder = "50,000";
-            qtyInput.placeholder = "1";
-        }
-    }
-
-    // 💡 [핵심 패치 1] 역대 최저가 입력창이 절대 잠겨있지 않도록 강제 해제!
-    if (inputEl) {
-        inputEl.removeAttribute('readonly');
-        inputEl.removeAttribute('disabled');
-
-        if (pastPrice) {
-            inputEl.value = pastPrice;
-            if(badgeEl) badgeEl.style.display = 'inline-block';
-        } else {
-            inputEl.value = ''; 
-            if(badgeEl) badgeEl.style.display = 'none';
-        }
-    }
-}
-window.loadPastPrice = loadPastPrice;
-
-// 🚀 앱 켤 때 및 탭 바꿀 때 자동 연동 & 💡 [핵심 패치 2] 최저가 칸을 직접 수정하면 즉시 내셔널 저장!
-document.addEventListener("DOMContentLoaded", () => {
-    const catSelect = document.getElementById('hd-category');
-    if (catSelect) {
-        catSelect.addEventListener('change', () => {
-            loadPastPrice(false);
-        });
-    }
-
-    const standardInput = document.getElementById('hd-standard-price');
-    if (standardInput) {
-        // 유저가 최저가 숫자를 직접 타이핑해서 바꾸는 순간 로컬스토리지에 곧바로 갱신 저장됨!
-        standardInput.addEventListener('input', () => {
-            const currentCat = document.getElementById('hd-category').value;
-            const newVal = Number(standardInput.value.replace(/,/g, ''));
-            if (newVal > 0) {
-                localStorage.setItem('tosil_hd_best_' + currentCat, newVal);
-            } else {
-                localStorage.removeItem('tosil_hd_best_' + currentCat);
-            }
-        });
-    }
-
-    if(typeof loadPastPrice === 'function') loadPastPrice(false);
-});
-
-function calcHotDeal() {
-    const cat = document.getElementById('hd-category').value;
-    const priceInput = document.getElementById('hd-total-price');
-    const countInput = document.getElementById('hd-count');
-    const standardInput = document.getElementById('hd-standard-price');
-    
-    const price = Number(priceInput.value.replace(/,/g,''));
-    const count = Number(countInput.value);
-    let pastPrice = Number(standardInput.value.replace(/,/g,'')); 
-    
-    if(!price || !count) return window.showToast ? window.showToast('낸 돈과 개수를 적어 주세요') : alert('낸 돈과 개수를 적어 주세요');
-    
-    const unitPrice = Math.round(price / count);
-    document.getElementById('hd-unit-price').innerText = unitPrice.toLocaleString() + "원";
-    
-    const verdictEl = document.getElementById('hd-verdict');
-    const commentEl = document.getElementById('hd-comment');
-    const unitName = ITEM_UNITS[cat];
-
-    // 과거 최저가 기록이 없거나 비정상적일 때
-    if (!pastPrice || pastPrice <= 0) {
-        verdictEl.innerHTML = `처음 계산한 값이에요`;
-        verdictEl.style.backgroundColor = "#7F77DD";
-        commentEl.innerHTML = `1${unitName}에 <strong>${unitPrice.toLocaleString()}원</strong>이에요. 다음에 살 때 이 값과 견줘 드릴게요.`;
-        
-        localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
-        standardInput.value = unitPrice;
-    } else {
-        const diffPast = pastPrice - unitPrice;
-        
-        if (diffPast > 0) {
-            verdictEl.innerHTML = `지금까지 중 제일 싸요 · 1${unitName}에 <span style="color:#FFF; font-weight:900;">${diffPast.toLocaleString()}원 덜</span>`;
-            verdictEl.style.backgroundColor = "#B98A2E";
-            commentEl.innerHTML = `전에 제일 싸게 산 값(${pastPrice.toLocaleString()}원)보다 모두 <strong>${(diffPast * count).toLocaleString()}원</strong> 아꼈어요. 이 값을 새 기준으로 적어 둘게요.`;
-            // 더 싸게 샀으므로 최저가 자동 갱신
-            localStorage.setItem('tosil_hd_best_' + cat, unitPrice);
-            standardInput.value = unitPrice;
-        } else if (diffPast < 0) {
-            verdictEl.innerHTML = `전보다 1${unitName}에 <span style="color:#FFF; font-weight:900;">${Math.abs(diffPast).toLocaleString()}원 비싸요</span>`;
-            verdictEl.style.backgroundColor = "#D32F2F";
-            commentEl.innerHTML = `전에 제일 싸게 산 값(${pastPrice.toLocaleString()}원)보다 모두 <strong>${(Math.abs(diffPast) * count).toLocaleString()}원</strong> 더 내는 셈이에요. 급하지 않다면 조금 기다려 봐도 돼요.`;
-        } else {
-            verdictEl.innerHTML = `제일 싸게 샀던 값과 같아요`;
-            verdictEl.style.backgroundColor = "#7F77DD";
-            commentEl.innerHTML = `1${unitName}에 ${pastPrice.toLocaleString()}원, 전에 제일 싸게 산 값과 똑같아요.`;
-        }
-    }
-    
-    verdictEl.style.color = "#FFF";
-    const hdRes = document.getElementById('hd-result'); if(hdRes) hdRes.style.display = 'block';
-    
-    // 품목마다 쿠팡 링크 하나 ('최저가' 는 확인할 수 없는 말이라 쓰지 않는다)
-    let coupangLink = ''; 
-    let btnText = '';
-
-    if (cat === 'diaper') {
-        coupangLink = 'https://link.coupang.com/a/fPSpeiTAD6'; 
-        btnText = '쿠팡에서 기저귀 값 보기';
-    } else if (cat === 'wipe') {
-        coupangLink = 'https://link.coupang.com/a/fPSk40HKOi';
-        btnText = '쿠팡에서 물티슈 값 보기';
-    } else if (cat === 'milk') {
-        coupangLink = 'https://link.coupang.com/a/fPSqFEMPcq';
-        btnText = '쿠팡에서 분유 값 보기';
-    }
-
-   document.getElementById('hd-action-area').innerHTML = `
-        <button class="btn-main" style="margin-top:20px; margin-bottom:8px; background:#FAF7F2 !important; color:#4A413C !important; border:1px solid #E2E8F0 !important; box-shadow:0 2px 4px rgba(0,0,0,0.02) !important; padding:16px; font-size:14.5px; font-weight:800; border-radius:14px; width:100%; display:flex; justify-content:center; align-items:center; gap:6px; cursor:pointer;" onclick="window.open('${coupangLink}', '_blank')">
-            ${btnText}
-        </button>
-        <button class="btn-main" style="margin-top:0; background:#4A413C !important; color:#FFF !important; border:none !important; box-shadow:none !important; padding:16px; font-size:14.5px; font-weight:800; border-radius:14px; width:100%; cursor:pointer;" onclick="sendHotdealToLedger(${price}, '${cat}')">
-            ${price.toLocaleString()}원 가계부로 연동하기
-        </button>
-    `;
-    
-    const badgeEl = document.getElementById('hd-past-badge');
-    if(badgeEl) badgeEl.style.display = 'inline-block';
-}
-
-async function sendHotdealToLedger(price, cat) {
-    let targetId = 'v-etc';
-    if(cat === 'diaper' || cat === 'wipe') targetId = 'v-diaper';
-    if(cat === 'milk') targetId = 'v-food';
-
-    const inputEl = document.getElementById(targetId);
-    if(inputEl) {
-        const currentVal = Number(inputEl.value.replace(/,/g, '')) || 0;
-        inputEl.value = (currentVal + price).toLocaleString();
-    }
-    
-    let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || { total: 0, savedTotal: 0, goal: "", goalAmount: 100000, history: [] };
-    ledger.total += price;
-    const now = new Date();
-    const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const ymNow = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-    if(!ledger.history) ledger.history = [];
-    ledger.history.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ts: Date.now(), by: (localStorage.getItem('user_role') === 'dad' ? 'dad' : 'mom'), time: timeStr, ym: ymNow, amount: price, type: 'expense', cat: 'etc', catName: '📦 기타', memo: '핫딜' });
-    
-    await saveLedgerToFirebase(ledger);
-    showToast(`✅ 핫딜 결제액 ${price.toLocaleString()}원을 가계부에 적었어요`);
-    directGoToolbox('money');
-}
+// 🛍️ 핫딜 계산기 — hotdeal.js 로 옮겼다 (1장 · 100g 값으로 견주고, 산 값은 두 폰이 같이 본다)
 
 // ==========================================
 // 5. 스마트 해열제 타이머 엔진 (실시간 연동형 + 하이엔드 디테일)
@@ -7159,6 +6969,7 @@ window.initRealtimeSync = () => {
     if (typeof startBatonRealtimeSync === 'function') startBatonRealtimeSync();
     if (typeof startLedgerRealtimeSync === 'function') startLedgerRealtimeSync();
     if (window.GrowthSync) window.GrowthSync.listen();   // 키 · 몸무게 (예전엔 올리기만 하고 받지 않았다)
+    if (window.Hotdeal) window.Hotdeal.listen();         // 핫딜 산 값 (예전엔 이 폰에만)
     
     if (typeof startTrackerRealtimeSync === 'function') startTrackerRealtimeSync();
     if (typeof startRoutineRealtimeSync === 'function') startRoutineRealtimeSync();
