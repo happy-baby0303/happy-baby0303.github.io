@@ -100,23 +100,24 @@
                 var F = x.F, ref = F.doc(x.db, 'baton_' + code(), 'status');
                 var rec = {
                     id: 'baton_' + Date.now(), text: text, reward: '없음', time: hhmm(), status: 'requested',
-                    by: x.user.uid, byRole: myWord(), kind: o.kind || '', from: o.from || ''
+                    by: x.user.uid, byRole: myWord(), kind: o.kind || '', from: o.from || '', at: Date.now()
                 };
                 if (Array.isArray(o.items)) rec.items = o.items.slice(0, 30);
                 /* ⚠️ 본 앱도 같은 칸(records 목록)을 통째로 쓴다. 짝꿍이 그 사이에 올린 부탁이 지워지지 않게 읽고-붙이고-쓰기를 한 번에 */
                 var write = F.runTransaction
                     ? F.runTransaction(x.db, function (t) {
                         return t.get(ref).then(function (s) {
-                            var list = s.exists() ? ((s.data() || {}).records || []) : [];
-                            list = [rec].concat(list).slice(0, 50);
-                            t.set(ref, { records: list });
+                            /* 본 앱(baton.js)이 남긴 묘비(deleted)는 그대로 둔다 — 지우면 끝낸 부탁이 되살아난다 */
+                            var cur = s.exists() ? (s.data() || {}) : {};
+                            var list = [rec].concat(cur.records || []).slice(0, 50);
+                            t.set(ref, Object.assign({}, cur, { records: list }));
                             return list;
                         });
                     })
                     : F.getDoc(ref).then(function (s) {
-                        var list = s.exists() ? ((s.data() || {}).records || []) : [];
-                        list = [rec].concat(list).slice(0, 50);
-                        return F.setDoc(ref, { records: list }).then(function () { return list; });
+                        var cur = s.exists() ? (s.data() || {}) : {};
+                        var list = [rec].concat(cur.records || []).slice(0, 50);
+                        return F.setDoc(ref, Object.assign({}, cur, { records: list })).then(function () { return list; });
                     });
                 return write.then(function (list) {
                     try { localStorage.setItem('tosil_baton_records', JSON.stringify(list)); } catch (e) {}

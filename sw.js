@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v142';
+const CACHE = 'baenaet-v143';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -179,7 +179,8 @@ const ASSETS = [
     './hotdeal.js',         /* 핫딜 계산기 */
     './formula.js',         /* 퐁당맘마 */
     './opened.js',          /* 언제깠지 같이 보기 */
-    './cube.js',            /* 냉장고 */       /* 할머니 · 할아버지 화면 */
+    './cube.js',            /* 냉장고 */
+    './baton.js',           /* 바통터치 같이 보기 */       /* 할머니 · 할아버지 화면 */
     './placefilter.js',
     './playdata.js',
     './postcard.js',

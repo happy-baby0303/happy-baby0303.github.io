@@ -36,7 +36,7 @@
         'tosil_baby', 'tosil_open_records', 'tosil_cube_records', 'tosil_cube_quicks',
         'tosil_parent_notice', 'tosil_baton_records', 'tosil_monthgift_done',
         // 성장 · 퐁당 · 언제깠지 · 냉장고를 두 폰이 같이 보게 하면서 생긴 것 (script.js 와 같게)
-        'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_open_meta', 'tosil_cube_meta',
+        'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_open_meta', 'tosil_cube_meta', 'tosil_baton_meta',
         // 큐레이터가 따로 만드는 것들도 아이마다 달라야 한다
         'tosil_food_calendar', 'tosil_passed_asked', 'tosil_my_toys',
         'tosil_playweek', 'tosil_nipple_changed', 'tosil_food_tool',

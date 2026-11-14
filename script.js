@@ -24,7 +24,7 @@ const BABY_SPECIFIC_KEYS = [
     // 단계 (stage.js) — 기다림 · 임신 중 · 태어남. 둘째만 임신 중일 수 있으니 아기마다 따로
     'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since', 'tosil_preg_qa', 'tosil_preg_weeks', 'tosil_apply', 'tosil_ready', 'tosil_news_id', 'tosil_prep',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
-    'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_open_meta', 'tosil_cube_meta', 'tosil_milestones', 'tosil_routine_data',
+    'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_open_meta', 'tosil_cube_meta', 'tosil_baton_meta', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',
     // 👶 배냇함도 아이별로 갈라야 한다.
     //    이게 빠져 있어서 둘째 배냇함에 첫째 사진이 그대로 보였다.
@@ -3148,6 +3148,8 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 
 async function saveBatonToFirebase(records) {
+    /* 부탁 단위로 합쳐서 올린다 (baton.js) — 예전엔 통째로 덮어써서 둘이 같이 만지면 한쪽 것이 지워졌다 */
+    if (window.BatonSync) return window.BatonSync.save(records);
     /* ⚠️ 예전엔 setDoc / db 를 전역으로 찾았는데, 이 앱은 window.setDoc 에 담아둔다.
           그래서 조건이 늘 false 가 되어 서버 저장을 통째로 건너뛰었다.
           내 폰 localStorage 만 바뀌고 짝꿍 폰은 그대로였다.
@@ -3197,7 +3199,7 @@ async function addCustomBaton() {
     const input = document.getElementById('baton-text');
     const rewardSelect = document.getElementById('baton-reward');
     const customInput = document.getElementById('baton-reward-custom');
-    if (!input || !input.value.trim()) return alert("부탁할 내용을 입력해 주세요");
+    if (!input || !input.value.trim()) return showToast("부탁할 내용을 적어 주세요");
     
     let reward = "없음";
     if (rewardSelect) {
@@ -3432,6 +3434,7 @@ function toggleFoodStatus(itemName) {
 // ==========================================
 let batonUnsubscribe = null;
 function startBatonRealtimeSync() {
+    if (window.BatonSync) return window.BatonSync.listen();   // 서버 것으로 통째로 바꾸지 않고 합친다 (baton.js)
     const syncCode = window.getSyncCode(); if (!syncCode) return;
     const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "baton_" + syncCode, "status") : null;
     
