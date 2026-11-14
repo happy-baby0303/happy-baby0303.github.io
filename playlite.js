@@ -378,7 +378,7 @@
     function trimOpenItems() {
         var sel = document.getElementById('open-item-type');
         if (!sel) return;
-        ['fever', 'tub_oint', 'eye_drop'].forEach(function (v) {
+        ['rx_syrup', 'fever', 'tub_oint', 'eye_drop'].forEach(function (v) {
             var o = sel.querySelector('option[value="' + v + '"]');
             if (!o) return;
             var was = o.selected;

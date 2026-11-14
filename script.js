@@ -6972,6 +6972,7 @@ window.initRealtimeSync = () => {
     if (typeof startCubeRealtimeSync === 'function') startCubeRealtimeSync();
     if (typeof startBatonRealtimeSync === 'function') startBatonRealtimeSync();
     if (typeof startLedgerRealtimeSync === 'function') startLedgerRealtimeSync();
+    if (window.OpenSync) window.OpenSync.listen();       // 언제깠지 (예전엔 이 폰에만)
     if (window.GrowthSync) window.GrowthSync.listen();   // 키 · 몸무게 (예전엔 올리기만 하고 받지 않았다)
     if (window.Hotdeal) window.Hotdeal.listen();         // 핫딜 산 값 (예전엔 이 폰에만)
     if (window.Formula) window.Formula.listen();         // 분유 갈아타기 계획 (밤에 타는 짝꿍도 오늘 비율을)
@@ -8282,115 +8283,10 @@ window.setOpenFilter = function(filter) {
     renderOpenRecords();
 };
 
-// 1. [기존 유지] 아이템 추가 기능 (이름 스마트 압축 포함)
-window.addOpenRecord = function() {
-    const typeSelect = document.getElementById('open-item-type');
-    const dateInput = document.getElementById('open-item-date');
-    
-    const typeVal = typeSelect.value;
-    const optionText = typeSelect.options[typeSelect.selectedIndex].text;
-    
-    // 이모지와 글자 분리
-    const parts = optionText.split(' ');
-    const emoji = parts[0]; 
-    let typeText = parts.slice(1).join(' '); 
-    
-    // 길고 안 예쁜 이름을 스마트하게 압축!
-    typeText = typeText.split('/')[0];
-    typeText = typeText.split('(')[0];
-    typeText = typeText.trim();
-    
-    const dateVal = dateInput.value;
-    
-    if (!dateVal) return showToast("뜯은 날짜를 골라 주세요");
-
-    // 권장 유통기한(일수) 맵핑
-    const limitMap = {
-        'formula': 21,    // 분유: 3주
-        'fever': 30,      // 시럽약: 1달
-        'tub_oint': 30,   // 소분 연고: 1달
-        'tube_oint': 180, // 튜브 연고: 6개월
-        'eye_drop': 30,   // 안약: 1달
-        'cream': 180,     // 로션/크림: 6개월
-        'puree': 2,       // 퓨레: 2일
-        'wipe': 30        // 소독티슈: 1달
-    };
-
-    const newRecord = {
-        id: 'open_' + new Date().getTime(),
-        type: typeVal,
-        name: typeText,
-        emoji: emoji,
-        openDate: dateVal,
-        limitDays: limitMap[typeVal]
-    };
-
-    let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
-    records.push(newRecord);
-    localStorage.setItem('tosil_open_records', JSON.stringify(records));
-    
-    window.currentOpenFilter = 'all'; 
-    renderOpenRecords();
-    showToast("✍️ 라벨을 붙였어요");
-};
-
-// 2. [기존 유지] 개별 삭제 기능
-window.deleteOpenRecord = function(id) {
-    showConfirm("이 기록을 삭제하시겠습니까?", function() {
-        let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
-        records = records.filter(r => r.id !== id);
-        localStorage.setItem('tosil_open_records', JSON.stringify(records));
-        renderOpenRecords();
-        showToast("🗑️ 지웠어요");
-    }, "🗑️", "삭제", "#D32F2F");
-};
-
-// 3. [신규 패치] 새로 뜯음(리필) 기능
-window.renewOpenRecord = function(id) {
-    showConfirm("이 제품을 오늘 날짜로 새로 뜯으셨나요?", function() {
-        let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
-        const todayStr = window.getSafeTodayStr();
-
-        records = records.map(record => {
-            if (record.id === id) {
-                return { ...record, openDate: todayStr };
-            }
-            return record;
-        });
-
-        localStorage.setItem('tosil_open_records', JSON.stringify(records));
-        window.renderOpenRecords();
-        showToast("🔄 오늘 새로 뜯은 걸로 바꿨어요");
-    }, "🔄", "새로 뜯음", "#7F77DD");
-};
-
-// 4. [신규 패치] 기한 만료템 한 번에 지우기 기능
-window.clearExpiredRecords = function() {
-    showConfirm("기한이 지난 아이템을 모두 비우시겠습니까?", function() {
-        let records = JSON.parse(localStorage.getItem('tosil_open_records')) || [];
-        
-        const validRecords = records.filter(record => {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const openDate = new Date(record.openDate);
-            openDate.setHours(0,0,0,0);
-            
-            const passedDays = Math.floor((today - openDate) / (1000 * 60 * 60 * 24));
-            const remainDays = record.limitDays - passedDays;
-            
-            return !(remainDays < 0); // 0일 이상 남은 것만 통과 (주기를 모르는 것은 남긴다)
-        });
-
-        const deletedCount = records.length - validRecords.length;
-
-        localStorage.setItem('tosil_open_records', JSON.stringify(validRecords));
-        window.renderOpenRecords();
-        showToast(`기한 지난 ${deletedCount}개를 치웠어요`);
-    }, "🧹", "비우기", "#D32F2F");
-};
+/* 적기 · 지우기 · 새로 뜯음 · 기한 지난 것 비우기는 opened.js — 두 폰이 같이 보게 (예전엔 이 폰에만 있었다) */
 
 // 5. [수정 패치] 언제깠지 화면 렌더링 (필터 + 리필버튼 + 대청소버튼 통합)
-/* 언제깠지 칸에 들어가는 글은 사용자가 쓴 것이다 (짝꿍 폰에서도 온다) — 그대로 넣지 않는다 */
+/* 언제깠지 칸에 들어가는 글은 사용자가 쓴 것이다 (짝꿍 폰에서도 온다 — opened.js) — 그대로 넣지 않는다 */
 function openEsc(v) {
     return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -8437,7 +8333,7 @@ window.renderOpenRecords = function() {
 
     const catGroupMap = {
         'formula': 'food', 'puree': 'food',
-        'fever': 'med', 'eye_drop': 'med',
+        'fever': 'med', 'rx_syrup': 'med', 'eye_drop': 'med',
         'tub_oint': 'skin', 'tube_oint': 'skin', 'cream': 'skin',
         'wipe': 'hygiene'
     };
@@ -8464,7 +8360,7 @@ window.renderOpenRecords = function() {
     let filteredRecords = window.currentOpenFilter === 'all' ? records : records.filter(r => (catGroupMap[r.type] || 'etc') === window.currentOpenFilter);
 
     if (filteredRecords.length === 0) {
-        html += `<div style="text-align:center; padding:20px; color:var(--text-s); font-size:13px; font-weight:700;">해당 카테고리의 품목이 없습니다.</div>`;
+        html += `<div style="text-align:center; padding:20px; color:var(--text-s); font-size:13px; font-weight:700;">이 칸엔 적어 둔 게 없어요</div>`;
     }
 
     const today = new Date();
@@ -8514,13 +8410,13 @@ window.renderOpenRecords = function() {
 
                 <div style="display:flex; gap:6px; flex-shrink:0;">
                     <button onclick="window.renewOpenRecord('${r.id}')" style="background:#F0EEFB; border:1px solid #D5D1F4; border-radius:10px; width:38px; height:38px; color:#7F77DD; cursor:pointer; font-size:15px; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="오늘 새로 뜯음">🔄</button>
-                    <button onclick="window.deleteOpenRecord('${r.id}')" style="background:#F7F3ED; border:none; border-radius:10px; width:38px; height:38px; color:#A3958A; cursor:pointer; font-size:14px; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="삭제">❌</button>
+                    <button onclick="window.deleteOpenRecord('${r.id}')" style="background:#F7F3ED; border:none; border-radius:10px; width:38px; height:38px; color:#A3958A; cursor:pointer; font-size:15px; font-weight:800; display:flex; justify-content:center; align-items:center; transition:0.2s;" title="지우기" aria-label="이 기록 지우기">✕</button>
                 </div>
             </div>
 
             <div style="display:flex; align-items:center; gap:6px; margin-top:10px; padding-left:2px; font-size:11.5px; white-space:nowrap;">
                 <span style="flex-shrink:0; display:inline-flex; align-items:center;">${statusHtml}</span>
-                <span style="color:var(--text-s); font-weight:600; flex-shrink:0;">${r.openDate.substring(5).replace('-', '.')} ${r.type === 'bottle_part' ? '교체' : '오픈'}</span>
+                <span style="color:var(--text-s); font-weight:600; flex-shrink:0;">${r.openDate.substring(5).replace('-', '.')} ${r.type === 'bottle_part' ? '교체' : '오픈'}${r.by === 'mom' ? ' · 엄마' : (r.by === 'dad' ? ' · 아빠' : '')}</span>
             </div>
 
         </div>`;
@@ -8535,9 +8431,6 @@ window.renderOpenRecords = function() {
 
     container.innerHTML = html;
 };
-
-window.addOpenRecord = addOpenRecord;
-window.deleteOpenRecord = deleteOpenRecord;
 window.renderOpenRecords = renderOpenRecords;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8553,7 +8446,9 @@ window.updateOpenItemGuide = function() {
     
     const guides = {
         'formula': '💡 습기에 약해요. 열고 나서 <strong>3주(21일) 안에</strong> 다 쓰는 게 좋아요.',
-        'fever': '💡 처방받은 시럽은 <strong>1주</strong>, 사서 연 병 시럽은 <strong>1달(30일)</strong> 안에 쓰는 게 좋아요.',
+        /* ⚠️ 예전엔 '시럽약' 하나로 묶어 말은 '처방 1주 · 병 1달' 인데 기한은 둘 다 30일로 셌다 */
+        'rx_syrup': '💡 약국에서 받은 물약은 <strong>1주(7일) 안에</strong> 먹이고, 남으면 버려요. 항생제 시럽은 냉장 보관해요.',
+        'fever': '💡 사서 연 시럽 병은 <strong>1달(30일) 안에</strong> 쓰는 게 좋아요.',
         'tub_oint': '💡 약국에서 덜어 준 둥근 통 연고는 <strong>1달(30일) 안에</strong> 써요.',
         'tube_oint': '💡 튜브형 연고(비판텐 등)는 연 뒤 <strong>6개월(180일)</strong>까지 써요.',
         'eye_drop': '💡 세균이 들어가기 쉬워요. 열고 나서 <strong>1달(30일) 안에</strong> 다 써요.',

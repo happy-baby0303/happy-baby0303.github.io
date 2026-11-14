@@ -34,7 +34,7 @@
     <!-- 🧰 안전망: 한 곳이 죽어도 나머지 화면은 살게. 제일 먼저 켜져 있어야 한다 -->
       <script src="./shared/safenet.js?v=3"></script>
     <!-- 📱 플레이 앱에서만 의료 기능을 숨긴다(웹은 그대로). 화면이 그려지기 전에 켜져야 해서 여기 둔다 -->
-      <script src="./playlite.js?v=6"></script>
+      <script src="./playlite.js?v=7"></script>
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
       <script src="./native.js?v=2"></script>
       <script src="./familyhome.js?v=1"></script>
@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="140">
+    <meta name="baenaet-build" content="141">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1699,7 +1699,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             </div>
         </div>
 
-        <button class="btn-main" onclick="calcFever()" style="width: 100%; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none; background:var(--danger); color: white; box-shadow: 0 4px 12px rgba(253, 104, 104, 0.25); cursor: pointer;">몸무게 저장하고 가이드 확인</button>
+        <!-- ⚠️ .btn-main 의 미색 규칙(!important)에 덮여 이 단추와 아래 '차트에 기록 추가하기' 가 눌리지 않는 단추처럼 보였다 -->
+        <button class="btn-main" onclick="calcFever()" style="width: 100%; padding: 18px; font-size: 16px; font-weight: 800; border-radius: 14px; border: none !important; background: #7F77DD !important; color: #FFF !important; box-shadow: none !important; cursor: pointer;">몸무게 저장하고 가이드 확인</button>
 
         <!-- 결과 출력 박스 (JS에서 제어됨) -->
         <div id="fever-result" style="display:none; margin-top:24px; border-top: 1px solid #F7F3ED; padding-top:24px;">
@@ -1764,7 +1765,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 </label>
             </div>
 
-            <button class="btn-main" onclick="addFeverRecord()" style="width: 100%; padding: 16px; border-radius: 14px; border: none; background: #5D5FEF; color: white; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(93,95,239,0.3); transition: transform 0.1s;">
+            <button class="btn-main" onclick="addFeverRecord()" style="width: 100%; padding: 16px; border-radius: 14px; border: none !important; background: #4A413C !important; color: #FFF !important; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: none !important; transition: transform 0.1s;">
                 ⏱️ 차트에 기록 추가하기
             </button>
         </div>
@@ -2084,22 +2085,35 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                         <!-- 👇 글씨를 짧고 명확하게 바꿨습니다 -->
                         <select id="open-item-type" onchange="window.updateOpenItemGuide()" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); margin-bottom: 12px;">
                             <option value="formula">🍼 분유</option>
-                            <option value="fever">💊 시럽약 (해열제/항생제)</option>
+                            <option value="rx_syrup">💊 처방받은 물약 (약국)</option>
+                        <option value="fever">💊 사서 연 시럽 병 (해열제 등)</option>
                             <option value="tub_oint">🧴 소분 통 연고 (약국)</option>
                             <option value="tube_oint">🩹 튜브형 연고 (비판텐 등)</option>
                             <option value="eye_drop">👁️ 안약/안연고</option>
                             <option value="cream">🧴 아기 로션/크림/오일</option>
                             <option value="puree">🥣 시판 퓨레/이유식</option>
                             <option value="wipe">🧼 소독티슈/물티슈</option>
+                        <option value="custom">🏷️ 직접 적기</option>
                         </select>
                         <!-- 👇 선택할 때마다 바뀌는 스마트 말풍선 추가! -->
                         <div id="open-item-guide" style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #7F77DD; background: #F0EEFB; padding: 12px 14px; border-radius: 12px; word-break: keep-all; line-height: 1.4;">
                             💡 습기에 약해요. 열고 나서 3주(21일) 안에 다 쓰는 게 좋아요.
                         </div>
+                    <!-- 직접 적기 — 이름 · 며칠 안에 (opened.js) -->
+                    <div id="open-custom" style="display:none; margin-bottom: 20px;">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="open-custom-name" maxlength="20" placeholder="무엇을 (예: 모유 저장팩)" style="flex: 1.6; min-width: 0; padding: 15px 14px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); box-sizing: border-box; font-family: inherit;">
+                            <div style="flex: 1; display:flex; align-items:center; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; padding-right:12px; box-sizing:border-box;">
+                                <input type="number" id="open-custom-days" inputmode="numeric" placeholder="30" style="flex:1; width:100%; min-width:0; padding:15px 8px; border:none; outline:none; background:transparent; font-size:15px; font-weight:900; text-align:right; color:var(--text-m); font-family:inherit;">
+                                <span style="font-size:13px; font-weight:800; color:var(--text-m); flex-shrink:0;">일 안에</span>
+                            </div>
+                        </div>
+                    </div>
                         <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">뜯은 날</label>
                         <input type="date" id="open-item-date" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); box-sizing: border-box;">
                     </div>
-                    <button class="btn-main" onclick="addOpenRecord()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 14px; border: none; background: #4A413C; color: white; cursor: pointer; margin-bottom: 24px;">📝 적어 두기</button>
+                    <!-- ⚠️ .btn-main 의 미색 규칙(!important)에 덮여 눌리지 않는 단추처럼 미색 · 회색 글씨로 나왔다 -->
+                    <button class="btn-main" onclick="addOpenRecord()" style="width: 100%; padding: 16px; font-size: 15px; font-weight: 800; border-radius: 14px; border: none !important; background: #4A413C !important; color: #FFF !important; box-shadow: none !important; cursor: pointer; margin-bottom: 24px;">적어 두기</button>
                 </div>
                 <!-- 리스트 영역 -->
                 <div style="background: #FFFFFF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
@@ -3493,7 +3507,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261114-6"></script>
+<script src="script.js?v=20261114-7"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
     <script src="./heartbeat.js"></script>
@@ -3514,6 +3528,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./growth.js?v=1"></script>       <!-- 성장 화면 · 원더윅스 창 -->
 <script src="./hotdeal.js?v=1"></script>      <!-- 핫딜: 1장 · 100g 값 · 산 값을 두 폰이 같이 -->
 <script src="./formula.js?v=1"></script>      <!-- 퐁당맘마: 나이에 맞는 하루 양 · 갈아타기 계획 -->
+<script src="./opened.js?v=1"></script>       <!-- 언제깠지: 두 폰이 같이 · 직접 적기 -->
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=2"></script>
 <script src="./emotion.js?v=3"></script>
