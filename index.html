@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="136">
+    <meta name="baenaet-build" content="137">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1578,18 +1578,24 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                         <!-- 카테고리 버튼들 -->
                         <div id="expense-category-area" style="opacity: 0.3; pointer-events: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(10px);">
                             <div style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">어디에 썼나요? 누르면 바로 남아요</div>
-                            <div style="display:flex; gap:8px; width:100%; justify-content:center;">
-                                <button class="btn-main" onclick="window.addDailyExpense('diaper')" style="flex:1; padding:16px 0; border-radius:16px; background: #F2F0FC !important; color: #6A61CE !important; border: none !important; font-weight:900; font-size:13.5px; cursor:pointer; margin:0; box-shadow: 0 4px 12px rgba(2,132,199,0.1) !important;">🧻 위생</button>
-                                <button class="btn-main" onclick="window.addDailyExpense('food')" style="flex:1; padding:16px 0; border-radius:16px; background: #ECFDF5 !important; color: #A07722 !important; border: none !important; font-weight:900; font-size:13.5px; cursor:pointer; margin:0; box-shadow: 0 4px 12px rgba(5,150,105,0.1) !important;">🍼 식비</button>
-                                <button class="btn-main" onclick="window.addDailyExpense('etc')" style="flex:1; padding:16px 0; border-radius:16px; background: #FFF4ED !important; color: #E65100 !important; border: none !important; font-weight:900; font-size:13.5px; cursor:pointer; margin:0; box-shadow: 0 4px 12px rgba(230,81,0,0.1) !important;">🧸 기타</button>
-                                <button class="btn-main" onclick="window.addDailyExpense('saving')" style="flex:1; padding:16px 0; border-radius:16px; background: #F0EEFB !important; color: #6A61CE !important; border: none !important; font-weight:900; font-size:13.5px; cursor:pointer; margin:0; box-shadow: 0 4px 12px rgba(124,58,237,0.1) !important;">💰 저축</button>
+<!-- 아기 돈 항목 일곱 (script.js MONEY_CATS 와 같은 순서) · 저축은 아래 목표 저금통에서 -->
+                            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; width:100%;">
+                                <button class="btn-main" onclick="window.addDailyExpense('diaper')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">🧷</span>기저귀·위생</button>
+                                <button class="btn-main" onclick="window.addDailyExpense('food')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">🍼</span>분유·이유식</button>
+                                <button class="btn-main" onclick="window.addDailyExpense('clothes')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">👕</span>옷</button>
+                                <button class="btn-main" onclick="window.addDailyExpense('toy')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">🧸</span>장난감·책</button>
+                                <button class="btn-main" onclick="window.addDailyExpense('gear')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">🛒</span>용품</button>
+                                <button class="btn-main" onclick="window.addDailyExpense('med')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">🏥</span>병원</button>
+                                <button class="btn-main" onclick="window.addDailyExpense('etc')" style="padding:12px 2px 11px; border-radius:14px; background:var(--bg-sub) !important; color:var(--text-m) !important; border:1px solid var(--border) !important; font-weight:800; font-size:12px; line-height:1.3; cursor:pointer; margin:0; box-shadow:none !important; word-break:keep-all;"><span style="display:block; font-size:19px; margin-bottom:3px;">📦</span>기타</button>
                             </div>
                         </div>
                     </div>
+                    <!-- 자주 적는 것 (script.js paintMoneyQuick) -->
+                    <div id="money-quick" style="display:none; margin-top:18px; padding-top:16px; border-top:1px dashed var(--border); text-align:center;"></div>
                 </div>
 
                 <!-- 🎁 2. 목표 저금통 -->
-                <div class="box-main" style="border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div class="box-main" style="border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
                     <div style="display:flex; align-items:center; gap:12px; flex: 1; min-width: 0;">
                         <div style="font-size: 32px; background: var(--bg-sub); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--border);">🎁</div>
                         <div style="flex: 1; min-width: 0;">
@@ -1602,6 +1608,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                             </div>
                         </div>
                     </div>
+                    <!-- 둘째 줄 — 첫 줄에 두면 목표액 칸이 눌려서 '500,(' 처럼 잘렸다 -->
+                    <button type="button" onclick="window.addMoneySaving()" style="order:3; flex:1 1 100%; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--bg-sub); color:var(--text-m); font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;">저금하기</button>
                     <!-- 달성률 -->
                     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #FAF4E6; padding: 12px 14px; border-radius: 16px; border: 1px solid #EBDDB8; flex-shrink: 0; min-width: 65px; box-sizing: border-box;">
                         <div style="font-size: 11px; font-weight: 900; color: #A07722; margin-bottom: 4px;">달성률</div>
@@ -1649,14 +1657,10 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; padding: 0 4px;">
         <div><div style="font-size: 16px; font-weight: 900; color: var(--text-m);">최근 내역</div><div style="font-size: 12px; font-weight: 600; color: var(--text-s); margin-top: 3px;">잘못 적은 줄은 눌러서 지울 수 있어요</div></div>
         <div style="display: flex; gap: 12px; align-items: center;">
-            <button onclick="window.toggleHistory()" style="background: transparent; color: #A3958A; border: none; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0;">지난달 내역 ›</button>
         </div>
     </div>
 
-    <!-- 지난달 내역 펼침 영역 -->
-    <div id="history-list-area" style="display: none; margin-bottom: 16px; background: var(--bg-sub); padding: 16px; border-radius: 16px; border: 1px solid var(--border);">
-        <div id="history-items"></div>
-    </div>
+    <!-- '지난달 내역' 은 뺐다 — 그달 쓴 돈이 아니라 처음부터의 합계가 찍혔다. 지난달은 위 '‹ 11월 ›' 로 넘겨 본다 -->
 
     <!-- 리스트 및 '기록 없음'이 꽂히는 공간 -->
     <div id="ledger-history-list" style="display:flex; flex-direction:column; gap:10px; min-height: 80px;">
@@ -3633,7 +3637,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261114-1"></script>
+<script src="script.js?v=20261114-3"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=1"></script>
     <script src="./heartbeat.js"></script>
@@ -3648,6 +3652,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <script src="./sitterplus.js?v=2"></script>
     <script src="./duty.js?v=3"></script>
 <script src="./graveyard.js"></script>
+<script src="./ledgersync.js?v=2"></script>   <!-- 가계부: 기록 단위로 합치기 (둘이 적어도 안 사라지게) -->
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=2"></script>
 <script src="./emotion.js?v=3"></script>

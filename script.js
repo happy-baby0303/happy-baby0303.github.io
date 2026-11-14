@@ -1099,6 +1099,8 @@ window.closeSOS = function(e) { if(e.target.id === 'sos-modal') closeSOSForce();
 // 💰 [가계부 업그레이드] 투트랙 실시간 저금통 엔진 병합
 // ==========================================
 async function saveLedgerToFirebase(data) {
+    /* 기록 단위로 합쳐서 올린다 — 둘이 적어도 한쪽이 사라지지 않게 (ledgersync.js) */
+    if (window.Ledger) return window.Ledger.save(data);
     if (typeof db !== 'undefined' && typeof setDoc === 'function') {
         const syncCode = window.getSyncCode(); if (!syncCode) return;
         // 🚨 [다둥이 패치] 가계부 저장 경로 분리
@@ -1127,14 +1129,15 @@ window.resizeInput = function(el) {
 // ==========================================
 // 🍩 토스 스타일 도넛 차트 (차트 바깥쪽 라벨 렌더링)
 // ==========================================
-function drawDonutChart(d, f, e) {
+function drawDonutChart(sums) {
     const canvas = document.getElementById('donutChart');
     if(!canvas || typeof Chart === 'undefined') return;
     const ctx = canvas.getContext('2d');
     
     if(currentDonutChart) { currentDonutChart.destroy(); }
     
-    const total = d + f + e;
+    const cats = window.MONEY_CATS.filter(c => (sums[c.k] || 0) > 0);
+    const total = cats.reduce((a, c) => a + sums[c.k], 0);
 
     const floatingLabelPlugin = {
         id: 'floatingLabels',
@@ -1147,7 +1150,7 @@ function drawDonutChart(d, f, e) {
             
             meta.data.forEach((arc, i) => {
                 const val = chart.data.datasets[0].data[i];
-                if (val === 0) return; 
+                if (val === 0 || val / total < 0.07) return;     // 작은 조각은 아래 '어디에 썼나' 에 적는다
                 
                 const pct = Math.round((val / total) * 100) + '%';
                 const labelName = chart.data.labels[i];
@@ -1175,10 +1178,10 @@ function drawDonutChart(d, f, e) {
     currentDonutChart = new Chart(ctx, { 
         type: 'doughnut', 
         data: { 
-            labels: ['위생용품', '분유/식비', '장난감/기타'], 
+            labels: cats.map(c => c.n), 
             datasets: [{ 
-                data: [d, f, e], 
-                backgroundColor: ['#7F77DD', '#B98A2E', '#FF823A'], 
+                data: cats.map(c => sums[c.k]), 
+                backgroundColor: cats.map(c => c.color), 
                 borderWidth: 0, 
             }] 
         }, 
@@ -1250,17 +1253,34 @@ window.shiftMoneyMonth = function (delta) {
 };
 
 // 그 달의 항목별 합계
+/* 아기 돈 항목 — 버튼 · 목록 딱지 · 그래프 · '어디에 썼나' 가 이 표 하나를 본다.
+   ⚠️ 예전엔 위생 · 식비 · 기타 셋이라 옷 · 장난감 · 책 · 유모차 · 병원비가 다 '기타' 였다.
+      옛 기록은 이름으로 읽는다 ('🧻 위생' → 기저귀 · 위생, '🍼 식비' → 분유 · 이유식, '🧸 기타' → 기타) */
+window.MONEY_CATS = [
+    { k: 'diaper',  e: '🧷', n: '기저귀·위생', color: '#7F77DD', words: ['기저귀', '위생'] },
+    { k: 'food',    e: '🍼', n: '분유·이유식', color: '#B98A2E', words: ['분유', '이유식', '식비'] },
+    { k: 'clothes', e: '👕', n: '옷',          color: '#D9785B', words: ['옷'] },
+    { k: 'toy',     e: '🧸', n: '장난감·책',   color: '#E8954A', words: ['장난감', '책'] },
+    { k: 'gear',    e: '🛒', n: '용품',        color: '#5E9C88', words: ['용품'] },
+    { k: 'med',     e: '🏥', n: '병원',        color: '#C0718F', words: ['병원'] },
+    { k: 'etc',     e: '📦', n: '기타',        color: '#9C9088', words: [] }
+];
+window.moneyCat = function (k) { return window.MONEY_CATS.find(c => c.k === k) || window.MONEY_CATS[window.MONEY_CATS.length - 1]; };
+window.moneyCatOf = function (h) {
+    if (h && h.cat && window.MONEY_CATS.some(c => c.k === h.cat)) return h.cat;
+    const name = String((h && h.catName) || '');
+    const hit = window.MONEY_CATS.find(c => c.words.some(w => name.indexOf(w) > -1));
+    return hit ? hit.k : 'etc';
+};
 window.moneyMonthSums = function (ym) {
     const led = JSON.parse(localStorage.getItem('tosil_ledger_data') || '{}');
-    const s = { diaper: 0, food: 0, etc: 0, saved: 0, n: 0 };
+    const s = { saved: 0, n: 0, total: 0 };
+    window.MONEY_CATS.forEach(c => { s[c.k] = 0; });
     (led.history || []).forEach(h => {
         if (window.moneyYM(h) !== ym) return;
         const a = Number(h.amount) || 0;
         if (h.type === 'saving') { s.saved += a; return; }
-        const cat = String(h.catName || "");
-        if (cat.indexOf('위생') > -1) s.diaper += a;
-        else if (cat.indexOf('식비') > -1) s.food += a;
-        else s.etc += a;
+        s[window.moneyCatOf(h)] += a; s.total += a;
         s.n++;
     });
     return s;
@@ -1282,21 +1302,48 @@ window.paintMoneyMonthBar = function (ym) {
         arrow(1, i < list.length - 1);
 };
 
+/* ⚠️ 예산이 이 폰(tosil_budget)에만 있어서, 엄마 폰과 아빠 폰의 '남은 예산' 이 서로 달랐다.
+      가계부 문서(budget · budgetAt)에 같이 둔다 — 나중에 고친 쪽이 두 폰 모두에 (ledgersync.js) */
+window.moneyBudget = function () {
+    let L = {}; try { L = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {}; } catch (e) {}
+    if (Number(L.budget) > 0) return Number(L.budget);
+    const mine = parseInt(localStorage.getItem('tosil_budget')) || 0;
+    if (mine > 0 && !window.__budgetMoved) {
+        /* 이 폰에만 있던 예산을 한 번 올린다. 시각은 1 — 다른 폰에서 새로 고친 예산이 이긴다 */
+        window.__budgetMoved = true;
+        window.saveMoneyBudget(mine, 1);
+    }
+    return mine > 0 ? mine : 500000;
+};
+window.saveMoneyBudget = function (v, at) {
+    v = parseInt(v) || 0;
+    if (v <= 0) return;
+    try { localStorage.setItem('tosil_budget', v); } catch (e) {}
+    let L = {}; try { L = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {}; } catch (e) {}
+    if (Number(L.budget) === v) return;
+    L.budget = v; L.budgetAt = at || Date.now();
+    if (typeof saveLedgerToFirebase === 'function') saveLedgerToFirebase(L);
+    else localStorage.setItem('tosil_ledger_data', JSON.stringify(L));
+};
+let moneyBudgetT = null;
+window.queueMoneyBudget = function (v) {
+    clearTimeout(moneyBudgetT);
+    moneyBudgetT = setTimeout(() => window.saveMoneyBudget(v), 900);
+};
+
 window.analyzeMoney = function() {
     const ym = window.moneyPickedYM();
     window.paintMoneyMonthBar(ym);
 
     const sums = window.moneyMonthSums(ym);
-    const d = sums.diaper;
-    const f = sums.food;
-    const e = sums.etc;
-    const detailsTotal = d + f + e;
+    const detailsTotal = sums.total;
 
+    /* 고치는 중(칸에 커서가 있을 때)만 칸의 숫자를 쓴다. 아니면 같이 쓰는 예산 */
     const budgetInput = document.getElementById('v-budget');
-    let userBudget = parseInt(localStorage.getItem('tosil_budget')) || 500000; 
-    if (budgetInput && budgetInput.value) { 
-        userBudget = parseInt(budgetInput.value.replace(/,/g, '')) || 500000; 
-        localStorage.setItem('tosil_budget', userBudget);
+    let userBudget = window.moneyBudget();
+    if (budgetInput && budgetInput.value && document.activeElement === budgetInput) {
+        userBudget = parseInt(budgetInput.value.replace(/,/g, '')) || 500000;
+        window.queueMoneyBudget(userBudget);
     }
     
     const budgetDisplayEl = document.getElementById('budget-display');
@@ -1345,7 +1392,7 @@ window.analyzeMoney = function() {
        ⚠️ '🏆 기저귀/위생용품 지출 비중이 가장 높아요 · 쌀 때 몰아 사 두세요' · '💡 예산 진단 결과 · 여유' 는
           누구에게나 같은 말이라 볼 게 없었다. 남은 예산과 하루에 쓸 수 있는 돈, 어디에 얼마 썼는지를 적는다. */
     const won = (n) => Math.round(n).toLocaleString() + '원';
-    const parts = [['위생', d], ['식비', f], ['기타', e]].filter(x => x[1] > 0).sort((x, y) => y[1] - x[1]);
+    const parts = window.MONEY_CATS.map(c => [c.n, sums[c.k]]).filter(x => x[1] > 0).sort((x, y) => y[1] - x[1]);
     const left = userBudget - detailsTotal;
     let head, sub;
     if (ym === window.moneyThisYM()) {
@@ -1380,7 +1427,7 @@ window.analyzeMoney = function() {
     if(emptyState) emptyState.style.display = 'none';
 
     if (typeof drawDonutChart === 'function') {
-        setTimeout(() => drawDonutChart(d, f, e), 100);
+        setTimeout(() => drawDonutChart(sums), 100);
     }
 }
 
@@ -1443,9 +1490,9 @@ window.toggleCategoryButtons = function(el) {
 };
 
 // 🌟 가계부 원터치 빠른 입력 (통합형 적용 완료!)
-window.addDailyExpense = async function(type) {
+window.addDailyExpense = async function(type, opt) {
     const input = document.getElementById('v-input-amount');
-    const amount = parseInt(input.value.replace(/,/g, '')) || 0;
+    const amount = (opt && opt.amount) ? Number(opt.amount) : (parseInt(input.value.replace(/,/g, '')) || 0);
     
     if(amount <= 0) {
         if(typeof showToast === 'function') return showToast("금액을 적어 주세요");
@@ -1464,21 +1511,20 @@ window.addDailyExpense = async function(type) {
     /* ⚠️ 기록이 '위생 38,000원' 뿐이라 나중에 보면 뭘 샀는지 알 수 없었다. 한마디를 같이 남긴다 (안 적어도 된다).
           id 는 한 줄만 골라 지우려고 붙인다 (잘못 적으면 전부 지우는 것밖에 없었다). */
     const memoEl = document.getElementById('v-input-memo');
-    const memo = memoEl ? String(memoEl.value || '').replace(/\s+/g, ' ').trim().slice(0, 20) : '';
+    const memo = opt ? String(opt.memo || '').slice(0, 20) : (memoEl ? String(memoEl.value || '').replace(/\s+/g, ' ').trim().slice(0, 20) : '');
     const rid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const rts = Date.now(), rby = (localStorage.getItem('user_role') === 'dad') ? 'dad' : (localStorage.getItem('user_role') === 'mom' ? 'mom' : '');
 
     if(type === 'saving') {
         ledger.savedTotal += amount;
-        ledger.history.unshift({ id: rid, time: timeStr, ym: ymNow, amount: amount, type: 'saving', catName: '저축', memo: memo });
+        ledger.history.unshift({ id: rid, ts: rts, by: rby, time: timeStr, ym: ymNow, amount: amount, type: 'saving', catName: '저축', memo: memo });
         if(typeof showToast === 'function') showToast(`🎉 목표 달성을 위해 ${amount.toLocaleString()}원 저금했어요`);
     } else {
         ledger.total += amount;
-        if(type === 'diaper') { ledger.categories.diaper += amount; typeName = "🧻 위생"; }
-        else if(type === 'food') { ledger.categories.food += amount; typeName = "🍼 식비"; }
-        else if(type === 'etc') { ledger.categories.etc += amount; typeName = "🧸 기타"; }
-        
-        ledger.history.unshift({ id: rid, time: timeStr, ym: ymNow, amount: amount, type: 'expense', catName: typeName, memo: memo });
-        if(typeof showToast === 'function') showToast(`✅ ${typeName} ${amount.toLocaleString()}원 적었어요`);
+        const C = window.moneyCat(type);
+        typeName = C.e + ' ' + C.n;
+        ledger.history.unshift({ id: rid, ts: rts, by: rby, time: timeStr, ym: ymNow, amount: amount, type: 'expense', cat: C.k, catName: typeName, memo: memo });
+        if(typeof showToast === 'function') showToast(`✅ ${memo || C.n} ${amount.toLocaleString()}원 적었어요`);
     }
     
     // 달별로 보려면 한 달치가 다 남아 있어야 한다 (30개면 두 달도 안 된다)
@@ -1486,17 +1532,17 @@ window.addDailyExpense = async function(type) {
     
     if (typeof saveLedgerToFirebase === 'function') await saveLedgerToFirebase(ledger);
     
+    /* ⚠️ 여기서 '지난달 내역' 용으로 처음부터의 합계를 그달 칸에 적었다 (그달 쓴 돈이 아니었다 · 이 폰에만 남았다).
+          지난달은 위 '‹ 11월 ›' 로 넘겨 본다 */
     localStorage.setItem('tosil_money_total', ledger.total); 
-    const curY = now.getFullYear(), curM = now.getMonth() + 1, monthKey = `${curY}-${curM}`;
-    const localHistory = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
-    localHistory[monthKey] = ledger.total;
-    localStorage.setItem('TosilBabyApp', JSON.stringify(localHistory));
 
-    // UI 리셋 및 업데이트 (버튼 다시 숨기기)
-    input.value = '';
-    if (memoEl) memoEl.value = '';
-    window.toggleCategoryButtons(input);
-    window.resizeInput(input);
+    // UI 리셋 및 업데이트 (버튼 다시 숨기기) — '자주 적는 것' 에서 누른 거면 쓰던 칸은 그대로 둔다
+    if (!opt) {
+        input.value = '';
+        if (memoEl) memoEl.value = '';
+        window.toggleCategoryButtons(input);
+        window.resizeInput(input);
+    }
 
     window.moneySelectedYM = null;          // 방금 적은 건 이번 달이니 이번 달로 돌아온다
     window.updateLedgerUI(); 
@@ -1514,6 +1560,7 @@ window.saveGoal = function() {
         const amountVal = amtEl.value.replace(/,/g, '');
         ledger.goalAmount = parseInt(amountVal) || 100000;
     }
+    ledger.goalAt = Date.now();     // 두 폰이 고치면 나중에 고친 쪽 (ledgersync.js)
     if (typeof saveLedgerToFirebase === 'function') saveLedgerToFirebase(ledger);
 };
 
@@ -1530,7 +1577,7 @@ window.updateLedgerUI = function() {
         if (typeof window.moneyMonthSums === 'function' && typeof window.moneyPickedYM === 'function') {
             const ym = window.moneyPickedYM();
             const ms = window.moneyMonthSums(ym);
-            shown = ms.diaper + ms.food + ms.etc;
+            shown = ms.total;
             const lab = document.getElementById('money-total-label');
             if (lab) {
                 lab.innerText = (ym === window.moneyThisYM() ? '이번 달' : window.moneyMonthLabel(ym)) + ' 지출 💸';
@@ -1549,9 +1596,8 @@ window.updateLedgerUI = function() {
     }
 
     const budgetInput = document.getElementById('v-budget');
-    const savedBudget = localStorage.getItem('tosil_budget');
-    if (budgetInput && document.activeElement !== budgetInput && savedBudget) {
-        budgetInput.value = Number(savedBudget).toLocaleString();
+    if (budgetInput && document.activeElement !== budgetInput && (Number(ledger.budget) > 0 || localStorage.getItem('tosil_budget'))) {
+        budgetInput.value = window.moneyBudget().toLocaleString();
         window.resizeInput(budgetInput); // 👈 앱 로딩 시 예산 칸도 넉넉하게 자동 조절
     }
 
@@ -1575,26 +1621,67 @@ window.updateLedgerUI = function() {
             rows.forEach(h => {
                 const isSave = h.type === 'saving';
                 
-                let bgColor = "#F6F2EC", textColor = "#7A6F68";
-                if(isSave) { bgColor = "#F0EEFB"; textColor = "#6A61CE"; }
-                else if(h.catName && h.catName.includes('위생')) { bgColor = "#F2F0FC"; textColor = "#6A61CE"; }
-                else if(h.catName && h.catName.includes('식비')) { bgColor = "#ECFDF5"; textColor = "#A07722"; }
-                else if(h.catName && h.catName.includes('기타')) { bgColor = "#FFF4ED"; textColor = "#E65100"; }
-
-                const badge = `<span style="background:${bgColor}; color:${textColor}; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:900;">${h.catName || (isSave ? '💰 저축' : '💸 지출')}</span>`;
+                const C = window.moneyCat(window.moneyCatOf(h));
+                const bgColor = isSave ? "#F0EEFB" : C.color + '1F', textColor = isSave ? "#6A61CE" : C.color;
+                const label = isSave ? '💰 저축' : C.e + ' ' + C.n;
+                const badge = `<span style="background:${bgColor}; color:${textColor}; padding:6px 12px; border-radius:10px; font-size:13px; font-weight:900; white-space:nowrap;">${label}</span>`;
                 const amountColor = isSave ? '#7F77DD' : 'var(--text-m)';
 
                 const escM = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
                 const idx = (ledger.history || []).indexOf(h);
+                const byTag = h.by === 'dad' || h.by === 'mom' ? `<span style="color:var(--text-s); font-size:12px; font-weight:700;">· ${h.by === 'dad' ? '아빠' : '엄마'}</span>` : '';
                 const memoLine = h.memo ? `<div style="font-size:13.5px; font-weight:800; color:var(--text-m); margin-top:7px; word-break:keep-all; overflow-wrap:anywhere;">${escM(h.memo)}</div>` : '';
                 html += `<div role="button" onclick="window.ledgerRowMenu(${idx})" style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:16px; background:#FFF; border-radius:16px; font-size:13.5px; border:1px solid #EDE6DE; margin-bottom:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); cursor:pointer;">
-                            <div style="min-width:0;"><div style="display:flex; align-items:center; gap:10px;">${badge} <span style="color:var(--text-s); font-size:12px; font-weight:700;">${h.time}</span></div>${memoLine}</div>
+                            <div style="min-width:0;"><div style="display:flex; align-items:center; gap:10px;">${badge} <span style="color:var(--text-s); font-size:12px; font-weight:700;">${h.time}</span>${byTag}</div>${memoLine}</div>
                             <span style="font-weight:900; color:${amountColor}; font-size:16px; flex-shrink:0;">${Number(h.amount).toLocaleString()}원</span>
                          </div>`;
             });
         }
         listContainer.innerHTML = html;
     }
+    if (typeof window.paintMoneyQuick === 'function') window.paintMoneyQuick();
+};
+
+/* 자주 적는 것 — 같은 항목 · 금액 · 한마디를 두 번 넘게 적었거나 한마디를 단 최근 기록. 누르면 바로 남는다.
+   ⚠️ 손으로 적는 가계부는 '적기 귀찮아서' 그만둔다. 기저귀 · 분유처럼 늘 같은 걸 사는 건 한 번에. */
+window.moneyQuickList = function () {
+    const led = JSON.parse(localStorage.getItem('tosil_ledger_data') || '{}');
+    const since = Date.now() - 90 * 86400000, map = {};
+    (led.history || []).forEach(h => {
+        if (h.type === 'saving' || !(Number(h.amount) > 0)) return;
+        if (h.ts && Number(h.ts) < since) return;
+        const cat = window.moneyCatOf(h), memo = String(h.memo || ''), key = cat + '|' + Number(h.amount) + '|' + memo;
+        if (memo === '핫딜') return;
+        if (!map[key]) map[key] = { cat: cat, amount: Number(h.amount), memo: memo, n: 0, ts: Number(h.ts) || 0 };
+        map[key].n++; map[key].ts = Math.max(map[key].ts, Number(h.ts) || 0);
+    });
+    return Object.values(map).filter(x => x.n >= 2 || x.memo)
+        .sort((a, b) => (b.n - a.n) || (b.ts - a.ts)).slice(0, 4);
+};
+window.paintMoneyQuick = function () {
+    const box = document.getElementById('money-quick'); if (!box) return;
+    const list = window.moneyQuickList();
+    window.__moneyQuick = list;
+    if (!list.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    const esc = (t) => String(t).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    box.style.display = '';
+    box.innerHTML = '<div style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-bottom: 10px;">자주 적는 것 · 누르면 바로 남아요</div>' +
+        '<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">' +
+        list.map((x, i) => { const C = window.moneyCat(x.cat);
+            return '<button type="button" onclick="window.addMoneyQuick(' + i + ')" style="max-width:100%; padding:10px 13px; border-radius:12px; border:1px solid var(--border); background:var(--bg-sub); color:var(--text-m); font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                C.e + ' ' + esc(x.memo || C.n) + ' <span style="color:var(--text-s); font-weight:700;">' + x.amount.toLocaleString() + '</span></button>'; }).join('') +
+        '</div>';
+};
+window.addMoneyQuick = function (i) {
+    const x = (window.__moneyQuick || [])[i]; if (!x) return;
+    window.addDailyExpense(x.cat, { amount: x.amount, memo: x.memo });
+};
+/* 저금 — 목표 저금통에서 따로 (지출 단추 사이에 섞여 있었다) */
+window.addMoneySaving = async function () {
+    if (typeof window.askText !== 'function') return;
+    const v = await window.askText({ title: '얼마를 모았나요?', sub: '목표 저금통에 쌓여요', placeholder: '예) 50,000', max: 12, numeric: true, yes: '저금하기' });
+    const amount = parseInt(String(v || '').replace(/[^0-9]/g, ''), 10) || 0;
+    if (amount > 0) window.addDailyExpense('saving', { amount: amount, memo: '' });
 };
 
 /* 한 줄만 지우기 — 목록의 줄을 누르면 묻는다. 합계 · 저축 · 달 통계를 같이 되돌린다 */
@@ -1606,6 +1693,14 @@ window.ledgerRowMenu = async function (idx) {
     const what = String(h.catName || (isSave ? '저축' : '지출')).replace(/^[^가-힣]+/, '') + ' ' + amt.toLocaleString() + '원' + (h.memo ? ' · ' + h.memo : '');
     const how = await window.askChoice({ title: '이 기록을 지울까요?', sub: what, options: [{ label: '지우기', value: 'del', danger: true }] });
     if (how !== 'del') return;
+    /* 지운 것도 짝꿍 폰에 알린다 — 안 그러면 합칠 때 되살아난다 (ledgersync.js 묘비) */
+    if (window.Ledger && h.id) {
+        await window.Ledger.remove(h.id);
+        window.updateLedgerUI(); window.analyzeMoney();
+        if (typeof updateHomeDashboard === 'function') updateHomeDashboard();
+        if (typeof showToast === 'function') showToast('지웠어요');
+        return;
+    }
     ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
     const i = (ledger.history || []).findIndex(x => h.id ? x.id === h.id : (x.time === h.time && Number(x.amount) === amt && x.catName === h.catName && x.type === h.type));
     if (i < 0) return;
@@ -1618,48 +1713,41 @@ window.ledgerRowMenu = async function (idx) {
     }
     if (typeof saveLedgerToFirebase === 'function') await saveLedgerToFirebase(ledger);
     localStorage.setItem('tosil_money_total', ledger.total);
-    const now = new Date(), monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
-    const localHistory = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
-    if (localHistory[monthKey] != null) { localHistory[monthKey] = ledger.total; localStorage.setItem('TosilBabyApp', JSON.stringify(localHistory)); }
     window.updateLedgerUI(); window.analyzeMoney();
     if (typeof updateHomeDashboard === 'function') updateHomeDashboard();
     if (typeof showToast === 'function') showToast('지웠어요');
 };
 
 window.resetMoneyAll = async function() {
-    /* ⚠️ 브라우저 기본 확인 창을 두 번 띄웠다 ('모든 달 지출을 지울까요' → '과거 월별 통계까지 지울까요').
-          한 창에서 고른다. 예산 · 목표는 어느 쪽이든 그대로 둔다. */
+    /* 이번 달만 · 모두 — 예산과 목표는 그대로. 비운 것은 짝꿍 폰에서도 다시 들어오지 않는다 (ledgersync.js) */
+    const ym = (typeof window.moneyPickedYM === 'function') ? window.moneyPickedYM() : '';
+    const label = ym && typeof window.moneyMonthLabel === 'function' ? window.moneyMonthLabel(ym) : '이번 달';
     const how = await window.askChoice({
         title: '가계부를 비울까요?',
-        sub: '예산과 목표는 그대로 둬요',
+        sub: '예산과 목표는 그대로 둬요. 엄마 · 아빠 폰 모두에서 지워져요',
         options: [
-            { label: '지출 기록만 지우기', value: 'spend' },
-            { label: '지난 달 통계까지 모두 지우기', value: 'all', danger: true }
+            { label: label + ' 기록만 지우기', value: 'month' },
+            { label: '모든 기록 지우기', value: 'all', danger: true }
         ]
     });
     if (!how) return;
-    
-    let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
-    ledger.total = 0;
-    ledger.savedTotal = 0;
-    ledger.history = [];
-    ledger.categories = { diaper: 0, food: 0, etc: 0 }; // 🌟 카테고리도 싹 비우기
-    
-    if (typeof saveLedgerToFirebase === 'function') await saveLedgerToFirebase(ledger);
-    localStorage.removeItem('tosil_money_total');
-    
-    const date = new Date();
-    const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
-    let localHistory = JSON.parse(localStorage.getItem('TosilBabyApp')) || {};
-    if (localHistory[monthKey]) {
-        delete localHistory[monthKey]; 
-        localStorage.setItem('TosilBabyApp', JSON.stringify(localHistory));
+    if (window.Ledger) {
+        if (how === 'month' && ym) await window.Ledger.clearMonth(ym); else await window.Ledger.clearAll();
+    } else {
+        let ledger = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
+        ledger.total = 0; ledger.savedTotal = 0; ledger.history = []; ledger.categories = { diaper: 0, food: 0, etc: 0 };
+        if (typeof saveLedgerToFirebase === 'function') await saveLedgerToFirebase(ledger);
+    }
+    localStorage.removeItem('TosilBabyApp');
+    const L = JSON.parse(localStorage.getItem('tosil_ledger_data') || '{}');
+    localStorage.setItem('tosil_money_total', L.total || 0);
+    if (L.history && L.history.length) {
+        window.updateLedgerUI(); window.analyzeMoney();
+        if (typeof updateHomeDashboard === 'function') updateHomeDashboard();
+        if (typeof showToast === 'function') showToast(label + ' 기록을 지웠어요');
+        return;
     }
 
-    if (how === 'all') {
-        localStorage.removeItem('TosilBabyApp');
-    }
-    
     const resBox = document.getElementById('money-result'); 
     if(resBox) resBox.style.display = 'none'; 
     const emptyState = document.getElementById('money-empty-state');
@@ -1873,7 +1961,7 @@ async function sendHotdealToLedger(price, cat) {
     const timeStr = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     const ymNow = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
     if(!ledger.history) ledger.history = [];
-    ledger.history.unshift({ time: timeStr, ym: ymNow, amount: price, type: 'expense', catName: '🧸 기타' });
+    ledger.history.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ts: Date.now(), by: (localStorage.getItem('user_role') === 'dad' ? 'dad' : 'mom'), time: timeStr, ym: ymNow, amount: price, type: 'expense', cat: 'etc', catName: '📦 기타', memo: '핫딜' });
     
     await saveLedgerToFirebase(ledger);
     showToast(`✅ 핫딜 결제액 ${price.toLocaleString()}원을 가계부에 적었어요`);
@@ -4340,6 +4428,7 @@ window.updateSyncBadge = function() {
 // ==========================================
 let ledgerUnsubscribe = null;
 function startLedgerRealtimeSync() {
+    if (window.Ledger) return window.Ledger.listen();     // 받을 때도 합친다 (ledgersync.js)
     const syncCode = window.getSyncCode(); if (!syncCode) return;
     // 🚨 [다둥이 패치] 가계부 수신 경로 분리
     const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "ledger_" + syncCode + window.currentBabySuffix, "status") : null;
@@ -8162,7 +8251,7 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
         const chips = Array.isArray(o.chips) ? o.chips : [];
         let chip = (o.chip != null) ? String(o.chip) : null;
         const r = open(head(o) +
-            '<input id="ask-text-input" type="text" maxlength="' + (Number(o.max) || 20) + '" autocomplete="off" placeholder="' + esc(o.placeholder || '') + '" value="' + esc(o.value || '') + '" ' +
+            '<input id="ask-text-input" type="text"' + (o.numeric ? ' inputmode="numeric"' : '') + ' maxlength="' + (Number(o.max) || 20) + '" autocomplete="off" placeholder="' + esc(o.placeholder || '') + '" value="' + esc(o.value || '') + '" ' +
                 'style="width:100%; box-sizing:border-box; margin-top:14px; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:#FBF8F3; color:var(--text-m); font-size:16px; font-weight:800; font-family:inherit; outline:none;">' +
             (chips.length ? '<div data-chips="1" style="display:flex; gap:8px; margin-top:10px; border-radius:14px;">' + chips.map((c) =>
                 '<button type="button" data-chip="' + esc(c.value) + '" style="flex:1; padding:12px 6px; border-radius:12px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap;">' + esc(c.label) + '</button>').join('') + '</div>' : '') +
