@@ -67,7 +67,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="141">
+    <meta name="baenaet-build" content="142">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1921,6 +1921,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             <select id="cube-category" style="width: 90px; flex-shrink: 0; box-sizing: border-box; padding: 14px 4px; border-radius: 12px; background: #FBF8F3; border: 1px solid #EDE6DE; font-weight: 800; font-size: 13px; color: #4A413C; outline:none; text-align:center;">
                 <option value="meat">🥩 고기</option>
                 <option value="veg">🥦 채소</option>
+                <option value="fruit">🍎 과일</option>
+                <option value="soup">🍲 육수·죽</option>
+                <option value="etc">🧊 기타</option>
             </select>
             <input type="text" id="cube-name" placeholder="직접 입력 (예: 소고기)" style="flex:1; min-width:0; box-sizing: border-box; padding:14px 10px; border-radius:12px; background: #FBF8F3; border: 1px solid #EDE6DE; font-size: 13px; font-weight: 800; color: #4A413C; outline:none;">
         </div>
@@ -3507,7 +3510,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261114-7"></script>
+<script src="script.js?v=20261114-8"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
     <script src="./heartbeat.js"></script>
@@ -3529,6 +3532,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./hotdeal.js?v=1"></script>      <!-- 핫딜: 1장 · 100g 값 · 산 값을 두 폰이 같이 -->
 <script src="./formula.js?v=1"></script>      <!-- 퐁당맘마: 나이에 맞는 하루 양 · 갈아타기 계획 -->
 <script src="./opened.js?v=1"></script>       <!-- 언제깠지: 두 폰이 같이 · 직접 적기 -->
+<script src="./cube.js?v=1"></script>         <!-- 냉장고: 큐브 단위로 합치기 · 혼자 쓰는 폰도 남는다 -->
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=2"></script>
 <script src="./emotion.js?v=3"></script>

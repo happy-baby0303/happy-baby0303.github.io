@@ -24,7 +24,7 @@ const BABY_SPECIFIC_KEYS = [
     // 단계 (stage.js) — 기다림 · 임신 중 · 태어남. 둘째만 임신 중일 수 있으니 아기마다 따로
     'tosil_stage', 'tosil_due_date', 'tosil_preg_checks', 'tosil_born_from_preg', 'tosil_stage_at', 'tosil_preg_log', 'tosil_preg_since', 'tosil_preg_qa', 'tosil_preg_weeks', 'tosil_apply', 'tosil_ready', 'tosil_news_id', 'tosil_prep',
     'tosil_tracker_records', 'tosil_sleep_start', 'tosil_sleep_type',
-    'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_milestones', 'tosil_routine_data',
+    'tosil_fever_records','tosil_latest_weight', 'tosil_growth_records', 'tosil_growth_gender', 'tosil_growth_meta', 'tosil_latest_height', 'tosil_pong_plan', 'tosil_open_meta', 'tosil_cube_meta', 'tosil_milestones', 'tosil_routine_data',
     'tosil_routine_date',
     // 👶 배냇함도 아이별로 갈라야 한다.
     //    이게 빠져 있어서 둘째 배냇함에 첫째 사진이 그대로 보였다.
@@ -2993,178 +2993,8 @@ function toggleDarkMode() {
 }
 window.toggleDarkMode = toggleDarkMode;
 
-// ==========================================
-// 🧊 [안심 큐브 냉장고 엔진] (실시간 동기화)
-// ==========================================
-document.addEventListener("DOMContentLoaded", async () => {
-    const _n = new Date();   // ⚠️ toISOString 은 UTC 라 아침 9시 전엔 어제 날짜가 들어갔다
-    const todayStr = _n.getFullYear() + '-' + String(_n.getMonth() + 1).padStart(2, '0') + '-' + String(_n.getDate()).padStart(2, '0');
-    const dateInput = document.getElementById('cube-date');
-    if (dateInput) dateInput.value = todayStr;
-
-    // 🔥 핵심: 이유식 화면에서 남긴 '차감 비밀 메모'가 있는지 확인!
-    let pendingSync = localStorage.getItem('tosil_cube_pending_sync');
-    if (pendingSync && typeof db !== 'undefined') {
-        let records = JSON.parse(pendingSync);
-        const syncCode = window.getSyncCode(); if (!syncCode) return;
-        try {
-            // 🚨 [다둥이 패치] 큐브 차감 경로 분리
-            await setDoc(doc(db, "cube_" + syncCode + window.currentBabySuffix, "status"), { records: records });
-            localStorage.removeItem('tosil_cube_pending_sync'); 
-        } catch(e) { console.error("차감 동기화 에러:", e); }
-    }
-});
-
-function getCubeDDayText(madeDateStr) {
-    const madeDate = new Date(madeDateStr); madeDate.setHours(0,0,0,0);
-    const today = new Date(); today.setHours(0,0,0,0);
-    
-    const diffDays = Math.floor((today - madeDate) / (1000 * 60 * 60 * 24));
-    
-    let color = "#7F77DD"; 
-    let bg = "#F2F0FC";
-    let text = `보관 ${diffDays}일차`;
-    
-    if (diffDays === 0) {
-        text = "오늘 얼림";
-        color = "#B98A2E"; 
-        bg = "#FAF4E6";
-    } else if (diffDays > 14) {
-        color = "#FF823A"; 
-        bg = "#FFF0E6";
-    } else if (diffDays < 0) {
-        text = "날짜 오류";
-        color = "#A3958A";
-        bg = "#F7F3ED";
-    }
-    
-    return `<span style="background:${bg}; color:${color}; font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; border:1px solid ${color};">${text}</span>`;
-}
-
-// 🧊 큐브 기록 추가 (토스트 적용)
-async function addCubeRecord() {
-    const cat = document.getElementById('cube-category').value;
-    const name = document.getElementById('cube-name').value.trim();
-    const date = document.getElementById('cube-date').value;
-    const qty = parseInt(document.getElementById('cube-qty').value);
-
-    if (!name || !date || isNaN(qty) || qty <= 0) {
-        return showToast("큐브 이름 · 날짜 · 개수를 적어 주세요"); // 👈 교체
-    }
-
-    const newCube = { id: "cube_" + new Date().getTime(), cat: cat, name: name, date: date, qty: qty, timestamp: new Date().getTime() };
-
-    let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
-    records.push(newCube);
-    
-    if (typeof db !== 'undefined') {
-        const syncCode = window.getSyncCode(); if (!syncCode) return;
-        // 🚨 [다둥이 패치] 큐브 추가 경로 분리
-        try { await setDoc(doc(db, "cube_" + syncCode + window.currentBabySuffix, "status"), { records: records }); } catch (e) { console.error(e); }
-    }
-
-    localStorage.setItem('tosil_cube_records', JSON.stringify(records));
-    document.getElementById('cube-name').value = '';
-    document.getElementById('cube-qty').value = '';
-    renderCubes();
-    showToast("🧊 큐브를 냉장고에 넣었어요"); // 👈 추가
-}
-
-async function useCube(id) {
-    let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
-    const index = records.findIndex(r => r.id === id);
-    if (index === -1) return;
-
-    records[index].qty -= 1;
-    
-    if (records[index].qty <= 0) {
-        records.splice(index, 1); 
-    }
-
-    if (typeof db !== 'undefined') {
-        const syncCode = window.getSyncCode(); if (!syncCode) return;
-        // 🚨 [다둥이 패치] 큐브 사용 경로 분리
-        try { await setDoc(doc(db, "cube_" + syncCode + window.currentBabySuffix, "status"), { records: records }); } 
-        catch (e) { console.error(e); }
-    }
-
-    localStorage.setItem('tosil_cube_records', JSON.stringify(records));
-    renderCubes();
-}
-
-function renderCubes() {
-    const container = document.getElementById('cube-list-container');
-    if (!container) return;
-
-    let records = JSON.parse(localStorage.getItem('tosil_cube_records')) || [];
-    
-    if (records.length === 0) {
-        container.innerHTML = `
-            <div style="text-align:center; padding:30px; background:var(--bg-sub); border-radius:16px; border:1px dashed var(--border);">
-                <div style="font-size:24px; margin-bottom:10px;">🌬️</div>
-                <div style="font-size:13.5px; font-weight:800; color:var(--text-s); line-height:1.6;">넣어 둔 큐브가 없어요<br>얼린 날을 적어 두면 오래된 것부터 보여 드려요</div>
-            </div>`;
-        return;
-    }
-
-    records.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    let html = '';
-    records.forEach(r => {
-        const icon = r.cat === 'meat' ? '🥩' : '🥦';
-        const dDayHtml = getCubeDDayText(r.date);
-        
-               // 보관 정보를 아래 단으로 내린다. 언제깠지 카드와 같은 모양.
-        // 이름·수량·버튼과 한 줄에 두면 좁은 폭에서 서로 밀어낸다.
-        html += `
-        <div style="background:var(--bg-card); border:1px solid var(--border); padding:14px 16px; border-radius:16px; margin-bottom:8px;">
-
-            <div style="display:flex; align-items:center; gap:12px;">
-                <div style="font-size:22px; background:var(--bg-sub); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${icon}</div>
-
-                <div style="flex:1; min-width:0; font-size:15px; font-weight:900; color:var(--text-m); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.name}</div>
-
-                              <button onclick="useCube('${r.id}')" style="background:#F7F3ED; color:#7A6F68; border:none; border-radius:10px; width:48px; height:38px; font-size:13.5px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">사용</button>
-            </div>
-
-            <div style="display:flex; align-items:center; gap:6px; margin-top:10px; padding-left:2px; font-size:11.5px; color:var(--text-s); white-space:nowrap;">
-                <span style="flex-shrink:0; display:inline-flex; align-items:center;">${dDayHtml}</span>
-                <span style="opacity:0.75; flex-shrink:0;">${r.date.substring(5).replace('-', '.')} 제조</span>
-                <span style="margin-left:auto; font-weight:900; color:var(--primary); font-size:13px; flex-shrink:0;">${r.qty}개</span>
-            </div>
-
-        </div>`;
-    });
-
-    container.innerHTML = html;
-}
-
-window.addCubeRecord = addCubeRecord;
-window.useCube = useCube;
-
-// ==========================================
-// 🧊 [냉장고] 파이어베이스 실시간 수신 리스너
-// ==========================================
-let cubeUnsubscribe = null;
-function startCubeRealtimeSync() {
-    const syncCode = window.getSyncCode(); if (!syncCode) return;
-    // 🚨 [다둥이 패치] 큐브 수신 경로 분리
-    const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "cube_" + syncCode + window.currentBabySuffix, "status") : null;
-    
-    if(!docRef) return; 
-
-    if (cubeUnsubscribe) cubeUnsubscribe();
-    if(typeof window.onSnapshot !== 'function') return;
-
-    cubeUnsubscribe = window.addLiveListener(window.onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            localStorage.setItem('tosil_cube_records', JSON.stringify(data.records || []));
-        }
-        if (typeof renderCubes === 'function') renderCubes();
-   }));
-}
-window.startCubeRealtimeSync = startCubeRealtimeSync;
+// 🧊 이유식 큐브 냉장고 — 넣기 · 쓰기 · 목록 · 실시간은 cube.js (큐브 단위로 합친다. 예전엔 통째로 덮어써서 둘이 쓰면 사라졌고,
+//    가족 코드가 없으면 아무것도 안 남았다)
 
 // ==========================================
 // 🧊 [안심 큐브 냉장고] 자주 쓰는 재료 커스텀 편집 엔진
@@ -3187,11 +3017,9 @@ function renderCubeQuicks() {
 
     let html = '';
     quicks.forEach((q, index) => {
-        const isMeat = q.cat === 'meat';
-        const bg = isMeat ? '#FFF0F1' : '#ECFDF5';
-        const color = isMeat ? '#D32F2F' : '#A07722';
-        const border = isMeat ? '#FFE3E3' : '#A7F3D0';
-        const icon = isMeat ? '🥩' : '🥦';
+        /* ⚠️ 고기는 경고 빨강, 채소는 민트였다 (색 원칙에 없는 색). 색은 하나로, 종류는 그림으로 */
+        const bg = '#FBF8F3', color = '#5A4D44', border = '#EDE6DE';
+        const icon = ({ meat: '🥩', veg: '🥦', fruit: '🍎', soup: '🍲', etc: '🧊' })[q.cat] || '🥦';
 
         if (isCubeQuickEditMode) {
             html += `<button onclick="deleteCubeQuick(${index})" style="flex-shrink:0; padding:8px 14px; background:#F6F2EC; color:#A3958A; border:1px dashed #D1D6DB; border-radius:20px; font-size:13px; font-weight:800; cursor:pointer; transition:0.2s;">${q.name} ❌</button>`;
@@ -3222,7 +3050,6 @@ function deleteCubeQuick(index) {
         showToast("🗑️ 지웠어요");
     }, "✂️", "삭제", "#D32F2F");
 }
-window.addCubeRecord = addCubeRecord;
 window.deleteCubeQuick = deleteCubeQuick;
 
 /* ⚠️ 이름은 기본 입력창(prompt), 종류는 기본 확인 창(confirm)으로 '고기면 [확인] · 채소면 [취소]' 라고 받았다.
@@ -3231,7 +3058,7 @@ async function addCubeQuick() {
     const got = await window.askText({
         title: '자주 쓰는 재료',
         placeholder: '예: 단호박, 대구살, 오트밀',
-        chips: [{ value: 'meat', label: '고기 · 생선' }, { value: 'veg', label: '채소 · 곡물' }],
+        chips: [{ value: 'meat', label: '고기·생선' }, { value: 'veg', label: '채소·곡물' }, { value: 'fruit', label: '과일' }, { value: 'soup', label: '육수·죽' }],
         yes: '넣기', max: 12
     });
     // 이름은 단추의 onclick 글자 안에 그대로 들어간다 — 따옴표 · 꺾쇠는 뺀다
@@ -3239,7 +3066,7 @@ async function addCubeQuick() {
     if (!name) return;
     
     let quicks = JSON.parse(localStorage.getItem('tosil_cube_quicks')) || [];
-    quicks.push({cat: got.chip === 'meat' ? 'meat' : 'veg', name: name});
+    quicks.push({cat: ['meat', 'veg', 'fruit', 'soup'].indexOf(got.chip) > -1 ? got.chip : 'veg', name: name});
     localStorage.setItem('tosil_cube_quicks', JSON.stringify(quicks));
     renderCubeQuicks();
 }
@@ -3642,7 +3469,7 @@ window.addEventListener('load', () => {
     loadAllExternalData();    
     renderBabyInfo();    
     loadBabyPhoto();    
-    renderCubes();
+    if (typeof window.renderCubes === 'function') window.renderCubes();   // cube.js
     renderBatonTasks();
     updateLedgerUI();
     updateHomeDashboard();

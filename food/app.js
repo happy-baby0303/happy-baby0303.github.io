@@ -1370,6 +1370,8 @@ window.confirmDeduction = function() {
         if(idx !== -1) {
             let currentQty = getCubeQty(cubes[idx]);
             if (currentQty > 0) {
+                /* 냉장고(cube.js)는 큐브마다 고친 시각(at)으로 합친다 — 시각을 올려야 뺀 게 이긴다 */
+                cubes[idx].at = Date.now();
                 if(cubes[idx].qty !== undefined) cubes[idx].qty = currentQty - 1; 
                 else if(cubes[idx].quantity !== undefined) cubes[idx].quantity = currentQty - 1;
                 else if(cubes[idx].count !== undefined) cubes[idx].count = currentQty - 1;
