@@ -14,6 +14,35 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css">
+    <!-- 처음 그리는 화면을 마지막 화면과 같게 (shared/settle.js 맨 위 설명).
+         · 지난번에 보던 탭(?tab=tools 로 오면 그 탭)을 스크립트가 돌기 전에 정한다
+         · '직접 조건 고르기' 는 처음부터 접혀 있다 (예전엔 펼친 '맞춤 젖병 상세 조건' 이 먼저 그려졌다가 0.2초 뒤 접혔다)
+         · 두 탭은 카드가 다 그려지고 탭 정리(bottletabs.js)가 끝날 때까지 자리 표시로 가린다. settle.js 를 못 받으면 바로, 무엇이 잘못돼도 8초 뒤엔 CSS 가 보여 준다 -->
+    <style>
+        #view-bottle-tools { display: none; }
+        html[data-tab="tools"] #view-bottle-pick { display: none; }
+        html[data-tab="tools"] #view-bottle-tools { display: block; }
+        html[data-tab="tools"] #btab-tools, html:not([data-tab="tools"]) #btab-pick { background: #FFFFFF !important; color: #4A413C !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; }
+        html[data-tab="tools"] #btab-pick, html:not([data-tab="tools"]) #btab-tools { background: transparent !important; color: #A3958A !important; box-shadow: none !important; }
+        html.cur-settle #view-bottle-pick, html.cur-settle #view-bottle-tools { opacity: 0; animation: curSettleShow 0s linear 8s forwards; }
+        #view-bottle-pick, #view-bottle-tools { transition: opacity .18s ease; }
+        html.cur-settle .legal-footer { visibility: hidden; animation: curSettleVis 0s linear 8s forwards; }
+        @keyframes curSettleShow { to { opacity: 1; } }
+        @keyframes curSettleVis { to { visibility: visible; } }
+        .cur-skel { display: none; position: relative; height: 0; overflow: visible; z-index: 1; }
+        html.cur-settle .cur-skel { display: block; }
+        .cur-skel-in { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; }
+        .cur-skel-b { background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 24px; margin-bottom: 20px; animation: curSkel 1.1s ease-in-out infinite alternate; }
+        @keyframes curSkel { from { opacity: .45; } to { opacity: .9; } }
+        .matrix-panel.bg-folded { padding: 18px 24px; margin-bottom: 20px; }
+        .matrix-panel.bg-folded > .matrix-header { margin-bottom: 0; }
+        .matrix-panel.bg-folded > :not(.matrix-header) { display: none !important; }
+    </style>
+    <script>(function () { var d = document.documentElement, t = "pick";
+        try { var q = new URLSearchParams(location.search).get("tab"); if (q === "tools" || q === "pick") localStorage.setItem("tosil_bottle_tab", q);
+              t = localStorage.getItem("tosil_bottle_tab") === "tools" ? "tools" : "pick"; } catch (e) {}
+        d.setAttribute("data-tab", t); d.classList.add("cur-settle"); d.setAttribute("data-settle", "view-bottle-pick,view-bottle-tools"); })();</script>
+    <script src="../shared/settle.js?v=3" onerror="document.documentElement.classList.remove('cur-settle')"></script>
 </head>
 <body>
 
@@ -56,6 +85,9 @@
     </header>
 
     <main class="container">
+        <!-- 제휴 고지 — 처음 그리는 화면부터 맨 위에 (예전엔 shared/disclosure.js 가 스크립트가 돈 뒤에 끼워 넣어서
+             느린 폰에서 그 아래 전부가 106px 밀려 내려갔다. 문구는 disclosure.js 와 같아야 한다 — 시험 t_cls44) -->
+        <div id="coupang-disclosure" style="display:flex; align-items:flex-start; gap:8px; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:12px 14px; margin:16px 0 20px; box-sizing:border-box;"><span style="flex-shrink:0; margin-top:2px; padding:2px 7px; border-radius:6px; background:#7A6F68; color:#FFFFFF; font-size:11px; font-weight:900; line-height:1.5;">제휴</span><span style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.65; word-break:keep-all; text-wrap:pretty;">이 페이지는 <b style="color:#4A413C;">쿠팡 파트너스 활동의 일환</b>으로, 구매가 일어나면 이에 따른 일정액의 수수료를 제공받습니다. 추천 순서와는 관계없습니다.</span></div>
         <!-- 제휴 안내 아래 · 탭 위 빈 곳을 이유식 · 놀이 큐레이터와 같게 줄인다 -->
         <div class="hero-title" style="text-align: center; margin-bottom: 12px; padding-top: 14px; padding-bottom: 12px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
@@ -81,10 +113,14 @@
             <div id="btab-pick" onclick="window.switchBottleTab && window.switchBottleTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#4A413C; box-shadow:0 2px 8px rgba(0,0,0,0.06);">젖병 고르기</div>
             <div id="btab-tools" onclick="window.switchBottleTab && window.switchBottleTab('tools')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:transparent; color:#A3958A;">쓰면서 챙길 것</div>
         </div>
+        <!-- 카드가 다 그려질 때까지 보이는 자리 표시 (shared/settle.js 가 걷어낸다) -->
+        <div class="cur-skel" data-static aria-hidden="true"><div class="cur-skel-in"><div class="cur-skel-b" style="height:300px"></div><div class="cur-skel-b" style="height:64px"></div><div class="cur-skel-b" style="height:220px"></div><div class="cur-skel-b" style="height:160px"></div></div></div>
 
         <div id="view-bottle-pick">
-<div class="matrix-panel">
-            <div class="matrix-header">맞춤 젖병 상세 조건</div>
+        <!-- 어떤 상황이신가요 · 몇 개 살까 (bottleguide.js 가 그 자리에 그린다) -->
+        <div id="bottle-guide"></div>
+<div class="matrix-panel bg-folded" id="bottle-cond">
+            <div class="matrix-header" data-folded="1" style="cursor:pointer;">직접 조건 고르기 <span id="fold-mark" style="margin-left:auto; font-size:13px; font-weight:800; color:#A3958A;">펼치기 ▾</span></div>
             <div class="matrix-grid">
                 
                 <div class="matrix-item">
@@ -192,8 +228,17 @@
         <div id="bottle-result-area"></div>
         </div>
 
-        <!-- 🧰 PLUS 모듈이 여기 안으로 들어온다 -->
-        <div id="view-bottle-tools" style="display:none;"></div>
+        <!-- 🧰 쓰면서 챙길 것 — 카드 자리를 순서대로 박아 둔다. 모듈은 자기 자리에 그린다 (예전엔 '고르기' 칸에 붙었다가 탭 정리가 옮겼다).
+             우리 집 수유 장비 · 갈 때가 된 것 · 다음에 준비할 것(bottlegear) · 젖꼭지 단계 · 안 물어요 · 모유 재고 · 쪽쪽이 · 다 쓴 물건(맨 아래).
+             PLUS 를 위로 · 무료를 위로는 bottletabs.js 가 첫 정리에서 한 번에 -->
+        <div id="view-bottle-tools">
+            <div id="bottle-gear"></div>
+            <div id="bottle-nipple"></div>
+            <div id="bottle-refuse"></div>
+            <div id="bottle-milk"></div>
+            <div id="paci-guide"></div>
+            <div id="bottle-handoff"></div>
+        </div>
 
 
         <div class="legal-footer">
@@ -216,21 +261,21 @@
     <script src="data.js?v=b8"></script>
     <script src="app.js?v=b15"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="bottleguide.js?v=b10"></script>
-    <script src="pacifier.js?v=b10"></script>
-    <script src="bottlegear.js?v=b11"></script>
-    <script src="bottlerefuse.js?v=b8"></script>
-    <script src="bottlemilk.js?v=b9"></script>
-    <script src="bottletabs.js?v=5"></script>
-    <script src="../shared/plusmark.js?v=b8"></script>
+    <script src="bottleguide.js?v=b11"></script>
+    <script src="pacifier.js?v=b11"></script>
+    <script src="bottlegear.js?v=b12"></script>
+    <script src="bottlerefuse.js?v=b9"></script>
+    <script src="bottlemilk.js?v=b10"></script>
+    <script src="bottletabs.js?v=6"></script>
+    <script src="../shared/plusmark.js?v=b9"></script>
     <!--        잠긴 PLUS 안내에 실제로 살 수 있는 문을 단다 -->
-    <script src="../shared/plusgate.js?v=4"></script>
+    <script src="../shared/plusgate.js?v=5"></script>
     <!-- ❤️ 찜을 부부가 같이 본다 -->
     <script src="../shared/favsync.js"></script>
     <!-- ← 뒤로가기: 시트 닫기 → 첫 탭으로 → 본 앱으로 -->
     <!-- 다 쓴 물건 보내기 — 당근 글 · 물려줄 말 (쓰면서 챙길 것 맨 아래 카드) -->
     <script src="../shared/handoff.js?v=1"></script>
-    <script src="../shared/handoffcards.js?v=4"></script>
+    <script src="../shared/handoffcards.js?v=5"></script>
     <script src="../shared/curatorback.js?v=4"></script> 
 
 <!-- 🚀 우측 하단 위로 가기 버튼 -->

@@ -313,16 +313,40 @@
             if (el.getAttribute && el.getAttribute("data-tail")) { tail.push(el); return false; }
             return true;
         });
+        /* 'PLUS 표시가 있는 카드 N개는 …' (plusgate.js) 는 PLUS 카드 바로 밑 — 무료로 쳐서 위로 올리면 plusgate 가 다시 내려서 오간다 */
+        var foot = [];
+        free = free.filter(function (el) {
+            if (el.classList && el.classList.contains("bnh-plus-foot")) { foot.push(el); return false; }
+            return true;
+        });
+        /* PLUS 회원 — '우리 집 수유 장비'(무료)를 '갈 때가 된 것'(PLUS) 바로 앞에.
+           ⚠️ 갈 때가 된 것은 수유 장비에 적은 날짜로 센다. 그런데 PLUS 를 위로 올리면서 둘이 떨어져,
+              무엇을 적어야 하는지 보다 '갈 때가 된 것' 을 먼저 보고 한참 내려가야 적는 곳이 나왔다 */
+        var plusUser = isPlusUser();
+        if (plusUser) {
+            var g0 = null;
+            free = free.filter(function (el) {
+                if (el.getAttribute && el.getAttribute("data-from") === "bottle-gear" && el.getAttribute("data-slot") === "0") { g0 = el; return false; }
+                return true;
+            });
+            if (g0) {
+                var gi = -1;
+                for (var q = 0; q < plus.length; q++) if (plus[q].getAttribute && plus[q].getAttribute("data-from") === "bottle-gear") { gi = q; break; }
+                if (gi > -1) plus.splice(gi, 0, g0); else free.unshift(g0);
+            }
+        }
 
-        var want = (isPlusUser()
-            ? plus.concat(free).concat(extra)
-            : free.concat(extra).concat(plus)).concat(tail);
+        var want = (plusUser
+            ? plus.concat(foot).concat(free).concat(extra)
+            : free.concat(extra).concat(plus).concat(foot)).concat(tail);
         if (want.every(function (el, i) { return kids[i] === el; })) return;
         want.forEach(function (el) { pane.appendChild(el); });
     }
 
     function paint() {
         var c = cur();
+        /* <head> 가 처음부터 이 값으로 칸과 단추를 보여 준다 (CSS). 탭을 바꾸면 같이 바꾼다 */
+        try { document.documentElement.setAttribute("data-tab", c); } catch (e) {}
         TABS.forEach(function (t) {
             var pane = document.getElementById(PANE[t.id]);
             if (pane) pane.style.display = (t.id === c) ? "block" : "none";
@@ -409,7 +433,12 @@
             paint();
             /* 칸이 이미 있으면 build 가 곧장 통과해서 아래 정리가 늦게 돈다.
                탭은 떴는데 안이 비어 보이지 않게 여기서 바로 한 번 한다. */
-            hookRefresh(); adopt(); flatten(); orderPlus();
+            /* 첫 정리 — 모듈들이 DOMContentLoaded 에 제자리에 그린 바로 뒤라 카드가 다 있다.
+               PLUS 표시를 먼저 붙이고 나서 정렬 · 접기. 끝나면 settle.js 에 알려서 한 번에 보여 준다 */
+            hookRefresh(); adopt(); flatten();
+            try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
+            orderPlus(); foldExtras();
+            try { if (typeof window.curSettleReady === "function") window.curSettleReady(); } catch (e) {}
             setTimeout(function () { adopt(); flatten(); orderPlus(); }, 250);
             setTimeout(function () { adopt(); flatten(); orderPlus(); }, 700);
             return true;
@@ -471,7 +500,7 @@
             }
             if (++tries < 20) setTimeout(go, 150);
         };
-        setTimeout(go, 120);
+        go();               // 타이머 없이 — 모듈들이 같은 DOMContentLoaded 에 이미 그렸다 (예전 0.12초 뒤)
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);

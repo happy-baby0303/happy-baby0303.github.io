@@ -651,7 +651,8 @@
     window.refreshBottleGear = paint;
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        var ex = document.getElementById(HOST);
+        if (ex) { if (!ex.firstChild) paint(); return; }          // index.html 이 '쓰면서 챙길 것' 안에 박아 둔 자리
         var anchor = document.getElementById("bottle-guide") || document.querySelector(".matrix-panel");
         if (!anchor || !anchor.parentNode) return;
         var box = document.createElement("div");

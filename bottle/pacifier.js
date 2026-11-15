@@ -376,7 +376,8 @@
     window.refreshPaci = paint;
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        var ex = document.getElementById(HOST);
+        if (ex) { if (!ex.firstChild) paint(); return; }          // index.html 이 '쓰면서 챙길 것' 안에 박아 둔 자리
         var guide = document.getElementById("bottle-guide");
         var panel = document.querySelector(".matrix-panel");
         var anchor = guide || panel;

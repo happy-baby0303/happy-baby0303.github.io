@@ -471,7 +471,8 @@
     window.refreshBottleNipple = paintNipple;
 
     function mountNipple() {
-        if (document.getElementById(NIP_HOST)) return;
+        var ex = document.getElementById(NIP_HOST);
+        if (ex) { if (!ex.firstChild) paintNipple(); return; }      // index.html 이 '쓰면서' 칸에 박아 둔 자리
         /* 처음부터 '쓰면서' 칸에 넣는다. 고르기 칸에 붙였다가 옮기면 그 사이 한 번 번쩍 보인다. */
         var tools = document.getElementById("view-bottle-tools");
         var guide = document.getElementById(HOST);
@@ -488,19 +489,35 @@
     }
 
     function mount() {
-        if (document.getElementById(HOST)) { mountNipple(); return; }
+        /* index.html 에 박아 둔 자리(#bottle-guide)가 있으면 그 자리에 그린다.
+           ⚠️ 예전엔 0.2초 뒤에 조건 카드 앞에 새로 끼워 넣어서, 느린 폰에서 그 아래가 통째로 밀려 내려갔다 */
+        var ex = document.getElementById(HOST);
+        if (ex && ex.getAttribute("data-on")) { mountNipple(); return; }
 
         /* '고르기' 칸의 직접 조건 패널을 짚는다. 다른 모듈 카드가 먼저 생겨도 헷갈리지 않게. */
-        var panel = document.querySelector("#view-bottle-pick > .matrix-panel") || document.querySelector(".matrix-panel");
+        var panel = document.getElementById("bottle-cond") || document.querySelector("#view-bottle-pick > .matrix-panel") || document.querySelector(".matrix-panel");
         if (!panel || !panel.parentNode) return;
 
-        var box = document.createElement("div");
-        box.id = HOST;
-        panel.parentNode.insertBefore(box, panel);
+        var box = ex;
+        if (!box) {
+            box = document.createElement("div");
+            box.id = HOST;
+            panel.parentNode.insertBefore(box, panel);
+        }
+        box.setAttribute("data-on", "1");
 
-        // 기존 필터 패널은 '직접 고르실 분' 용으로 접어둔다
         var head = panel.querySelector(".matrix-header");
-        if (head && !head.getAttribute("data-folded")) {
+        /* index.html 이 처음부터 접어 둔 판(#bottle-cond.bg-folded) — 펴고 접기만 단다 */
+        if (panel.id === "bottle-cond") {
+            if (head && typeof head.onclick !== "function") head.onclick = function () {
+                var folded = !panel.classList.contains("bg-folded");
+                panel.classList.toggle("bg-folded", folded);
+                var mk = document.getElementById("fold-mark");
+                if (mk) mk.textContent = folded ? "펼치기 ▾" : "접기 ▴";
+            };
+        }
+        // (옛 화면) 기존 필터 패널은 '직접 고르실 분' 용으로 접어둔다
+        else if (head && !head.getAttribute("data-folded")) {
             head.setAttribute("data-folded", "1");
             head.style.cursor = "pointer";
             head.innerHTML = '직접 조건 고르기 <span id="fold-mark" style="margin-left:auto; ' +
@@ -529,7 +546,7 @@
     /* ---------- 시작 ---------- */
 
     function boot() {
-        setTimeout(mount, 200);
+        mount();                    // 타이머 없이 — 탭 정리(bottletabs)가 첫 정리를 하기 전에 그려져 있어야 한다 (예전 0.2초)
         setTimeout(mount, 900);
     }
 
