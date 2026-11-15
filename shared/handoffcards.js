@@ -330,11 +330,13 @@
     /* ==========================================================
        붙이기 — 모듈들이 자기 카드를 다 붙인 뒤에 (탭 정리 · 접기가 6초 안에 자리를 잡는다)
        ---------------------------------------------------------- */
+    /* index.html 이 박아 둔 빈 자리(<div id="…-handoff"></div>)는 아직 안 붙은 것으로 친다 — 그 자리에 그린다 */
+    function filled(id) { var e = document.getElementById(id); return !!(e && e.firstChild); }
     function mountAll() {
-        if (document.getElementById("view-carseat-use") && !document.getElementById("carseat-handoff")) put("view-carseat-use", "carseat-handoff", seatHTML());
-        if (document.getElementById("view-stroller-use") && !document.getElementById("stroller-handoff")) put("view-stroller-use", "stroller-handoff", strollerHTML());
-        if (document.getElementById("view-bottle-tools") && !document.getElementById("bottle-handoff")) put("view-bottle-tools", "bottle-handoff", bottleHTML());
-        if (document.getElementById("my-shelf") && !document.getElementById("toy-handoff")) putToy();
+        if (document.getElementById("view-carseat-use") && !filled("carseat-handoff")) put("view-carseat-use", "carseat-handoff", seatHTML());
+        if (document.getElementById("view-stroller-use") && !filled("stroller-handoff")) put("view-stroller-use", "stroller-handoff", strollerHTML());
+        if (document.getElementById("view-bottle-tools") && !filled("bottle-handoff")) put("view-bottle-tools", "bottle-handoff", bottleHTML());
+        if (document.getElementById("my-shelf") && !filled("toy-handoff")) putToy();
         /* 카시트 · 유모차 · 젖병 — 다른 카드가 나중에 붙어도 늘 그 탭 맨 아래 */
         [["view-carseat-use", "carseat-handoff"], ["view-stroller-use", "stroller-handoff"], ["view-bottle-tools", "bottle-handoff"]].forEach(function (x) {
             var pane = document.getElementById(x[0]), el = document.getElementById(x[1]);
@@ -370,6 +372,7 @@
 
     function boot() {
         var n = 0;
+        hooks(); mountAll();        // 타이머 없이 한 번 — 보여 주기 전에 맨 아래 자리에 (예전 0.4초 뒤)
         var t = setInterval(function () {
             hooks(); mountAll();
             if (++n > 20) clearInterval(t);                   // 0.4초마다 8초 동안 — 앵커가 늦게 생겨도 붙고, 자리도 지킨다

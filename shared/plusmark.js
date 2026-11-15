@@ -210,10 +210,10 @@
         (document.head || document.documentElement).appendChild(st);
     })();
 
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () {
-        setTimeout(watch, 400);
-    });
-    else setTimeout(watch, 400);
+    /* 타이머 없이 — 탭 정리가 첫 정리 전에 refreshPlusMark 로 붙이고, 그 뒤 바뀌는 건 watch 가 본다.
+       ⚠️ 예전 0.4초 뒤에 붙어서, 그 사이 PLUS 를 위로 · 무료를 위로 정리가 제목으로 짐작해 틀린 순서를 먼저 보여 줬다 */
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", watch);
+    else watch();
 
     window.plusMarkVersion = '2026-09-28';   // 다섯 폴더가 같은 날짜여야 한다
 

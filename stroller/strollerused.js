@@ -134,14 +134,16 @@
 
     function mount() {
         var h = document.getElementById("view-stroller-use");
-        if (!h || document.getElementById(ID)) return;
+        var ex = document.getElementById(ID);
+        if (ex && !ex.firstChild) { paint(); return; }      // index.html 에 박아 둔 자리 — 그 자리에 그린다
+        if (!h || ex) return;
         var box = document.createElement("div");
         box.innerHTML = html();
         if (box.firstChild) h.appendChild(box.firstChild);
     }
 
     function boot() {
-        setTimeout(mount, 900);
+        mount();                    // 타이머 없이 (예전 0.9초 — 그 사이 탭 정리가 끝나서 붙을 때마다 카드가 밀렸다)
         setTimeout(mount, 2600);
         setInterval(mount, 5000);
     }

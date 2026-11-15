@@ -209,7 +209,10 @@
     }
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        /* index.html 에 박아 둔 자리(#stroller-guide)가 있으면 그 자리에 그린다.
+           ⚠️ 예전엔 0.2초 뒤에 조건 고르기 앞에 새로 끼워 넣어서, 느린 폰에서 그 아래가 통째로 383px 밀려 내려갔다 */
+        var ex = document.getElementById(HOST);
+        if (ex) { if (!ex.firstChild) paint(); return; }
         var anchor = document.querySelector(".filter-section") ||
                      document.querySelector(".matrix-panel");
         if (!anchor || !anchor.parentNode) return;
@@ -221,7 +224,7 @@
     }
 
     function boot() {
-        setTimeout(mount, 200);
+        mount();                    // 타이머 없이 — 탭 정리(strollertabs)가 첫 정리를 하기 전에 그려져 있어야 한다
         setTimeout(mount, 900);
     }
 

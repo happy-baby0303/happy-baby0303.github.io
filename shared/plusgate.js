@@ -167,6 +167,7 @@
     window.repaintPlusGate = paint;
 
     function boot() {
+        paint();                    // 타이머 없이 — 보여 주기 전에 카드마다 붙은 'PLUS 둘러보기' 를 걷어 둔다 (예전 0.6초 뒤라 걷힐 때 아래 카드가 올라왔다)
         setTimeout(paint, 600);
         setTimeout(paint, 1800);
         setTimeout(paint, 4000);

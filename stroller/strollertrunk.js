@@ -302,7 +302,7 @@
     window.refreshStrollerTrunk = paint;
 
     function boot() {
-        setTimeout(paint, 1100);
+        paint();                    // 타이머 없이 — index.html 에 박아 둔 자리에 바로 (예전 1.1초 뒤에 따로 붙어서 순서가 붙는 때에 따라 바뀌었다)
         setTimeout(paint, 2600);
         setInterval(paintIfChanged, 6000);
         ["pickMyStroller", "closeStrollerSheet", "switchStrollerTab"].forEach(function (n) {

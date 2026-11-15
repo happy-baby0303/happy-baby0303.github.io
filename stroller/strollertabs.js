@@ -77,6 +77,8 @@
 
     function paint() {
         var c = cur();
+        /* <head> 가 처음부터 이 값으로 칸과 단추를 보여 준다 (CSS). 탭을 바꾸면 같이 바꾼다 */
+        try { document.documentElement.setAttribute("data-tab", c); } catch (e) {}
         TABS.forEach(function (t) {
             var pane = document.getElementById(PANE[t.id]);
             if (pane) pane.style.display = (t.id === c) ? "block" : "none";
@@ -107,6 +109,20 @@
     })();
 
     function fixFold() {
+        /* index.html 이 처음부터 접어 둔 판(#stroller-cond.sf-folded) — 펴고 접기만 단다.
+           ⚠️ 예전엔 펼친 채로 그려 두고 여기서 접어서, 느린 폰에서 열고 1초 뒤에 아래가 통째로 올라왔다 */
+        var cond = document.getElementById("stroller-cond");
+        if (cond) {
+            if (cond.getAttribute("data-slim")) return;
+            cond.setAttribute("data-slim", "1");
+            var hd = cond.querySelector(".matrix-header"), mk = document.getElementById("sf-mark");
+            if (hd) hd.onclick = function () {
+                var folded = !cond.classList.contains("sf-folded");
+                cond.classList.toggle("sf-folded", folded);
+                if (mk) mk.textContent = folded ? "펼치기 \u25BE" : "접기 \u25B4";
+            };
+            return;
+        }
         var panel = null, host = strollerHost();
         if (!host) return;
         /* ⚠️ 두 번 틀렸던 자리다. 기록해 둔다.
@@ -312,6 +328,26 @@
 
     /* strollerown.js 는 #stroller-guide 옆에 붙는다.
        그 자리는 '고르기' 칸 안이라, 쓸 때 칸으로 데려와야 한다. */
+    /* '우리 카시트가 얹히나' · '우리 차에 들어가나' 는 '우리 유모차' 바로 밑 — 같은 유모차 얘기다.
+       ⚠️ 예전엔 붙는 때에 따라 '우리 유모차' 위로 갔다 (얹히나 0.9초 · 트렁크 1.1초 · 우리 유모차는 꺼내는 때).
+       PLUS 를 위로 · 무료를 위로 정리(orderPlus)는 순서를 지키며 나누기만 하니, 그 전에 붙여 두면 끝까지 붙어 있다. */
+    function pinNearOwn() {
+        var pane = document.getElementById(PANE.use);
+        if (!pane) return;
+        var ref = null;
+        for (var i = 0; i < pane.children.length; i++) {
+            var c = pane.children[i];
+            if (c.getAttribute("data-from") === "stroller-own" && c.getAttribute("data-slot") === "0") { ref = c; break; }
+        }
+        if (!ref) return;
+        ["stroller-match", "stroller-trunk"].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el || el.parentNode !== pane) return;
+            if (ref.nextElementSibling !== el) pane.insertBefore(el, ref.nextSibling);
+            ref = el;
+        });
+    }
+
     function adopt() {
         var use = document.getElementById(PANE.use);
         if (!use) return;
@@ -374,10 +410,17 @@
             if (el.getAttribute && el.getAttribute("data-tail")) { tail.push(el); return false; }
             return true;
         });
+        /* 'PLUS 표시가 있는 카드 N개는 …' (plusgate.js) 는 PLUS 카드 바로 밑.
+           ⚠️ 무료로 쳐서 위로 올렸다가 plusgate 가 다시 밑으로 내려서, 열고 몇 초 동안 위아래로 오갔다 */
+        var foot = [];
+        free = free.filter(function (el) {
+            if (el.classList && el.classList.contains("bnh-plus-foot")) { foot.push(el); return false; }
+            return true;
+        });
 
         var want = (plusFirst
-            ? plus.concat(free).concat(extra)
-            : free.concat(extra).concat(plus)).concat(tail);
+            ? plus.concat(foot).concat(free).concat(extra)
+            : free.concat(extra).concat(plus).concat(foot)).concat(tail);
         var same = want.every(function (el, i) { return kids[i] === el; });
         if (same) return;
         want.forEach(function (el) { pane.appendChild(el); });
@@ -562,9 +605,15 @@
             /* \u26a0\ufe0f 칸이 이미 있으면 build 가 곧장 통과한다.
                   그러면 아래 setTimeout 정리가 1.4초 뒤에나 돌아서
                   탭은 떴는데 안이 비어 보인다. 여기서 바로 한 번 정리한다. */
-            hookRefresh(); adopt(); flatten(); orderPlus(); foldExtras();
-            setTimeout(function () { adopt(); flatten(); orderPlus(); foldExtras(); }, 250);
-            setTimeout(function () { adopt(); flatten(); orderPlus(); foldExtras(); }, 700);
+            /* 첫 정리 — 모듈들이 DOMContentLoaded 에 제자리에 그린 바로 뒤라 카드가 다 있다.
+               PLUS 표시(plusmark)를 먼저 붙여야 PLUS 를 위로 · 무료를 위로가 처음부터 맞는다 (배지가 없으면 제목으로 짐작해서 틀렸다).
+               끝나면 settle.js 에 알려서 그때 한 번에 보여 준다 */
+            hookRefresh(); adopt(); flatten(); pinNearOwn();
+            try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
+            orderPlus(); foldExtras();
+            try { if (typeof window.curSettleReady === "function") window.curSettleReady(); } catch (e) {}
+            setTimeout(function () { adopt(); flatten(); pinNearOwn(); orderPlus(); foldExtras(); }, 250);
+            setTimeout(function () { adopt(); flatten(); pinNearOwn(); orderPlus(); foldExtras(); }, 700);
             return true;
         }
 
@@ -608,14 +657,14 @@
             fixFold();
             calmEmoji();
             if (build()) {
-                setTimeout(function () { hookRefresh(); calmEmoji(); flatten(); orderPlus(); foldExtras(); }, 400);
-                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); foldExtras(); }, 1400);
-                setTimeout(function () { hookRefresh(); adopt(); flatten(); orderPlus(); foldExtras(); }, 3000);
+                setTimeout(function () { hookRefresh(); calmEmoji(); flatten(); pinNearOwn(); orderPlus(); foldExtras(); }, 400);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); pinNearOwn(); orderPlus(); foldExtras(); }, 1400);
+                setTimeout(function () { hookRefresh(); adopt(); flatten(); pinNearOwn(); orderPlus(); foldExtras(); }, 3000);
                 return;
             }
             if (++tries < 20) setTimeout(go, 150);
         };
-        setTimeout(go, 120);
+        go();               // 타이머 없이 — 모듈들이 같은 DOMContentLoaded 에 이미 그렸다 (예전 0.12초 뒤 · 그 사이 정리 전 화면이 보였다)
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);
@@ -630,7 +679,7 @@
                 if (qt) return;
                 qt = setTimeout(function () {
                     qt = null;
-                    flatten();
+                    flatten(); pinNearOwn();
                 /* 카드를 다시 그리면 PLUS 배지도 같이 지워진다. 배지 담당(plusmark)은
                    0.4초 뒤에야 다시 붙여서, 누를 때마다 배지가 사라졌다 생겼다 했다.
                    여기서 바로 붙여준다. */
@@ -650,7 +699,7 @@
         }
 
         setInterval(function () { if (document.hidden) return;   /* 다른 앱을 보는 동안은 쉰다 (배터리) */
-            calmEmoji(); hookRefresh(); adopt(); flatten();
+            calmEmoji(); hookRefresh(); adopt(); flatten(); pinNearOwn();
                 /* 카드를 다시 그리면 PLUS 배지도 같이 지워진다. 배지 담당(plusmark)은
                    0.4초 뒤에야 다시 붙여서, 누를 때마다 배지가 사라졌다 생겼다 했다.
                    여기서 바로 붙여준다. */

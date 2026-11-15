@@ -25,19 +25,36 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css?v=b14">
-    <!-- 카드가 다 붙을 때까지 이 탭은 잠깐 가린다 (shared/settle.js). 그 파일을 못 받으면 바로 보여 주고(onerror), 무엇이 잘못돼도 8초 뒤엔 CSS 가 보여 준다.
-         ⚠️ 2.4초였는데, 통신이 느린 곳에서는 카드가 다 붙기 전에 CSS 가 먼저 열어 버려서 밀리는 게 그대로 보였다 -->
+    <!-- 처음 그리는 화면을 마지막 화면과 같게 (shared/settle.js 맨 위 설명).
+         · 지난번에 보던 탭(?tab=use 로 오면 그 탭)을 스크립트가 돌기 전에 정한다 — 예전엔 '고르기' 가 먼저 그려졌다가 '쓰면서' 로 통째로 바뀌었다
+         · 두 탭은 카드가 다 그려지고 탭 정리(strollertabs.js)가 끝날 때까지 자리 표시로 가린다.
+           settle.js 를 못 받으면 바로 보여 주고(onerror), 무엇이 잘못돼도 8초 뒤엔 CSS 가 보여 준다 -->
     <style>
-        html.cur-settle #view-stroller-use { opacity: 0; animation: curSettleShow 0s linear 8s forwards; }
-        #view-stroller-use { transition: opacity .18s ease; }
+        #view-stroller-use { display: none; }
+        html[data-tab="use"] #view-stroller-pick { display: none; }
+        html[data-tab="use"] #view-stroller-use { display: block; }
+        html[data-tab="use"] #stab-use, html:not([data-tab="use"]) #stab-pick { background: #FFFFFF !important; color: #4A413C !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; }
+        html[data-tab="use"] #stab-pick, html:not([data-tab="use"]) #stab-use { background: transparent !important; color: #A3958A !important; box-shadow: none !important; }
+        html.cur-settle #view-stroller-pick, html.cur-settle #view-stroller-use { opacity: 0; animation: curSettleShow 0s linear 8s forwards; }
+        #view-stroller-pick, #view-stroller-use { transition: opacity .18s ease; }
+        html.cur-settle .legal-footer { visibility: hidden; animation: curSettleVis 0s linear 8s forwards; }
         @keyframes curSettleShow { to { opacity: 1; } }
-        .cur-skel { position: relative; height: 0; overflow: visible; z-index: 1; }
+        @keyframes curSettleVis { to { visibility: visible; } }
+        .cur-skel { display: none; position: relative; height: 0; overflow: visible; z-index: 1; }
+        html.cur-settle .cur-skel { display: block; }
         .cur-skel-in { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; }
         .cur-skel-b { background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 24px; margin-bottom: 20px; animation: curSkel 1.1s ease-in-out infinite alternate; }
         @keyframes curSkel { from { opacity: .45; } to { opacity: .9; } }
+        /* '우리 집 상황' 은 처음부터 접혀 있다 (strollertabs.js 가 같은 클래스로 펴고 접는다). 예전엔 펼친 채 그려졌다가 1초 뒤에 접혀서 아래가 통째로 올라왔다 */
+        .matrix-panel.sf-folded { padding: 18px 24px; margin-bottom: 20px; }
+        .matrix-panel.sf-folded > .matrix-header { margin-bottom: 0; }
+        .matrix-panel.sf-folded > :not(.matrix-header) { display: none !important; }
     </style>
-    <script>document.documentElement.classList.add('cur-settle'); document.documentElement.setAttribute('data-settle', 'view-stroller-use');</script>
-    <script src="../shared/settle.js?v=2" onerror="document.documentElement.classList.remove('cur-settle')"></script>
+    <script>(function () { var d = document.documentElement, t = "pick";
+        try { var q = new URLSearchParams(location.search).get("tab"); if (q === "use" || q === "pick") localStorage.setItem("tosil_stroller_tab", q);
+              t = localStorage.getItem("tosil_stroller_tab") === "use" ? "use" : "pick"; } catch (e) {}
+        d.setAttribute("data-tab", t); d.classList.add("cur-settle"); d.setAttribute("data-settle", "view-stroller-pick,view-stroller-use"); })();</script>
+    <script src="../shared/settle.js?v=3" onerror="document.documentElement.classList.remove('cur-settle')"></script>
 </head>
 <body>
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8RVVNWZ"
@@ -53,7 +70,7 @@
                 홈
             </a>
             <h1 style="font-size: 18px; margin: 0; font-weight: 800;">배냇함 큐레이터</h1>
-            <div class="pro-badge" id="stroller-count-badge">유모차 49종</div>
+            <div class="pro-badge" id="stroller-count-badge">유모차 50종</div>
         </div>
         <nav class="gnb-menu">
             <a href="../stroller/index.html" class="gnb-item active">👶 유모차</a>
@@ -87,7 +104,10 @@
          이제 제품 카드마다 '보내기' 가 있고, 받은 링크를 열면 그 유모차 카드로 바로 간다 (app.js shareStroller). -->
 
     <main class="container">
-        
+        <!-- 제휴 고지 — 처음 그리는 화면부터 맨 위에 (예전엔 shared/disclosure.js 가 스크립트가 돈 뒤에 끼워 넣어서
+             느린 폰에서 그 아래 전부가 106px 밀려 내려갔다. 문구는 disclosure.js 와 같아야 한다 — 시험 t_cls44) -->
+        <div id="coupang-disclosure" style="display:flex; align-items:flex-start; gap:8px; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:12px 14px; margin:16px 0 20px; box-sizing:border-box;"><span style="flex-shrink:0; margin-top:2px; padding:2px 7px; border-radius:6px; background:#7A6F68; color:#FFFFFF; font-size:11px; font-weight:900; line-height:1.5;">제휴</span><span style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.65; word-break:keep-all; text-wrap:pretty;">이 페이지는 <b style="color:#4A413C;">쿠팡 파트너스 활동의 일환</b>으로, 구매가 일어나면 이에 따른 일정액의 수수료를 제공받습니다. 추천 순서와는 관계없습니다.</span></div>
+
         <!-- 제휴 안내 아래 · 탭 위 빈 곳을 이유식 · 놀이 · 젖병 큐레이터와 같게 줄인다 -->
         <div class="hero-title" style="text-align: center; margin-bottom: 12px; padding-top: 14px; padding-bottom: 12px;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
@@ -114,10 +134,12 @@
             <div id="stab-pick" onclick="window.switchStrollerTab && window.switchStrollerTab('pick')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:#FFFFFF; color:#4A413C; box-shadow:0 2px 8px rgba(0,0,0,0.06);">유모차 고르기</div>
             <div id="stab-use" onclick="window.switchStrollerTab && window.switchStrollerTab('use')" style="flex:1; text-align:center; padding:12px 8px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:800; white-space:nowrap; transition:0.15s; background:transparent; color:#A3958A;">쓰면서 챙길 것</div>
         </div>
+        <!-- 카드가 다 그려질 때까지 보이는 자리 표시 (shared/settle.js 가 걷어낸다) -->
+        <div class="cur-skel" data-static aria-hidden="true"><div class="cur-skel-in"><div class="cur-skel-b" style="height:60px"></div><div class="cur-skel-b" style="height:150px"></div><div class="cur-skel-b" style="height:220px"></div><div class="cur-skel-b" style="height:160px"></div></div></div>
 
         <div id="view-stroller-pick">
-<div class="matrix-panel">
-            <div class="matrix-header">우리 집 상황</div>
+<div class="matrix-panel sf-folded" id="stroller-cond">
+            <div class="matrix-header" style="cursor:pointer;">우리 집 상황<span id="sf-mark" style="margin-left:auto; font-size:13px; font-weight:800; color:#A3958A;">펼치기 ▾</span></div>
             <div class="matrix-grid">
                 <div class="matrix-item">
                     <label>🏡 거주 및 주행 환경</label>
@@ -181,6 +203,9 @@
             <div id="vs-result" style="display:none; margin-top:16px;"></div>
         </div>
 
+        <!-- 유모차 안전 · 개월수 · 기내반입 안내 (strollerguide.js 가 그 자리에 그린다) -->
+        <div id="stroller-guide"></div>
+
         <div class="filter-section">
             <div class="filter-row">
                 <div class="filter-label">유모차 종류</div>
@@ -225,8 +250,19 @@
         <div id="result-other-area" class="result-area" style="display:none; margin-top:20px;"></div>
         </div>
 
-        <!-- 🧰 PLUS 모듈이 여기 안으로 들어온다 -->
-        <div id="view-stroller-use" style="display:none;"></div>
+        <!-- 🧰 쓰면서 챙길 것 — 카드 자리를 순서대로 박아 둔다. 모듈은 자기 자리에 그린다 (예전엔 0.7 ~ 2.6초 타이머로 따로 붙어서
+             붙는 때에 따라 순서가 바뀌었다 — '우리 카시트가 얹히나' 가 '우리 유모차' 위로 갔다).
+             오늘 어디 가세요(맨 위) · 최대 몇 kg(넘었을 때만 펼쳐서 보인다) · 우리 유모차(strollerown 이 카드 여러 장) · 얹히나 · 트렁크 · 중고 · 다 쓴 물건(맨 아래).
+             얹히나 · 트렁크를 '우리 유모차' 바로 밑으로, PLUS 를 위로 · 무료를 위로, 접어 둘 것은 strollertabs.js 가 첫 정리에서 한 번에 -->
+        <div id="view-stroller-use">
+            <div id="stroller-go"></div>
+            <div id="stroller-limit"></div>
+            <div id="stroller-own"></div>
+            <div id="stroller-match"></div>
+            <div id="stroller-trunk"></div>
+            <div id="stroller-used"></div>
+            <div id="stroller-handoff"></div>
+        </div>
 
 
                 <div class="legal-footer">
@@ -241,28 +277,28 @@
     <script src="../shared/babyswitch.js"></script>
     <script src="../shared/babyage.js?v=1"></script>
     <script src="data.js?v=b8"></script>
-    <script src="app.js?v=b16"></script>
+    <script src="app.js?v=b17"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="strollerguide.js?v=b8"></script>
-    <script src="strollerown.js?v=b13"></script>
+    <script src="strollerguide.js?v=b9"></script>
+    <script src="strollerown.js?v=b14"></script>
     <!-- ⚠️ strollerused.js 가 폴더에 있는데 이 줄이 없어서
          통째로 안 돌고 있었습니다. 중고 확인 · 리콜 안내가 전부 그 안에 있습니다. -->
-    <script src="strollerused.js?v=b8"></script>
+    <script src="strollerused.js?v=b9"></script>
     <!-- ⚖️ 최대 사용 체중 — 아기 몸무게와 견줘서 알려준다 -->
-    <script src="strollerlimit.js?v=b9"></script>
+    <script src="strollerlimit.js?v=b10"></script>
     <!-- 🔗 우리 카시트가 이 유모차에 얹히나 — PLUS -->
-    <script src="strollermatch.js?v=b8"></script>
+    <script src="strollermatch.js?v=b9"></script>
     <!-- 🚗 우리 차에 들어가나 — 차 바꿨을 때 · 렌터카 · 친정 차 -->
-    <script src="strollertrunk.js?v=b9"></script>
+    <script src="strollertrunk.js?v=b10"></script>
     <!-- 🧭 오늘 어디 가세요 — 나가기 전에 보는 것. PLUS 의 중심 -->
-    <script src="strollergo.js?v=b10"></script>
-    <script src="strollertabs.js?v=b11"></script>
-    <script src="../shared/plusmark.js?v=b8"></script>
-    <script src="../shared/plusgate.js?v=4"></script>
+    <script src="strollergo.js?v=b11"></script>
+    <script src="strollertabs.js?v=b12"></script>
+    <script src="../shared/plusmark.js?v=b9"></script>
+    <script src="../shared/plusgate.js?v=5"></script>
     <script src="../shared/favsync.js"></script>
     <!-- 다 쓴 물건 보내기 — 당근 글 · 물려줄 말 (쓰면서 챙길 것 맨 아래 카드) -->
     <script src="../shared/handoff.js?v=1"></script>
-    <script src="../shared/handoffcards.js?v=4"></script>
+    <script src="../shared/handoffcards.js?v=5"></script>
     <script src="../shared/curatorback.js?v=4"></script>
 
 <!-- 오른쪽 아래 '맨 위로' 단추 (보내기 단추와 안 겹치게 bottom: 100px) -->

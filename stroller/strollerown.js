@@ -97,6 +97,29 @@
         return (s && s.specs && Number(s.specs.weight)) || 0;
     }
 
+    /* 이름 뒤 '로 · 으로' — 받침(ㄹ 빼고)이 있으면 '으로'. 숫자 · 영문은 읽는 소리로 (0 영 · 3 삼 · 6 육 · M 엠 · N 엔).
+       '(단종)' 같은 괄호는 떼고 붙인다.
+       ⚠️ '잉글레시나 일렉타 로 나가실 때' 처럼 띄어 써서 붙였다 */
+    function ro(name) {
+        var n = String(name || "").replace(/\s*\([^)]*\)\s*$/, "").trim();
+        if (!n) return "";
+        var ch = n.charAt(n.length - 1), code = n.charCodeAt(n.length - 1);
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+            var j = (code - 0xAC00) % 28;
+            return n + ((j === 0 || j === 8) ? "로" : "으로");
+        }
+        return n + ("036MNmn".indexOf(ch) > -1 ? "으로" : "로");
+    }
+
+    /* 같은 목록에서 디럭스 무게 가운데값 (kg, 소수 한 자리) — '휴대용만큼 가볍다' 같은 말 대신 견줄 기준 */
+    function deluxeMid() {
+        var ws = all().filter(function (x) { return x.type === "디럭스" && weightOf(x) > 0; })
+                      .map(weightOf).sort(function (a, b) { return a - b; });
+        if (!ws.length) return 0;
+        var m = ws.length >> 1;
+        return ws.length % 2 ? ws[m] : Math.round((ws[m - 1] + ws[m]) * 5) / 10;
+    }
+
     /* ---------- 조작 ---------- */
 
     /* \u26a0\ufe0f 두 대를 쓰는 집이 제일 흔하다. 디럭스 + 휴대용.
@@ -275,19 +298,24 @@
             '<div style="font-size:13px; font-weight:900; color:' + DARK + '; margin-bottom:10px;">' +
                 '\uD83E\uDDB4 하루에 들어 올리는 무게</div>' +
 
-            '<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">' +
+            /* '하루 외출 [2] 번' · '엘베 없이 [0] 층' 을 한 묶음씩 — ⚠️ 폭이 좁은 폰(390px)에서 '층' 만 혼자 다음 줄로 떨어졌다 */
+            '<div style="display:flex; gap:8px 16px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">' +
+              '<span style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">' +
                 '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">하루 외출</span>' +
                 '<input type="number" value="' + trips + '" ' +
                     'onchange="window.setStrollerField(\'trips\', this.value)" ' +
                     'style="width:60px; padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">' +
                 '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">번</span>' +
-                '<span style="font-size:12.5px; font-weight:800; color:#7A6F68; margin-left:8px;">엘베 없이</span>' +
+              '</span>' +
+              '<span style="display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">' +
+                '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">엘베 없이</span>' +
                 '<input type="number" value="' + (floor || "") + '" placeholder="0" ' +
                     'onchange="window.setStrollerField(\'floor\', this.value)" ' +
                     'style="width:60px; padding:10px; border-radius:10px; border:1px solid #DCD3C8; ' +
                     'background: #FFFFFF; font-size:13px; font-weight:800; text-align:center; box-sizing:border-box;">' +
                 '<span style="font-size:12.5px; font-weight:800; color:#7A6F68;">층</span>' +
+              '</span>' +
             '</div>' +
 
             '<div style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.85; ' +
@@ -392,7 +420,7 @@
         return '<div style="margin-top:16px; background: #FBF8F3; border:1px solid #EDE6DE; ' +
             'border-radius:14px; padding:16px;">' +
             '<div style="font-size:13px; font-weight:900; color:' + DARK + ';">' +
-                '\uD83D\uDEB6 ' + esc(x.name) + ' 로 나가실 때</div>' +
+                '\uD83D\uDEB6 ' + esc(ro(x.name)) + ' 나가실 때</div>' +
             '<div style="margin-top:4px; margin-bottom:11px; font-size:11.5px; font-weight:600; ' +
                 'color:' + GRAY + '; line-height:1.7; word-break:keep-all;">' +
                 '한 대로 다 하시니까, <b>힘들어지는 상황만</b> 미리 짚어드릴게요.</div>' +
@@ -561,16 +589,19 @@
         var kg = weightOf(s);
         var t = s.type;
 
-        /* 절충형은 대개 하나로 끝난다. 그걸 안 말해주면 앱이 안 사도 될 걸 판다. */
-        if (t === "절충형" && kg <= 9) {
+        /* 절충형은 대개 하나로 끝난다. 그걸 안 말해주면 앱이 안 사도 될 걸 판다.
+           ⚠️ '휴대용만큼 가벼워요' 라고 했는데 목록의 휴대용은 5.2 ~ 7.6kg 라 9kg 가까운 절충형은 그만큼 가볍지 않다.
+              견줄 것은 디럭스다 — 두 대를 쓰는 집은 대개 디럭스가 무거워서 휴대용을 더 들인다 */
+        var dm = deluxeMid();
+        if (t === "절충형" && kg <= 9 && dm - kg >= 2) {
             return '<div style="margin-top:16px; background:#EAF7F1; border:1px solid #A7DFC8; ' +
                 'border-radius:14px; padding:15px 16px;">' +
                 '<div style="font-size:13px; font-weight:900; color:#1F6F52;">' +
                     '\u2705 두 번째 유모차는 안 사셔도 돼요</div>' +
                 '<div style="margin-top:5px; font-size:12.5px; font-weight:600; color:#7A6F68; ' +
                     'line-height:1.8; word-break:keep-all;">' +
-                    '쓰고 계신 게 ' + kg + 'kg 절충형이라 <b>휴대용만큼 가벼워요.</b> ' +
-                    '두 대 쓰시는 분들 대부분은 디럭스가 무거워서 그런 거예요.</div>' +
+                    '쓰고 계신 게 ' + kg + 'kg 절충형이라 <b>디럭스(보통 ' + dm + 'kg)보다 ' + Math.floor(dm - kg) + 'kg 넘게 가벼워요.</b> ' +
+                    '두 대 쓰시는 분들은 대부분 디럭스가 무거워서 휴대용을 하나 더 들여요.</div>' +
             '</div>';
         }
 
@@ -1078,7 +1109,9 @@
     window.refreshStrollerOwn = paint;
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        /* index.html 이 '쓰면서 챙길 것' 안에 자리(#stroller-own)를 박아 둔다 — 거기 바로 그린다 */
+        var ex = document.getElementById(HOST);
+        if (ex) { if (!ex.firstChild) paint(); return; }
         var anchor = document.getElementById("stroller-guide") ||
                      document.querySelector(".filter-section");
         if (!anchor || !anchor.parentNode) return;

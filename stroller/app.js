@@ -756,6 +756,7 @@ window.shareStroller = shareStroller;
         var list = (typeof strollerData !== "undefined" && strollerData) ? strollerData : null;
         if (list && list.length) b.textContent = "유모차 " + list.length + "종";
     }
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(paintCount, 200); });
-    else setTimeout(paintCount, 200);
+    /* 타이머 없이 — 숫자가 바뀌면 글자 폭이 바뀐다. index.html 의 글자도 지금 수(50종)로 맞춰 둔다 (시험 t_cls44 가 견준다) */
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", paintCount);
+    else paintCount();
 })();
