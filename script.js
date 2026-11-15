@@ -11396,7 +11396,7 @@ setTimeout(() => {
 // 🔐 카카오 로그아웃 & 회원 탈퇴 엔진 (찐 카카오 서버 통신 추가!)
 // ==========================================
 window.logoutKakao = function() {
-    window.showConfirm("정말 로그아웃 하시겠습니까?", function() {
+    window.showConfirm("정말 로그아웃 하시겠습니까?", async function() {
         // 🚨 1. 카카오 서버에서 진짜로 로그아웃 시키기!
         if (typeof Kakao !== 'undefined' && Kakao.Auth.getAccessToken()) {
             Kakao.Auth.logout(function() {
@@ -11404,7 +11404,12 @@ window.logoutKakao = function() {
             });
         }
 
-        // 2. 내 폰(캐시)에 남은 정보 삭제
+        // 2. 이 폰의 알림 주소를 이 계정에서 뺀다 (accountswitch.js) — 아래에서 카카오 번호 · 로그인을 지우기 전에
+        /* ⚠️ 빼지 않아서, 로그아웃한 폰에 그 가족의 알림이 계속 왔다.
+              같은 폰에서 다른 계정으로 들어가면 두 가족의 알림이 한 폰으로 왔다 */
+        if (typeof window.forgetThisDeviceForPush === 'function') await window.forgetThisDeviceForPush();
+
+        // 3. 내 폰(캐시)에 남은 정보 삭제 (기록은 남긴다 — 다시 들어오면 이어서 쓴다)
         localStorage.removeItem('kakao_nickname');
         localStorage.removeItem('kakao_id');
         localStorage.removeItem('kakao_profile_image');
@@ -11482,6 +11487,10 @@ window.unlinkKakao = function() {
         try { if (window.auth && typeof window.auth.signOut === 'function') await window.auth.signOut(); } catch (e) {}
 
         // 4. 앱 로컬 데이터 완전 초기화
+        //    이 계정 몫으로 이 폰에 보관해 둔 기록(계정 바꾸기)과 사진 칸도 지운다 (accountswitch.js)
+        if (typeof window.dropAccountBackup === 'function') {
+            try { await window.dropAccountBackup(localStorage.getItem('firebase_uid')); } catch (e) {}
+        }
         if (typeof window.wipeAllRecordsSafely === 'function') {
             window.wipeAllRecordsSafely();
         } else {

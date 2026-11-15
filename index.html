@@ -38,6 +38,8 @@
       <!-- 📱 앱 껍데기(크롬 없이 뜨는 플레이 앱) 안에서만: 카카오 로그인·푸시·저장·공유를 앱으로 잇는다. 웹에서는 아무것도 안 한다 -->
       <script src="./native.js?v=2"></script>
       <script src="./familyhome.js?v=1"></script>
+      <!-- 🔁 이 폰에서 다른 카카오 계정으로 바꿔 들어왔을 때 묻는다 (이어서 쓰기 · 비우고 새로 시작). 로그인보다 먼저 읽혀야 한다 -->
+      <script src="./accountswitch.js?v=1"></script>
       <!-- 🙋 카카오 이름 — 로그인하면 늘 '육아동지' 가 들어가던 것. 진짜 이름을 묻고, 없으면 '꿈이 아빠' 로 부른다 -->
       <script src="./kakaoname.js?v=1"></script>
     <!-- 🎨 색 칠하기는 맨 먼저. 예전엔 본문 맨 끝에서 불려서, 그 전까지 화면이 파랗게 한 번 그려졌다.
@@ -67,7 +69,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="145">
+    <meta name="baenaet-build" content="146">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2954,7 +2956,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     // 1. 오프라인 캐시에 쓰는 세 가지 (initializeFirestore · persistentLocalCache · persistentMultipleTabManager)
-    import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, onSnapshot, collection, deleteDoc, query, orderBy, limit, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, onSnapshot, collection, deleteDoc, query, orderBy, limit, updateDoc, arrayUnion, arrayRemove, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
       import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
       import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -3139,6 +3141,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     window.onSnapshot = onSnapshot;
     window.updateDoc = updateDoc;
     window.arrayUnion = arrayUnion;
+    window.arrayRemove = arrayRemove;   // 로그아웃할 때 이 폰의 알림 주소를 뺀다 (accountswitch.js)
+    window.deleteField = deleteField;
 
     window.collection = collection;
     window.deleteDoc = deleteDoc;
@@ -3245,6 +3249,13 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         
         // 로그인 감지 시에도 카카오 고유 번호 저장 및 콘솔 확인
         const kakaoSub = user.providerData?.[0]?.uid || user.uid;
+
+        // 🔁 이 폰에서 다른 카카오 계정으로 바꿔 들어왔으면 먼저 묻는다 (accountswitch.js)
+        //    ⚠️ 묻지 않고 지나가서, 앞 계정의 아기 기록이 새 계정이 만드는 가족방으로 그대로 옮겨 갔다
+        if (typeof window.checkAccountSwitch === 'function') {
+            const next = await window.checkAccountSwitch(user, kakaoSub);
+            if (next === 'stop') return;   // 비우고 새로 시작 · 로그인 그만두기 → 다시 열린다
+        }
         console.log("✅ 현재 로그인된 유저 UID:", user.uid);
         console.log("✅ 카카오 고유 ID (admin 대조용):", kakaoSub);
         
