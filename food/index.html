@@ -21,7 +21,9 @@
         html[data-ftab="plan"] #tab-plan, html[data-ftab="allergy"] #tab-allergy { display: block; }
         html[data-ftab="plan"] .food-tab[data-tab="recipe"], html[data-ftab="allergy"] .food-tab[data-tab="recipe"] { background: transparent; color: #A3958A; box-shadow: none; }
         html[data-ftab="plan"] .food-tab[data-tab="plan"], html[data-ftab="allergy"] .food-tab[data-tab="allergy"] { background: #FFFFFF; color: #4A413C; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        html[data-ftab="allergy"] #coupang-disclosure { display: none; }
+        /* 알레르기 탭엔 제휴 고지를 안 보인다. ⚠️ 고지 상자에 style="display:flex" 가 박혀 있어서 !important 없이는 이 줄이 졌다
+           → 느린 폰에서 알레르기 탭을 열면 고지가 1초쯤 보였다가 사라지며 화면이 16px 올라갔다 (시험 t_cls44) */
+        html[data-ftab="allergy"] #coupang-disclosure { display: none !important; }
         html.cur-settle #tab-recipe, html.cur-settle #tab-plan, html.cur-settle #tab-allergy { opacity: 0; animation: curSettleShow 0s linear 8s forwards; }
         #tab-recipe, #tab-plan, #tab-allergy { transition: opacity .18s ease; }
         html.cur-settle .legal-footer { visibility: hidden; animation: curSettleVis 0s linear 8s forwards; }
