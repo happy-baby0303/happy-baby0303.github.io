@@ -76,6 +76,10 @@
     window.tidyToyOrder = tidy;
 
     function boot() {
+        /* 첫 정리는 바로 — 모듈들이 같은 DOMContentLoaded 에 index.html 의 자리에 이미 그렸다. 끝나면 settle.js 에 알려서 한 번에 보여 준다.
+           ⚠️ 예전엔 0.4초부터 다섯 번 더 세웠고, 그 사이 보여 준 화면에서 카드가 오르내렸다 */
+        tidy();
+        try { if (typeof window.curSettleReady === "function") window.curSettleReady(); } catch (e) {}
         [400, 900, 1500, 2200, 3500, 5000].forEach(function (t) { setTimeout(tidy, t); });
 
         /* 탭을 옮기거나 카드를 다시 그리면 또 흐트러진다 */

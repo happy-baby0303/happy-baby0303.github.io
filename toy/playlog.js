@@ -323,7 +323,7 @@
     }
 
     function boot() {
-        setTimeout(function () { paintCard(); paintMarks(); }, 700);
+        paintCard(); paintMarks();  // 타이머 없이 (예전 0.7초)
         setTimeout(function () { paintCard(); paintMarks(); }, 1800);
         setTimeout(function () { paintMarks(); }, 3200);
 

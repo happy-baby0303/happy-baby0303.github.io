@@ -186,7 +186,7 @@
             w2.__like = true;
             window.swapPlayDay = w2;
         }
-        setTimeout(paintAll, 700);
+        paintAll();                 // 타이머 없이 — '이번 주 놀이' 안의 좋아요 줄도 보여 주기 전에 (예전 0.7초 뒤라 카드가 늘어났다)
         setTimeout(paintAll, 1800);
     }
 

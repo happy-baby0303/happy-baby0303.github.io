@@ -288,7 +288,7 @@
     window.refreshPlayNow = paint;
 
     function boot() {
-        setTimeout(paint, 800);
+        paint();                    // 타이머 없이 (예전 0.8초)
         setTimeout(paint, 2000);
         ["closeShelfSheet", "switchToyMainTab", "setPlayLike"].forEach(function (nn) {
             var f = window[nn];

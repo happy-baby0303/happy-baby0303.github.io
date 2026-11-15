@@ -317,7 +317,7 @@
     window.refreshToyGift = paint;
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        if (document.getElementById(HOST)) return;                // index.html 에 박아 둔 자리가 있으면 그대로 (paint 가 채운다)
         var gear = document.getElementById("view-toy-gear");
         if (!gear) return;
         var box = document.createElement("div");
@@ -329,7 +329,7 @@
     }
 
     function boot() {
-        setTimeout(function () { mount(); paint(); }, 600);
+        mount(); paint();           // 타이머 없이 (예전 0.6초)
         setTimeout(function () { mount(); paint(); }, 1700);
 
         /* 우리 집 장난감을 고치거나 찜을 바꾸면 목록이 바뀐다 */

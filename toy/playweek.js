@@ -738,7 +738,8 @@
     };
 
     function mount() {
-        if (document.getElementById(ID)) return;
+        var ex = document.getElementById(ID);
+        if (ex) { if (!ex.firstChild) paint(); return; }          // index.html 에 박아 둔 자리
         var host = document.getElementById("view-toy-play");
         if (!host) return;
         var box = document.createElement("div");
@@ -750,7 +751,7 @@
 
     function boot() {
         restorePlan();
-        setTimeout(mount, 300);
+        mount();                    // 타이머 없이 (예전 0.3초)
         setTimeout(mount, 1200);
     }
 

@@ -193,7 +193,8 @@
     }
 
     function mount() {
-        if (document.getElementById(ID)) return;
+        var ex = document.getElementById(ID);
+        if (ex) { if (!ex.firstChild) paint(); return; }          // index.html 에 박아 둔 자리
         var host = document.getElementById("view-toy-play");
         if (!host) return;
         var box = document.createElement("div");
@@ -253,7 +254,7 @@
     /* ---------- 시작 ---------- */
 
     function boot() {
-        setTimeout(function () { mount(); markToyCards(); }, 300);
+        mount(); markToyCards();    // 타이머 없이 — 보여 주기 전에 제자리에 (예전 0.3초)
         setTimeout(function () { mount(); markToyCards(); }, 1200);
 
         ["updateToyView", "renderFavorites", "switchToyMainTab"].forEach(function (n) {

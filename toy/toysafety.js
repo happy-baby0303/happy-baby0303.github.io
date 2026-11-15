@@ -216,7 +216,7 @@
     window.refreshBattMarks = markCards;
 
     function boot() {
-        setTimeout(function () { paint(); markCards(); }, 500);
+        paint(); markCards();       // 타이머 없이 (예전 0.5초)
         setTimeout(function () { paint(); markCards(); }, 1600);
 
         ["updateToyView", "renderFavorites", "switchToyMainTab", "closeShelfSheet"].forEach(function (n) {

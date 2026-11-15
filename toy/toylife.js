@@ -358,7 +358,7 @@
     /* ---------- 시작 ---------- */
 
     function boot() {
-        setTimeout(function () { paint(); markLife(); }, 500);
+        paint(); markLife();        // 타이머 없이 (예전 0.5초)
         setTimeout(function () { paint(); markLife(); }, 1600);
 
         ["updateToyView", "renderFavorites", "switchToyMainTab", "closeShelfSheet",

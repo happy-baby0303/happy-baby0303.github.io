@@ -254,7 +254,7 @@
     window.refreshPlayStage = paint;
 
     function boot() {
-        setTimeout(function () { hook(); paint(); }, 800);
+        hook(); paint();            // 타이머 없이 (예전 0.8초)
         setTimeout(function () { hook(); paint(); }, 2200);
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) setTimeout(paint, 500);

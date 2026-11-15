@@ -179,7 +179,7 @@
     }
 
     function boot() {
-        setTimeout(function () { paint(); markCards(); }, 400);
+        paint(); markCards();       // 타이머 없이 (예전 0.4초)
         setTimeout(function () { paint(); markCards(); }, 1400);
 
         ["updateToyView", "renderFavorites", "switchToyMainTab", "closeShelfSheet"].forEach(function (n) {
