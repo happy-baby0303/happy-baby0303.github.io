@@ -1051,7 +1051,7 @@
         // 400일 넘어 달별로 접어 둔 것까지 — 이 숫자는 줄어들면 안 된다
         Object.keys(ledger.months || {}).forEach(function (k) { total += ledger.months[k].care || 0; });
 
-        // 🌟 [추가됨] 방문 횟수에 따른 훈장 수여식
+        // 방문 횟수에 따른 훈장 수여식
         var gradeMsg = '';
         /* ⚠️ '1분 대기조 명예 훈장', '새벽의 수호자 임명장 쾅쾅!' 은 꾸민 말이라 어색했다 */
         if (today.care >= 20) gradeMsg = "정말 바쁜 하루였어요. 수고 많았어요.";
@@ -1668,7 +1668,7 @@ wrap.innerHTML =
         wrap.setAttribute("style", "position:fixed; inset:0; z-index:9999; background:var(--bg-main); overflow-y:auto; -webkit-overflow-scrolling:touch;");
         wrap.innerHTML =
         '<div style="max-width:520px; margin:0 auto; padding:0 20px 60px;">' +
-            // 👇 본드 역할을 하는 속성을 지우고 배경색과 여백만 남겼습니다!
+            // 붙어 다니던 속성은 지우고 배경색과 여백만 남긴다
             '<div style="background:var(--bg-main); padding:22px 0 16px;">' +
                 '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
                     '<div>' +

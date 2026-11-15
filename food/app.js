@@ -1518,7 +1518,7 @@ function calcBabyFoodWater() {
     document.getElementById('res-water-g').innerText = waterG.toLocaleString();
     document.getElementById('res-yield-g').innerText = yieldG.toLocaleString();
 
-    // 🚨 [현실 패치 1] 월령별 1끼 권장량에 맞춘 소분 가이드!
+    // 월령별 1끼 권장량에 맞춘 소분 가이드!
     const ageFilter = document.getElementById('food-age') ? document.getElementById('food-age').value : 'early';
     let mealSize = 60; // 초기 기본값
     if (ageFilter === 'mid') mealSize = 100;
@@ -1603,7 +1603,7 @@ function calcReverseFood() {
     let exactBaseG  = target / (rate * (1 + mult));
     let exactWaterG = exactBaseG * mult;
 
-    // 2. 🚨 [현실 패치] 쌀은 1g, 물은 10ml 단위로 젖병 눈금 최적화!
+    // 2. 쌀은 1g, 물은 10ml 단위로 — 젖병 눈금에 맞춘다
     let realisticBaseG = Math.round(exactBaseG);
     let realisticWaterG = Math.round(exactWaterG / 10) * 10;
 
@@ -1627,7 +1627,7 @@ function calcReverseFood() {
         resultBox.appendChild(noteEl);
     }
 
-    // 🚨 [현실 패치 2] 육수 큐브(채수/소고기 육수) 사용자 배려 기능!
+    // 육수 큐브(채수/소고기 육수) 사용자 배려 기능!
     let brothTip = '';
     if (realisticWaterG >= 40) {
         brothTip = `<div style="margin-top:8px; font-size:11.5px; color:#7A6F68; background:#FFF; padding:8px; border-radius:8px; border:1px solid #D5D1F4; box-shadow:0 2px 4px rgba(127, 119, 221,0.05);">🍲 <b>육수 큐브(30ml) 1개</b>를 쓰신다면 맹물은 <b>${realisticWaterG - 30}ml</b>만 부어주세요</div>`;

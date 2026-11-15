@@ -140,7 +140,7 @@ function renderFavorites() {
     }
 
     
-    // 🚨 [신규 패치] 찜한 목록 상단에 '비교 요약 표' 제공
+    // 찜한 목록 상단에 '비교 요약 표' 제공
     let summaryTable = `
         <div style="background: #FBF8F3; padding: 16px; border-radius: 16px; margin-bottom: 24px; border: 1px solid #EDE6DE; overflow-x: auto;">
             <div style="font-size: 13px; font-weight: 800; color: #7A6F68; margin-bottom: 10px;">찜한 젖병 비교</div>

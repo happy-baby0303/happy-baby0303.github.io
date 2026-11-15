@@ -253,9 +253,9 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
     function one(el) {
         if (!el || el.nodeType !== 1 || SKIP[el.tagName]) return;
         if (el.closest && el.closest("#mb-photo-viewer")) return;   // 사진 뷰어는 원래 어둡다
-        if (el.closest && el.closest("#premium-paywall-modal, #vip-modal-overlay")) return;   // 👈 결제 화면은 원래 색 그대로
-        if (el.closest && el.closest("#kiosk-modal")) return;   // 👈 키오스크는 실제 매장과 같아야 연습이 된다
-        /* 👈 파란약(덱시부프로펜·이부프로펜)은 파랑이어야 한다. 빨간약·파란약은 실제 시럽 색이고,
+        if (el.closest && el.closest("#premium-paywall-modal, #vip-modal-overlay")) return;   // 결제 화면은 원래 색 그대로
+        if (el.closest && el.closest("#kiosk-modal")) return;   // 키오스크는 실제 매장과 같아야 연습이 된다
+        /* 파란약(덱시부프로펜·이부프로펜)은 파랑이어야 한다. 빨간약·파란약은 실제 시럽 색이고,
               새벽에 약병과 화면을 맞춰 보는 색이다. 보라로 바뀌면 안 된다. */
         if (el.closest && el.closest("#btn-pill-blue, [data-keep-color]")) return;
 
@@ -270,7 +270,7 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
 
                 var next = convert(src);
 
-        // 👇 display 는 화면 로직의 것이다. 색만 바꾸고 이건 그대로 둔다.
+        // display 는 화면 로직의 것이다. 색만 바꾸고 이건 그대로 둔다.
         //    안 그러면 display:block 으로 연 화면을 기억해둔 display:none 으로 덮어버린다.
         var live = el.getAttribute("style") || "";
         var dm = live.match(/(^|;)\s*display\s*:\s*([^;]+)/i);
@@ -355,7 +355,7 @@ body.dark-mode select option { background: #221E1A; color: #EDE7E1; }
     function boot() {
         paint();                        // 이미 그려진 것 한 번 (혹시 놓친 칸)
 
-        // 👇 첫 덧칠이 끝났다. 이제 애니메이션을 풀어준다.
+        // 첫 덧칠이 끝났다. 이제 애니메이션을 풀어준다.
         document.documentElement.classList.remove("theme-booting");
 
         watchDarkToggle();

@@ -165,7 +165,7 @@
         try {
                 await window.setDoc(window.doc(window.db, "sealed_" + code + suffix(), "status"), {
                 list: load(),
-                deleted: (window.Grave ? window.Grave.list("seal") : {})   // 👈 지운 목록도 같이
+                deleted: (window.Grave ? window.Grave.list("seal") : {})   // 지운 목록도 같이
             });
         } catch (e) { console.warn("[봉인 편지] 동기화 실패", e); }
     };
@@ -180,13 +180,13 @@
             if (!snap.exists()) return;
             var data = snap.data() || {};
             var remote = data.list || [];
-            if (window.Grave) window.Grave.merge("seal", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
+            if (window.Grave) window.Grave.merge("seal", data.deleted);   // 짝꿍이 지운 것 받아오기
             var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("seal") : {};
             var local = load(), seen = {}, out = [];
 
             local.concat(remote).forEach(function (l) {
                 if (!l || !l.id) return;
-                if (gone[l.id]) return;   // 👈 지운 건 되살리지 않기
+                if (gone[l.id]) return;   // 지운 건 되살리지 않기
                 if (seen[l.id]) {
                     // 한쪽에서 열었으면 열린 상태가 이긴다
                     if (l.opened && !seen[l.id].opened) {
@@ -443,7 +443,7 @@
 
     window.removeSealed = function (id) {
             var go = function () {
-            if (window.Grave) window.Grave.add("seal", id);   // 👈 묘비 세우기
+            if (window.Grave) window.Grave.add("seal", id);   // 묘비 세우기
             save(load().filter(function (x) { return x.id !== id; }));
             window.syncSealedToFirebase();
             var el = document.getElementById("sealed-box");

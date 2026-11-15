@@ -15,7 +15,7 @@
            대신 첫 화면이 0.1초 정도 늦게 뜹니다. */
         /* html.theme-booting body { visibility: hidden; } */
 
-        /* 👇 아빠 작전 상황판과 브리핑은 홈에서 내렸다.
+        /* 아빠 작전 상황판과 브리핑은 홈에서 내렸다.
               JS로 숨기면 이미 그려진 뒤라 한 번 번쩍인다.
               CSS로 처음부터 안 그리게 한다. */
         #dad-quest-container,
@@ -214,7 +214,7 @@ body.mode-senior .hide-on-senior,
 body.mode-senior #home-memorybox-card, 
 body.mode-senior #home-words-card,     
 body.mode-senior #home-memory-card,
-body.mode-senior #export-card /* 👈 🚨 요놈이 바로 '배냇함 내려받기' 카드입니다! 완벽 차단! */
+body.mode-senior #export-card /* '배냇함 내려받기' 카드 — 조부모 화면에선 숨긴다 */
 { display: none !important; }
                /* ========================================== */
         /* 🌙 1단계: 고집불통 인라인 스타일까지 씹어먹는 강력 다크모드 */
@@ -394,7 +394,7 @@ body.dark-mode #stats-sheet-content { background: #4A413C !important; }
 }
 
 /* ========================================== */
-        /* 🚨 [긴급 추가] 스마트 관리(눈뽕) & 하얀색 테두리 박멸 패치 */
+        /* 스마트 관리(눈뽕) & 하얀색 테두리 박멸 패치 */
         /* ========================================== */
 
         /* 1. 스마트 관리(해열/저금통) 하얀색 그라데이션 강제 다크모드화 */
@@ -428,7 +428,7 @@ body.dark-mode #stats-sheet-content { background: #4A413C !important; }
         }
 
 /* ========================================== */
-        /* 🚨 [긴급 추가 2] 트래커(지금 우리 아기) 다크모드 완벽 패치 */
+        /* 트래커(지금 우리 아기) 다크모드 패치 */
         /* ========================================== */
 
         /* 1. 메인 카드 테두리를 어두운 회색으로 톤다운 */
@@ -669,7 +669,7 @@ div[style*="border-radius: 8px"] {
             border-color: #5A4D44 !important;
         }
 
-        /* 🌟 [추가] 맘마 퀵버튼(원클릭) 다크모드 글씨/배경 강제 보호 */
+        /* 맘마 퀵버튼(원클릭) 다크모드 글씨/배경 강제 보호 */
         body.dark-mode button.quick-btn.active,
         body.dark-mode [style*="background: #F2F0FC"],
         body.dark-mode [style*="background:#F2F0FC"] {
@@ -683,7 +683,7 @@ div[style*="border-radius: 8px"] {
             border: 1px solid #7A6F68 !important;
         }
 
-        /* 🌟 [추가] 수면 중 배너(꿀잠 타임) 다크모드 가독성 완벽 대응 */
+        /* 수면 중 배너(꿀잠 타임) 다크모드 가독성 대응 */
         body.dark-mode [style*="background:linear-gradient(135deg, #F3F0FF, #EDE9FE)"],
         body.dark-mode [style*="background: linear-gradient(135deg, #F3F0FF, #EDE9FE)"] {
             background: linear-gradient(135deg, #2D2440, #1E162B) !important;
@@ -714,10 +714,10 @@ div[style*="border-radius: 8px"] {
             box-shadow: none !important;
         }
 
-        /* 🌟 [수정] 맘마 퀵버튼(원클릭) 전용 다크모드 스타일 */
+        /* 맘마 퀵버튼(원클릭) 전용 다크모드 스타일 */
         body.dark-mode .quick-btn.active {
             background-color: #F2F0FC !important; /* 원래대로 옅은 파란색 유지 */
-            color: #111111 !important; /* 👈 글씨를 짙은 검은색으로 강제 변경해서 눈에 확 띄게! */
+            color: #111111 !important; /* 글씨를 짙은 검은색으로 강제 변경해서 눈에 확 띄게! */
             border: none !important;
         }
         body.dark-mode .quick-btn:not(.active) {
@@ -1563,7 +1563,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <div style="text-align: center; padding: 10px 0;">
                         <div style="font-size: 14px; font-weight: 800; color: #7F77DD; margin-bottom: 8px;">얼마를 기록할까요?</div>
                         
-             <!-- 🚨 [최종 해결] theme.js의 간섭을 피하기 위해 색상 코드를 CSS 변수(var)로 교체하여 고무줄 너비 정상 작동! -->
+             <!-- theme.js의 간섭을 피하기 위해 색상 코드를 CSS 변수(var)로 교체하여 고무줄 너비 정상 작동! -->
                         <div style="display:flex; align-items:baseline; justify-content:center; margin-bottom:24px;">
                             <input type="text" inputmode="numeric" id="v-input-amount" placeholder="0" 
                                    oninput="this.style.width = Math.max(40, (this.value.length || 1) * 28) + 'px'; formatNum(this); window.toggleCategoryButtons(this);" 
@@ -1600,7 +1600,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                         <div style="font-size: 32px; background: var(--bg-sub); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--border);">🎁</div>
                         <div style="flex: 1; min-width: 0;">
                             <input type="text" id="v-goal-text" placeholder="아기 전집 사기" onchange="window.saveGoal()" style="background:transparent; border:none; color:var(--text-m); font-size: 15px; font-weight: 900; width: 100%; outline:none; margin-bottom: 4px; padding: 0;">
-                            <!-- 🚨 [수정 완료] 자바스크립트 자동 리사이즈 끄고, CSS 플렉스로 영역 침범 완벽 방어! -->
+                            <!-- 자바스크립트 자동 리사이즈 끄고, CSS 플렉스로 영역 침범 방어! -->
                             <div style="display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 6px;">
                                 <span style="font-size: 12px; font-weight: 700; color: var(--text-s); flex-shrink: 0;">목표액:</span>
                                 <input type="text" inputmode="numeric" id="v-goal-amount" placeholder="1,000,000" onkeyup="formatNum(this); window.saveGoal();" style="flex: 1; min-width: 0; background:transparent; border:none; color:#B98A2E; font-size: 15px; font-weight: 900; text-align: right; outline:none; padding: 0;">
@@ -1688,7 +1688,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             </p>
         </div>
 
-        <!-- 👇 체크박스는 깔끔하게 삭제되었습니다! 바로 체중 입력이 나옵니다 👇 -->
+        <!-- 체크박스 없이 바로 체중 입력 -->
 
         <!-- 체중 입력 -->
         <div class="input-group" style="margin-bottom: 24px;">
@@ -1916,7 +1916,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             <!-- 빠른 입력 버튼들이 들어갈 자리 -->
         </div>
 
-<!-- 🚨 [수정 완료] 카테고리 폭을 90px로 확 줄이고 플레이스홀더 폰트를 13px로 조절 -->
+<!-- 카테고리 폭을 90px로 확 줄이고 플레이스홀더 폰트를 13px로 조절 -->
         <div style="display: flex; gap: 8px; margin-bottom: 12px; width: 100%;">
             <select id="cube-category" style="width: 90px; flex-shrink: 0; box-sizing: border-box; padding: 14px 4px; border-radius: 12px; background: #FBF8F3; border: 1px solid #EDE6DE; font-weight: 800; font-size: 13px; color: #4A413C; outline:none; text-align:center;">
                 <option value="meat">🥩 고기</option>
@@ -2005,7 +2005,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                         <input type="text" id="baton-reward-custom" class="box-tint-blue" placeholder="해 줄 것을 적어 주세요" style="display:none; width:100%; min-width:0; box-sizing: border-box; padding:12px; border-radius:12px; font-size: 13.5px; font-weight: 600; outline:none; border: 1px solid var(--border); font-family: 'Pretendard', sans-serif;">
                     </div>
 
-                    <!-- 🚨 [수정됨] 텍스트 다이어트: 이모지 및 불필요한 서술어 삭제! -->
+                    <!-- 텍스트 다이어트: 이모지 및 불필요한 서술어 삭제! -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
                         <button class="box-main" onclick="addQuickBaton('오늘 새벽 수유 부탁해요')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">새벽 수유 대타</button>
                         <button class="box-main" onclick="addQuickBaton('퇴근길에 장 좀 봐 줘요')" style="padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border:1px solid var(--border);">퇴근길 장보기</button>
@@ -2085,7 +2085,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <p style="font-size: 13px; font-weight: 700; color: #A3958A; margin-bottom: 20px; word-break: keep-all;">통에 네임펜으로 쓰던 날짜, 여기 적어 두면 지워지지 않아요. 언제까지 쓰면 좋은지도 같이 보여 드려요.</p>
                     <div style="margin-bottom: 24px;">
                        <label style="font-size: 13.5px; font-weight: 800; margin-bottom: 10px; display: block; color: var(--text-m);">뜯은 것</label>
-                        <!-- 👇 글씨를 짧고 명확하게 바꿨습니다 -->
+                        <!-- 짧은 글씨 -->
                         <select id="open-item-type" onchange="window.updateOpenItemGuide()" style="width: 100%; padding: 16px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); margin-bottom: 12px;">
                             <option value="formula">🍼 분유</option>
                             <option value="rx_syrup">💊 처방받은 물약 (약국)</option>
@@ -2098,7 +2098,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                             <option value="wipe">🧼 소독티슈/물티슈</option>
                         <option value="custom">🏷️ 직접 적기</option>
                         </select>
-                        <!-- 👇 선택할 때마다 바뀌는 스마트 말풍선 추가! -->
+                        <!-- 고를 때마다 바뀌는 말풍선 -->
                         <div id="open-item-guide" style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: #7F77DD; background: #F0EEFB; padding: 12px 14px; border-radius: 12px; word-break: keep-all; line-height: 1.4;">
                             💡 습기에 약해요. 열고 나서 3주(21일) 안에 다 쓰는 게 좋아요.
                         </div>
@@ -2151,14 +2151,14 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             <!-- 🎛️ 3. 통합 컨트롤 패널 (탭 + 검색 + 필터 합체!) -->
             <div style="background: #FFFFFF; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
                 
-              <!-- 🚨 [패치 완료] 탭 버튼: 3분할 (행사 / 리스트 / 맵) -->
+              <!-- 탭 버튼: 3분할 (행사 / 리스트 / 맵) -->
                 <div style="display: flex; background: var(--bg-sub); border-radius: 16px; padding: 4px; margin-bottom: 16px;">
                     <button id="seg-event" onclick="switchOutingSubTab('event')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: #FFF; color: var(--text-m); box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: 0.2s; cursor: pointer; white-space: nowrap;">주말 행사</button>
                     <button id="seg-list" onclick="switchOutingSubTab('list')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: var(--text-s); transition: 0.2s; cursor: pointer; white-space: nowrap;">가볼 만한 곳</button>
                     <button id="seg-map" onclick="switchOutingSubTab('map')" style="flex: 1; padding: 12px 0; border-radius: 12px; font-weight: 800; font-size: 13px; border: none; background: transparent; color: var(--text-s); transition: 0.2s; cursor: pointer; white-space: nowrap;">수유실 지도</button>
                 </div>
 
-                <!-- 🚨 [추가됨] 수유실 카카오맵이 그려질 도화지 (기본은 숨김) -->
+                <!-- 수유실 카카오맵이 그려질 도화지 (기본은 숨김) -->
                 <div id="nursing-map-container" style="display: none; width: 100%; height: 65vh; border-radius: 20px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 1;"></div>
 
                 <!-- 검색창 -->
@@ -2184,7 +2184,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 </style>
                 </div>
           
-            <!-- 👇 행사/지도 목록이 뜨는 공간 (건드리지 않음) 👇 -->
+            <!-- 행사/지도 목록이 뜨는 공간 (건드리지 않음) -->
             <div id="sub-filter-row"></div>
             <div id="hotplace-container"></div>
 
@@ -2777,7 +2777,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
 <!-- 🎟️ 프리미엄(축제) 모달 -->
 <div id="premium-modal" class="modal-overlay" onclick="closeFestivalModal(event)">
-    <!-- 👇 여기에 max-height와 overflow-y:auto 를 추가해서 스크롤을 만듭니다! 👇 -->
+    <!-- max-height · overflow-y:auto — 안에서 스크롤 -->
     <div class="modal-content box-main" style="max-height: 85vh; overflow-y: auto; position: relative;" onclick="event.stopPropagation()">
         <div class="modal-close-handle" style="background:var(--border);" onclick="closeFestivalModalForce()"></div>
         <div id="modal-dynamic-body"></div>
@@ -2953,7 +2953,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <!-- Firebase 로직 (온보딩 서버 반영 및 짝꿍 정보 싱크 패치 완료) -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    // 👇 1. 여기에 3가지 단어(initializeFirestore, persistentLocalCache, persistentMultipleTabManager)가 추가되었습니다!
+    // 1. 오프라인 캐시에 쓰는 세 가지 (initializeFirestore · persistentLocalCache · persistentMultipleTabManager)
     import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, getDoc, onSnapshot, collection, deleteDoc, query, orderBy, limit, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
       import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
@@ -3123,7 +3123,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         console.warn("푸시 알림을 지원하지 않는 브라우저입니다.", e);
     }
 
-    // 👇 2. 오프라인 캐시 적용 (서버비 1/6 절감 패치)
+    // 2. 오프라인 캐시 — 서버에서 읽는 횟수를 줄인다
     try {
         window.db = initializeFirestore(app, {
             localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
@@ -3168,9 +3168,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
  const auth = getAuth(app);
  window.auth = auth; 
  const functions = getFunctions(app); // 카카오 로그인용 (미국 서버 = us-central1)
- const functionsSeoul = getFunctions(app, "asia-northeast3"); // 👈 추가 알림/탈퇴용 (서울 서버)
- window.functions = functionsSeoul;   // 👈 수정 앱이 부르는 건 이제 서울 서버
- window.functionsUS = functions;      // 👈 추가 (혹시 몰라 남겨두는 미국 서버)
+ const functionsSeoul = getFunctions(app, "asia-northeast3"); // 알림 · 탈퇴용 (서울 서버)
+ window.functions = functionsSeoul;   // 앱이 부르는 건 서울 서버
+ window.functionsUS = functions;      // 옛 미국 서버 (남겨 둔다)
  window.httpsCallable = httpsCallable;
 
  // 카카오 SDK 초기화
@@ -3243,13 +3243,13 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     onAuthStateChanged(auth, async (user) => {
         if (!user) return;
         
-        // 🚨 [패치 1-2] 로그인 감지 시에도 카카오 고유 번호 저장 및 콘솔 확인
+        // 로그인 감지 시에도 카카오 고유 번호 저장 및 콘솔 확인
         const kakaoSub = user.providerData?.[0]?.uid || user.uid;
         console.log("✅ 현재 로그인된 유저 UID:", user.uid);
         console.log("✅ 카카오 고유 ID (admin 대조용):", kakaoSub);
         
                 localStorage.setItem('firebase_uid', user.uid); 
-                     localStorage.setItem('kakao_id', kakaoSub); // 👈 부활
+                     localStorage.setItem('kakao_id', kakaoSub); // 카카오 고유 번호
 
         // ✅ [추가] 로그인이 확인되면 푸시 토큰을 서버에 저장/갱신
         setTimeout(() => window.syncPushToken && window.syncPushToken(), 1500);
@@ -3485,7 +3485,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
         try {
             await window.setDoc(window.doc(window.db, "waitlist", liveUid), {
-                firebase_uid: liveUid,                      // 👈 이게 없어서 계속 거부당했다
+                firebase_uid: liveUid,                      // 이게 없어서 계속 거부당했다
                 kakaoId: localStorage.getItem('kakao_id') || '',
                 syncCode: syncCode,
                 nickname: (typeof window.realKakaoName === 'function' ? window.realKakaoName() : '') || '',
@@ -3769,7 +3769,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         <div id="confirm-icon" style="font-size: 36px; margin-bottom: 12px;">🚨</div>
         <div id="confirm-message" style="font-size: 15px; font-weight: 800; color: var(--text-m, #4A413C); line-height: 1.5; word-break: keep-all; margin-bottom: 20px;">정말 삭제하시겠습니까?</div>
         
-        <!-- 👇 안전 잠금 입력창 추가! -->
+        <!-- 안전 잠금 입력창 -->
         <div id="confirm-input-area" style="display: none; margin-bottom: 20px;">
             <div id="confirm-keyword-hint" style="font-size: 12px; color: var(--danger); margin-bottom: 8px; font-weight: 700;">아래 칸에 '삭제' 라고 적어 주세요</div>
             <input type="text" id="confirm-keyword-input" placeholder="삭제" autocomplete="off" style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 12px; border: 1px solid #EDE6DE; background: #FBF8F3; text-align: center; font-weight: 900; font-size: 16px; outline: none; color: #4A413C;">
@@ -3898,7 +3898,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             <!-- 게시글 들어가는 자리 -->
         </div>
 
-        <!-- 🚨 [핵심 패치] 최신순/인기순 버튼을 게시글 밖으로 빼서 댓글창 바로 위로 밀착! -->
+        <!-- 최신순/인기순 버튼을 게시글 밖으로 빼서 댓글창 바로 위로 밀착! -->
         <div style="display: flex; justify-content: flex-end; padding: 16px 20px 8px 20px;">
             <div style="display: flex; gap: 12px; font-size: 13px; font-weight: 800; color: var(--text-sub);">
                 <span id="sort-latest" style="color: var(--text-title); cursor: pointer;" onclick="window.sortComments(window.currentActivePostId, 'latest')">최신순</span>

@@ -71,7 +71,7 @@ body.dark-mode #v-budget { color: var(--primary) !important; }
     left: 50%; 
     transform: translateX(-50%); 
     width: 100%; 
-    max-width: 480px; /* 👈 500px에서 480px로 변경! */
+    max-width: 480px; /* 앱 폭 480px */
     background: rgba(255,255,255,0.85); 
     backdrop-filter: blur(12px); 
     -webkit-backdrop-filter: blur(12px); 
@@ -460,7 +460,7 @@ body.dark-mode button[onclick*="resetMoneyAll"] {
     border-bottom: 1px solid var(--border) !important; 
     cursor: pointer; 
 }
-.check-item:last-child { border-bottom: none !important; } /* 👈 이게 줄 2개인 거 잡아주는 핵심입니다! */
+.check-item:last-child { border-bottom: none !important; } /* 마지막 줄은 밑줄 없이 (줄이 두 번 그어졌다) */
 
 /* 체크박스 */
 .check-box { 
@@ -601,7 +601,7 @@ body.dark-mode #smart-banner-container > div span[style*="background: #B98A2E"] 
 .tool-chip .t-label { font-size: 13px !important; font-weight: 800 !important; }
 .tool-chip.active .t-label { color: #FFFFFF !important; }
 
-/* 🌟 마법의 투명 망토: 선택 안 된 툴박스 내용 숨기기 */
+/* 선택 안 된 툴박스 내용 숨기기 */
 #tool-money, #tool-fever, #tool-growth, #tool-hotdeal, #tool-cube, #tool-baton {
     display: none; /* 일단 전부 숨기기 */
 }
@@ -615,7 +615,7 @@ body.dark-mode #smart-banner-container > div span[style*="background: #B98A2E"] 
     display: block; /* 눌린(active) 녀석만 짠! 하고 나타나기 */
 }
 
-/* ✨ 대기업 앱의 쫀득한 버튼 터치감 */
+/* 버튼을 누를 때 살짝 눌리는 느낌 */
 button, .btn-main, .segment-btn, .pill-btn, .sym-btn, .ai-matrix-card {
     transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s !important;
 }
@@ -832,7 +832,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
     font-weight: 700;
 }
 
-/* 👆 터치(클릭) 시 쫀득하게 눌리는 애니메이션 */
+/* 터치(클릭) 시 살짝 눌리는 애니메이션 */
 .category-chip:active {
     transform: scale(0.92);
 }
@@ -865,7 +865,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
     transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease;
 }
 
-/* 👆 터치(클릭) 시 쫀득하게 눌리는 손맛 */
+/* 터치(클릭) 시 살짝 눌리는 손맛 */
 .fab-write:active {
     transform: scale(0.92);
     box-shadow: 0 4px 12px rgba(127, 119, 221, 0.3); /* 눌렸을 때 그림자도 작아짐 */
@@ -913,7 +913,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
 /* 2. 실제 모달창 (시원하게 뻗도록 height 고정 & 계급 최상위 상향!) */
 .write-modal {
     position: fixed;
-    bottom: 0; /* 🚨 수정됨: -100% 대신 바닥(0)에 닻을 내림 */
+    bottom: 0; /* -100% 대신 바닥(0)에 붙인다 */
     left: 50%;
     width: 100%;
     max-width: 480px;
@@ -924,7 +924,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
     display: flex;
     flex-direction: column;
     box-shadow: 0 -10px 40px rgba(0,0,0,0.12);
-    /* 🚀 마법의 코드: bottom 대신 transform을 이용해 화면 밑으로 완벽히 숨김! (모바일 에러 원천 차단) */
+    /* bottom 대신 transform 으로 화면 밑에 숨긴다 */
     transform: translate(-50%, 100%); 
     transition: transform 0.35s cubic-bezier(0.2, 0, 0, 1); /* 🚨 bottom 대신 transform 애니메이션으로 부드럽게 변경 */
 }
@@ -1010,7 +1010,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
     background: #ffffff;
     z-index: 1000; /* 모든 화면(하단바 포함)을 덮도록 설정 */
     transform: translateX(100%); /* 처음엔 오른쪽 화면 밖에 숨김 */
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* 쫀득한 타이밍 */
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* 끝에서 부드럽게 멈춘다 */
     display: flex;
     flex-direction: column;
 }
@@ -1020,17 +1020,17 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
 .comment-input-area {
     box-sizing: border-box;
     width: 100%;
-    max-width: 480px; /* 👈 추가: 전체 앱 화면 크기(480px)에 딱 맞추기 */
+    max-width: 480px; /* 추가: 전체 앱 화면 크기(480px)에 딱 맞추기 */
     display: flex; align-items: center; gap: 12px;
     padding: 12px 20px 24px;
     border-top: 1px solid #F6F2EC; background: #ffffff;
     
-    /* 👇 sticky 대신 fixed를 쓰고 중앙 정렬 마법을 걸어줍니다 */
+    /* sticky 대신 fixed를 쓰고 중앙 정렬 맞춘다 */
     position: fixed; 
     bottom: 0;
-    left: 50%;                  /* 👈 추가: 화면 정중앙으로 밀기 */
-    transform: translateX(-50%); /* 👈 추가: 삐뚤어지지 않게 정중앙 핀 꽂기 */
-    z-index: 9999;              /* 👈 추가: 스크롤해도 글자에 안 가려지게 맨 위로 띄우기 */
+    left: 50%;                  /* 추가: 화면 정중앙으로 밀기 */
+    transform: translateX(-50%); /* 추가: 삐뚤어지지 않게 정중앙 핀 꽂기 */
+    z-index: 9999;              /* 추가: 스크롤해도 글자에 안 가려지게 맨 위로 띄우기 */
 }
 
 /* 아래는 기존 코드 그대로 유지! (건드릴 필요 없음) */
@@ -1110,7 +1110,7 @@ padding-bottom: 24px;      /* 하단 버튼이 폰 베젤에 씹히지 않게 �
     position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%);
     background: rgba(49, 51, 63, 0.9); color: white; padding: 12px 24px;
     border-radius: 24px; font-size: 14px; font-weight: 600;
-    z-index: 99999; /* 👈 무조건 맨 위에 뜨게 마법의 숫자 투척! */
+    z-index: 99999; /* 다른 창보다 늘 위에 */
     opacity: 0; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     pointer-events: none;
 }
@@ -1434,7 +1434,7 @@ body.dark-mode .category-chip:not(.active) {
 
 .tool-chip {
     background: #FFFFFF !important; 
-    color: #A3958A !important; /* 👈 선택 안 된 버튼은 회색 글씨 */
+    color: #A3958A !important; /* 선택 안 된 버튼은 회색 글씨 */
     border: 1px solid #F7F3ED !important; 
     border-radius: 18px !important; 
     padding: 16px 0 !important; 
@@ -1458,7 +1458,7 @@ body.dark-mode .category-chip:not(.active) {
     box-shadow: 0 4px 12px rgba(91,138,202,0.15) !important; 
 }
 
-/* 🚨 [핵심 해결] 활성화되었을 때 하얀색 글씨 찌꺼기 삭제! 진한 파란색으로 뚜렷하게! */
+/* 활성화되었을 때 하얀색 글씨 찌꺼기 삭제! 진한 파란색으로 뚜렷하게! */
 .tool-chip.active,
 .tool-chip.active .t-label { 
     color: #5B8ACA !important; 

@@ -198,7 +198,7 @@
         if (typeof orig !== "function" || orig.__guarded) return;
 
         var wrapped = function (type) {
-            // 🚨 [핵심 패치] 월령 제한 등 '절대 불가(hard)' 사유를 제일 먼저 검사해서 차단!
+            // 월령 제한 등 '절대 불가(hard)' 사유를 제일 먼저 검사해서 차단!
             var v = window.feverCheck(type);
             if (!v.ok && v.hard) return { locked: true, reason: v.why };
 

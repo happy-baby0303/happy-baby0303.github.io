@@ -7,7 +7,7 @@ window.escapeHTML = function(text) {
     });
 };
 
-// 🚨 [날짜 버그 패치] 문자열을 완벽한 한국 로컬 날짜로 변환해주는 헬퍼!
+// 문자열을 한국 로컬 날짜로 변환해주는 헬퍼!
 window.parseLocalDate = function(str) {
     if (!str) return null;
     const [y, m, d] = str.split('-').map(Number);
@@ -357,7 +357,7 @@ function directGoToolbox(toolType) {
     switchTool(toolType, targetChip);
 }
 
-// 🚨 [패치 완료] 3개 탭 전환 및 수유실 지도(카카오맵) 백지 버그 완벽 해결 엔진
+// 3개 탭 전환 및 수유실 지도(카카오맵) 백지 버그 해결 엔진
 function switchOutingSubTab(type) {
     const btnEvent = document.getElementById('seg-event');
     const btnList = document.getElementById('seg-list');
@@ -393,7 +393,7 @@ function switchOutingSubTab(type) {
         if (meBtn) meBtn.style.display = 'inline-block';
         if (mapNote) mapNote.style.display = 'block';
         
-        // 🚨 [지도 백지현상 100% 해결] 약간의 딜레이를 주어 DOM이 완전히 펴진 후 지도를 갱신!
+        // 약간의 딜레이를 주어 DOM이 완전히 펴진 후 지도를 갱신!
         setTimeout(() => {
             if(!window.kakaoMapInitialized) {
                 window.initNursingMap();
@@ -456,7 +456,7 @@ function switchTool(panelId, el) {
     if(targetPanel) { 
         targetPanel.classList.add('active'); 
         targetPanel.style.display = 'block'; 
-        // 👇 대기업 앱 특유의 쫀득한 팝업 효과
+        // 팝업 효과
         targetPanel.style.animation = 'toolFadeUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards';
     }
 
@@ -527,7 +527,7 @@ async function loadAllExternalData() {
     } catch (e) { console.warn("데이터 로드 실패 - 앱은 정상 작동 중"); }
 }
 
-// 🚨 [패치 완료] 큰 지역 누를 때 세부 지역 필터 재생성
+// 큰 지역 누를 때 세부 지역 필터 재생성
 function setRegion(region, btn) {
     currentRegion = region;
     document.querySelectorAll('.filter-wrap .filter-btn').forEach(b => b.classList.remove('active'));
@@ -578,7 +578,7 @@ function festRegionOf(addr) {
 }
 window.festRegionOf = festRegionOf;
 
-// 🚨 [패치 완료] 핫플 탭에서도 세부 지역 필터 나오게 수정 + 행사 없는 지역 빼기 로직 추가!
+// 핫플 탭에서도 세부 지역 필터 나오게 수정 + 행사 없는 지역 빼기 로직 추가!
 function generateSubFilters(mainRegion) {
     const subRow = document.getElementById('sub-filter-row');
     const subRegions = new Set();
@@ -676,7 +676,7 @@ function generateSubFilters(mainRegion) {
     subRow.innerHTML = html;
 }
 
-// 🚨 [패치 완료] 세부 지역 탭핑 시 적용
+// 세부 지역 탭핑 시 적용
 function setSubRegion(sub, btn) {
     document.querySelectorAll('#sub-filter-row .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active'); 
@@ -684,7 +684,7 @@ function setSubRegion(sub, btn) {
     filterPlaces();
 }
 
-// 🚨 [완벽 이원화 패치] 행사/핫플 카드 이모티콘 박멸 & 모달 분기 완벽 적용
+// 행사/핫플 카드 이모티콘 박멸 & 모달 분기 적용
 function filterPlaces() {
     const searchInput = document.getElementById('spot-search');
     const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
@@ -752,7 +752,7 @@ function filterPlaces() {
             const card = document.createElement('div'); card.className = 'fest-card';
             let imgHtml = rawImg ? `<img src="${rawImg}" loading="lazy" decoding="async" onerror="this.style.display='none';">` : `<div style="width:100%; height:100%; background:var(--bg-main); display:flex; align-items:center; justify-content:center; font-size:32px;">🎪</div>`;
             
-            // 🚨 [중요] 행사 탭에서는 마지막에 true를 보냅니다!
+            // 행사 탭에서는 마지막에 true를 보냅니다!
             card.onclick = () => openFestivalModal(title, dateText, addr, item.tel || '정보없음', item.review || '', title, rawImg || '⚙️GRAPHIC', true);
             /* 요금이 '무료' 로 시작하면 사진 오른쪽 위에 붙인다 (공식 요금 칸 그대로) */
             const freeTag = festIsFree(item) ? '<span style="position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.94); color:#4A413C; font-size:11px; font-weight:800; padding:4px 8px; border-radius:8px; z-index:10;">무료</span>' : '';
@@ -818,7 +818,7 @@ function filterPlaces() {
             let safeReview = (p.review || '').replace(/'/g, "\\'");
             let safeQuery = (p.query || p.title || '').replace(/'/g, "\\'");
 
-            // 🚨 [중요] 핫플 탭에서는 마지막에 false를 보냅니다! (절대 행사로 안 뜸)
+            // 핫플 탭에서는 마지막에 false를 보냅니다! (절대 행사로 안 뜸)
             // 🚨 촌스러운 이모티콘(p.emoji) 코드 완벽 삭제!
             htmlString += `
                 <div onclick="openFestivalModal('${safeTitle}', '${timeInfo}', '${fullAddr}', '정보없음', '${safeReview}', '${safeQuery}', '', false)" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.02);" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">
@@ -1103,7 +1103,7 @@ async function saveLedgerToFirebase(data) {
     if (window.Ledger) return window.Ledger.save(data);
     if (typeof db !== 'undefined' && typeof setDoc === 'function') {
         const syncCode = window.getSyncCode(); if (!syncCode) return;
-        // 🚨 [다둥이 패치] 가계부 저장 경로 분리
+        // 다둥이 — 가계부 저장 경로 분리
         try { await setDoc(doc(db, "ledger_" + syncCode + window.currentBabySuffix, "status"), data); } catch (e) { console.error(e); }
     }
     localStorage.setItem('tosil_ledger_data', JSON.stringify(data));
@@ -1546,7 +1546,7 @@ window.addDailyExpense = async function(type, opt) {
 
     window.moneySelectedYM = null;          // 방금 적은 건 이번 달이니 이번 달로 돌아온다
     window.updateLedgerUI(); 
-    window.analyzeMoney(); // 👈 입력과 동시에 차트를 알아서 다시 그림
+    window.analyzeMoney(); // 입력과 동시에 차트를 알아서 다시 그림
     if(typeof updateHomeDashboard === 'function') updateHomeDashboard();
 }
 
@@ -1592,13 +1592,13 @@ window.updateLedgerUI = function() {
     const amountInput = document.getElementById('v-goal-amount');
     if(amountInput && document.activeElement !== amountInput && ledger.goalAmount) {
         amountInput.value = Number(ledger.goalAmount).toLocaleString();
-        window.resizeInput(amountInput); // 👈 앱 로딩 시 목표액 칸도 넉넉하게 자동 조절
+        window.resizeInput(amountInput); // 앱 로딩 시 목표액 칸도 넉넉하게 자동 조절
     }
 
     const budgetInput = document.getElementById('v-budget');
     if (budgetInput && document.activeElement !== budgetInput && (Number(ledger.budget) > 0 || localStorage.getItem('tosil_budget'))) {
         budgetInput.value = window.moneyBudget().toLocaleString();
-        window.resizeInput(budgetInput); // 👈 앱 로딩 시 예산 칸도 넉넉하게 자동 조절
+        window.resizeInput(budgetInput); // 앱 로딩 시 예산 칸도 넉넉하게 자동 조절
     }
 
     const targetAmount = parseInt(ledger.goalAmount) || 100000;
@@ -1757,7 +1757,7 @@ window.resetMoneyAll = async function() {
     if(area) area.style.display = 'none';
     
     window.updateLedgerUI();
-    window.analyzeMoney(); // 👈 0원으로 초기화된 차트 강제 적용
+    window.analyzeMoney(); // 0원으로 초기화된 차트 강제 적용
     
     if(typeof showToast === 'function') showToast("기록을 정리했어요 🌿");
     else alert("기록을 정리했어요. 다시 모아봐요 🌿");
@@ -2049,7 +2049,7 @@ async function addFeverRecord() {
     if (typeof db !== 'undefined' && typeof setDoc === 'function') {
         const syncCode = window.getSyncCode();
         if (syncCode) {
-            // 🚨 [다둥이 패치] 해열제 저장 경로 분리
+            // 다둥이 — 해열제 저장 경로 분리
             const docRef = doc(db, "fever_" + syncCode + window.currentBabySuffix, "status");
             setDoc(docRef, { records: records }, { merge: true })
                 .catch(function (e) { console.warn('[해열제] 서버 저장 실패 — 이 폰엔 남아 있어요', e); });
@@ -2248,7 +2248,7 @@ async function clearFeverRecord() {
 
         if (typeof db !== 'undefined' && typeof setDoc === 'function') {
             const syncCode = window.getSyncCode();
-            // 🚨 [다둥이 패치] 해열제 삭제 경로 분리 · 기다리지 않는다 (오프라인이면 화면이 안 풀렸다)
+            // 다둥이 — 해열제 삭제 경로 분리 · 기다리지 않는다 (오프라인이면 화면이 안 풀렸다)
             if (syncCode) {
                 setDoc(doc(db, "fever_" + syncCode + window.currentBabySuffix, "status"), { records: keep })
                     .catch(function () {});
@@ -2312,7 +2312,7 @@ window.downloadFeverReport = downloadFeverReport;
 let feverUnsubscribe = null;
 function startFeverRealtimeSync() {
     const syncCode = window.getSyncCode(); if (!syncCode) return;
-    // 🚨 [다둥이 패치] 해열제 수신 경로 분리
+    // 다둥이 — 해열제 수신 경로 분리
     const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "fever_" + syncCode + window.currentBabySuffix, "status") : null;
     
     if(!docRef) return; 
@@ -3239,7 +3239,7 @@ async function createBatonTask(text, reward) {
     await saveBatonToFirebase(records);
     showToast("💌 부탁을 보냈어요"); 
 
-    // 🌟 [자동 알림 우체부 호출] 아빠한테 진짜 푸시 알림 쏘기!
+    // 아빠한테 진짜 푸시 알림 쏘기!
     const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
     if (syncCode && window.functions && window.httpsCallable) {
         const sendFamilyPush = window.httpsCallable(window.functions, 'sendFamilyPush');
@@ -3571,7 +3571,7 @@ let ledgerUnsubscribe = null;
 function startLedgerRealtimeSync() {
     if (window.Ledger) return window.Ledger.listen();     // 받을 때도 합친다 (ledgersync.js)
     const syncCode = window.getSyncCode(); if (!syncCode) return;
-    // 🚨 [다둥이 패치] 가계부 수신 경로 분리
+    // 다둥이 — 가계부 수신 경로 분리
     const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "ledger_" + syncCode + window.currentBabySuffix, "status") : null;
     if(!docRef) return; 
 
@@ -3583,7 +3583,7 @@ function startLedgerRealtimeSync() {
             const serverData = docSnap.data();
             const localData = JSON.parse(localStorage.getItem('tosil_ledger_data')) || {};
             
-            // 🚨 [방어막] 서버에 내역이 없는데 로컬엔 내역이 있다면 덮어쓰지 않음!
+            // 서버에 내역이 없는데 로컬엔 내역이 있다면 덮어쓰지 않음!
             if ((serverData.history && serverData.history.length > 0) || !localData.history || localData.history.length === 0) {
                  localStorage.setItem('tosil_ledger_data', JSON.stringify(serverData));
             }
@@ -3851,10 +3851,10 @@ window.copySymptomMemo = function() {
 // ==========================================
 // 📱 원터치 육아 트래커 엔진 (바텀시트 + 대시보드 완벽 통합본)
 // ==========================================
-window.trackerState = { type: '', subType: '', status: '', dateOffset: 0 }; // 👈 dateOffset 추가됨
+window.trackerState = { type: '', subType: '', status: '', dateOffset: 0 }; // dateOffset — 어제 / 오늘
 window.editingTrackerId = null;
 
-// 🌟 [신규] 어제/오늘 토글 스위치 엔진
+// 어제/오늘 토글 스위치 엔진
 window.setTrackerDateOffset = function(offset) {
     window.trackerState.dateOffset = offset;
     
@@ -4011,7 +4011,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
     if (type === 'feed') {
         title.innerHTML = '맘마 기록하기';
         
-        // 🚨 [직수 패치] 수유를 누르고 시작했으면 스와이프(드럼)를 아예 숨기고 깔끔하게 띄웁니다!
+        // 수유를 누르고 시작했으면 스와이프(드럼)를 아예 숨기고 깔끔하게 띄웁니다!
         if (localStorage.getItem('tosil_breast_start')) {
             const startMs = parseInt(localStorage.getItem('tosil_breast_start'));
             const dir = localStorage.getItem('tosil_breast_dir') || '양쪽';
@@ -4953,7 +4953,7 @@ window.editTrackerRecord = function(id) {
     let record = records.find(r => r.id === id);
     if (!record) return;
     
-    // 🚨 [핵심 해결] 현재 열려있는 통계/기록 창(z-index 99999)을 닫아줍니다!
+    // 현재 열려있는 통계/기록 창(z-index 99999)을 닫아줍니다!
     if (typeof window.closeStatsSheet === 'function') {
         window.closeStatsSheet();
     }
@@ -5377,7 +5377,7 @@ window.updateTrackerDashboard = function() {
                 d.setHours(0, 0, 0, 0);
                 return d.getTime();
             })();
-           // 🚨 [수정됨] 아래 트래커 카드들과 동일하게 둥글고 하얀 예쁜 카드로 렌더링!
+           // 아래 트래커 카드들과 동일하게 둥글고 하얀 예쁜 카드로 렌더링!
             for(let date in grouped) {
                 const shown = (F === 'all') ? grouped[date] : grouped[date].filter(r => r.type === F);
                 if (!shown.length) continue;                   // 그날 그 종류가 없으면 날짜 칸도 안 그린다
@@ -5393,7 +5393,7 @@ window.updateTrackerDashboard = function() {
                 
                 shown.forEach(r => {
                     let icon = '✨';
-                    // 🚨 [패치됨] 투약 기록 아이콘 추가!
+                    // 투약 기록 아이콘 추가!
                     if (r.type === 'feed') icon = (r.subType === '이유식') ? '🥄' : '🍼';
                     else if (r.type === 'sleep') icon = (r.subType === '밤잠' ? '🌙' : '☀️');
                     else if (r.type === 'diaper') {
@@ -5442,7 +5442,7 @@ window.updateTrackerDashboard = function() {
                             displayTime = `${r.time || hhmmOf(r.timestamp)} ~ ${endStr}`; 
                         }
                     }
-                    // 🚨 [패치됨] 투약 기록 텍스트 추가!
+                    // 투약 기록 텍스트 추가!
                     else if(r.type === 'med') {
                         txt = `<span style="color:#A07722">${r.subType}</span>`;
                     }
@@ -5450,7 +5450,7 @@ window.updateTrackerDashboard = function() {
                     historyHtml += `
                         <div class="swipe-list-item" style="position:relative; margin-bottom:8px; border-radius:12px; background:var(--bg-card); border:1px solid #EDE6DE; overflow:hidden;">
                             
-                            <!-- 🚨 [수정됨] div를 button으로 교체! (iOS 터치 씹힘 완벽 해결) -->
+                            <!-- div를 button으로 교체! (iOS 터치 씹힘 해결) -->
                             <div style="position:absolute; top:0; right:0; height:100%; display:flex; z-index:1;">
                                 <button type="button" onclick="window.editTrackerRecord('${r.id}')" style="background:#F0EEFB; color:#7F77DD; width:65px; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; font-size:12px; cursor:pointer; border:none; padding:0; outline:none; pointer-events:auto;">
                                     <span style="font-size:16px; margin-bottom:2px;">✏️</span>수정
@@ -5460,7 +5460,7 @@ window.updateTrackerDashboard = function() {
                                 </button>
                             </div>
                             
-                            <!-- 🚨 [수정됨] transform:translateZ(0) 추가 (iOS 화면 렌더링 버그 방어) -->
+                            <!-- transform:translateZ(0) 추가 (iOS 화면 렌더링 버그 방어) -->
                             <div class="swipe-content" data-id="${r.id}" style="position:relative; z-index:2; background:var(--bg-card); display:flex; justify-content:space-between; align-items:center; padding:14px 4px; transition:transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); transform:translateZ(0);"
                                  ontouchstart="window.handleSwipeStart(event)" 
                                  ontouchmove="window.handleSwipeMove(event)" 
@@ -5501,7 +5501,7 @@ window.updateTrackerDashboard = function() {
         return; 
     }
 
-    // 🚨 [유령 수면 자가치유 엔진] 
+    // 끝나지 않은 잠 기록을 스스로 정리한다
     const activeSleepRecords = records.filter(r => r.type === 'sleep' && r.amount === 0);
     let sleepStartTime = localStorage.getItem('tosil_sleep_start');
     
@@ -5833,7 +5833,7 @@ window.updateTrackerDashboard = function() {
         `;
     }
 
-    // 🚨 [감성 디테일 패치] 값이 0일 때는 연한 회색으로 죽여서 시각적 피로도 감소!
+    // 값이 0일 때는 연한 회색으로 죽여서 시각적 피로도 감소!
     /* 색은 '오늘 하루' 카드의 줄 색과 맞춘다 (잠 보라 · 기저귀 초록). 기저귀 횟수를 빨강(경고색)으로 칠할 이유가 없다 */
     let sleepColor = todaySleepMins === 0 ? '#C4B5A9' : '#7F77DD';
     let diaperColor = todayDiaperCount === 0 ? '#C4B5A9' : '#2F9E7E';
@@ -6095,7 +6095,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if(window.updateTrackerDashboard) window.updateTrackerDashboard();
         
-        // 👇 이 줄을 추가해야 앱이 켜질 때 체크리스트가 화면에 그려집니다!
+        // 앱이 켜질 때 체크리스트를 그린다
         if(window.renderRoutineChecklist) window.renderRoutineChecklist(); 
         
     }, 100);
@@ -6142,7 +6142,7 @@ window.renderRoutineChecklist = function() {
     const createBtn = (id, label) => {
         const isChecked = routineData[id];
         
-        // 🚨 [근본 해결] #7F77DD(파란색) 하드코딩 삭제! 처음부터 var(--primary)로 렌더링!
+        // #7F77DD(파란색) 하드코딩 삭제! 처음부터 var(--primary)로 렌더링!
         const bg = isChecked ? 'var(--primary)' : 'var(--bg-sub)';
         const color = isChecked ? '#FFFFFF' : 'var(--text-s)';
         const border = isChecked ? '1px solid var(--primary)' : '1px solid var(--border)';
@@ -6206,7 +6206,7 @@ window.saveRoutineSettings = function() {
     window.renderRoutineChecklist();
 };
 
-// 👆 체크버튼 누를 때 파이어베이스로 이름도 같이 보내도록 업데이트
+// 체크버튼 누를 때 파이어베이스로 이름도 같이 보내도록 업데이트
 window.toggleRoutine = async function(id) {
     let routineData = JSON.parse(localStorage.getItem('tosil_routine_data')) || {};
     routineData[id] = !routineData[id]; 
@@ -6320,7 +6320,7 @@ window.saveTrackerToFirebase = async function(records) {
     localStorage.setItem('tosil_tracker_records', JSON.stringify(records));
     if(typeof window.updateTrackerDashboard === 'function') window.updateTrackerDashboard();
 
-    // 🚨 [오프라인 방어막] 네트워크가 꺼져있으면 '오프라인 큐'에 깃발만 꽂아두고 스무스하게 종료!
+    // 네트워크가 꺼져있으면 '오프라인 큐'에 깃발만 꽂아두고 스무스하게 종료!
     if (!navigator.onLine) {
         localStorage.setItem('tosil_offline_queue_tracker', 'true');
         console.warn("오프라인 상태입니다. 기기에만 임시 저장 후 통신 재개 시 동기화합니다.");
@@ -6339,7 +6339,7 @@ window.saveTrackerToFirebase = async function(records) {
         try { stamp = JSON.stringify(records); } catch (e) {}
         if (stamp && window._lastTrackerStamp === stamp) return;
 
-        // 🚨 [긴급 패치] 트래커에도 다둥이 꼬리표(currentBabySuffix) 부착 완료!
+        // 트래커에도 다둥이 꼬리표(currentBabySuffix) 부착 완료!
         // ⚠️ 기다리지 않는다. 신호가 약하면 '저장 중… 💾' 에서 멈춰서 저장이 안 된 줄 알았다.
         const payload = { records: records, updatedAt: Date.now(), deleted: (window.Grave ? window.Grave.list('trk') : {}) };
         setDoc(doc(db, "tracker_" + syncCode + window.currentBabySuffix, "status"), payload)
@@ -6356,7 +6356,7 @@ window.saveTrackerToFirebase = async function(records) {
 };
 
 /// 🛠️ [패치 3-1] 무적 락(Lock) 변수 생성 및 오프라인 큐 발사 로직
-window.isFlushingOfflineData = false; // 👈 락 변수 추가
+window.isFlushingOfflineData = false; // 보내는 중 잠금
 
 window.flushOfflineQueue = async function() {
     if (!navigator.onLine) return; // 여전히 오프라인이면 패스
@@ -6395,7 +6395,7 @@ window.addEventListener('online', window.flushOfflineQueue);
 
 // 앱을 처음 켤 때도 오프라인에 묶여있던 짐이 있는지 한 번 검사
 document.addEventListener("DOMContentLoaded", () => {
-    // 🚨 [긴급 픽스] 내 폰의 과거 데이터가 서버 최신 데이터를 덮어씌우는 참사 방지 (2초 -> 8초 대기)
+    // 내 폰의 과거 데이터가 서버 최신 데이터를 덮어씌우는 참사 방지 (2초 -> 8초 대기)
     setTimeout(window.flushOfflineQueue, 8000);
 });
 
@@ -6433,7 +6433,7 @@ window.stopSleepTimer = async function() {
     window.showToast(`✅ ${durationMins}분 동안 자고 일어났어요`);
 };
 
-// 🚨 [저장 엔진 업데이트] 수면 강제 종료 버그 (무한수면) 완벽 킬스위치!
+// 수면 강제 종료 버그 (무한수면) 킬스위치!
 window.saveTrackerRecord = async function() {
     if(!window.trackerState.type) return;
 
@@ -6532,7 +6532,7 @@ window.saveTrackerRecord = async function() {
         record.amount = 0; // 약은 용량보다 시간이 중요하므로 amount는 0 고정
         record.status = '';
     }
-    // 🚨 [핵심 픽스] 수면 저장 로직 - 킬스위치 가동!
+    // 수면 저장 로직 - 킬스위치 가동!
     else if (window.trackerState.type === 'sleep') {
         if (!window.trackerState.subType) {
             if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
@@ -6654,7 +6654,7 @@ window.saveTrackerRecord = async function() {
         }, 500);
     }
     
-    // 👇 방금 추가한 스마트 팝업 검사기를 여기에 꽂아줍니다!
+    // 스마트 팝업 검사기
     if (typeof window.checkAndShowInviteNudge === 'function') window.checkAndShowInviteNudge();
 };
 
@@ -6668,7 +6668,7 @@ let settingsUnsubscribe = null; // 🌟 아기 설정값 연동 리스너 추가
 window.startTrackerRealtimeSync = function() {
     const syncCode = window.getSyncCode(); if (!syncCode) return;
     
-    // 🚨 [긴급 패치] 수신할 때도 다둥이 꼬리표(currentBabySuffix) 확인 완료!
+    // 수신할 때도 다둥이 꼬리표(currentBabySuffix) 확인 완료!
     const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "tracker_" + syncCode + window.currentBabySuffix, "status") : null;
     if(!docRef) return; 
     
@@ -6716,7 +6716,7 @@ window.startTrackerRealtimeSync = function() {
     }));
 };
 
-// 👇 기존 비타민 연동 코드 무사히 보존 완료! 👇
+// 비타민 연동 
 window.startRoutineRealtimeSync = function() {
     const syncCode = window.getSyncCode(); if (!syncCode) return;
     const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "routine_" + syncCode + window.currentBabySuffix, "status") : null;
@@ -6740,12 +6740,12 @@ window.startRoutineRealtimeSync = function() {
    }));
 };
 
-// 🌟 [추가] 아빠 폰에도 아기 이름, 생일이 실시간으로 동기화되게 만드는 엔진!
+// 아빠 폰에도 아기 이름, 생일이 실시간으로 동기화되게 만드는 엔진!
 window.startSettingsRealtimeSync = function() {
     const syncCode = localStorage.getItem("family_sync_code");
     if (!syncCode || typeof doc === 'undefined' || typeof window.db === 'undefined' || typeof window.onSnapshot !== 'function') return;
     
-    // 🚨 [다둥이 패치] 아기 설정 수신 경로 분리
+    // 다둥이 — 아기 설정 수신 경로 분리
     const docRef = doc(window.db, "settings_" + syncCode + window.currentBabySuffix, "info");
     if (settingsUnsubscribe) settingsUnsubscribe();
 
@@ -6776,7 +6776,7 @@ window.syncBabySettingsToFirebase = function(targetId, skipFamily) {
         startDate: raw('tosil_startDate') || '',
         feedingStage: raw('tosil_feedingStage') || '모유/분유'
     };
-    // 🚨 [다둥이 패치] 아기 설정 경로 분리
+    // 다둥이 — 아기 설정 경로 분리
     const jobs = [window.setDoc(window.doc(window.db, "settings_" + syncCode + sfx, "info"), settings)];
     // 첫째는 가족방 문서에도 — 새 폰에서 가족방을 되찾을 때 familyhome.js 가 여기서 이름 · 생일을 받는다
     if (!sfx && !skipFamily && typeof window.updateDoc === 'function') {
@@ -6795,7 +6795,7 @@ window.syncBabySettingsToFirebase = function(targetId, skipFamily) {
 window.initRealtimeSync = () => {
     const code = localStorage.getItem("family_sync_code");
     
-    // 🚨 [방어막] 코드가 없거나, 연동이 끊겨서 unlinked 상태면 감시 기능을 아예 안 켭니다! (에러 차단)
+    // 코드가 없거나, 연동이 끊겨서 unlinked 상태면 감시 기능을 아예 안 켭니다! (에러 차단)
     if (!code || code.includes("unlinked")) return; 
 
     if (typeof startFeverRealtimeSync === 'function') startFeverRealtimeSync();
@@ -7279,7 +7279,7 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
     
     if(!modal) return;
     
-    // 🌟 [핵심 픽스] 어떤 모달창이 떠 있든 무조건 그 위로 덮어버리도록 z-index를 '999999'로 강제 고정!
+    // 어떤 모달창이 떠 있든 무조건 그 위로 덮어버리도록 z-index를 '999999'로 강제 고정!
     modal.style.zIndex = '999999';
     
     msgEl.innerHTML = message.replace(/\n/g, '<br>');
@@ -7533,7 +7533,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// 🌟 [핵심] 로그인 전용 시작 화면(Step 0)을 화면에 예쁘게 그리는 함수
+// 로그인 전용 시작 화면(Step 0)을 화면에 예쁘게 그리는 함수
 window.showForcedLoginStep = function() {
     // 기존 단계들 다 숨기기
     document.getElementById('onboarding-step-1').style.display = 'none';
@@ -7770,7 +7770,7 @@ window.finishOnboarding = function(feedingStage) {
         // 아기 설정 칸도 같이 — 짝꿍 폰은 이 칸(settings_/info)을 듣고 이름 · 생일을 맞춘다
         try { if (typeof window.syncBabySettingsToFirebase === 'function') await window.syncBabySettingsToFirebase(window.currentBabySuffix || '', true); } catch (e) {}
 
-        // 🚨 [필수 패치] 서버(families 문서)에 아기 이름/생일 실시간 반영!
+        // 서버(families 문서)에 아기 이름/생일 실시간 반영!
         const code = localStorage.getItem('family_sync_code');
         if (code && window.db && window.updateDoc) {
             try {
@@ -7976,7 +7976,7 @@ window.checkAndShowInviteNudge = async function() {
 // 👶 [홈 화면 통합 엔진] 아기 정보 & 맞춤형 큐레이션 & 시간대 인사말
 // ==========================================
 window.renderBabyInfo = function() {
-    // 🌟 [다둥이 패치] 상단 프로필 스위치 렌더링 (카드 외부 상단 완벽 밀착 패치)
+    // 다둥이 — 상단 프로필 스위치 렌더링 (카드 외부 상단 밀착 패치)
     const profiles = window.getBabyProfiles();
     const heroSection = document.querySelector('.home-hero'); 
     
@@ -7986,7 +7986,7 @@ window.renderBabyInfo = function() {
         profiles.forEach(p => {
             const isActive = window.currentBabySuffix === p.id;
             
-            // 🚨 [핵심 픽스] 순서를 뒤집었습니다! 과거의 임시 장부(p.name)를 믿지 않고 무조건 '진짜 저장된 이름'부터 1순위로 긁어옵니다!
+            // 순서를 뒤집었습니다! 과거의 임시 장부(p.name)를 믿지 않고 무조건 '진짜 저장된 이름'부터 1순위로 긁어옵니다!
             const realName = originalGetItem.call(localStorage, 'tosil_babyName' + p.id) || p.name || '우리아기';
             
             // 감성 스타일: 선택된 건 진한 검정/파랑, 안 된 건 은은한 카드 스타일
@@ -8004,7 +8004,7 @@ window.renderBabyInfo = function() {
     if (existingSwitcher) existingSwitcher.remove(); // 중복 생성 방지
     
     if (switchHtml && heroSection) {
-        // 🚨 [핵심 픽스] heroSection의 바깥쪽 '바로 위(beforebegin)'에 꽂아서 카드 외부에 노출시킵니다!
+        // heroSection의 바깥쪽 '바로 위(beforebegin)'에 꽂아서 카드 외부에 노출시킵니다!
         heroSection.insertAdjacentHTML('beforebegin', `<div id="baby-profile-switcher">${switchHtml}</div>`);
     }
 
@@ -8080,7 +8080,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (savedName && savedDate) {
         document.getElementById('onboarding-overlay').style.display = 'none';
-        renderBabyInfo(); // 👈 여기서 하나로 통합된 엔진 실행
+        renderBabyInfo(); // 여기서 하나로 통합된 엔진 실행
     } else {
         document.getElementById('onboarding-overlay').style.display = 'flex';
     }
@@ -8439,7 +8439,7 @@ async function completeBaton(id) {
     // 경험치 지급 쏴라!
     gainMateExp(earnedExp); 
 
-    // 🌟 [자동 알림 우체부 호출] 아내에게 해결 완료 푸시 알림 쏘기!
+    // 아내에게 해결 완료 푸시 알림 쏘기!
     const syncCode = window.getSyncCode ? window.getSyncCode() : localStorage.getItem('family_sync_code');
     if (syncCode && window.functions && window.httpsCallable) {
         const sendFamilyPush = window.httpsCallable(window.functions, 'sendFamilyPush');
@@ -9009,7 +9009,7 @@ window.getMateLevelInfo = function() {
     let currentLevelExp = totalExp % 100; 
     let percent = currentLevelExp; 
 
-    // 🚨 [패치] 하드코딩된 헥스코드를 모두 CSS 변수로 교체 (깜빡임 완벽 차단)
+    // 하드코딩된 헥스코드를 모두 CSS 변수로 교체 (깜빡임 차단)
     let title = "👶 신입 육아 요원"; let color = "var(--text-sub)";
     if (level >= 10) { title = "👑 육아의 신"; color = "var(--accent)"; }
     else if (level >= 7) { title = "💎 베테랑 요원"; color = "var(--primary)"; }
@@ -9092,7 +9092,7 @@ window.renderDadQuests = function() {
 
     const isHeroToday = localStorage.getItem('tosil_hero_mode_date') === new Date().toDateString();
 
-    // 🚨 [패치] 평상시 바탕/경고톤 역시 CSS 변수로 강제 고정하여 theme.js의 개입을 원천 차단!
+    // 평상시 바탕/경고톤 역시 CSS 변수로 강제 고정하여 theme.js의 개입을 원천 차단!
     const boardBg = todayFever ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)';
     const boardShadow = todayFever ? '0 4px 16px rgba(239,68,68,0.12)' : '0 2px 8px rgba(0,0,0,0.04)';
     const boardBorder = todayFever ? '1px solid var(--danger, #EF4444)' : '1px solid var(--border)';
@@ -9201,7 +9201,7 @@ window.updateDadBriefing = function() {
                 const minF = briefDays <= 30 ? 10 : (briefDays <= 100 ? 20 : 40);
                 const minB = briefDays <= 30 ? 2 : (briefDays <= 100 ? 3 : 5);
 
-                // 🚨 [아빠 모드 동기화 2] 1순위 미션 브리핑 월령 맞춤형!
+                // 아빠 모드 — 1순위 미션 브리핑 월령 맞춤형!
                 if(!lastFeed || r.timestamp > lastFeed.timestamp) {
                     if (r.subType === '이유식') lastFeed = r;
                     else if (r.subType === '모유' && amt >= minB) lastFeed = r;
@@ -10186,7 +10186,7 @@ window.submitPost = function(btnElement) {
         posts.unshift(newPost);
         targetPost = newPost; // 저장할 대상 지정
         
-        // 🚨 [핵심 방어막] 최신 글 50개만 남기고 옛날 글은 날려서 로컬 용량 확보!
+        // 최신 글 50개만 남기고 옛날 글은 날려서 로컬 용량 확보!
         if (posts.length > 50) {
             posts = posts.slice(0, 50);
         }
@@ -10202,7 +10202,7 @@ window.submitPost = function(btnElement) {
         return window.showToast('⚠️ 용량이 꽉 찼습니다 기기의 캐시를 비우거나 사진 갯수를 줄여주세요.');
     }
 
-    // 🚨 [수술 완료] 통짜 배열 저장이 아닌 '개별 글 ID'로 파이어베이스에 각각 독립 저장!
+    // 통짜 배열 저장이 아닌 '개별 글 ID'로 파이어베이스에 각각 독립 저장!
     if (typeof window.db !== 'undefined' && typeof window.setDoc === 'function' && targetPost) {
         window.setDoc(window.doc(window.db, "community_posts", targetPost.id), targetPost, { merge: true })
             .catch(e => console.error("커뮤니티 글쓰기 파이어베이스 연동 에러:", e));
@@ -11066,7 +11066,7 @@ window.renderCommunityFeed = function() {
                 <span style="font-size: 13.5px; font-weight: 800; color: #6A61CE;">현재 <span style="font-size: 16px; font-weight: 900;">${totalCount}</span>명의 엄빠가 대기 중!</span>
             </div>
 
-            <!-- 👇 찐 수집 함수 연결 -->
+            <!-- 수집 함수 연결 -->
             <button onclick="window.applyCommunityWaitlist(this)" style="width: 100%; max-width: 300px; padding: 18px; color: #FFF; border: none; border-radius: 16px; font-size: 15px; font-weight: 900; cursor: pointer; transition: 0.2s; ${btnStyle}" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">
                 ${btnText}
             </button>
@@ -11256,7 +11256,7 @@ window.saveUserInfoToFirebase = async function() {
             const userSnap = await (typeof window.getDoc === 'function' ? window.getDoc(userRef) : userRef.get());
             const exists = typeof userSnap.exists === 'function' ? userSnap.exists() : userSnap.exists;
 
-            // 🌟 [케이스 A] 완전 처음 로그인한 신규 유저일 때 (DB에 기록이 없음)
+            // 케이스 A — 완전 처음 로그인한 신규 유저일 때 (DB에 기록이 없음)
             if (!exists) {
                 
                 // 관리자가 파이어베이스에서 이벤트 종료 스위치(founder_event_closed)를 켰는지 확인!
@@ -11275,7 +11275,7 @@ window.saveUserInfoToFirebase = async function() {
                 let founderUntil = null;
                 if (isFounder) {
                     const until = new Date();
-                    until.setMonth(until.getMonth() + 1); // 👈 1년(setFullYear)을 1달(setMonth)로 수정!
+                    until.setMonth(until.getMonth() + 1); // 한 달
                     founderUntil = until.toISOString().split('T')[0];
                 }
 
@@ -11302,7 +11302,7 @@ window.saveUserInfoToFirebase = async function() {
                 // 이벤트 당첨자라면 내 폰에도 황금 뱃지 부여
                 if (isFounder) {
                     localStorage.setItem('tosil_is_founder', 'true');
-                    localStorage.setItem('tosil_founder_until', founderUntil); // 👈 마이페이지 날짜 표시를 위한 캐시 추가
+                    localStorage.setItem('tosil_founder_until', founderUntil); // 마이페이지 날짜 표시용
                     
                     /* ⚠️ '🎉 축하합니다 선착순 얼리버드 당첨 · 2026-11-08까지 (1개월) 프리미엄 무료' 였다.
                           가입한 사람 모두 받는데 '당첨' 이라고 했고, 무료 개방 중에는 이미 12월까지 다 열려 있어서
@@ -11315,7 +11315,7 @@ window.saveUserInfoToFirebase = async function() {
                     }, 1500);
                 }
             } 
-            // 🌟 [케이스 B] 이미 가입했던 유저일 때 (앱을 지웠다 다시 깔았거나 매일 접속 시)
+            // 케이스 B — 이미 가입했던 유저일 때 (앱을 지웠다 다시 깔았거나 매일 접속 시)
             else {
                 const userData = typeof userSnap.data === 'function' ? userSnap.data() : userSnap.data;
                 
@@ -12094,7 +12094,7 @@ window.addComment = function() {
     let comments = JSON.parse(localStorage.getItem('tosil_community_comments')) || [];
     comments.push(newComment);
 
-    // 🚨 [핵심 방어막] 댓글은 최신 100개까지만 로컬에 유지!
+    // 댓글은 최신 100개까지만 로컬에 유지!
     if (comments.length > 100) {
         comments = comments.slice(comments.length - 100);
     }
@@ -12411,7 +12411,7 @@ window.initPremiumBanner = function() {
     let currentIndex = 0;
     let autoTimer;
     
-    // 👆 터치 위치를 기억할 변수들
+    // 터치 위치를 기억할 변수들
     let startX = 0;
     let endX = 0;
 
@@ -12444,7 +12444,7 @@ window.initPremiumBanner = function() {
     const stopTimer = () => clearInterval(autoTimer);
 
     // ==========================================
-    // 👆 스와이프 (터치 드래그) 로직 추가
+    // 스와이프 (터치 드래그) 로직 추가
     // ==========================================
     const handleTouchStart = (e) => {
         stopTimer(); // 터치하는 순간 자동 롤링 정지
@@ -12543,7 +12543,7 @@ window.checkFeedPlateauBreakthrough = function() {
         }
     });
 
-    // 🌟 [현실 패치] 어제 이 시간대보다 오늘 딱 '30ml 이상'만 더 먹어도 뱃골 확장으로 인정!
+    // 어제 이 시간대보다 오늘 딱 '30ml 이상'만 더 먹어도 뱃골 확장으로 인정!
     // (안전장치: 오늘 총 수유량이 300ml 이상은 넘었을 때만 발동)
     if (yesterdayFeedTotal > 0 && todayFeedTotal >= 300 && todayFeedTotal >= yesterdayFeedTotal + 30) {
         
@@ -12704,7 +12704,7 @@ window.updateMilestoneCounter = function(isFromClick = false) {
         homeCounterEl.innerText = countText;
         homeCounterEl.style.display = 'inline-block'; 
         
-        // 🚨 [수정됨] 하얀색 찌꺼기 삭제! 배경에 맞는 진한 보라색으로 텍스트 색상 고정
+        // 하얀색 찌꺼기 삭제! 배경에 맞는 진한 보라색으로 텍스트 색상 고정
         homeCounterEl.style.color = '#6A61CE'; 
         homeCounterEl.style.fontWeight = '900';
         
@@ -12938,7 +12938,7 @@ window.__old_downloadMilestone_unused = function() {
         if (diffDays > 0) ddayText = `생후 ${diffDays}일의 기록`;
     }
 
-    // 🚨 [픽스 1] 렌더링 차단 방지: 화면 밖(-9999px)으로 날리지 않고 제자리에 두되, z-index로 맨 뒤로 숨깁니다!
+    // 렌더링 차단 방지: 화면 밖(-9999px)으로 날리지 않고 제자리에 두되, z-index로 맨 뒤로 숨깁니다!
     const exportDiv = document.createElement('div');
     exportDiv.style.cssText = `
         position: fixed; top: 0; left: 0; width: 1080px; height: 1440px; 
@@ -12948,7 +12948,7 @@ window.__old_downloadMilestone_unused = function() {
         z-index: -9999; pointer-events: none;
     `;
 
-    // 🚨 [픽스 2] 브라우저를 죽이던 box-shadow 빛 번짐 효과를 지우고, 카드 바탕에 은은한 핑크 그라데이션 적용!
+    // 브라우저를 죽이던 box-shadow 빛 번짐 효과를 지우고, 카드 바탕에 은은한 핑크 그라데이션 적용!
     let html = `
         <div style="width: 100%; height: 100%; background: linear-gradient(145deg, #FFFFFF 40%, #FFF0F2 100%); border-radius: 8px; box-shadow: 0 20px 60px rgba(163, 148, 137, 0.1); padding: 80px 60px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden;">
             
@@ -13001,7 +13001,7 @@ window.__old_downloadMilestone_unused = function() {
 
     window.showToast(" 엽서를 굽고 있어요...");
 
-    // 🚨 [픽스 3] 모바일 램(RAM) 초과(크래시) 방지를 위해 scale: 1 적용 (1080x1440은 이미 최고 화질입니다!)
+    // 모바일 램(RAM) 초과(크래시) 방지를 위해 scale: 1 적용 (1080x1440은 이미 최고 화질입니다!)
     setTimeout(() => {
         html2canvas(exportDiv, { 
             scale: 1, 
@@ -13052,7 +13052,7 @@ window.handleSwipeMove = function(e) {
     const diffX = currentX - window.swipeState.startX;
     const diffY = currentY - window.swipeState.startY;
 
-    // 🚨 [긴급 픽스] 스와이프 튕김 방지! 세로 움직임이 가로보다 크면서 '10px 이상' 움직였을 때만 취소
+    // 스와이프 튕김 방지! 세로 움직임이 가로보다 크면서 '10px 이상' 움직였을 때만 취소
     if (Math.abs(diffY) > Math.abs(diffX) * 0.8 && Math.abs(diffY) > 10) {
         window.swipeState.isScrolling = true;
         return;
@@ -13188,7 +13188,7 @@ window.showSleepWake = function () {
 };
 
 // ==========================================
-// 🚨 [핵심 패치] 버튼 1개로 초단순화 시킨 완벽한 토글 마술
+// 버튼 하나로 켜고 끄는 토글
 // ==========================================
 window.toggleIsSleeping = function(forceState = null) {
     if (forceState !== null) {
@@ -13594,7 +13594,7 @@ window.toggleSeniorRoutine = async function() {
 
     if (typeof window.db !== 'undefined' && typeof window.setDoc === 'function') {
         const syncCode = window.getSyncCode(); if (!syncCode) return;
-        // 🚨 [다둥이 패치] 시니어 루틴 경로 분리
+        // 다둥이 — 시니어 루틴 경로 분리
         try { await window.setDoc(window.doc(window.db, "routine_" + syncCode + window.currentBabySuffix, "status"), { data: routineData, date: new Date().toLocaleDateString() }, { merge: true }); } catch(e) {}
     }
 };
@@ -13611,7 +13611,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 🍔 찐 현실판! 메가 프랜차이즈 키오스크 엔진 (매운맛 결제 흐름 완벽 추가!)
+// 키오스크 연습 — 프랜차이즈 매장의 실제 결제 흐름
 // ==========================================
 window.kioskCart = [];
 window.kioskTotal = 0;
@@ -14015,7 +14015,7 @@ window.saveParentNoticeToFirebase = async function(text) {
     if (typeof db !== 'undefined' && typeof setDoc === 'function' && typeof doc === 'function') {
         const syncCode = window.getSyncCode(); if (!syncCode) return;
         try {
-            // 🚨 [다둥이 패치] 조부모 전달사항 경로 분리
+            // 다둥이 — 조부모 전달사항 경로 분리
             await setDoc(doc(db, "parentNotice_" + syncCode + window.currentBabySuffix, "status"), {  
     notice: text, 
     updatedAt: new Date().getTime()  
@@ -14030,7 +14030,7 @@ window.saveParentNoticeToFirebase = async function(text) {
 let parentNoticeUnsubscribe = null;
 window.startParentNoticeRealtimeSync = function() {
     const syncCode = window.getSyncCode(); if (!syncCode) return;
-    // 🚨 [다둥이 패치] 조부모 전달사항 수신 경로 분리
+    // 다둥이 — 조부모 전달사항 수신 경로 분리
    const docRef = typeof doc !== 'undefined' && typeof window.db !== 'undefined' ? doc(window.db, "parentNotice_" + syncCode + window.currentBabySuffix, "status") : null;
     
     if (!docRef) return; 
@@ -14242,7 +14242,7 @@ window.editBabyProfile = function(targetId) {
                     <option value="모유/분유" ${stage === '모유/분유' ? 'selected' : ''}>모유/분유</option>
                     <option value="초기 이유식" ${stage === '초기 이유식' ? 'selected' : ''}>초기 이유식</option>
                     <option value="중후기 이유식" ${stage === '중후기 이유식' ? 'selected' : ''}>중/후기 이유식</option>
-                    <!-- 👇 여기에 유아식/일반식 추가됨 -->
+                    <!-- 유아식 / 일반식 -->
                     <option value="유아식/일반식" ${stage === '유아식/일반식' ? 'selected' : ''}>유아식/일반식 </option>
                 </select>
                 ${ptRow}
@@ -15515,7 +15515,7 @@ window.renderMonthlyCardBanner = function() {
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { 
         if (window.renderDadCommute) window.renderDadCommute(); 
-        if (window.renderMonthlyCardBanner) window.renderMonthlyCardBanner(); // 👈 새롭게 추가됨
+        if (window.renderMonthlyCardBanner) window.renderMonthlyCardBanner(); // 이달의 카드 배너
     }, 400);
 });
 

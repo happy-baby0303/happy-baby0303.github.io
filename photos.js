@@ -362,7 +362,7 @@
         try {
                 await window.setDoc(window.doc(window.db, "photos_" + code + suffix(), "status"), {
                 days: loadIndex(),
-                deleted: (window.Grave ? window.Grave.list("photo") : {})   // 👈 지운 목록도 같이
+                deleted: (window.Grave ? window.Grave.list("photo") : {})   // 지운 목록도 같이
             });
         } catch (e) { console.warn("[배냇함 사진] 동기화 실패", e); }
     };
@@ -385,7 +385,7 @@
             if (!snap.exists()) return;
             var data = snap.data() || {};
             var remote = data.days || {};
-            if (window.Grave) window.Grave.merge("photo", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
+            if (window.Grave) window.Grave.merge("photo", data.deleted);   // 짝꿍이 지운 것 받아오기
             var local = loadIndex();
             var merged = {};
             var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("photo") : {};   // 묘비는 한 번만 읽는다
@@ -397,7 +397,7 @@
                       서버 것을 먼저 놓고, 이 폰에서 더 나중에 고친 것(ets)만 이 폰 것으로 바꾼다. */
                 (remote[k] || []).concat(local[k] || []).forEach(function (p) {
                     if (!p || !p.id) return;
-                    if (gone[p.id]) return;                                    // 👈 지운 건 되살리지 않기
+                    if (gone[p.id]) return;                                    // 지운 건 되살리지 않기
                     if (seen[p.id]) {
                         if ((Number(p.ets) || 0) > (Number(seen[p.id].ets) || 0)) {
                             out[out.indexOf(seen[p.id])] = p; seen[p.id] = p;
@@ -728,7 +728,7 @@
                 if (p.thumbPath) del(p.thumbPath);
             }
             if (window.dropCachedPhotoData) window.dropCachedPhotoData(p.id);
-            if (window.Grave) window.Grave.add("photo", p.id);   // 👈 묘비 세우기
+            if (window.Grave) window.Grave.add("photo", p.id);   // 묘비 세우기
             dropPhoto(vKey, p.id);
             window.syncPhotosToFirebase();
             vList = vList.filter(function (x) { return x.id !== p.id; });

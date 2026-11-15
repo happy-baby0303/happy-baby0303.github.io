@@ -288,7 +288,7 @@
         el.onclick = window.openNursingSheet;
         // 디자인 평탄화 (선, 색상 깔끔하게)
         el.style.cssText = "background: linear-gradient(135deg, #FFF0F1 0%, #FFE4E6 100%); border-radius: 16px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05); border: 1px solid #FFE4E6; cursor: pointer; margin-bottom: 24px;";
-       // 🚨 [수정됨] 글씨가 길어져도 버튼이 가운데로 딸려오지 않고 무조건 우측 끝에 붙도록 Flex 레이아웃 보정!
+       // 글씨가 길어져도 버튼이 가운데로 딸려오지 않고 무조건 우측 끝에 붙도록 Flex 레이아웃 보정!
         el.innerHTML = `
             <div style="flex: 1; min-width: 0; padding-right: 12px;">
                 <div style="font-size: 12px; font-weight: 800; color: #E11D48; margin-bottom: 4px;">급하게 수유실이 필요할 때</div>

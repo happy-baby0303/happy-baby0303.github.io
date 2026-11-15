@@ -285,7 +285,7 @@
             window.anniversaryDays().forEach(function (k) { touch(k); });
         }
 
-        // 🚨 [CTO 근본 패치] NaN 유령 데이터 완벽 차단!
+        // NaN 유령 데이터 차단!
         // 저장소에 찌꺼기(NaN, undefined 등)가 들어와도, YYYY-MM-DD 형식이 아니면 아예 화면에 그리지 못하게 폐기 처분합니다!
         return Object.keys(days)
             .filter(function (k) { return k && /^\d{4}-\d{2}-\d{2}$/.test(k); })

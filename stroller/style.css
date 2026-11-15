@@ -16,7 +16,7 @@ body {
     color: #4A413C; 
     -webkit-font-smoothing: antialiased; 
     
-    /* 🚀 마법의 주문: 앱 전체의 단어 쪼개짐 철벽 방어! */
+    /* 앱 전체 — 한글 단어가 중간에서 쪼개지지 않게 */
     word-break: keep-all; 
     overflow-wrap: break-word; 
 }

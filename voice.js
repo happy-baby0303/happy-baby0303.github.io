@@ -209,7 +209,7 @@
         try {
                 await window.setDoc(window.doc(window.db, "voices_" + code + suffix(), "status"), {
                 days: loadIndex(),
-                deleted: (window.Grave ? window.Grave.list("voice") : {})   // 👈 지운 목록도 같이
+                deleted: (window.Grave ? window.Grave.list("voice") : {})   // 지운 목록도 같이
             });
         } catch (e) { console.warn("[목소리] 동기화 실패", e); }
     };
@@ -224,7 +224,7 @@
             if (!snap.exists()) return;
             var data = snap.data() || {};
             var remote = data.days || {};
-            if (window.Grave) window.Grave.merge("voice", data.deleted);   // 👈 짝꿍이 지운 것 받아오기
+            if (window.Grave) window.Grave.merge("voice", data.deleted);   // 짝꿍이 지운 것 받아오기
             var local = loadIndex(), merged = {};
             var gone = (window.Grave && window.Grave.peek) ? window.Grave.peek("voice") : {};   // 묘비는 한 번만 읽는다
 
@@ -234,7 +234,7 @@
                 // 서버 것을 먼저 놓고, 이 폰에서 더 나중에 고친 것(ets)만 이 폰 것으로 (사진과 같은 규칙)
                 (remote[k] || []).concat(local[k] || []).forEach(function (v) {
                     if (!v || !v.id) return;
-                    if (gone[v.id]) return;                                    // 👈 지운 건 되살리지 않기
+                    if (gone[v.id]) return;                                    // 지운 건 되살리지 않기
                     if (seen[v.id]) {
                         if ((Number(v.ets) || 0) > (Number(seen[v.id].ets) || 0)) {
                             out[out.indexOf(seen[v.id])] = v; seen[v.id] = v;
@@ -732,7 +732,7 @@
             if (v && window.deleteObject && window.storage && window.storageRef && v.path) {
                 try { window.deleteObject(window.storageRef(window.storage, v.path)); } catch (e) {}
             }
-            if (window.Grave) window.Grave.add("voice", id);   // 👈 묘비 세우기
+            if (window.Grave) window.Grave.add("voice", id);   // 묘비 세우기
             dropVoice(key, id);
             window.syncVoicesToFirebase();
             repaint();
@@ -746,7 +746,7 @@
         if (typeof window.showConfirm === "function") {
             var okBtn = document.getElementById("btn-confirm-ok");
             if (okBtn) {
-                // 🚨 [진짜 원인 해결] 0.2초 동안 서서히 색이 변하는 애니메이션을 강제로 끕니다!
+                // 0.2초 동안 서서히 색이 변하는 애니메이션을 강제로 끕니다!
                 okBtn.style.setProperty("transition", "none", "important");
             }
             
