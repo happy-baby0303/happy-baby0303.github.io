@@ -348,27 +348,16 @@
     }
 
     /* ==========================================================
-       계절 — 매년 두 번 오는 것
-       \u26a0\ufe0f 겨울 패딩은 실제로 사고가 나는 항목이다. 크게 띄운다.
+       계절 — 여름 쿨시트
+       겨울 패딩은 실제로 사고가 나는 항목이라 '태우기 전 3분 점검' 첫 줄이 늘 맨 위에서 맡는다 (carseatguide.js)
        ---------------------------------------------------------- */
 
     function seasonHTML() {
         var m = new Date().getMonth() + 1;
 
-        if (m >= 11 || m <= 2) {
-            var y = new Date().getFullYear();
-            try { localStorage.setItem("tosil_carseat_winter_seen", m >= 11 ? y + "-" + (y + 1) : (y - 1) + "-" + y); } catch (e) {}
-            return '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:14px; ' +
-                'padding:15px 16px; margin-bottom:14px;">' +
-                '<div style="font-size:13.5px; font-weight:900; color:' + RED + '; margin-bottom:5px;">' +
-                    '\uD83E\uDDE5 겨울이에요 \u00b7 패딩 벗기고 태우세요</div>' +
-                '<div style="font-size:12.5px; font-weight:600; color:#7A6F68; line-height:1.8; ' +
-                    'word-break:keep-all;">' +
-                    '두꺼운 외투를 입은 채 채우면, 충돌 순간 옷이 납작해지면서 ' +
-                    '<b>하네스가 그만큼 헐거워져요.</b> 벗겨서 태우고 <b>담요를 위에 덮어</b> 주세요. ' +
-                    '차 안이 따뜻해지면 담요만 걷으면 되고요.</div>' +
-            '</div>';
-        }
+        /* ⚠️ 겨울 패딩은 바로 위 '태우기 전 3분 점검' 첫 줄과 같은 말이었다 (같은 탭 맨 위, 한 화면에 두 번).
+              그 카드가 무료 · PLUS 모두에게 늘 맨 위에 있으니 여기서는 빼고, 봤다는 표시도 그 카드가 적는다 (carseatguide.js) */
+        if (m >= 11 || m <= 2) return "";
         if (m >= 6 && m <= 8) {
             var o = own(), seat = seatById(o.id);
             var q = (seat ? seat.brand + " " : "") + "정품 쿨시트";
@@ -907,7 +896,8 @@
     window.refreshCarseatOwn = paint;
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        var ex = document.getElementById(HOST);
+        if (ex) { if (!ex.firstChild) paint(); return; }          // index.html 이 '쓰면서 챙길 것' 안에 박아 둔 자리
         var anchor = document.getElementById("carseat-guide") ||
                      document.querySelector(".matrix-panel");
         if (!anchor || !anchor.parentNode) return;

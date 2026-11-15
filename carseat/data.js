@@ -17,14 +17,14 @@ const carseatData = [
         compactOk: true,   // 소형차 장착 가능
         rotation: "yes", safety: ["isize", "adac"], price: "mid",
         bodySpec: "📏 40~105cm / ⚖️ 최대 19kg",
-        specs: { adacScore: "1.8 (좋음)", reboundStopper: "컴팩트 베이스" }, // 👈 [수정됨] 최우수 -> 좋음
+        specs: { adacScore: "1.8 (좋음)", reboundStopper: "컴팩트 베이스" }, // ADAC 1.6 ~ 2.5 는 '좋음' (1.5 이하만 '매우 좋음')
         desc: "회전형 중에 많이 팔리는 제품이에요. 하단 베이스가 슬림해서 아반떼, K3 같은 준중형 차량 뒷좌석에 장착해도 앞좌석 공간이 꽤 확보돼요.",
         purchasePlatform: "coupang", linkUrl: "https://link.coupang.com/a/eGfNlAgYqi", searchKeyword: "조이 아이스핀 360"
     },
     {
         id: "cs02", brand: "순성", name: "아크 올인원 아이사이즈",
         age: ["newborn", "toddler", "junior"], install: ["isofix_leg"], carSize: ["sedan", "suv", "carnival"],
-        rotation: "yes", safety: ["isize", "kc"], price: "low", // 👈 [수정됨] all -> kc
+        rotation: "yes", safety: ["isize", "kc"], price: "low", // 국내 KC 인증
         bodySpec: "📏 40~145cm / ⚖️ 12세까지",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "성장 맞춤형 이너시트" },
         desc: "예산이 빠듯하면 좋은 선택이에요. 다만 단계별 제품만큼 각 시기에 꼭 맞지는 않아요.",
@@ -34,8 +34,8 @@ const carseatData = [
         id: "cs03", brand: "폴레드", name: "올에이지 360",
         age: ["newborn", "toddler", "junior"], install: ["isofix_tether", "belt"], 
         carSize: ["compact", "sedan", "suv", "carnival"],
-        compactOk: true, // 👈 [추가됨] 소형차 장착 가능
-        rotation: "yes", safety: ["kc"], price: "low", // 👈 [수정됨] all -> kc
+        compactOk: true, // 소형차에도 들어간다
+        rotation: "yes", safety: ["kc"], price: "low", // 국내 KC 인증
         bodySpec: "📏 신생아~160cm / ⚖️ 체중: ~36kg",
         specs: { adacScore: "미참여 · KC 인증", reboundStopper: "락킹벨트 (안전벨트로도 장착)" },
         desc: "ISOFIX가 없는 구형 차량에도 안전벨트로 달 수 있어요. 탑테더 방식이라 카니발이나 팰리세이드 3열에도 설치하기 좋아요.",
@@ -44,7 +44,7 @@ const carseatData = [
     {
         id: "cs04", brand: "브라이텍스", name: "베르사픽스",
         age: ["toddler", "junior"], install: ["isofix_tether"], carSize: ["suv", "sedan", "carnival"],
-        rotation: "no", safety: ["kc"], price: "high", // 👈 [수정됨] all -> kc
+        rotation: "no", safety: ["kc"], price: "high", // 국내 KC 인증
         bodySpec: "📏 15개월~12세 / ⚖️ 9~36kg",
         specs: { adacScore: "미참여 · 유럽 인증", reboundStopper: "V-Tether (탑테더)" },
         desc: "바닥 지지대(레그)가 없는 탑테더 방식이라, 바닥에 수납함이 있는 카니발이나 대형 SUV 뒷좌석에 맞아요.",
@@ -123,7 +123,7 @@ const carseatData = [
         age: ["newborn"], install: ["isofix_leg", "belt"], carSize: ["sedan", "suv", "carnival"],
         rotation: "yes", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 45~87cm",
-        specs: { adacScore: "1.7 (좋음)", reboundStopper: "유모차에서 평평하게 눕힘" }, // 👈 [수정됨] 최우수 -> 좋음
+        specs: { adacScore: "1.7 (좋음)", reboundStopper: "유모차에서 평평하게 눕힘" }, // ADAC 1.6 ~ 2.5 는 '좋음' (1.5 이하만 '매우 좋음')
         desc: "부가부, 스토케 같은 디럭스 유모차에 그대로 얹히는 바구니 카시트예요. 차 밖에서는 요람처럼 180도 눕혀져요.",
         purchasePlatform: "official", linkUrl: "https://cybex-online.com/ko-kr/car-seats/cloud-t-isize", searchKeyword: "싸이벡스 클라우드 T"
     },
@@ -141,7 +141,7 @@ const carseatData = [
         age: ["newborn"], install: ["isofix_leg", "belt"], carSize: ["suv", "sedan", "carnival"],
         rotation: "no", safety: ["isize", "adac"], price: "high",
         bodySpec: "📏 40~75cm",
-        specs: { adacScore: "1.7 (좋음)", reboundStopper: "스토케 유모차 어댑터 프리 결합" }, // 👈 [수정됨] 최우수 -> 좋음
+        specs: { adacScore: "1.7 (좋음)", reboundStopper: "스토케 유모차 어댑터 프리 결합" }, // ADAC 1.6 ~ 2.5 는 '좋음' (1.5 이하만 '매우 좋음')
         desc: "스토케 유모차를 쓰신다면 어댑터 없이 프레임에 바로 꽂혀요.",
         purchasePlatform: "official", linkUrl: "https://www.stokke.com/KOR/ko-kr/", searchKeyword: "스토케 이지고 모듈러"
     }

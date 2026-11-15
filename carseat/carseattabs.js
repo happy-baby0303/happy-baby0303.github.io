@@ -64,6 +64,8 @@
 
     function paint() {
         var c = cur();
+        /* <head> 가 처음부터 이 값으로 칸과 단추를 보여 준다 (CSS). 탭을 바꾸면 같이 바꾼다 */
+        try { document.documentElement.setAttribute("data-tab", c); } catch (e) {}
         TABS.forEach(function (t) {
             var pane = document.getElementById(PANE[t.id]);
             if (pane) pane.style.display = (t.id === c) ? "block" : "none";
@@ -94,6 +96,9 @@
     })();
 
     function fixFold() {
+        /* index.html 이 처음부터 접어 둔 판(#carseat-cond.cg-folded) — 여백은 CSS 가, 펴고 접기는 carseatguide 가 맡는다.
+           ⚠️ 여기서 여백을 손대면 접힌 카드에 펼친 여백(28px)이 붙는다 */
+        if (document.getElementById("carseat-cond")) return;
         var panel = null, host = document.querySelector("main.container");
         if (!host) return;
         /* ⚠️ 두 번 틀렸던 자리다. 기록해 둔다.
@@ -373,14 +378,20 @@
             if (el.getAttribute && el.getAttribute("data-tail")) { tail.push(el); return false; }
             return true;
         });
+        /* 'PLUS 표시가 있는 카드 N개는 …' (plusgate.js) 는 PLUS 카드 바로 밑 — 무료로 쳐서 위로 올리면 plusgate 가 다시 내려서 오간다 */
+        var foot = [];
+        free = free.filter(function (el) {
+            if (el.classList && el.classList.contains("bnh-plus-foot")) { foot.push(el); return false; }
+            return true;
+        });
 
         /* ⚠️ 접힘 상자도 무료다. 무료 유저에게는 무료끼리 묶어서 먼저 보여준다.
               안 그러면 못 쓰는 PLUS 카드가 중간에 벽처럼 서고,
               그 뒤에 있는 무료 내용을 아무도 못 본다.
               PLUS 회원은 반대다 — 돈 낸 것부터 위로. */
         var want = pin.concat(
-            plusFirst ? plus.concat(free).concat(extra)
-                      : free.concat(extra).concat(plus)).concat(tail);
+            plusFirst ? plus.concat(foot).concat(free).concat(extra)
+                      : free.concat(extra).concat(plus).concat(foot)).concat(tail);
 
         var now = pin.concat(kids);
         var same = want.every(function (el, i) { return now[i] === el; });
@@ -455,6 +466,10 @@
                 if (h.querySelector(".plus-badge")) continue;
                 if (PLUS_TITLE.test(h.textContent || "")) continue;          // 유료는 안 접는다
                 if (neverFoldEl(ps[i])) continue;                      // 지금 위험한 건 안 접는다
+                /* 뒤보기 · 앞보기와 태우기 전 3분 점검(#carseat-guide-use)은 접지 않는다 — 맨 위에 고정(orderPlus 의 pin).
+                   ⚠️ 그동안 안 접혔던 건 그 카드가 0.2초 늦게 붙어서였다(상자가 먼저 생겼다). 카드를 제때 그리니 상자로 들어가 버렸다.
+                      우연이 아니라 규칙으로 둔다 */
+                if (ps[i].closest && ps[i].closest("#carseat-guide-use")) continue;
                 for (var k = 0; k < FOLD_KEYS.length; k++) {
                     if (t.indexOf(FOLD_KEYS[k]) > -1) { targets.push(ps[i]); break; }
                 }
@@ -571,7 +586,13 @@
             paint();
             /* 칸이 이미 있으면 build 가 곧장 통과해서 아래 정리가 늦게 돈다.
                탭은 떴는데 안이 비어 보이지 않게 여기서 바로 한 번 한다. */
-            hookRefresh(); adopt(); flatten(); orderPlus(); foldExtras();
+            /* 첫 정리 — 모듈들이 DOMContentLoaded 에 제자리에 그린 바로 뒤라 카드가 다 있다.
+               리콜 · 사고가 났다면을 '사고 뒤에' 앞으로, PLUS 표시를 먼저 붙이고 나서 정렬 · 접기. 끝나면 settle.js 에 알려서 한 번에 보여 준다 */
+            hookRefresh(); adopt(); flatten();
+            try { if (typeof window.placeCrashCards === "function") window.placeCrashCards(); } catch (e) {}
+            try { if (typeof window.refreshPlusMark === "function") window.refreshPlusMark(); } catch (e) {}
+            orderPlus(); foldExtras();
+            try { if (typeof window.curSettleReady === "function") window.curSettleReady(); } catch (e) {}
             setTimeout(function () { adopt(); flatten(); orderPlus(); foldExtras(); }, 250);
             setTimeout(function () { adopt(); flatten(); orderPlus(); foldExtras(); }, 700);
             return true;
@@ -631,7 +652,7 @@
             }
             if (++tries < 20) setTimeout(go, 150);
         };
-        setTimeout(go, 120);
+        go();               // 타이머 없이 — 모듈들이 같은 DOMContentLoaded 에 이미 그렸다 (예전 0.12초 뒤)
         /* 탭이 못 붙어도 화면은 반드시 보여야 한다 */
         setTimeout(showNow, 2000);
         setTimeout(function () { showNow(); }, 2500);

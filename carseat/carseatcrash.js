@@ -234,10 +234,18 @@
            탭이 아직 안 만들어졌으면 다음 차례에 다시 시도한다. */
         var host = document.getElementById("view-carseat-use");
         if (!host) return;
-        if (document.getElementById("crash-card")) return;   // 이미 있으면 그대로 둔다
+        var ex = document.getElementById("crash-card");
+        if (ex && ex.firstChild) return;   // 이미 그려져 있으면 그대로 둔다
 
         var box = document.createElement("div");
         box.innerHTML = cardHTML() + recallHTML();
+        /* index.html 이 박아 둔 자리(#recall-card · #crash-card)가 있으면 그 자리에 갈아 끼운다 */
+        if (ex) {
+            var c = box.querySelector("#crash-card"), r = box.querySelector("#recall-card"), exR = document.getElementById("recall-card");
+            if (c) ex.parentNode.replaceChild(c, ex);
+            if (r) { if (exR) exR.parentNode.replaceChild(r, exR); else if (c) c.parentNode.insertBefore(r, c); }
+            return;
+        }
         while (box.firstChild) host.appendChild(box.firstChild);
     }
 
@@ -272,10 +280,13 @@
         }
     }
 
+    /* 탭 정리(carseattabs)가 카드를 꺼낸 바로 뒤 첫 정리에서 부른다 — 그래야 처음 보일 때부터 제자리 */
+    window.placeCrashCards = placeNear;
+
     function boot() {
+        mount();                    // 타이머 없이 (예전 0.8초 · 자리 맞추기는 3초 뒤였다)
         setTimeout(placeNear, 3000);
         setTimeout(placeNear, 6500);
-        setTimeout(mount, 800);
         setTimeout(mount, 2500);
         /* ⚠️ 카시트 탭이 굼뜨던 가장 큰 이유가 여기였다.
               4초마다 mount() 를 불렀는데, 카드가 이미 있으면 repaint() 로 들어가서

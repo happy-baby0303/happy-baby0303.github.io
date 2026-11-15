@@ -186,6 +186,13 @@
     ];
 
     function checkCard() {
+        /* 겨울(11 ~ 2월)엔 첫 줄 '두꺼운 외투는 벗기고' 가 곧 겨울 안내다 — 이 카드는 무료 · PLUS 모두 '쓰면서 챙길 것' 맨 위에 있다.
+           봤다고 적어 두면 홈 '오늘 챙길 것' · 알림의 겨울 패딩 줄이 내려간다 (homefix.js · nextstep.js).
+           ⚠️ 예전엔 PLUS 의 '우리 카시트' 카드만 적어서, 무료로 쓰는 집은 겨울 내내 홈에 같은 줄이 남았다 */
+        try {
+            var mo = new Date().getMonth() + 1, yr = new Date().getFullYear();
+            if (mo >= 11 || mo <= 2) localStorage.setItem("tosil_carseat_winter_seen", mo >= 11 ? yr + "-" + (yr + 1) : (yr - 1) + "-" + yr);
+        } catch (e) {}
         var rows = CHECK.map(function (c) {
             return '<div style="padding:14px 0; border-bottom:1px solid #F6F2EC;">' +
                 '<div style="font-size:14px; font-weight:900; color:var(' + c.tone + '); margin-bottom:6px;">' +
@@ -413,7 +420,7 @@
                 "padding:13px 15px; margin-bottom:16px; font-size:13px; font-weight:700; " +
                 "color:var(--cg-red); line-height:1.7; word-break:keep-all;";
             d.innerHTML = "⚠️ 이 제품은 <b>" + need + "개월부터</b>예요. " +
-                          esc(babyName()) + "는 지금 " + m + "개월이라 아직 일러요. " +
+                          esc(nm("는")) + " 지금 " + m + "개월이라 아직 일러요. " +
                           "미리 사두시는 거라면 괜찮지만, <b>지금 태우면 안 돼요.</b>";
             card.insertBefore(d, card.firstChild);
         });
@@ -451,7 +458,8 @@
     }
 
     function mountUse() {
-        if (document.getElementById(HOST_USE)) return;
+        var ex = document.getElementById(HOST_USE);
+        if (ex) { if (!ex.firstChild) paint(); return; }          // index.html 에 박아 둔 자리
         var pane = document.getElementById("view-carseat-use");
         if (!pane) return;
         var box = document.createElement("div");
@@ -462,18 +470,34 @@
     }
 
     function mount() {
-        if (document.getElementById(HOST)) return;
+        /* index.html 에 박아 둔 자리(#carseat-guide)가 있으면 그 자리에 그린다.
+           ⚠️ 예전엔 0.2초 뒤에 조건 카드 앞에 새로 끼워 넣어서, 느린 폰에서 그 아래가 통째로 1,000px 넘게 밀려 내려갔다 */
+        var ex = document.getElementById(HOST);
+        if (ex && ex.getAttribute("data-on")) return;
 
-        var panel = document.querySelector(".matrix-panel");
+        var panel = document.getElementById("carseat-cond") || document.querySelector(".matrix-panel");
         if (!panel || !panel.parentNode) return;
 
-        var box = document.createElement("div");
-        box.id = HOST;
-        panel.parentNode.insertBefore(box, panel);
+        var box = ex;
+        if (!box) {
+            box = document.createElement("div");
+            box.id = HOST;
+            panel.parentNode.insertBefore(box, panel);
+        }
+        box.setAttribute("data-on", "1");
 
-        // 기존 조건 네 개는 '직접 고를 분' 용으로 접어둔다
         var head = panel.querySelector(".matrix-header");
-        if (head && !head.getAttribute("data-folded")) {
+        /* index.html 이 처음부터 접어 둔 판(#carseat-cond.cg-folded) — 펴고 접기만 단다 */
+        if (panel.id === "carseat-cond") {
+            if (head && typeof head.onclick !== "function") head.onclick = function () {
+                var folded = !panel.classList.contains("cg-folded");
+                panel.classList.toggle("cg-folded", folded);
+                var mk = document.getElementById("cg-fold");
+                if (mk) mk.textContent = folded ? "펼치기 ▾" : "접기 ▴";
+            };
+        }
+        // (옛 화면) 기존 조건 네 개는 '직접 고를 분' 용으로 접어둔다
+        else if (head && !head.getAttribute("data-folded")) {
             head.setAttribute("data-folded", "1");
             head.style.cursor = "pointer";
             head.innerHTML = '직접 조건 고르기 <span id="cg-fold" style="margin-left:auto; ' +
@@ -511,7 +535,8 @@
     /* ---------- 시작 ---------- */
 
     function boot() {
-        setTimeout(function () { mount(); mountUse(); }, 200);
+        mount(); mountUse();        // 타이머 없이 — 탭 정리(carseattabs)가 첫 정리를 하기 전에 그려져 있어야 한다 (예전 0.2초)
+        markTooEarly();             // 결과 카드 맨 위 '아직 일러요' 도 보여 주기 전에 (예전 1.2초 뒤 — 카드가 그만큼 밀렸다)
         setTimeout(function () { mount(); mountUse(); }, 900);
         setTimeout(function () { mount(); mountUse(); }, 2200);
         /* 탭을 옮기면 '쓰면서' 칸이 그때 만들어지기도 한다 */
