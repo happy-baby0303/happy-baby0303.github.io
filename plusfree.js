@@ -265,6 +265,7 @@
         window.renderSettingsTab = function () {
             var out;
             if (typeof origin === "function") out = origin.apply(this, arguments);
+            mountCard();                    // 그린 그 자리에서 — 0.06초 뒤에 붙으면 아래 카드가 그만큼 밀렸다
             setTimeout(mountCard, 60);
             return out;
         };

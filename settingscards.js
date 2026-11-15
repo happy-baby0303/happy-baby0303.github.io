@@ -1,160 +1,112 @@
 /* ============================================================
-   배냇함 — 설정 카드 정리 (settingscards.js) v3
+   배냇함 — 설정 카드 제자리 (settingscards.js) v4
 
-   자리를 옮겼다.
-     v2 — "설정" 제목 바로 아래
-     v3 — "앱 설정" 과 "데이터 및 기록 관리" 사이
+   설정 탭은 묶음 일곱이다 (script.js 의 renderSettingsTab):
+     우리 아기 · 가족 · 알림 · PLUS · 기록 보관 · 도움 · 계정
 
-   맨 위는 프로필과 가족 코드 자리다.
-   설정 탭에 들어오는 이유의 절반이 그 둘이고,
-   엄지가 제일 편하게 닿는 곳이기도 하다.
+   다른 파일들이 붙이는 카드를 제 묶음(#st-…)으로 옮긴다.
+     가족      settings-cloud-card · st-together-card (script.js) · family-members-card (rolelock.js)
+               st-role-card (script.js) · gh-helper-row (grandhome.js) · parent-phone-card · parent-notice-card (homefix.js, 줄 밑에 접혀 있다)
+     알림      remind-card (remind.js) · care-alarm-card · pushcheck-card (pushcheck.js) · push-permission-card (script.js)
+     PLUS      st-plus-banner (script.js) · plusfree-card (plusfree.js)
+     기록 보관 export-card (export.js) · st-report-card (script.js, 플레이 앱에선 숨는다)
+   묶음 안에 보이는 카드가 하나도 없으면 묶음째 숨긴다 (돌봄 화면 · 플레이 앱).
 
-   찾는 방법
-     "데이터 및 기록 관리" 소제목을 찾아 그 앞에 끼운다.
-     못 찾으면 "고객 지원 및 약관" 앞, 그것도 없으면 맨 아래.
+   붙는 그 순간에 옮긴다 — MutationObserver 는 화면을 그리기 전에 돈다. 그래서 카드가 엉뚱한 데 잠깐 보였다가
+   옮겨지는 일이 없다.
+   ⚠️ v3 까지는 '알림 · 가족 · 보관' 한 상자에 담았다 (이름부터 세 가지였다). 그리고 20 · 120 · 400ms 타이머로 다시 담았다.
 
-   index.html 에서 homelayout.js 다음에 로드하세요.
+   index.html 에서 설정 탭을 감싸는 파일들(rolelock · plusfree · homefix · export · remind · pushcheck · feedback)
+   다음, 맨 끝에 로드한다 — 그래야 이 파일의 '다 그린 뒤' 가 맨 마지막에 돈다.
    ============================================================ */
 (function () {
     'use strict';
 
-    // parent-phone-card — 도우미가 걸 번호 (homefix.js). 빠져 있으면 설정 맨 위에 혼자 떠 있었다
-    // care-alarm-card · pushcheck-card — 수유 · 기저귀 알림, 알림 점검 (pushcheck.js)
-    // parent-notice-card — 도우미께 남길 말 (homefix.js). 이것도 빠져 있어서 '설정' 제목보다 위에 떠 있었다
-    var CARD_IDS = ["remind-card", "care-alarm-card", "push-permission-card", "pushcheck-card", "parent-phone-card", "parent-notice-card", "export-card"];
-    var GROUP_ID = "bnh-care-group";
-    var BODY_ID  = "bnh-care-body";
-
-    /* 이 소제목 '앞에' 끼운다. 위에서부터 먼저 찾는 것을 쓴다. */
-    var ANCHORS = ["데이터 및 기록 관리", "고객 지원 및 약관"];
+    var SLOTS = [
+        ["st-family", ["settings-cloud-card", "st-together-card", "family-members-card", "st-role-card", "gh-helper-row", "parent-phone-card", "parent-notice-card"]],
+        ["st-alarm",  ["remind-card", "care-alarm-card", "push-permission-card", "pushcheck-card"]],
+        ["st-plus",   ["st-plus-banner", "plusfree-card"]],
+        ["st-keep",   ["export-card", "st-report-card"]]
+    ];
 
     function tab() { return document.getElementById("tab-settings"); }
 
-    /* ---------- 소제목 찾기 ----------
-       조건 셋을 다 만족해야 소제목이다.
-         · 자식 요소가 없다 (잎 노드)
-         · 글자가 정확히 일치
-         · 우리가 만든 상자 안이 아니다 -------- */
-
-    function findLeaf(container, text) {
-        var all = container.querySelectorAll("div, h1, h2, h3, span, p");
-        for (var i = 0; i < all.length; i++) {
-            var el = all[i];
-            if (el.children.length) continue;
-            if (el.closest && el.closest("#" + GROUP_ID)) continue;
-            if ((el.textContent || "").trim() === text) return el;
-        }
-        return null;
+    function visible(el) {
+        if (!el || el.nodeType !== 1) return false;
+        try { return getComputedStyle(el).display !== "none"; } catch (e) { return true; }
     }
 
-    function findAnchor(container) {
-        for (var i = 0; i < ANCHORS.length; i++) {
-            var el = findLeaf(container, ANCHORS[i]);
-            if (el && el.parentNode) return el;
-        }
-        return null;
-    }
-
-    /* ---------- 상자 ---------- */
-
-    function ensureGroup() {
-        var g = document.getElementById(GROUP_ID);
-        if (g) return g;
-
-        g = document.createElement("div");
-        g.id = GROUP_ID;
-        g.style.cssText = "margin:0 0 24px;";
-        g.innerHTML =
-            '<div style="font-size:12px; font-weight:900; color:var(--text-sub); ' +
-                'letter-spacing:0.2px; margin:0 4px 10px;">알림 · 가족 · 보관</div>' +
-            '<div id="' + BODY_ID + '"></div>';
-        return g;
-    }
-
-    /* ---------- 자리 잡기 ---------- */
-
+    var busy = false;
     function tidy() {
-        var container = tab();
-        if (!container) return;
-
-        var any = CARD_IDS.some(function (id) { return document.getElementById(id); });
-        if (!any) return;
-
-        var g = ensureGroup();
-        var body = document.getElementById(BODY_ID) || g.lastElementChild;
-
-        // 카드를 순서대로 상자에 담는다
-        CARD_IDS.forEach(function (id) {
-            var el = document.getElementById(id);
-            if (!el) return;
-            if (el.parentNode !== body) body.appendChild(el);
-            el.style.marginBottom = "10px";
-        });
-
-        // 소제목 바로 '앞'에
-        var anchor = findAnchor(container);
-        if (anchor) {
-            if (anchor.previousSibling !== g) anchor.parentNode.insertBefore(g, anchor);
-            return;
-        }
-
-        // 소제목을 못 찾으면 통짜 덩어리 맨 아래에 (맨 위로 튀는 것보다 낫다)
-        var shell = container.firstElementChild;
-        if (shell && shell.id !== GROUP_ID) {
-            if (shell.lastElementChild !== g) shell.appendChild(g);
-        } else if (container.lastElementChild !== g) {
-            container.appendChild(g);
-        }
+        var host = tab();
+        if (!host || busy) return;
+        busy = true;
+        try {
+            SLOTS.forEach(function (pair) {
+                var slot = document.getElementById(pair[0]);
+                if (!slot) return;
+                var want = [];
+                pair[1].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    /* 설정 탭 안에 있는 것만 — 도우미 칸은 '돌봄 도우미' 창이 열려 있으면 그 창 안에 가 있다 */
+                    if (el && el.closest && el.closest("#tab-settings") && !el.contains(slot)) want.push(el);
+                });
+                Array.prototype.forEach.call(slot.children, function (el) { if (want.indexOf(el) < 0) want.push(el); });
+                var same = want.length === slot.children.length;
+                for (var i = 0; same && i < want.length; i++) if (slot.children[i] !== want[i]) same = false;
+                if (!same) want.forEach(function (el) { slot.appendChild(el); });
+            });
+            /* 묶음 안이 비면 묶음째 숨긴다 */
+            var secs = host.querySelectorAll(".st-sec[data-sec]");
+            for (var k = 0; k < secs.length; k++) {
+                var sl = document.getElementById(secs[k].getAttribute("data-sec"));
+                var any = false;
+                if (sl) for (var m = 0; m < sl.children.length; m++) if (visible(sl.children[m])) { any = true; break; }
+                var d = any ? "" : "none";
+                if (secs[k].style.display !== d) secs[k].style.display = d;
+            }
+        } catch (e) {}
+        busy = false;
     }
-
     window.tidySettingsCards = tidy;
 
-    /* ---------- 설정 탭이 다시 그려질 때마다 ----------
-       innerHTML 을 통째로 갈아끼우므로 상자도 카드도 매번 사라진다.
-       각 모듈이 카드를 다시 만들고 나면 우리가 다시 담는다. -------- */
+    /* 붙는 그 순간에 — 다른 파일이 setTimeout 으로 늦게 붙여도 */
+    var mo = null;
+    function watch() {
+        var host = tab();
+        if (!host || mo) return;
+        mo = new MutationObserver(function () { tidy(); });
+        mo.observe(host, { childList: true, subtree: true });
+    }
 
+    /* 설정 탭을 다시 그릴 때마다 (innerHTML 을 통째로 갈아 끼운다) — 다른 파일들이 카드를 붙인 바로 뒤 */
     (function hook() {
         var _origin = window.renderSettingsTab;
         window.renderSettingsTab = function () {
             var out;
             if (typeof _origin === "function") out = _origin.apply(this, arguments);
-            setTimeout(tidy, 20);
-            setTimeout(tidy, 120);
-            setTimeout(tidy, 400);
+            watch();
+            tidy();
             return out;
         };
     })();
 
     function boot() {
-        setTimeout(tidy, 1200);
-        setTimeout(tidy, 3000);
-        document.addEventListener("visibilitychange", function () {
-            if (!document.hidden) setTimeout(tidy, 300);
-        });
+        watch();
+        tidy();
+        /* 돌봄 화면으로 바뀌면 숨는 카드가 있다 (body.mode-senior) — 묶음째 숨길지 다시 본다 */
+        try {
+            new MutationObserver(function () { tidy(); }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+        } catch (e) {}
     }
-
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
     else boot();
 
     /* ---------- 점검용 ---------- */
     window.settingsDebug = function () {
-        var c = tab();
-        if (!c) return console.log("설정 탭 없음");
-
-        ANCHORS.forEach(function (t) {
-            console.log('소제목 "' + t + '":', findLeaf(c, t) ? "찾음" : "없음");
-        });
-
-        var g = document.getElementById(GROUP_ID);
-        console.log("상자 위치:", g
-            ? (g.nextElementSibling
-                ? '"' + (g.nextElementSibling.textContent || "").trim().slice(0, 14) + '" 바로 앞'
-                : "맨 아래")
-            : "아직 없음");
-
-        CARD_IDS.forEach(function (id) {
-            var el = document.getElementById(id);
-            console.log("  " + id + ":", el ? (el.parentNode.id === BODY_ID ? "상자 안 ✅" : "상자 밖 ❌") : "없음");
+        SLOTS.forEach(function (pair) {
+            var slot = document.getElementById(pair[0]);
+            console.log(pair[0] + ":", slot ? Array.prototype.map.call(slot.children, function (c) { return c.id || c.className || c.tagName; }).join(" · ") : "없음");
         });
     };
 })();

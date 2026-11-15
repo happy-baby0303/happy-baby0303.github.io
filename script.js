@@ -8495,9 +8495,6 @@ window.renderSettingsTab = function() {
                     <div style="font-size: 11.5px; font-weight: 800; color: #7F77DD; margin-bottom: 4px; white-space: nowrap; letter-spacing: -0.5px;">카카오로 로그인했어요</div>
                     <div style="font-size: 16px; font-weight: 900; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${savedNickname} <span style="font-size: 13.5px; font-weight: 600; color: var(--text-s);">님</span></div>
                 </div>
-                <button onclick="window.logoutKakao()" style="padding: 8px 14px; border-radius: 8px; background: #F7F3ED; color: #A3958A; font-size: 12px; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; flex-shrink: 0;">
-                    로그아웃
-                </button>
             </div>
         `;
     } else {
@@ -8519,7 +8516,7 @@ window.renderSettingsTab = function() {
 
    if (syncCode) {
         syncHtml = `
-            <div id="settings-cloud-card" class="box-main" style="border-radius: 24px; padding: 24px 20px; margin-bottom: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); box-sizing: border-box; width: 100%;">
+            <div id="settings-cloud-card" class="box-main" style="border-radius: 24px; padding: 24px 20px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); box-sizing: border-box; width: 100%;">
                 
                 <!-- 🚨 gap 추가, flex-shrink와 nowrap으로 두 줄 깨짐 완벽 방어! -->
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px;">
@@ -8544,17 +8541,13 @@ window.renderSettingsTab = function() {
                     <button onclick="window.sendKakaoInvite('viewer')" style="width: 100%; padding: 16px; border-radius: 14px; background: #F6F2EC; color: #7A6F68; font-size: 14.5px; font-weight: 800; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
                         조부모 / 돌봄 선생님 초대하기
                     </button>
-                    
-                    <!-- 🚪 방 나가기 (실수 방지를 위해 깔끔한 텍스트형으로 유지) -->
-                    <button onclick="window.safeUnlinkFamilySync()" style="width: 100%; padding: 12px; background: transparent; color: #A3958A; font-size: 12.5px; font-weight: 700; border: none; cursor: pointer; margin-top: 4px; text-decoration: underline; text-underline-offset: 4px;">
-                        가족 연결 끊고 나가기
-                    </button>
+
                 </div>
             </div>
         `;
     } else {
         syncHtml = `
-            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
+            <div id="st-together-card" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
                 <div style="font-size: 14.5px; font-weight: 900; color: var(--text-m); margin-bottom: 8px;">👨‍👩‍👧 우리 아기 함께 키우기</div>
                 <div style="font-size: 11.5px; color: var(--text-s); font-weight: 600; margin-bottom: 16px; line-height: 1.5; letter-spacing: -0.3px; word-break: keep-all;">혼자 하는 육아는 너무 힘들어요.<br>아빠, 할머니, 이모님을 초대해서 기록을 공유하세요</div>
                 
@@ -8572,40 +8565,41 @@ window.renderSettingsTab = function() {
 
     const currentRole = localStorage.getItem('user_role') || 'mom';
 
-    // 🌟 3. 전체 화면 조립하기 
+    // 🌟 3. 전체 화면 조립하기
+    /* 묶음 일곱 — 우리 아기 · 가족 · 알림 · PLUS · 기록 보관 · 도움 · 계정.
+       ⚠️ 예전엔 '앱 설정' 안에 아기 정보가 묻혀 있었고, '알림 · 가족 · 보관' 이라는 한 상자에
+          알림 카드 넷과 돌봄 도우미 · 내려받기가 섞여 있었다. 가족 칸은 네 군데로 흩어져 있었고,
+          '가족 연결 끊고 나가기' 는 초대 단추 바로 밑에 붙어 있었다.
+       다른 파일들이 붙이는 카드(알림 · 돌봄 도우미 · PLUS · 내려받기 · 우리 가족)는 settingscards.js 가
+       붙는 그 순간 제 묶음(#st-…)으로 옮긴다. 묶음 안이 비면 묶음째 숨긴다. */
     container.innerHTML = `
         <div style="padding: 24px 20px 40px 20px; max-width: 600px; margin: 0 auto; box-sizing: border-box; width: 100%;">
             <!-- 최상단 타이틀 -->
             <div style="font-size: 24px; font-weight: 900; color: var(--text-m); margin-bottom: 24px; letter-spacing: -0.5px;">설정</div>
 
-            <!-- 계정 및 프로필 -->
+            <!-- 나 — 로그아웃은 맨 아래 '계정' -->
             ${profileHtml}
 
-            <!-- 💎 PLUS 안내 배너
-                 ⚠️ '단 한 번의 결제로 우리 가족 평생 육아 기록실' 이라고 적혀 있었다.
-                    예정 요금은 달마다 / 1년치이고, 지금은 결제를 받지도 않는다. 사실과 다른 말이라 걷어냈다.
-                    누르면 옛 안내창(vip-modal-overlay — '다둥이 무제한' 같은 지금과 다른 말이 적힌)이 떴다. 지금 결제 안내로 잇는다.
-                    무료 개방 중엔 바로 아래 PLUS 칸(plusfree.js)이 같은 이야기를 하므로 숨긴다.
-                 ⚠️ '포토북, 목소리 녹음, 소아과 리포트까지' 라고 적혀 있었다. 목소리는 10개까지 무료이고,
-                    소아과 리포트는 플레이 앱에서 숨긴 기능이다. 두 앱에 다 있는 것만 적는다. -->
-            ${(typeof window.isFreeOpen === 'function' && window.isFreeOpen()) ? '' : `
-            <div onclick="window.showPaywall()" style="background: linear-gradient(135deg, #4A403A 0%, #3B322C 100%); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; transition: 0.2s;">
-                <div>
-                    <div style="font-size: 13px; font-weight: 900; color: #A9A2EA; margin-bottom: 6px;">배냇함 PLUS</div>
-                    <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">사진 · 목소리 무제한,<br>포토북과 이달의 배냇함까지</div>
+            <div class="st-sec" data-sec="st-baby" style="margin-bottom: 20px;">
+                <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">우리 아기</div>
+                <div id="st-baby">
+            <div onclick="window.openBabyManagementModal()" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--bg-card); padding: 18px 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%; cursor: pointer;">
+                <div style="min-width: 0;">
+                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">아기 정보 관리</div>
+                    <div style="font-size: 12px; font-weight: 600; color: var(--text-s); margin-top: 3px;">이름 · 생일 · 예정일</div>
                 </div>
-                <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; font-weight: 700;">›</div>
-            </div>`}
+                <div style="color: #A3958A; font-size: 12px;">›</div>
+            </div>
+                </div>
+            </div>
 
-            <!-- 가족 연동 섹션 -->
+            <div class="st-sec" data-sec="st-family" style="margin-bottom: 20px;">
+                <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">가족</div>
+                <div id="st-family">
             ${syncHtml}
-
-            <!-- 앱 설정 -->
-            <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">앱 설정</div>
-            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
-                
+            <div id="st-role-card" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
                 <!-- 역할 설정 -->
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 12px 16px 20px; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 12px 16px 20px;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-right: auto; white-space: nowrap; flex-shrink: 0;">내 역할</div>
                     <div style="display: flex; background: var(--bg-sub); border-radius: 10px; padding: 3px; border: 1px solid var(--border); flex-shrink: 0;">
                         <button onclick="window.changeUserRole('mom')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'mom' ? 'background:var(--bg-card); color:#D32F2F; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">엄마</button>
@@ -8613,23 +8607,37 @@ window.renderSettingsTab = function() {
                         <button onclick="window.changeUserRole('senior')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'senior' ? 'background:var(--bg-card); color:#B98A2E; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">돌봄 화면</button>
                     </div>
                 </div>
-
-                <div onclick="window.openBabyManagementModal()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
-                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">아기 정보 관리</div>
-                    <div style="color: #A3958A; font-size: 12px;">›</div>
+            </div>
                 </div>
-
-                
             </div>
 
-            <!-- 데이터 관리
-                 ⚠️ '기록 데이터 초기화' 를 뺐다. 부르는 코드(wipeAllRecordsSafely)가 없어서 눌러도 에러만 났고,
-                    부부가 같이 쓰는 기록이라 한 사람이 지우면 짝꿍 기록까지 지워진다. 다 지우고 나가는 건 '탈퇴하기' 가 한다.
-                    남은 줄(소아과 리포트)은 플레이 앱에서 숨겨지므로, 거기선 이 칸 전체를 숨긴다(pl-hide). -->
-            <div class="pl-hide" style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">
-                데이터 및 기록 관리
+            <div class="st-sec" data-sec="st-alarm" style="margin-bottom: 20px;">
+                <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">알림</div>
+                <div id="st-alarm">
+                </div>
             </div>
-            <div class="pl-hide" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
+
+            <!-- PLUS — 무료 개방 중엔 plusfree.js 의 칸이, 아니면 이 띠가 -->
+            <div class="st-sec" data-sec="st-plus" style="margin-bottom: 20px;">
+                <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">PLUS</div>
+                <div id="st-plus">
+            ${(typeof window.isFreeOpen === 'function' && window.isFreeOpen()) ? '' : `
+            <div id="st-plus-banner" onclick="window.showPaywall()" style="background: linear-gradient(135deg, #4A403A 0%, #3B322C 100%); border-radius: 16px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box; width: 100%; transition: 0.2s;">
+                <div>
+                    <div style="font-size: 13px; font-weight: 900; color: #A9A2EA; margin-bottom: 6px;">배냇함 PLUS</div>
+                    <div style="font-size: 16px; font-weight: 900; color: #FFFFFF; line-height: 1.4; letter-spacing: -0.5px;">사진 · 목소리 무제한,<br>포토북과 이달의 배냇함까지</div>
+                </div>
+                <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 18px; font-weight: 700;">›</div>
+            </div>`}
+                </div>
+            </div>
+
+            <!-- 기록 보관 — 내려받기(export.js) · 소아과 리포트(플레이 앱에선 숨긴다)
+                 ⚠️ '기록 데이터 초기화' 는 뺐다 (부르는 코드가 없었고, 같이 쓰는 기록이라 짝꿍 것까지 지워진다). -->
+            <div class="st-sec" data-sec="st-keep" style="margin-bottom: 20px;">
+                <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">기록 보관</div>
+                <div id="st-keep">
+            <div id="st-report-card" class="pl-hide" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
                 
                 <!-- 🚨 gap 추가 & 텍스트 한 줄 고정 (white-space: nowrap) -->
                 <div onclick="window.openPediatricianReport()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; gap: 12px;">
@@ -8638,9 +8646,12 @@ window.renderSettingsTab = function() {
                 </div>
             </div>
 
-            <!-- 고객 지원 및 약관 -->
-            <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">고객 지원 및 약관</div>
-            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
+                </div>
+            </div>
+
+            <!-- 도움 · 약관 -->
+            <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">도움 · 약관</div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
                 <div id="feedback-row" onclick="window.openFeedback && window.openFeedback()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">의견 보내기</div>
                     <div style="color: #A3958A; font-size: 12px;">›</div>
@@ -8665,15 +8676,38 @@ window.renderSettingsTab = function() {
                 </div>
             </div>
 
-            <!-- 위험 구역 (회원 탈퇴) -->
-            ${savedNickname ? `
-                <div style="text-align: center; margin-bottom: 40px;">
+            ${(loggedIn || syncCode) ? `
+            <div class="st-sec" data-sec="st-account" style="margin-bottom: 20px;">
+                <div style="font-size: 13.5px; font-weight: 900; color: var(--text-s); margin-bottom: 12px;">계정</div>
+                <div id="st-account">
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
+                        ${loggedIn ? `
+                        <div onclick="window.logoutKakao()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer;${syncCode ? ' border-bottom: 1px solid var(--border);' : ''}">
+                            <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">로그아웃</div>
+                            <div style="color: #A3958A; font-size: 12px;">›</div>
+                        </div>` : ''}
+                        ${syncCode ? `
+                        <div onclick="window.safeUnlinkFamilySync()" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 20px; cursor: pointer;">
+                            <div style="min-width: 0;">
+                                <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m);">가족 연결 끊고 나가기</div>
+                                <div style="font-size: 12px; font-weight: 600; color: var(--text-s); margin-top: 3px;">이 폰만 가족방에서 나가요. 누르면 한 번 더 물어봐요</div>
+                            </div>
+                            <div style="color: #A3958A; font-size: 12px;">›</div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            </div>` : ''}
+
+            <!-- 회원 탈퇴 — 계정 맨 끝, 작게.
+                 ⚠️ '이름이 있나' 로 보여 줬는데, 이름은 로그인 전에도 '꿈이 엄마' 처럼 지어 부른다 (kakaoname.js) — 로그인 전에도 탈퇴 단추가 떴다 -->
+            ${loggedIn ? `
+                <div style="text-align: center; margin: 4px 0 40px;">
                     <button onclick="window.unlinkKakao()" style="background: none; border: none; color: #A3958A; font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer;">
                         회원 탈퇴 (카카오 연결 끊기 및 데이터 삭제)
                     </button>
                 </div>
             ` : ''}
-            
+
             <!-- ⚠️ 'Made with ♥ for our baby' 였다. 남의 앱 틀에서 흔히 보는 영어 꼬리말이라 우리 말로 -->
             <div style="text-align: center; color: var(--text-s); font-size: 11.5px; font-weight: 700; margin-bottom: 40px;">
                 우리 아기를 위해 만들었어요
