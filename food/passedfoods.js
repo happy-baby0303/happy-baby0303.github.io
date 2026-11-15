@@ -641,7 +641,12 @@
             ? "background:#EAF7F1; border:1px solid #A7DFC8;"
             : "background:#FFFFFF; border:1px solid #EDE6DE;";
 
-        if (old) { old.style.cssText = css + " border-radius:14px; padding:13px 15px; margin-bottom:14px; cursor:pointer;"; old.innerHTML = inner; return; }
+        if (old) {
+            old.style.cssText = css + " border-radius:14px; padding:13px 15px; margin-bottom:14px; cursor:pointer;";
+            old.innerHTML = inner;
+            if (!old.onclick) old.onclick = window.openPassedSheet;      // index.html 에 박아 둔 자리는 눌러도 열리게
+            return;
+        }
 
         var box = document.createElement("div");
         box.id = ID_A;
@@ -656,7 +661,7 @@
     }
 
     function boot() {
-        setTimeout(function () { paint(); paintAllergy(); }, 700);
+        paint(); paintAllergy();    // 타이머 없이 (예전 0.7초)
         setTimeout(function () { paint(); paintAllergy(); }, 2000);
 
         /* ⚠️ 4초마다 다시 그리고 있었다 (하루 종일). 기록이 바뀔 때만 다시 그린다. */

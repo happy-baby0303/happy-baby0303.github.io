@@ -229,7 +229,7 @@
     window.nextFoodRepaint = paint;
 
     function boot() {
-        setTimeout(paint, 500);
+        paint();                    // 타이머 없이 — 박아 둔 자리에 (예전 0.5초)
         setTimeout(paint, 1600);
         ["saveTestRecord", "deleteFoodRecord", "renderSelectedDateRecords"].forEach(function (n) {
             var f = window[n];

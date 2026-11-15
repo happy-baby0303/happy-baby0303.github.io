@@ -539,7 +539,7 @@
     }
 
     function boot() {
-        setTimeout(mount, 200);
+        mount();                    // 타이머 없이 — index.html 에 박아 둔 자리에 보여 주기 전에 (예전 0.2초)
         setTimeout(mount, 900);
 
         ["saveTestRecord", "saveMealRecord", "deleteFoodRecord"].forEach(function (n) {

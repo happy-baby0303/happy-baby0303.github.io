@@ -13,6 +13,30 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css?v=b7">
+    <!-- 처음 그리는 화면을 마지막 화면과 같게 (shared/settle.js 맨 위 설명).
+         · 지난번에 보던 탭(레시피 · 식단표 · 알레르기)을 스크립트가 돌기 전에 정한다 — 예전엔 '레시피' 가 먼저 그려졌다가 바뀌었다
+         · 세 탭은 카드가 다 그려질 때까지 자리 표시로 가린다 (맨 아래 스크립트가 curSettleReady 를 부른다). settle.js 를 못 받으면 바로, 무엇이 잘못돼도 8초 뒤엔 CSS 가 보여 준다 -->
+    <style>
+        html[data-ftab="plan"] #tab-recipe, html[data-ftab="allergy"] #tab-recipe { display: none; }
+        html[data-ftab="plan"] #tab-plan, html[data-ftab="allergy"] #tab-allergy { display: block; }
+        html[data-ftab="plan"] .food-tab[data-tab="recipe"], html[data-ftab="allergy"] .food-tab[data-tab="recipe"] { background: transparent; color: #A3958A; box-shadow: none; }
+        html[data-ftab="plan"] .food-tab[data-tab="plan"], html[data-ftab="allergy"] .food-tab[data-tab="allergy"] { background: #FFFFFF; color: #4A413C; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        html[data-ftab="allergy"] #coupang-disclosure { display: none; }
+        html.cur-settle #tab-recipe, html.cur-settle #tab-plan, html.cur-settle #tab-allergy { opacity: 0; animation: curSettleShow 0s linear 8s forwards; }
+        #tab-recipe, #tab-plan, #tab-allergy { transition: opacity .18s ease; }
+        html.cur-settle .legal-footer { visibility: hidden; animation: curSettleVis 0s linear 8s forwards; }
+        @keyframes curSettleShow { to { opacity: 1; } }
+        @keyframes curSettleVis { to { visibility: visible; } }
+        .cur-skel { display: none; position: relative; height: 0; overflow: visible; z-index: 1; }
+        html.cur-settle .cur-skel { display: block; }
+        .cur-skel-in { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; }
+        .cur-skel-b { background: #FFFFFF; border: 1px solid #F7F3ED; border-radius: 24px; margin-bottom: 20px; animation: curSkel 1.1s ease-in-out infinite alternate; }
+        @keyframes curSkel { from { opacity: .45; } to { opacity: .9; } }
+    </style>
+    <script>(function () { var d = document.documentElement, t = "recipe";
+        try { var v = localStorage.getItem("tosil_food_view"); if (v === "plan" || v === "allergy") t = v; } catch (e) {}
+        d.setAttribute("data-ftab", t); d.classList.add("cur-settle"); d.setAttribute("data-settle", "tab-recipe,tab-plan,tab-allergy"); })();</script>
+    <script src="../shared/settle.js?v=3" onerror="document.documentElement.classList.remove('cur-settle')"></script>
 </head>
 <body>
 
@@ -53,6 +77,9 @@
     </header>
 
     <main class="container">
+        <!-- 제휴 고지 — 처음 그리는 화면부터 맨 위에 (예전엔 shared/disclosure.js 가 스크립트가 돈 뒤에 끼워 넣어서
+             느린 폰에서 그 아래 전부가 106px 밀려 내려갔다. 문구는 disclosure.js 와 같아야 한다 — 시험 t_cls44) -->
+        <div id="coupang-disclosure" style="display:flex; align-items:flex-start; gap:8px; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:12px; padding:12px 14px; margin:16px 0 20px; box-sizing:border-box;"><span style="flex-shrink:0; margin-top:2px; padding:2px 7px; border-radius:6px; background:#7A6F68; color:#FFFFFF; font-size:11px; font-weight:900; line-height:1.5;">제휴</span><span style="font-size:13px; font-weight:600; color:#7A6F68; line-height:1.65; word-break:keep-all; text-wrap:pretty;">이 페이지는 <b style="color:#4A413C;">쿠팡 파트너스 활동의 일환</b>으로, 구매가 일어나면 이에 따른 일정액의 수수료를 제공받습니다. 추천 순서와는 관계없습니다.</span></div>
 <!-- ⚠️ 제휴 안내 아래로 52px, 탭 위로 48px 이 비어 있었다. 첫 화면에 계산기가 안 보였다 -->
 <div id="food-hero" class="hero-title" style="text-align: center; margin-bottom: 12px; padding-top: 14px; padding-bottom: 12px;">
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
@@ -89,7 +116,11 @@
             <button class="food-tab"    data-tab="plan"    onclick="foodTabGo('plan')">식단표</button>
             <button class="food-tab"    data-tab="allergy" onclick="foodTabGo('allergy')">알레르기</button>
         </div>
+        <!-- 카드가 다 그려질 때까지 보이는 자리 표시 (shared/settle.js 가 걷어낸다) -->
+        <div class="cur-skel" data-static aria-hidden="true"><div class="cur-skel-in"><div class="cur-skel-b" style="height:300px"></div><div class="cur-skel-b" style="height:64px"></div><div class="cur-skel-b" style="height:220px"></div><div class="cur-skel-b" style="height:160px"></div></div></div>
         <div class="food-pane on" id="tab-recipe">
+        <!-- 미음 · 죽 만들기 (foodguide.js 가 그 자리에 그린다 — 예전엔 0.2초 뒤 계산기 앞에 끼워 넣어서 아래가 밀렸다) -->
+        <div id="fg-cook"></div>
 <div style="margin-bottom: 24px; background: #FFFFFF; border-radius: 16px; border: 1px solid #EDE6DE; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden;">
                 <div onclick="toggleFoodCalc()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; background: #F7F5FD; transition: 0.2s;">
                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -264,6 +295,10 @@
 <style>@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }</style>
         </div>
         <div class="food-pane" id="tab-allergy">
+        <!-- 사흘 규칙 · 먹여본 재료 · 다음엔 뭘 (foodguide · passedfoods · nextfood 가 그 자리에 그린다) — 신호등 위 -->
+        <div id="fg-aller"></div>
+        <div id="passed-foods-aller"></div>
+        <div id="next-food"></div>
 <div id="auto-sync-banner" style="display: none; align-items: center; background: #F0EEFB; border: 1px solid #7F77DD; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: #6A61CE; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(127, 119, 221, 0.1);">
             </div>
 <div class="search-box">
@@ -461,19 +496,19 @@
     <script src="../shared/babyage.js?v=1"></script>
     <script src="data.js?v=b9"></script>
     <script>try { document.getElementById('food-count-badge').textContent = '레시피 ' + babyFoodData.length + '종'; } catch (e) {}</script>
-    <script src="app.js?v=b16"></script>
+    <script src="app.js?v=b17"></script>
     <!-- 토핑 이유식: 재료마다 몇 g · 처음 먹인 재료 (홈 맘마 기록과 같은 칸) -->
     <script src="../shared/topping.js?v=1"></script>
     <script src="toppingmeal.js?v=2"></script>
-    <script src="passedfoods.js?v=b10"></script>
+    <script src="passedfoods.js?v=b11"></script>
     <script src="../shared/disclosure.js"></script>
-    <script src="foodguide.js?v=b12"></script>
+    <script src="foodguide.js?v=b13"></script>
     <script src="cookmode.js?v=3"></script>
     <script src="shoplist.js?v=b10"></script>
     <script src="planlock.js?v=b7"></script>
-    <script src="nextfood.js?v=b9"></script>
-    <script src="../shared/plusmark.js?v=b8"></script>
-    <script src="../shared/plusgate.js?v=4"></script>
+    <script src="nextfood.js?v=b10"></script>
+    <script src="../shared/plusmark.js?v=b9"></script>
+    <script src="../shared/plusgate.js?v=5"></script>
     <script src="../shared/favsync.js"></script>
     <!-- 💌 짝꿍 배냇함으로 보내기 (장볼 거) — 누를 때만 서버에 붙는다 -->
     <script src="../shared/familysend.js?v=1"></script>
@@ -509,6 +544,8 @@
         var KEY = 'tosil_food_view';
         window.foodTabGo = function (id) {
             try { localStorage.setItem(KEY, id); } catch (e) {}
+            /* <head> 가 처음부터 이 값으로 칸과 단추를 보여 준다 (CSS). 탭을 바꾸면 같이 바꾼다 */
+            try { document.documentElement.setAttribute('data-ftab', id); } catch (e) {}
             ['recipe', 'plan', 'allergy'].forEach(function (t) {
                 var pane = document.getElementById('tab-' + t);
                 if (pane) pane.classList.toggle('on', t === id);
@@ -540,5 +577,15 @@
         return window.foodTabGo('recipe');
     };
     </script>
-</body> <!-- 기존 바디 닫는 태그 -->
+
+    <script>
+    /* 카드가 다 그려졌다 — 이 스크립트가 맨 끝이라 DOMContentLoaded 도 맨 끝에 돈다 (모듈들 · 위의 탭 열기 다음).
+       그때 settle.js 가 세 탭을 한 번에 보여 준다 */
+    (function () {
+        function ready() { try { if (typeof window.curSettleReady === 'function') window.curSettleReady(); } catch (e) {} }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+        else ready();
+    })();
+    </script>
+</body>
 </html>

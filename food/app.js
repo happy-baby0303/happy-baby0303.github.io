@@ -576,7 +576,7 @@ function runFoodEngine() {
             `;
         }
 
-        resultArea.innerHTML = htmlOutput; // 👈 2개 중 여기가 맞습니다 (runFoodEngine 안쪽)
+        resultArea.innerHTML = htmlOutput;
 
         /* ⚠️ 무조건 스크롤하면 안 된다.
               탭을 누를 때도 runFoodEngine 이 다시 돌아서,
@@ -601,7 +601,7 @@ function toggleFoodOthers() {
         const otherCount = otherArea.querySelectorAll('.stroller-card').length;
         btn.innerText = `나머지 ${otherCount}개 레시피 더보기 ▾`;
         
-        // 👇 추가: 리스트 접을 때 화면 튕김 방지
+        // 목록을 접을 때 화면이 튀지 않게
         btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
