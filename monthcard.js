@@ -308,7 +308,8 @@
             if (!year || !month) continue;
 
             var btn = document.createElement("span");
-            btn.textContent = "카드";
+            // '카드' 두 글자로는 무엇이 되는지 몰랐다 — 백일의 '한 장으로 보기' 와 같은 말로
+            btn.textContent = "한 장으로";
             btn.style.cssText = "flex-shrink:0; margin-left:auto; margin-right:9px; " +
                 "font-size:11px; font-weight:800; color:" + GOLD + "; " +
                 "background:rgba(185,138,46,0.12); padding:5px 11px; border-radius:9px; cursor:pointer;";

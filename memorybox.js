@@ -468,7 +468,8 @@
         var lock = (typeof window.lockChip === "function") ? window.lockChip("프리미엄") : "";
 
         var items = [
-            { icon: "💌", label: "편지함", sub: "쌓인 편지 읽기",
+            // ⚠️ 편지가 0통이어도 '쌓인 편지 읽기' 였다. 소리함 · 문답함처럼 개수를 말한다
+            { icon: "💌", label: "편지함", sub: s.letters ? s.letters + "통 쌓였어요" : "아직 비어 있어요",
               act: "window.openLetterBox()" },
             { icon: "🎙️", label: "소리함", sub: vN ? vN + "개 담겼어요" : "아직 비어 있어요",
               act: vN ? "window.openVoiceBox()" : "window.openVoiceSheet()" },
@@ -500,7 +501,9 @@
     function milestoneSub(s) {
         if (typeof window.milestonePhotoCount !== "function" || !s.firsts) return "해낸 일 모아보기";
         var n = window.milestonePhotoCount();
-        return n ? "사진 " + n + " / " + s.firsts + "장" : "사진은 아직 없어요";
+        // ⚠️ '사진 1 / 5장' 은 무슨 뜻인지 한참 봐야 알았다 — 남은 빈칸을 바로 말한다
+        if (!n) return "사진은 아직 없어요";
+        return n >= s.firsts ? "사진 다 채웠어요" : "사진 빈칸 " + (s.firsts - n) + "개";
     }
 
     function shortcut(icon, title, sub, action) {
@@ -719,13 +722,15 @@
             'border-radius:16px; padding:5px 4px; margin-bottom:20px;">' + cells + '</div>';
     }
 
-    function monthRow(year, m, days, isOpen) {
+    function monthRow(year, m, days, isOpen, thumbs) {
         var ym = year + "-" + m;
         var age = monthAgeLabel(days[0].key);
+        // 접힌 달에 사진 줄이 붙으면 밑줄은 사진 줄 아래로 내려간다
+        var under = !isOpen && !thumbs;
         return '<div id="mb-m-' + ym + '" onclick="window.mbToggleMonth(\'' + ym + '\')" ' +
             'style="position:relative; display:flex; justify-content:space-between; align-items:center; ' +
-            'padding:14px 2px; margin:' + (isOpen ? '26px 0 14px' : '0') + '; cursor:pointer;' +
-            (isOpen ? '' : ' border-bottom:1px solid var(--border);') + '">' +
+            'padding:' + (thumbs && !isOpen ? '14px 2px 10px' : '14px 2px') + '; margin:' + (isOpen ? '26px 0 14px' : '0') + '; cursor:pointer;' +
+            (under ? ' border-bottom:1px solid var(--border);' : '') + '">' +
             '<div style="position:absolute; left:-29px; top:50%; margin-top:-4px; width:7px; height:7px; border-radius:50%; ' +
                 'background:' + (isOpen ? '#7F77DD' : 'var(--border)') + '; border:3px solid var(--bg-main);"></div>' +
             '<span style="font-size:' + (isOpen ? '13.5' : '13') + 'px; font-weight:800; color:' +
@@ -733,6 +738,41 @@
                 m + '월' + esc(age) + '</span>' +
             '<span style="font-size:11.5px; font-weight:700; color:var(--text-sub);">' +
                 days.length + '일' + (isOpen ? '' : '  ›') + '</span>' +
+        '</div>';
+    }
+
+    /* ---------- 접힌 달의 사진 줄 ----------
+       지난달들은 '8월 · 생후 3개월   10일 ›' 처럼 글자 한 줄로만 접혀 있었다.
+       사진을 모아 두는 곳인데 열어 보기 전엔 어떤 달이었는지 보이지 않았다.
+       가족 앨범 앱들처럼 그달 사진을 넉 장까지 미리 보여 준다 (최근 날부터 하루 한 장 · 남은 장 수는 +N).
+       누르면 그 달이 펼쳐진다. 사진이 없는 달은 예전처럼 한 줄. -------- */
+
+    function monthThumbs(year, m, days) {
+        if (typeof window.getLoosePhotos !== "function") return "";
+        var picks = [], total = 0;
+        days.forEach(function (d) {
+            var list = [];
+            try { list = window.getLoosePhotos(d.key) || []; } catch (e) {}
+            total += list.length;
+            if (list.length && picks.length < 4) picks.push(list[0]);
+        });
+        if (!picks.length) return "";
+        var thumbOf = (typeof window.photoThumb === "function") ? window.photoThumb : function (p) { return p && p.url; };
+        var more = total - picks.length;
+        return '<div class="mb-month-thumbs" onclick="window.mbToggleMonth(\'' + year + '-' + m + '\')" ' +
+            'style="display:flex; gap:6px; padding:0 2px 14px; border-bottom:1px solid var(--border); cursor:pointer;">' +
+            picks.map(function (p, i) {
+                var plus = (i === picks.length - 1 && more > 0);
+                return '<div style="position:relative; width:56px; height:56px; border-radius:11px; overflow:hidden; ' +
+                        'flex-shrink:0; background:var(--bg-sub);">' +
+                    '<img src="' + esc(thumbOf(p)) + '" loading="lazy" alt="" ' +
+                        'style="width:100%; height:100%; object-fit:cover; display:block;">' +
+                    (plus
+                        ? '<div style="position:absolute; inset:0; background:rgba(40,32,28,0.42); color:#FFF; ' +
+                          'font-size:12.5px; font-weight:800; display:flex; align-items:center; justify-content:center;">+' + more + '</div>'
+                        : '') +
+                '</div>';
+            }).join("") +
         '</div>';
     }
 
@@ -873,8 +913,9 @@
             var days = months[m];
             var isOpen = (ym === openMonth);
 
-            body += monthRow(openYear, m, days, isOpen);
-            if (!isOpen) return;
+            var strip = isOpen ? "" : monthThumbs(openYear, m, days);
+            body += monthRow(openYear, m, days, isOpen, !!strip);
+            if (!isOpen) { body += strip; return; }
 
             // 카드가 많을 때만 주 구분선. 적으면 오히려 방해다.
             var showWeeks = days.length >= 8;
