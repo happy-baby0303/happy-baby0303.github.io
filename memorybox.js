@@ -321,17 +321,16 @@
     /* ---------- 화면 조각 ---------- */
 
     // 부모는 달력이 아니라 개월 수로 기억한다.
-    // 월 헤더는 달 단위로만 묶이므로, 그 달의 마지막 날 기준으로 나이를 매긴다.
+    // ⚠️ 그 달 마지막 날 나이로 '생후 4개월' 이라고 적었다 — 5월 26일생이면 9월은 25일까지 3개월이라 그 달 대부분과 안 맞았다.
+    //    태어난 다음 달부터는 달마다 'N개월 되는 날' 이 꼭 한 번 들어 있으니 그걸 적는다 (9월 · 4개월 되는 달)
     function monthAgeLabel(key) {
         var b = birthTime();
         if (!b) return "";
-        var d = parseKey(key);
-        var monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0).getTime();
-        var days = Math.floor((monthEnd - b) / DAY);
-        if (days < 0) return "";
-        if (days < 31) return "  ·  태어난 달";
-        var m = Math.floor(days / 30.436875);
-        return "  ·  생후 " + m + "개월";
+        var d = parseKey(key), bd = new Date(b);
+        var n = (d.getFullYear() - bd.getFullYear()) * 12 + (d.getMonth() - bd.getMonth());
+        if (n < 0) return "";
+        if (n === 0) return "  ·  태어난 달";
+        return "  ·  " + (n === 12 ? "돌" : n === 24 ? "두 돌" : n === 36 ? "세 돌" : n + "개월") + " 되는 달";
     }
 
     function statBox(num, label) {
@@ -613,7 +612,7 @@
         inner += addRow(d.key);
 
         return '<div style="position:relative; background:var(--bg-card); border:1px solid var(--border); border-radius:22px; padding:24px 22px; margin-bottom:16px; box-shadow:0 4px 16px rgba(0,0,0,0.03);">' +
-            '<div style="position:absolute; left:-27px; top:30px; width:11px; height:11px; border-radius:50%; background:#7F77DD; border:3px solid var(--bg-main); box-shadow:0 0 0 1px rgba(127,119,221,0.25);"></div>' +
+            '<div style="position:absolute; left:-29px; top:30px; width:11px; height:11px; border-radius:50%; background:#7F77DD; border:3px solid var(--bg-main); box-shadow:0 0 0 1px rgba(127,119,221,0.25);"></div>' +
             '<div style="display:flex; align-items:baseline; gap:8px; margin-bottom:18px;">' +
                 '<span class="serif-display" style="font-size:17px; font-weight:700; color:var(--text-title);">' + (date.getMonth() + 1) + '월 ' + date.getDate() + '일</span>' +
                 '<span style="font-size:12px; font-weight:600; color:var(--text-sub);">' + WEEK[date.getDay()] + '요일</span>' +
@@ -629,7 +628,7 @@
         if (!b) return "";
         var d = new Date(b);
         return '<div style="position:relative; background:rgba(127,119,221,0.06); border:1px solid rgba(127,119,221,0.18); border-radius:22px; padding:28px 22px; margin-top:6px; text-align:center;">' +
-            '<div style="position:absolute; left:-27px; top:34px; width:11px; height:11px; border-radius:50%; background:#7F77DD; border:3px solid var(--bg-main);"></div>' +
+            '<div style="position:absolute; left:-29px; top:34px; width:11px; height:11px; border-radius:50%; background:#7F77DD; border:3px solid var(--bg-main);"></div>' +
             '<div style="font-size:10.5px; font-weight:800; color:#7F77DD; letter-spacing:2px; margin-bottom:12px;">D+0</div>' +
             '<div class="serif-display" style="font-size:20px; font-weight:700; color:var(--text-title); line-height:1.5; margin-bottom:8px;">' +
                 esc(callName("가")) + ' 세상에 온 날</div>' +
@@ -731,7 +730,8 @@
             'style="position:relative; display:flex; justify-content:space-between; align-items:center; ' +
             'padding:' + (thumbs && !isOpen ? '14px 2px 10px' : '14px 2px') + '; margin:' + (isOpen ? '26px 0 14px' : '0') + '; cursor:pointer;' +
             (under ? ' border-bottom:1px solid var(--border);' : '') + '">' +
-            '<div style="position:absolute; left:-29px; top:50%; margin-top:-4px; width:7px; height:7px; border-radius:50%; ' +
+            // 점 — 7px 에 테두리 3px 이면 (모든 칸이 border-box) 가운데가 1px 만 남아 보이지 않았다. 13px 로 두고 세로 줄 한가운데에
+            '<div style="position:absolute; left:-29px; top:50%; margin-top:-6.5px; width:13px; height:13px; border-radius:50%; ' +
                 'background:' + (isOpen ? '#7F77DD' : 'var(--border)') + '; border:3px solid var(--bg-main);"></div>' +
             '<span style="font-size:' + (isOpen ? '13.5' : '13') + 'px; font-weight:800; color:' +
                 (isOpen ? 'var(--text-m)' : 'var(--text-sub)') + '; letter-spacing:-0.2px;">' +
@@ -882,7 +882,7 @@
                 lastYm = ym;
                 out += '<div style="position:relative; font-size:13px; font-weight:800; color:var(--text-m); ' +
                     'letter-spacing:-0.2px; margin:22px 2px 14px;">' +
-                    '<div style="position:absolute; left:-29px; top:50%; margin-top:-4px; width:7px; height:7px; ' +
+                    '<div style="position:absolute; left:-31px; top:50%; margin-top:-6.5px; width:13px; height:13px; ' +
                         'border-radius:50%; background:#7F77DD; border:3px solid var(--bg-main);"></div>' +
                     dt.getFullYear() + '년 ' + (dt.getMonth() + 1) + '월' + esc(monthAgeLabel(d.key)) + '</div>';
             }
@@ -927,7 +927,7 @@
                         lastWeek = w;
                         body += '<div style="position:relative; font-size:10.5px; font-weight:800; color:var(--text-sub); ' +
                             'letter-spacing:1.8px; margin:20px 4px 12px; opacity:0.75;">' +
-                            '<div style="position:absolute; left:-27px; top:1px; width:5px; height:5px; border-radius:50%; ' +
+                            '<div style="position:absolute; left:-31px; top:50%; margin-top:-4.5px; width:9px; height:9px; border-radius:50%; ' +
                                 'background:var(--border); border:2px solid var(--bg-main);"></div>' +
                             esc(w) + '</div>';
                     }

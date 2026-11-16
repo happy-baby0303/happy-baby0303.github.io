@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="161">
+    <meta name="baenaet-build" content="162">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1520,7 +1520,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         <!-- 🌟 감옥 탈출! (box-main 클래스를 지워서 배경을 투명하게 날렸습니다) -->
         <div style="padding-top:20px; padding-bottom: 4px;">
             <h2 class="app-title" style="font-size: 24px; font-weight: 900; color: #4A413C; margin: 0 0 6px 0; letter-spacing: -0.5px;">육아 툴박스</h2>
-            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom:24px; letter-spacing: -0.3px;">필요할 때 바로 꺼내 쓰는 도구들이에요.</p>
+            <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom:24px; letter-spacing: -0.3px;">필요할 때 바로 꺼내 쓰는 도구들이에요</p>
 
             
             <!-- ⚠️ 가계부가 💰(달러 표시 돈주머니), 성장이 📈(주식 그래프) 였다. 원화 가계부엔 🧾 영수증,
@@ -1939,7 +1939,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         <!-- 날짜 및 수량 입력 -->
         <div style="display:flex; gap:10px; margin-bottom: 24px; width: 100%;">
             <input type="date" id="cube-date" style="flex:1; min-width:0; box-sizing: border-box; padding: 14px; border-radius: 12px; background: #FBF8F3; border: 1px solid #EDE6DE; font-size: 14px; font-weight: 800; color: #4A413C; outline:none;">
-            <div style="display:flex; align-items:center; background: #FBF8F3; border: 1px solid #EDE6DE; border-radius:12px; padding-right:16px; width: 110px; flex-shrink: 0; box-sizing: border-box;">
+            <!-- 수량 칸 겉 상자 — 입력칸은 모두 투명(style.css input, select)인데 이 상자만 베이지라 혼자 꺼진 칸처럼 보였다 -->
+            <div style="display:flex; align-items:center; background: transparent; border: 1px solid #EDE6DE; border-radius:12px; padding-right:16px; width: 110px; flex-shrink: 0; box-sizing: border-box;">
                 <input type="number" id="cube-qty" placeholder="수량" style="width:100%; min-width:0; padding: 14px 8px; border:none; background:transparent; font-size: 15px; font-weight: 900; text-align: right; outline:none; color: #4A413C;">
                 <span style="font-size:14px; font-weight:800; color:#A3958A;">개</span>
             </div>
@@ -2114,7 +2115,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <div id="open-custom" style="display:none; margin-bottom: 20px;">
                         <div style="display:flex; gap:10px;">
                             <input type="text" id="open-custom-name" maxlength="20" placeholder="무엇을 (예: 모유 저장팩)" style="flex: 1.6; min-width: 0; padding: 15px 14px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; background: #FBF8F3; border: 1px solid #EDE6DE; color: var(--text-m); box-sizing: border-box; font-family: inherit;">
-                            <div style="flex: 1; display:flex; align-items:center; background:#FBF8F3; border:1px solid #EDE6DE; border-radius:14px; padding-right:12px; box-sizing:border-box;">
+                            <!-- '며칠 안에' 겉 상자 — 옆 이름 칸(투명)과 같게. 이 상자만 베이지라 꺼진 칸처럼 보였다 -->
+                            <div style="flex: 1; display:flex; align-items:center; background:transparent; border:1px solid #EDE6DE; border-radius:14px; padding-right:12px; box-sizing:border-box;">
                                 <input type="number" id="open-custom-days" inputmode="numeric" placeholder="30" style="flex:1; width:100%; min-width:0; padding:15px 8px; border:none; outline:none; background:transparent; font-size:15px; font-weight:900; text-align:right; color:var(--text-m); font-family:inherit;">
                                 <span style="font-size:13px; font-weight:800; color:var(--text-m); flex-shrink:0;">일 안에</span>
                             </div>
@@ -3578,9 +3580,9 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=2"></script>
 <script src="./emotion.js?v=3"></script>
-<script src="./memorybox.js?v=5"></script>
+<script src="./memorybox.js?v=6"></script>
 <script src="./newbadge.js?v=2"></script>
-<script src="./monthcard.js?v=2"></script> 
+<script src="./monthcard.js?v=3"></script> 
 <script src="./monthgift.js?v=2"></script>
 <script src="./expiryalert.js"></script>
 <script src="./toolbrief.js"></script> 
@@ -3657,7 +3659,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./fit.js"></script>
 <script src="./emergency119.js?v=3"></script>
 <script src="./libraryplus.js?v=4"></script>
-<script src="./infopick.js?v=7"></script>
+<script src="./infopick.js?v=8"></script>
 <script src="./sosplus.js"></script>
 <!-- 🍎 아이폰은 홈 화면에 담아둔 앱에만 알림을 준다.
      그 안내를 띄운다. 안드로이드·PC 에서는 아무 일도 안 한다. -->

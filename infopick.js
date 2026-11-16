@@ -660,8 +660,10 @@
         return '<div>' +
             '<div onclick="window.openInfoArticle(' + i + ')" ' +
                 'style="display:flex; align-items:center; gap:10px; padding:12px 2px; cursor:pointer;">' +
+                // ⚠️ 한 줄 말줄임이라 오른쪽 이유 칸에 밀려 '터미타임(엎드려 놀기), 언제부터 얼…' 처럼 제목이 잘렸다. 두 줄까지 보인다
                 '<span style="flex:1; min-width:0; font-size:13.5px; font-weight:800; color:var(--text-m); ' +
-                    'letter-spacing:-0.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                    'letter-spacing:-0.3px; line-height:1.45; word-break:keep-all; overflow:hidden; ' +
+                    'display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;">' +
                     esc(a.title) + '</span>' +
                 (a.why
                     ? '<span style="flex-shrink:0; font-size:10.5px; font-weight:800; color:' + color + '; ' +

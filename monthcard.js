@@ -39,14 +39,15 @@
         return isNaN(t) ? null : t;
     }
 
+    // 그 달 마지막 날 나이('생후 4개월')는 그 달 대부분과 안 맞았다 — 달마다 꼭 한 번 오는 'N개월 되는 날' 로 (배냇함 연대기와 같은 말)
     function ageLabel(year, month) {
         var b = birthTime();
         if (!b) return "";
-        var end = new Date(year, month, 0).getTime();      // 그 달 마지막 날
-        var days = Math.floor((end - b) / 86400000);
-        if (days < 0) return "";
-        if (days < 31) return "태어난 달";
-        return "생후 " + Math.floor(days / 30.436875) + "개월";
+        var bd = new Date(b);
+        var n = (year - bd.getFullYear()) * 12 + (month - 1 - bd.getMonth());
+        if (n < 0) return "";
+        if (n === 0) return "태어난 달";
+        return (n === 12 ? "돌" : n === 24 ? "두 돌" : n === 36 ? "세 돌" : n + "개월") + " 되는 달";
     }
 
     /* ---------- 그 달에 뭐가 있었나 ---------- */
