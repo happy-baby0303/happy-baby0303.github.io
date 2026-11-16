@@ -4236,7 +4236,10 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             if (r) {
                 const sDate = new Date(r.timestamp);
                 sleepStartD = window.getSafeDateStr(sDate.getTime());
-                sleepStartT = r.time;
+                /* ⚠️ 'time' 칸이 없는 잠 기록을 고치면 잠든 시각 칸이 비었고, 그대로 저장하면 시각이 사라진 기록이 됐다.
+                      시각 칸은 09:30 꼴만 받으니 아니면 시각(timestamp)에서 만든다 */
+                sleepStartT = (typeof r.time === 'string' && /^\d{2}:\d{2}$/.test(r.time)) ? r.time
+                    : `${String(sDate.getHours()).padStart(2,'0')}:${String(sDate.getMinutes()).padStart(2,'0')}`;
                 activeSubType = r.subType || ''; 
                 
                 if (r.amount === 0) {
@@ -4362,6 +4365,10 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         if(saveBtn) saveBtn.style.display = 'block';
     }
 
+    // 제목 줄 '지우기' — 고치는 창에서만
+    const delBtn = document.getElementById('btn-tracker-delete');
+    if (delBtn) delBtn.style.display = window.editingTrackerId ? 'block' : 'none';
+
     if (window.editingTrackerId) {
         title.innerHTML = title.innerHTML.replace('기록하기', '수정하기');
         if(saveBtn) saveBtn.innerText = '수정 완료';
@@ -4371,7 +4378,11 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
         if (recordToEdit) {
             setTimeout(() => {
                 const timeInput = document.getElementById('v-tracker-time');
-                if(timeInput) timeInput.value = recordToEdit.time;
+                // 'time' 칸이 없는 기록이면 시각(timestamp)에서 만든다 (없으면 칸에 'undefined' 가 들어갔다)
+                const t0 = new Date(Number(recordToEdit.timestamp));
+                if(timeInput) timeInput.value = (typeof recordToEdit.time === 'string' && /^\d{1,2}:\d{2}/.test(recordToEdit.time))
+                    ? recordToEdit.time
+                    : String(t0.getHours()).padStart(2, '0') + ':' + String(t0.getMinutes()).padStart(2, '0');
 
                 const buttons = document.querySelectorAll('#tracker-sheet-body .btn-main');
                 buttons.forEach(btn => {
@@ -4479,8 +4490,12 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
             let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
             let recordToEdit = records.find(r => r.id === window.editingTrackerId);
             if (recordToEdit) {
-                initialTargetTime = recordToEdit.time;
                 const eDate = new Date(recordToEdit.timestamp);
+                /* ⚠️ 'time' 칸이 없는 기록(옛 기록 · 다른 데서 온 기록)을 고치려고 열면 time.split 에서 멈춰 바퀴가 안 돌았다.
+                      없으면 시각(timestamp)에서 만든다 */
+                initialTargetTime = (typeof recordToEdit.time === 'string' && /^\d{1,2}:\d{2}/.test(recordToEdit.time))
+                    ? recordToEdit.time
+                    : String(eDate.getHours()).padStart(2, '0') + ':' + String(eDate.getMinutes()).padStart(2, '0');
                 initialDateStr = `${eDate.getFullYear()}-${String(eDate.getMonth()+1).padStart(2,'0')}-${String(eDate.getDate()).padStart(2,'0')}`;
             }
         }
@@ -5008,7 +5023,15 @@ window.editTrackerRecord = function(id) {
         window.openTrackerSheet(record.type, id); 
     }, 300);
 };
-    
+
+/* 고치는 창 제목 줄의 '지우기' — 창을 닫고 목록에서 지울 때와 같은 '지울까요?' 를 묻는다 */
+window.deleteFromTrackerSheet = function () {
+    const id = window.editingTrackerId;
+    if (!id) return;
+    window.closeTrackerSheet();
+    setTimeout(() => window.deleteTrackerRecord(id), 320);
+};
+
 window.deleteTrackerRecord = function(id) {
     // 🚨 버튼 누르자마자 스와이프 열려있던 뚜껑 강제로 원상복구
     const swipeContents = document.querySelectorAll('.swipe-content');
@@ -5792,17 +5815,23 @@ window.updateTrackerDashboard = function() {
             if (r.type === 'sleep') {
                 const sr = window.getSleepRange(r);
                 if (!(sr.end > sr.start)) return null;
-                return { t: sr.end, html: `<b>${hhmm(sr.start)}–${hhmm(sr.end)}</b> ${r.subType === '밤잠' ? '밤잠' : '잠'}` };
+                return { id: r.id, t: sr.end, html: `<b>${hhmm(sr.start)}–${hhmm(sr.end)}</b> ${r.subType === '밤잠' ? '밤잠' : '잠'}` };
             }
             if (r.type === 'feed') {
                 const unit = r.subType === '모유' ? '분' : (r.subType === '이유식' ? 'g' : 'ml');
-                return { t: r.timestamp, html: `<b>${hhmm(r.timestamp)}</b> ${r.subType || '맘마'}${r.amount ? ' ' + r.amount + unit : ''}` };
+                return { id: r.id, t: r.timestamp, html: `<b>${hhmm(r.timestamp)}</b> ${r.subType || '맘마'}${r.amount ? ' ' + r.amount + unit : ''}` };
             }
-            return { t: r.timestamp, html: `<b>${hhmm(r.timestamp)}</b> ${r.subType === '대변' ? '응가' : (r.subType || '기저귀')}` };
+            return { id: r.id, t: r.timestamp, html: `<b>${hhmm(r.timestamp)}</b> ${r.subType === '대변' ? '응가' : (r.subType || '기저귀')}` };
         }).filter(Boolean).sort((x, y) => y.t - x.t).slice(0, 6);
+    /* ⚠️ 시간표 칸은 글자뿐이었다. 방금 적은 양이 틀렸으면 '기록 · 통계' 를 열고 목록을 밀어서 고쳐야 했다.
+          칸을 누르면 바로 그 기록을 고치는 창 (editTrackerRecord — 목록에서 고칠 때와 같은 창).
+          id 에 이상한 글자가 있으면 누를 수 없는 글자 칸으로 둔다 (onclick 안에 들어가니까) */
+    const chipStyle = 'font-size:12px; font-weight:500; color:var(--text-s); background:var(--bg-sub); padding:5px 9px; border-radius:9px;';
     const timeListHtml = timeline.length
         ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:14px;">${timeline.map(x =>
-              `<span style="font-size:12px; font-weight:500; color:var(--text-s); background:var(--bg-sub); padding:5px 9px; border-radius:9px;">${x.html}</span>`).join('')}</div>`
+              /^[A-Za-z0-9_\-.:]+$/.test(String(x.id || ''))
+                  ? `<button type="button" class="tl-chip" onclick="window.editTrackerRecord('${x.id}')" aria-label="${x.html.replace(/<[^>]+>/g, '')} 고치기" style="${chipStyle} border:none; font-family:inherit; line-height:inherit; cursor:pointer;">${x.html}</button>`
+                  : `<span style="${chipStyle}">${x.html}</span>`).join('')}</div>`
         : '';
 
     let timelineHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:18px 16px 16px; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.02);">
@@ -6544,10 +6573,11 @@ window.saveTrackerRecord = async function() {
     if(!window.trackerState.type) return;
 
     const saveBtn = document.getElementById('btn-tracker-save');
+    const saveLabel = saveBtn ? saveBtn.innerText : '';
     if (saveBtn) {
-        if (saveBtn.disabled) return; 
-        saveBtn.disabled = true; 
-        saveBtn.innerText = '저장 중... 💾'; 
+        if (saveBtn.disabled) return;
+        saveBtn.disabled = true;
+        saveBtn.innerText = '저장 중... 💾';
         saveBtn.style.opacity = '0.5';
     }
 
@@ -6560,6 +6590,11 @@ window.saveTrackerRecord = async function() {
         const sTime = document.getElementById('v-sleep-start-time').value;
         timeStr = sTime;
         timestamp = new Date(`${sDate}T${sTime}:00`).getTime();
+        /* 잠든 날짜 · 시각 칸이 비어 있으면 시각이 null 인 잠이 저장됐다 (홈 · 통계에서 사라지고 셈이 틀어진다) */
+        if (!sDate || !sTime || !isFinite(timestamp)) {
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.innerText = saveLabel || '저장하기'; saveBtn.style.opacity = '1'; }
+            return window.showToast('잠든 시간을 넣어 주세요');
+        }
     } else {
         const timeInputEl = document.getElementById('v-tracker-time');
         const customDateInput = document.getElementById('v-tracker-custom-date');
@@ -6583,7 +6618,7 @@ window.saveTrackerRecord = async function() {
         if (window.trackerState.subType === '이유식') {
             const foodAmt = document.getElementById('v-food-amount').value;
             if(!foodAmt) {
-                if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
+                if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = saveLabel || '저장하기'; saveBtn.style.opacity = '1'; }
                 return window.showToast('먹은 이유식 양을 적어 주세요');
             }
             record.type = 'feed'; 
@@ -6599,13 +6634,13 @@ window.saveTrackerRecord = async function() {
         } 
         else {
             if(!window.trackerState.subType) {
-                if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
+                if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = saveLabel || '저장하기'; saveBtn.style.opacity = '1'; }
                 return window.showToast('분유 · 모유 · 유축 중 하나를 골라 주세요');
             }
             if (window.trackerState.subType === '모유') {
                 const bAmt = document.getElementById('v-breast-amount').value;
-                if(!bAmt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('수유한 시간(분)을 적어 주세요'); }
-                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('왼쪽 · 오른쪽 · 양쪽 중 하나를 골라 주세요'); }
+                if(!bAmt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText=saveLabel || '저장하기'; saveBtn.style.opacity='1'; } return window.showToast('수유한 시간(분)을 적어 주세요'); }
+                if(!window.trackerState.status) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText=saveLabel || '저장하기'; saveBtn.style.opacity='1'; } return window.showToast('왼쪽 · 오른쪽 · 양쪽 중 하나를 골라 주세요'); }
                 
                 record.type = 'feed';
                 record.subType = '모유';
@@ -6613,7 +6648,7 @@ window.saveTrackerRecord = async function() {
                 record.status = window.trackerState.status; 
             } else {
                 const amt = document.getElementById('v-feed-amount').value;
-                if(!amt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('먹은 양(ml)을 적어 주세요'); }
+                if(!amt) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText=saveLabel || '저장하기'; saveBtn.style.opacity='1'; } return window.showToast('먹은 양(ml)을 적어 주세요'); }
                 record.type = 'feed';
                 record.subType = window.trackerState.subType; 
                 record.amount = parseInt(amt);
@@ -6622,7 +6657,7 @@ window.saveTrackerRecord = async function() {
         }
     } 
     else if (window.trackerState.type === 'diaper') {
-        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; } return window.showToast('소변인지 대변인지 골라 주세요'); }
+        if(!window.trackerState.subType) { if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText=saveLabel || '저장하기'; saveBtn.style.opacity='1'; } return window.showToast('소변인지 대변인지 골라 주세요'); }
         record.subType = window.trackerState.subType;
         record.status = (window.trackerState.subType === '소변') ? '' : (window.trackerState.status || '');
     }
@@ -6631,7 +6666,7 @@ window.saveTrackerRecord = async function() {
         let medName = document.getElementById('v-med-custom').value.trim();
         if (!medName) medName = window.trackerState.subType;
         if (!medName) {
-            if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; }
+            if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText=saveLabel || '저장하기'; saveBtn.style.opacity='1'; }
             return window.showToast('어떤 약인지 고르거나 적어 주세요');
         }
         record.subType = medName;
@@ -6641,7 +6676,7 @@ window.saveTrackerRecord = async function() {
     // 수면 저장 로직 - 킬스위치 가동!
     else if (window.trackerState.type === 'sleep') {
         if (!window.trackerState.subType) {
-            if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = '저장하기'; saveBtn.style.opacity = '1'; }
+            if(saveBtn) { saveBtn.disabled = false; saveBtn.innerText = saveLabel || '저장하기'; saveBtn.style.opacity = '1'; }
             return window.showToast('낮잠인지 밤잠인지 골라 주세요');
         }
 
@@ -6650,7 +6685,7 @@ window.saveTrackerRecord = async function() {
         if (amt && amt.value !== '') sleepAmount = parseInt(amt.value);
         
         if (sleepAmount < 0) {
-            if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText='저장하기'; saveBtn.style.opacity='1'; }
+            if(saveBtn){ saveBtn.disabled=false; saveBtn.innerText=saveLabel || '저장하기'; saveBtn.style.opacity='1'; }
             return window.showToast('깬 시간이 잠든 시간보다 앞서 있어요. 시간을 다시 봐 주세요');
         }
 

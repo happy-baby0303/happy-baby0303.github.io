@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="157">
+    <meta name="baenaet-build" content="158">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2969,7 +2969,12 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
         <div style="width: 40px; height: 5px; background: var(--border); border-radius: 3px; margin: 0 auto 20px auto;"></div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <h3 id="tracker-sheet-title" style="font-size: 18px; font-weight: 900; color: var(--text-m); margin: 0;">기록하기</h3>
-            <button onclick="window.closeTrackerSheet()" style="background: none; border: none; font-size: 20px; color: var(--text-s); cursor: pointer; padding: 0;">✕</button>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <!-- 고치는 창에서만 보인다. 홈 '오늘 하루' 칸을 눌러 들어와도 잘못 적은 기록을 여기서 지울 수 있게.
+                     아래 저장 버튼 밑에 두면 작은 폰에서 먹은 양 칸이 그만큼 가려져서 제목 줄에 둔다 -->
+                <button id="btn-tracker-delete" type="button" onclick="window.deleteFromTrackerSheet()" style="display: none; padding: 4px 11px; background: var(--bg-sub); border: none; border-radius: 9px; font-family: inherit; font-size: 12.5px; font-weight: 700; line-height: 1.4; color: var(--text-s); cursor: pointer;">지우기</button>
+                <button onclick="window.closeTrackerSheet()" style="background: none; border: none; font-size: 20px; color: var(--text-s); cursor: pointer; padding: 0;">✕</button>
+            </div>
         </div>
         <div id="tracker-sheet-body"></div>
         <button id="btn-tracker-save" class="btn-main" onclick="window.saveTrackerRecord()" style="width: 100%; padding: 16px; font-size: 16px; background: var(--text-m) !important; color: var(--bg-card) !important; border-radius: 16px; margin-top: 10px;">저장하기</button>
@@ -3545,7 +3550,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261117-2"></script>
+<script src="script.js?v=20261117-4"></script>
     <script src="./statweek.js?v=1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
