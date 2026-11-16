@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="158">
+    <meta name="baenaet-build" content="159">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2966,8 +2966,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <!-- 🍼 트래커 바텀시트 모달 -->
 <div id="tracker-sheet-overlay" class="modal-overlay" style="z-index: 7000; display: none;" onclick="window.closeTrackerSheet()">
     <div id="tracker-sheet-content" class="box-main" style="position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; max-width: 500px; width: 100%; border-radius: 24px 24px 0 0; padding: 24px 20px 40px 20px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 1, 0.2, 1);" onclick="event.stopPropagation()">
-        <div style="width: 40px; height: 5px; background: var(--border); border-radius: 3px; margin: 0 auto 20px auto;"></div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div class="ts-grip" style="width: 40px; height: 5px; background: var(--border); border-radius: 3px; margin: 0 auto 20px auto;"></div>
+        <div class="ts-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <h3 id="tracker-sheet-title" style="font-size: 18px; font-weight: 900; color: var(--text-m); margin: 0;">기록하기</h3>
             <div style="display: flex; align-items: center; gap: 14px;">
                 <!-- 고치는 창에서만 보인다. 홈 '오늘 하루' 칸을 눌러 들어와도 잘못 적은 기록을 여기서 지울 수 있게.
@@ -3550,7 +3550,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261117-4"></script>
+<script src="script.js?v=20261118-1"></script>
     <script src="./statweek.js?v=1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
@@ -3653,7 +3653,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./settingscards.js?v=4"></script>
 <script src="./emoji.js"></script>
 <script src="./feverguard.js"></script> 
-<script src="./mobile.js?v=2"></script>
+<script src="./mobile.js?v=3"></script>
 <script src="./fit.js"></script>
 <script src="./emergency119.js?v=3"></script>
 <script src="./libraryplus.js?v=4"></script>

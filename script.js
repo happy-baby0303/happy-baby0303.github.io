@@ -3959,7 +3959,10 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
     if(title) title.style.color = 'var(--text-m)';
     if(saveBtn) { saveBtn.style.backgroundColor = 'var(--primary)'; saveBtn.style.color = '#FFF'; saveBtn.style.border = 'none'; }
 
+    /* ⚠️ 85vh 로 묶여 있어서 작은 폰(갤럭시 S23 · 아이폰 SE · 사파리)에선 먹은 양 · 모유 시간 칸이 창 아래에 숨었다.
+          보이는 화면(dvh)에서 위로 72px 만 남기고 다 쓴다. dvh 를 모르는 옛 브라우저는 85vh 그대로 */
     content.style.maxHeight = '85vh';
+    content.style.maxHeight = 'calc(100dvh - 72px)';
     content.style.display = 'flex';
     content.style.flexDirection = 'column';
     body.style.overflowY = 'auto';
@@ -4141,7 +4144,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
 
                 <!-- 🚨 모유 직수 (백그라운드 타이머 연동) -->
                 <div id="feed-breast-area" style="display: none; margin-bottom: 20px;">
-                    <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px; text-align:center;">방향을 선택해주세요</div>
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px; text-align:center;">어느 쪽으로 먹였나요</div>
                     <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;">
                         <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_left')" style="flex:1; display: flex; align-items: center; justify-content: center; padding: 14px 0; background: var(--bg-sub); color: #A3958A; border: none; border-radius: 14px; margin:0; transition:0.2s; font-size: 14.5px; font-weight:700;">왼쪽 (L)</button>
                         <button class="btn-main" onclick="window.selectTrackerBtn(this, 'breast_right')" style="flex:1; display: flex; align-items: center; justify-content: center; padding: 14px 0; background: var(--bg-sub); color: #A3958A; border: none; border-radius: 14px; margin:0; transition:0.2s; font-size: 14.5px; font-weight:700;">오른쪽 (R)</button>
@@ -4149,7 +4152,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                     </div>
                     
                     <div style="background: var(--bg-card); border-radius: 20px; padding: 24px 20px; text-align: center; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
-                        <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">직접 입력 (분) 또는 지금 수유 시작</div>
+                        <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">몇 분 먹였나요</div>
                         
                         <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 24px; height: 55px;">
                             <input type="number" id="v-breast-amount" placeholder="0" style="font-size: 46px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 100px; padding: 0; margin: 0; transition: 0.3s;">
@@ -4729,6 +4732,30 @@ window.toggleMammaTab = function(type) {
         }
     }
 };
+
+/* 분유 · 모유 직수 · 이유식 · 대변을 누르면 그 밑에 칸(먹은 양 · 방향과 시간 · 색)이 새로 열린다.
+   키 작은 폰에선 그 칸이 창 아래에 숨어서, 누르고도 아무 일이 없는 것처럼 보였다.
+   누른 뒤 열린 칸이 창 밖으로 넘치면 넘친 만큼만 창 속을 내린다 (다 보이면 그대로 · 칸 머리는 안 넘긴다) */
+window.revealTrackerArea = function (el) {
+    const body = document.getElementById('tracker-sheet-body');
+    if (!body || !el || !el.isConnected || el.offsetParent === null) return;
+    const b = body.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const below = r.bottom - b.bottom + 8;
+    if (below <= 0) return;
+    const dy = Math.min(below, Math.max(0, r.top - b.top - 8));
+    if (dy > 0) body.scrollBy({ top: dy, behavior: 'smooth' });
+};
+document.addEventListener('click', function (e) {
+    const btn = e.target && e.target.closest ? e.target.closest('#tracker-sheet-body button') : null;
+    if (!btn) return;
+    const on = btn.getAttribute('onclick') || '';
+    let area = null;
+    if (btn.id === 'tab-btn-food') area = document.getElementById('food-input-area');
+    else if (btn.id === 'tab-btn-milk' || btn.closest('#milk-input-area')) area = document.getElementById('milk-input-area');
+    else if (btn.closest('#diaper-status-area') || /diaper_(poop|both)/.test(on)) area = document.getElementById('diaper-status-area');
+    else if (/showSleepWake/.test(on)) area = document.getElementById('sleep-end-area');
+    if (area) setTimeout(() => window.revealTrackerArea(area), 40);
+}, true);   // 먼저 듣는다 — '깬 시간 적기' 단추는 누르자마자 자기 자리를 새로 그려서 나중엔 어디 있던 단추인지 모른다
 
 // ==========================================
 // 💡 트래커 버튼 컬러 통일 엔진 (모든 탭 보라색 💜 - 대변도 예외 없음!)

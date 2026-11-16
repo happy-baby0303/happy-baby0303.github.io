@@ -98,9 +98,13 @@ body { overscroll-behavior-y: contain; }
     }
 
     /* 바텀시트도 마찬가지 */
-    #postcard-picker > div,
-    #tracker-sheet-content {
+    #postcard-picker > div {
         padding-bottom: calc(34px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    /* 기록 창은 저장 단추 밑을 줄인다 (안드로이드 34 → 20 · 홈 막대 있는 아이폰 68 → 44).
+       작은 폰에서 먹은 양 · 모유 시간 칸이 이만큼 더 가려졌다 */
+    #tracker-sheet-content {
+        padding-bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 10px)) !important;
     }
 
     /* 작은 칩은 줄바꿈보다 축소가 낫다 */
@@ -146,6 +150,18 @@ body { overscroll-behavior-y: contain; }
     #tab-home div[style*="grid-template-columns: 1fr 1fr"] { gap: 8px !important; }
     #home-postcard-tile,
     #tab-home div[style*="grid-template-columns: 1fr 1fr"] > div { padding: 16px 10px !important; }
+}
+
+
+/* ===== 키가 760px 이하 : 갤럭시 S22 · S23, 아이폰 SE, 주소창 있는 사파리 =====
+   기록 창 맘마 칸은 시간 바퀴 · 수유/이유식 · 분유/모유 밑에 먹은 양이 온다.
+   키가 작으면 먹은 양 · 모유 시간 칸이 창 아래에 숨어서 손가락으로 끌어 올려야 보였다.
+   위 여백과 칸 사이(24px)를 조금씩 줄인다. 시간 바퀴 크기는 그대로 */
+@media (max-height: 760px) {
+    #tracker-sheet-content { padding-top: 14px !important; }
+    #tracker-sheet-content .ts-grip { margin-bottom: 12px !important; }
+    #tracker-sheet-content .ts-head { margin-bottom: 16px !important; }
+    #tracker-sheet-body div[style*="margin-bottom: 24px"] { margin-bottom: 16px !important; }
 }
 `;
 
