@@ -13485,7 +13485,16 @@ window.toggleIsSleeping = function(forceState = null) {
 
 window.setWakeTimeNow = function() {
     // 1. 현재 시간으로 일어난 시간 셋팅 (한국시간 패치)
-    const now = new Date();
+    let now = new Date();
+    /* ⚠️ 잠든 바로 그 분에 '방금 깼어요' 를 누르면 깬 시간 = 잠든 시간(0분)이라, 창이 '새로 재우기' 모습으로 돌아가고
+          저장 단추도 '방금 잠들었어요' 가 되어 눌러도 계속 자는 중이었다. 그 저장의 되돌리기도 '자는 중' 으로 돌렸다 (CS).
+          빠른 기록 단추(sleep_end · Math.max(1, …))처럼 1분 잔 걸로 맞추고, 깬 시간 칸은 펼쳐 둔다 */
+    const sDv = document.getElementById('v-sleep-start-date')?.value, sTv = document.getElementById('v-sleep-start-time')?.value;
+    if (sDv && sTv) {
+        const startMs = new Date(`${sDv}T${sTv}:00`).getTime();
+        if (!isNaN(startMs) && now.getTime() - startMs < 60000) now = new Date(startMs + 60000);
+    }
+    window.trackerState.showWake = true;
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
