@@ -5314,30 +5314,46 @@ window.updateTrackerDashboard = function() {
                 }
             });
 
-            const dayDiv = activeDays.size > 0 ? activeDays.size : 1; 
-            const avgFeed = Math.round(weekFeedAmt / dayDiv);
-            const avgSleepH = Math.floor((weekSleepMins / dayDiv) / 60);
-            const avgSleepM = Math.round((weekSleepMins / dayDiv) % 60);
-            const avgDiaper = Math.round(weekDiaperCount / dayDiv);
+            const dayDiv = activeDays.size > 0 ? activeDays.size : 1;
+            let avgFeed = Math.round(weekFeedAmt / dayDiv);
+            let avgSleepMins = Math.round(weekSleepMins / dayDiv);
+            let avgDiaper = Math.round(weekDiaperCount / dayDiv);
+            let avgToday = false;
+            /* ⚠️ 168시간 안의 기록을 기록한 날 수로 나눴다. 반나절뿐인 오늘과 이레 전이 하루씩으로 세어져
+                  평균이 늘 낮게 나왔다 (매일 1,080ml 먹는 집이 1,003ml). 어제까지 이레로 센다 (statweek.js — 막대와 같은 셈).
+                  어제까지 기록한 날이 없으면(쓰기 시작한 첫날) 오늘 숫자를 '오늘' 로 적는다 */
+            const weekAvg = (typeof window.statWeekAvg === 'function') ? window.statWeekAvg(records, nowTime) : undefined;
+            if (weekAvg) {
+                avgFeed = Math.round(weekAvg.ml); avgSleepMins = Math.round(weekAvg.sleep); avgDiaper = Math.round(weekAvg.diaper);
+            } else if (weekAvg === null) {
+                const t = window.statWeekDays(records, nowTime).pop();
+                avgToday = true; avgFeed = t.ml; avgSleepMins = t.night + t.nap; avgDiaper = t.diaper;
+            }
+            const avgSleepH = Math.floor(avgSleepMins / 60);
+            const avgSleepM = avgSleepMins % 60;
+            const U = (u, mr) => `<span style="font-size:11px; margin-left:2px;${mr ? ' margin-right:2px;' : ''}">${u}</span>`;
 
-            let historyHtml = `
+            /* 맘마 · 잠 · 기저귀를 고르면 그 종류의 지난 7일 막대가 평균 칸 자리에 뜬다 (statweek.js) */
+            const weekCard = ((window.__histFilter || 'all') !== 'all' && typeof window.statWeekCard === 'function')
+                ? window.statWeekCard(window.__histFilter, records, nowTime) : '';
+            let historyHtml = weekCard || `
                 <div style="background: #FAF7F2; padding: 16px; border-radius: 16px; border: 1px solid #EDE6DE; margin-bottom: 16px;">
                     <div style="font-size: 13px; font-weight: 900; color: #7F77DD; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-                        지난 7일 평균
+                        ${avgToday ? '오늘' : '지난 7일 평균'}
                     </div>
                     <!-- ⚠️ 칸 이름이 '평균 수유량 825ml' 였다. 한 번에 먹는 양으로 읽혀서 '하루' 라고 적는다 (기록한 날 수로 나눈 하루 평균) -->
                     <div style="display: flex; justify-content: space-between; text-align: center; gap: 8px;">
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">하루 수유량</div>
-                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgFeed) ? avgFeed + '<span style="font-size:11px; margin-left:2px;">ml</span>' : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">${avgToday ? '수유량' : '하루 수유량'}</div>
+                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgFeed) ? avgFeed.toLocaleString('ko-KR') + U('ml') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">하루 수면</div>
-                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${(Number(avgSleepH) || Number(avgSleepM)) ? `${avgSleepH}<span style="font-size:11px; margin-left:2px; margin-right:2px;">시간</span>${avgSleepM}<span style="font-size:11px; margin-left:2px;">분</span>` : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">${avgToday ? '수면' : '하루 수면'}</div>
+                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${avgSleepMins > 0 ? (avgSleepH ? avgSleepH + U('시간', avgSleepM) : '') + (avgSleepM ? avgSleepM + U('분') : '') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">하루 기저귀</div>
-                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgDiaper) ? avgDiaper + '<span style="font-size:11px; margin-left:2px;">회</span>' : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">${avgToday ? '기저귀' : '하루 기저귀'}</div>
+                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgDiaper) ? avgDiaper + U('번') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                     </div>
                 </div>
@@ -5388,7 +5404,7 @@ window.updateTrackerDashboard = function() {
                 ${insight ? '' : `<div style="background:var(--bg-sub); color:var(--text-s); font-size:12px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:12px; text-align:center; border: 1px dashed var(--border);">
                     리스트를 <span style="color:var(--text-m);">왼쪽으로 밀면</span> 고치거나 지울 수 있어요
                 </div>`}
-                <div id="hist-list" style="max-height:max(200px, calc(88vh - 420px)); overflow-y:auto; overscroll-behavior:contain; padding-right:4px;">
+                <div id="hist-list" style="position:relative; max-height:max(200px, calc(88vh - 420px)); overflow-y:auto; overscroll-behavior:contain; padding-right:4px;">
             `;
 
             let shownAny = false;
@@ -5408,7 +5424,9 @@ window.updateTrackerDashboard = function() {
                 shownAny = true;
                 const dayStart = new Date(Number(grouped[date][0].timestamp)).setHours(0, 0, 0, 0);
                 const dNum = (birth0 != null) ? Math.round((dayStart - birth0) / 86400000) : -1;
+                // data-hday — 위 막대를 누르면 이 자리로 온다 (statweek.js). 날짜 칸은 sticky 라 칸 대신 앞에 둔 표식으로 잰다
                 historyHtml += `
+                    <div data-hday="${dayStart}" style="height:0;"></div>
                     <div style="position: sticky; top: -1px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
                         <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}${dNum >= 0 ? `<span data-dplus style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-left: 6px;">· ${dNum === 0 ? '태어난 날' : 'D+' + dNum}</span>` : ''}</div>
                         ${window.getDailySummaryHtml(grouped[date], { dayStart: dayStart, all: records })}
@@ -5458,7 +5476,7 @@ window.updateTrackerDashboard = function() {
                         } else {
                             let h = Math.floor(r.amount / 60);
                             let m = r.amount % 60;
-                            let durText = h > 0 ? `${h}시간 ${m}분` : `${m}분`;
+                            let durText = h > 0 ? (m ? `${h}시간 ${m}분` : `${h}시간`) : `${m}분`;   // '낮잠 1시간 0분' 이 아니라 '1시간'
                             txt = `${r.subType || '낮잠'} <span style="color:#7F77DD;">${durText}</span>`;
                             // timestamp 가 글자로 들어 있으면 '+' 가 이어 붙이기가 된다 — 숫자로 바꿔서 더한다
                             let dEnd = new Date(Number(r.timestamp) + (Number(r.amount) * 60000));
@@ -5520,9 +5538,16 @@ window.updateTrackerDashboard = function() {
                 </div>
             `;
             container.innerHTML = historyHtml;
+            /* ⚠️ 위에 지난 7일 막대(평균 칸보다 높다)가 들어오면 창 전체가 한 번 더 스크롤됐다 (목록 스크롤 안에 창 스크롤).
+                  창이 넘치면 넘친 만큼 목록을 줄인다. 200px 아래로는 안 줄인다 — 아주 작은 폰은 예전처럼 창이 스크롤된다 */
+            const histList = document.getElementById('hist-list');
+            if (histList && container === sheetBody) {
+                const over = sheetBody.scrollHeight - sheetBody.clientHeight;
+                if (over > 0) histList.style.maxHeight = Math.max(200, histList.clientHeight - over) + 'px';
+            }
         }
         container.style.display = 'block';
-        return; 
+        return;
     }
 
     // 끝나지 않은 잠 기록을 스스로 정리한다
