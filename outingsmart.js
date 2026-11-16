@@ -807,13 +807,14 @@
 
         return '<div style="display:flex; gap:7px; overflow-x:auto; padding:2px 0 9px; ' +
                 '-webkit-overflow-scrolling:touch; scrollbar-width:none;">' +
-                // 개월수 칩은 그림 없이 글자만 — 유모차 칩(🚼)과 아기 그림이 둘 나란히 서서 헷갈렸다
+                // 개월수 칩은 그림 없이 글자만 — 아기 그림(👶)은 유모차 칩이 쓴다
                 (m !== null && !tooEarly ? chip("age", m + "개월 갈 수 있는 곳", F.age) : "") +
                 chip("open",     "🕘 지금 열린 곳", F.open) +
                 chip("indoor",   "🏠 실내",      F.indoor) +
                 chip("park",     "🅿️ 주차",     F.park) +
-                // ⚠️ 유모차 칩 그림이 🦼(전동 휠체어)였다. 유모차 그림 글자는 없어서 아기 표지(🚼)로
-                chip("stroller", "🚼 유모차",    F.stroller) +
+                // ⚠️ 유모차 칩 그림이 🦼(전동 휠체어)였다. 유모차 그림 글자는 없어서 아기(👶)로.
+                //    아기 표지(🚼)는 표지판 모양이라 칩 안에서 어색했다
+                chip("stroller", "👶 유모차",    F.stroller) +
                 chip("near", "📍 가까운 순", F.near) +
             '</div>' +
             (F.near && myPos
