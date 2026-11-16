@@ -451,8 +451,8 @@
                 if (el.querySelector('div')) continue;   // 글이 직접 들어 있는 칸만 (바깥 상자 말고)
                 if (String(el.textContent).indexOf('의학적 지침(응급처치, 해열제 등)') > -1) {
                     el.innerHTML =
-                        '본 앱의 육아 정보와 제품 사용 기한은 전문 기관의 일반적인 가이드라인을 요약한 것입니다.<br><br>' +
-                        '아기마다 다를 수 있으니 <strong>참고용</strong>으로만 사용해 주세요. ' +
+                        '배냇함의 육아 정보와 제품 사용 기한은 소아과학회 같은 전문 기관의 권고를 간추린 거예요.<br><br>' +
+                        '아기마다 다를 수 있으니 <strong>참고용</strong>으로만 봐 주세요. ' +
                         '아기가 평소와 다르거나 걱정되면 소아과 의료진과 상담해 주세요.';
                     var t = el.previousElementSibling;
                     if (t && String(t.textContent).indexOf('면책') > -1) t.textContent = '⚠️ 배냇함 안내';

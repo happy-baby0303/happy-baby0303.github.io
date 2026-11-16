@@ -171,6 +171,10 @@
         /* ---- libraryplus.js 가 붙이는 여덟 편 ---- */
 
         { find: "눕히는 자세", ranges: [[0, 12]], whys: ["돌 전엔 이게 먼저"], base: 70 },
+        { find: "신생아 목욕", ranges: [[0, 1]],  whys: ["첫 목욕 무렵"],        base: 68 },
+        { find: "터미타임",   ranges: [[0, 5]],  whys: ["목 가누기 연습할 때"], base: 63 },
+        { find: "낯가림",     ranges: [[8, 18]], whys: ["낯가림이 시작될 즈음"], base: 55 },
+        { find: "영상",       ranges: [[0, 24]], whys: ["영상 고민될 때"],      base: 40 },
         { find: "코막힘",     ranges: [[0, 24]], whys: ["코가 자주 막힐 때"], base: 47 },
         { find: "배앓이",     ranges: [[0, 4]],  whys: ["배앓이가 잦은 시기"],   base: 64 },
         { find: "이앓이",     ranges: [[4, 14]], whys: ["첫니 나올 무렵"],     base: 56 },
@@ -307,7 +311,8 @@
         if (block) block.style.display = on ? "" : "none";
 
         var btn = document.getElementById("info-all-btn");
-        if (btn) btn.textContent = on ? "글 접기 〈" : ("글 전체 보기 " + articles().length + "개 ›");
+        // 앱 다른 곳과 같은 표시: 펼치기 ▾ · 접기 ▴
+        if (btn) btn.textContent = on ? "글 접기 ▴" : ("글 전체 보기 " + articles().length + "개 ▾");
 
         /* ⚠️ 접는 버튼이 목록 '위' 에만 있으면, 펼친 뒤 아래로 내려간 사람은
               그 버튼을 못 찾는다. 화면 밖으로 올라가 있기 때문이다.
@@ -323,7 +328,7 @@
                     "background:var(--bg-card); border:1px solid var(--border); " +
                     "border-radius:14px; font-size:13px; font-weight:800; " +
                     "color:var(--text-sub); cursor:pointer;";
-                foot.textContent = "〈 글 접기";
+                foot.textContent = "글 접기 ▴";
                 if (block.parentNode) block.parentNode.insertBefore(foot, block.nextSibling);
             }
             foot.style.display = "";
@@ -684,7 +689,7 @@
             '<div id="info-all-btn" onclick="window.toggleInfoLibrary()" ' +
                 'style="text-align:center; margin-top:11px; padding-top:11px; ' +
                 'border-top:1px solid var(--border); font-size:11.5px; font-weight:800; ' +
-                'color:var(--text-sub); cursor:pointer;">글 전체 보기 ' + articles().length + '개 ›</div>' +
+                'color:var(--text-sub); cursor:pointer;">글 전체 보기 ' + articles().length + '개 ▾</div>' +
         '</div>';
     }
 
