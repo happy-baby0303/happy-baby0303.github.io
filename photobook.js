@@ -541,7 +541,72 @@
         );
     }
 
-    function endPage(n, sum) {
+    /* ==========================================================
+       같은 날 사진 여러 장을 한 쪽에 — 두 장 · 세 장 · 네 장
+       ----------------------------------------------------------
+       ⚠️ 같은 날 찍은 사진도 한 장에 한 쪽씩 썼다. 하루에 다섯 장이면 다섯 쪽.
+          인쇄 포토북들처럼 그날 사진을 한 쪽에 모은다 (넉 장까지).
+          · 두 장: 나란히 (둘 다 가로 사진이면 위아래로)
+          · 세 장: 위에 크게 한 장 + 아래 두 장
+          · 네 장: 두 장씩 두 줄
+          사진은 자르지 않는다 (contain) — 칸 가운데에 인화지처럼 놓는다.
+       ---------------------------------------------------------- */
+
+    function gridPage(o, folio) {
+        var it = o.items || [], n = it.length;
+        var W = 1040, GAP = 36, AREA = 1300;
+
+        /* 사진 설명은 사진 바로 밑에 붙는다 (칸 바닥에 따로 떨어지면 어느 사진 말인지 모른다) */
+        function cell(x, w, h) {
+            var capH = x.caption ? 56 : 0;
+            return '<div style="width:' + Math.floor(w) + 'px; height:' + Math.floor(h) + 'px; display:flex; flex-direction:column; ' +
+                    'align-items:center; justify-content:center;">' +
+                '<img src="' + x.img + '" style="max-width:100%; max-height:' + Math.floor(h - capH) + 'px; width:auto; height:auto; ' +
+                    'object-fit:contain; display:block; box-shadow:0 3px 16px rgba(96,78,60,0.13);">' +
+                (x.caption ? '<div style="height:' + capH + 'px; width:100%; padding-top:12px; box-sizing:border-box; text-align:center; ' +
+                    'font-family:\'Nanum Pen Script\',cursive; font-size:30px; color:' + INK_S + '; line-height:1.3; ' +
+                    'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(x.caption) + '</div>' : '') +
+            '</div>';
+        }
+        function line(cells, dir) {
+            return '<div style="display:flex; flex-direction:' + dir + '; gap:' + GAP + 'px; align-items:center; justify-content:center;">' +
+                cells.join("") + '</div>';
+        }
+
+        var half = (W - GAP) / 2, body;
+        if (n <= 1) {
+            body = it.length ? cell(it[0], W, AREA) : "";
+        } else if (n === 2) {
+            // 둘 다 세로 사진일 때만 나란히. 가로 사진이 끼면 위아래로 놓아야 종이가 덜 빈다
+            var tall = (it[0].r || 0.75) < 0.95 && (it[1].r || 0.75) < 0.95;
+            body = tall ? line([cell(it[0], half, AREA), cell(it[1], half, AREA)], "row")
+                        : line([cell(it[0], W, (AREA - GAP) / 2), cell(it[1], W, (AREA - GAP) / 2)], "column");
+        } else if (n === 3) {
+            var topH = Math.floor(AREA * 0.52), botH = AREA - topH - GAP;
+            body = line([cell(it[0], W, topH), line([cell(it[1], half, botH), cell(it[2], half, botH)], "row")], "column");
+        } else {
+            var hh = (AREA - GAP) / 2;
+            body = line([line([cell(it[0], half, hh), cell(it[1], half, hh)], "row"),
+                         line([cell(it[2], half, hh), cell(it[3], half, hh)], "row")], "column");
+        }
+
+        return shell(
+            '<div style="height:100%; display:flex; flex-direction:column;">' +
+                '<div style="font-size:16px; font-weight:800; color:' + GOLD + '; letter-spacing:5px; margin-bottom:12px;">그날의 사진</div>' +
+                '<div style="font-size:21px; font-weight:600; color:' + INK_L + '; margin-bottom:34px;">' +
+                    esc(pretty(o.key)) + '  ·  ' + esc(dday(o.key)) + '</div>' +
+                '<div style="flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding-bottom:24px;">' +
+                    body +
+                '</div>' +
+                '<div style="padding-top:30px; border-top:1px solid ' + LINE + '; display:flex; justify-content:flex-end; ' +
+                    'font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:0.5px;">' +
+                    '<span>' + esc(dday(o.key)) + '</span>' +
+                '</div>' +
+            '</div>', folio
+        );
+    }
+
+    function endPage(n, sum, next) {
         /* 총계 한 줄이 있으면 '책' 이 되고, 없으면 '출력물' 로 끝난다. */
         var tail = "";
         if (sum) {
@@ -567,7 +632,9 @@
                     head + '</div>' +
                 '<div style="width:1px; height:110px; background:' + LINE + '; margin:52px auto;"></div>' +
                 '<div style="font-size:23px; font-weight:400; color:' + INK_S + '; line-height:1.9;">' +
-                    '다음 장은 아직 비어 있습니다.<br>내일 또 한 줄이 쌓입니다.</div>' +   /* 한 문단에 '-어요' 와 '-ㅂ니다' 가 섞여 있었다 */
+                    /* 여러 권으로 나눈 책의 앞 권은 '다음 장은 비어 있다' 가 거짓말이 된다 */
+                    (next ? '이야기는<br>' + esc(String(next)) + '권으로 이어집니다.'
+                          : '다음 장은 아직 비어 있습니다.<br>내일 또 한 줄이 쌓입니다.') + '</div>' +   /* 한 문단에 '-어요' 와 '-ㅂ니다' 가 섞여 있었다 */
                 tail +
                 /* ⚠️ 맨 아래 '배냇함' 에 margin-top:auto 를 주니 가운데 정렬이 풀려서 마지막 장 글이 종이 위쪽에 몰렸다. 바닥에 따로 놓는다 */
                 '<div style="position:absolute; left:0; right:0; bottom:64px; text-align:center; font-size:19px; font-weight:600; color:' + INK_L + '; letter-spacing:3px;">배냇함</div>' +
@@ -633,43 +700,14 @@
         }
     }
 
-    window.makeMemoryBook = function () {
-        // 조용히 끝나는 게 제일 나쁘다. 뭐가 됐든 흔적을 남긴다.
-        return bakeBook().catch(function (e) {
-            console.error("[포토북] 실패", e);
-            closeProgress();
-            toast("책을 만들지 못했어요: " + (e && e.message ? e.message : "알 수 없는 오류"));
-        });
-    };
+    /* ---------- 쪽 짜기 ----------
+       날(collect 한 줄) 목록을 받아 본문 쪽(기념일 · 그날 · 모은 사진)만 짠다.
+       표지 · 태어난 날 · 소리 · 맺음은 bakeBook 이 앞뒤에 붙인다.
+       달마다 몇 쪽이 되는지 세어서 권을 나눌 때도 이걸 쓴다. -------- */
 
-    async function bakeBook(opts) {
-        opts = opts || {};
-        var previewOnly = !!opts.preview;      // 앞 몇 쪽만 굽고 화면에 보여준다
-        if (typeof html2canvas === "undefined") return toast("이미지 라이브러리를 불러오지 못했어요");
-
-        var data = collect();
-        if (!data.length) return toast("아직 책으로 묶을 기록이 없어요");
-
-        progress(0, 1, "재료를 모으는 중이에요");
-        try { await ensureJsPDF(); }
-        catch (e) { closeProgress(); return toast("책 만들기 도구를 불러오지 못했어요"); }
-
-        // 1) 페이지 목록부터 짠다
+    function planContent(data) {
         var pages = [];
-        var b = birth();
-        var last = data[data.length - 1].key;
-        var span = b ? (b.getFullYear() + "." + String(b.getMonth() + 1).padStart(2, "0") +
-                        "  —  " + last.slice(0, 4) + "." + last.slice(5, 7)) : "";
-
-        var covSrc = null;
-        for (var i = data.length - 1; i >= 0 && !covSrc; i--) {
-            if (data[i].photos.length) covSrc = data[i].photos[data[i].photos.length - 1];
-        }
-
-        pages.push({ type: "cover", src: covSrc, span: span });
-        pages.push({ type: "opening" });
-
-        /* \u26a0\ufe0f 예전엔 사진 쪽, 편지 쪽을 따로 만들어서 절반이 빈 종이였다.
+        /* ⚠️ 예전엔 사진 쪽, 편지 쪽을 따로 만들어서 절반이 빈 종이였다.
               하루를 한 장에 담는다. 사진이 여러 장인 날만 장수가 늘어나고,
               편지는 그 날의 첫 장에 같이 실린다. */
         data.forEach(function (d) {
@@ -702,15 +740,40 @@
                 letter = null; lines = null;
             });
 
-            loose.forEach(function (p) {
+            /* 그날 편지 · 한 줄이 아직 안 실렸으면 첫 사진과 한 쪽에 (글에 자리가 필요해서 사진은 한 장)
+               ⚠️ 예전엔 사진마다 한 쪽이라 한 줄만 있는 날도 첫 사진 쪽에 실렸다. 그대로 지킨다 */
+            if ((letter || lines) && loose.length) {
+                var p0 = loose.shift();
                 pages.push({
-                    type: "day", key: d.key, src: p,
+                    type: "day", key: d.key, src: p0,
                     kicker: "그날의 사진", title: "", desc: "",
-                    caption: p.caption || "",
+                    caption: p0.caption || "",
                     letter: letter, lines: lines
                 });
                 letter = null; lines = null;
-            });
+            }
+
+            /* 남은 사진은 한 쪽에 넉 장까지 모은다. 고르게 나눈다 (다섯 장 → 3 + 2, 여섯 장 → 3 + 3).
+               한 장만 남으면 예전처럼 한 쪽에 크게. */
+            var left = loose.length;
+            if (left) {
+                var k = Math.ceil(left / 4), base = Math.floor(left / k), extra = left % k, at = 0;
+                for (var g = 0; g < k; g++) {
+                    var size = base + (g < extra ? 1 : 0);
+                    var chunk = loose.slice(at, at + size);
+                    at += size;
+                    if (chunk.length === 1) {
+                        pages.push({
+                            type: "day", key: d.key, src: chunk[0],
+                            kicker: "그날의 사진", title: "", desc: "",
+                            caption: chunk[0].caption || "",
+                            letter: null, lines: null
+                        });
+                    } else {
+                        pages.push({ type: "grid", key: d.key, list: chunk });
+                    }
+                }
+            }
 
             /* 부부 문답은 collect() 에서 아예 안 담는다. 여기도 만들지 않는다. */
 
@@ -721,39 +784,165 @@
                 letter: letter, lines: lines
             });
         });
+        return pages;
+    }
 
-        // 목소리 목록
-        if (typeof window.voiceDays === "function") {
-            var vs = [];
-            window.voiceDays().sort().forEach(function (k) {
-                (window.getDayVoices(k) || []).forEach(function (v) {
-                    var t = v.msId && typeof msItem === "function" && msItem(v.msId) ? msItem(v.msId).title : (v.note || "그날의 소리");
-                    vs.push({ label: t, when: pretty(k), sec: v.sec || 0, peaks: v.peaks || null, key: k, id: v.id });
-                });
+    // 담긴 목소리 — 권으로 나눌 때는 그 권에 든 날들의 소리만
+    function voiceList(fromKey, toKey) {
+        var vs = [];
+        if (typeof window.voiceDays !== "function") return vs;
+        window.voiceDays().sort().forEach(function (k) {
+            var key = normKey(k) || String(k);
+            if (fromKey && key < fromKey) return;
+            if (toKey && key > toKey) return;
+            (window.getDayVoices(k) || []).forEach(function (v) {
+                var t = v.msId && typeof msItem === "function" && msItem(v.msId) ? msItem(v.msId).title : (v.note || "그날의 소리");
+                vs.push({ label: t, when: pretty(k), sec: v.sec || 0, peaks: v.peaks || null, key: k, id: v.id });
             });
-            /* ⚠️ 예전에 담은 소리는 파형(peaks)이 없는 게 있다. 그러면 '소리의 모양' 쪽에 이름만 덩그러니 남았다.
-                  굽기 전에 한 번 계산해 본다 (한 개에 4초까지만 기다린다). */
-            if (typeof window.voicePeaks === "function") {
-                for (var vi = 0; vi < vs.length && vi < 21; vi++) {
-                    if (vs[vi].peaks || !vs[vi].id) continue;
-                    try {
-                        vs[vi].peaks = await Promise.race([
-                            window.voicePeaks(vs[vi].key, vs[vi].id),
-                            new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })
-                        ]);
-                    } catch (e) {}
-                }
+        });
+        return vs.slice(0, 21);            // 한 쪽에 일곱 개 · 세 쪽까지
+    }
+
+    /* ---------- 여러 권으로 ----------
+       ⚠️ 80쪽이 넘으면 뒤를 잘라 냈다 ('기록이 많아 80쪽까지만 담았어요').
+          매일 사진을 담는 집은 석 달 치쯤에서 책이 끝나고, 그 뒤 달들은 어디에도 안 실렸다.
+          포토북 서비스들처럼 달 단위로 끊어 여러 권으로 나누고, 만들 권을 고르게 한다.
+          (한 권 = 표지 · [1권만 태어난 날] · 본문 · 소리 · 맺음, 80쪽 안) -------- */
+
+    function splitVolumes(all) {
+        var whole = 3 + planContent(all).length + Math.ceil(voiceList(null, null).length / 7);
+        if (whole <= MAX_PAGES) return [{ no: 1, total: 1, days: all, pages: whole }];
+
+        var LIMIT = MAX_PAGES - 6;         // 표지 · 태어난 날 · 소리(세 쪽까지) · 맺음 자리를 남긴다
+        var months = [];
+        all.forEach(function (d) {
+            var ym = d.key.slice(0, 7), m = months[months.length - 1];
+            if (!m || m.ym !== ym) months.push(m = { ym: ym, days: [] });
+            m.days.push(d);
+        });
+        var vols = [], cur = null;
+        months.forEach(function (m) {
+            var n = planContent(m.days).length;
+            if (!cur || (cur.days.length && cur.n + n > LIMIT)) vols.push(cur = { days: [], n: 0, from: m.ym, to: m.ym });
+            cur.days = cur.days.concat(m.days);
+            cur.n += n;
+            cur.to = m.ym;
+        });
+        vols.forEach(function (v, i) {
+            v.no = i + 1;
+            v.total = vols.length;
+            var fk = v.days[0].key, lk = v.days[v.days.length - 1].key;
+            v.pages = Math.min(MAX_PAGES, (i === 0 ? 3 : 2) + v.n + Math.ceil(voiceList(fk, lk).length / 7));
+        });
+        return vols;
+    }
+
+    function ymText(a, b) {
+        var ya = a.slice(0, 4), ma = Number(a.slice(5, 7)), yb = b.slice(0, 4), mb = Number(b.slice(5, 7));
+        if (a === b) return ya + "년 " + ma + "월";
+        if (ya === yb) return ya + "년 " + ma + "~" + mb + "월";
+        return ya + "년 " + ma + "월 ~ " + yb + "년 " + mb + "월";
+    }
+
+    function pickVolume(vols) {
+        if (typeof window.askChoice !== "function") return Promise.resolve(vols[0]);
+        return window.askChoice({
+            title: "기록이 많아서 " + vols.length + "권으로 나눴어요",
+            sub: "한 권에 " + MAX_PAGES + "쪽까지 담겨요. 만들 권을 골라 주세요. 다른 권은 다시 눌러서 만들 수 있어요.",
+            options: vols.map(function (v, i) {
+                return { label: v.no + "권 · " + ymText(v.from, v.to) + " · " + v.pages + "쪽", value: i };
+            }),
+            no: "닫기"
+        }).then(function (i) {
+            return (i === null || i === undefined || !vols[i]) ? null : vols[i];
+        });
+    }
+
+    // 모은 사진 쪽에서 두 장을 나란히 둘지 위아래로 둘지 — 사진 비율(가로/세로)
+    function imgRatio(src) {
+        return new Promise(function (ok) {
+            if (!src) return ok(0.75);
+            var im = new Image();
+            im.onload = function () { ok(im.naturalHeight ? im.naturalWidth / im.naturalHeight : 0.75); };
+            im.onerror = function () { ok(0.75); };
+            im.src = src;
+        });
+    }
+
+    window.makeMemoryBook = function () {
+        // 조용히 끝나는 게 제일 나쁘다. 뭐가 됐든 흔적을 남긴다.
+        return bakeBook().catch(function (e) {
+            console.error("[포토북] 실패", e);
+            closeProgress();
+            toast("책을 만들지 못했어요: " + (e && e.message ? e.message : "알 수 없는 오류"));
+        });
+    };
+
+    async function bakeBook(opts) {
+        opts = opts || {};
+        var previewOnly = !!opts.preview;      // 앞 몇 쪽만 굽고 화면에 보여준다
+        if (typeof html2canvas === "undefined") return toast("이미지 라이브러리를 불러오지 못했어요");
+
+        var all = collect();
+        if (!all.length) return toast("아직 책으로 묶을 기록이 없어요");
+
+        /* 80쪽이 넘는 집은 달 단위로 여러 권 (splitVolumes) — 미리보기는 늘 처음부터 */
+        var vols = splitVolumes(all);
+        var vol = null, data = all;
+        if (!previewOnly && vols.length > 1) {
+            vol = await pickVolume(vols);
+            if (!vol) return;                         // 닫기
+            data = vol.days;
+        }
+        var first = !vol || vol.no === 1;
+
+        progress(0, 1, "재료를 모으는 중이에요");
+        try { await ensureJsPDF(); }
+        catch (e) { closeProgress(); return toast("책 만들기 도구를 불러오지 못했어요"); }
+
+        // 1) 페이지 목록부터 짠다
+        var pages = [];
+        var b = birth();
+        var firstKey = data[0].key;
+        var last = data[data.length - 1].key;
+        var from = (first && b) ? (b.getFullYear() + "." + String(b.getMonth() + 1).padStart(2, "0"))
+                                : (firstKey.slice(0, 4) + "." + firstKey.slice(5, 7));
+        var span = (b || !first) ? (from + "  —  " + last.slice(0, 4) + "." + last.slice(5, 7)) : "";
+        if (vol) span += "   ·   " + vol.no + "권";
+
+        var covSrc = null;
+        for (var i = data.length - 1; i >= 0 && !covSrc; i--) {
+            if (data[i].photos.length) covSrc = data[i].photos[data[i].photos.length - 1];
+        }
+
+        pages.push({ type: "cover", src: covSrc, span: span });
+        if (first) pages.push({ type: "opening" });       // 태어난 날은 1권에만
+        pages = pages.concat(planContent(data));
+
+        // 목소리 목록 (여러 권이면 이 권에 든 날들의 소리만)
+        var vs = voiceList(vol ? firstKey : null, vol ? last : null);
+        /* ⚠️ 예전에 담은 소리는 파형(peaks)이 없는 게 있다. 그러면 '소리의 모양' 쪽에 이름만 덩그러니 남았다.
+              굽기 전에 한 번 계산해 본다 (한 개에 4초까지만 기다린다). */
+        if (typeof window.voicePeaks === "function" && !previewOnly) {
+            for (var vi = 0; vi < vs.length; vi++) {
+                if (vs[vi].peaks || !vs[vi].id) continue;
+                try {
+                    vs[vi].peaks = await Promise.race([
+                        window.voicePeaks(vs[vi].key, vs[vi].id),
+                        new Promise(function (r) { setTimeout(function () { r(null); }, 4000); })
+                    ]);
+                } catch (e) {}
             }
-            /* 한 쪽에 일곱 개까지 (더 넣으면 종이 밖으로 넘친다). 넘으면 다음 쪽으로 */
-            vs = vs.slice(0, 21);
-            for (var vc = 0; vc < vs.length; vc += 7) {
-                pages.push({ type: "voice", list: vs.slice(vc, vc + 7), more: vc + 7 < vs.length });
-            }
+        }
+        /* 한 쪽에 일곱 개까지 (더 넣으면 종이 밖으로 넘친다). 넘으면 다음 쪽으로 */
+        for (var vc = 0; vc < vs.length; vc += 7) {
+            pages.push({ type: "voice", list: vs.slice(vc, vc + 7), more: vc + 7 < vs.length });
         }
 
         /* 이 책에 실제로 담긴 것들을 센다 */
         var sum = { photos: 0, letters: 0, ms: 0 };
         pages.forEach(function (p) {
+            if (p.type === "grid") { sum.photos += p.list.length; return; }
             if (p.type !== "day") return;
             if (p.src) sum.photos++;
             if (p.letter) sum.letters++;
@@ -767,9 +956,12 @@
         if (endN === null) {
             for (var q = data.length - 1; q >= 0 && endN === null; q--) endN = ddayNum(data[q].key);
         }
-        pages.push({ type: "end", n: endN === null ? "" : endN, sum: sum });
+        pages.push({ type: "end", n: endN === null ? "" : endN, sum: sum,
+                     next: (vol && vol.no < vol.total) ? vol.no + 1 : 0 });
 
-        if (pages.length > MAX_PAGES) {
+        /* 미리보기는 '전부 몇 쪽' 을 그대로 알려 준다 (잘라 낸 숫자가 아니라).
+           권으로 나눠도 한 달이 80쪽을 넘는 아주 드문 집은 마지막으로 자른다 */
+        if (!previewOnly && pages.length > MAX_PAGES) {
             pages = pages.slice(0, MAX_PAGES - 1).concat(pages[pages.length - 1]);
             toast("기록이 많아 " + MAX_PAGES + "쪽까지만 담았어요");
         }
@@ -783,6 +975,15 @@
         progress(0, pages.length, "사진을 옮기는 중이에요");
         for (var j = 0; j < pages.length; j++) {
             if (pages[j].src) pages[j].img = await photoData(pages[j].src);
+            if (pages[j].type === "grid") {
+                // 모은 사진 쪽: 한 장씩 옮기고, 가로/세로를 재어 두 장일 때 놓는 방향을 정한다
+                var items = [];
+                for (var gi = 0; gi < pages[j].list.length; gi++) {
+                    var gp = pages[j].list[gi], gimg = await photoData(gp);
+                    if (gimg) items.push({ img: gimg, caption: gp.caption || "", r: await imgRatio(gimg) });
+                }
+                pages[j].items = items;
+            }
         }
 
         // 3) 한 장씩 굽는다
@@ -802,13 +1003,14 @@
 
             if (p.type === "cover")        html = coverPage(p.img, p.span);
             else if (p.type === "opening") html = openingPage();
-            else if (p.type === "end")     html = endPage(p.n, p.sum);
+            else if (p.type === "end")     html = endPage(p.n, p.sum, p.next);
             else {
                 folioNo++;
                 if (p.type === "anni")        html = anniPage(p.a, p.key, String(folioNo));
                 else if (p.type === "letter") html = letterPage(p.l, p.key, String(folioNo));
                 else if (p.type === "voice")  html = voicePage(p.list, String(folioNo), p.more);
                 else if (p.type === "diary")  html = diaryPage(p.e, String(folioNo));
+                else if (p.type === "grid")   html = gridPage({ key: p.key, items: p.items || [] }, String(folioNo));
                 else if (p.type === "day") html = dayPage({
                     img: p.img, kicker: p.kicker, title: p.title,
                     desc: p.desc, caption: p.caption, key: p.key, letter: p.letter, lines: p.lines
@@ -827,10 +1029,11 @@
 
         closeProgress();
 
-        if (previewOnly) { showPreview(shots, total); return; }
+        if (previewOnly) { showPreview(shots, total, vols.length); return; }
 
         progress(pages.length, pages.length, "책을 묶는 중이에요");
-        var fname = babyName() + "의 배냇함.pdf";
+        var fname = babyName() + "의 배냇함" + (vol ? " " + vol.no + "권" : "") + ".pdf";
+        var made = "📖 " + (vol ? vol.no + "권 · " : "") + pages.length + "쪽짜리 책이 만들어졌어요";
         var ua = navigator.userAgent || "";
         var mobile = /Android|iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
         var file = null;
@@ -881,27 +1084,30 @@
                         shareBook();         // 저장이 안 되면 공유 창으로라도
                     });
                 };
-                window.showConfirm("📖 " + pages.length + "쪽짜리 책이 만들어졌어요.<br><span style='font-size:12px;color:#A3958A;'>휴대폰 '다운로드 › 배냇함' 폴더에 저장할게요.</span>",
+                window.showConfirm(made + ".<br><span style='font-size:12px;color:#A3958A;'>휴대폰 '다운로드 › 배냇함' 폴더에 저장할게요.</span>",
                     saveBook, "📖", "저장하기", "#B98A2E");
                 return;
             }
             if (typeof window.showConfirm === "function") {
-                window.showConfirm("📖 " + pages.length + "쪽짜리 책이 만들어졌어요.<br><span style='font-size:12px;color:#A3958A;'>창이 뜨면 '파일에 저장'을 누르거나 인쇄소로 바로 보내세요.</span>",
+                window.showConfirm(made + ".<br><span style='font-size:12px;color:#A3958A;'>창이 뜨면 '파일에 저장'을 누르거나 인쇄소로 바로 보내세요.</span>",
                     shareBook, "📖", "저장하기", "#B98A2E");
             } else shareBook();
             return;
         }
         pdf.save(fname);
-        toast("📖 " + pages.length + "쪽짜리 책이 만들어졌어요");
+        toast(made);
     };
 
     /* ---------- 미리보기 ----------
        잠긴 문 앞에서 파는 것과, 열어보고 나서 파는 것은 다르다.
        앞 세 쪽은 무료로 구워서 손에 쥐여준다. -------- */
 
-    function showPreview(shots, total) {
+    function showPreview(shots, total, nVols) {
         var old = document.getElementById("book-preview");
         if (old) old.remove();
+        nVols = nVols || 1;
+        // 80쪽이 넘으면 달 단위로 여러 권 — 미리보기에서 미리 말해 둔다
+        var volNote = nVols > 1 ? " · " + nVols + "권으로 나눠 담겨요" : "";
 
         var pro = (typeof window.isPremium !== "function") || window.isPremium();
 
@@ -918,7 +1124,7 @@
                     '<div style="font-family:\'Gowun Batang\',serif; font-size:21px; font-weight:700; color:#FFF; letter-spacing:-0.5px;">' +
                         esc(babyName()) + '의 배냇함</div>' +
                     '<div style="font-size:12px; font-weight:600; color:#A3958A; margin-top:6px;">' +
-                        '전부 ' + total + '쪽 · 앞 ' + shots.length + '쪽 미리보기</div>' +
+                        '전부 ' + total + '쪽' + volNote + ' · 앞 ' + shots.length + '쪽 미리보기</div>' +
                 '</div>' +
                 '<span onclick="document.getElementById(\'book-preview\').remove(); document.body.style.overflow=\'\';" ' +
                     'style="font-size:24px; font-weight:300; color:#A3958A; cursor:pointer; line-height:1;">×</span>' +
@@ -940,7 +1146,8 @@
                     '사진과 첫 순간, 그날의 편지, 담긴 목소리까지<br>한 권으로 묶여 있습니다.</div>' +
                 '<div onclick="window.bookFromPreview()" style="margin-top:18px; padding:16px; background:#B98A2E; ' +
                     'color:#FFF; border-radius:15px; font-size:15px; font-weight:800; cursor:pointer;">' +
-                    (pro ? '전체 ' + total + '쪽 내려받기' : '전체 ' + total + '쪽 뽑기') + '</div>' +
+                    (pro ? (nVols > 1 ? '권을 골라 내려받기' : '전체 ' + total + '쪽 내려받기')
+                         : '전체 ' + total + '쪽 뽑기') + '</div>' +
             '</div>' +
 
             '<div style="text-align:center; font-size:11px; font-weight:600; color:#7A6F68; margin-top:20px; line-height:1.8;">' +
@@ -1056,14 +1263,23 @@
     /* ---------- 점검용 ---------- */
     window.bookDebug = function () {
         var d = collect();
-        var pages = 2;
-        d.forEach(function (x) {
-            pages += (x.diary || []).length + x.anni.length + x.ms.length +
-                     x.photos.filter(function (p) { return !p.msId; }).length +
-                     (x.letter ? 1 : 0);
-        });
+        var vols = splitVolumes(d);
         console.log("담긴 날:", d.length + "일");
-        console.log("예상 쪽수:", (pages + 1) + "쪽");
+        console.log("예상 쪽수:", (3 + planContent(d).length + Math.ceil(voiceList(null, null).length / 7)) + "쪽" +
+                    (vols.length > 1 ? " · " + vols.length + "권" : ""));
         return d;
+    };
+
+    // 굽지 않고 짜임만 본다 (쪽 종류 · 권 나눔)
+    window.bookPlan = function () {
+        var d = collect();
+        return {
+            content: planContent(d).map(function (p) {
+                return p.type + ":" + p.key + (p.list ? ":" + p.list.length : "") + (p.letter ? ":편지" : "");
+            }),
+            vols: splitVolumes(d).map(function (v) {
+                return { no: v.no, from: v.from || d[0].key.slice(0, 7), to: v.to || d[d.length - 1].key.slice(0, 7), pages: v.pages, days: v.days.length };
+            })
+        };
     };
 })();
