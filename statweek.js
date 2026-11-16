@@ -96,8 +96,17 @@
             if (typeof window.showToast === "function") window.showToast("그날은 이 기록이 없어요");
             return;
         }
-        var top = mark.offsetParent === list ? mark.offsetTop : mark.offsetTop - list.offsetTop;
-        list.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        /* 목록은 통계 창과 함께 스크롤한다 — 그날 머리를 맨 위에 붙어 있는 거르는 칸 바로 밑으로.
+           (목록이 따로 스크롤하는 옛 화면이면 예전처럼 목록을 굴린다) */
+        var body = document.getElementById("stats-sheet-body");
+        if (!body || list.scrollHeight > list.clientHeight + 2) {
+            var top = mark.offsetParent === list ? mark.offsetTop : mark.offsetTop - list.offsetTop;
+            list.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+            return;
+        }
+        var f = document.getElementById("hist-filters");
+        var y = mark.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - (f ? f.offsetHeight : 0) - 4;
+        body.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
     };
 
     /* 잠 무늬 — ⚠️ 잠 무늬 창(z-index 9999)은 통계 창(99999) 밑에 열린다. 이 길로 열 때만 위로 올린다.

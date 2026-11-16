@@ -5158,14 +5158,20 @@ window.toggleTrackerHistory = function() {
     setTimeout(() => { content.style.transform = 'translateY(0)'; }, 10);
 
     window.updateTrackerDashboard();                   // 내용 채우기
+    // 목록이 창과 함께 스크롤한다 — 다시 열면 맨 위부터 (창이 숨어 있을 땐 0 을 넣어도 안 먹어서 연 뒤에)
+    const sheetBody = document.getElementById('stats-sheet-body');
+    if (sheetBody) sheetBody.scrollTop = 0;
 };
 
 // 📊 기록 · 통계 — 종류별로 보기 (전체 · 수유 · 잠 · 기저귀 · 약)
 window.setHistFilter = function(k) {
     window.__histFilter = k || 'all';
     window.updateTrackerDashboard();
-    const l = document.getElementById('hist-list');
-    if (l) l.scrollTop = 0;
+    const body = document.getElementById('stats-sheet-body'), top = document.getElementById('hist-top');
+    if (body && top) {
+        const y = top.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop;
+        if (body.scrollTop > y) body.scrollTop = y;
+    }
 };
 
 // 📊 바텀시트 닫기
@@ -5496,7 +5502,10 @@ window.updateTrackerDashboard = function() {
             // 순서는 홈 기록 단추와 같이 맘마 · 기저귀 · 잠
             const FILTERS = [['all', '전체'], ['feed', '맘마'], ['diaper', '기저귀'], ['sleep', '잠']]
                 .concat(records.some(r => r.type === 'med') ? [['med', '약']] : []);
-            historyHtml += '<div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; -webkit-overflow-scrolling:touch;">' +
+            /* 목록은 창 하나로 스크롤한다 (예전엔 목록만 200~320px 창 안에서 따로 움직였다 — 기록이 두세 줄씩만 보였다).
+               내려가도 거르는 칸은 맨 위에 붙어 있다. hist-top 은 거르는 칸이 원래 있던 자리 (setHistFilter 가 쓴다) */
+            historyHtml += '<div id="hist-top" style="height:0;"></div>' +
+                '<div id="hist-filters" style="display:flex; gap:6px; margin:-6px 0 4px; padding:6px 0; overflow-x:auto; -webkit-overflow-scrolling:touch; position:sticky; top:0; z-index:3; background-color:var(--bg-card);">' +
                 FILTERS.map(([k, label]) => {
                     const on = (F === k);
                     return `<button type="button" onclick="window.setHistFilter('${k}')" style="flex-shrink:0; padding:8px 15px; border-radius:20px; border:1px solid ${on ? '#4A413C' : 'var(--border)'}; background-color:${on ? '#4A413C' : 'var(--bg-card)'}; color:${on ? '#FFF' : 'var(--text-s)'}; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit;">${label}</button>`;
@@ -5535,7 +5544,7 @@ window.updateTrackerDashboard = function() {
                 ${insight ? '' : `<div style="background:var(--bg-sub); color:var(--text-s); font-size:12px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:12px; text-align:center; border: 1px dashed var(--border);">
                     리스트를 <span style="color:var(--text-m);">왼쪽으로 밀면</span> 고치거나 지울 수 있어요
                 </div>`}
-                <div id="hist-list" style="position:relative; max-height:max(200px, calc(88vh - 420px)); overflow-y:auto; overscroll-behavior:contain; padding-right:4px;">
+                <div id="hist-list" style="position:relative;">
             `;
 
             let shownAny = false;
@@ -5558,7 +5567,7 @@ window.updateTrackerDashboard = function() {
                 // data-hday — 위 막대를 누르면 이 자리로 온다 (statweek.js). 날짜 칸은 sticky 라 칸 대신 앞에 둔 표식으로 잰다
                 historyHtml += `
                     <div data-hday="${dayStart}" style="height:0;"></div>
-                    <div style="position: sticky; top: -1px; z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="position: sticky; top: var(--hist-sticky, -1px); z-index: 10; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px 10px 16px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
                         <div style="font-size: 14px; font-weight: 900; color: var(--text-m); margin-bottom: 6px;">${date}${dNum >= 0 ? `<span data-dplus style="font-size: 12px; font-weight: 800; color: var(--text-s); margin-left: 6px;">· ${dNum === 0 ? '태어난 날' : 'D+' + dNum}</span>` : ''}</div>
                         ${window.getDailySummaryHtml(grouped[date], { dayStart: dayStart, all: records })}
                     </div>
@@ -5669,13 +5678,9 @@ window.updateTrackerDashboard = function() {
                 </div>
             `;
             container.innerHTML = historyHtml;
-            /* ⚠️ 위에 지난 7일 막대(평균 칸보다 높다)가 들어오면 창 전체가 한 번 더 스크롤됐다 (목록 스크롤 안에 창 스크롤).
-                  창이 넘치면 넘친 만큼 목록을 줄인다. 200px 아래로는 안 줄인다 — 아주 작은 폰은 예전처럼 창이 스크롤된다 */
-            const histList = document.getElementById('hist-list');
-            if (histList && container === sheetBody) {
-                const over = sheetBody.scrollHeight - sheetBody.clientHeight;
-                if (over > 0) histList.style.maxHeight = Math.max(200, histList.clientHeight - over) + 'px';
-            }
+            // 날짜 칸은 맨 위에 붙은 거르는 칸 바로 밑에 붙는다 (같이 맨 위에 붙으면 날짜 칸이 거르는 칸을 덮었다)
+            const hf = document.getElementById('hist-filters');
+            if (hf && container === sheetBody) sheetBody.style.setProperty('--hist-sticky', (hf.offsetHeight - 1) + 'px');
         }
         container.style.display = 'block';
         return;
