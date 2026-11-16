@@ -75,8 +75,9 @@
 
     /* ⚠️ '편지함' 점을 봉인 편지로 세고 있었다. 편지함은 아기가 쓰는 하루 편지와
           부부의 한 줄이 쌓이는 곳이다. 새 편지가 왔거나, 짝꿍이 한 줄을 남겼으면 점을 찍는다. */
-    function letterLatest() {
-        var newest = 0, now = Date.now();
+    /* 아기 편지(baby)와 가족이 남긴 한 줄(other)을 따로 센다 — 홈 칸은 무엇이 왔는지 말해 준다 */
+    function letterParts() {
+        var out = { baby: 0, other: 0, who: "", count: 0 }, now = Date.now();
         var L = {};
         try { L = JSON.parse(localStorage.getItem("tosil_letters")) || {}; } catch (e) {}
         Object.keys(L).forEach(function (k) {
@@ -87,7 +88,9 @@
                 var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 21, 0, 0).getTime();
                 if (!isNaN(d)) t = d;
             }
-            if (t > newest && t <= now) newest = t;
+            if (t > now) return;
+            if (l.text) out.count++;
+            if (t > out.baby) out.baby = t;
         });
 
         // 짝꿍이 남긴 한 줄 — 편지함 답장 + 배냇함 한 줄
@@ -100,7 +103,7 @@
             ["mom", "dad"].forEach(function (slot) {
                 if (slot === meSlot || !o[slot]) return;
                 var t = Number(o[slot].at) || 0;
-                if (t > newest) newest = t;
+                if (t > out.other) { out.other = t; out.who = slot === "dad" ? "아빠" : "엄마"; }
             });
         });
         if (typeof window.noteDays === "function" && typeof window.getDayNotes === "function") {
@@ -108,11 +111,15 @@
                 (window.getDayNotes(k) || []).forEach(function (n) {
                     if (!n || !n.who || n.who === meWord) return;
                     var t = Number(n.ts) || 0;
-                    if (t > newest) newest = t;
+                    if (t > out.other) { out.other = t; out.who = String(n.who); }
                 });
             });
         }
-        return newest;
+        return out;
+    }
+    function letterLatest() {
+        var p = letterParts();
+        return Math.max(p.baby, p.other);
     }
 
     function diaryLatest() {
@@ -174,7 +181,32 @@
         return d;
     }
 
+    /* ---------- 홈 '편지함' 칸 ----------
+       ⚠️ 점은 배냇함 탭 안에서만 찍혔다. 하루는 홈에서 시작하는데, 홈 편지함 칸은 늘 '아기가 보낸 하루들' 이었다.
+          편지는 밤마다 오고 짝꿍의 한 줄도 오는데 홈에서는 와도 몰랐다.
+          무엇이 왔는지 칸에 적고 점을 단다. 다 읽었으면 몇 통 쌓였는지 (배냇함 탭과 같은 말). */
+    function ga(w) {
+        var c = String(w || "").charCodeAt(String(w || "").length - 1);
+        return (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0) ? "이" : "가";
+    }
+    function paintHome() {
+        var tile = document.getElementById("home-letter-tile"), sub = document.getElementById("home-letter-sub");
+        if (!tile || !sub) return;
+        var p = letterParts(), s = seen()["편지함"] || 0;
+        var line, fresh = true;
+        if (p.baby && p.baby > s) line = "새 편지가 왔어요";
+        else if (p.other && p.other > s && p.who) line = p.who + ga(p.who) + " 한 줄 남겼어요";
+        else { fresh = false; line = p.count ? p.count + "통 쌓였어요" : "아기가 보낸 하루들"; }
+        if (sub.textContent !== line) sub.textContent = line;
+        sub.style.color = fresh ? "#7F77DD" : "var(--text-sub)";
+        if (getComputedStyle(tile).position === "static") tile.style.position = "relative";
+        var old = tile.querySelector("." + DOT_ID);
+        if (fresh && !old) tile.appendChild(dot());
+        else if (!fresh && old) old.remove();
+    }
+
     function paint() {
+        try { paintHome(); } catch (e) {}
         // 보관함 칸은 '3열 격자 안의, 글자가 함 이름인 칸'으로 찾는다
         var labels = Object.keys(BOXES);
         // 배냇함 탭이 안 보일 때는 훑지 않는다 (배터리)
@@ -241,6 +273,20 @@
             };
             wrapped.__badged = true;
             window.renderMemoryBox = wrapped;
+        }
+
+        /* 편지함은 홈 칸 · 배냇함 탭 · 육퇴 띠 어디서 열어도 '봤다' 로 친다
+           ⚠️ 배냇함 탭 칸을 누를 때만 봤다고 쳐서, 홈에서 편지를 다 읽어도 탭의 점이 그대로 남았다 */
+        var openLB = window.openLetterBox;
+        if (typeof openLB === "function" && !openLB.__seen) {
+            var seenLB = function () {
+                markSeen("편지함");
+                var out = openLB.apply(this, arguments);
+                schedule();
+                return out;
+            };
+            seenLB.__seen = true;
+            window.openLetterBox = seenLB;
         }
 
         document.addEventListener("visibilitychange", function () {

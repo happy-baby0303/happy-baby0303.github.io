@@ -5704,6 +5704,9 @@ window.updateTrackerDashboard = function() {
             <span style="width:62px; flex-shrink:0; text-align:right; font-size:12.5px; font-weight:800; color:var(--text-m);">%%${key}%%</span>
         </div>`;
     const dotKey = (c, ring) => `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; ${ring ? 'border:2px solid ' + c + '; box-sizing:border-box;' : 'background-color:' + c + ' !important;'}"></span>`;
+    /* ⚠️ 범례에 '이유식' 이 늘 있었다. 이유식은 아직 먼 백일 아기 화면에도. 시작한 뒤에만 (먹는 단계 · 이유식 기록 중 하나라도) */
+    const showFoodKey = /이유식|유아식/.test(localStorage.getItem('tosil_feedingStage') || '') ||
+        records.some(r => r && r.type === 'feed' && r.subType === '이유식');
 
     /* 오늘 시간표 — 최근 것부터 여섯 개 */
     const timeline = todayRecords.filter(r => r.type === 'feed' || r.type === 'diaper' || r.type === 'sleep')
@@ -5732,7 +5735,7 @@ window.updateTrackerDashboard = function() {
         <div style="display:flex; gap:12px; flex-wrap:wrap; font-size:11px; font-weight:600; color:var(--text-sub); margin-bottom:4px;">
             <span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:#7F77DD !important;"></span>잠</span>
             <span style="display:flex; align-items:center; gap:4px;">${dotKey('#EF9F27')}맘마</span>
-            <span style="display:flex; align-items:center; gap:4px;">${dotKey('#EF9F27', true)}이유식</span>
+            ${showFoodKey ? `<span style="display:flex; align-items:center; gap:4px;">${dotKey('#EF9F27', true)}이유식</span>` : ''}
             <span style="display:flex; align-items:center; gap:4px;">${dotKey('#5DCAA5')}기저귀</span>
             <span style="display:flex; align-items:center; gap:4px; margin-left:auto;"><span style="display:inline-block; width:2px; height:10px; background-color:#4A413C !important; opacity:0.75;"></span>지금 ${hhmm(nowTime)}</span>
         </div>
@@ -5831,7 +5834,7 @@ window.updateTrackerDashboard = function() {
         briefing = `🍼 맘마 먹은 지 ${Math.floor(diffFeedMins/60)}시간 넘었어요`;
         briefBadge = `
             <div style="display:flex; align-items:center; gap:10px;">
-                <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#7F77DD; padding:6px 14px; border-radius:8px; cursor:pointer;">기록</div>
+                <div onclick="window.openTrackerSheet('feed')" style="font-size:12px; font-weight:800; color:#fff; background:#7F77DD; padding:6px 14px; border-radius:8px; cursor:pointer;">기록하기</div>
                 <div onclick="${briefClose('feed', latestMeal)}" aria-label="닫기" style="font-size:16px; color:#9C95E0; cursor:pointer; font-weight:bold;">✕</div>
             </div>
         `;
@@ -8064,7 +8067,22 @@ window.renderBabyInfo = function() {
     const devMonthAge = Math.max(0, Math.floor(devDays / 30.436875));
 
     // 3. 이름 & D-Day 뿌리기 (뱃지 크기 밸런스 조정)
-    if(nameEl) nameEl.innerText = `${savedName}의 공간`; 
+    /* ⚠️ 이름 줄이 '꿈이의 공간' 이었다. 부모가 하루에도 몇 번씩 세는 건 '몇 개월' 이다 (이유식 · 옷 치수 · 문화센터).
+          이른둥이는 이름 옆에 '교정 N개월' 칩이 붙는데, 제때 태어난 아기는 개월 수를 볼 데가 없었다.
+          개월은 달력으로 센다 (BabyAge.monthsBetween — 큐레이터들과 같은 셈). 31일생은 그달 마지막 날이 달 생일.
+          태어나기 전에는 예전 그대로 */
+    const ageLine = (function () {
+        if (diffDays < 0) return '';
+        if (diffDays === 0) return '태어난 날';
+        if (diffDays < 7) return '태어난 첫 주';
+        const mb = (window.BabyAge && window.BabyAge.monthsBetween) ? window.BabyAge.monthsBetween(birthDate, today) : monthAge;
+        if (mb < 1) return '생후 ' + Math.floor(diffDays / 7) + '주';
+        const last = new Date(birthDate.getFullYear(), birthDate.getMonth() + mb + 1, 0).getDate();
+        const anniv = new Date(birthDate.getFullYear(), birthDate.getMonth() + mb, Math.min(birthDate.getDate(), last));
+        const rest = Math.round((today.getTime() - anniv.getTime()) / 86400000);
+        return rest > 0 ? `${mb}개월 ${rest}일` : rest === 0 ? `${mb}개월 되는 날` : `${mb}개월`;
+    })();
+    if(nameEl) nameEl.innerText = ageLine ? `${savedName} · ${ageLine}` : `${savedName}의 공간`;
     if(missionNameEl) missionNameEl.innerText = savedName;
     if(document.getElementById('play-dday-badge')) document.getElementById('play-dday-badge').innerText = diffDays > 0 ? diffDays : 0;
 
