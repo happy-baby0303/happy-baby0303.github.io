@@ -168,7 +168,7 @@
               return c.stage.indexOf("이유식") > -1 ? { s: 35, why: c.stage + " 중" } : null;
           } },
 
-        /* ---- libraryplus.js 가 붙이는 여덟 편 ---- */
+        /* ---- libraryplus.js 가 붙이는 글 ---- */
 
         { find: "눕히는 자세", ranges: [[0, 12]], whys: ["돌 전엔 이게 먼저"], base: 70 },
         { find: "신생아 목욕", ranges: [[0, 1]],  whys: ["첫 목욕 무렵"],        base: 68 },
@@ -178,6 +178,9 @@
         { find: "코막힘",     ranges: [[0, 24]], whys: ["코가 자주 막힐 때"], base: 47 },
         { find: "배앓이",     ranges: [[0, 4]],  whys: ["배앓이가 잦은 시기"],   base: 64 },
         { find: "이앓이",     ranges: [[4, 14]], whys: ["첫니 나올 무렵"],     base: 56 },
+        { find: "트림",       ranges: [[0, 6]],  whys: ["트림 시킬 때"],       base: 57 },
+        { find: "손톱",       ranges: [[0, 12]], whys: ["손톱이 자라 긁을 때"], base: 44 },
+        { find: "아기띠",     ranges: [[0, 12]], whys: ["아기띠 쓸 무렵"],     base: 50 },
 
         { find: "안 쌌어요", ranges: [[4, 24]], whys: ["변이 단단해질 즈음"], base: 46,
           boost: function (c) {

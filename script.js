@@ -5207,12 +5207,43 @@ window.toggleNextSetting = function () {
     paintNextSetting(!(row && row.getAttribute('data-on') === '1'));
 };
 
+/* 알림 간격 고르는 칸 — 숨은 칸(시간)에 값을 넣는다. 예전에 손으로 적은 값(5시간 · 1시간 15분 등)도 칸으로 하나 더 세운다 */
+function paintIntervalChips(boxId, inputId, hours) {
+    const box = document.getElementById(boxId), inp = document.getElementById(inputId);
+    if (!box || !inp) return;
+    const cur = parseFloat(inp.value);
+    const list = hours.slice();
+    if (!isNaN(cur) && cur >= 0 && list.indexOf(cur) === -1) list.push(cur);
+    list.sort((a, b) => a - b);
+    const label = h => {
+        if (h === 0) return '끔';
+        const whole = Math.floor(h), m = Math.round((h - whole) * 60);
+        if (!whole) return m + '분';
+        return whole + '시간' + (m === 30 ? ' 반' : (m ? ' ' + m + '분' : ''));
+    };
+    const paint = () => {
+        const v = parseFloat(inp.value);
+        box.querySelectorAll('button').forEach(b => {
+            const on = parseFloat(b.getAttribute('data-h')) === v;
+            b.setAttribute('aria-checked', on ? 'true' : 'false');
+            b.style.background = on ? '#F0EEFB' : 'var(--bg-card)';
+            b.style.borderColor = on ? '#7F77DD' : 'var(--border)';
+            b.style.color = on ? '#6B63C9' : 'var(--text-m)';
+        });
+    };
+    box.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px;';
+    box.innerHTML = list.map(h => `<button type="button" role="radio" data-h="${h}" style="padding:9px 13px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg-card); color:var(--text-m); font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer;">${label(h)}</button>`).join('');
+    box.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { inp.value = b.getAttribute('data-h'); paint(); }));
+    paint();
+}
 window.openTrackerSettings = function() {
     const feedMins = localStorage.getItem('tosil_feed_interval') || 180;
     const diaperMins = localStorage.getItem('tosil_diaper_interval') || 180;
     /* ⚠️ 2.5시간(150분)으로 정해도 창을 다시 열면 2 로 보였고, 그대로 저장하면 2시간이 됐다. 소수점까지 보여 준다 */
     document.getElementById('set-feed-interval').value = parseFloat((feedMins / 60).toFixed(2));
     document.getElementById('set-diaper-interval').value = parseFloat((diaperMins / 60).toFixed(2));
+    paintIntervalChips('set-feed-chips', 'set-feed-interval', [0, 1.5, 2, 2.5, 3, 3.5, 4]);
+    paintIntervalChips('set-diaper-chips', 'set-diaper-interval', [0, 2, 3, 4]);
     paintSleepySetting(localStorage.getItem('tosil_sleepy_push') !== 'off');
     /* 다음에 올 '바꿀 때 알림' 하나 — '12월 25일 · 빨대컵으로 물을 줘 볼 때예요' (이미 때가 됐으면 '곧') */
     const pv = document.getElementById('set-next-preview');
