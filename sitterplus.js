@@ -66,7 +66,7 @@
         var recs = [];
         try { recs = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
         until = until || Date.now();
-        var feed = 0, ml = 0, food = 0, breast = 0, diaper = 0, poop = 0, naps = 0, napMin = 0;
+        var feed = 0, ml = 0, pump = 0, food = 0, breast = 0, diaper = 0, poop = 0, naps = 0, napMin = 0;
         recs.forEach(function (r) {
             var t = Number(r && r.timestamp);
             if (!t || t < since || t > until) return;
@@ -74,7 +74,7 @@
                 feed++;
                 if (r.subType === "이유식") food += Number(r.amount) || 0;
                 else if (r.subType === "모유") breast++;
-                else ml += Number(r.amount) || 0;
+                else { ml += Number(r.amount) || 0; if (r.subType === "유축") pump += Number(r.amount) || 0; }
             } else if (r.type === "diaper") {
                 diaper++;
                 if (r.subType === "대변" || r.subType === "응가") poop++;
@@ -85,7 +85,8 @@
         var parts = [];
         if (feed) {
             var how = [];
-            if (ml) how.push("분유 " + ml + "ml");
+            if (ml - pump > 0) how.push("분유 " + (ml - pump) + "ml");
+            if (pump) how.push("유축 " + pump + "ml");
             if (food) how.push("이유식 " + food + "g");
             if (breast) how.push("모유 " + breast + "번");
             parts.push("맘마 " + feed + "번" + (how.length ? "(" + how.join(", ") + ")" : ""));

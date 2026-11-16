@@ -199,7 +199,10 @@
         } else {
             var f = feedBtn('분유');
             if (f) window.selectTrackerBtn(f, 'feed');
-            if (p.bottle && p.bottle.sub === '유축') st.subType = '유축';
+            if (p.bottle && p.bottle.sub === '유축') {
+                st.subType = '유축';
+                if (typeof window.paintBottleKind === 'function') window.paintBottleKind();   // 젖병 칸 '유축' 이 골라진 채로
+            }
             fill('v-feed-amount', p.bottle && p.bottle.ml);
         }
     }

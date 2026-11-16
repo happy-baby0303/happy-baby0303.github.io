@@ -4129,7 +4129,11 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 </div>
 
                 <div id="feed-ml-area" style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 8px;">먹은 양 (ml)</div>
+                    <!-- 젖병에 든 것 — 유축한 모유를 먹여도 전부 '분유' 로 남았다 (유축 칸은 장부 · 저장 단추에는 있었는데 고를 곳이 없었다) -->
+                    <div id="bottle-kind" role="group" aria-label="젖병에 든 것" style="display: inline-flex; gap: 4px; padding: 3px; background: var(--bg-sub); border-radius: 12px; margin-bottom: 10px;">
+                        <button type="button" data-bk="분유" aria-pressed="true" onclick="window.pickBottleKind('분유')" style="border: none; font-family: inherit; cursor: pointer; padding: 6px 18px; border-radius: 9px; font-size: 13px; font-weight: 900; background: rgba(127, 119, 221, 0.15); color: var(--primary);">분유</button>
+                        <button type="button" data-bk="유축" aria-pressed="false" onclick="window.pickBottleKind('유축')" style="border: none; font-family: inherit; cursor: pointer; padding: 6px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; background: transparent; color: #A3958A;">유축</button>
+                    </div>
                     <div style="display: flex; justify-content: center; align-items: baseline; gap: 4px; margin-bottom: 16px;">
                         <input type="number" id="v-feed-amount" placeholder="${uniqueAmounts[0] || 0}" class="feed-amt-input" style="font-size: 46px; font-weight: 900; color: var(--text-m); border: none; outline: none; background: transparent; text-align: center; width: 130px; padding: 0; margin: 0; transition: 0.3s;">
                         <span style="font-size: 17px; font-weight: 800; color: var(--text-s);">ml</span>
@@ -4434,6 +4438,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                             if (recordToEdit.status === '양쪽') window.selectTrackerBtn(document.querySelector("button[onclick*='breast_both']"), 'breast_both');
                         } else {
                             window.trackerState.subType = recordToEdit.subType || '분유';   // 분유 · 유축 그대로
+                            if (typeof window.paintBottleKind === 'function') window.paintBottleKind();
                             const amtInput = document.getElementById('v-feed-amount');
                             if (amtInput) amtInput.value = recordToEdit.amount;
                         }
@@ -4757,6 +4762,27 @@ document.addEventListener('click', function (e) {
     if (area) setTimeout(() => window.revealTrackerArea(area), 40);
 }, true);   // 먼저 듣는다 — '깬 시간 적기' 단추는 누르자마자 자기 자리를 새로 그려서 나중엔 어디 있던 단추인지 모른다
 
+/* 젖병에 든 것 — 분유 · 유축. '분유/유축' 칸일 때만 바꾼다 (모유 직수 · 이유식이면 그대로) */
+window.pickBottleKind = function (kind) {
+    const st = window.trackerState || {};
+    if ((kind !== '분유' && kind !== '유축') || st.subType === '모유' || st.subType === '이유식') return;
+    st.subType = kind;
+    window.paintBottleKind();
+};
+window.paintBottleKind = function () {
+    const box = document.getElementById('bottle-kind');
+    if (!box) return;
+    const cur = (window.trackerState && window.trackerState.subType) === '유축' ? '유축' : '분유';
+    box.querySelectorAll('button[data-bk]').forEach(b => {
+        const on = b.getAttribute('data-bk') === cur;
+        b.style.setProperty('background', on ? 'rgba(127, 119, 221, 0.15)' : 'transparent', 'important');
+        b.style.setProperty('color', on ? 'var(--primary)' : '#A3958A', 'important');
+        b.style.setProperty('font-weight', on ? '900' : '700', 'important');
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.removeAttribute('data-theme-src');
+    });
+};
+
 // ==========================================
 // 💡 트래커 버튼 컬러 통일 엔진 (모든 탭 보라색 💜 - 대변도 예외 없음!)
 // ==========================================
@@ -4842,11 +4868,13 @@ window.selectTrackerBtn = function(btn, category) {
         const customInput = document.getElementById('v-med-custom');
         if(customInput) customInput.value = '';
     } else if (category === 'feed') {
-        const rawText = btn.innerText.replace(/[^가-힣]/g, ''); 
+        const rawText = btn.innerText.replace(/[^가-힣]/g, '');
+        const prevSub = window.trackerState.subType;
         if (rawText.includes('모유')) window.trackerState.subType = '모유';
-        else if (rawText.includes('분유')) window.trackerState.subType = '분유';
+        else if (rawText.includes('분유')) window.trackerState.subType = prevSub === '유축' ? '유축' : '분유';   // '분유/유축' 칸 — 유축으로 골라 뒀으면 그대로
         else if (rawText.includes('유축')) window.trackerState.subType = '유축';
         else window.trackerState.subType = rawText;
+        if (typeof window.paintBottleKind === 'function') window.paintBottleKind();
 
         const mlArea = document.getElementById('feed-ml-area');
         const breastArea = document.getElementById('feed-breast-area');
@@ -5885,6 +5913,7 @@ window.updateTrackerDashboard = function() {
 
     // 📈 오늘 통계 바 
     let todayFormulaAmt = 0; let todayBreastMins = 0; let todayFoodAmt = 0; 
+    let todayPumpAmt = 0;   // 젖병 양(todayFormulaAmt) 중 유축한 모유
     let todaySleepMins = 0; let todayDiaperCount = 0;
     
     todayRecords.forEach(r => {
@@ -5894,7 +5923,7 @@ window.updateTrackerDashboard = function() {
             const amt = parseInt(r.amount) || 0;
             if (r.subType === '모유') todayBreastMins += amt; 
             else if (r.subType === '이유식') todayFoodAmt += amt;
-            else todayFormulaAmt += amt; 
+            else { todayFormulaAmt += amt; if (r.subType === '유축') todayPumpAmt += amt; }
         }
         if(r.type === 'sleep') {
             const sr = window.getSleepRange(r);
@@ -6014,7 +6043,8 @@ window.updateTrackerDashboard = function() {
     /* ⚠️ '오늘 하루' 카드 아래에 같은 숫자를 칸 세 개로 또 보여줬다 (총 식사량 · 수면 · 기저귀). 카드 줄 끝으로 옮기고 칸은 없앴다 */
     const feedCountToday = todayRecords.filter(r => r.type === 'feed' && r.subType !== '이유식').length;
     const amountBits = [];
-    if (todayFormulaAmt > 0) amountBits.push(`분유 ${todayFormulaAmt}ml`);
+    if (todayFormulaAmt - todayPumpAmt > 0) amountBits.push(`분유 ${todayFormulaAmt - todayPumpAmt}ml`);
+    if (todayPumpAmt > 0) amountBits.push(`유축 ${todayPumpAmt}ml`);
     if (todayBreastMins > 0) amountBits.push(`모유 ${todayBreastMins}분`);
     if (todayFoodAmt > 0) amountBits.push(`이유식 ${todayFoodAmt}g`);
     timelineHtml = timelineHtml
@@ -9397,6 +9427,7 @@ window.updateDadBriefing = function() {
     let records = JSON.parse(localStorage.getItem('tosil_tracker_records')) || [];
     let todayFormulaAmt = 0; let todayBreastMins = 0; let todayFoodAmt = 0; 
     let todayFeedCount = 0; let todayDiaperCount = 0; let todaySleepCount = 0;
+    let todayPumpAmt = 0;   // 젖병 양 중 유축한 모유
     
     let lastFeed = null; let lastDiaper = null; let lastSleep = null;
 
@@ -9406,7 +9437,7 @@ window.updateDadBriefing = function() {
                 let amt = parseInt(String(r.amount || '0').replace(/[^0-9]/g, ''));
                 if (r.subType === '모유') todayBreastMins += amt;
                 else if (r.subType === '이유식') todayFoodAmt += amt;
-                else todayFormulaAmt += amt;
+                else { todayFormulaAmt += amt; if (r.subType === '유축') todayPumpAmt += amt; }
                 
                 todayFeedCount++;
                 
@@ -9440,7 +9471,8 @@ window.updateDadBriefing = function() {
     
     if(feedEl) {
         let texts = [];
-        if(todayFormulaAmt > 0) texts.push(`분유 ${todayFormulaAmt}ml`);
+        if(todayFormulaAmt - todayPumpAmt > 0) texts.push(`분유 ${todayFormulaAmt - todayPumpAmt}ml`);
+        if(todayPumpAmt > 0) texts.push(`유축 ${todayPumpAmt}ml`);
         if(todayFoodAmt > 0) texts.push(`이유식 ${todayFoodAmt}g`);
         if(todayBreastMins > 0) texts.push(`모유 ${todayBreastMins}분`);
         
@@ -13482,6 +13514,7 @@ window.getDailySummaryHtml = function(dailyRecords, opts) {
     if (!dailyRecords || dailyRecords.length === 0) return '';
 
     let formulaAmt = 0;   
+    let pumpAmt = 0;      // formulaAmt 중 유축한 모유
     let breastMins = 0;   
     let babyfoodAmt = 0;  
     let totalSleepMins = 0; 
@@ -13492,7 +13525,7 @@ window.getDailySummaryHtml = function(dailyRecords, opts) {
             const amt = parseInt(r.amount) || 0;
             if (r.subType === '이유식') babyfoodAmt += amt;
             else if (r.subType === '모유') breastMins += amt;
-            else formulaAmt += amt; 
+            else { formulaAmt += amt; if (r.subType === '유축') pumpAmt += amt; }
         } else if (r.type === 'sleep' && r.amount > 0) {
             if (!(opts && opts.all)) totalSleepMins += (parseInt(r.amount) || 0); 
         } else if (r.type === 'diaper') {
@@ -13515,7 +13548,8 @@ window.getDailySummaryHtml = function(dailyRecords, opts) {
     
     /* 색은 '오늘 하루' 줄의 점과 맞춘다 (잠 보라 · 맘마 · 이유식 주황 · 기저귀 초록).
        ⚠️ 기저귀가 빨강이라 경고처럼 보였고, 분유는 잠과 같은 보라라 헷갈렸다 */
-    if (formulaAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">분유 ${formulaAmt}ml</span>`);
+    if (formulaAmt - pumpAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">분유 ${formulaAmt - pumpAmt}ml</span>`);
+    if (pumpAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">유축 ${pumpAmt}ml</span>`);
     if (breastMins > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">모유 ${breastMins}분</span>`);
     if (babyfoodAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">이유식 ${babyfoodAmt}g</span>`);
     // 순서는 홈 기록 단추와 같이 맘마 · 기저귀 · 잠
