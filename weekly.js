@@ -195,10 +195,11 @@
             out.push(["맘마", (t.feed || t.food) + "번", sub.join(" · "), p.feed ? "지난주 " + p.feed + "번" : ""]);
             if (!t.feed) out[out.length - 1][0] = "이유식";
         }
-        if (t.sleepAvg) out.push(["잠", hm(t.sleepAvg), t.nSleep >= 6 ? "하루 평균" : "기록한 " + t.nSleep + "일 평균",
-                               p.sleepAvg ? "지난주 " + hm(p.sleepAvg) : ""]);
+        // 순서는 홈 기록 단추와 같이 맘마 · 기저귀 · 잠
         if (t.diaper) out.push(["기저귀", t.diaper + "개", t.diaperAvg ? "하루 " + (Math.round(t.diaperAvg * 10) / 10) + "개" : "",
                                p.diaper ? "지난주 " + p.diaper + "개" : ""]);
+        if (t.sleepAvg) out.push(["잠", hm(t.sleepAvg), t.nSleep >= 6 ? "하루 평균" : "기록한 " + t.nSleep + "일 평균",
+                               p.sleepAvg ? "지난주 " + hm(p.sleepAvg) : ""]);
         return out;
     }
 

@@ -5348,12 +5348,12 @@ window.updateTrackerDashboard = function() {
                             <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgFeed) ? avgFeed.toLocaleString('ko-KR') + U('ml') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                         <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">${avgToday ? '수면' : '하루 수면'}</div>
-                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${avgSleepMins > 0 ? (avgSleepH ? avgSleepH + U('시간', avgSleepM) : '') + (avgSleepM ? avgSleepM + U('분') : '') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
-                        </div>
-                        <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
                             <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">${avgToday ? '기저귀' : '하루 기저귀'}</div>
                             <div style="font-size:14px; font-weight:900; color:#5A4D44;">${Number(avgDiaper) ? avgDiaper + U('번') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
+                        </div>
+                        <div style="flex:1; background:#FFF; padding:10px 4px; border-radius:12px; border:1px solid #F7F3ED; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size:11px; color:#A3958A; font-weight:800; margin-bottom:4px;">${avgToday ? '수면' : '하루 수면'}</div>
+                            <div style="font-size:14px; font-weight:900; color:#5A4D44;">${avgSleepMins > 0 ? (avgSleepH ? avgSleepH + U('시간', avgSleepM) : '') + (avgSleepM ? avgSleepM + U('분') : '') : '<span style="font-size:12px; color:#C4B5A9;">기록 없음</span>'}</div>
                         </div>
                     </div>
                 </div>
@@ -5363,7 +5363,8 @@ window.updateTrackerDashboard = function() {
                날짜 칸의 하루 합계는 종류와 상관없이 그대로 둔다. */
             const F = window.__histFilter || 'all';
             // '맘마' 는 앱 전체에서 쓰는 이름 (홈 · 기록 단추 · 주간 카드) — 수유와 이유식을 같이 담는다
-            const FILTERS = [['all', '전체'], ['feed', '맘마'], ['sleep', '잠'], ['diaper', '기저귀']]
+            // 순서는 홈 기록 단추와 같이 맘마 · 기저귀 · 잠
+            const FILTERS = [['all', '전체'], ['feed', '맘마'], ['diaper', '기저귀'], ['sleep', '잠']]
                 .concat(records.some(r => r.type === 'med') ? [['med', '약']] : []);
             historyHtml += '<div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; -webkit-overflow-scrolling:touch;">' +
                 FILTERS.map(([k, label]) => {
@@ -5758,15 +5759,16 @@ window.updateTrackerDashboard = function() {
             <span onclick="if(window.openSleepMap) window.openSleepMap()" style="font-size:12px; font-weight:700; color:#7F77DD; cursor:pointer;">일주일 잠 보기 ›</span>
         </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; font-size:11px; font-weight:600; color:var(--text-sub); margin-bottom:4px;">
-            <span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:#7F77DD !important;"></span>잠</span>
             <span style="display:flex; align-items:center; gap:4px;">${dotKey('#EF9F27')}맘마</span>
             ${showFoodKey ? `<span style="display:flex; align-items:center; gap:4px;">${dotKey('#EF9F27', true)}이유식</span>` : ''}
             <span style="display:flex; align-items:center; gap:4px;">${dotKey('#5DCAA5')}기저귀</span>
+            <span style="display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:12px; height:8px; border-radius:3px; background-color:#7F77DD !important;"></span>잠</span>
             <span style="display:flex; align-items:center; gap:4px; margin-left:auto;"><span style="display:inline-block; width:2px; height:10px; background-color:#4A413C !important; opacity:0.75;"></span>지금 ${hhmm(nowTime)}</span>
         </div>
-        ${lane('잠', 20, sleepBlocks, 'SLEEP')}
+        <!-- 줄 순서는 바로 위 기록 단추와 같이 맘마 · 기저귀 · 잠 (예전 잠 · 맘마 · 기저귀) -->
         ${lane('맘마', 16, feedDots, 'FEED')}
         ${lane('기저귀', 16, diaperDots, 'DIAPER')}
+        ${lane('잠', 20, sleepBlocks, 'SLEEP')}
         <div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:500; color:var(--text-sub); margin-top:6px; padding:0 70px 0 42px;"><span>0시</span><span>6시</span><span>12시</span><span>18시</span><span>24시</span></div>
         %%AMOUNTS%%
         ${timeListHtml}
@@ -13402,13 +13404,14 @@ window.getDailySummaryHtml = function(dailyRecords, opts) {
     if (formulaAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">분유 ${formulaAmt}ml</span>`);
     if (breastMins > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">모유 ${breastMins}분</span>`);
     if (babyfoodAmt > 0) summaryItems.push(`<span style="color:#D9822B; font-weight:800;">이유식 ${babyfoodAmt}g</span>`);
+    // 순서는 홈 기록 단추와 같이 맘마 · 기저귀 · 잠
+    if (pee > 0 || poop > 0) summaryItems.push(`<span style="color:#2FA584; font-weight:800;">기저귀 ${pee+poop}번</span>`);
     if (totalSleepMins > 0) {
         let h = Math.floor(totalSleepMins / 60);
         let m = totalSleepMins % 60;
         let sleepText = h > 0 ? (m ? `수면 ${h}시간 ${m}분` : `수면 ${h}시간`) : `수면 ${m}분`;   // '7시간 0분' 이 아니라 '7시간'
         summaryItems.push(`<span style="color:#7F77DD; font-weight:800;">${sleepText}</span>`);
     }
-    if (pee > 0 || poop > 0) summaryItems.push(`<span style="color:#2FA584; font-weight:800;">기저귀 ${pee+poop}번</span>`);
 
     if (summaryItems.length === 0) return '';
 
@@ -15233,7 +15236,7 @@ window.downloadPediatricianPDF = function() {
             ${feverRows}
         </table>
 
-        <div style="font-size:15px;font-weight:900;margin-bottom:11px;">📈 성장 계측 기록</div>
+        <div style="font-size:15px;font-weight:900;margin-bottom:11px;">📏 성장 계측 기록</div>
         <table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:26px;">
             <tr style="background:#F6F2EC;">
                 ${['측정일','월령','키','몸무게'].map(h=>`<th style="padding:10px 8px;text-align:left;font-weight:800;">${h}</th>`).join('')}

@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="154">
+    <meta name="baenaet-build" content="155">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1355,23 +1355,24 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 <!-- 구분선 (항상 가운데에 예쁘게 떠 있도록 고정) -->
                 <div style="width: 1px; height: 40px; background: #F6F2EC; align-self: center; margin-top: -12px;"></div>
                 
-                <!-- 2. 수면
-                     ⚠️ 이 줄은 맘마 · 기저귀 · 수면, 바로 아래 기록 버튼은 맘마 · 수면 · 기저귀 였다.
-                        '기저귀 3시간 전' 이 수면 버튼 위에 앉아 있었다. 버튼(늘 누르던 자리)은 그대로 두고 이 줄을 맞춘다 -->
+                <!-- 2. 기저귀
+                     ⚠️ 칸과 바로 아래 기록 버튼은 늘 같은 순서로 (칸이 맘마 · 기저귀 · 수면, 버튼이 맘마 · 수면 · 기저귀 였을 땐
+                        '기저귀 3시간 전' 이 수면 버튼 위에 앉아 있었다).
+                        버튼을 맘마 · 기저귀 · 수면 으로 바꾸면서(자주 누르는 둘을 앞에 — 쓰는 분 요청) 칸도 같이 -->
                 <div style="flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: flex-start;">
-                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #F0EEFB; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-bottom: 8px;">💤</div>
-                    <div id="now-sleep-label" style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-bottom: 4px;">수면</div>
-                    <div id="now-sleep-state" style="font-size: 13.5px; font-weight: 800; color: var(--text-m); letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">-</div>
+                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #FFF0F1; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-bottom: 8px;">💩</div>
+                    <div style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-bottom: 4px;">기저귀</div>
+                    <div id="now-diaper" style="font-size: 13.5px; font-weight: 800; color: var(--text-m); letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">-</div>
                 </div>
 
                 <!-- 구분선 -->
                 <div style="width: 1px; height: 40px; background: #F6F2EC; align-self: center; margin-top: -12px;"></div>
 
-                <!-- 3. 기저귀 -->
+                <!-- 3. 수면 -->
                 <div style="flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: flex-start;">
-                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #FFF0F1; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-bottom: 8px;">💩</div>
-                    <div style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-bottom: 4px;">기저귀</div>
-                    <div id="now-diaper" style="font-size: 13.5px; font-weight: 800; color: var(--text-m); letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">-</div>
+                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #F0EEFB; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-bottom: 8px;">💤</div>
+                    <div id="now-sleep-label" style="font-size: 11.5px; font-weight: 700; color: #A3958A; margin-bottom: 4px;">수면</div>
+                    <div id="now-sleep-state" style="font-size: 13.5px; font-weight: 800; color: var(--text-m); letter-spacing: -0.5px; word-break: keep-all; line-height: 1.3;">-</div>
                 </div>
 
             </div>
@@ -1395,15 +1396,16 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <span style="font-size: 12.5px; font-weight: 800; color: var(--text-m);">맘마</span>
                     <span id="btn-sub-feed" style="display: none;"></span>
                 </button>
-                <button onclick="window.openTrackerSheet('sleep')" style="background: var(--bg-sub); border: none; border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;">
-                    <span style="font-size: 22px; line-height: 1;">💤</span>
-                    <span style="font-size: 12.5px; font-weight: 800; color: var(--text-m);">수면</span>
-                  <span id="btn-sub-sleep" style="display: none;"></span>
-                </button>
+                <!-- 맘마 · 기저귀 · 수면 (예전 맘마 · 수면 · 기저귀) — 자주 누르는 둘을 나란히. 위 '지금 꿈이' 칸과 같은 순서 -->
                 <button onclick="window.openTrackerSheet('diaper')" style="background: var(--bg-sub); border: none; border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;">
                     <span style="font-size: 22px; line-height: 1;">💩</span>
                     <span style="font-size: 12.5px; font-weight: 800; color: var(--text-m);">기저귀</span>
                      <span id="btn-sub-diaper" style="display: none;"></span>
+                </button>
+                <button onclick="window.openTrackerSheet('sleep')" style="background: var(--bg-sub); border: none; border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;">
+                    <span style="font-size: 22px; line-height: 1;">💤</span>
+                    <span style="font-size: 12.5px; font-weight: 800; color: var(--text-m);">수면</span>
+                  <span id="btn-sub-sleep" style="display: none;"></span>
                 </button>
                 <button onclick="window.openTrackerSheet('med')" style="background: var(--bg-sub); border: none; border-radius: 16px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;">
                     <span style="font-size: 22px; line-height: 1;">💊</span>
@@ -1521,10 +1523,12 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             <p class="app-desc" style="font-size: 14px; font-weight: 600; color: #A3958A; margin-bottom:24px; letter-spacing: -0.3px;">필요할 때 바로 꺼내 쓰는 도구들이에요.</p>
 
             
+            <!-- ⚠️ 가계부가 💰(달러 표시 돈주머니), 성장이 📈(주식 그래프) 였다. 원화 가계부엔 🧾 영수증,
+                    키 · 몸무게엔 📏 자 (홈 '성장 기록' 카드는 이미 📏) -->
             <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 30px;">
-                          <div id="btn-tool-money" class="tool-chip" onclick="switchTool('money', this)"><span class="t-icon">💰</span><span class="t-label">가계부</span></div>
+                          <div id="btn-tool-money" class="tool-chip" onclick="switchTool('money', this)"><span class="t-icon">🧾</span><span class="t-label">가계부</span></div>
                 <div id="btn-tool-fever" class="tool-chip" onclick="switchTool('fever', this)"><span class="t-icon">🌡️</span><span class="t-label">해열제</span></div>
-                <div id="btn-tool-growth" class="tool-chip" onclick="switchTool('growth', this)"><span class="t-icon">📈</span><span class="t-label">성장</span></div>
+                <div id="btn-tool-growth" class="tool-chip" onclick="switchTool('growth', this)"><span class="t-icon">📏</span><span class="t-label">성장</span></div>
                 <div id="btn-tool-hotdeal" class="tool-chip" onclick="switchTool('hotdeal', this)"><span class="t-icon">🔥</span><span class="t-label">핫딜</span></div>
                 <div id="btn-tool-formula" class="tool-chip" onclick="switchTool('formula', this)"><span class="t-icon">🍼</span><span class="t-label">퐁당맘마</span></div>
                 <div id="btn-tool-tracker" class="tool-chip" onclick="switchTool('tracker', this)"><span class="t-icon">🗓️</span><span class="t-label">언제깠지</span></div>
@@ -3536,7 +3540,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261116-3"></script>
+<script src="script.js?v=20261116-4"></script>
     <script src="./statweek.js?v=1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
@@ -3557,7 +3561,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./growthsync.js?v=1"></script>   <!-- 성장: 두 폰이 같은 키 · 몸무게 -->
 <script src="./growth.js?v=1"></script>       <!-- 성장 화면 · 원더윅스 창 -->
 <script src="./hotdeal.js?v=1"></script>      <!-- 핫딜: 1장 · 100g 값 · 산 값을 두 폰이 같이 -->
-<script src="./formula.js?v=1"></script>      <!-- 퐁당맘마: 나이에 맞는 하루 양 · 갈아타기 계획 -->
+<script src="./formula.js?v=2"></script>      <!-- 퐁당맘마: 나이에 맞는 하루 양 · 갈아타기 계획 -->
 <script src="./opened.js?v=1"></script>       <!-- 언제깠지: 두 폰이 같이 · 직접 적기 -->
 <script src="./cube.js?v=1"></script>         <!-- 냉장고: 큐브 단위로 합치기 · 혼자 쓰는 폰도 남는다 -->
 <script src="./baton.js?v=1"></script>        <!-- 바통터치: 부탁 단위로 합치기 · 끝낸 부탁은 안 살아난다 -->
@@ -3595,7 +3599,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./anniversaries.js"></script>
 <script src="./home.js?v=2"></script>
  <script src="./homefix.js?v=10"></script>
-<script src="./weekly.js?v=3"></script>
+<script src="./weekly.js?v=4"></script>
 <script src="./postcard.js?v=2"></script>
 <script src="./export.js?v=3"></script>
 <!-- 🕰 시간 바퀴 — 손가락을 직접 따라간다 (아이폰에서 바퀴가 잘 안 돌던 것) -->

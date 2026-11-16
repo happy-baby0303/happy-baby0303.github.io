@@ -99,7 +99,10 @@
             sub = g.text;
             foot = '분유를 언제 끊을지는 아기마다 달라요. 밥을 잘 먹는지 보면서 천천히요.';
         } else {
-            big = '하루 ' + g.range[0].toLocaleString() + '~' + ml(g.range[1]);
+            /* ⚠️ 몸무게가 6.4kg 를 넘으면 아래 끝(1kg에 150ml)도 960 에 걸려 '하루 960~960ml' 로 나왔다 */
+            big = g.range[0] === g.range[1]
+                ? '하루 ' + ml(g.range[1]) + (g.capped ? '까지' : '')
+                : '하루 ' + g.range[0].toLocaleString() + '~' + ml(g.range[1]);
             if (g.kind === 'band' && g.about) big = '하루 ' + ml(g.about) + ' 안팎';
             if (g.kind === 'band') sub = g.text;
             if (g.kind === 'weight') sub = '몸무게 ' + w + 'kg × 1kg에 150~200ml' + (g.capped ? ' — 하루 960ml 는 넘기지 않는 게 좋다고 해요' : '');
