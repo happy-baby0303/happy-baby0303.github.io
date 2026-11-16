@@ -44,8 +44,7 @@
       <script src="./kakaoname.js?v=1"></script>
     <!-- 🎨 색 칠하기는 맨 먼저. 예전엔 본문 맨 끝에서 불려서, 그 전까지 화면이 파랗게 한 번 그려졌다.
          여기서 부르면 본문이 만들어지는 순간부터 보라로 칠해서 파란 장면이 아예 안 생긴다. -->
-    <!-- 카카오톡 SDK (이게 있어야 카톡이 뜹니다!) -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=68bca10ddfe2ec67112b07eb9a08da2b&libraries=clusterer"></script>
+    <!-- 카카오 SDK (카톡 로그인 · 공유). 수유실 지도 SDK 는 지도를 처음 열 때 script.js 가 받는다 (loadKakaoMaps) -->
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/1.44.0/kakao.min.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-N8JZ91ZQHR"></script>
     <script>
@@ -69,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="148">
+    <meta name="baenaet-build" content="149">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2166,7 +2165,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                 <!-- 검색창 -->
                 <div class="search-wrapper" style="margin-bottom: 16px; position: relative;">
                     <span class="search-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px;">🔍</span>
-                    <input type="text" id="spot-search" class="search-input" placeholder="장소명, 유모차, 수유실 키워드 검색..." onkeyup="filterPlaces()" style="box-sizing: border-box; width: 100%; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 12px; padding: 14px 14px 14px 40px; outline: none; font-size: 14px; font-weight: 800; color: var(--text-m);">
+                    <input type="text" id="spot-search" class="search-input" placeholder="이름이나 동네로 찾아보세요" onkeyup="filterPlaces()" style="box-sizing: border-box; width: 100%; background: #FBF8F3; border: 1px solid #F7F3ED; border-radius: 12px; padding: 14px 14px 14px 40px; outline: none; font-size: 14px; font-weight: 800; color: var(--text-m);">
                 </div>
 
 <!-- 🚀 [UI 업그레이드] 지역 필터: 최신 앱 스타일 (가로 스와이프) -->
@@ -3534,7 +3533,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261115-1"></script>
+<script src="script.js?v=20261116-1"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
     <script src="./heartbeat.js"></script>
@@ -3569,7 +3568,8 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./toolbrief.js"></script> 
 <script src="./placefilter.js?v=2"></script> 
 <script src="./nursing.js?v=3"></script>
-<script src="./outingsmart.js?v=3"></script>
+<script src="./openhours.js?v=1"></script>
+<script src="./outingsmart.js?v=4"></script>
 <script src="./photos.js"></script>
 <script src="./babyphoto.js"></script>
 <script src="./voice.js?v=5"></script>

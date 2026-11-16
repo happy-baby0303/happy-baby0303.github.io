@@ -93,7 +93,22 @@
         return true;
     }
 
-    var F = { age: true, indoor: false, park: false, stroller: false, near: false };
+    var F = { age: true, open: false, indoor: false, park: false, stroller: false, near: false };
+
+    /* ---------- 지금 여는지 (openhours.js) ----------
+       지도 앱처럼 카드에서 바로: 오늘 쉬어요 · 18:00까지 열어요 · 곧 닫아요 · 10:00에 열어요.
+       운영시간 글을 못 읽은 곳(요일 말이 없거나 '확인 요망')은 아무것도 안 붙인다. -------- */
+
+    var OPEN_COLOR = { open: GREEN, soon: "#D9822B", before: BLUE, after: "var(--text-sub)", closed: "#D32F2F" };
+
+    function openNow(p) {
+        if (typeof window.placeOpenNow !== "function") return null;
+        try { return window.placeOpenNow(p && p.datetime); } catch (e) { return null; }
+    }
+    function isOpenNow(p) {
+        var st = openNow(p);
+        return !!st && (st.state === "open" || st.state === "soon" || st.state === "always");
+    }
 
     /* ==========================================================
        0. 지도 열기 — script.js 가 부르는데 아무도 안 만든 함수
@@ -245,6 +260,8 @@
 
         var m = monthsOld();
         if (F.age && m !== null && p.minMonths && m < Number(p.minMonths)) return false;
+        // 지금 열린 곳 — 쉬는 날을 모르는 곳은 '열려 있다' 고 장담하지 않아서 뺀다
+        if (F.open && !isOpenNow(p)) return false;
         if (F.indoor && indoorOf(p) === false) return false;
         if (F.park && !hasTag(p, "주차")) return false;
         if (F.stroller && !hasTag(p, "유모차")) return false;
@@ -288,6 +305,15 @@
                    q(p.locText || "") + "','정보없음','" + q(p.review || "") + "','" +
                    q(p.query || p.title) + "','',false";
 
+        // 오늘 여는지 — 읽을 수 있으면 운영시간 글과 한 줄로 (늘 여는 곳은 글만)
+        var st = openNow(p);
+        var hoursLine = (st && st.state !== "always")
+            ? '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:3px; ' +
+                  'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
+                  '<b class="open-now open-' + st.state + '" style="color:' + OPEN_COLOR[st.state] + '; font-weight:900;">● ' +
+                  esc(st.text) + '</b>' + (p.datetime ? ' · ' + esc(p.datetime) : '') + '</div>'
+            : "";
+
         return '<div onclick="openFestivalModal(' + args + ')" ' +
             'style="display:flex; gap:13px; background:var(--bg-card); border:1px solid var(--border); ' +
             'border-radius:18px; padding:15px 16px; margin-bottom:11px; cursor:pointer;">' +
@@ -312,7 +338,9 @@
                     'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     '<b style="color:' + (inside === false ? GREEN : PURPLE) + ';">' + esc(cat.name) + '</b>' +
                     (dist !== null ? ' · <b style="color:' + BLUE + ';">' + distText(dist) + '</b>' : '') +
-                    ' · ' + esc(p.locText || "") + (p.datetime ? " · " + esc(p.datetime) : "") + '</div>' +
+                    ' · ' + esc(p.locText || "") + (!hoursLine && p.datetime ? " · " + esc(p.datetime) : "") + '</div>' +
+
+                hoursLine +
 
                 (p.ageNote
                     ? '<div style="font-size:12.5px; font-weight:700; color:var(--text-m); margin-top:8px; ' +
@@ -779,10 +807,13 @@
 
         return '<div style="display:flex; gap:7px; overflow-x:auto; padding:2px 0 9px; ' +
                 '-webkit-overflow-scrolling:touch; scrollbar-width:none;">' +
-                (m !== null && !tooEarly ? chip("age", "👶 " + m + "개월 갈 수 있는 곳", F.age) : "") +
+                // 개월수 칩은 그림 없이 글자만 — 유모차 칩(🚼)과 아기 그림이 둘 나란히 서서 헷갈렸다
+                (m !== null && !tooEarly ? chip("age", m + "개월 갈 수 있는 곳", F.age) : "") +
+                chip("open",     "🕘 지금 열린 곳", F.open) +
                 chip("indoor",   "🏠 실내",      F.indoor) +
                 chip("park",     "🅿️ 주차",     F.park) +
-                chip("stroller", "🦼 유모차",    F.stroller) +
+                // ⚠️ 유모차 칩 그림이 🦼(전동 휠체어)였다. 유모차 그림 글자는 없어서 아기 표지(🚼)로
+                chip("stroller", "🚼 유모차",    F.stroller) +
                 chip("near", "📍 가까운 순", F.near) +
             '</div>' +
             (F.near && myPos

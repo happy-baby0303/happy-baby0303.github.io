@@ -30,13 +30,19 @@ APP = {"MobileOS": "ETC", "MobileApp": "Baenaet", "_type": "json"}
 # 아기랑 갈 곳이 아닌 행사 — 제목에 이 말이 있으면 뺀다
 BAD_TITLE = ["산업", "포럼", "세미나", "심포지엄", "콘퍼런스", "컨퍼런스", "학술",
              "주류", "막걸리", "맥주", "치맥", "와인", "야시장", "포차",
+             # '2026 대한민국 우리술 대축제' 가 들어왔다 — 술 이름을 더 넣는다
+             # ('술' · '술 축제' 는 미술 축제 · 예술축제 · 기술 축제에 걸려서 안 된다)
+             "우리술", "전통주", "소주", "양조", "위스키", "칵테일", "하이볼",
              "노인", "실버", "스타트업", "창업", "채용", "취업", "마라톤", "기념품"]
 
 # 관람 가능 연령이 성인만인 행사
 ADULT_ONLY = re.compile(r"(19|20)\s*세\s*이상|성인\s*(만|전용|관람)")
 ALL_AGES = re.compile(r"누구나|전\s*연령|제한\s*없|연령\s*무관")
 # '만 13세 이상' 처럼 아기가 못 들어가는 행사 — 네 살부터인 행사는 뺀다 (만 3세 이하는 부모가 보고 고르게 남긴다)
-MIN_AGE = re.compile(r"(\d+)\s*세\s*이상")
+# ⚠️ 'DDP 건축투어 — 만 13세(중학생) 이상' 은 세와 이상 사이에 괄호가 있어서 못 거르고 들어왔다
+MIN_AGE = re.compile(r"(\d+)\s*세(?:\s*\([^)]*\))?\s*이상")
+# '초등학생 이상 · 중학생 이상' 처럼 학년으로 적은 것
+SCHOOL_UP = re.compile(r"(초등|중|고등)\s*학생\s*이상|초등\s*이상")
 
 # 상세 창에 쓰는 칸 (TourAPI 이름 그대로 저장한다)
 INTRO_KEYS = ["usetimefestival", "agelimit", "playtime", "eventplace", "placeinfo", "subevent"]
@@ -139,7 +145,7 @@ def keep(item):
         return False
     age = item.get("agelimit", "")
     if age and not ALL_AGES.search(age):
-        if ADULT_ONLY.search(age):
+        if ADULT_ONLY.search(age) or SCHOOL_UP.search(age):
             return False
         mins = [int(n) for n in MIN_AGE.findall(age)]
         if mins and min(mins) >= 4:

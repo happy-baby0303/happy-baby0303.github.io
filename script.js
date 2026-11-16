@@ -396,8 +396,15 @@ function switchOutingSubTab(type) {
         // 약간의 딜레이를 주어 DOM이 완전히 펴진 후 지도를 갱신!
         setTimeout(() => {
             if(!window.kakaoMapInitialized) {
-                window.initNursingMap();
-                window.kakaoMapInitialized = true;
+                window.kakaoMapInitialized = true;                     // 받는 동안 두 번 만들지 않게
+                window.loadKakaoMaps().then(() => {
+                    const box = document.getElementById('nursing-map-container');
+                    if (box && box.querySelector('.map-fail')) box.innerHTML = '';
+                    return window.initNursingMap();
+                }).catch(() => {
+                    window.kakaoMapInitialized = false;                // 다음에 열면 다시 받는다
+                    window.showNursingMapFail();
+                });
             } else if(window.nursingMapObj) {
                 window.nursingMapObj.relayout(); // 백지 방지용 강제 리사이징
                 if (window.nursingMapCenter) {
@@ -594,6 +601,7 @@ function generateSubFilters(mainRegion) {
 
         // 행사 데이터는 끝나버린 행사인지 여기서 미리 한 번 걸러냅니다! (빈 깡통 지역 방지)
         source = [...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].filter(p => {
+            if (!festBabyOk(p)) return false;              // 술 축제 · 중학생 이상 행사는 빼고 지역 칩을 만든다
             if (p.expiryDate && localDayKey(now) > p.expiryDate) return false; 
             
             let rawStartDate = String(p.eventstartdate || p.datetime || '').replace(/[^0-9]/g, '');
@@ -700,6 +708,7 @@ function filterPlaces() {
         let eventSource = Array.from(new Map([...apiFestivals, ...hotplacesData.filter(p => p.isEvent)].map(i => [i.title, i])).values());
         const filteredEvents = eventSource.filter(p => {
             let addr = p.addr1 || p.addr || p.locText || '', title = p.title || '';
+            if (!festBabyOk(p)) return false;              // 아기랑 못 가는 행사 (festBabyOk)
             if (p.expiryDate && localDayKey(now) > p.expiryDate) return false; 
             
             let rawStartDate = String(p.eventstartdate || p.datetime || '').replace(/[^0-9]/g, '');
@@ -861,6 +870,21 @@ function festInfoOf(title) {
     try { return (Array.isArray(apiFestivals) ? apiFestivals : []).find(f => f && f.title === title) || null; } catch (e) { return null; }
 }
 function festIsFree(fi) { return !!(fi && /^\s*무료/.test(String(fi.usetimefestival || ''))); }
+/* ⚠️ 'DDP 건축투어 — 만 13세(중학생) 이상' 이 아기랑 갈 행사 목록에 떴다.
+      로봇(update_events.py)의 나이 거르기가 '13세(중학생) 이상' 처럼 괄호가 끼면 못 알아봤다.
+      '우리술 대축제' 같은 술 축제도 '주류 · 막걸리 · 맥주' 만 거르고 있어서 들어왔다.
+      로봇도 고쳤지만 이미 받아 둔 목록(festivals.json)에도 바로 적용되게 화면에서 한 번 더 거른다. */
+function festBabyOk(p) {
+    if (!p || p.isEvent) return true;                 // 직접 고른 행사(places.json)는 그대로
+    // '술 축제' 는 미술 · 예술 · 기술 축제에 걸려서 안 쓴다
+    if (/우리술|전통주|주류|막걸리|맥주|치맥|와인|소주|양조|위스키|칵테일|하이볼/.test(String(p.title || ''))) return false;
+    const age = String(p.agelimit || '');
+    if (!age || /누구나|전\s*연령|제한\s*없|연령\s*무관/.test(age)) return true;
+    if (/(19|20)\s*세\s*이상|성인\s*(만|전용|관람)/.test(age)) return false;
+    if (/(초등|중|고등)\s*학생\s*이상|초등\s*이상/.test(age)) return false;
+    const mins = (age.match(/\d+\s*세(?:\s*\([^)]*\))?\s*이상/g) || []).map(s => parseInt(s, 10)).filter(n => !isNaN(n));
+    return !(mins.length && Math.min.apply(null, mins) >= 4);
+}
 function festInfoHTML(fi) {
     if (!fi) return '';
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15743,6 +15767,46 @@ window.openSettingsTab = function() {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', handleShortcut);
     else handleShortcut();
 })();
+
+/* ⚠️ 카카오 지도 SDK 를 <head> 에서 바로 불러서, 지도를 한 번도 안 여는 사람도 앱이 뜰 때마다 그걸 기다렸다.
+      (자동 로딩은 문서를 쓰는 중에 파일을 더 받아 붙여서, 받는 동안 화면 그리기가 멈춘다)
+      그리고 못 받으면(인터넷이 약하거나 막히면) 지도 칸이 하얗게 빈 채로 아무 말이 없었다.
+      → 수유실 지도를 처음 열 때 받는다 (autoload=false + kakao.maps.load). 못 받으면 지도 칸에 안내와 '다시 불러오기'. */
+window.loadKakaoMaps = function () {
+    if (window.kakao && window.kakao.maps && window.kakao.maps.Map) return Promise.resolve();
+    if (window.__kakaoMapsLoading) return window.__kakaoMapsLoading;
+    const SDK = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=68bca10ddfe2ec67112b07eb9a08da2b&libraries=clusterer&autoload=false';
+    const p = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = SDK; s.async = true;
+        s.onload = () => {
+            try { window.kakao.maps.load(() => resolve()); } catch (e) { reject(e); }
+        };
+        s.onerror = () => reject(new Error('kakao maps sdk'));
+        document.head.appendChild(s);
+        setTimeout(() => reject(new Error('kakao maps sdk timeout')), 15000);
+    });
+    window.__kakaoMapsLoading = p.catch((e) => { window.__kakaoMapsLoading = null; throw e; });
+    return window.__kakaoMapsLoading;
+};
+window.showNursingMapFail = function () {
+    const box = document.getElementById('nursing-map-container');
+    if (!box) return;
+    box.innerHTML =
+        '<div class="map-fail" style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; ' +
+            'gap:12px; padding:24px; text-align:center; background:var(--bg-sub); word-break:keep-all;">' +
+            '<div style="font-size:15px; font-weight:900; color:var(--text-m);">지도를 불러오지 못했어요</div>' +
+            '<div style="font-size:12.5px; font-weight:700; color:var(--text-sub); line-height:1.6;">인터넷 연결을 확인하고 다시 불러와 주세요.<br>가까운 수유실은 목록으로도 찾을 수 있어요.</div>' +
+            '<div style="display:flex; gap:8px; margin-top:4px;">' +
+                '<button type="button" onclick="switchOutingSubTab(\'map\')" style="padding:11px 16px; border-radius:12px; border:none; ' +
+                    'background:var(--primary); color:#FFF; font-size:13px; font-weight:800; cursor:pointer;">다시 불러오기</button>' +
+                (typeof window.openNursingSheet === 'function'
+                    ? '<button type="button" onclick="window.openNursingSheet()" style="padding:11px 16px; border-radius:12px; ' +
+                      'border:1px solid var(--border); background:var(--bg-card); color:var(--text-m); font-size:13px; font-weight:800; cursor:pointer;">목록으로 찾기</button>'
+                    : '') +
+            '</div>' +
+        '</div>';
+};
 
 // ==========================================
 // 🍼 카카오맵 API 연동: 전국 수유실 렌더링 엔진 (클러스터러 적용)
