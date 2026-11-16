@@ -43,6 +43,30 @@
   ],
   "shortcuts": [
     {
+      "name": "맘마 기록하기",
+      "short_name": "맘마 기록",
+      "description": "맘마 기록 창을 바로 엽니다",
+      "url": "./index.html?go=rec&k=feed",
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "기저귀 기록하기",
+      "short_name": "기저귀 기록",
+      "description": "기저귀 기록 창을 바로 엽니다",
+      "url": "./index.html?go=rec&k=diaper",
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "오늘 사진 담기",
       "short_name": "사진 담기",
       "description": "오늘의 아기 얼굴을 배냇함에 담습니다",

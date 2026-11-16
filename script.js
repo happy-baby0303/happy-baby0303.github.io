@@ -3120,6 +3120,27 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
         var go = new URLSearchParams(location.search).get('go');
         if (!go) return;
+        /* 🍼 '맘마 시간이에요' · '기저귀 확인할 때예요' 알림을 누르면 바로 그 기록 창 (?go=rec&k=feed · diaper).
+              ⚠️ 예전엔 홈만 열려서, 알림을 보고 들어와서도 기록 단추를 한 번 더 찾아 눌러야 했다.
+              홈 화면 아이콘을 길게 눌러 '맘마 기록' 으로 들어와도 같다 (manifest.json shortcuts).
+              돌봄 도우미(어르신) 화면은 기록 단추가 따로라 홈만 연다. 아기 등록 전이면 아무것도 안 연다 */
+        if (go === 'rec') {
+            var kind = new URLSearchParams(location.search).get('k') || '';
+            if (!/^(feed|diaper|sleep)$/.test(kind)) return;
+            var tries = 0;
+            var tick = setInterval(function () {
+                var homeNav = document.getElementById('nav-home');
+                var ready = homeNav && typeof window.switchTab === 'function' &&
+                            typeof window.openTrackerSheet === 'function' && localStorage.getItem('tosil_startDate');
+                if (!ready) { if (++tries > 24) clearInterval(tick); return; }
+                clearInterval(tick);
+                history.replaceState(null, '', location.pathname);   // 주소는 깔끔하게 (새로 고침해도 또 안 열리게)
+                window.switchTab('home', homeNav);
+                if (localStorage.getItem('user_role') === 'senior') return;
+                setTimeout(function () { window.openTrackerSheet(kind); }, 400);
+            }, 250);
+            return;
+        }
         /* ⚠️ 큐레이터(젖병·이유식·놀이·카시트·유모차)는 별도 페이지라
               거기서는 결제창을 열 수가 없다. script.js 가 없기 때문이다.
               그쪽 잠긴 화면에서 '플러스 보러 가기' 를 누르면

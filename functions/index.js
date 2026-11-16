@@ -953,7 +953,9 @@ exports.careReminder = onSchedule(
               if (sleepy && await sleptSince(db, code, j.key, j.wake)) continue;   // 그새 잠들었다
               const tk = await tokensOf(db, careTargets(d, roles, j.kind, now));
               const [title, body] = sleepy ? sleepyWords(j) : careWords(j.kind, j.name, j.from, j.every, j.at);
-              await sendTo(db, tk, { title, body, tag: "care-" + j.kind, link: "index.html", ttl: sleepy ? TTL.sleepy : TTL.care });
+              /* 맘마 · 기저귀 알림을 누르면 바로 그 기록 창 (앱 script.js 의 ?go=rec). 졸릴 때 알림은 홈 */
+              const link = (j.kind === "feed" || j.kind === "diaper") ? "index.html?go=rec&k=" + j.kind : "index.html";
+              await sendTo(db, tk, { title, body, tag: "care-" + j.kind, link, ttl: sleepy ? TTL.sleepy : TTL.care });
             }
           }
         }
