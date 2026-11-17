@@ -194,7 +194,8 @@
     var GOLD_BG = "rgba(185,138,46,0.10)";
 
     // 날짜 카드 맨 위에 놓인다
-    window.renderAnniversary = function (key) {
+    // attach — { 기념일 이름: 칸 안 맨 아래에 붙일 HTML } (배냇함: 그날 찍은 백일 · 첫돌 도장)
+    window.renderAnniversary = function (key, attach) {
         var list = window.anniversariesOn(key);
         if (!list.length) return "";
 
@@ -208,6 +209,7 @@
                 '<div style="font-size:10px; font-weight:800; color:' + GOLD + '; letter-spacing:2.5px; margin-bottom:9px;">기념일</div>' +
                 '<div class="serif-display" style="font-size:21px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px;">' + esc(a.label) + '</div>' +
                 (a.sub ? '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); margin-top:7px; word-break:keep-all;">' + esc(a.sub) + '</div>' : '') +
+                ((attach && attach[a.label]) || '') +
             '</div>';
         });
 

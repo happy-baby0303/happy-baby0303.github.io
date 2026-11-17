@@ -1,7 +1,7 @@
 /* ============================================================
    배냇함 — 백일 · 돌 한 장 (recap.js)
 
-   50일 · 백일 · 첫 돌 · 두 돌. 그날부터 일주일 동안 홈에 한 장이 뜬다.
+   50일 · 백일 · 첫돌 · 두 돌. 그날부터 일주일 동안 홈에 한 장이 뜬다.
      · 사진 — 태어난 무렵부터 그날까지 고르게 골라 나란히 (돌은 열두 장)
      · '백 일 동안 1,720번 달려갔어요 · 그중 214번은 모두가 잠든 새벽이었어요'
      · 맘마 · 잠 · 기저귀 / 처음 해낸 일 / 키 · 몸무게 / 첫 마디 / 처음 남긴 한 줄
@@ -32,7 +32,7 @@
     var KINDS = [
         { id: "d50",  title: "50일",  span: "오십 일", en: "OUR 50 DAYS",     n: 4,  ms: "",    at: function (b) { return addDays(b, 49); }, byDay: true },
         { id: "d100", title: "백일",  span: "백 일",   en: "OUR 100 DAYS",    n: 4,  ms: "m18", at: function (b) { return addDays(b, 99); } },
-        { id: "y1",   title: "첫 돌", span: "한 해",   en: "OUR FIRST YEAR",  n: 12, ms: "m45", at: function (b) { return addMonths(b, 12); } },
+        { id: "y1",   title: "첫돌",  span: "한 해",   en: "OUR FIRST YEAR",  n: 12, ms: "m45", at: function (b) { return addMonths(b, 12); } },
         { id: "y2",   title: "두 돌", span: "두 해",   en: "OUR TWO YEARS",   n: 12, ms: "",    at: function (b) { return addMonths(b, 24); } }
     ];
     var SKIP_FIRSTS = { m18: 1, m45: 1 };      // '백일' · '첫돌' 도장은 그날 자체라 '처음 해낸 일' 에서 뺀다

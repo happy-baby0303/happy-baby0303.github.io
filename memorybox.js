@@ -513,14 +513,45 @@
         '</div>';
     }
 
+    // 도감 도장 중 그날 기념일과 같은 일 (도감 id → 기념일 이름 · anniversaries.js)
+    var SAME_AS_ANNIV = { m18: "백일", m45: "첫 번째 생일" };
+
+    // 기념일 칸 안에 들어가는 도감 한 줄 — 제목은 기념일이 이미 말했으니 설명 · 사진 · 소리만
+    function annexHTML(key, m) {
+        var thumb = (typeof window.renderMilestonePhoto === "function") ? window.renderMilestonePhoto(key, m.id) : "";
+        var voice = (typeof window.renderMilestoneVoice === "function") ? window.renderMilestoneVoice(m.id) : "";
+        return '<div data-annex="' + esc(m.id) + '" style="display:flex; gap:12px; align-items:center; margin-top:16px; padding-top:15px; border-top:1px dashed rgba(185,138,46,0.32); text-align:left;">' +
+            '<div style="flex:1; min-width:0;">' +
+                '<div style="font-size:10.5px; font-weight:800; color:#B98A2E; letter-spacing:0.5px; margin-bottom:5px;">첫 순간 도감</div>' +
+                (m.desc ? '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); line-height:1.55; word-break:keep-all;">' + esc(m.desc) + '</div>' : '') +
+                voice +
+            '</div>' +
+            thumb +
+        '</div>';
+    }
+
     function dayCard(d) {
         var date = parseKey(d.key);
         var dday = ddayOf(d.key);
         var inner = "";
 
         // 기념일이 맨 위. 그날이 무슨 날이었는지가 먼저다.
+        /* ⚠️ 백일 날 카드에 '기념일 · 백일' 과 '처음 해낸 일 · 백일' 이 위아래로 두 번 나왔다 (첫돌도 같다).
+              같은 날 찍은 백일 · 첫돌 도장은 기념일 칸 안에 (도감 사진 · 소리 자리째) 넣고, '처음 해낸 일' 에서는 뺀다. */
+        var firsts = d.milestones;
         if (typeof window.renderAnniversary === "function") {
-            inner += window.renderAnniversary(d.key);
+            var attach = {}, annOn = [];
+            try { annOn = window.anniversariesOn(d.key).map(function (a) { return a.label; }); } catch (e) {}
+            d.milestones.forEach(function (m) {
+                var lab = SAME_AS_ANNIV[m.id];
+                if (lab && annOn.indexOf(lab) > -1 && !attach[lab]) attach[lab] = annexHTML(d.key, m);
+            });
+            var ann = window.renderAnniversary(d.key, attach);
+            inner += ann;
+            // 기념일 칸 안에 실제로 들어간 것만 뺀다 (못 들어갔으면 예전처럼 '처음 해낸 일' 에)
+            firsts = d.milestones.filter(function (m) {
+                return ann.indexOf('data-annex="' + m.id + '"') < 0;
+            });
         }
 
         // 사진이 먼저. 배냇함을 열면 글자보다 얼굴이 먼저 나와야 한다.
@@ -534,14 +565,14 @@
         }
 
         // 첫 순간 — 여러 개여도 라벨은 한 번만. 배지가 반복되면 정작 이름이 묻힌다.
-        if (d.milestones.length) {
-            var msLabel = d.milestones.length > 1
-                ? "처음 해낸 일 " + d.milestones.length + "가지"
+        if (firsts.length) {
+            var msLabel = firsts.length > 1
+                ? "처음 해낸 일 " + firsts.length + "가지"
                 : "처음 해낸 일";
             inner +=
             '<div style="margin-bottom:18px;">' +
                 '<div style="display:inline-block; font-size:10.5px; font-weight:800; color:#7F77DD; background:rgba(127,119,221,0.12); padding:3px 9px; border-radius:8px; letter-spacing:0.5px; margin-bottom:14px;">' + esc(msLabel) + '</div>';
-            d.milestones.forEach(function (m, i) {
+            firsts.forEach(function (m, i) {
                 var thumb = (typeof window.renderMilestonePhoto === "function")
                     ? window.renderMilestonePhoto(d.key, m.id) : "";
                 inner +=

@@ -12998,107 +12998,388 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 100);
 });
 
-// 3. 바텀 시트 열기 & 리스트 렌더링 (이모지 삭제 & 미니멀 체크마크 패치 🤍)
-window.openMilestoneModal = function() {
-    if (navigator.vibrate) navigator.vibrate(15);
-    
-    const sheetContent = document.querySelector('#milestone-bottom-sheet .bottom-sheet-content');
-    if(sheetContent) {
-        sheetContent.style.background = 'var(--bg-main)';
-        sheetContent.style.border = 'none'; 
-    }
-    
-    const sheetHeader = document.querySelector('#milestone-bottom-sheet .sheet-header');
-    if(sheetHeader) {
-        sheetHeader.style.background = 'var(--bg-main)';
-        sheetHeader.style.borderBottom = 'none'; 
-    }
+// 3. 바텀 시트 열기 & 목록
+/* ⚠️ 100칸이 한 줄로 (9천 px 넘게) 이어져 있었다. 아기마다 크는 순서가 다른데
+      '첫걸음' 하나 찍으려면 손가락으로 한참 내려가며 찾아야 했다.
+      → 맨 위 찾기 칸 (한두 글자 · 비슷한 말 · 초성 'ㄷㅈㄱ' 도) + 개월별로 접고 펴는 묶음.
+        지금 개월 묶음은 '지금 여기' 를 달고 펼쳐 둔다. 순서와 상관없이 아무 칸이나 바로 찍는 건 그대로.
+      줄 모양(.milestone-item · onclick · 맨 끝 도장 칸)은 그대로 — milestonebook.js 가 도장 앞에 액자를 끼운다. */
+const MS_STAGES = [
+    { range: '0~1개월',   name: '모든 게 처음인 한 달' },
+    { range: '1~3개월',   name: '눈 맞추고 웃는 시기' },
+    { range: '4~6개월',   name: '뒤집고 앉는 시기' },
+    { range: '7~9개월',   name: '잡고 서고 엄마 부르는 시기' },
+    { range: '10~12개월', name: '첫걸음과 첫돌' },
+    { range: '13~18개월', name: '걷고 말이 트이는 시기' },
+    { range: '19~24개월', name: '뭐든 혼자 해 보는 시기' },
+    { range: '25~30개월', name: '"왜?"가 많아지는 시기' },
+    { range: '31~36개월', name: '마음을 말로 하는 시기' },
+    { range: '사회로 한 걸음', name: '어린이집 · 친구 · 첫 소풍' }
+];
 
-    const sheetHeaderTitle = document.querySelector('#milestone-bottom-sheet .sheet-header h3');
-    if(sheetHeaderTitle) {
-        sheetHeaderTitle.style.color = 'var(--text-m)';
-    }
+// 제목 · 설명에 없는 말로 찾을 때 (엄마들이 실제로 쓰는 말)
+const MS_ALIAS = {
+    '이': ['m24', 'm48'], '이빨': ['m24', 'm48', 'm62', 'm88'], '치아': ['m24', 'm48', 'm62', 'm88'], '이앓이': ['m24', 'm48'],
+    '걷기': ['m35', 'm41', 'm42'], '걸음마': ['m35', 'm41', 'm42'],
+    '기기': ['m29', 'm30'], '기어가기': ['m29', 'm30'], '포복': ['m29'],
+    '목가누기': ['m12'], '엎드리기': ['m12', 'm29'], '터미타임': ['m12', 'm29'], '뒤집기': ['m22'],
+    '웃음': ['m1', 'm13', 'm33'], '미소': ['m1', 'm13'],
+    '수면': ['m16', 'm81'], '밤잠': ['m16'],
+    '말하기': ['m9', 'm36', 'm37', 'm56', 'm90'], '단어': ['m36', 'm37', 'm56'],
+    '접종': ['m8'], '예방접종': ['m8'], '주사': ['m8'], '병원': ['m8', 'm38', 'm39', 'm88'],
+    '아픈': ['m38', 'm98'], '아파': ['m38', 'm98'], '열나': ['m38'],
+    '기저귀': ['m66', 'm67'], '응가': ['m66', 'm67'], '대소변': ['m66', 'm67'],
+    '미용실': ['m51'], '머리카락': ['m51'], '옷입기': ['m68', 'm77', 'm89'],
+    '놀이터': ['m65', 'm96'], '박수': ['m32'], '손뼉': ['m32'],
+    '그림': ['m64', 'm95'], '색칠': ['m64'], '숫자': ['m73'], '한글': ['m94', 'm95'],
+    '유치원': ['m99', 'm100'], '수유': ['m10'], '분유': ['m10', 'm47'],
+    '생일': ['m45'], '돌잔치': ['m45'], '감정': ['m90']
+};
 
-    const container = document.getElementById('milestone-list-container');
-    
-    let achievedData = JSON.parse(localStorage.getItem('tosil_milestones')) || [];
-    let achievedIds = [];
-    let achievedDates = {};
-    
-    if (achievedData.length > 0) {
-        if (typeof achievedData[0] === 'string') {
-            achievedIds = achievedData;
-        } else {
-            achievedIds = achievedData.map(a => a.id);
-            achievedData.forEach(a => achievedDates[a.id] = a.date);
+const msUI = window.__msUI || (window.__msUI = { q: '', open: null, pop: null });
+
+function msEsc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// 지금 개월 수가 든 묶음 (모르면 -1)
+function msStageNow() {
+    const m = (typeof window.babyAgeMonths === 'function') ? window.babyAgeMonths() : null;
+    if (m === null || m === undefined || isNaN(m)) return -1;
+    if (m < 1) return 0;
+    if (m <= 3) return 1;
+    if (m <= 6) return 2;
+    if (m <= 9) return 3;
+    if (m <= 12) return 4;
+    if (m <= 18) return 5;
+    if (m <= 24) return 6;
+    if (m <= 30) return 7;
+    if (m <= 36) return 8;
+    return 9;
+}
+
+function msAchieved() {
+    let raw = [];
+    try { raw = JSON.parse(localStorage.getItem('tosil_milestones')) || []; } catch (e) { raw = []; }
+    const ids = [], dates = {};
+    raw.forEach(a => {
+        if (typeof a === 'string') ids.push(a);
+        else if (a && a.id) { ids.push(a.id); dates[a.id] = a.date; }
+    });
+    return { ids, dates };
+}
+
+/* ---------- 찾기 ----------
+   한글은 치는 동안 '뒤' → '뒺' → '뒤지' → '뒤집' 처럼 글자가 바뀐다.
+   마지막 글자는 '이 글자로 시작하는 말' 로 보고 (받침이 다음 글자로 넘어가는 중인 것도),
+   홀자음은 그 자음으로 시작하는 글자 전부로 본다 — 그래서 'ㄷㅈㄱ' 으로도 '뒤집기' 가 나온다. */
+const MS_CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+// 받침 번호 → [남는 받침 번호, 다음 글자 첫소리]
+const MS_JONG = { 1: [0, 'ㄱ'], 2: [0, 'ㄲ'], 3: [1, 'ㅅ'], 4: [0, 'ㄴ'], 5: [4, 'ㅈ'], 6: [4, 'ㅎ'], 7: [0, 'ㄷ'],
+    8: [0, 'ㄹ'], 9: [8, 'ㄱ'], 10: [8, 'ㅁ'], 11: [8, 'ㅂ'], 12: [8, 'ㅅ'], 13: [8, 'ㅌ'], 14: [8, 'ㅍ'], 15: [8, 'ㅎ'],
+    16: [0, 'ㅁ'], 17: [0, 'ㅂ'], 18: [17, 'ㅅ'], 19: [0, 'ㅅ'], 20: [0, 'ㅆ'], 21: [0, 'ㅇ'], 22: [0, 'ㅈ'],
+    23: [0, 'ㅊ'], 24: [0, 'ㅋ'], 25: [0, 'ㅌ'], 26: [0, 'ㅍ'], 27: [0, 'ㅎ'] };
+
+function msChoClass(ch) {
+    const i = MS_CHO.indexOf(ch);
+    if (i < 0) return null;
+    const s = 0xAC00 + i * 588;
+    return '[' + ch + String.fromCharCode(s) + '-' + String.fromCharCode(s + 587) + ']';
+}
+
+function msPattern(q) {
+    const chars = Array.from(q);
+    return chars.map((ch, i) => {
+        const cho = msChoClass(ch);
+        if (cho) return cho;
+        const c = ch.charCodeAt(0);
+        if (i === chars.length - 1 && c >= 0xAC00 && c <= 0xD7A3) {
+            const jong = (c - 0xAC00) % 28;
+            if (!jong) return '[' + ch + '-' + String.fromCharCode(c + 27) + ']';
+            const sp = MS_JONG[jong];
+            return '(?:' + ch + '|' + String.fromCharCode(c - jong + sp[0]) + '\\s*' + msChoClass(sp[1]) + ')';
         }
+        return ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }).join('\\s*');
+}
+
+// id → { at, len } (제목에서 찾은 자리. 설명 · 비슷한 말로 찾았으면 at = -1)
+function msSearch(raw) {
+    const q = String(raw || '').replace(/\s+/g, '').toLowerCase();
+    if (!q) return null;
+    let re, head;
+    try { const p = msPattern(q); re = new RegExp(p, 'i'); head = new RegExp('^' + p, 'i'); }
+    catch (e) { return {}; }
+
+    const extra = {};
+    Object.keys(MS_ALIAS).forEach(k => { if (head.test(k)) MS_ALIAS[k].forEach(id => { extra[id] = 1; }); });
+    // '6개월' · '6' 처럼 개월 수로 찾으면 그 개월 묶음
+    const mm = q.match(/^(\d{1,2})[ㄱ-ㅎㅏ-ㅣ가-힣]{0,2}$/);
+    if (mm) {
+        const n = Number(mm[1]);
+        const si = n < 1 ? 0 : n <= 3 ? 1 : n <= 6 ? 2 : n <= 9 ? 3 : n <= 12 ? 4 : n <= 18 ? 5 : n <= 24 ? 6 : n <= 30 ? 7 : n <= 36 ? 8 : -1;
+        if (si > -1) MILESTONE_DATA.slice(si * 10, si * 10 + 10).forEach(it => { extra[it.id] = 1; });
     }
-    
-let html = `
-    <button onclick="window.openPostcardPicker()" style="width: 100%; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); padding: 16px; border-radius: 16px; font-size: 14.5px; font-weight: 800; margin-bottom: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); transition: 0.2s;">
-        💌 사진 붙인 순간을 엽서로 만들기
-    </button>
-    <div id="milestone-capture-area" style="background: transparent; padding-bottom: 10px;">
-`;
 
-    MILESTONE_DATA.forEach((item, index) => {
-        const isDone = achievedIds.includes(item.id);
-        const doneDate = achievedDates[item.id] || '기억해둘게요 🤍'; 
-        const formattedNum = String(index + 1).padStart(2, '0');
-        
-        // 🎨 미니멀 & 하이엔드 감성 디자인 변수
-        /* ⚠️ 해낸 칸만 분홍 · 빨강 그라데이션이라 앱의 다른 화면과 따로 놀았다. 종이색 + 금색으로 */
-        const cardBg = isDone ? '#FCF8F1' : 'var(--bg-card)';
-        const cardBorder = isDone ? '1px solid #E8D9BC' : '1px solid var(--border)';
-        const titleColor = 'var(--text-m)';
-        const descColor = 'var(--text-s)';
+    const long = Array.from(q).length >= 2;          // 한 글자는 제목에서만 (설명까지 보면 거의 다 걸린다)
+    const hits = {};
+    MILESTONE_DATA.forEach(it => {
+        const t = re.exec(it.title);
+        if (t) hits[it.id] = { at: t.index, len: t[0].length };
+        else if (extra[it.id] || (long && re.test(it.desc))) hits[it.id] = { at: -1, len: 0 };
+    });
+    return hits;
+}
 
-        const numBg = isDone ? '#B98A2E' : 'var(--bg-sub)';
-        const numColor = isDone ? '#FFFFFF' : '#A3958A';
-        const numShadow = 'none';
+/* ---------- 한 줄 (모양은 예전 그대로) ---------- */
+function msRowHTML(item, index, ach, hit) {
+    const isDone = ach.ids.includes(item.id);
+    const doneDate = String(ach.dates[item.id] || '기억해둘게요 🤍');
+    const formattedNum = String(index + 1).padStart(2, '0');
 
-        // 🔥 이모지(💮) 삭제! 애플 스타일의 매끄러운 그라데이션 체크 마크(✓) 도입
-        const stampHtml = isDone
-            ? `<div style="width: 28px; height: 28px; border-radius: 50%; background: #4A413C; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900;">✓</div>`
-            : `<div style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #EDE6DE; background: transparent; display: flex; align-items: center; justify-content: center;"></div>`;
+    /* ⚠️ 해낸 칸만 분홍 · 빨강 그라데이션이라 앱의 다른 화면과 따로 놀았다. 종이색 + 금색으로 */
+    const cardBg = isDone ? '#FCF8F1' : 'var(--bg-card)';
+    const cardBorder = isDone ? '1px solid #E8D9BC' : '1px solid var(--border)';
+    const numBg = isDone ? '#B98A2E' : 'var(--bg-sub)';
+    const numColor = isDone ? '#FFFFFF' : '#A3958A';
+    const pop = (msUI.pop === item.id) ? ' class="ms-pop"' : '';
 
-        // 💡 날짜가 비어있거나 길 때 너무 길게 나오던 텍스트를 아주 짧고 세련되게 압축!
-        let displayDate = doneDate;
-        if (doneDate.includes('기억해둘게요') || doneDate.includes('예전 기록')) {
-            displayDate = '날짜 기록';
-        } else if (/^\d{4}-\d{2}-\d{2}$/.test(doneDate)) {
-            const p = doneDate.split('-');
-            displayDate = `${p[0]}. ${Number(p[1])}. ${Number(p[2])}.`;
-        }
+    const stampHtml = isDone
+        ? `<div${pop} style="width: 28px; height: 28px; border-radius: 50%; background: #4A413C; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900;">✓</div>`
+        : `<div style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #EDE6DE; background: transparent; display: flex; align-items: center; justify-content: center;"></div>`;
 
-        html += `
-            <div class="milestone-item ${isDone ? 'achieved' : ''}" onclick="window.toggleMilestone('${item.id}')" style="background: ${cardBg}; border: ${cardBorder}; padding: 16px 14px; margin-bottom: 12px; border-radius: 18px; display: flex; align-items: center; cursor: pointer; transition: all 0.2s ease;">
-                
-                <!-- 왼쪽: 번호 뱃지 (크기 및 여백 다이어트) -->
-                <div style="width: 32px; height: 32px; background: ${numBg}; box-shadow: ${numShadow}; border-radius: 10px; font-size: 13px; font-weight: 900; color: ${numColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">
+    let displayDate = doneDate;
+    if (doneDate.includes('기억해둘게요') || doneDate.includes('예전 기록')) {
+        displayDate = '날짜 기록';
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(doneDate)) {
+        const p = doneDate.split('-');
+        displayDate = `${p[0]}. ${Number(p[1])}. ${Number(p[2])}.`;
+    }
+
+    // 찾은 글자에 살짝 금색 밑칠
+    let title = msEsc(item.title);
+    if (hit && hit.at > -1) {
+        const t = item.title;
+        title = msEsc(t.slice(0, hit.at)) + '<mark class="ms-hl">' + msEsc(t.substr(hit.at, hit.len)) + '</mark>' + msEsc(t.slice(hit.at + hit.len));
+    }
+
+    return `
+            <div class="milestone-item ${isDone ? 'achieved' : ''}" onclick="window.toggleMilestone('${item.id}')" style="background: ${cardBg}; border: ${cardBorder}; padding: 15px 14px; margin-bottom: 10px; border-radius: 18px; display: flex; align-items: center; cursor: pointer; transition: all 0.2s ease;">
+                <div style="width: 32px; height: 32px; background: ${numBg}; border-radius: 10px; font-size: 13px; font-weight: 900; color: ${numColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">
                     ${formattedNum}
                 </div>
-                
-                <!-- 중앙: 텍스트 영역 (공간 쫙 펴주기) -->
                 <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; margin-right: 8px;">
-                    <div style="font-size: 15px; font-weight: 900; color: ${titleColor}; margin-bottom: 4px; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</div>
-                    <div style="font-size: 12.5px; font-weight: 600; color: ${descColor}; line-height: 1.35; margin-bottom: ${isDone ? '8px' : '0'}; word-break: keep-all;">${item.desc}</div>
-                    
-                    <!-- 🚨 뚱뚱했던 날짜 수정 버튼을 작고 세련되게 압축! (한 줄 강제 고정) -->
+                    <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 4px; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</div>
+                    <div style="font-size: 12.5px; font-weight: 600; color: var(--text-s); line-height: 1.35; margin-bottom: ${isDone ? '8px' : '0'}; word-break: keep-all;">${msEsc(item.desc)}</div>
                     ${isDone ? `<div onclick="event.stopPropagation(); window.editMilestoneDate && window.editMilestoneDate('${item.id}')" style="font-size: 11px; font-weight: 800; color: #8A6A2A; display: inline-flex; align-items: center; background: #FFFFFF; border: 1px solid rgba(185, 138, 46, 0.35); padding: 5px 8px; border-radius: 6px; cursor: pointer; align-self: flex-start; white-space: nowrap;">📅 ${displayDate} ▾</div>` : ``}
                 </div>
-                
                 <!-- 우측: 도장 (milestonebook.js가 이 녀석 바로 앞에 빈 액자를 꽂아넣음) -->
                 <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; min-width: 28px;">
                     ${stampHtml}
                 </div>
+            </div>`;
+}
+
+/* ---------- 개월 묶음 머리 (모은 만큼 금색 고리) ---------- */
+function msStageHead(st, si, done, total, open, isNow) {
+    const R = 16, C = 2 * Math.PI * R;
+    const ring = done >= total
+        ? `<div style="width: 42px; height: 42px; border-radius: 50%; background: #B98A2E; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 900; flex-shrink: 0;">✓</div>`
+        : `<div style="position: relative; width: 42px; height: 42px; flex-shrink: 0;">
+                <svg width="42" height="42" viewBox="0 0 42 42" style="display: block; transform: rotate(-90deg);">
+                    <circle cx="21" cy="21" r="${R}" fill="none" stroke="#EDE6DE" stroke-width="4"></circle>
+                    ${done ? `<circle cx="21" cy="21" r="${R}" fill="none" stroke="#B98A2E" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C * done / total).toFixed(2)} ${C.toFixed(2)}"></circle>` : ''}
+                </svg>
+                <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; letter-spacing: -0.5px; color: ${done ? '#8A6A2A' : '#A3958A'};">${done}<span style="font-size: 9px; font-weight: 800; opacity: 0.75;">/${total}</span></span>
+            </div>`;
+    return `
+        <div class="ms-stage" data-stage="${si}" role="button" aria-expanded="${open ? 'true' : 'false'}" onclick="window.msToggleStage(${si})" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 12px; margin: 0 0 10px; border-radius: 18px; cursor: pointer; background: var(--bg-card); border: 1px solid ${isNow ? 'rgba(185, 138, 46, 0.5)' : 'var(--border)'};">
+            ${ring}
+            <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 16px; font-weight: 900; color: var(--text-m); letter-spacing: -0.4px;">${msEsc(st.range)}</span>
+                    ${isNow ? `<span style="font-size: 10.5px; font-weight: 900; color: #8A6A2A; background: #F6EEDD; padding: 3px 8px; border-radius: 8px;">지금 여기</span>` : ''}
+                </div>
+                <div style="font-size: 12.5px; font-weight: 700; color: var(--text-sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${msEsc(st.name)}</div>
             </div>
-        `;
+            <svg width="20" height="20" viewBox="0 0 24 24" style="flex-shrink: 0; transition: transform .2s ease; transform: rotate(${open ? 180 : 0}deg);"><path d="M6 9l6 6 6-6" fill="none" stroke="#A3958A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>`;
+}
+
+function msOpenList() {
+    if (!Array.isArray(msUI.open)) {
+        const now = msStageNow();
+        msUI.open = [now >= 0 ? now : 0];
+    }
+    return msUI.open;
+}
+
+function msListHTML() {
+    const ach = msAchieved();
+    const q = String(msUI.q || '').trim();
+    let html = '';
+
+    if (!q) {
+        const now = msStageNow();
+        const open = msOpenList();
+        html += `
+    <button onclick="window.openPostcardPicker()" style="width: 100%; background: var(--bg-card); color: var(--text-m); border: 1px solid var(--border); padding: 13px; border-radius: 16px; font-size: 14px; font-weight: 800; margin-bottom: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
+        💌 사진 붙인 순간을 엽서로 만들기
+    </button>
+    <div id="milestone-capture-area" style="background: transparent; padding-bottom: 10px;">`;
+        MS_STAGES.forEach((st, si) => {
+            const items = MILESTONE_DATA.slice(si * 10, si * 10 + 10);
+            if (!items.length) return;
+            const done = items.filter(it => ach.ids.includes(it.id)).length;
+            const isOpen = open.indexOf(si) > -1;
+            html += msStageHead(st, si, done, items.length, isOpen, si === now && si < 9);
+            if (isOpen) {
+                html += '<div class="ms-stage-body" style="padding: 0 0 12px;">' +
+                    items.map(it => msRowHTML(it, MILESTONE_DATA.indexOf(it), ach, null)).join('') + '</div>';
+            }
+        });
+        return html + '</div>';
+    }
+
+    const hits = msSearch(q) || {};
+    const n = Object.keys(hits).length;
+    if (!n) {
+        return `
+    <div style="text-align: center; padding: 44px 16px 30px;">
+        <div style="font-size: 15px; font-weight: 900; color: var(--text-m); margin-bottom: 8px;">찾는 순간이 도감에 없어요</div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-sub); line-height: 1.6; word-break: keep-all;">‘걸음’, ‘이’, ‘잠’처럼 짧게 찾아보세요</div>
+    </div>`;
+    }
+    html += `<div style="font-size: 12.5px; font-weight: 800; color: var(--text-sub); margin: 0 4px 12px;">찾은 순간 ${n}개</div>
+    <div id="milestone-capture-area" style="background: transparent; padding-bottom: 10px;">`;
+    MS_STAGES.forEach((st, si) => {
+        const items = MILESTONE_DATA.slice(si * 10, si * 10 + 10).filter(it => hits[it.id]);
+        if (!items.length) return;
+        html += `<div style="display: flex; align-items: baseline; gap: 7px; margin: 4px 4px 9px;">
+            <span style="font-size: 13px; font-weight: 900; color: #8A6A2A;">${msEsc(st.range)}</span>
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-sub); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${msEsc(st.name)}</span>
+        </div>`;
+        html += items.map(it => msRowHTML(it, MILESTONE_DATA.indexOf(it), ach, hits[it.id])).join('');
     });
-    
-    html += `</div>`; 
-    container.innerHTML = html;
-    document.getElementById('milestone-bottom-sheet').classList.add('show');
+    return html + '</div>';
+}
+
+function msRenderList() {
+    const list = document.getElementById('ms-list');
+    if (!list) return;
+    list.innerHTML = msListHTML();
+    msUI.pop = null;                                         // 도장 찍는 몸짓은 한 번만
+    const clr = document.getElementById('ms-q-clear');
+    if (clr) clr.style.display = String(msUI.q || '').trim() ? 'flex' : 'none';
+    // 액자를 바로 끼운다 (기다리면 빈 줄이 먼저 보였다가 액자가 튀어나온다)
+    if (typeof window.refreshMilestoneFrames === 'function') { try { window.refreshMilestoneFrames(); } catch (e) {} }
+}
+
+// 지금 개월 묶음이 아래에 숨어 있으면 그 머리가 맨 위에 오게
+function msScrollTo(si, smooth) {
+    const c = document.getElementById('milestone-list-container');
+    const h = c && c.querySelector('.ms-stage[data-stage="' + si + '"]');
+    if (!h) return;
+    const head = document.getElementById('ms-head');
+    const top = h.getBoundingClientRect().top - c.getBoundingClientRect().top;
+    if (top > 0 && top < c.clientHeight * 0.42) return;      // 이미 잘 보인다
+    const to = Math.max(0, c.scrollTop + top - (head ? head.offsetHeight : 0) - 2);
+    if (smooth && c.scrollTo) c.scrollTo({ top: to, behavior: 'smooth' });
+    else c.scrollTop = to;
+}
+
+window.msToggleStage = function (si) {
+    const open = msOpenList();
+    const i = open.indexOf(si);
+    if (i > -1) open.splice(i, 1); else open.push(si);
+    if (navigator.vibrate) navigator.vibrate(8);
+    msRenderList();
+    if (i < 0) msScrollTo(si, true);
+};
+
+function msEnsureShell(container) {
+    if (!document.getElementById('ms-style')) {
+        const st = document.createElement('style');
+        st.id = 'ms-style';
+        st.textContent =
+            '#ms-q::placeholder { color: var(--text-sub); font-weight: 600; opacity: 1; }' +
+            '#ms-q::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }' +
+            '.ms-stage { -webkit-tap-highlight-color: transparent; transition: transform .15s ease; }' +
+            '.ms-stage:active { transform: scale(0.985); }' +
+            'mark.ms-hl { background: rgba(185, 138, 46, 0.22); color: inherit; border-radius: 4px; padding: 0 1px; }' +
+            '@keyframes msPop { 0% { transform: scale(0.3); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }' +
+            '.ms-pop { animation: msPop .4s cubic-bezier(.2, .9, .3, 1.2); }';
+        document.head.appendChild(st);
+    }
+    if (document.getElementById('ms-head')) return;
+
+    container.innerHTML = `
+    <div id="ms-head" style="position: sticky; top: 0; z-index: 3; background: var(--bg-main); padding: 0 0 12px;">
+        <div style="display: flex; align-items: center; gap: 9px; height: 48px; padding: 0 6px 0 15px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0;"><circle cx="11" cy="11" r="7" fill="none" stroke="#A3958A" stroke-width="2.4"></circle><path d="M20.5 20.5l-4.2-4.2" fill="none" stroke="#A3958A" stroke-width="2.4" stroke-linecap="round"></path></svg>
+            <input id="ms-q" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="첫 순간 찾기" placeholder="찾아보기 · 뒤집기, 첫니, 걸음마" style="flex: 1; min-width: 0; height: 100%; border: none; outline: none; padding: 0; font-size: 16px; font-weight: 700; font-family: inherit; -webkit-appearance: none; appearance: none;">
+            <button id="ms-q-clear" type="button" aria-label="지우기" style="display: none; flex-shrink: 0; width: 34px; height: 34px; border: none; border-radius: 50%; background: transparent; align-items: center; justify-content: center; cursor: pointer; padding: 0;">
+                <span style="width: 24px; height: 24px; border-radius: 50%; background: var(--bg-sub); color: var(--text-sub); font-size: 14px; line-height: 24px; text-align: center;">×</span>
+            </button>
+        </div>
+    </div>
+    <div id="ms-list"></div>`;
+
+    const inp = document.getElementById('ms-q');
+    const clr = document.getElementById('ms-q-clear');
+    inp.addEventListener('input', () => {
+        msUI.q = inp.value;
+        msRenderList();
+        container.scrollTop = 0;
+    });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); } });
+    clr.addEventListener('click', () => {
+        inp.value = '';
+        msUI.q = '';
+        msRenderList();
+        container.scrollTop = 0;
+        msScrollTo(msStageNow());
+        inp.focus();
+    });
+}
+
+window.openMilestoneModal = function() {
+    const sheet = document.getElementById('milestone-bottom-sheet');
+    const container = document.getElementById('milestone-list-container');
+    if (!sheet || !container) return;
+    // 도장을 찍거나 날짜를 고쳐서 다시 그릴 때는 찾던 말 · 펼친 묶음 · 스크롤을 그대로 둔다
+    const fresh = !sheet.classList.contains('show');
+    if (fresh && navigator.vibrate) navigator.vibrate(15);
+
+    const sheetContent = sheet.querySelector('.bottom-sheet-content');
+    if (sheetContent) {
+        sheetContent.style.background = 'var(--bg-main)';
+        sheetContent.style.border = 'none';
+        sheetContent.style.height = '85vh';      // 찾은 게 몇 줄뿐이어도 창 높이가 줄었다 늘었다 하지 않게
+    }
+    const sheetHeader = sheet.querySelector('.sheet-header');
+    if (sheetHeader) {
+        sheetHeader.style.background = 'var(--bg-main)';
+        sheetHeader.style.borderBottom = 'none';
+        sheetHeader.style.marginBottom = '14px';
+    }
+    const sheetHeaderTitle = sheet.querySelector('.sheet-header h3');
+    if (sheetHeaderTitle) sheetHeaderTitle.style.color = 'var(--text-m)';
+
+    msEnsureShell(container);
+    if (fresh) {
+        msUI.q = '';
+        msUI.open = null;
+        const inp = document.getElementById('ms-q');
+        if (inp) inp.value = '';
+    }
+    msRenderList();
+    sheet.classList.add('show');
+    if (fresh) {
+        container.scrollTop = 0;
+        msScrollTo(msStageNow());
+    }
 };
 
 // 4. 바텀 시트 닫기 (이 함수는 기존 그대로 유지)
@@ -13106,12 +13387,70 @@ window.closeMilestoneModal = function() {
     document.getElementById('milestone-bottom-sheet').classList.remove('show');
 };
 
-// 5. 감성 스탬프 찍기 로직 (글씨 깨짐 및 에러 영구 박멸 엔진)
-window.toggleMilestone = function(id) {
+// 5. 도장 찍기 · 지우기
+/* 백일 · 첫돌은 날짜가 정해진 날이다. 며칠 지나 찍어도 그날(태어난 날 + 99일 · 첫 생일)로 남긴다.
+   ⚠️ 찍은 날(오늘)로 적혀서, 배냇함에 백일 카드와 '처음 해낸 일 · 백일' 이 다른 날 따로 나왔다.
+      아직 그날이 안 왔으면 예전처럼 오늘로. 날짜 칸(📅)을 눌러 언제든 고칠 수 있다. */
+const MS_FIXED_DAY = { m18: { days: 99, name: '백일' }, m45: { months: 12, name: '첫돌' } };
+function msFixedDay(id) {
+    const f = MS_FIXED_DAY[id];
+    const s = localStorage.getItem('tosil_startDate');
+    if (!f || !s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+    const b = window.parseLocalDate(s);
+    let d;
+    if (f.days) d = new Date(b.getFullYear(), b.getMonth(), b.getDate() + f.days);
+    else {
+        // 2월 29일생의 첫돌은 2월 28일 (anniversaries.js 와 같게)
+        const last = new Date(b.getFullYear(), b.getMonth() + f.months + 1, 0).getDate();
+        d = new Date(b.getFullYear(), b.getMonth() + f.months, Math.min(b.getDate(), last));
+    }
+    return d.getTime() <= Date.now() ? d : null;
+}
+
+/* 잘못 눌러 도장을 지우면 날짜까지 같이 사라졌다 (다시 찍으면 오늘 날짜).
+   5초 동안 '되돌리기' — 지우기 전 날짜 · 자리 그대로 돌아온다. */
+function msUndoBar(id, info) {
+    const item = MILESTONE_DATA.find(m => m.id === id);
+    const old = document.getElementById('ms-undo-bar');
+    if (old) old.remove();
+    clearTimeout(msUndoBar._t);
+
+    const bar = document.createElement('div');
+    bar.id = 'ms-undo-bar';
+    bar.setAttribute('role', 'status');
+    bar.setAttribute('style', 'position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);width:88%;max-width:400px;box-sizing:border-box;' +
+        'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 8px 8px 20px;border-radius:20px;' +
+        'background:rgba(49,51,63,0.95);color:#FFFFFF;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:10000010;opacity:0;transition:opacity .25s ease;');
+    const line = document.createElement('span');
+    line.setAttribute('style', 'min-width:0;flex:1;font-size:14px;font-weight:800;line-height:1.4;word-break:keep-all;');
+    line.textContent = '‘' + (item ? item.title : '') + '’ 도장을 지웠어요';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '되돌리기';
+    btn.setAttribute('style', 'flex-shrink:0;padding:10px 12px;border:none;border-radius:14px;background:transparent;color:#C9C3FF;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;');
+    const hide = () => {
+        clearTimeout(msUndoBar._t);
+        bar.style.opacity = '0';
+        setTimeout(() => { if (bar.parentNode) bar.parentNode.removeChild(bar); }, 260);
+    };
+    btn.onclick = (e) => {
+        e.stopPropagation();
+        hide();
+        window.toggleMilestone(id, info);
+    };
+    bar.appendChild(line);
+    bar.appendChild(btn);
+    document.body.appendChild(bar);
+    setTimeout(() => { bar.style.opacity = '1'; }, 10);
+    msUndoBar._t = setTimeout(hide, 5000);
+}
+
+window.toggleMilestone = function(id, restore) {
     if (navigator.vibrate) navigator.vibrate([10, 30, 20]);
-    
-    let achievedData = JSON.parse(localStorage.getItem('tosil_milestones')) || [];
-    
+
+    let achievedData = [];
+    try { achievedData = JSON.parse(localStorage.getItem('tosil_milestones')) || []; } catch (e) { achievedData = []; }
+
     // 구버전 배열(단순 ID만 있는 배열) 호환성 자동 업그레이드 처리
     let isStringArray = achievedData.length > 0 && typeof achievedData[0] === 'string';
     if (isStringArray) {
@@ -13119,38 +13458,67 @@ window.toggleMilestone = function(id) {
     }
 
     const idx = achievedData.findIndex(a => a.id === id);
-    
+    let removed = null, fixed = null;
+
     if (idx === -1) {
-        // 🌸 도장 쾅! (새로 달성)
-        /* ⚠️ toISOString() 은 세계표준시라 한국보다 9시간 느리다.
-              새벽 0~9시에 도감을 찍으면 어제 날짜로 적혔다.
-              밤중에 처음 뒤집기를 본 날이 하루 전으로 기록되는 셈이다.
-              내 시계 기준으로 적는다. */
-        const _t = new Date();
-        const todayStr = _t.getFullYear() + '. ' +
-                         String(_t.getMonth() + 1).padStart(2, '0') + '. ' +
-                         String(_t.getDate()).padStart(2, '0');
-        achievedData.push({ id: id, date: todayStr }); 
+        if (restore && restore.entry && restore.entry.id === id) {
+            // 되돌리기 — 지우기 전 그 날짜 · 그 자리 그대로
+            achievedData.splice(Math.min(Math.max(0, restore.at | 0), achievedData.length), 0, restore.entry);
+        } else {
+            // 🌸 도장 쾅! (새로 달성)
+            /* ⚠️ toISOString() 은 세계표준시라 한국보다 9시간 느리다.
+                  새벽 0~9시에 도감을 찍으면 어제 날짜로 적혔다.
+                  밤중에 처음 뒤집기를 본 날이 하루 전으로 기록되는 셈이다.
+                  내 시계 기준으로 적는다. */
+            fixed = msFixedDay(id);
+            const _t = fixed || new Date();
+            const todayStr = _t.getFullYear() + '. ' +
+                             String(_t.getMonth() + 1).padStart(2, '0') + '. ' +
+                             String(_t.getDate()).padStart(2, '0');
+            achievedData.push({ id: id, date: todayStr });
+            msUI.pop = id;
+        }
     } else {
         // 🌫️ 도장 취소
-        achievedData.splice(idx, 1); 
+        removed = { entry: achievedData[idx], at: idx };
+        achievedData.splice(idx, 1);
     }
-    
+
     localStorage.setItem('tosil_milestones', JSON.stringify(achievedData));
-    
+
     // (선택) 이전 버전 날짜 저장소 호환 유지
     try {
         const msDates = JSON.parse(localStorage.getItem('tosil_milestone_dates')) || {};
-        if (idx === -1) { if (!msDates[id]) msDates[id] = Date.now(); }
-        else { delete msDates[id]; }
+        if (idx === -1) {
+            if (restore && restore.msDate) msDates[id] = restore.msDate;
+            else if (!msDates[id]) msDates[id] = Date.now();
+        } else {
+            if (removed) removed.msDate = msDates[id];
+            delete msDates[id];
+        }
         localStorage.setItem('tosil_milestone_dates', JSON.stringify(msDates));
     } catch (e) {}
 
-    window.updateMilestoneCounter(true); 
-    
-    // 🚨 핵심 패치: 에러 나는 부분 싹 도려내고, 완벽하게 스타일링된 카드를 통째로 다시 그립니다.
-    // (속도가 빨라서 폰트 깨짐 방지 및 에러 없음!)
-    window.openMilestoneModal();
+    window.updateMilestoneCounter(true);
+
+    // 도감이 열려 있을 때만 그 자리에서 다시 그린다 (닫은 뒤 '되돌리기' 를 눌렀을 때 도감이 다시 튀어나오지 않게)
+    const sheet = document.getElementById('milestone-bottom-sheet');
+    if (sheet && sheet.classList.contains('show')) window.openMilestoneModal();
+
+    if (removed) { msUndoBar(id, removed); return; }
+    if (restore || typeof window.showToast !== 'function') return;
+
+    if (fixed) {
+        window.showToast(`${MS_FIXED_DAY[id].name}인 ${fixed.getMonth() + 1}월 ${fixed.getDate()}일로 남겼어요`);
+        return;
+    }
+    // 한 묶음 열 칸을 다 채우면 한마디
+    const at = MILESTONE_DATA.findIndex(m => m.id === id);
+    const si = Math.floor(at / 10), st = MS_STAGES[si];
+    const have = achievedData.map(a => a.id);
+    if (at > -1 && st && MILESTONE_DATA.slice(si * 10, si * 10 + 10).every(m => have.includes(m.id))) {
+        window.showToast(`‘${st.range}’ 열 칸을 다 모았어요`);
+    }
 };
 
 // ==========================================
