@@ -58,8 +58,10 @@
         var p = String(k).split("-");
         var t = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getTime();
         if (isNaN(b) || isNaN(t)) return "";
-        var n = Math.floor((t - b) / 86400000);
-        return n >= 0 ? "생후 " + n + "일의 소리" : "";
+        /* 추억 엽서와 같은 셈 — 태어난 날이 1일 (백일 = 태어난 지 100일째) */
+        var n = Math.round((t - b) / 86400000);
+        if (n < 0) return "";
+        return n === 0 ? "태어난 날" : "태어난 지 " + (n + 1) + "일째";
     }
 
     function msTitle(id) {
@@ -200,14 +202,13 @@
             "background:#F8F6F4; padding:60px; box-sizing:border-box; " +
             "font-family:'Pretendard',sans-serif; z-index:-9999; pointer-events:none;";
 
+        /* ⚠️ 'MY PRECIOUS BABY' · 'DATE' · '소리의 모양' — 견본 엽서 문구였다. 추억 엽서 · 이달의 카드와 같은 판으로 */
+        var dd = ddayText(key);
         stage.innerHTML =
-        '<div style="width:100%; height:100%; background:linear-gradient(160deg,#FFFFFF 35%,#FDF6E8 100%); ' +
-            'border-radius:8px; padding:90px 70px; box-sizing:border-box; display:flex; flex-direction:column; text-align:center;">' +
+        '<div style="width:100%; height:100%; background:#FFFDF9; border:1px solid #EFE6D8; ' +
+            'border-radius:10px; padding:80px 66px 54px; box-sizing:border-box; display:flex; flex-direction:column; text-align:center;">' +
 
-            '<div style="font-family:sans-serif; font-size:14px; font-weight:600; color:#C4B5A9; letter-spacing:8px; margin-bottom:30px;">' +
-                'MY PRECIOUS BABY</div>' +
-
-            '<div style="font-size:28px; font-weight:400; color:#8C827A; font-family:\'Gowun Batang\',serif; letter-spacing:-1px;">' +
+            '<div style="font-size:30px; font-weight:400; color:#9A8A7B; font-family:\'Gowun Batang\',serif; letter-spacing:-1px;">' +
                 esc(babyName()) + '의 목소리</div>' +
 
             '<div style="margin:auto 0;">' +
@@ -219,22 +220,21 @@
             '</div>' +
 
             '<div style="margin:auto 0;">' +
-                '<h1 style="font-family:\'Gowun Batang\',serif; font-size:54px; font-weight:700; color:#5A4D44; ' +
+                '<h1 style="font-family:\'Gowun Batang\',serif; font-size:54px; font-weight:700; color:#4A413C; ' +
                     'margin:0; letter-spacing:-2px; line-height:1.35; word-break:keep-all;">' + esc(title) + '</h1>' +
                 (v.msId && v.note
                     ? '<p style="font-family:\'Nanum Pen Script\',cursive; font-size:38px; color:#7A6F68; margin:26px 0 0; line-height:1.5;">' + esc(v.note) + '</p>'
                     : '') +
             '</div>' +
 
-            '<div style="margin-top:auto; border-top:1px solid #F0EBE6; padding-top:32px; display:flex; justify-content:space-between; align-items:flex-end; text-align:left;">' +
+            '<div style="margin-top:auto; border-top:1px solid #F0E8DC; padding-top:30px; display:flex; justify-content:space-between; align-items:center; text-align:left;">' +
                 '<div>' +
-                    '<div style="font-size:15px; font-weight:600; color:#C4B5A9; margin-bottom:10px; letter-spacing:2px;">DATE</div>' +
-                    '<div style="font-size:25px; font-weight:600; color:#7A6F68;">' + esc(pretty(key)) +
-                        ' <span style="font-size:19px; font-weight:400; color:' + GOLD + '; font-family:\'Gowun Batang\',serif;">· ' + esc(ddayText(key)) + '</span></div>' +
+                    '<div style="font-size:26px; font-weight:600; color:#6F6259; letter-spacing:-0.5px;">' + esc(pretty(key)) + '</div>' +
+                    (dd ? '<div style="font-size:21px; font-weight:400; color:' + GOLD + '; font-family:\'Gowun Batang\',serif; margin-top:8px;">' + esc(dd) + '</div>' : '') +
                 '</div>' +
-                '<div style="text-align:right;">' +
-                    '<div style="font-size:13px; font-weight:600; color:#C4B5A9; letter-spacing:3px; margin-bottom:10px;">소리의 모양</div>' +
-                    '<div style="font-size:27px; font-weight:700; color:#7A6F68; letter-spacing:-1px; font-family:\'Gowun Batang\',serif;">배냇함</div>' +
+                '<div style="display:flex; align-items:center; gap:12px;">' +
+                    '<img src="icon-192x192.png" alt="" style="width:46px; height:46px; border-radius:12px; display:block;">' +
+                    '<span style="font-size:28px; font-weight:700; color:#6F6259; letter-spacing:-1px; font-family:\'Gowun Batang\',serif;">배냇함</span>' +
                 '</div>' +
             '</div>' +
         '</div>';

@@ -63,6 +63,8 @@
         return m[1] + "-" + String(m[2]).padStart(2, "0") + "-" + String(m[3]).padStart(2, "0");
     }
 
+    /* ⚠️ 백일 엽서에 '백일 · 건강하게 100일을 맞았어요' 아래 '생후 99일의 기록' 이 찍혔다.
+          엄마들은 태어난 날을 1일로 센다 (그래서 태어난 날 + 99일이 백일이다). 그 셈으로 '태어난 지 100일째'. */
     function ddayText(dateStr) {
         var s = localStorage.getItem("tosil_startDate");
         if (!s) return "";
@@ -70,9 +72,13 @@
         var b = new Date(s + "T00:00:00").getTime();
         var t = key ? new Date(key + "T00:00:00").getTime() : Date.now();
         if (isNaN(b) || isNaN(t)) return "";
-        var n = Math.floor((t - b) / 86400000);
-        return n >= 0 ? "생후 " + n + "일의 기록" : "";
+        var n = Math.round((t - b) / 86400000);
+        if (n < 0) return "";
+        return n === 0 ? "태어난 날" : "태어난 지 " + (n + 1) + "일째";
     }
+
+    // 백일 · 첫돌 도장은 '해낸 일' 이 아니라 그날 자체라 'N번째 기적' 에서 뺀다 (recap.js SKIP_FIRSTS 와 같다)
+    var NOT_FIRST = { m18: 1, m45: 1 };
 
     /* ---------- 사진을 캔버스에 안전하게 옮기기 ----------
        스토리지 URL 을 그대로 html2canvas 에 넘기면 CORS 설정에 따라
@@ -123,47 +129,47 @@
         return await toDataUrl(p.url);
     }
 
-    /* ---------- 엽서 판 ---------- */
+    /* ---------- 엽서 판 ----------
+       ⚠️ 분홍 그라데이션 · 'MY PRECIOUS BABY' · 'DATE' · '기록의 완성' — 어디서나 보는 견본 엽서 모양이었고
+          앱(종이색 · 금색)과도 따로 놀았다. 인스타 · 가족 단톡에 나가는 건 이 엽서다.
+          → 크림 종이 · 금색 글씨, 맨 아래엔 날짜 · 태어난 지 며칠째 · 배냇함 아이콘과 이름 */
 
     function buildCard(o) {
         // o = { badge, title, desc, dateText, ddayText, photo, caption }
         var photoBlock = o.photo
-            ? '<div style="margin:0 auto; width:760px; height:760px; border-radius:10px; overflow:hidden; background:#F1ECE8;">' +
+            ? '<div style="margin:0 auto; width:760px; height:760px; border-radius:12px; overflow:hidden; background:#F1ECE6;">' +
                   '<img src="' + o.photo + '" style="width:100%; height:100%; object-fit:cover; display:block;">' +
               '</div>'
-            : '<div style="width:1px; height:80px; background:#E8E3DD; margin:0 auto;"></div>';
+            : '<div style="width:1px; height:80px; background:#E8DFD2; margin:0 auto;"></div>';
 
         // 사진이 있으면 제목을 줄여 균형을 맞춘다
         var titleSize = o.photo ? 52 : 72;
         var gapTop    = o.photo ? 44 : 40;
 
         return '' +
-        '<div style="width:100%; height:100%; background:linear-gradient(145deg,#FFFFFF 40%,#FFF0F2 100%); border-radius:8px; padding:70px 60px; box-sizing:border-box; display:flex; flex-direction:column;">' +
+        '<div style="width:100%; height:100%; background:#FFFDF9; border:1px solid #EFE6D8; border-radius:10px; padding:66px 60px 54px; box-sizing:border-box; display:flex; flex-direction:column;">' +
 
             '<div style="text-align:center;">' +
-                '<div style="font-family:sans-serif; font-size:14px; font-weight:600; color:#C4B5A9; letter-spacing:8px; margin-bottom:26px;">MY PRECIOUS BABY</div>' +
-                '<div style="font-size:30px; font-weight:400; color:#8C827A; font-family:\'Gowun Batang\',serif; letter-spacing:-1px;">' + esc(babyName()) + '의 배냇함에 보관된</div>' +
-                (o.badge ? '<div style="font-size:34px; font-weight:700; color:#E5989B; font-family:\'Gowun Batang\',serif; letter-spacing:-1px; margin-top:12px;">' + esc(o.badge) + '</div>' : '') +
+                '<div style="font-size:30px; font-weight:400; color:#9A8A7B; font-family:\'Gowun Batang\',serif; letter-spacing:-1px;">' + esc(babyName()) + '의 배냇함에 보관된</div>' +
+                (o.badge ? '<div style="font-size:34px; font-weight:700; color:#B98A2E; font-family:\'Gowun Batang\',serif; letter-spacing:-1px; margin-top:12px;">' + esc(o.badge) + '</div>' : '') +
             '</div>' +
 
             '<div style="margin:' + gapTop + 'px 0 auto;">' + photoBlock + '</div>' +
 
             '<div style="text-align:center; margin:' + gapTop + 'px 0 auto;">' +
-                '<h1 style="font-family:\'Gowun Batang\',serif; font-size:' + titleSize + 'px; font-weight:700; color:#5A4D44; margin:0 0 22px; line-height:1.3; letter-spacing:-2px; word-break:keep-all;">' + esc(o.title) + '</h1>' +
-                (o.desc ? '<p style="font-size:24px; font-weight:400; color:#9A8F86; line-height:1.7; margin:0; padding:0 40px; word-break:keep-all;">' + esc(o.desc) + '</p>' : '') +
-                (o.caption ? '<p style="font-family:\'Nanum Pen Script\',cursive; font-size:38px; color:#7A6F68; line-height:1.5; margin:26px 0 0; padding:0 40px; word-break:keep-all;">' + esc(o.caption) + '</p>' : '') +
+                '<h1 style="font-family:\'Gowun Batang\',serif; font-size:' + titleSize + 'px; font-weight:700; color:#4A413C; margin:0 0 22px; line-height:1.3; letter-spacing:-2px; word-break:keep-all;">' + esc(o.title) + '</h1>' +
+                (o.desc ? '<p style="font-size:24px; font-weight:400; color:#8C7F74; line-height:1.7; margin:0; padding:0 40px; word-break:keep-all;">' + esc(o.desc) + '</p>' : '') +
+                (o.caption ? '<p style="font-family:\'Nanum Pen Script\',cursive; font-size:38px; color:#6F6259; line-height:1.5; margin:26px 0 0; padding:0 40px; word-break:keep-all;">' + esc(o.caption) + '</p>' : '') +
             '</div>' +
 
-            '<div style="margin-top:auto; border-top:1px solid #F0EBE6; padding-top:32px; display:flex; justify-content:space-between; align-items:flex-end;">' +
+            '<div style="margin-top:auto; border-top:1px solid #F0E8DC; padding-top:30px; display:flex; justify-content:space-between; align-items:center;">' +
                 '<div>' +
-                    '<div style="font-size:15px; font-weight:600; color:#C4B5A9; margin-bottom:10px; letter-spacing:2px;">DATE</div>' +
-                    '<div style="font-size:25px; font-weight:600; color:#7A6F68;">' + esc(o.dateText) +
-                        (o.ddayText ? ' <span style="font-size:19px; font-weight:400; color:#E5989B; font-family:\'Gowun Batang\',serif;">· ' + esc(o.ddayText) + '</span>' : '') +
-                    '</div>' +
+                    '<div style="font-size:26px; font-weight:600; color:#6F6259; letter-spacing:-0.5px;">' + esc(o.dateText) + '</div>' +
+                    (o.ddayText ? '<div style="font-size:21px; font-weight:400; color:#B98A2E; font-family:\'Gowun Batang\',serif; margin-top:8px;">' + esc(o.ddayText) + '</div>' : '') +
                 '</div>' +
-                '<div style="text-align:right;">' +
-                    '<div style="font-size:13px; font-weight:600; color:#C4B5A9; letter-spacing:3px; margin-bottom:10px;">기록의 완성</div>' +
-                    '<div style="font-size:27px; font-weight:700; color:#7A6F68; letter-spacing:-1px; font-family:\'Gowun Batang\',serif;">배냇함</div>' +
+                '<div style="display:flex; align-items:center; gap:12px;">' +
+                    '<img src="icon-192x192.png" alt="" style="width:46px; height:46px; border-radius:12px; display:block;">' +
+                    '<span style="font-size:28px; font-weight:700; color:#6F6259; letter-spacing:-1px; font-family:\'Gowun Batang\',serif;">배냇함</span>' +
                 '</div>' +
             '</div>' +
 
@@ -275,7 +281,16 @@
         var item = milestoneList().find(function (m) { return m.id === id; });
         if (!item) return toast("도감 정보를 불러오지 못했어요");
 
-        var rank = a.ids.indexOf(id) + 1;
+        /* ⚠️ 'N번째 기적' 이 도장을 찍은 순서였다. 지난 일을 나중에 몰아 찍으면 순서가 뒤죽박죽이었고,
+              백일 엽서에도 '4번째 기적' 이 붙었다. 해낸 날짜 순서로 세고, 백일 · 첫돌에는 붙이지 않는다. */
+        var rank = 0;
+        if (!NOT_FIRST[id]) {
+            var order = a.ids.filter(function (x) { return !NOT_FIRST[x]; }).map(function (x, i) {
+                return { x: x, d: normDate(a.dates[x]) || "9999-99-99", i: i };
+            });
+            order.sort(function (p, q) { return p.d < q.d ? -1 : p.d > q.d ? 1 : p.i - q.i; });
+            for (var j = 0; j < order.length; j++) if (order[j].x === id) { rank = j + 1; break; }
+        }
         /* ⚠️ toISOString() 은 세계표준시라 새벽엔 어제가 된다. 내 시계로 적는다. */
         var _n = new Date();
         var date = a.dates[id] || (_n.getFullYear() + "-" +
@@ -309,7 +324,9 @@
             var item = milestoneList().find(function (m) { return m.id === p.msId; });
             if (item) { title = item.title; desc = item.desc; }
         }
-        if (!title) title = prettyDate(key);
+        /* ⚠️ 날마다 찍은 사진 엽서는 제목도 '2026. 09. 17' · 맨 아래도 '2026. 09. 17' 이었다 → 제목은 그날 나이 ('3개월 22일') */
+        if (!title) title = (typeof window.ageOnDay === "function" && window.ageOnDay(key)) || prettyDate(key);
+        var dd = ddayText(key);
 
         var photo = await photoOf(p);
         if (!photo) return toast("사진을 옮기지 못했어요. 이 기기에서 담은 사진인지 확인해 주세요");
@@ -320,7 +337,7 @@
             desc: p.msId ? desc : "",
             caption: p.caption || "",
             dateText: prettyDate(key),
-            ddayText: ddayText(key),
+            ddayText: dd === title ? "" : dd,          // 태어난 날 사진은 제목이 이미 '태어난 날'
             photo: photo
         }, babyName() + "_" + title + "_추억엽서.png");
     };

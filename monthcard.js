@@ -134,7 +134,9 @@
         return await toDataUrl(p.url);
     }
 
-    /* ---------- 카드 판 ---------- */
+    /* ---------- 카드 판 ----------
+       ⚠️ 맨 위 'MY PRECIOUS BABY' 는 어디서나 보는 견본 문구였다. 추억 엽서 · 소리 엽서와 같이 빼고,
+          맨 아래 오른쪽엔 배냇함 아이콘과 이름 (세 카드가 한 집 물건으로 보이게) */
 
     function buildCard(o) {
         // 사진 넉 장이 2×2. 없으면 그 자리를 비워둔다.
@@ -158,13 +160,11 @@
         if (o.notes)  bits.push("한 줄 " + o.notes);
 
         return '' +
-        '<div style="width:100%; height:100%; background:linear-gradient(160deg,#FFFFFF 40%,#FDF6E8 100%); ' +
+        '<div style="width:100%; height:100%; background:#FFFDF9; ' +
             'padding:64px 58px; box-sizing:border-box; display:flex; flex-direction:column;">' +
 
             '<div style="text-align:center;">' +
-                '<div style="font-family:sans-serif; font-size:13px; font-weight:600; color:#C4B5A9; ' +
-                    'letter-spacing:7px; margin-bottom:20px;">MY PRECIOUS BABY</div>' +
-                '<div style="font-family:\'Gowun Batang\',serif; font-size:44px; font-weight:700; color:#5A4D44; ' +
+                '<div style="font-family:\'Gowun Batang\',serif; font-size:44px; font-weight:700; color:#4A413C; ' +
                     'letter-spacing:-2px; line-height:1.25;">' + esc(o.title) + '</div>' +
                 (o.age ? '<div style="font-size:21px; font-weight:400; color:' + GOLD + '; ' +
                     'font-family:\'Gowun Batang\',serif; margin-top:8px;">' + esc(o.age) + '</div>' : '') +
@@ -174,7 +174,8 @@
                 'gap:8px; border-radius:12px; overflow:hidden; aspect-ratio:1/1;">' + cells + '</div>' +
 
             (firstLine
-                ? '<div style="margin-top:28px; text-align:center;">' +
+                // ⚠️ 이 줄 바로 밑에 맨 아래 칸 금이 붙어 있었다 (글자가 금에 얹혀 보였다)
+                ? '<div style="margin:26px 0 22px; text-align:center;">' +
                       '<div style="font-size:13px; font-weight:600; color:#C4B5A9; letter-spacing:3px; margin-bottom:9px;">' +
                           '이 달에 처음 해낸 일</div>' +
                       '<div style="font-family:\'Gowun Batang\',serif; font-size:26px; font-weight:700; ' +
@@ -182,12 +183,15 @@
                   '</div>'
                 : '') +
 
-            '<div style="margin-top:auto; padding-top:28px; border-top:1px solid #F0EBE6; ' +
-                'display:flex; justify-content:space-between; align-items:flex-end;">' +
-                '<div style="font-size:20px; font-weight:600; color:#7A6F68;">' +
+            '<div style="margin-top:auto; padding-top:24px; border-top:1px solid #F0E8DC; ' +
+                'display:flex; justify-content:space-between; align-items:center;">' +
+                '<div style="font-size:20px; font-weight:600; color:#6F6259;">' +
                     esc(bits.join("   ·   ")) + '</div>' +
-                '<div style="font-family:\'Gowun Batang\',serif; font-size:22px; font-weight:700; ' +
-                    'color:#7A6F68; letter-spacing:-1px;">배냇함</div>' +
+                '<div style="display:flex; align-items:center; gap:10px;">' +
+                    '<img src="icon-192x192.png" alt="" style="width:38px; height:38px; border-radius:10px; display:block;">' +
+                    '<span style="font-family:\'Gowun Batang\',serif; font-size:23px; font-weight:700; ' +
+                        'color:#6F6259; letter-spacing:-1px;">배냇함</span>' +
+                '</div>' +
             '</div>' +
 
         '</div>';

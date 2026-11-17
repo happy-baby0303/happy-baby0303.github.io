@@ -162,6 +162,26 @@
         return p.length === 3 ? (Number(p[1]) + "월 " + Number(p[2]) + "일") : key;
     }
 
+    /* 그날 아기 나이 — 홈 맨 위 줄과 같은 셈 ('3개월 22일' · '생후 3주' · '태어난 첫 주' · '태어난 날')
+       엽서 고르는 줄 · 날마다 찍은 사진 엽서 제목(postcard.js)에 쓴다 */
+    window.ageOnDay = function (key) {
+        var A = window.BabyAge;
+        var b = A && A.parse(localStorage.getItem("tosil_startDate")), d = A && A.parse(key);
+        if (!b || !d) return "";
+        var n = A.between(b, d);
+        if (n < 0) return "";
+        if (n === 0) return "태어난 날";
+        if (n < 7) return "태어난 첫 주";
+        var mb = A.monthsBetween(b, d);
+        if (mb < 1) return "생후 " + Math.floor(n / 7) + "주";
+        var last = new Date(b.getFullYear(), b.getMonth() + mb + 1, 0).getDate();
+        var rest = A.between(new Date(b.getFullYear(), b.getMonth() + mb, Math.min(b.getDate(), last)), d);
+        return rest > 0 ? mb + "개월 " + rest + "일" : mb + "개월 되는 날";
+    };
+
+    // 백일 · 첫돌 도장은 '처음 해낸 일' 이 아니라 그날 자체 (기념일)
+    var ANNIV_MS = { m18: 1, m45: 1 };
+
     /* ---------- 엽서로 뽑을 수 있는 것들 ---------- */
 
     function postcardables() {
@@ -174,7 +194,11 @@
                     url: (window.photoThumb ? window.photoThumb(p) : p.url),
                     msId: p.msId || null,
                     label: p.msId ? (msTitle(p.msId) || prettyKey(k)) : prettyKey(k),
-                    sub: p.msId ? "처음 해낸 일" : "그날의 사진"
+                    /* ⚠️ 날마다 찍은 사진 줄이 '9월 17일 / 그날의 사진 · 9월 17일' 로 날짜를 두 번 말했다 → 그날 나이로.
+                          백일 · 첫돌은 '처음 해낸 일' 이 아니다 → 기념일 */
+                    sub: p.msId
+                        ? (ANNIV_MS[p.msId] ? "기념일" : "처음 해낸 일") + "  ·  " + prettyKey(k)
+                        : "그날의 사진" + (window.ageOnDay(k) ? "  ·  " + window.ageOnDay(k) : "")
                 });
             });
         });
@@ -203,7 +227,7 @@
                     '</div>' +
                     '<div style="flex:1; min-width:0;">' +
                         '<div style="font-size:14.5px; font-weight:800; color:var(--text-title); letter-spacing:-0.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(it.label) + '</div>' +
-                        '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:3px;">' + esc(it.sub) + '  ·  ' + esc(prettyKey(it.key)) + '</div>' +
+                        '<div style="font-size:11.5px; font-weight:700; color:var(--text-sub); margin-top:3px;">' + esc(it.sub) + '</div>' +
                     '</div>' +
                     '<span style="font-size:11.5px; font-weight:800; color:#B08423; background:rgba(185,138,46,0.12); padding:6px 11px; border-radius:10px; flex-shrink:0;">엽서</span>' +
                 '</div>';
