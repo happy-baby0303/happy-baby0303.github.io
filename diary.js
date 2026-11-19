@@ -312,7 +312,9 @@
         else btn = d[yk] ? you + "는 벌써 답했어요 · 내 답 쓰기" : "내 답 쓰기";
 
         var bk = A.bookNow();
-        var foot = !bk.pages ? "첫 쪽을 기다려요"
+        /* ⚠️ 처음엔 '첫 쪽을 기다려요' 라고만 적혀서, 책이 있는 줄 모르는 사람은 무슨 쪽인지 몰랐다.
+              쪽은 둘 다 답한 날에 생긴다 (qacore.js scan). 그걸 그대로 말한다 */
+        var foot = !bk.pages ? "둘 다 답하면 문답 책 첫 쪽이 돼요"
                  : bk.inBook ? "「" + bk.title + "」 " + bk.inBook + "쪽"
                  : "「" + A.bookTitle(bk.full) + "」 다 채웠어요";
 

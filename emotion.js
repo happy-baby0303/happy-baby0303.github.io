@@ -736,6 +736,33 @@
         return seedPick(ok, key) || "";
     }
     function pickFor(pool, key, st) { return untag(pickRaw(pool, key, st)); }
+
+    /* 한 편지 안에서 같은 장면 · 같은 말이 두 번 나오지 않게 한다.
+       ⚠️ 여는 말 '그 소리가 좋아서 눈을 감았다' 바로 뒤에 '울다 지쳐 잠들었다' 가 붙었다.
+          잠드는 장면이 둘인데, 하나는 웃으며 하나는 울면서였다.
+          잠을 설친 날 '조용한 하루였다' 로 열고, 바로 '방 안을 몇 바퀴나 돌았다' 가 이어진 날도 있었다.
+          '심장 소리' · '기다려 준' · '내일은 ~할게' 가 한 편지에 두 번씩 나온 날도 있었다.
+       고른 문장이 앞 문장과 겹치면 씨앗만 바꿔 다시 고른다. 안 겹치는 날은 예전과 같은 문장이 나온다. */
+    var MOTIFS = [
+        ["drift", /눈을 감았다|잠들었다|잠이 왔다|졸음이 왔다/],   // 잠드는 장면
+        ["wait", /기다려/],
+        ["heart", /심장 소리/],
+        ["song", /노래|자장가|흥얼/],
+        ["back", /등을 토닥|등을 쓸어/],
+        ["tomorrow", /내일/],
+        ["quiet", /조용한 하루|특별한 일 없는 하루/]
+    ];
+    function motifsOf(line) {
+        var s = untag(line);
+        return MOTIFS.filter(function (m) { return m[1].test(s); }).map(function (m) { return m[0]; });
+    }
+    function pickApart(pick, used) {
+        var line = pick("");
+        for (var i = 1; i <= 5 && line && motifsOf(line).some(function (m) { return used.indexOf(m) > -1; }); i++) {
+            line = pick("~" + i) || line;
+        }
+        return line;
+    }
     /* 새벽을 짝꿍만 챙긴 날 — 그 문장의 '나를 부르는 말' 과 '짝꿍' 을 바꿔 끼운다 */
     function swapRoles(line) {
         return String(line || "").replace(/\{me\}/g, "\u0000").replace(/\{partner\}/g, "{me}").replace(/\u0000/g, "{partner}");
@@ -779,49 +806,55 @@
         var theirsOnly = st.dawnByPartner > 0 && !st.dawnByMe, both = st.dawnByPartner > 0 && st.dawnByMe > 0;
 
         var sl = sleepLevel(st, b), sleepLine = "";
-        if (sl === "good") sleepLine = pickFor(rd.sleepGood, key + "b", st);
+        // 쓴 장면을 모아 두고, 다음 문장은 겹치지 않게 고른다 (pickApart). 잠을 설친 날은 '조용한 하루' 로 열지 않는다
+        var used = sl === "bad" ? ["quiet"] : [];
+        var take = function (line) { used = used.concat(motifsOf(line)); return line; };
+        var intro = take(pickApart(function (s) { return seedPick(rd.intro, key + "a" + s); }, used));
+        if (sl === "good") sleepLine = take(pickApart(function (s) { return pickFor(rd.sleepGood, key + "b" + s, st); }, used));
         else if (sl === "bad") {
-            var rawBad = pickRaw(rd.sleepBad, key + "c", st);
+            var rawBad = take(pickApart(function (s) { return pickRaw(rd.sleepBad, key + "c" + s, st); }, used));
             sleepLine = untag(theirsOnly && tagOf(rawBad) === "night" ? swapRoles(rawBad) : rawBad);
         }
-        paras.push([seedPick(rd.intro, key + "a"), sleepLine]);
+        paras.push([intro, sleepLine]);
 
         // 새벽에 깬 날 — 부모가 제일 힘든 시간을 아기가 알아봐 주는 자리
         if (st.wakes >= 1 && rd.dawn && rd.dawn.length) {
-            var dawnLine = both ? pickFor(rd.dawn.filter(function (x) { return tagOf(x) === "both"; }), key + "n", st) : "";
+            var bothPool = rd.dawn.filter(function (x) { return tagOf(x) === "both"; });
+            var dawnLine = both ? pickApart(function (s) { return pickFor(bothPool, key + "n" + s, st); }, used) : "";
             if (!dawnLine) {
-                dawnLine = pickFor(rd.dawn, key + "n", st);
+                dawnLine = pickApart(function (s) { return pickFor(rd.dawn, key + "n" + s, st); }, used);
                 if (theirsOnly) dawnLine = swapRoles(dawnLine);
             }
-            paras.push([dawnLine]);
+            paras.push([take(dawnLine)]);
         }
 
         var body = [];
         var fl = feedLevel(st, b);
         var pool = fl === "much" ? rd.feedMuch : fl === "little" ? rd.feedLittle : fl === "zero" ? rd.feedZero : (rd.feedNormal || rd.feedMuch);
-        body.push(pickFor(pool, key + ({ much: "d", little: "e", zero: "f" }[fl] || "k"), st));
+        var feedSalt = key + ({ much: "d", little: "e", zero: "f" }[fl] || "k");
+        body.push(take(pickApart(function (s) { return pickFor(pool, feedSalt + s, st); }, used)));
 
         var foodLine = "";
         if (st.foodCount > 0) {
             var msFood = milestoneTitlesOn(key).some(function (t) { return t.indexOf("이유식") > -1; });   // 도감에 이미 적혔으면 겹치지 않게
-            if (rd.foodFirst && !msFood && isFirstFoodDay(s0)) foodLine = seedPick(rd.foodFirst, key + "ff");
+            if (rd.foodFirst && !msFood && isFirstFoodDay(s0)) foodLine = pickApart(function (s) { return seedPick(rd.foodFirst, key + "ff" + s); }, used);
             // ⚠️ 덜 먹은 날 '입을 꼭 닫고 고개를 돌렸다' 바로 뒤에 '대답 대신 입을 또 벌렸다' 가 붙었다
-            else if (rd.food && fl !== "little" && dice("fd") < 0.7) foodLine = seedPick(rd.food, key + "fo");
+            else if (rd.food && fl !== "little" && dice("fd") < 0.7) foodLine = pickApart(function (s) { return seedPick(rd.food, key + "fo" + s); }, used);
         }
-        if (foodLine) body.push(foodLine);
+        if (foodLine) body.push(take(foodLine));
 
         /* 응가 얘기는 다섯 중 넷만 (이유식 얘기가 들어간 날은 둘 중 하나). 매일 나오면 편지가 아니라 보고서다.
            ⚠️ 기저귀를 안 적는 집에도 '오늘은 소식이 없었다' 가 매일 갔다. 기저귀를 적은 날만 말한다. */
-        if (st.poop > 0) body.push(seedPick(rd.poopMuch, key + "g"));
-        else if (st.diaper > 0 && dice("p") < (foodLine ? 0.5 : 0.8)) body.push(seedPick(rd.poopZero, key + "h"));
+        if (st.poop > 0) body.push(take(pickApart(function (s) { return seedPick(rd.poopMuch, key + "g" + s); }, used)));
+        else if (st.diaper > 0 && dice("p") < (foodLine ? 0.5 : 0.8)) body.push(take(pickApart(function (s) { return seedPick(rd.poopZero, key + "h" + s); }, used)));
         paras.push(body);
 
         // 열흘에 한 번쯤 오는 말. 매일 나오면 무뎌진다.
         if (rd.rare && rd.rare.length && dice("r") < 0.12) {
-            paras.push([seedPick(rd.rare, key + "z")]);
+            paras.push([take(pickApart(function (s) { return seedPick(rd.rare, key + "z" + s); }, used))]);
         }
 
-        paras.push([seedPick(rd.outro, key + "i")]);
+        paras.push([pickApart(function (s) { return seedPick(rd.outro, key + "i" + s); }, used)]);
         var t = paras.map(function (g) {
             return g.map(clean).filter(function (x) { return x; }).join(" ");
         }).filter(function (x) { return x; }).join("\n\n");
