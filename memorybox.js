@@ -299,7 +299,10 @@
     function summary() {
         var letters = readJSON("tosil_letters", {});
         var b = birthTime();
-        var together = b ? Math.floor((Date.now() - b) / DAY) : 0;
+        /* ⚠️ 태어난 날을 0일로 세서, 백일(태어난 날 + 99일)에 '함께한 날 99' 가 떴다.
+              함께한 날은 태어난 날이 1일이다 (백일은 100번째 날). 태어나기 전이면 0 */
+        var days = b ? Math.floor((Date.now() - b) / DAY) : -1;
+        var together = days >= 0 ? days + 1 : 0;
 
         var ids = {};
         var achieved = readJSON("tosil_milestones", []);
@@ -314,7 +317,7 @@
         return {
             letters: Object.keys(letters).length,
             firsts: Object.keys(ids).length,
-            together: together > 0 ? together : 0
+            together: together
         };
     }
 

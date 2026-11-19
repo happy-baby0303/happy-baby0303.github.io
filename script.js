@@ -5465,6 +5465,8 @@ window.updateTrackerDashboard = function() {
                 const t = window.statWeekDays(records, nowTime).pop();
                 avgToday = true; avgFeed = t.ml; avgSleepMins = t.night + t.nap; avgDiaper = t.diaper;
             }
+            /* ⚠️ 쓰기 시작한 지 이틀째인데도 '지난 7일 평균' 이라고 적혔다. 어제까지 이레 중 기록한 날이 일곱이 안 되면 그 날 수를 말한다 */
+            const avgTitle = avgToday ? '오늘' : (weekAvg && weekAvg.days < 7 ? `기록한 ${weekAvg.days}일 평균` : '지난 7일 평균');
             const avgSleepH = Math.floor(avgSleepMins / 60);
             const avgSleepM = avgSleepMins % 60;
             const U = (u, mr) => `<span style="font-size:11px; margin-left:2px;${mr ? ' margin-right:2px;' : ''}">${u}</span>`;
@@ -5475,7 +5477,7 @@ window.updateTrackerDashboard = function() {
             let historyHtml = weekCard || `
                 <div style="background: #FAF7F2; padding: 16px; border-radius: 16px; border: 1px solid #EDE6DE; margin-bottom: 16px;">
                     <div style="font-size: 13px; font-weight: 900; color: #7F77DD; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-                        ${avgToday ? '오늘' : '지난 7일 평균'}
+                        ${avgTitle}
                     </div>
                     <!-- ⚠️ 칸 이름이 '평균 수유량 825ml' 였다. 한 번에 먹는 양으로 읽혀서 '하루' 라고 적는다 (기록한 날 수로 나눈 하루 평균) -->
                     <div style="display: flex; justify-content: space-between; text-align: center; gap: 8px;">

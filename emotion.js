@@ -1300,7 +1300,8 @@
         var bits = [], v2 = Number(l.v) >= 2;
         var milk = Number(l.milk) || 0;
         // 옛 편지(v1)는 이유식이 섞였을 수 있다. 기록이 사라져 다시 못 센 날의 큰 숫자는 숨긴다
-        if (milk && (v2 || milk <= 1500)) bits.push("수유 " + milk.toLocaleString() + "ml");
+        // ⚠️ '수유 840ml · 모유 2번' 이라 모유는 수유가 아닌 것처럼 읽혔다. 젖병으로 먹은 양이다 (기록 창의 '분유/유축')
+        if (milk && (v2 || milk <= 1500)) bits.push("분유/유축 " + milk.toLocaleString() + "ml");
         if (l.food) bits.push("이유식 " + Number(l.food).toLocaleString() + "g");
         if (l.breastCount || l.breastMins) bits.push("모유 " + (l.breastCount ? l.breastCount + "번" : "") + (l.breastMins ? (l.breastCount ? " (" + l.breastMins + "분)" : l.breastMins + "분") : ""));
         if (l.sleepMins) {
