@@ -10143,7 +10143,10 @@ window.alert = function (message) {
     else console.log(String(message));
 };
 
-window.showToast = function(message) {
+/* opts.top — 위쪽에 띄운다. 수유 · 기저귀 · 졸릴 때처럼 폰 알림 대신 뜨는 말은 위에서 내려온다 (폰 알림 자리).
+   ⚠️ 앱을 열자마자 '🍼 슬슬 맘마 시간이에요' 가 아래쪽에 떠서, 홈 '지금 하윤이' 의 맘마 · 기저귀 · 잠 숫자를 3초 넘게 가렸다.
+      앱을 여는 건 그 숫자를 보려고다 */
+window.showToast = function(message, opts) {
     const oldToast = document.getElementById('super-toast-msg');
     if (oldToast) oldToast.remove();
 
@@ -10182,8 +10185,8 @@ window.showToast = function(message) {
 
     /* ⚠️ 아래에서 올라온 창의 버튼(알려 주세요 · 저장하기)을 말풍선이 3초 넘게 가렸다 (처음 기록 직후 '알림 켤까요?' 에서).
           말풍선 자리에 떠 있는 창의 버튼이 있으면 화면 위쪽에 띄운다. 홈의 보통 화면에서는 그대로 아래. */
-    let atTop = false;
-    try {
+    let atTop = !!(opts && opts.top);
+    if (!atTop) try {
         const y = window.innerHeight - 124;
         for (const fx of [0.3, 0.5, 0.7]) {
             const el = document.elementFromPoint(window.innerWidth * fx, y);

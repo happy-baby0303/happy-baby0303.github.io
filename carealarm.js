@@ -240,7 +240,7 @@
             if (isAway()) { markSent(k, q.from); return; }                 // 밖에 있는 사람 폰은 조용히
             if (visibleNow) {
                 var w = words(k, q);
-                if (typeof window.showToast === "function") window.showToast(w.t);
+                if (typeof window.showToast === "function") window.showToast(w.t, { top: true });   // 홈 숫자를 가리지 않게 (script.js showToast)
                 (window.__pushSeen || (window.__pushSeen = {}))[w.t] = Date.now();   // 몇 분 뒤 서버 알림이 와도 화면에 또 띄우지 않게
                 markSent(k, q.from);
             } else if (!serverPushes()) {
@@ -252,7 +252,7 @@
             if (isAway()) markSent("sleepy", z.from);
             else if (visibleNow) {
                 var w = sleepyWords(z);
-                if (typeof window.showToast === "function") window.showToast(w.t);
+                if (typeof window.showToast === "function") window.showToast(w.t, { top: true });
                 (window.__pushSeen || (window.__pushSeen = {}))[w.t] = Date.now();
                 markSent("sleepy", z.from);
             } else if (!serverPushes()) {

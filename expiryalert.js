@@ -97,10 +97,18 @@
 
         if (isBad) {
             var names = s.expired.map(function (x) { return x.r.name; });
-            head = "기한이 지난 게 " + s.expired.length + "개 있어요";
-            body = esc(names.slice(0, 3).join(", ")) +
-                   (names.length > 3 ? " 외 " + (names.length - 3) + "개" : "") +
-                   ". 쓰기 전에 확인해 주세요";
+            /* ⚠️ 하나뿐일 때 '기한이 지난 게 1개 있어요 / 분유. 쓰기 전에 확인해 주세요' 라고 떴다.
+                  '분유.' 하고 끊겨서 무엇이 얼마나 지났는지 몰랐다. 하나면 이름과 뜯은 지 며칠인지를 말한다 */
+            if (s.expired.length === 1) {
+                var one = s.expired[0];
+                head = esc(one.r.name) + " 기한이 지났어요";
+                body = "뜯은 지 " + (one.r.limitDays - one.left) + "일 됐어요. 쓰기 전에 확인해 주세요";
+            } else {
+                head = "기한이 지난 게 " + s.expired.length + "개 있어요";
+                body = esc(names.slice(0, 3).join(", ")) +
+                       (names.length > 3 ? " 외 " + (names.length - 3) + "개" : "") +
+                       " — 쓰기 전에 확인해 주세요";
+            }
         } else {
             var f = s.soon[0];
             head = esc(f.r.name) + (f.left === 0 ? " 오늘까지예요" : " " + f.left + "일 남았어요");
