@@ -8,6 +8,7 @@
      가족      settings-cloud-card · st-together-card (script.js) · family-members-card (rolelock.js)
                st-role-card (script.js) · gh-helper-row (grandhome.js) · parent-phone-card · parent-notice-card (homefix.js, 줄 밑에 접혀 있다)
      알림      remind-card (remind.js) · care-alarm-card · pushcheck-card (pushcheck.js) · push-permission-card (script.js)
+               widget-card (widget.js, 앱 1.1.4 · 바탕화면에 위젯을 아직 안 놓았을 때만)
      PLUS      st-plus-banner (script.js) · plusfree-card (plusfree.js)
      기록 보관 export-card (export.js) · st-report-card (script.js, 플레이 앱에선 숨는다)
    묶음 안에 보이는 카드가 하나도 없으면 묶음째 숨긴다 (돌봄 화면 · 플레이 앱).
@@ -24,7 +25,7 @@
 
     var SLOTS = [
         ["st-family", ["settings-cloud-card", "st-together-card", "family-members-card", "st-role-card", "gh-helper-row", "parent-phone-card", "parent-notice-card"]],
-        ["st-alarm",  ["remind-card", "care-alarm-card", "push-permission-card", "pushcheck-card"]],
+        ["st-alarm",  ["remind-card", "care-alarm-card", "push-permission-card", "widget-card", "pushcheck-card"]],
         ["st-plus",   ["st-plus-banner", "plusfree-card"]],
         ["st-keep",   ["export-card", "st-report-card"]]
     ];
