@@ -11872,9 +11872,17 @@ window.adminClickTimer = null;
    의견을 보낼 때 같이 가는 판과 같은 값이라, 받은 의견이 어느 판 이야기인지 맞춰 볼 수 있다 */
 /* ⚠️ script.js 를 고친 날짜만 보여서, 다른 파일만 고쳐 올린 날에는 옛 날짜(11.6)가 그대로 떴다.
       index.html 의 판 번호(sw.js 의 baenaet-vN 과 같은 수)를 붙인다 — 받은 의견이 어느 판인지 정확히 맞춰 볼 수 있다. */
+/* ⚠️ 플레이 앱에서도 '1.0.0' 이 떴다. 플레이 스토어엔 1.1.3 · 1.1.4 로 보여서 업데이트가 안 된 것처럼 보였다.
+      앱이면 껍데기 버전을 쓴다 (native.js 가 1.1.4 부터 받아 둔다. 그 전 껍데기는 1.1.3). 웹 · 홈 화면 앱은 1.0.0 그대로 */
+window.appVersionName = function () {
+    if (window.__NATIVE_APP__ !== true) return '1.0.0';
+    let v = '';
+    try { v = localStorage.getItem('tosil_native_ver') || ''; } catch (e) {}
+    return /^\d+(\.\d+){1,3}$/.test(v) ? v : '1.1.3';
+};
 window.appBuildLabel = function () {
     const b = document.querySelector('meta[name="baenaet-build"]');
-    if (b && /^\d+$/.test(b.content || '')) return '1.0.0 (' + b.content + ')';
+    if (b && /^\d+$/.test(b.content || '')) return window.appVersionName() + ' (' + b.content + ')';
     const el = document.querySelector('script[src*="script.js?v="]');
     const m = el && /v=\d{4}(\d{2})(\d{2})/.exec(el.getAttribute('src') || '');
     return '1.0.0' + (m ? ' · ' + Number(m[1]) + '.' + Number(m[2]) : '');

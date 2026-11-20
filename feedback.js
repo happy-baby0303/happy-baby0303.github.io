@@ -40,7 +40,9 @@
         var b = document.querySelector('meta[name="baenaet-build"]');
         var el = document.querySelector('script[src*="script.js?v="]');
         var m = el && /v=([\w.-]+)/.exec(el.getAttribute("src") || "");
-        return (b && b.content ? "b" + b.content + " " : "") + (m ? m[1] : "");
+        // 앱이면 껍데기 버전도 (어느 앱 버전에서 생긴 일인지 — 1.1.4 위젯 · 별점 창부터 앱마다 다르다)
+        var app = window.__NATIVE_APP__ === true && typeof window.appVersionName === "function" ? "app " + window.appVersionName() + " " : "";
+        return app + (b && b.content ? "b" + b.content + " " : "") + (m ? m[1] : "");
     }
     function close() { var w = document.getElementById("fb-sheet"); if (w) w.remove(); }
 

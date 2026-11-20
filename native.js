@@ -340,7 +340,20 @@
     /* ==========================================================
        4. 준비되면 바로 연결
        ---------------------------------------------------------- */
+    /* 플레이 스토어에 보이는 앱 버전 (1.1.4) — 설정 '앱 버전' 줄 · 의견 보내기에 쓴다.
+       1.1.4 껍데기부터 BaenaetApp 이 알려 준다. 그 전 껍데기면 지운다 (script.js 가 1.1.3 으로 본다) */
+    function noteVersion() {
+        var P = plugin('BaenaetApp');
+        try {
+            if (!P || typeof P.info !== 'function') { localStorage.removeItem('tosil_native_ver'); return; }
+            P.info().then(function (r) {
+                if (r && /^\d+(\.\d+){1,3}$/.test(String(r.version || ''))) localStorage.setItem('tosil_native_ver', String(r.version));
+            }).catch(function () {});
+        } catch (e) {}
+    }
+
     function boot() {
+        noteVersion();
         listenPush();
         if (!patchKakao()) {
             // 카카오 SDK 가 늦게 뜨는 화면 대비: 잠깐 기다렸다 다시
