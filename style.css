@@ -589,12 +589,12 @@ body.dark-mode #smart-banner-container > div span[style*="background: #B98A2E"] 
     transition: 0.2s !important;
     box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important; 
 }
-/* 🚨 까만색 삭제! 따뜻하고 맑은 수채화 블루 톤으로 변경 */
+/* 고른 도구 칸 — ⚠️ 여기만 '수채화 파랑'(#5B8ACA)이 남아 있었다. 앱의 다른 고른 칸('기록 · 통계 보기' 등)처럼 연보라로 */
 .tool-chip.active {
-    background: #F0F5FC !important; 
-    color: #5B8ACA !important; 
-    border: 1px solid #D5E2F2 !important;
-    box-shadow: 0 4px 12px rgba(91,138,202,0.15) !important; 
+    background: #F0EEFB !important; 
+    color: #6A61CE !important; 
+    border: 1px solid #DCD8F5 !important;
+    box-shadow: 0 4px 12px rgba(127,119,221,0.15) !important; 
 }
 
 .tool-chip .t-icon { font-size: 26px !important; line-height: 1 !important; margin-bottom: 2px !important;}
@@ -1451,17 +1451,16 @@ body.dark-mode .category-chip:not(.active) {
 .tool-chip .t-icon { font-size: 26px !important; line-height: 1 !important; margin-bottom: 2px !important;}
 .tool-chip .t-label { font-size: 13px !important; font-weight: 800 !important; }
 
-/* 🚨 활성화(클릭) 상태 - 수채화 블루톤 배경 */
+/* 고른 도구 칸 (위의 같은 규칙을 덮는 자리 — 둘 다 연보라) */
 .tool-chip.active {
-    background: #F0F5FC !important; 
-    border: 1px solid #D5E2F2 !important;
-    box-shadow: 0 4px 12px rgba(91,138,202,0.15) !important; 
+    background: #F0EEFB !important; 
+    border: 1px solid #DCD8F5 !important;
+    box-shadow: 0 4px 12px rgba(127,119,221,0.15) !important; 
 }
 
-/* 활성화되었을 때 하얀색 글씨 찌꺼기 삭제! 진한 파란색으로 뚜렷하게! */
 .tool-chip.active,
 .tool-chip.active .t-label { 
-    color: #5B8ACA !important; 
+    color: #6A61CE !important; 
 }
 
 /* ============================================================

@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="179">
+    <meta name="baenaet-build" content="180">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -107,7 +107,7 @@
                   이제 시작 화면에서 inapp.js 가 안내 창(주소 복사 포함)을 띄운다. */
         }
     </script>
-    <link rel="stylesheet" href="style.css?v=20261109">
+    <link rel="stylesheet" href="style.css?v=20261121">
     <link rel="stylesheet" href="tune.css?v=3">
 
 <style>
@@ -1607,10 +1607,11 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <div style="display:flex; align-items:center; gap:12px; flex: 1; min-width: 0;">
                         <div style="font-size: 32px; background: var(--bg-sub); width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--border);">🎁</div>
                         <div style="flex: 1; min-width: 0;">
-                            <input type="text" id="v-goal-text" placeholder="아기 전집 사기" onchange="window.saveGoal()" style="background:transparent; border:none; color:var(--text-m); font-size: 15px; font-weight: 900; width: 100%; outline:none; margin-bottom: 4px; padding: 0;">
+                            <input type="text" id="v-goal-text" placeholder="모을 곳 적기 (예: 아기 전집)" onchange="window.saveGoal()" style="background:transparent; border:none; color:var(--text-m); font-size: 15px; font-weight: 900; width: 100%; outline:none; margin-bottom: 4px; padding: 0;">
                             <!-- 자바스크립트 자동 리사이즈 끄고, CSS 플렉스로 영역 침범 방어! -->
                             <div style="display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 6px;">
-                                <span style="font-size: 12px; font-weight: 700; color: var(--text-s); flex-shrink: 0;">목표액:</span>
+                                <!-- ⚠️ '아기 전집 사기 / 목표액:' — 앱이 정해 둔 목표처럼 보였다. 적는 칸이라는 게 보이게 '예:' 를 붙이고 쌍점은 뺐다 -->
+                                <span style="font-size: 12px; font-weight: 700; color: var(--text-s); flex-shrink: 0;">목표</span>
                                 <input type="text" inputmode="numeric" id="v-goal-amount" placeholder="1,000,000" onkeyup="formatNum(this); window.saveGoal();" style="flex: 1; min-width: 0; background:transparent; border:none; color:#B98A2E; font-size: 15px; font-weight: 900; text-align: right; outline:none; padding: 0;">
                                 <span style="font-size: 12px; font-weight: 800; color: var(--text-m); flex-shrink: 0;">원</span>
                             </div>
