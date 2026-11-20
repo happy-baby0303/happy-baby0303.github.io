@@ -2113,7 +2113,7 @@ function renderFeverTimeline() {
     let records = JSON.parse(localStorage.getItem('tosil_fever_records')) || [];
     
     if(records.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:40px 20px; background:var(--bg-sub, #FAF7F2); border-radius:16px; border:1px dashed #EDE6DE;">아기가 아프지 않아서 기록이 비어있네요💚</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:40px 20px; background:var(--bg-sub, #FAF7F2); border-radius:16px; border:1px dashed #EDE6DE;">아직 적은 열 기록이 없어요</div>`;
         ['fever-timer-box','fever-chart-container','fever-alert'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display='none'; });
         if(feverTimerInterval) clearInterval(feverTimerInterval);
         
@@ -8893,7 +8893,7 @@ window.renderSettingsTab = function() {
                 
                 <!-- 🚨 gap 추가 & 텍스트 한 줄 고정 (white-space: nowrap) -->
                 <div onclick="window.openPediatricianReport()" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; cursor: pointer; gap: 12px;">
-                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🏥 소아과 진료용 리포트</div>
+                    <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">소아과 진료 브리핑</div>
                     <div style="background: rgba(185,138,46,0.12); color: #B98A2E; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; flex-shrink: 0; white-space: nowrap;">PLUS</div>
                 </div>
             </div>

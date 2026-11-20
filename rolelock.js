@@ -416,6 +416,22 @@
             (helpers ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);line-height:1.6;margin-top:10px;word-break:keep-all;">' +
                 '돌봄이 끝나면 연결을 끊어 주세요. 그 폰에서는 더 이상 기록을 보거나 남길 수 없어요. 엄마 아빠 둘만의 기록(가계부 · 문답 · 편지)은 처음부터 보이지 않아요.</div>' : '');
         card.setAttribute("data-labels", JSON.stringify(labels));
+        partnerInvite(m, dev, me);
+    }
+
+    /* ⚠️ 아빠가 이미 가족방에 있는데도 설정 '안심 클라우드' 의 큰 단추가 '아빠 초대하기' 였다.
+          짝꿍 폰이 한 달 안에 이 가족방으로 열렸으면 그 단추는 접는다.
+          (짝꿍이 폰을 바꿔도 카카오로 들어오면 원래 가족방으로 돌아온다 — familyhome.js) */
+    function partnerInvite(m, dev, me) {
+        var btn = document.querySelector('#settings-cloud-card [onclick*="sendKakaoInvite(\'master\')"]');
+        if (!btn) return;
+        var mine = localStorage.getItem("user_role"), want = mine === "mom" ? "dad" : (mine === "dad" ? "mom" : "");
+        var now = Date.now();
+        var inRoom = !!want && Object.keys(m).some(function (u) {
+            var x = dev[u];
+            return u !== me && m[u] !== "viewer" && x && x.role === want && x.at && now - x.at < 30 * DAY;
+        });
+        btn.style.display = inRoom ? "none" : "";
     }
 
     window.__tidyMember = function (uid) {

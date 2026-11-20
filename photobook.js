@@ -649,7 +649,8 @@
             if (window.jspdf && window.jspdf.jsPDF) return res();
             var s = document.createElement("script");
             s.src = JSPDF_CDN;
-            s.onload = function () { res(); };
+            // 받기는 됐는데 속이 비어 있을 때도 (막힌 망 · 잘린 파일) 못 불러온 것으로 본다
+            s.onload = function () { (window.jspdf && window.jspdf.jsPDF) ? res() : rej(new Error("jsPDF 없음")); };
             s.onerror = function () { rej(new Error("jsPDF 로드 실패")); };
             document.head.appendChild(s);
         });
@@ -874,7 +875,9 @@
         return bakeBook().catch(function (e) {
             console.error("[포토북] 실패", e);
             closeProgress();
-            toast("책을 만들지 못했어요: " + (e && e.message ? e.message : "알 수 없는 오류"));
+            /* ⚠️ '책을 만들지 못했어요: Cannot read properties of undefined (reading ...)' 처럼 영어 오류문이 그대로 떴다.
+                  자세한 건 위의 console.error 에 남기고, 화면에는 할 수 있는 일을 말한다 */
+            toast("책을 만들지 못했어요. 잠시 뒤에 다시 해 주세요");
         });
     };
 
@@ -898,7 +901,7 @@
 
         progress(0, 1, "재료를 모으는 중이에요");
         try { await ensureJsPDF(); }
-        catch (e) { closeProgress(); return toast("책 만들기 도구를 불러오지 못했어요"); }
+        catch (e) { closeProgress(); return toast("책 만들기 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 해 주세요"); }
 
         // 1) 페이지 목록부터 짠다
         var pages = [];

@@ -73,6 +73,22 @@
         return n >= 0 ? "D+" + n + "일" : "";
     }
 
+    /* 예시 글도 그날 아기 나이에 맞춘다.
+       ⚠️ 여덟 달 된 아기의 한 줄 칸에도 늘 '오늘 처음으로 나를 보고 웃었다' (생후 두 달 즈음 일) 가 떠 있었다 */
+    function hintFor(k) {
+        var s = localStorage.getItem("tosil_startDate");
+        var b = s ? new Date(s + "T00:00:00").getTime() : NaN;
+        if (isNaN(b)) return "오늘 처음으로 나를 보고 웃었다";
+        var n = Math.floor((fromKey(k).getTime() - b) / DAY);
+        if (n < 0) return "오늘 처음으로 태동을 느꼈다";
+        if (n < 75) return "오늘 처음으로 나를 보고 웃었다";
+        if (n < 150) return "까르르 소리 내서 한참 웃었다";
+        if (n < 240) return "혼자 뒤집고는 스스로도 놀란 얼굴이었다";
+        if (n < 330) return "소파를 잡고 서서 나를 보고 웃었다";
+        if (n < 480) return "한 발짝 떼고 내 품으로 왔다";
+        return "처음으로 두 단어를 이어서 말했다";
+    }
+
     function repaint() {
         if (typeof window.renderMemoryBox === "function") {
             try { window.renderMemoryBox(); } catch (e) {}
@@ -237,7 +253,7 @@
                 esc(prettyKey(editing.key)) + (ddayOf(editing.key) ? "  ·  " + esc(ddayOf(editing.key)) : "") + '</div>' +
 
             '<textarea id="note-input" rows="5" maxlength="' + MAX_LEN + '" ' +
-                'placeholder="오늘 처음으로 나를 보고 웃었다" ' +
+                'placeholder="' + esc(hintFor(editing.key)) + '" ' +
                 'style="width:100%; box-sizing:border-box; padding:16px; border-radius:16px; border:1px solid var(--border); ' +
                 'background:var(--bg-sub); color:var(--text-m); font-family:\'Nanum Pen Script\',cursive; ' +
                 'font-size:22px; line-height:1.6; outline:none; resize:none;">' + esc(cur) + '</textarea>' +
