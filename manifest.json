@@ -67,6 +67,18 @@
       ]
     },
     {
+      "name": "수면 기록하기",
+      "short_name": "수면 기록",
+      "description": "수면 기록 창을 바로 엽니다",
+      "url": "./index.html?go=rec&k=sleep",
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "오늘 사진 담기",
       "short_name": "사진 담기",
       "description": "오늘의 아기 얼굴을 배냇함에 담습니다",
