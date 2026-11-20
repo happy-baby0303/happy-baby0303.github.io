@@ -53,6 +53,11 @@
     function isAway() { return localStorage.getItem("tosil_where") === "away" && localStorage.getItem("user_role") !== "senior"; }
     function serverPushes() { return !!(localStorage.getItem("fcm_token") && localStorage.getItem("family_sync_code")); }
     function sleepyOn() { return localStorage.getItem(SLEEPY_KEY) !== "off"; }
+    // 지금 재우는 중인가 (수면 타이머 · 둘째부터는 열쇠 끝에 _2 · 14시간이 넘은 건 끄는 걸 잊은 것)
+    function asleepNow() {
+        var s = Number(localStorage.getItem("tosil_sleep_start" + (window.currentBabySuffix || ""))) || 0, now = Date.now();
+        return s > 0 && s <= now && now - s < 14 * 3600000;
+    }
     window.sleepyPushOn = sleepyOn;
 
     function latest(type) {
@@ -112,6 +117,14 @@
     }
     function words(k, p) {
         var n = nick(), t = p.every ? hm(p.every) : "", when = p.from ? clock(p.from) : "";
+        /* ⚠️ 아기가 자는 중(1시간 10분)인데 '슬슬 맘마 시간이에요' 가 떴다. 깨워서 먹이라는 말처럼 들린다.
+              자는 중이면 깬 뒤의 일로 말한다 (서버 careWords 의 asleep 과 같은 말) */
+        if (p.asleep) {
+            var ago = t && when ? when + (k === "feed" ? "에 먹고 " : "에 갈고 ") + t + "이 지났어요. " : "";
+            return k === "feed"
+                ? { t: "🍼 깨면 맘마 먹일 때예요", b: ago + "지금은 자는 중이에요" }
+                : { t: "🧷 깨면 기저귀 한번 봐 주세요", b: ago + "지금은 자는 중이에요" };
+        }
         var FEED = [
             ["🍼 슬슬 맘마 시간이에요", t && when ? when + "에 먹고 " + t + "이 지났어요" : n + "가 곧 배고프다고 할 거예요"],
             ["🍼 " + n + " 배꼽시계가 울릴 때예요", when ? "마지막 맘마는 " + when + (/분$/.test(when) ? "이었어요" : "였어요") : "천천히 준비해 주세요"],
@@ -238,6 +251,7 @@
             if (!q || now < q.at || now > q.at + LATE_MAX) return;
             if (s[key + ":" + k] === q.from) return;
             if (isAway()) { markSent(k, q.from); return; }                 // 밖에 있는 사람 폰은 조용히
+            q.asleep = asleepNow();
             if (visibleNow) {
                 var w = words(k, q);
                 if (typeof window.showToast === "function") window.showToast(w.t, { top: true });   // 홈 숫자를 가리지 않게 (script.js showToast)

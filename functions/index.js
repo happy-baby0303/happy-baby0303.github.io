@@ -808,10 +808,18 @@ const LATE_MAX = 6 * 3600 * 1000;
 const AWAY_MAX = 14 * 3600 * 1000;
 const SLEEPY_LATE = 15 * 60 * 1000;
 
-function careWords(kind, name, from, every, at) {
+function careWords(kind, name, from, every, at, asleep) {
   const n = pushNick(name);
   const t = every ? hm(every) : "";
   const when = from ? kTime(from) : "";
+  /* ⚠️ 아기가 자는 중인데 '슬슬 맘마 시간이에요' 가 갔다. 깨워서 먹이라는 말처럼 들린다.
+        자는 중이면 깬 뒤의 일로 말한다 (앱 carealarm.js words 의 asleep 과 같은 말) */
+  if (asleep) {
+    const ago = t && when ? `${when}${kind === "feed" ? "에 먹고 " : "에 갈고 "}${t}이 지났어요. ` : "";
+    return kind === "feed"
+      ? ["🍼 깨면 맘마 먹일 때예요", `${ago}지금은 자는 중이에요`]
+      : ["🧷 깨면 기저귀 한번 봐 주세요", `${ago}지금은 자는 중이에요`];
+  }
   const FEED = [
     ["🍼 슬슬 맘마 시간이에요", t && when ? `${when}에 먹고 ${t}이 지났어요` : `${n}가 곧 배고프다고 할 거예요`],
     [`🍼 ${n} 배꼽시계가 울릴 때예요`, when ? `마지막 맘마는 ${when}${/분$/.test(when) ? "이었어요" : "였어요"}` : "천천히 준비해 주세요"],
@@ -850,6 +858,20 @@ function sleepyWords(j) {
   ];
   const list = j.night ? NIGHT : NAP;
   return list[Math.floor(Number(j.at) / 3600000) % list.length];
+}
+
+/* 지금 재우는 중인가 — 앱(sleepsync.js)이 settings_{가족코드}{꼬리표}/sleep_now 에 재우기 시작 시각을 적는다.
+ * 14시간이 넘은 건 끄는 걸 잊은 것으로 본다 */
+async function sleepingNow(db, code, key, now) {
+  if (!/^(main|_[A-Za-z0-9]{1,30})$/.test(String(key))) return false;
+  try {
+    const snap = await db.collection("settings_" + code + (key === "main" ? "" : key)).doc("sleep_now").get();
+    const s = snap.exists ? Number((snap.data() || {}).start) || 0 : 0;
+    return s > 0 && s <= now && now - s < 14 * 3600 * 1000;
+  } catch (e) {
+    logger.warn("[care] 잠 상태 확인 실패", { code, message: e.message });
+    return false;
+  }
 }
 
 /* 깬 뒤에 다시 잠든 기록이 있나 (타이머를 켰거나 잠을 적었다)
@@ -923,7 +945,7 @@ exports.careReminder = onSchedule(
           if (now - at > LATE_MAX) return;                         // 너무 늦었다 — 조용히 넘긴다
           const every = Number(c[kind + "Every"]) || 0;
           jobs.push({
-            kind, at, every,
+            kind, key, at, every,
             from: Number(c[kind + "From"]) || (every ? at - every * 60000 : 0),
             name: c.babyName || d.babyName || "우리 아기",
           });
@@ -952,7 +974,8 @@ exports.careReminder = onSchedule(
               const sleepy = j.kind === "sleepy";
               if (sleepy && await sleptSince(db, code, j.key, j.wake)) continue;   // 그새 잠들었다
               const tk = await tokensOf(db, careTargets(d, roles, j.kind, now));
-              const [title, body] = sleepy ? sleepyWords(j) : careWords(j.kind, j.name, j.from, j.every, j.at);
+              const asleep = !sleepy && await sleepingNow(db, code, j.key, now);   // 자는 중이면 '깨면 맘마 먹일 때예요'
+              const [title, body] = sleepy ? sleepyWords(j) : careWords(j.kind, j.name, j.from, j.every, j.at, asleep);
               /* 맘마 · 기저귀 알림을 누르면 바로 그 기록 창 (앱 script.js 의 ?go=rec). 졸릴 때 알림은 홈 */
               const link = (j.kind === "feed" || j.kind === "diaper") ? "index.html?go=rec&k=" + j.kind : "index.html";
               await sendTo(db, tk, { title, body, tag: "care-" + j.kind, link, ttl: sleepy ? TTL.sleepy : TTL.care });

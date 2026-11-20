@@ -8258,6 +8258,8 @@ window.renderBabyInfo = function() {
         const last = new Date(birthDate.getFullYear(), birthDate.getMonth() + mb + 1, 0).getDate();
         const anniv = new Date(birthDate.getFullYear(), birthDate.getMonth() + mb, Math.min(birthDate.getDate(), last));
         const rest = Math.round((today.getTime() - anniv.getTime()) / 86400000);
+        // ⚠️ 첫 생일에 '12개월 되는 날' 이라고 떴다. 돌은 돌이라고 부른다
+        if (rest === 0 && mb > 0 && mb % 12 === 0) return ['첫돌', '두 돌', '세 돌', '네 돌', '다섯 돌'][mb / 12 - 1] || `${mb / 12}번째 생일`;
         return rest > 0 ? `${mb}개월 ${rest}일` : rest === 0 ? `${mb}개월 되는 날` : `${mb}개월`;
     })();
     if(nameEl) nameEl.innerText = ageLine ? `${savedName} · ${ageLine}` : `${savedName}의 공간`;
@@ -8265,6 +8267,16 @@ window.renderBabyInfo = function() {
     if(document.getElementById('play-dday-badge')) document.getElementById('play-dday-badge').innerText = diffDays > 0 ? diffDays : 0;
 
     let ddayText = diffDays > 0 ? `D+${diffDays}일` : diffDays < 0 ? `D${diffDays}일` : `D-Day`;
+    /* ⚠️ 백일(태어난 날 + 99일)에 홈 맨 위는 'D+99일', 바로 밑 기념일 카드는 '꿈이의 백일' 이었다.
+          백일 · 오십일 같은 일수 기념일은 태어난 날을 1일로 센다 (anniversaries.js). D+ 는 태어난 날이 D-Day 라 하루 어긋난다.
+          D+ 를 통째로 하루 올리면 돌(태어난 날 + 365일)이 D+366 이 되고, 배 속에서 세던 D-Day 와도 끊긴다.
+          그래서 일수 기념일 당일에만 숫자 대신 '오늘 백일' 을 크게 띄운다 */
+    if (diffDays > 0 && typeof window.anniversariesOn === 'function') {
+        const tk = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const DAY_ANNIV = ['오십일', '백일', '이백일', '삼백일', '오백일', '천일'];
+        const hit = (window.anniversariesOn(tk) || []).find(a => DAY_ANNIV.indexOf(a.label) > -1);
+        if (hit) ddayText = `오늘 ${hit.label}`;
+    }
 
     if(ddayEl) ddayEl.innerText = ddayText;
 
@@ -10159,7 +10171,7 @@ window.showToast = function(message, opts) {
         bottom: -50px; 
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(49, 51, 63, 0.95);
+        background: #31333f; /* ⚠️ 위쪽에 뜰 때 뒤의 '원더윅스' 글씨가 말풍선에 비쳐 보였다. 바탕은 비치지 않게 */
         color: #ffffff;
         padding: 14px 24px;
         border-radius: 20px;
