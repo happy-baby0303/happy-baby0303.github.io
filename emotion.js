@@ -1680,15 +1680,27 @@ wrap.innerHTML =
         var name = babyName();
         var WD = ["일", "월", "화", "수", "목", "금", "토"];
 
+        /* ⚠️ 밤 12시에 열면 '오늘' 줄에 낮잠만 있고, 9시부터 자고 있는 잠은 빠져 있었다 (홈 '오늘 하루' 띠에는 보이는데).
+              지금 자는 중이면 잠든 때부터 지금까지를 오늘 줄에 그린다. 평균 · 최장에는 안 넣는다 (아직 안 끝났다) */
+        var live = null;
+        try {
+            var ss = Number(localStorage.getItem("tosil_sleep_start")), t0 = days.length ? days[days.length - 1].ts : 0;
+            if (ss > 0 && t0) {
+                var la = Math.max(0, Math.round((ss - t0) / 60000)), lb = Math.round((Date.now() - t0) / 60000);
+                if (lb > la && lb - la < 20 * 60) live = [la, lb];
+            }
+        } catch (e) {}
+
         var rows = "";
         days.forEach(function (x) {
             var d = new Date(x.ts), total = 0;
-            (x.segs || []).forEach(function (g) { total += Math.max(0, g[1] - g[0]); });
+            var segs = x.today && live ? (x.segs || []).concat([live]) : x.segs;
+            (segs || []).forEach(function (g) { total += Math.max(0, g[1] - g[0]); });
             rows +=
             '<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">' +
-                '<div style="width:46px; flex-shrink:0; font-size:11.5px; font-weight:700; color:' + (x.segs ? "var(--text-s)" : "var(--text-sub)") + ';">' +
+                '<div style="width:46px; flex-shrink:0; font-size:11.5px; font-weight:700; color:' + (segs ? "var(--text-s)" : "var(--text-sub)") + ';">' +
                     (x.today ? '오늘' : d.getDate() + '일 ' + WD[d.getDay()]) + '</div>' +
-                '<div style="flex:1;">' + miniRibbon(x.segs, 18) + '</div>' +
+                '<div style="flex:1;">' + miniRibbon(segs, 18) + '</div>' +
                 '<div style="width:74px; flex-shrink:0; text-align:right; font-size:12px; font-weight:800; white-space:nowrap; color:' + (total ? "var(--text-m)" : "var(--text-sub)") + ';">' +
                     (total ? dur(total) : '없음') + '</div>' +
             '</div>';

@@ -15898,8 +15898,8 @@ window.downloadPediatricianPDF = function() {
 
     window.showConfirm(
         isIOS
-          ? "리포트가 만들어졌어요<br><span style='font-size:12px;color:#A3958A;'>아이폰은 공유창에서 '이미지 저장'을 눌러주세요.</span>"
-          : "📄 갤러리에 저장되었습니다<br><span style='font-size:12px;color:#A3958A;'>카톡으로 바로 보내시겠어요?</span>",
+          ? "진료 브리핑을 만들었어요<br><span style='font-size:12px;color:#A3958A;'>아이폰은 공유창에서 '이미지 저장'을 눌러 주세요.</span>"
+          : "진료 브리핑을 갤러리에 저장했어요<br><span style='font-size:12px;color:#A3958A;'>카톡으로 바로 보낼까요?</span>",
         function() {
             if (canShare) navigator.share({ files: [file], title: '소아과 진료 참고 자료' }).catch(()=>{});
         },
@@ -15907,7 +15907,7 @@ window.downloadPediatricianPDF = function() {
     );
     box.remove();
 });
-        }).catch(e => { console.error(e); box.remove(); window.showToast("리포트 생성 실패"); });
+        }).catch(e => { console.error(e); box.remove(); window.showToast("진료 브리핑을 만들지 못했어요. 잠시 뒤에 다시 해 주세요"); });
     }, 300);
 };
 

@@ -1178,7 +1178,7 @@
         return bakeBook({ preview: true }).catch(function (e) {
             console.error("[포토북 미리보기] 실패", e);
             closeProgress();
-            toast("미리보기를 만들지 못했어요: " + (e && e.message ? e.message : "알 수 없는 오류"));
+            toast("미리보기를 만들지 못했어요. 잠시 뒤에 다시 해 주세요");   // 영어 오류문은 console.error 에만
         });
     };
 
