@@ -14823,16 +14823,20 @@ window.openBabyManagementModal = function() {
                // 🚨 프록시를 타면 첫째('' 꼬리표)가 지금 보는 아기 이름으로 바뀐다.
         //    전환 버튼(7283줄)과 같은 방식으로 원본에서 직접 읽는다.
         const babyName = originalGetItem.call(localStorage, 'tosil_babyName' + p.id) || p.name || '우리아기';
+        const safeName = String(babyName).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        /* ⚠️ 아기가 하나뿐이어도, 첫째(지울 수 없는 칸)여도 빨간 '삭제' 단추가 늘 떠 있었다. 누르면 '지울 수 없어요' 만 나왔다.
+              지울 수 있는 아기에만 단추를 단다. 이름은 단추 속 글자에 넣지 않는다 (이름에 ' 가 있으면 단추가 깨졌다) */
+        const canDelete = !!p.id && profiles.length > 1;
 
         listHtml += `
             <div style="background: #FFFFFF; border: 1px solid #EDE6DE; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span style="font-size: 15px; font-weight: 800; color: #4A413C;">${babyName}</span>
+                    <span style="font-size: 15px; font-weight: 800; color: #4A413C;">${safeName}</span>
                     ${isCurrent ? '<span style="background: #F2F0FC; color: #7F77DD; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px;">현재 보는 중</span>' : ''}
                 </div>
                 <div style="display: flex; gap: 8px;">
                     <button onclick="window.editBabyProfile('${p.id}')" style="flex:1; background: #FFFFFF; color: #5A4D44; border: 1px solid #EDE6DE; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">정보 수정</button>
-                    <button onclick="window.deleteBabyProfile('${p.id}', '${babyName}')" style="flex:1; background: #FFF0F1; color: #D32F2F; border: 1px solid #FFE3E8; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">삭제</button>
+                    ${canDelete ? `<button onclick="window.deleteBabyProfile('${p.id}')" style="flex:1; background: #FFF0F1; color: #D32F2F; border: 1px solid #FFE3E8; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">삭제</button>` : ''}
                 </div>
             </div>
         `;
@@ -14842,14 +14846,12 @@ window.openBabyManagementModal = function() {
         <div id="baby-mgmt-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; display: flex; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(2px);">
             <div style="background: #FFFFFF; width: 100%; max-width: 320px; border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <div style="font-size: 18px; font-weight: 800; color: #4A413C;">👶 아기 프로필 관리</div>
+                    <div style="font-size: 18px; font-weight: 800; color: #4A413C;">아기 정보 관리</div>
                     <button onclick="document.getElementById('baby-mgmt-modal').remove()" style="background: none; border: none; font-size: 20px; color: #A3958A; cursor: pointer; padding: 0;">✕</button>
                 </div>
                 <div style="max-height: 300px; overflow-y: auto; margin-bottom: 16px;">${listHtml}</div>
-                
-                <!-- 🚨 이 부분이 변경되었습니다! 버튼을 누르면 모달이 닫히고 VIP 검사 로직(addNewBabyProfile)으로 곧바로 연결됩니다 -->
                 <button onclick="document.getElementById('baby-mgmt-modal').remove(); window.addNewBabyProfile();" style="width: 100%; padding: 16px; background: #7F77DD; color: #FFF; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(127, 119, 221,0.2);">
-                    <span style="font-size:16px;">➕</span> 새 아기 추가하기
+                    <span style="font-size:18px; font-weight:700; line-height:1;">+</span> 새 아기 추가하기
                 </button>
             </div>
         </div>
@@ -14862,9 +14864,14 @@ window.openBabyManagementModal = function() {
 // ==========================================
 window.deleteBabyProfile = function(targetId, babyName) {
     const profiles = window.getBabyProfiles();
-    
+    // 이름은 여기서 읽는다 (관리 창 단추에는 이제 이름을 안 넣는다) · 확인 창에 넣기 전에 글자로만 다룬다
+    if (!babyName) {
+        const hit = profiles.find(p => p.id === targetId);
+        babyName = originalGetItem.call(localStorage, 'tosil_babyName' + targetId) || (hit && hit.name) || '우리아기';
+    }
+    babyName = String(babyName).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
     // 방어막: 아기가 1명밖에 없으면 삭제 불가!
-        // 방어막: 아기가 1명밖에 없으면 삭제 불가!
     if (profiles.length <= 1) {
         return window.showToast("아기 프로필은 하나는 남겨 둬야 해요");
     }
@@ -14958,25 +14965,47 @@ window.editBabyProfile = function(targetId) {
                 </div>`
         : '';
 
+    /* ⚠️ 닫는 단추가 없었다. 열면 '저장하기' 를 눌러야만 나갈 수 있었다 (아이폰 홈 화면 앱은 뒤로가기도 없다).
+          칸 이름도 없었다 — 날짜가 생일인지 예정일인지, 아래 칸이 무엇을 고르는 건지 몰랐다.
+          예정일(아직 배 속)이면 '지금 먹는 것' · '일찍 태어났나요?' 는 묻지 않는다 (온보딩과 같은 기준) */
+    const isFuture = v => { const d = window.parseLocalDate(v); if (!d) return false; const t = new Date(); t.setHours(0, 0, 0, 0); return d.getTime() > t.getTime(); };
+    const dateLabel = v => isFuture(v) ? '출산 예정일' : '생일';
+    const lab = (id, t) => `<div${id ? ` id="${id}"` : ''} style="font-size:12.5px; font-weight:800; color:var(--text-s); margin:0 0 6px;">${t}</div>`;
+    const field = 'width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:14px;';
     const editHtml = `
-        <div id="edit-baby-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div id="edit-baby-modal" onclick="if (event.target === this) this.remove()" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px;">
             <div style="background:var(--bg-card); width:100%; max-width:340px; border-radius:24px; padding:24px;">
-                <h3 style="margin:0 0 20px 0;">정보 수정</h3>
-                <input type="text" id="edit-name" value="${window.escapeHTML(name)}" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid var(--border); border-radius:10px;" placeholder="이름">
-                <input type="date" id="edit-date" value="${date}" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid var(--border); border-radius:10px;">
-                <select id="edit-stage" style="width:100%; padding:12px; margin-bottom:${ptRow ? '10px' : '20px'}; border:1px solid var(--border); border-radius:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px;">
+                    <div style="font-size:18px; font-weight:800; color:var(--text-m); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${window.escapeHTML(name || '아기')} 정보 수정</div>
+                    <button onclick="document.getElementById('edit-baby-modal').remove()" aria-label="닫기" style="background:none; border:none; font-size:20px; color:#A3958A; cursor:pointer; padding:0; flex-shrink:0;">✕</button>
+                </div>
+                ${lab('', '이름')}
+                <input type="text" id="edit-name" value="${window.escapeHTML(name)}" style="${field} margin-bottom:14px;" placeholder="이름 또는 태명">
+                ${lab('edit-date-label', dateLabel(date))}
+                <input type="date" id="edit-date" value="${date}" style="${field} margin-bottom:14px;">
+                <div id="edit-stage-wrap" style="display:${isFuture(date) ? 'none' : 'block'};">
+                ${lab('', '지금 먹는 것')}
+                <select id="edit-stage" style="${field} margin-bottom:${ptRow ? '14px' : '20px'};">
                     <option value="모유/분유" ${stage === '모유/분유' ? 'selected' : ''}>모유/분유</option>
                     <option value="초기 이유식" ${stage === '초기 이유식' ? 'selected' : ''}>초기 이유식</option>
                     <option value="중후기 이유식" ${stage === '중후기 이유식' ? 'selected' : ''}>중/후기 이유식</option>
                     <!-- 유아식 / 일반식 -->
-                    <option value="유아식/일반식" ${stage === '유아식/일반식' ? 'selected' : ''}>유아식/일반식 </option>
+                    <option value="유아식/일반식" ${stage === '유아식/일반식' ? 'selected' : ''}>유아식/일반식</option>
                 </select>
-                ${ptRow}
-                <button onclick="window.saveBabyProfile('${targetId}')" style="width:100%; padding:14px; background:#7F77DD; color:white; border:none; border-radius:12px; font-weight:900;">저장하기</button>
+                </div>
+                <div id="edit-preterm-wrap" style="display:${isFuture(date) ? 'none' : 'block'};">${ptRow}</div>
+                <button id="edit-save-btn" onclick="window.saveBabyProfile('${targetId}')" style="width:100%; padding:14px; margin-top:${isFuture(date) ? '6px' : '0'}; background:#7F77DD; color:white; border:none; border-radius:12px; font-weight:900;">저장하기</button>
             </div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', editHtml);
+    const dEl = document.getElementById('edit-date');
+    if (dEl) dEl.addEventListener('change', function () {
+        const f = isFuture(this.value), lb = document.getElementById('edit-date-label');
+        if (lb) lb.textContent = dateLabel(this.value);
+        ['edit-stage-wrap', 'edit-preterm-wrap'].forEach(id => { const w = document.getElementById(id); if (w) w.style.display = f ? 'none' : 'block'; });
+        const sb = document.getElementById('edit-save-btn'); if (sb) sb.style.marginTop = f ? '6px' : '0';
+    });
 };
 
 // 💾 [신규] 정보 저장 로직
@@ -14984,7 +15013,8 @@ window.saveBabyProfile = async function(targetId) {
     const newName = document.getElementById('edit-name').value.trim();
     const newDate = document.getElementById('edit-date').value;
     const newStage = document.getElementById('edit-stage').value;
-    if (!newName || !newDate) return window.showToast("이름과 생일을 확인해 주세요");
+    if (!newName) return window.showToast("이름을 적어 주세요");
+    if (!newDate) return window.showToast(document.getElementById('edit-date-label') ? document.getElementById('edit-date-label').textContent + "을 골라 주세요" : "날짜를 골라 주세요");
 
     originalSetItem.call(localStorage, 'tosil_babyName' + targetId, newName);
     originalSetItem.call(localStorage, 'tosil_startDate' + targetId, newDate);
