@@ -3786,15 +3786,14 @@ window.openPediatricianReport = function() {
     if (records.length === 0) {
         recordHtml = `
             <div style="background: #FAF4E6; border: 1px dashed #B98A2E; border-radius: 12px; padding: 20px; text-align: center;">
-                <div style="font-size: 24px; margin-bottom: 8px;">🌿</div>
-                <div style="font-size: 14px; font-weight: 800; color: #B98A2E; margin-bottom: 4px;">최근 발열 및 투약 기록이 없습니다.</div>
-                <div style="font-size: 12px; font-weight: 600; color: #A07722;">영유아 검진 및 예방접종 브리핑으로 활용하세요</div>
+                <div style="font-size: 14px; font-weight: 800; color: #B98A2E; margin-bottom: 4px;">최근에 적은 열 · 해열제 기록이 없어요</div>
+                <div style="font-size: 12px; font-weight: 600; color: #A07722;">영유아 검진 · 예방접종 때도 이 한 장을 보여 드리면 돼요</div>
             </div>
         `;
     } else {
         recordHtml = '<div class="box-sub" style="max-height: 200px; overflow-y: auto; padding:16px; border-radius:12px; border:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">';
         records.slice(0, 10).forEach(r => {
-            let pillText = '<span style="color:#A3958A; font-weight:700;">약 미복용</span>';
+            let pillText = '<span style="color:#A3958A; font-weight:700;">약 안 먹음</span>';
             if (r.type === 'red') pillText = '<span style="color:#FF4B2B; font-weight:900;">🔴 아세트 (빨강)</span>';
             else if (r.type === 'blue') pillText = '<span style="color:#7F77DD; font-weight:900;">🔵 이부/덱시 (파랑)</span>';
             
@@ -3816,21 +3815,22 @@ window.openPediatricianReport = function() {
     const body = document.getElementById('modal-dynamic-body');
     if(!body) return;
 
+    /* ⚠️ '의사 선생님께 보여드릴 자료를 선택하세요 · 최근 발열 및 투약 기록이 없습니다 · A4 종합 건강 리포트 발급' —
+          앱의 다른 말과 달리 딱딱한 안내문 말투였고, 칸마다 그림 글자가 붙어 있었다. 고를 것도 없는데 '선택하세요' 였다 */
     body.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
-            <div style="font-size: 36px; margin-bottom: 8px;">👨‍⚕️</div>
             <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: var(--text-m);">소아과 진료 브리핑</h3>
-            <p style="margin: 0; font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5;">
-                의사 선생님께 보여드릴 자료를 선택하세요.
+            <p style="margin: 0; font-size: 13px; font-weight: 600; color: var(--text-s); line-height: 1.5; word-break: keep-all;">
+                진료실에서 선생님께 보여 드리기 좋게 한 장으로 모아요
             </p>
         </div>
         
         <!-- 🚨 병원 체중계 앞에서 바로 적을 수 있는 실시간 입력칸! -->
         <div style="background: var(--bg-sub); border-radius: 16px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
-            <div style="font-size: 12px; font-weight: 800; color: var(--text-m); margin-bottom: 12px;">🩺 오늘 병원에서 잰 신체 정보 (선택)</div>
+            <div style="font-size: 12px; font-weight: 800; color: var(--text-m); margin-bottom: 12px;">오늘 병원에서 잰 키 · 몸무게 <span style="font-weight: 600; color: var(--text-sub);">(안 적어도 돼요)</span></div>
             <div style="display: flex; gap: 10px;">
                 <div style="flex: 1; display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 0 12px;">
-                    <span style="font-size: 12px; color: var(--text-s); font-weight: 700; width: 30px;">체중</span>
+                    <span style="font-size: 12px; color: var(--text-s); font-weight: 700; width: 40px;">몸무게</span>
                     <input type="number" id="report-weight-input" value="${weight}" placeholder="0.0" step="0.1" style="flex: 1; width: 100%; border: none; outline: none; background: transparent; padding: 12px 0; font-size: 15px; font-weight: 900; color: var(--text-m); text-align: right;">
                     <span style="font-size: 13px; font-weight: 800; color: var(--text-m); margin-left: 4px;">kg</span>
                 </div>
@@ -3843,14 +3843,14 @@ window.openPediatricianReport = function() {
         </div>
 
         <div class="box-main" style="border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-            <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">📊 최근 타임라인 요약</div>
+            <div style="font-size: 13px; font-weight: 800; color: var(--text-s); margin-bottom: 12px;">최근 열 · 해열제 기록</div>
             ${recordHtml}
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <button onclick="window.downloadPediatricianPDF()" style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #7F77DD 0%, #6A61CE 100%); color: #FFF; font-weight: 900; font-size: 15px; border: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:17px;">📄</span> A4 종합 건강 리포트 발급
+                    A4 한 장으로 받기
                 </div>
                 ${(() => {
                     // ⚠️ 'PREMIUM' 이었다. 무료로도 한 장은 받을 수 있는데 그 말이 없었다 (downloadPediatricianPDF)
@@ -3861,7 +3861,7 @@ window.openPediatricianReport = function() {
             </button>
             
             <button onclick="window.copySymptomMemo()" style="width: 100%; padding: 16px; border-radius: 16px; background: var(--bg-sub); color: #7A6F68; font-weight: 800; font-size: 14.5px; border: 1px solid var(--border); cursor: pointer;">
-                📋 텍스트로 요약만 복사하기
+                글로 요약만 복사하기
             </button>
         </div>
         <div style="height: 20px; width: 100%;"></div>

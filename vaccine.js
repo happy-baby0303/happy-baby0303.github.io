@@ -504,20 +504,21 @@
             '</div>' +
 
             '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-top:5px;">' +
-                n + ' / ' + list.length + '  ·  눌러서 맞은 것을 표시하세요</div>' +
+                n + ' / ' + list.length + '  ·  맞은 건 눌러서 표시해 주세요</div>' +
 
-            /* ⚠️ 이 두 줄이 이 화면의 법적 안전선이다. 지우지 말 것. */
+            /* ⚠️ 이 두 줄이 이 화면의 법적 안전선이다. 지우지 말 것.
+                  (말투만 앱의 다른 말과 같게 — '~정합니다' → '~정해요'. 뜻은 그대로) */
             '<div style="margin-top:14px; padding:13px 15px; background:var(--bg-sub); ' +
                 'border-radius:13px; font-size:11.5px; font-weight:700; color:' + INK_S + '; ' +
                 'line-height:1.65; word-break:keep-all;">' +
                 '질병관리청 표준예방접종일정표를 생일에 맞춰 계산한 것이에요.<br>' +
-                '아이마다 시기가 다를 수 있으니 <b>실제 접종일은 병원에서 정합니다.</b></div>' +
+                '아이마다 시기가 다를 수 있으니 <b>실제 맞는 날은 병원에서 정해요.</b></div>' +
 
             body +
 
             '<div style="text-align:center; font-size:11px; font-weight:600; color:var(--text-sub); ' +
                 'margin-top:26px; line-height:1.7;">' +
-                '늦어진 접종은 흔한 일이에요<br>남은 일정은 병원에서 다시 잡아줍니다</div>' +
+                '늦어진 접종은 흔한 일이에요<br>남은 일정은 병원에서 다시 잡아 줘요</div>' +
         '</div>';
 
         document.body.appendChild(wrap);

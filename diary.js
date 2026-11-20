@@ -175,9 +175,11 @@
                     side("엄마", e.wife, MOM) +
                 '</div>';
               }).join("")
-            : '<div style="text-align:center; padding:80px 24px; font-family:\'Nanum Pen Script\',cursive; font-size:26px; color:var(--text-sub); line-height:1.6;">' +
-                  '아직 둘 다 답한 문답이 없어요<br>한 사람만 쓴 건 아직 대화가 아니니까요' +
-              '</div>';
+            /* ⚠️ '한 사람만 쓴 건 아직 대화가 아니니까요' 로 끝나고, 여기서 할 수 있는 게 없었다.
+                  언제 쌓이는지 말하고, 내가 아직 안 쓴 질문이 있으면 바로 쓰러 가게 한다 */
+            : '<div style="text-align:center; padding:80px 24px 0; font-family:\'Nanum Pen Script\',cursive; font-size:26px; color:var(--text-sub); line-height:1.6;">' +
+                  '아직 둘 다 답한 문답이 없어요<br>둘 다 답하면 여기에 차곡차곡 쌓여요' +
+              '</div>' + boxGo();
 
         wrap.innerHTML =
         '<div style="max-width:520px; margin:0 auto; padding:0 20px 60px;">' +
@@ -204,6 +206,22 @@
         var el = document.getElementById("diary-box");
         if (el) el.remove();
         document.body.style.overflow = "";
+    };
+
+    // 빈 문답함 아래 단추 — 내가 아직 안 쓴 질문이 있을 때만 (홈 카드와 같은 질문으로 간다)
+    function boxGo() {
+        var s = null;
+        try { if (Q() && !qaHidden() && questions().length) s = qaState(); } catch (e) {}
+        if (!s || (s.kind !== "mine" && s.kind !== "norole")) return "";
+        return '<div style="text-align:center; margin-top:28px;"><span onclick="window.__qaFromBox()" style="display:inline-block; padding:13px 22px; border-radius:14px; ' +
+            'background:#7F77DD; color:#FFF; font-size:14px; font-weight:800; cursor:pointer;">' + (s.kind === "norole" ? "문답 시작하기" : "지금 질문에 답하기") + '</span></div>';
+    }
+    window.__qaFromBox = function () {
+        window.closeDiaryBox();
+        var s = null;
+        try { s = qaState(); } catch (e) {}
+        if (!s || s.kind === "norole") { location.href = "diary.html"; return; }
+        window.openQaSheet(s.day);
     };
 
     /* ---------- 홈 카드: 우리의 문답 ----------

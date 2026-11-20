@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="175">
+    <meta name="baenaet-build" content="176">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2882,20 +2882,24 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <div id="family-sync-modal" class="modal-overlay" style="z-index: 6000; display:none;" onclick="closeFamilySyncModal(event)">
     <div class="modal-content box-main" style="max-width:400px;" onclick="event.stopPropagation()">
         <div class="modal-close-handle" style="background:var(--border);" onclick="closeFamilySyncModalForce()"></div>
-        <div style="text-align:center; margin-bottom: 24px;">
-            <div style="font-size:40px; margin-bottom:12px;">🔗</div>
-            <div style="font-size:20px; font-weight:900; color:var(--text-m); margin-bottom:8px;">부부 폰 실시간 연동 센터</div>
+        <!-- ⚠️ '부부 폰 실시간 연동 센터' 라는 제목 아래 단추 두 개만 있어서 무엇을 누르는 건지 몰랐다.
+              할머니 · 시터도 이 코드로 들어온다. 칸마다 언제 누르는지 한 줄씩 -->
+        <div style="text-align:center; margin-bottom: 22px;">
+            <div style="font-size:20px; font-weight:900; color:var(--text-m); margin-bottom:6px;">가족 코드</div>
+            <div style="font-size:13px; font-weight:600; color:var(--text-sub); line-height:1.6; word-break:keep-all;">같은 코드로 들어온 폰끼리 기록을 같이 보고 남겨요</div>
         </div>
-        <div class="box-sub" style="border-radius:16px; padding:20px; margin-bottom:16px; text-align:center;">
-            <button class="btn-main" onclick="window.createSyncCode()" style="margin-top:0; padding:14px; border-radius:12px; font-size:15px; background:var(--primary) !important; color:#FFF !important; box-shadow:0 4px 12px rgba(127, 119, 221,0.2) !important;">🔑 새로운 가족 코드 생성하기</button>
+        <div class="box-sub" style="border-radius:16px; padding:18px 20px 20px; margin-bottom:12px; text-align:center;">
+            <div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin-bottom:10px;">우리 가족에서 처음이면</div>
+            <button class="btn-main" onclick="window.createSyncCode()" style="margin-top:0; padding:14px; border-radius:12px; font-size:15px; background:var(--primary) !important; color:#FFF !important; box-shadow:0 4px 12px rgba(127, 119, 221,0.2) !important;">우리 가족 코드 만들기</button>
             <div id="my-sync-code-area" style="display:none; margin-top:16px;">
                 <div class="box-main" style="font-size:28px; font-weight:900; letter-spacing:2px; padding:12px; border-radius:12px; border:2px dashed var(--primary) !important;">TS-7A9B</div>
             </div>
         </div>
-        <div class="box-sub" style="border-radius:16px; padding:20px; text-align:center;">
+        <div class="box-sub" style="border-radius:16px; padding:18px 20px 20px; text-align:center;">
+            <div style="font-size:12.5px; font-weight:800; color:var(--text-s); margin-bottom:10px;">가족에게 코드를 받았으면</div>
             <div style="display:flex; gap:8px;">
                 <input type="text" id="partner-sync-code" class="box-main" placeholder="예: TS-7A9B" style="flex:1; min-width: 0; padding:14px; border-radius:12px; font-size:16px; font-weight:800; text-align:center; text-transform:uppercase; outline:none; box-sizing: border-box;">
-                <button class="btn-main" onclick="window.connectSyncCode()" style="margin-top:0; width:auto; padding:0 24px; border-radius:12px; font-size:15px; font-weight:900; background:var(--text-m) !important; color:var(--bg-card) !important; box-shadow:none !important; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;">연결</button>
+                <button class="btn-main" onclick="window.connectSyncCode()" style="margin-top:0; width:auto; padding:0 24px; border-radius:12px; font-size:15px; font-weight:900; background:var(--text-m) !important; color:var(--bg-card) !important; box-shadow:none !important; white-space: nowrap; flex-shrink: 0; box-sizing: border-box;">들어가기</button>
             </div>
         </div>   
     </div> 
@@ -3386,12 +3390,28 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
             }
             return alert(`우리 가족 코드는 ${existing} 예요. 짝꿍에게 알려 주세요`);
         }
+        /* ⚠️ 코드가 없을 때 이 단추를 누르면 아무 일도 없었다. 가족방(코드)은 카카오로 들어올 때 만들어진다.
+              로그인 전이면 로그인부터. 로그인은 됐는데 방이 없으면(만들던 때 인터넷이 끊겼던 경우) 다시 열어 새로 만든다 */
+        if (typeof window.closeFamilySyncModalForce === 'function') window.closeFamilySyncModalForce();
+        if (!(auth && auth.currentUser)) {
+            if (typeof window.loginWithKakao === 'function') return window.loginWithKakao();
+            return alert('카카오로 로그인하면 우리 가족 코드가 생겨요');
+        }
+        if (typeof window.showToast === 'function') window.showToast('우리 가족 코드를 만들고 있어요');
+        setTimeout(() => location.reload(), 900);
     };
 
     window.connectSyncCode = async (autoCode) => {
         const inputCode = (typeof autoCode === 'string') ? autoCode : document.getElementById('partner-sync-code').value.trim().toUpperCase();
         if (!inputCode || inputCode.length < 5 || !inputCode.startsWith("TS-")) return alert("가족 코드를 다시 확인해 주세요. TS- 로 시작해요");
         if (inputCode === localStorage.getItem('family_sync_code')) return alert("이미 들어와 있는 가족방이에요");
+        /* 로그인 전에 코드를 넣었으면 — 코드를 적어 두고 로그인부터. 로그인되면 초대 링크와 같은 길로 들어간다.
+           (가족방 명단에는 로그인한 계정만 오른다. 로그인 없이 들어가면 다음 로그인 때 '권한 없는 코드' 로 지워진다) */
+        if (typeof autoCode !== 'string' && !(auth && auth.currentUser) && typeof window.loginWithKakao === 'function') {
+            localStorage.setItem('pending_invite_code', inputCode);
+            if (typeof window.closeFamilySyncModalForce === 'function') window.closeFamilySyncModalForce();
+            return window.loginWithKakao();
+        }
 
         /* ⚠️ 새 폰에도 브라우저 확인창(confirm)으로 '이 기기의 기존 기록이 대체됩니다' 를 물었다.
               대체될 게 없는 폰이고, 앱에서는 사이트 주소가 제목으로 붙어 나와 낯설었다.
@@ -3552,7 +3572,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./idle.js?v=1"></script>
 <script src="./sleepsync.js"></script>
 <script src="./shared/babyage.js?v=1"></script>
-<script src="script.js?v=20261120-6"></script>
+<script src="script.js?v=20261120-7"></script>
     <script src="./statweek.js?v=2"></script>
     <script src="./stage.js?v=2"></script>
     <script src="./preterm.js?v=2"></script>
@@ -3579,7 +3599,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./baton.js?v=1"></script>        <!-- 바통터치: 부탁 단위로 합치기 · 끝낸 부탁은 안 살아난다 -->
 <script src="playdata.js"></script>
 <script src="receiptData.js?v=3"></script>
-<script src="./emotion.js?v=6"></script>
+<script src="./emotion.js?v=7"></script>
 <script src="./review.js?v=1"></script>      <!-- 플레이 별점 창: 편지를 읽고 닫았을 때 (앱 1.1.4 부터) -->
 <script src="./widget.js?v=1"></script>      <!-- 바탕화면 위젯: 기록이 바뀔 때 시각을 넘긴다 · 설정에 '바탕화면 위젯' 칸 (앱 1.1.4 부터) -->
 <script src="./memorybox.js?v=8"></script>
@@ -3605,7 +3625,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./firstfill.js?v=3"></script>
 <!-- 우리의 문답 — 저장 · 알림 · 코인을 문답 화면과 같이 쓴다 (홈에서 바로 쓰기) -->
 <script src="./qacore.js?v=5"></script>
-<script src="./diary.js?v=8"></script>
+<script src="./diary.js?v=9"></script>
 <script src="./photobook.js?v=4"></script>
 <script src="./premium.js?v=4"></script>
     <!-- 🎁 출시 기념 무료 개방 (구글 결제 붙이기 전까지) -->
@@ -3615,7 +3635,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
  <script src="./homefix.js?v=10"></script>
 <script src="./weekly.js?v=6"></script>
 <script src="./postcard.js?v=3"></script>
-<script src="./export.js?v=3"></script>
+<script src="./export.js?v=4"></script>
 <!-- 🕰 시간 바퀴 — 손가락을 직접 따라간다 (아이폰에서 바퀴가 잘 안 돌던 것) -->
 <script src="./timewheel.js?v=1"></script>
 <script src="./sleeppicker.js?v=3"></script>
@@ -3673,7 +3693,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <!-- 창이 화면보다 길어지면 창 안에서 스크롤되게 — 큰 글씨 폰 · 작은 폰 · 가로 화면의 마지막 안전망 -->
 <script src="./sheetfit.js?v=2"></script>
 <!-- 💉 예방접종 일정 (질병관리청 표준일정) -->
-<script src="./vaccine.js?v=1"></script>
+<script src="./vaccine.js?v=2"></script>
 <!-- 🕯️ 가까운 날에 열리는 봉인 편지 -->
 <script src="./sealsoon.js?v=2"></script>
 <!-- 🎨 하단 탭 아이콘(icons.js)은 탭 줄(</nav>) 바로 다음으로 옮겼다 -->

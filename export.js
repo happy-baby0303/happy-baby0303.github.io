@@ -575,6 +575,16 @@
         var lN = allLetters().length, mN = achievedMilestones().length;
         var dN = diaryPages().length, bN = babyLetters().length;
         var heavy = pN > 120;
+        /* ⚠️ '봉인 편지 0 · 아기 편지 20 · 문답 0쪽 · 도감 0' 처럼 없는 것까지 0 으로 늘어놨다. 있는 것만 */
+        var textParts = [];
+        if (lN) textParts.push("봉인 편지 " + lN);
+        if (bN) textParts.push("아기 편지 " + bN);
+        if (dN) textParts.push("문답 " + dN + "쪽");
+        if (mN) textParts.push("도감 " + mN);
+        var allParts = [];
+        if (pN) allParts.push("사진 " + pN + "장");
+        if (vN) allParts.push("소리 " + vN + "개");
+        allParts.push("글 전부");
 
         var old = document.getElementById("export-sheet");
         if (old) old.remove();
@@ -600,13 +610,14 @@
                 '<span onclick="document.getElementById(\'export-sheet\').remove()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); line-height:1.7; margin-bottom:18px; word-break:keep-all;">' +
-                                '앱이 없어도 열리는 폴더 하나로 만들어 드려요.<br>' +
+                // ⚠️ '폴더 하나로 만들어 드려요' 라고 해 놓고 받는 건 압축 파일(.zip)이었다
+                '압축 파일 하나로 묶어 드려요. 풀면 앱이 없어도 열려요.<br>' +
                 '컴퓨터나 외장 하드에 옮겨 두면 오래 간직할 수 있어요.' +
             '</div>' +
                                    btn("window.exportMemoryBox(true)", "전부 받기",
-                "사진 " + pN + "장 · 소리 " + vN + "개 · 글 전부" + (heavy ? " · 와이파이에서 받으세요" : ""), true) +
+                allParts.join(" · ") + (heavy ? " · 와이파이에서 받으세요" : ""), true) +
             btn("window.exportMemoryBox(false)", "사진 빼고 받기",
-                "봉인 편지 " + lN + " · 아기 편지 " + bN + " · 문답 " + dN + "쪽 · 도감 " + mN) +
+                textParts.join(" · ") || "글 · 기록만") +
             '<div style="text-align:center; font-size:11px; font-weight:600; color:var(--text-sub); margin-top:10px; line-height:1.6;">' +
                 '이 파일은 어디에도 올라가지 않아요. 이 기기에서 바로 만들어져요.</div>' +
         '</div>';

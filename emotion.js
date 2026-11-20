@@ -1542,6 +1542,19 @@ wrap.innerHTML =
 
     function sleepStats(days) {
         var totals = [], bedtimes = [], longest = 0, have = 0, wakes = [];
+        /* 잠 기록 하나 안에 맘마 · 기저귀 기록이 있으면 그때 깬 것이다 (편지의 새벽 셈 dayStats 와 같다).
+           ⚠️ 밤잠을 한 줄(8시 반~6시 반)로 적고 새벽 맘마를 따로 적는 집은
+              '밤에 깨는 횟수 0번 · 안 깨고 잔 최장 10시간' 이 떴다. 같은 밤을 편지는 '새벽에 깬 날' 로 썼다. */
+        var MIN = 60000, marks = [];
+        if (days.length) {
+            var from = days[0].ts, to = days[days.length - 1].ts + 2 * DAY;
+            allRecords().forEach(function (r) {
+                var t = Number(r && r.timestamp);
+                if (t && r.type !== "sleep" && t > from && t < to) marks.push(t);
+            });
+            marks.sort(function (a, b) { return a - b; });
+        }
+        function inside(a, b) { return marks.filter(function (t) { return t > a && t < b; }); }
         days.forEach(function (x) {
             /* \u26a0\ufe0f segs 가 빈 배열인 날은 '기록 있는 날' 이 아니다.
                   그걸 세면 평균이 0 으로 깎여 '하루 평균 수면 0분' 이 뜬다. */
@@ -1553,10 +1566,11 @@ wrap.innerHTML =
                   이제 하루가 새벽 4시에 시작하므로 밤잠이 애초에 안 잘린다.
                   한 조각이 곧 한 번의 잠이다. */
             x.segs.forEach(function (g) {
-                var len = g[1] - g[0];
-                sum += len;
-                if (len > longest) longest = len;
-                // 잠든 시각은 아래에서 따로 고른다
+                sum += g[1] - g[0];
+                // 안 깨고 잔 최장 — 잠 안에 남긴 기록에서 끊어 잰다. 잠든 시각은 아래에서 따로 고른다
+                var a = x.ts + g[0] * MIN, b = x.ts + g[1] * MIN, prev = a;
+                inside(a, b).forEach(function (t) { longest = Math.max(longest, Math.round((t - prev) / MIN)); prev = t; });
+                longest = Math.max(longest, Math.round((b - prev) / MIN));
             });
 
             /* 밤에 몇 번 깼나 — 밤 구간(저녁 이후)의 조각 수 - 1.
@@ -1573,7 +1587,18 @@ wrap.innerHTML =
                   평균(잠 · 밤에 깬 횟수)은 다 지난 날로만 낸다 (statweek.js · weekly.js 와 같은 셈).
                   띠 · 겹쳐보기 · 안 깨고 잔 최장 · 잠드는 시간은 오늘 것도 본다 */
             var night = x.segs.filter(function (g) { return g[0] >= 13 * 60; });
-            if (night.length && !x.today) wakes.push(Math.max(0, night.length - 1));
+            if (night.length && !x.today) {
+                var w = night.length - 1;
+                night.forEach(function (g) {
+                    // 45분 안에 붙은 기록(맘마 → 기저귀)은 한 번 깬 것. 끝나기 45분 안쪽은 그 잠에서 깬 때라 따로 안 센다
+                    var last = -Infinity;
+                    inside(x.ts + g[0] * MIN, x.ts + g[1] * MIN - 45 * MIN).forEach(function (t) {
+                        if (t - last > 45 * MIN) w++;
+                        last = t;
+                    });
+                });
+                wakes.push(w);
+            }
 
             if (!x.today) totals.push(sum);
             if (bt !== null) bedtimes.push(bt);
