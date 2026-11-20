@@ -11891,10 +11891,16 @@ window.handleSecretAdminClick = function() {
         const myUid = localStorage.getItem('firebase_uid') || '';
         const MASTER_UIDS = ["7Xj1jGZcV4OdWsyQrtUkuGq0HqJ3"]; // 관리자 UID
         
+        const open = () => { if (navigator.vibrate) navigator.vibrate([50, 50, 100]); window.openAdminDashboard(); };
         // 저장된 표시가 아니라 실제 UID 가 관리자일 때만 연다
-        if (MASTER_UIDS.includes(String(myUid).trim())) {
-            if (navigator.vibrate) navigator.vibrate([50, 50, 100]); 
-            window.openAdminDashboard();
+        if (MASTER_UIDS.includes(String(myUid).trim())) { open(); return; }
+        /* ⚠️ 서버(의견함 · 답장 · 새 의견 알림)는 Firestore admins 명단도 관리자로 보는데, 이 문은 위 계정 하나만 열렸다.
+              명단에 넣은 계정은 관제센터에 들어올 길이 없었다. 명단에 있는지 서버에서 바로 읽어 확인한다 (저장된 표시는 믿지 않는다) */
+        if (myUid && window.db && typeof window.getDoc === 'function' && typeof window.doc === 'function') {
+            window.getDoc(window.doc(window.db, 'admins', String(myUid).trim())).then((snap) => {
+                const role = snap && snap.exists() ? ((snap.data() || {}).role || '') : '';
+                if (role === 'master_admin' || role === 'admin') open();
+            }).catch(() => {});
         }
         /* ⚠️ 관리자가 아니면 '👀 개발자 모드는 관리자만…' 토스트가 떴다.
               숨은 문이 있다고 알려 주는 말이라 아무 반응도 하지 않는다. */
