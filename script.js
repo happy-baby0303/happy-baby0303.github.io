@@ -7527,7 +7527,7 @@ window.showConfirm = function(message, onConfirm, icon = '🚨', confirmText = '
         /* ⚠️ 안내 글이 늘 '삭제' 라고 적혀 있었다 ('탈퇴' · '해제' 를 받을 때도). 받을 말을 그대로 적는다.
               한글은 글자를 조합하는 동안 keyup 이 안 오는 폰이 있어서 input 으로도 본다 */
         const hint = document.getElementById('confirm-keyword-hint');
-        if (hint) hint.textContent = "아래 칸에 '" + requireKeyword + "' 라고 적어 주세요";
+        if (hint) hint.textContent = "아래 칸에 '" + requireKeyword + "'라고 적어 주세요";
         inputEl.placeholder = requireKeyword;
         inputEl.onkeyup = inputEl.oninput = function() {
             if (String(this.value || '').trim() === requireKeyword) {

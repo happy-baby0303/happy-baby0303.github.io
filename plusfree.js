@@ -200,17 +200,25 @@
           프로필 · 가족 코드 다음, '앱 설정' 소제목 바로 위에 둔다. 약속은 접어 두고 누르면 펼친다. */
     function cardHTML() {
         var open = freeOpen();
+        /* ⚠️ 카드 첫 줄은 '열려 있어요' 인데 약속만 '알려드립니다 · 보실 수 있습니다' 였다 (앱 말투는 '해요').
+              줄이 넘치면 둘째 줄이 '·' 밑으로 파고들어 '보실 / 수 있습니다' 처럼 끊겨 보였다 — 점 옆으로 들여 쓴다.
+              플레이 앱(라이트)에서는 해열제 · 응급 처치를 숨기므로 그 줄은 처음부터 그리지 않는다
+              (playlite.js 도 data-safe-line 을 지운다 — 두 겹) */
+        function li(html, attr) {
+            return '<div' + (attr || '') + ' style="display:flex; gap:6px;"><span style="flex-shrink:0;">·</span><span style="min-width:0;">' + html + '</span></div>';
+        }
+        var lite = typeof window.isPlayLite === 'function' && window.isPlayLite();
         var promise =
             '<details style="margin-top:12px;">' +
                 '<summary style="font-size:12.5px; font-weight:800; color:var(--text-sub); cursor:pointer; list-style:none;">' +
                     '유료로 바뀔 때 지킬 것 ›</summary>' +
                 '<div style="margin-top:10px; background:var(--bg-sub); border-radius:12px; padding:13px 15px; ' +
-                    'font-size:12.5px; font-weight:700; color:var(--text-s); line-height:1.9; word-break:keep-all;">' +
-                    '· 바뀌기 <b>30일 전</b>에 앱에서 미리 알려드립니다<br>' +
-                    '· 무료 기간에 담은 <b>사진·소리·편지·기록은 계속 보실 수 있습니다</b><br>' +
-                    '· 무료 기간에 등록한 <b>둘째·셋째 아이도 그대로</b> 쓰실 수 있습니다<br>' +
-                    '· 할머니·시터 <b>돌봄 화면(도우미 1명)은 계속 무료</b>이고, 무료 기간에 연결한 도우미는 그대로 쓰실 수 있습니다<br>' +
-                    '· 해열제 간격, 응급 처치 같은 <b>안전 정보는 계속 무료</b>입니다' +
+                    'font-size:12.5px; font-weight:700; color:var(--text-s); line-height:1.8; word-break:keep-all; display:flex; flex-direction:column; gap:4px;">' +
+                    li('바뀌기 <b>30일 전</b>에 앱에서 먼저 알려 드려요') +
+                    li('무료 기간에 담은 <b>사진 · 소리 · 편지 · 기록은 계속 보실 수 있어요</b>') +
+                    li('무료 기간에 등록한 <b>둘째 · 셋째 아이도 그대로</b> 쓰실 수 있어요') +
+                    li('할머니 · 시터 <b>돌봄 화면(도우미 1명)은 계속 무료</b>예요. 무료 기간에 연결한 도우미도 그대로 쓰실 수 있어요') +
+                    (lite ? '' : li('해열제 간격, 응급 처치 같은 <b>안전 정보는 계속 무료</b>예요', ' data-safe-line="1"')) +
                 '</div>' +
             '</details>';
         return '<div style="display:flex; align-items:center; gap:10px;">' +

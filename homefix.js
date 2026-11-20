@@ -753,7 +753,7 @@
         /* ⚠️ 빈칸 안내 글씨가 굵은 글씨(700)를 그대로 받아서 '010-1234-5678' 이 진짜 저장된 번호처럼 보였다.
               안내 글씨는 가늘고 옅게, 숫자는 누가 봐도 예시인 0000 으로 둔다. */
         return '<style>#pp-mom::placeholder,#pp-dad::placeholder{font-weight:500;color:#C4BAAF;opacity:1;}</style>' +
-            '<div style="font-size:15px; font-weight:900; color:var(--text-m);">📞 도우미가 걸 번호</div>' +
+            '<div style="font-size:15px; font-weight:900; color:var(--text-m);">도우미가 걸 번호</div>' +   // 📞 를 뗐다 — 같은 창의 '도우미께 남길 말' · '아기 사진 보이기' 에는 없다
             '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin:4px 0 14px; line-height:1.6; word-break:keep-all;">' +
                 '할머니·시터 화면의 \'엄마에게 전화 / 아빠에게 전화\'가 이 번호로 걸려요. 우리 가족에게만 보여요.</div>' +
             '<div style="display:flex; gap:8px;">' + input("mom", "엄마") + input("dad", "아빠") + '</div>' +
@@ -774,7 +774,7 @@
             if (!v) { bad = true; return; }
             o[k] = v;
         });
-        if (bad) return hint("번호를 다시 확인해주세요 (숫자 9~13자리)");
+        if (bad) return hint("번호를 다시 확인해 주세요 (숫자 9~13자리)");
         try { localStorage.setItem(PHONE_KEY, JSON.stringify(o)); } catch (e) {}
         var ref = familyRef();
         if (ref && typeof window.setDoc === "function") {

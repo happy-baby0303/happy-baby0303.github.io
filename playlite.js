@@ -485,6 +485,12 @@
         if (!root || root.nodeType !== 1) return;
         var text = root.textContent || '';
         // 설정의 PLUS 약속 — '해열제 간격, 응급 처치 같은 안전 정보는 계속 무료'
+        //   지금 약속은 한 줄씩 칸이라 그 줄(data-safe-line)을 통째로 지운다. 아래는 예전 모양(한 덩어리 글)용
+        if (root.hasAttribute && root.hasAttribute('data-safe-line')) { root.remove(); return; }
+        if (root.querySelectorAll) {
+            var safeLines = root.querySelectorAll('[data-safe-line]');
+            for (var sl = 0; sl < safeLines.length; sl++) safeLines[sl].remove();
+        }
         if (text.indexOf('해열제 간격, 응급 처치') > -1) {
             var targets = root.querySelectorAll('div');
             for (var i = 0; i < targets.length; i++) {
