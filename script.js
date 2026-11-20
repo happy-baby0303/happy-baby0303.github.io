@@ -2605,6 +2605,12 @@ window.renderChecklist = function() {
     let progress = Math.round((checkedItems / totalItems) * 100) || 0;
     let isAllChecked = progress === 100;
     let pColor = isAllChecked ? '#B98A2E' : brandColor;
+    /* ⚠️ '돌아와서' 탭(손 씻기 · 체온 · 맘마)에도 '패킹 완료까지 10개 남았어요' 가 떴다. 짐 싸는 목록이 아니다.
+          다 하면 '모든 패킹을 완료했습니다' 였는데, 앱의 다른 말과 같게 '다 챙겼어요' 로 */
+    const isBack = window.currentChecklistTheme === 'comeback';
+    const leftItems = totalItems - checkedItems;
+    const progressText = isAllChecked ? (isBack ? '다 했어요' : '다 챙겼어요')
+                                      : (isBack ? `${leftItems}개 남았어요` : `다 챙기려면 ${leftItems}개 남았어요`);
 
     // 🚨 2. 상단 헤더 (배경을 투명하게 해서 부모의 베이지색을 그대로 흡수, 상단 선 제거)
     let topHtml = `
@@ -2612,7 +2618,7 @@ window.renderChecklist = function() {
             <div style="font-size: 22px; font-weight: 900; color: ${textMain} !important; letter-spacing: -0.5px; margin-bottom: 24px;">외출 체크리스트</div>
             
            <!-- 🚨 외출 예상 시간 (하얀 박스, 테두리, 그림자 전부 철거 -> 배경과 혼연일체) -->
-            <div style="display: flex; justify-content: space-between; align-items: center; background: transparent !important; padding: 0 !important; border: none !important; margin-bottom: 24px; height: 56px; box-sizing: border-box; box-shadow: none !important;">
+            <div style="display: ${isBack ? 'none' : 'flex'}; justify-content: space-between; align-items: center; background: transparent !important; padding: 0 !important; border: none !important; margin-bottom: 24px; height: 56px; box-sizing: border-box; box-shadow: none !important;">
                 
                 <!-- 왼쪽 글씨 (박스가 사라졌으므로 padding 0으로 맞춰서 위아래 글씨와 좌측 정렬 완벽 일치) -->
                 <div style="font-size: 15px; font-weight: 800; color: #4A423C !important; margin: 0 !important; padding: 0 !important; line-height: 1 !important; display: flex; align-items: center;">외출 예상 시간</div>
@@ -2651,7 +2657,7 @@ window.renderChecklist = function() {
             </div>
             
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
-                <span style="font-size: 13px; font-weight: 800; color: ${pColor} !important;">${isAllChecked ? '모든 패킹을 완료했습니다' : `패킹 완료까지 ${totalItems - checkedItems}개 남았어요`}</span>
+                <span style="font-size: 13px; font-weight: 800; color: ${pColor} !important;">${progressText}</span>
                 <span style="font-size: 15px; font-weight: 900; color: ${textMain} !important;">${checkedItems} / ${totalItems}</span>
             </div>
             <div style="width: 100%; height: 6px; background: #E8E3D9 !important; border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
@@ -4141,8 +4147,9 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                     <div style="display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
                         ${quickButtonsHtml}
                         <div style="width: 1px; background: var(--border); margin: 0 4px;"></div>
+                        <!-- ⚠️ '+10 · -10' 순서였다. 빼기가 왼쪽 · 더하기가 오른쪽 (이유식 칸도 같게) -->
+                        <button type="button" onclick="window.adjustFeedAmount(-10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">−10</button>
                         <button type="button" onclick="window.adjustFeedAmount(10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">+10</button>
-                        <button type="button" onclick="window.adjustFeedAmount(-10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">-10</button>
                     </div>
                 </div>
 
@@ -4179,9 +4186,10 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 </div>
                 <div style="display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
                     ${foodQuickHtml}
-                    <div style="width: 1px; background: var(--border); margin: 0 4px;"></div>
-                    <button type="button" onclick="window.adjustFoodAmount(10)" style="padding: 10px 16px; background: rgba(16, 185, 129, 0.1); color: #B98A2E; border: none; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; flex-shrink:0;">+10</button>
-                    <button type="button" onclick="window.adjustFoodAmount(-10)" style="padding: 10px 16px; background: rgba(240, 68, 82, 0.1); color: #D32F2F; border: none; border-radius: 12px; font-weight: 800; font-size: 13.5px; cursor: pointer; flex-shrink:0;">-10</button>
+                    <!-- ⚠️ 이 단추만 민트 · 분홍이었고(분유 칸은 미색), '늘 먹던' 단추가 없는 첫 이유식 때는 왼쪽에 가는 줄만 홀로 섰다 -->
+                    ${foodQuickHtml ? '<div style="width: 1px; background: var(--border); margin: 0 4px;"></div>' : ''}
+                    <button type="button" onclick="window.adjustFoodAmount(-10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">−10</button>
+                    <button type="button" onclick="window.adjustFoodAmount(10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">+10</button>
                 </div>
             </div>`;
 

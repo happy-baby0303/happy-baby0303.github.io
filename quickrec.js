@@ -297,7 +297,12 @@
             if (a > 24 * 60) return ['잠든 날짜를 한 번 봐 주세요', false];
             // 낮잠 4시간 반 · 밤잠 14시간이 넘으면 (타이머를 끄는 걸 잊었을 때) — 기준은 sleepguard.js 와 같다
             if (typeof window.sleepTimerTooLong === 'function' && window.sleepTimerTooLong(st.subType, a)) return ['깬 시간을 한 번 봐 주세요 · ' + st.subType + ' ' + dur(a), false];
-            if (a === 0) return nowish(s) ? [icon + st.subType + ' · ' + since, true] : ['깬 시간을 골라 주세요', false];
+            if (a === 0) {
+                /* ⚠️ '이미 깼으면 깬 시간 적기' 를 눌러 깬 시간 칸을 연 채 두 바퀴가 같은 시각이면 단추가 '방금 잠들었어요' 였다.
+                      깼다고 해 놓고 누르면 자는 중으로 남았다. 깬 시간 칸이 열려 있으면 무엇을 돌려야 하는지 말한다 */
+                if (st.showWake) return [Math.abs(now - s) <= 5 * MIN ? '잠든 시간을 골라 주세요' : '깬 시간을 골라 주세요', false];
+                return nowish(s) ? [icon + st.subType + ' · ' + since, true] : ['깬 시간을 골라 주세요', false];
+            }
             return [icon + st.subType + ' ' + dur(a) + ' 남기기', true];
         }
         return null;
@@ -410,6 +415,13 @@
         var w = async function () {
             if (busy.save) return s.apply(this, arguments);
             var st = window.trackerState || {}, slept = false;
+            // 깬 시간 칸을 연 채 0분 — 자는 중으로도, 0분짜리 잠으로도 남기지 않는다 (단추 글씨가 할 일을 말한다)
+            if (st.type === 'sleep' && st.subType && !st.isSleeping && !window.editingTrackerId && st.showWake &&
+                val('v-sleep-amount') !== '' && num(val('v-sleep-amount')) === 0) {
+                var w0 = want();
+                if (typeof window.showToast === 'function') window.showToast(w0 && !w0[1] ? w0[0] : '깬 시간을 골라 주세요');
+                return;
+            }
             // '방금 잠들었어요' — 깬 시간 = 잠든 시간이면 자는 중으로 남긴다 ('자는 중으로 변경' 을 누르고 저장한 것과 같은 길)
             if (st.type === 'sleep' && st.subType && !st.isSleeping && !window.editingTrackerId &&
                 val('v-sleep-amount') !== '' && num(val('v-sleep-amount')) === 0 && nowish(sleepStart()) &&

@@ -1535,7 +1535,7 @@ wrap.innerHTML =
         for (var i = n - 1; i >= 0; i--) {
             var ts = base.getTime() - i * DAY;
             var d = ledger.days[sleepDayKey(ts + 60000)];
-            out.push({ ts: ts, segs: d ? (d.segs || []) : null });
+            out.push({ ts: ts, segs: d ? (d.segs || []) : null, today: i === 0 });
         }
         return out;
     }
@@ -1568,10 +1568,14 @@ wrap.innerHTML =
             var cands = x.segs.filter(function (g) { return g[0] >= 14 * 60 && (g[1] - g[0]) >= 90; });
             if (!cands.length) cands = x.segs.filter(function (g) { return g[0] >= 13 * 60; });
             if (cands.length) bt = cands.reduce(function (a, g) { return g[0] < a[0] ? g : a; })[0];
+            /* ⚠️ 아직 안 끝난 오늘까지 나눠서 '하루 평균 수면' 이 늘 낮게 나왔다
+                  (저녁 8시에 6시간 54분 — 같은 때 '기록 · 통계' 창은 7시간 30분).
+                  평균(잠 · 밤에 깬 횟수)은 다 지난 날로만 낸다 (statweek.js · weekly.js 와 같은 셈).
+                  띠 · 겹쳐보기 · 안 깨고 잔 최장 · 잠드는 시간은 오늘 것도 본다 */
             var night = x.segs.filter(function (g) { return g[0] >= 13 * 60; });
-            if (night.length) wakes.push(Math.max(0, night.length - 1));
+            if (night.length && !x.today) wakes.push(Math.max(0, night.length - 1));
 
-            totals.push(sum);
+            if (!x.today) totals.push(sum);
             if (bt !== null) bedtimes.push(bt);
         });
         var avg = function (a) {
@@ -1658,7 +1662,7 @@ wrap.innerHTML =
             rows +=
             '<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">' +
                 '<div style="width:46px; flex-shrink:0; font-size:11.5px; font-weight:700; color:' + (x.segs ? "var(--text-s)" : "var(--text-sub)") + ';">' +
-                    d.getDate() + '일 ' + WD[d.getDay()] + '</div>' +
+                    (x.today ? '오늘' : d.getDate() + '일 ' + WD[d.getDay()]) + '</div>' +
                 '<div style="flex:1;">' + miniRibbon(x.segs, 18) + '</div>' +
                 '<div style="width:74px; flex-shrink:0; text-align:right; font-size:12px; font-weight:800; white-space:nowrap; color:' + (total ? "var(--text-m)" : "var(--text-sub)") + ';">' +
                     (total ? dur(total) : '없음') + '</div>' +

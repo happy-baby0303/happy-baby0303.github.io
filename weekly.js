@@ -172,6 +172,14 @@
     function rangeText(g) {
         return md(g.ws) + " – " + (g.ws.getMonth() === g.we.getMonth() ? g.we.getDate() + "일" : md(g.we));
     }
+    /* 그 주가 오늘 기준으로 어느 주인가.
+       ⚠️ 월 · 화요일에 뜨는 건 지난주 한 장인데 창에는 '이번 주 기록' 이라고 적혔고,
+          옆에 붙은 '지난주 53번' 은 사실 그 전 주 숫자였다. */
+    function weekWord(g) {
+        var gap = Math.round((mondayOf(new Date()) - g.ws) / (7 * DAY));
+        return gap === 0 ? "이번 주" : (gap === 1 ? "지난주" : "그 주");
+    }
+    function prevWord(g) { return weekWord(g) === "이번 주" ? "지난주" : "그 전 주"; }
     function headline(g) {
         if (g.firsts.length) {
             var t = g.firsts[0].title;
@@ -187,21 +195,21 @@
     }
     /* 세 칸 숫자 — [이름, 큰 글씨, 작은 줄, 지난주] */
     function numbers(g) {
-        var t = g.t, p = g.prev, out = [];
+        var t = g.t, p = g.prev, out = [], pw = prevWord(g) + " ";
         if (t.feed || t.food) {
             var sub = [];
             if (t.ml - (t.pump || 0) > 0) sub.push("분유 " + comma(t.ml - (t.pump || 0)) + "ml");
             if (t.pump) sub.push("유축 " + comma(t.pump) + "ml");
             if (t.breast) sub.push("모유 " + t.breast + "번");
             if (t.food) sub.push("이유식 " + t.food + "번");
-            out.push(["맘마", (t.feed || t.food) + "번", sub.join(" · "), p.feed ? "지난주 " + p.feed + "번" : ""]);
+            out.push(["맘마", (t.feed || t.food) + "번", sub.join(" · "), p.feed ? pw + p.feed + "번" : ""]);
             if (!t.feed) out[out.length - 1][0] = "이유식";
         }
         // 순서는 홈 기록 단추와 같이 맘마 · 기저귀 · 잠
         if (t.diaper) out.push(["기저귀", t.diaper + "개", t.diaperAvg ? "하루 " + (Math.round(t.diaperAvg * 10) / 10) + "개" : "",
-                               p.diaper ? "지난주 " + p.diaper + "개" : ""]);
+                               p.diaper ? pw + p.diaper + "개" : ""]);
         if (t.sleepAvg) out.push(["잠", hm(t.sleepAvg), t.nSleep >= 6 ? "하루 평균" : "기록한 " + t.nSleep + "일 평균",
-                               p.sleepAvg ? "지난주 " + hm(p.sleepAvg) : ""]);
+                               p.sleepAvg ? pw + hm(p.sleepAvg) : ""]);
         return out;
     }
 
@@ -356,8 +364,8 @@
             '<div class="wk-sub">' + esc(rangeText(g)) + (ageLine(g) ? ' · ' + esc(ageLine(g)) : '') + '</div>' +
             (photos ? '<div class="wk-photos">' + photos + '</div>' : '') +
             (firsts ? '<div class="wk-sec"><div class="wk-sec-h">처음 해낸 일</div>' + firsts + '</div>' : '') +
-            (nums ? '<div class="wk-sec"><div class="wk-sec-h">이번 주 기록</div><div class="wk-nums">' + nums + '</div></div>' : '') +
-            (note ? '<div class="wk-sec"><div class="wk-sec-h">이번 주 한 줄</div><div class="wk-quote">' + esc(note.text.length > 80 ? note.text.slice(0, 80) + "…" : note.text) +
+            (nums ? '<div class="wk-sec"><div class="wk-sec-h">' + esc(weekWord(g)) + ' 기록</div><div class="wk-nums">' + nums + '</div></div>' : '') +
+            (note ? '<div class="wk-sec"><div class="wk-sec-h">' + esc(weekWord(g)) + ' 한 줄</div><div class="wk-quote">' + esc(note.text.length > 80 ? note.text.slice(0, 80) + "…" : note.text) +
                 '<span>' + (note.who ? esc(note.who) + ' · ' : '') + esc(md(fromKey(note.key))) + '</span></div></div>' : '') +
             (g.growth ? '<div class="wk-sec"><div class="wk-sec-h">키 · 몸무게</div><div style="font-size:14.5px;font-weight:800;">' +
                 [g.growth.w ? g.growth.w + "kg" : "", g.growth.h ? g.growth.h + "cm" : ""].filter(Boolean).join(" · ") +
