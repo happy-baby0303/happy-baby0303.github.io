@@ -4116,10 +4116,9 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                 // 🚨 파란색 ➔ 보라색으로 변경 완료!
                 quickButtonsHtml += `<button type="button" class="quick-btn active" onclick="window.setFeedAmount(${amt})" style="flex-shrink: 0; padding: 10px 14px; background: rgba(127, 119, 221, 0.15); color: var(--primary); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 ${amt}ml</button>`;
             });
-        } else {
-            // 🚨 파란색 ➔ 보라색으로 변경 완료!
-            quickButtonsHtml += `<button type="button" class="quick-btn active" onclick="window.setFeedAmount(160)" style="flex-shrink: 0; padding: 10px 14px; background: rgba(127, 119, 221, 0.15); color: var(--primary); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">🍼 160ml</button>`;
         }
+        /* ⚠️ 젖병 기록이 하나도 없으면 '🍼 160ml' 단추가 대신 떴다. 막 태어난 아기(한 번에 60ml 안팎)의 첫 기록에도 160 이었다.
+              이 단추는 '우리 집이 늘 먹이던 양' 이다. 그 집 기록이 생기기 전에는 숫자를 내밀지 않는다 */
 
         let foodRecords = records.filter(r => r.type === 'feed' && r.subType === '이유식' && r.amount > 0);
         let recentFoodAmount = foodRecords.length > 0 ? foodRecords[0].amount : 60;
@@ -4146,7 +4145,7 @@ window.openTrackerSheet = function(type, editId = null, preSelect = null) {
                     </div>
                     <div style="display: flex; justify-content: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
                         ${quickButtonsHtml}
-                        <div style="width: 1px; background: var(--border); margin: 0 4px;"></div>
+                        ${quickButtonsHtml ? '<div style="width: 1px; background: var(--border); margin: 0 4px;"></div>' : ''}
                         <!-- ⚠️ '+10 · -10' 순서였다. 빼기가 왼쪽 · 더하기가 오른쪽 (이유식 칸도 같게) -->
                         <button type="button" onclick="window.adjustFeedAmount(-10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">−10</button>
                         <button type="button" onclick="window.adjustFeedAmount(10)" style="flex-shrink: 0; padding: 10px 14px; background: var(--bg-sub); color: var(--text-m); border: none; border-radius: 12px; font-weight: 900; font-size: 13.5px; cursor: pointer;">+10</button>
@@ -14115,16 +14114,47 @@ window.quickSaveSenior = async function(actionType) {
 
     let record = { id: recordId, time: timeStr, timestamp: timestamp };
 
+    /* ⚠️ 우리 집 기록이 없으면 '분유 160ml · 이유식 80g · 잠 60분' 을 지어서 남겼다.
+          잠은 저녁에 재워도 늘 '낮잠' 이었고, 엄마 폰에서 밤잠으로 재운 걸 여기서 깨우면 '낮잠' 으로 바뀌었다.
+          모르는 숫자는 지어내지 않는다 — 한 번만 기록 창에서 고르게 하고, 다음부터 한 번에 남긴다 */
+    const openSheet = (type, after) => {
+        if (typeof window.openTrackerSheet !== 'function') return;
+        window.openTrackerSheet(type);
+        if (after) setTimeout(after, 350);
+    };
+    // 낮잠 · 밤잠 — 빠른 기록(quickrec.js) · 재우기 소리(sleepsound.js)와 같은 셈
+    const sleepKind = (at) => {
+        const mod = (ms) => { const d = new Date(ms); return d.getHours() * 60 + d.getMinutes(); };
+        const m = mod(at), n = { '낮잠': 0, '밤잠': 0 };
+        records.forEach(r => {
+            if (!r || r.type !== 'sleep' || !(r.subType in n) || at - Number(r.timestamp) > 14 * 864e5) return;
+            const d = Math.abs(mod(Number(r.timestamp)) - m);
+            if (Math.min(d, 1440 - d) <= 90) n[r.subType]++;
+        });
+        if (n['낮잠'] + n['밤잠'] >= 2 && n['낮잠'] !== n['밤잠']) return n['밤잠'] > n['낮잠'] ? '밤잠' : '낮잠';
+        const h = new Date(at).getHours();
+        return (h >= 19 || h < 6) ? '밤잠' : '낮잠';
+    };
+    const hm = (min) => min >= 60 ? `${Math.floor(min / 60)}시간${min % 60 ? ' ' + (min % 60) + '분' : ''}` : `${min}분`;
+
     if (actionType === 'formula') {
-        let lastFormula = records.find(r => r.type === 'feed' && r.subType !== '모유' && r.subType !== '이유식');
-        let feedAmount = lastFormula ? parseInt(lastFormula.amount) : 160;
+        let lastFormula = records.find(r => r.type === 'feed' && r.subType !== '모유' && r.subType !== '이유식' && Number(r.amount) > 0);
+        if (!lastFormula) {
+            window.showToast('얼마나 먹였는지 한 번만 적어 주세요. 다음부터는 바로 남겨요');
+            return openSheet('feed');
+        }
+        let feedAmount = parseInt(lastFormula.amount);
 
         record.type = 'feed'; record.subType = '분유'; record.amount = feedAmount;
         window.showToast(`🍼 분유 ${feedAmount}ml 남겼어요`);
     } 
     else if (actionType === 'babyfood') {
-        let lastFood = records.find(r => r.type === 'feed' && r.subType === '이유식');
-        let foodAmount = lastFood ? parseInt(lastFood.amount) : 80;
+        let lastFood = records.find(r => r.type === 'feed' && r.subType === '이유식' && Number(r.amount) > 0);
+        if (!lastFood) {
+            window.showToast('얼마나 먹였는지 한 번만 적어 주세요. 다음부터는 바로 남겨요');
+            return openSheet('feed', () => { if (typeof window.toggleMammaTab === 'function') window.toggleMammaTab('food'); });
+        }
+        let foodAmount = parseInt(lastFood.amount);
 
         record.type = 'feed'; record.subType = '이유식'; record.amount = foodAmount;
         window.showToast(`🥄 이유식 ${foodAmount}g 남겼어요`);
@@ -14138,40 +14168,42 @@ window.quickSaveSenior = async function(actionType) {
         window.showToast("💩 응가 기저귀 남겼어요");
     } 
     else if (actionType === 'sleep_start') {
+        const kind = sleepKind(timestamp);
         localStorage.setItem('tosil_sleep_start', timestamp.toString());
-        localStorage.setItem('tosil_sleep_type', '낮잠');
+        localStorage.setItem('tosil_sleep_type', kind);
         window.trackerState = window.trackerState || {};
         window.trackerState.isSleeping = true;
         
-        record.type = 'sleep'; record.subType = '낮잠'; record.amount = 0; 
+        record.type = 'sleep'; record.subType = kind; record.amount = 0; 
         if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        window.showToast("💤 잠들었다고 남겼어요");
+        window.showToast(kind === '밤잠' ? "🌙 밤잠 들었다고 남겼어요" : "💤 잠들었다고 남겼어요");
     } 
     else if (actionType === 'sleep_end') {
         const startStr = localStorage.getItem('tosil_sleep_start');
-        let duration = 60; 
-        if (startStr) {
-            duration = Math.max(1, Math.floor((timestamp - parseInt(startStr)) / 60000));
-            localStorage.removeItem('tosil_sleep_start');
-            localStorage.removeItem('tosil_sleep_type');
+        const openIdx = records.findIndex(r => r.type === 'sleep' && r.amount === 0);
+        let startTs = startStr ? parseInt(startStr, 10) : NaN;
+        // 잠든 때를 이 폰이 모르면 하루 안에 남은 '자는 중' 기록에서 찾는다. 그래도 없으면 지어내지 않는다
+        if (!(startTs > 0) && openIdx !== -1 && timestamp - Number(records[openIdx].timestamp) < 864e5) startTs = Number(records[openIdx].timestamp);
+        if (!(startTs > 0) || startTs > timestamp) {
+            window.showToast('언제 잠들었는지 골라 주세요');
+            return openSheet('sleep', () => { if (typeof window.showSleepWake === 'function') window.showSleepWake(); });
         }
+        const kind = localStorage.getItem('tosil_sleep_type') || (openIdx !== -1 && records[openIdx].subType) || sleepKind(startTs);
+        const duration = Math.max(1, Math.floor((timestamp - startTs) / 60000));
+        localStorage.removeItem('tosil_sleep_start');
+        localStorage.removeItem('tosil_sleep_type');
         window.trackerState = window.trackerState || {};
         window.trackerState.isSleeping = false;
 
-        const existingSleepIdx = records.findIndex(r => r.type === 'sleep' && r.amount === 0);
-        if(existingSleepIdx !== -1) {
-            record.id = records[existingSleepIdx].id; 
-        }
+        if (openIdx !== -1) record.id = records[openIdx].id;
 
-       record.type = 'sleep'; record.subType = '낮잠'; record.amount = duration;
-        if (startStr) {
-            record.timestamp = parseInt(startStr);
-            record.endTs = timestamp;
-            const sd = new Date(record.timestamp);
-            record.time = `${String(sd.getHours()).padStart(2,'0')}:${String(sd.getMinutes()).padStart(2,'0')}`;
-        }
-        window.showToast(`☀️ ${duration}분 자고 일어났다고 남겼어요`); 
-        }  
+        record.type = 'sleep'; record.subType = kind === '밤잠' ? '밤잠' : '낮잠'; record.amount = duration;
+        record.timestamp = startTs;
+        record.endTs = timestamp;
+        const sd = new Date(startTs);
+        record.time = `${String(sd.getHours()).padStart(2,'0')}:${String(sd.getMinutes()).padStart(2,'0')}`;
+        window.showToast(`${record.subType === '밤잠' ? '🌙' : '☀️'} ${hm(duration)} 자고 일어났다고 남겼어요`);
+    }
     const idx = records.findIndex(r => r.id === record.id); 
     if(idx !== -1) records[idx] = record;
     else records.push(record);
