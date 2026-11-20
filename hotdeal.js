@@ -180,9 +180,9 @@
         if ($('hd-qty-b')) $('hd-qty-b').placeholder = String(I.b);
         if ($('hd-total-price')) $('hd-total-price').placeholder = cur.item === 'milk' ? '89,000' : (cur.item === 'wipe' ? '15,900' : '45,000');
         if ($('hd-qty-hint')) $('hd-qty-hint').textContent = cur.item === 'milk'
-            ? '통에 적힌 g 과 통 수예요. 100g 값으로 견줘서 750g · 800g 통도 바로 비교돼요'
-            : (cur.item === 'wipe' ? '한 팩 매수와 팩 수예요 (예: 70매 × 10팩). 1장 값으로 견줘요'
-                : '한 팩 장수와 팩 수예요 (예: 60매 × 3팩). 단계를 고르면 같은 단계끼리 견줘요');
+            ? '통에 적힌 g 과 통 수예요. 100g 값으로 바꿔서 750g · 800g 통도 바로 비교돼요'
+            : (cur.item === 'wipe' ? '한 팩 매수와 팩 수예요 (예: 70매 × 10팩). 1장 값으로 비교해요'
+                : '한 팩 장수와 팩 수예요 (예: 60장 × 3팩). 같은 단계끼리 비교해요');
     }
     function paintList() {
         var box = $('hd-log'), card = $('hd-log-card'); if (!box || !card) return;
@@ -238,7 +238,7 @@
         if (!bst) {
             v.textContent = '처음 적는 ' + kind + ' 값이에요';
             v.style.cssText = 'background:#F3F1FC; color:#5B52B8;';
-            c.innerHTML = '샀다면 아래 \'샀어요\' 로 남겨 두세요. 다음에 살 때 이 값과 견줘 드릴게요.';
+            c.innerHTML = '샀다면 아래 \'샀어요\' 로 남겨 두세요. 다음에 살 때 이 값과 비교해 드릴게요.';
         } else {
             var bp = num(bst.per), d = per - bp, tot = Math.abs(d) * qty / I.per;
             var when = bst.old ? '예전에 적어 둔 값' : dayLabel(bst.ts);

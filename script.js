@@ -5832,18 +5832,29 @@ window.updateTrackerDashboard = function() {
             const h = d.getHours();
             const period = h < 5 ? "새벽" : (h < 12 ? "아침" : (h < 18 ? "낮" : "밤"));
             let hh = h % 12; if (hh === 0) hh = 12;
-            return `${period} ${hh}시` + (d.getMinutes() ? ` ${d.getMinutes()}분` : "");
+            return `${period} ${hh}시` + (d.getMinutes() ? `\u00A0${d.getMinutes()}분` : "");   // '1시 / 20분' 으로 줄이 갈리지 않게
         };
         const rel = (ms) => {          // 오늘 전이면 '어젯밤 · 어제'
             const t = clock(ms);
             if (ms >= todayStart) return t;
             return t.indexOf('밤') === 0 ? '어젯' + t : '어제 ' + t;
         };
-        const when = (longestStart !== null && longestEnd !== null)
-            ? (longestIsNow ? `${rel(longestStart)}에 잠들어 지금 자는 중이에요. ` : `${rel(longestStart)}에 잠들어 ${clock(longestEnd)}에 깼어요. `)
-            : "";
-        const cntTxt = sleepsStartedToday > 0 ? `오늘은 ${sleepsStartedToday}번 잠들었고, ` : '';
-        ribbonCaption = `<div id="today-sleep-caption" style="font-size:12.5px; font-weight:500; color:var(--text-sub); margin-top:14px; letter-spacing:-0.2px; line-height:1.6;">${when}${cntTxt}가장 길게 잔 건 ${longTxt}이에요.</div>`;
+        /* ⚠️ '어젯밤 9시 10분에 잠들어 새벽 1시 20분에 깼어요. 오늘은 1번 잠들었고, 가장 길게 잔 건 4시간 10분이에요' 라고 떴다.
+              오늘 잔 1번(낮잠 1시간 10분)이 4시간 10분인 것처럼 읽힌다. 4시간 10분은 어젯밤 잠이다.
+              오늘 몇 번 잠들었는지를 먼저 말하고, 가장 길게 잔 잠은 그 잠의 시각을 붙여 따로 말한다 */
+        const cntTxt = sleepsStartedToday > 0 ? `오늘은 ${sleepsStartedToday}번 잠들었어요. ` : '';
+        let longLine = '';
+        if (longestStart !== null && longestEnd !== null && longestSleep > 0) {
+            // '아침 9시 40분부터 10시 50분까지' — 깬 때가 같은 때(아침 · 낮 · 밤)면 앞말을 한 번만
+            const from = rel(longestStart), end = clock(longestEnd), p = end.split(' ')[0];
+            const till = from.split(' ')[0] === p ? end.slice(p.length + 1) : end;
+            longLine = longestIsNow
+                ? `${rel(longestStart)}에 잠들어 지금 ${longTxt}째 자는 중이에요.`
+                : `가장 길게 잔 건 ${from}부터 ${till}까지, ${longTxt}이에요.`;
+        } else if (isSleeping) {
+            longLine = '지금 자는 중이에요.';   // 방금 재우기 시작했다 ('가장 길게 잔 건 0분' 이 되지 않게)
+        }
+        ribbonCaption = `<div id="today-sleep-caption" style="font-size:12.5px; font-weight:500; color:var(--text-sub); margin-top:14px; letter-spacing:-0.2px; line-height:1.6;">${(cntTxt + longLine).trim()}</div>`;
     } else {
         ribbonCaption = `<div style="font-size:12.5px; font-weight:500; color:var(--text-sub); margin-top:14px;">아직 오늘 잠든 기록이 없어요.</div>`;
     }
@@ -8281,11 +8292,12 @@ window.renderBabyInfo = function() {
     if(ddayEl) ddayEl.innerText = ddayText;
 
     // ✨ 뱃지 상태 동적 계산 (도약기 vs 평온기)
-    let badgeText = "🚀 도약기"; // 기본값
+    /* ⚠️ 🚀 는 emoji.js 가 장식이라 지운다. 평온기는 '☀️ 원더윅스 평온기' 인데 도약기만 글자뿐이었다. 크는 때라 🌱 */
+    let badgeText = "🌱 원더윅스 도약기"; // 기본값
     if (typeof wwList !== 'undefined') {
         let currentWeek = Math.floor(devDays / 7); 
         let isWonderWeek = wwList.some(x => currentWeek >= (x.w - 1) && currentWeek <= (x.w + 1));
-        badgeText = isWonderWeek ? "🚀 원더윅스 도약기" : "☀️ 원더윅스 평온기";
+        badgeText = isWonderWeek ? "🌱 원더윅스 도약기" : "☀️ 원더윅스 평온기";
     }
 
     const wwBadgeEl = document.getElementById('wonderweek-badge');

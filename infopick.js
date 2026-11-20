@@ -600,22 +600,35 @@
         try { recs = JSON.parse(localStorage.getItem("tosil_tracker_records")) || []; } catch (e) {}
         if (!recs.length) return null;
 
-        var now = new Date();
+        var now = new Date(), nowMs = now.getTime();
         var thisY = now.getFullYear(), thisM = now.getMonth();
-        var prev = new Date(thisY, thisM - 1, 1);
+        var curFrom = new Date(thisY, thisM, 1).getTime();
+        /* ⚠️ 이번 달(20일까지)을 지난달 한 달 전체와 비교했다. 다음 달 3일이면 사흘치와 서른 날치를 비교해서
+              밤중 수유가 그대로여도 '지난달보다 22번 줄었어요' 가 초록색으로 떴다.
+              지난달도 1일부터 오늘과 같은 날 · 같은 시각까지만 센다 (지난달이 짧으면 말일까지) */
+        var prevFrom = new Date(thisY, thisM - 1, 1).getTime();
+        var prevTo = new Date(thisY, thisM - 1, Math.min(now.getDate(), new Date(thisY, thisM, 0).getDate()),
+                              now.getHours(), now.getMinutes()).getTime();
 
-        var a = 0, b = 0;
+        var a = 0, b = 0, earliest = Infinity;
         recs.forEach(function (r) {
-            if (!r || r.type !== "feed" || !Number(r.timestamp)) return;
-            var d = new Date(Number(r.timestamp));
-            var h = d.getHours();
+            var t = Number(r && r.timestamp);
+            if (!t) return;
+            if (t < earliest) earliest = t;
+            if (r.type !== "feed") return;
+            var h = new Date(t).getHours();
             if (h >= 6 && h < 22) return;                       // 밤 10시 ~ 새벽 6시만
-            if (d.getFullYear() === thisY && d.getMonth() === thisM) a++;
-            else if (d.getFullYear() === prev.getFullYear() && d.getMonth() === prev.getMonth()) b++;
+            if (t >= curFrom && t <= nowMs) a++;
+            else if (t >= prevFrom && t < prevTo) b++;
         });
 
         if (a < 3) return null;                                 // 표본이 적으면 말하지 않는다
-        return { now: a, prev: b, month: thisM + 1 };
+        /* 지난달 초부터 기록이 있어야 비교한다. 중간에 쓰기 시작한 달은 앞부분이 0번처럼 보인다.
+           1~3일에 시작했으면 그달부터, 아니면 다음 달부터 '기록이 다 있는 달' 로 본다 */
+        var e = new Date(earliest);
+        var cover = new Date(e.getFullYear(), e.getMonth() + (e.getDate() <= 3 ? 0 : 1), 1);
+        return { now: a, prev: b, hasPrev: prevFrom >= cover.getTime(),
+                 from: new Date(cover.getFullYear(), cover.getMonth() + 1, 1).getMonth() + 1, month: thisM + 1 };
     }
 
     function monthHTML() {
@@ -623,10 +636,10 @@
         if (!n) return "";
 
         var line, color;
-        if (!n.prev)              { line = (n.month % 12 + 1) + "월부터 이번 달과 견줘 드려요"; color = "var(--text-sub)"; }
-        else if (n.now < n.prev)  { line = "지난달보다 " + (n.prev - n.now) + "번 줄었어요"; color = GREEN; }
-        else if (n.now > n.prev)  { line = "지난달보다 " + (n.now - n.prev) + "번 늘었어요"; color = GOLD; }
-        else                      { line = "지난달과 같아요"; color = "var(--text-sub)"; }
+        if (!n.hasPrev)           { line = n.from + "월부터 지난달과 비교해 드려요"; color = "var(--text-sub)"; }
+        else if (n.now < n.prev)  { line = "지난달 이맘때보다 " + (n.prev - n.now) + "번 줄었어요"; color = GREEN; }
+        else if (n.now > n.prev)  { line = "지난달 이맘때보다 " + (n.now - n.prev) + "번 늘었어요"; color = GOLD; }
+        else                      { line = "지난달 이맘때와 같아요"; color = "var(--text-sub)"; }
 
         return '<div id="' + MON_ID + '" onclick="window.openInfoWord(\'통잠\')" ' +
             'style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border); ' +
@@ -890,7 +903,7 @@
             : "생년월일 없음");
 
         var n = nightFeeds();
-        console.log("밤중 수유:", n ? (n.month + "월 " + n.now + "번 / 지난달 " + n.prev + "번") : "기록 3번 미만이라 안 띄움");
+        console.log("밤중 수유:", n ? (n.month + "월 " + n.now + "번 / 지난달 이맘때 " + (n.hasPrev ? n.prev + "번" : "기록 없음")) : "기록 3번 미만이라 안 띄움");
 
         var g = feverLine(c.months);
         console.log("열 기준 안내:", g ? g.body : "생년월일이 없어 안 띄움");
