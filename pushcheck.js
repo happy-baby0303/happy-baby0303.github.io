@@ -235,7 +235,8 @@
         var p = perm();
         var line;
         if (!on) line = '지금은 꺼져 있어요';
-        else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">이 폰 알림이 꺼져 있어요 · 눌러서 켜기</span>';
+        // 막아 둔 알림(denied)은 눌러서 켤 수 없다 — 누르면 켜는 법이 열린다. 가족 알림 칸과 같은 말로 (script.js pushPermLine)
+        else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">' + (typeof window.pushPermLine === "function" ? window.pushPermLine(p) : "이 폰 알림이 꺼져 있어요") + '</span>';
         else {
             /* 한 줄에 다 넣으면 '바꾸기 ›' 만 다음 줄로 떨어진다. 졸릴 때 · 바꿀 때는 둘째 줄로 */
             var t = [f > 0 ? "수유 " + hm(f) : "", d > 0 ? "기저귀 " + hm(d) : ""].filter(Boolean).join(" · ");

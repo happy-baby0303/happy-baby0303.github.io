@@ -1376,6 +1376,14 @@ window.analyzeMoney = function() {
     const resBox = document.getElementById('money-result'); 
     const emptyState = document.getElementById('money-empty-state');
 
+    /* ⚠️ 처음 쓰는 사람(기록 0개)에게도 '전부 비우기' 가 떠 있었다. 비울 게 생기면 보인다 (다른 달 기록이 있으면 보인다) */
+    const clearAll = document.getElementById('money-clear-all');
+    if (clearAll) {
+        let anyRec = true;
+        try { const L = JSON.parse(localStorage.getItem('tosil_ledger_data') || '{}'); anyRec = Array.isArray(L.history) && L.history.length > 0; } catch (e) {}
+        clearAll.style.visibility = anyRec ? 'visible' : 'hidden';
+    }
+
     if(detailsTotal === 0) {
         if(resBox) resBox.style.display = 'none';
         if(emptyState) {
@@ -8849,13 +8857,13 @@ window.renderSettingsTab = function() {
                 <div id="st-family">
             ${syncHtml}
             <div id="st-role-card" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); box-sizing: border-box; width: 100%;">
-                <!-- 역할 설정 -->
+                <!-- 역할 설정 — ⚠️ 고른 칸 글씨가 엄마는 빨강(#D32F2F · 삭제 단추 색), 돌봄 화면은 금색이었다. 아빠처럼 연보라 하나로 -->
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 12px 16px 20px;">
                     <div style="font-size: 14.5px; font-weight: 800; color: var(--text-m); margin-right: auto; white-space: nowrap; flex-shrink: 0;">내 역할</div>
                     <div style="display: flex; background: var(--bg-sub); border-radius: 10px; padding: 3px; border: 1px solid var(--border); flex-shrink: 0;">
-                        <button onclick="window.changeUserRole('mom')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'mom' ? 'background:var(--bg-card); color:#D32F2F; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">엄마</button>
+                        <button onclick="window.changeUserRole('mom')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'mom' ? 'background:var(--bg-card); color:#7F77DD; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">엄마</button>
                         <button onclick="window.changeUserRole('dad')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'dad' ? 'background:var(--bg-card); color:#7F77DD; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">아빠</button>
-                        <button onclick="window.changeUserRole('senior')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'senior' ? 'background:var(--bg-card); color:#B98A2E; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">돌봄 화면</button>
+                        <button onclick="window.changeUserRole('senior')" style="padding: 6px 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; transition: 0.2s; white-space: nowrap; ${currentRole === 'senior' ? 'background:var(--bg-card); color:#7F77DD; box-shadow:0 2px 6px rgba(0,0,0,0.05);' : 'background:transparent; color:#A3958A;'}">돌봄 화면</button>
                     </div>
                 </div>
             </div>
@@ -16326,6 +16334,16 @@ window.openSettingsTab = function() {
 };
 
 
+/* ⚠️ 설정 '알림' 의 세 칸(육퇴 · 수유 기저귀 · 가족)이 같은 상태를 서로 다른 말로 적었다.
+      폰에서 막아 둔 알림(denied)은 눌러도 켜지지 않고 켜는 법이 열리는데, 두 칸은 '눌러서 켜기' 라고 했다.
+      말을 한 곳에 둔다 (remind.js · pushcheck.js 도 이걸 부른다).
+      막혀 있을 때는 두 줄로 끊는다 — 한 줄로 이으면 단추 옆 칸에서 '켜는 / 법 보기' 로 갈라졌다 */
+window.pushPermLine = function (p) {
+    return p === 'denied'      ? '이 폰에서 알림이 막혀 있어요<br>눌러서 켜는 법 보기'
+         : p === 'unsupported' ? '이 브라우저는 알림을 지원하지 않아요'
+         :                       '이 폰 알림이 아직 꺼져 있어요 · 눌러서 켜기';
+};
+
 // ==========================================
 // 🔔 [바통터치 알림] 설정 탭 카드
 //    브라우저 권한은 코드로 못 끈다.
@@ -16357,7 +16375,7 @@ window.openSettingsTab = function() {
         var p = perm(), on = isOn();
         var sub =
             p === 'unsupported' ? '이 브라우저는 알림을 지원하지 않아요'
-          : p === 'denied'      ? '이 폰에서 알림이 막혀 있어요. 눌러서 켜는 법 보기'
+          : p === 'denied'      ? '<span style="color:#B07A22; font-weight:800;">' + window.pushPermLine(p) + '</span>'
           : on                 ? '부탁 · 교대 · 문답 소식이 오면 바로 알려 드려요'
                                : '지금은 꺼져 있어요';
 

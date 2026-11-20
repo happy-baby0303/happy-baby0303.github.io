@@ -104,7 +104,7 @@
             '<div style="margin-top:16px; background:#FBF8F3; border:1px solid #EDE6DE; ' +
                 'border-radius:14px; padding:15px 16px; font-size:12.5px; font-weight:600; ' +
                 'color:#7A6F68; line-height:1.9; word-break:keep-all;">' +
-                '\u00b7 ' + esc(nm("의")) + ' 개월수에 맞춰 <b>일주일치를 한 번에</b><br>' +
+                '\u00b7 ' + esc(nm("의")) + ' 개월수에 맞춰 <b>일주일 치를 한 번에</b><br>' +
                 '\u00b7 새 재료끼리 겹치지 않게 <b>테스트 날짜를 띄워서</b><br>' +
                 '\u00b7 <b>장 볼 목록</b>도 같이. 마트에서 몇 개 사면 되는지<br>' +
                 '\u00b7 <b>이번 주 영양</b>은 어땠는지 한눈에' +
@@ -179,7 +179,7 @@
                 "background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.22); " +
                 "border-radius:12px; padding:13px 15px; margin-top:12px; cursor:pointer; " +
                 "font-size:12.5px; font-weight:700; color:#E8C766; line-height:1.7; word-break:keep-all;";
-            d.innerHTML = "🔒 <b>일주일치를 대신 짜드리는 건 PLUS예요.</b><br>" +
+            d.innerHTML = "🔒 <b>일주일 치를 대신 짜드리는 건 PLUS예요.</b><br>" +
                           "레시피 " + recipeCount() + "종과 알레르기 기록은 그대로 무료로 쓰실 수 있어요.";
             d.onclick = window.showFoodPaywall;
             box.appendChild(d);

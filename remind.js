@@ -277,7 +277,8 @@
         var line;
         if (!on) line = '지금은 꺼져 있어요';
         // ⚠️ 폰 알림이 막혀 있어도 '오후 8시 30분에 알려드려요' 라고 했다. 막혀 있으면 막혀 있다고 말한다
-        else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">이 폰 알림이 꺼져 있어요 · 눌러서 켜기</span>';
+        // 막아 둔 알림(denied)은 눌러서 켤 수 없다 — 누르면 켜는 법이 열린다. 가족 알림 칸과 같은 말로 (script.js pushPermLine)
+        else if (p !== "granted") line = '<span style="color:' + WARN + '; font-weight:800;">' + (typeof window.pushPermLine === "function" ? window.pushPermLine(p) : "이 폰 알림이 꺼져 있어요") + '</span>';
         else line = esc(when) + '에 알려 드려요' + (mode ? ' · ' + esc(mode) : '') +
                     '  <span style="color:' + PURPLE + '; font-weight:800;">바꾸기 ›</span>';
 
@@ -287,7 +288,7 @@
                 '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-top:2px; word-break:keep-all;">' + line + '</div>' +
             '</div>' +
             '<div id="remind-toggle" style="width:46px; height:27px; border-radius:14px; flex-shrink:0; cursor:pointer; ' +
-                'background:' + (on ? PURPLE : "var(--border)") + '; position:relative; transition:0.2s;">' +
+                'background:' + (on ? PURPLE : "var(--border)") + '; position:relative; transition:0.2s;' + (p === "denied" ? ' opacity:0.45;' : '') + '">' +
                 '<div style="position:absolute; top:3px; ' + (on ? "left:22px" : "left:3px") + '; width:21px; height:21px; ' +
                     'border-radius:50%; background:#FFF; transition:0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>' +
             '</div>';
