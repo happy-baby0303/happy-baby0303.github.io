@@ -405,7 +405,7 @@ function runBottleEngine() {
             </div>
             <div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">가장 가까운 3개</div>`;
     } else {
-        htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">${isFilterActive ? '조건에 맞는 젖병' : '젖병 전체'}</div>`;
+        htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">${window.__bottleOnlyAge ? '지금 개월수에 맞는 젖병' : (isFilterActive ? '조건에 맞는 젖병' : '젖병 전체')}</div>`;
     }
     
     let top3Results = processedData.slice(0, 3); 

@@ -347,7 +347,7 @@ function runCarseatEngine() {
         return;
     }
 
-    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">${isFilterActive ? '조건에 맞는 카시트' : '카시트 전체'}</div>`;
+    let htmlOutput = `<div style="font-size: 16px; font-weight: 800; color: #4A413C; margin-bottom: 16px;">${window.__seatOnlyAge ? '지금 개월수에 맞는 카시트' : (isFilterActive ? '조건에 맞는 카시트' : '카시트 전체')}</div>`;
     
     let top3Results = processedData.slice(0, 3); 
     let otherResults = processedData.slice(3); 

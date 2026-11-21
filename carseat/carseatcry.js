@@ -621,7 +621,7 @@
         out += '<div style="font-size:12.5px; font-weight:600; color:' + GRAY + '; ' +
             'margin:-16px 0 12px; line-height:1.75; word-break:keep-all;">' +
             '카시트는 몸이 반쯤 접힌 자세라 오래 있으면 힘들어요. ' +
-            '<b>두 시간마다</b>가 널리 쓰이는 기준이에요.</div>';
+            '<b>2시간마다</b>가 널리 쓰이는 기준이에요.</div>';
 
         if (youngWarn()) {
             out += '<div style="background:#FFF2F2; border:1px solid #FCA5A5; border-radius:13px; ' +

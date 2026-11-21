@@ -31,12 +31,18 @@ function applyGlobalBabyProfile() {
         b.innerText = `${window.BabyAge ? window.BabyAge.pre('생후 ') : '생후 '}${months}개월 맞춤`;
     });
 
-    let ageFilter = 'all';
-    if (months <= 6) ageFilter = 'newborn';
-    else if (months > 12) ageFilter = 'giant';
+    /* 시기마다 고르는 기준이 다르다 — 정보 탭 '지금 이 아기에게 맞는 종류' (strollerguide.js) 와 같은 구간.
+       ⚠️ 예전엔 7 ~ 12개월은 아무것도 안 골라서 목록이 데이터 순서(200만 원대 디럭스)부터 나왔고,
+          돌이 지나면 '우량아' 로 골라서 13kg 디럭스가 '다 맞아요' 로 맨 위에 섰다. 가이드는 '무게가 제일 중요해져요' 라고 하는데. */
+    let ageFilter = 'newborn';
+    if (months >= 24) ageFilter = 'walker';
+    else if (months >= 12) ageFilter = 'toddler';
+    else if (months >= 7) ageFilter = 'sitter';
+    window.__strollerAgeStage = ageFilter;
 
+    /* 주소에 baby 가 있으면 (받은 링크 · 직접 고른 것) 그대로 둔다. 예전엔 나이로 덮어써서 '둘째 계획' 이 '신생아' 로 바뀌었다 */
     const matBaby = document.getElementById('mat-baby');
-    if (matBaby && ageFilter !== 'all') {
+    if (matBaby && !new URLSearchParams(window.location.search).has('baby')) {
         matBaby.value = ageFilter;
     }
 }
@@ -246,7 +252,10 @@ function generateCardHtml(item) {
     /* ⚠️ 조건을 골라도 맞는지 안 맞는지가 세 번째 탭 '카시트 호환' 안에 있었다. 누르기 전엔 안 보였다. */
     let verdictHtml = '';
     if (!isFavViewMode && item.matchRate !== null) {
-        const reportTitle = item.matchRate === 100 ? '고르신 조건에 다 맞아요' : (item.matchRate >= 80 ? '조건에 잘 맞아요' : (item.matchRate >= 50 ? '일부만 맞아요' : '조건에 안 맞아요'));
+        /* 아무것도 안 고르고 나이로만 골랐으면 '고르신 조건에' 라고 하지 않는다 */
+        const reportTitle = item.ageOnly
+            ? (item.matchRate === 100 ? '지금 시기에 잘 맞아요' : (item.matchRate >= 80 ? '지금 시기에 무난해요' : (item.matchRate >= 50 ? '지금 시기엔 아쉬워요' : '지금 시기엔 안 맞아요')))
+            : (item.matchRate === 100 ? '고르신 조건에 다 맞아요' : (item.matchRate >= 80 ? '조건에 잘 맞아요' : (item.matchRate >= 50 ? '일부만 맞아요' : '조건에 안 맞아요')));
         const titleColor = item.matchRate >= 80 ? '#7F77DD' : (item.matchRate >= 50 ? '#B45309' : '#E32636');
         const why = item.matchRate === 100 ? '' : (item.matchReasons || []).join(' · ');
         verdictHtml = `<div class="stroller-verdict"><b style="color: ${titleColor};">${reportTitle}</b>${why ? ' · ' + why : ''}</div>`;
@@ -440,6 +449,8 @@ function renderList(isUserAction = false) {
     const parent = document.getElementById('mat-parent').value;
     const budget = document.getElementById('mat-budget').value;
     const isMatrixActive = (env !== 'all' || car !== 'all' || baby !== 'all' || parent !== 'all' || budget !== 'all');
+    const ageOnly = baby === window.__strollerAgeStage && env === 'all' && car === 'all' && parent === 'all' && budget === 'all';
+    const lightFirst = ['sitter', 'toddler', 'walker'].includes(baby);
 
     if (isUserAction) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -461,18 +472,19 @@ function renderList(isUserAction = false) {
 
        // 1. 💰 절대 조건: 예산 (자비 없는 칼각 컷팅! - 숨겨진 추가비용까지 합산해서 계산)
         const realTotalPrice = item.price + (item.hiddenTax?.cost || 0);
+        const overWhy = `예산을 넘어요 (${(item.hiddenTax?.cost || 0) > 0 ? '따로 사야 하는 것까지 ' : ''}${(realTotalPrice/10000).toFixed(0)}만 원)`;
         
         if (budget === 'under40' && realTotalPrice > 400000) {
-            score -= 100; reasons.push(`실결제 예산 초과 (총 ${(realTotalPrice/10000).toFixed(0)}만 원)`);
+            score -= 100; reasons.push(overWhy);
         } else if (budget === 'under100' && realTotalPrice > 1000000) {
-            score -= 100; reasons.push(`실결제 예산 초과 (총 ${(realTotalPrice/10000).toFixed(0)}만 원)`);
+            score -= 100; reasons.push(overWhy);
         }
 
         // 2. 🏡 환경: 계단 없는 빌라면 무게가 깡패
         if (env === 'stairs' && item.specs.weight > 8.5) {
-            score -= 40; reasons.push(`계단에서 들기 무거운 편 (${item.specs.weight}kg)`);
+            score -= 40; reasons.push(`계단에서 들기엔 무거워요 (${item.specs.weight}kg)`);
         } else if (env === 'mall' && item.width >= 60) {
-            score -= 15; reasons.push(`실내 주행 시 좁은 길 불편 (너비 ${item.width}cm)`);
+            score -= 15; reasons.push(`좁은 길에선 빠듯해요 (너비 ${item.width}cm)`);
         }
 
         // 3. 🚗 차/비행기 물리적 한계
@@ -496,25 +508,38 @@ function renderList(isUserAction = false) {
             }
         }
 
-        // 4. 👶 아기 성장 / 뼈대
+        // 4. 👶 아기 성장 — 시기마다 기준이 다르다 (정보 탭 '지금 이 아기에게 맞는 종류' 와 같은 말)
+        const deg = parseInt(String(item.specs.angle).replace(/[^0-9]/g, ''), 10) || 0;   // '175도 조절' → 175 · '등받이 고정' → 0
+        const kg = item.specs.weight;
         if (baby === 'newborn' && (item.type === '휴대용' || item.type === '트라이크')) {
             score -= 30; reasons.push('신생아에겐 디럭스·절충형보다 덜 눕고 덜 받쳐줘요');
+        } else if (baby === 'sitter' && deg < 160) {
+            /* 앉기 시작해도 낮잠은 유모차에서 눕혀서 잔다 — 아예 안 눕는 건 크게, 덜 눕는 건 조금 */
+            if (deg < 140) { score -= 30; reasons.push('등받이가 거의 안 눕혀져요 (낮잠 잘 땐 눕혀야 해요)'); }
+            else { score -= 10; reasons.push(`${deg}도까지만 눕혀져서 낮잠엔 조금 불편할 수 있어요`); }
+        } else if (baby === 'toddler' || baby === 'walker') {
+            if (baby === 'walker' && item.type !== '휴대용' && item.type !== '트라이크') {
+                score -= 20; reasons.push(`두 돌이 지나면 가벼운 휴대용 하나면 돼요 (${kg}kg)`);
+            } else if (baby === 'toddler' && kg > 8.5) {
+                score -= (kg > 10 ? 30 : 10); reasons.push(`돌이 지나면 접어서 드는 일이 잦아요 (${kg}kg)`);
+            }
+            if (deg < 140) { score -= 15; reasons.push('잠들면 눕힐 수가 없어요'); }
         } else if (baby === 'giant' && item.backrest < 50) {
-            score -= 15; reasons.push('우량아에게는 등받이나 시트가 좁게 느껴질 수 있음');
+            score -= 15; reasons.push('큰 아기에겐 등받이가 좁게 느껴질 수 있어요');
         } else if (baby === 'twins' && !item.expand.includes('⭕') && item.type !== '쌍둥이' && item.type !== '웨건') {
             score -= 60; reasons.push('두 아이를 같이 태울 수 없어요');
         }
 
         // 5. 🦴 부모 관절
         if (parent === 'joint' && item.specs.weight >= 9.0) {
-            score -= 30; reasons.push(`손목에 무리가 갈 수 있는 무게 (${item.specs.weight}kg)`);
+            score -= 30; reasons.push(`손목에 무리가 갈 수 있어요 (${item.specs.weight}kg)`);
         }
 
         // 결과 합산
         if (score === 100) reasons.push('고르신 조건에 다 맞아요');
         if (score < 0) score = 0;
 
-        return { ...item, originalIndex: index, matchRate: score, matchReasons: reasons };
+        return { ...item, originalIndex: index, matchRate: score, matchReasons: reasons, ageOnly };
     });
 
     const activeFilters = Array.from(document.querySelectorAll('.stroller-filt-btn.active')).map(btn => btn.getAttribute('data-filter'));
@@ -542,7 +567,8 @@ function renderList(isUserAction = false) {
         });
     }
 
-    if (isMatrixActive) processedData.sort((a, b) => b.matchRate - a.matchRate);
+    /* 앉기 시작한 뒤로는 점수가 같으면 가벼운 것부터 — 미는 사람 몸이 먼저 상한다 (정보 탭: '이 시기부터 무게가 제일 중요해져요') */
+    if (isMatrixActive) processedData.sort((a, b) => (b.matchRate - a.matchRate) || (lightFirst ? a.specs.weight - b.specs.weight : 0));
 
     if(processedData.length === 0) { 
         topArea.innerHTML = `
@@ -561,6 +587,7 @@ function renderList(isUserAction = false) {
     window.__strollerRest = null;
     if (isMatrixActive && processedData.length > 3) {
         topTitle.style.display = 'flex'; showMoreBtn.style.display = 'block'; showMoreBtn.innerText = `나머지 ${processedData.length - 3}개 더 보기 ▾`; otherArea.style.display = 'none';
+        topTitle.innerText = ageOnly ? ('지금 시기에 잘 맞는 3종' + (lightFirst ? ' · 가벼운 순' : '')) : '조건에 잘 맞는 3종';
         topArea.innerHTML = processedData.slice(0, 3).map(x => generateCardHtml(x)).join('');
         otherArea.innerHTML = processedData.slice(3).map(generateCardHtml).join('');
     } else if (processedData.length > 5) {

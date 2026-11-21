@@ -306,3 +306,8 @@ body.dark-mode [style*="background: #FFF9E6"] b,
 body.dark-mode [style*="background: #FFF9E6"] strong,
 body.dark-mode [style*="background:#FFF9E6"] b,
 body.dark-mode [style*="background: #FFFBEB"] b { color: #FDE68A !important; }
+
+/* 빈 칸 안내 글씨(placeholder)는 연하게 — '걸리는 시간 [4] 시간 [30] 분' 이 이미 적힌 값처럼 보여서
+   '시간표를 만들어드릴게요' 가 왜 안 나오는지 헷갈렸다 */
+input::placeholder { color: #C3B8AD; font-weight: 600; opacity: 1; }
+body.dark-mode input::placeholder { color: #7D746C; }
