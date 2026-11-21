@@ -77,7 +77,7 @@
     /* 하루 평균은 '다 지난 날' 로만 낸다. 일요일 저녁에 이번 주를 보면 오늘 밤잠 · 저녁 기록이 아직 없어서
        오늘까지 넣으면 평균이 낮게 나온다. 합계(맘마 몇 번 · 기저귀 몇 개)는 오늘 것도 센다. */
     function tally(recs, from, to) {
-        var o = { feed: 0, ml: 0, pump: 0, breast: 0, food: 0, sleep: 0, diaper: 0, days: {}, sleepDays: {}, sleepFull: 0, diaperFull: 0 };
+        var o = { feed: 0, ml: 0, pump: 0, breast: 0, food: 0, sleep: 0, diaper: 0, days: {}, allDays: {}, sleepDays: {}, sleepFull: 0, diaperFull: 0 };
         var t0 = new Date(); t0.setHours(0, 0, 0, 0);
         var cut = Math.min(to, t0.getTime());          // 이 시각 전이 '다 지난 날'
         for (var i = 0; i < recs.length; i++) {
@@ -85,6 +85,7 @@
             if (!ts || ts < from || ts >= to) continue;
             var dk = keyOf(new Date(ts)), amt = parseInt(r.amount, 10) || 0, full = ts < cut;
             if (full) o.days[dk] = 1;
+            o.allDays[dk] = 1;                                // 오늘까지 넣어 기록이 있는 날 (제목용)
             if (r.type === "feed") {
                 if (r.subType === "이유식") o.food++;
                 else {
@@ -98,6 +99,7 @@
             } else if (r.type === "diaper") { o.diaper++; if (full) o.diaperFull++; }
         }
         o.nDays = Object.keys(o.days).length;
+        o.nAll = Object.keys(o.allDays).length;
         o.nSleep = Object.keys(o.sleepDays).length;
         o.sleepAvg = o.nSleep ? o.sleepFull / o.nSleep : 0;
         o.diaperAvg = o.nDays ? o.diaperFull / o.nDays : 0;
@@ -188,10 +190,14 @@
         }
         if (g.photos.length) return "사진 " + g.photos.length + "장이 담긴 한 주";
         if (g.notes.length) return "한 줄 " + g.notes.length + "개가 남은 한 주";
-        var bits = [];
-        if (g.t.feed) bits.push("맘마 " + g.t.feed + "번");
-        if (g.t.diaper) bits.push("기저귀 " + g.t.diaper + "개");
-        return (bits.join(", ") || "기록이 쌓인") + (bits.length ? "의 한 주" : " 한 주");
+        if (g.voices) return "목소리 " + g.voices + "개가 담긴 한 주";
+        /* ⚠️ 기록만 있는 주는 '맘마 53번, 기저귀 53개의 한 주' 라고 했는데, 바로 아래 줄이
+              '맘마 53번 · 기저귀 53개 · 잠 하루 7시간 30분' 이라 같은 숫자를 두 번 읽었다.
+              숫자는 아래 줄에 맡기고, 제목은 그 주를 한 마디로 */
+        var nd = g.t.nAll || 0;
+        if (nd >= 7) return "하루도 빠짐없이 기록한 한 주";
+        if (nd >= 2) return nd + "일 동안 기록한 한 주";
+        return "기록이 쌓인 한 주";
     }
     /* 세 칸 숫자 — [이름, 큰 글씨, 작은 줄, 지난주] */
     function numbers(g) {
