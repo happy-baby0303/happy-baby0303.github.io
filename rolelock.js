@@ -242,6 +242,9 @@
          이름에 따라 말투와 카드가 달라진다. 권한(보안 규칙)은 그대로다. */
     var LABELS = ["할머니", "할아버지", "시터 선생님", "가족"];
     var ICON = { "할머니": "👵", "할아버지": "👴", "시터 선생님": "🧑‍🍼", "가족": "🏠" };   // 시터: 아기를 돌보는 사람
+    /* ⚠️ 엄마 · 아빠 줄은 늘 집(🏠) 그림이었다 — 사람 줄에 집이 붙어 '우리 가족' 이 집 목록처럼 보였다.
+          할머니(👵) · 할아버지(👴)처럼 사람으로. 누군지 아직 모르면 👤 (설정 맨 위 내 칸과 같은 그림) */
+    var PICON = { "엄마": "👩", "아빠": "👨" };
     function isFamilyLabel(l) { return l === "할머니" || l === "할아버지" || l === "가족"; }
     window.helperLabel = function () { return localStorage.getItem("tosil_helper_label") || ""; };
     window.helperIsFamily = function () { return isFamilyLabel(window.helperLabel()); };
@@ -395,7 +398,7 @@
             }
             return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border);">' +
                 '<span style="width:34px;height:34px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:' +
-                    (r === "viewer" ? "#F3EFE9" : "#EFEDFB") + ';">' + (r === "viewer" ? (ICON[lb] || "🤝") : "🏠") + '</span>' +
+                    (r === "viewer" ? "#F3EFE9" : "#EFEDFB") + ';">' + (r === "viewer" ? (ICON[lb] || "🤝") : (PICON[word] || "👤")) + '</span>' +
                 '<div style="flex:1;min-width:0;">' +
                     '<div style="font-size:14.5px;font-weight:700;color:var(--text-m);">' + title + (!lb && n && helpers > 1 ? ' ' + n : '') +
                         (r === "viewer" ? ' <span onclick="window.__nameHelper(\'' + uid + '\')" style="font-size:11.5px;font-weight:700;color:var(--text-sub);cursor:pointer;margin-left:4px;">' + (lb ? '바꾸기' : '이름 붙이기') + '</span>' : '') +

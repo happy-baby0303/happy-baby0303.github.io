@@ -17,6 +17,13 @@
    옮겨지는 일이 없다.
    ⚠️ v3 까지는 '알림 · 가족 · 보관' 한 상자에 담았다 (이름부터 세 가지였다). 그리고 20 · 120 · 400ms 타이머로 다시 담았다.
 
+   v5 — 묶음 하나 = 카드 한 장
+   ⚠️ 설정이 복잡해 보였다. 묶음 안 카드가 저마다 테두리 · 그림자 · 12px 틈을 가져서
+      '알림' 하나에 상자가 넷, '가족' 하나에 상자가 넷이었다 (도움 · 약관 · 계정은 이미 한 장).
+      줄로 붙인다 — 줄 사이엔 선 하나, 맨 위 · 맨 아래만 둥글게. 카드를 옮기거나 다시 그리지 않고
+      표시(class)만 단다 (st-row · st-first · st-last). 그래서 다른 파일이 카드를 새로 그려도 모양이 따라온다.
+      초대 단추가 있는 '안심 클라우드' 와 PLUS 는 따로 둔다.
+
    index.html 에서 설정 탭을 감싸는 파일들(rolelock · plusfree · homefix · export · remind · pushcheck · feedback)
    다음, 맨 끝에 로드한다 — 그래야 이 파일의 '다 그린 뒤' 가 맨 마지막에 돈다.
    ============================================================ */
@@ -30,7 +37,42 @@
         ["st-keep",   ["export-card", "st-report-card"]]
     ];
 
+    /* 줄로 붙일 묶음 — 빼는 카드만 적는다 (나중에 다른 파일이 붙이는 카드도 그대로 줄이 된다) */
+    var ROWS = {
+        "st-family": ["settings-cloud-card", "st-together-card"],
+        "st-alarm":  [],
+        "st-keep":   []
+    };
+
     function tab() { return document.getElementById("tab-settings"); }
+
+    (function style() {
+        if (document.getElementById("st-row-style")) return;
+        var s = document.createElement("style");
+        s.id = "st-row-style";
+        s.textContent =
+            "#tab-settings .st-row{border-radius:0 !important;margin:0 0 -1px 0 !important;box-shadow:none !important;}" +
+            "#tab-settings .st-row.st-first{border-top-left-radius:16px !important;border-top-right-radius:16px !important;}" +
+            "#tab-settings .st-row.st-last{border-bottom-left-radius:16px !important;border-bottom-right-radius:16px !important;margin-bottom:12px !important;}" +
+            /* '알림이 안 오나요?' 는 점선 · 회색 상자였다 — 줄 안에서는 다른 줄과 같은 바탕으로 */
+            "#tab-settings #pushcheck-card.st-row{border-style:solid !important;background:var(--bg-card) !important;}";
+        (document.head || document.documentElement).appendChild(s);
+    })();
+
+    function rowify() {
+        Object.keys(ROWS).forEach(function (id) {
+            var slot = document.getElementById(id);
+            if (!slot) return;
+            var kids = Array.prototype.filter.call(slot.children, function (el) { return ROWS[id].indexOf(el.id) < 0; });
+            var vis = kids.filter(visible);
+            kids.forEach(function (el) {
+                var f = el === vis[0], l = el === vis[vis.length - 1];
+                if (!el.classList.contains("st-row")) el.classList.add("st-row");
+                if (el.classList.contains("st-first") !== f) el.classList.toggle("st-first", f);
+                if (el.classList.contains("st-last") !== l) el.classList.toggle("st-last", l);
+            });
+        });
+    }
 
     function visible(el) {
         if (!el || el.nodeType !== 1) return false;
@@ -66,6 +108,7 @@
                 var d = any ? "" : "none";
                 if (secs[k].style.display !== d) secs[k].style.display = d;
             }
+            rowify();
         } catch (e) {}
         busy = false;
     }
@@ -77,7 +120,8 @@
         var host = tab();
         if (!host || mo) return;
         mo = new MutationObserver(function () { tidy(); });
-        mo.observe(host, { childList: true, subtree: true });
+        /* 카드가 숨거나 다시 보일 때(style)도 맨 위 · 맨 아래를 다시 본다 — 표시(class)는 지켜보지 않는다 (다시 돌지 않게) */
+        mo.observe(host, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
     }
 
     /* 설정 탭을 다시 그릴 때마다 (innerHTML 을 통째로 갈아 끼운다) — 다른 파일들이 카드를 붙인 바로 뒤 */
