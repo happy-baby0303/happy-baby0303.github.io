@@ -68,7 +68,7 @@
          앱 배경(#FAF7F2)과 정확히 같은 값 하나로 통일한다. -->
     <meta name="theme-color" content="#FAF7F2">
     <!-- 판 번호 — sw.js 의 CACHE(baenaet-vN) 와 같은 수. 설정 '앱 버전' 과 의견 보내기에 붙는다 -->
-    <meta name="baenaet-build" content="183">
+    <meta name="baenaet-build" content="184">
     <link rel="manifest" href="./manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2388,10 +2388,11 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     </summary>
 
                     <div class="box-main" style="border-radius: 16px; padding: 0 16px; margin-top: 8px;">
-                        
+                        <!-- ⚠️ 글 제목을 고칠 때: 플레이 앱은 제목 속 낱말로 의료 글을 숨긴다 (playlite.js MED_ARTICLES),
+                                맞춤 글도 낱말로 고른다 (infopick.js find). '열날 때 · 똥 색깔 · 떨어졌어요 · 화상 · 두드러기 · 개봉 후 …' 를 지우면 안 된다 -->
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">신생아/영유아 열날 때 대처법</div>
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">신생아 · 영유아 열날 때 대처법</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2456,7 +2457,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">신생아 맹물·보리차, 언제부터 먹일까?</div>
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">신생아 맹물 · 보리차, 언제부터 먹일까</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2496,7 +2497,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">공갈 젖꼭지(쪽쪽이), 물리는/끊는 시기</div>
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">공갈 젖꼭지(쪽쪽이), 물리는 · 끊는 시기</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2519,7 +2520,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                             <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">당황하지 마세요 아기 똥 색깔 건강법</div>
+                                <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">아기 똥 색깔, 괜찮은 색과 병원 갈 색</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2546,7 +2547,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                                <!-- 🌟 새로 추가된 개봉일 가이드 아코디언 -->
                         <details class="lib-item" style="border-bottom: 1px solid var(--border);">
     <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-        <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">약, 연고, 화장품 개봉 후 언제까지 쓸까?</div>
+        <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">약 · 연고 · 화장품, 개봉 후 언제까지 쓸까</div>
                                 <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                             </summary>
                             <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2573,7 +2574,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                             <!-- ✨ [추가 1] 에버그린 상식: 낙상 -->
                     <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                         <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">쿵 아기가 침대/소파에서 떨어졌어요</div>
+                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">아기가 침대 · 소파에서 떨어졌어요</div>
                             <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                         </summary>
                         <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2592,7 +2593,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <!-- ✨ [추가 2] 에버그린 상식: 화상 -->
                     <details class="lib-item" style="border-bottom: 1px solid var(--border);">
                         <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">앗 뜨거 화상 응급처치 골든타임</div>
+                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">화상 입었을 때, 바로 할 일</div>
                             <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                         </summary>
                         <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -2608,7 +2609,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
                     <!-- ✨ [추가 3] 에버그린 상식: 알레르기 -->
                     <details class="lib-item" style="border-bottom: none;">
                         <summary style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; cursor:pointer;">
-                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">이유식 먹고 두드러기가? (알레르기 대처)</div>
+                            <div style="font-size:14.5px; font-weight:800; color:var(--text-m);">이유식 먹고 두드러기가 났을 때</div>
                             <div class="lib-plus" style="font-size:22px; font-weight:300; color:var(--primary); line-height:0.5; transition:0.2s;">+</div>
                         </summary>
                         <div style="padding:0 0 20px 0; font-size:13.5px; line-height:1.6; color:var(--text-s);">
@@ -3633,7 +3634,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 🎁 출시 기념 무료 개방 (구글 결제 붙이기 전까지) -->
     <script src="./plusfree.js?v=5"></script>
 <script src="./anniversaries.js?v=2"></script>
-<script src="./home.js?v=3"></script>
+<script src="./home.js?v=4"></script>
  <script src="./homefix.js?v=11"></script>
 <script src="./weekly.js?v=6"></script>
 <script src="./postcard.js?v=3"></script>
@@ -3673,7 +3674,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
     <!-- 인스타 · 페북 · 네이버 앱 안에서 열렸을 때 — 바깥 브라우저로 여는 길 -->
     <script src="./inapp.js?v=1"></script>
 <script src="./memories.js"></script>    
-<script src="./firstwords.js?v=3"></script>
+<script src="./firstwords.js?v=4"></script>
 <script src="./babytab.js"></script> 
 <script src="./homelayout.js?v=4"></script>
 <script src="./settingscards.js?v=5"></script>
@@ -3682,7 +3683,7 @@ body.mode-senior #hero-empty-hint span { display: none !important; }
 <script src="./mobile.js?v=3"></script>
 <script src="./fit.js"></script>
 <script src="./emergency119.js?v=3"></script>
-<script src="./libraryplus.js?v=4"></script>
+<script src="./libraryplus.js?v=5"></script>
 <script src="./infopick.js?v=9"></script>
 <script src="./sosplus.js"></script>
 <!-- 🍎 아이폰은 홈 화면에 담아둔 앱에만 알림을 준다.

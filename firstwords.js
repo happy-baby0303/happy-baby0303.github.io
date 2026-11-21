@@ -132,7 +132,7 @@
 
     window.addFirstWord = function (word, date, note) {
         var w = String(word || "").trim();
-        if (!w) return toast("한 마디를 적어주세요");
+        if (!w) return toast("한 마디를 적어 주세요");
 
         var list = load();
         list.push({
@@ -180,7 +180,7 @@
                 '<span onclick="document.getElementById(\'word-input-sheet\').remove()" style="font-size:22px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="font-size:12px; font-weight:600; color:var(--text-sub); margin-bottom:16px; word-break:keep-all;">' +
-                '들린 대로 적어주세요. "엄마" 보다 "어무마" 가 나중에 더 웃겨요.</div>' +
+                '들린 대로 적어 주세요. "엄마"보다 "어무마"가 나중에 더 웃겨요.</div>' +
 
             '<input id="word-input" type="text" maxlength="20" placeholder="어무마" ' +
                 'style="width:100%; box-sizing:border-box; padding:16px; border-radius:14px; border:1px solid var(--border); ' +
@@ -212,7 +212,7 @@
             var w = (document.getElementById("word-input") || {}).value;
             var n = (document.getElementById("word-note")  || {}).value;
             var d = (document.getElementById("word-date")  || {}).value;
-            if (!String(w || "").trim()) return toast("한 마디를 적어주세요");
+            if (!String(w || "").trim()) return toast("한 마디를 적어 주세요");
             // 달력에서 미래 날짜를 고를 수 있었다 — 오늘 이후면 오늘로
             if (d && d > todayKey()) d = todayKey();
             wrap.remove();
@@ -260,7 +260,7 @@
                     'style="font-size:24px; font-weight:300; color:var(--text-sub); cursor:pointer; line-height:1;">×</span>' +
             '</div>' +
             '<div style="font-size:12.5px; font-weight:600; color:var(--text-sub); margin-bottom:20px;">' +
-                (list.length ? list.length + '가지 말을 배웠어요' : '처음 한 말을 날짜와 함께 남겨두세요') + '</div>' +
+                (list.length ? list.length + '가지 말을 배웠어요' : '처음 한 말을 날짜와 함께 남겨 두세요') + '</div>' +
             rows +
             '<div onclick="document.getElementById(\'words-sheet\').remove(); document.body.style.overflow=\'\'; window.openWordSheet();" ' +
                 'style="position:fixed; left:22px; right:22px; bottom:calc(26px + env(safe-area-inset-bottom, 0px)); max-width:476px; margin:0 auto; ' +
@@ -289,7 +289,7 @@
                 '<div style="font-size:12px; font-weight:700; color:var(--text-sub); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' +
                     (latest
                         ? '가장 최근 · “' + esc(latest.word) + '”  ' + esc(dday(latest.date))
-                        : esc(callName("가")) + ' 처음 한 말을 남겨보세요') +
+                        : esc(callName("가")) + ' 처음 한 말을 남겨 보세요') +
                 '</div>' +
             '</div>' +
             '<div onclick="event.stopPropagation(); window.openWordSheet();" ' +

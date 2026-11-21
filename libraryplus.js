@@ -279,7 +279,7 @@
       src: "미국소아과학회 · MSD 매뉴얼"
     },
 
-    { title: "스마트폰·TV 영상, 언제부터 괜찮을까",
+    { title: "스마트폰 · TV 영상, 언제부터 괜찮을까",
       tint: "box-tint-purple",
       leadTitle: "18개월 전에는 영상통화만",
       lead: "미국소아과학회는 <strong>18개월 전</strong>에는 영상통화 말고는 화면을 보여 주지 말라고 권해요. 세계보건기구는 <strong>두 돌 전</strong>에는 권하지 않고, 두 돌부터는 <strong>하루 1시간 안</strong>으로 줄이라고 합니다.",

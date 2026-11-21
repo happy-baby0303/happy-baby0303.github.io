@@ -232,9 +232,12 @@
                     '<span style="font-size:11.5px; font-weight:800; color:#B08423; background:rgba(185,138,46,0.12); padding:6px 11px; border-radius:10px; flex-shrink:0;">엽서</span>' +
                 '</div>';
               }).join('<div style="height:1px; background:var(--border); opacity:0.5;"></div>')
-            : '<div style="padding:34px 0; text-align:center; font-size:13px; font-weight:700; color:var(--text-sub); line-height:1.7;">' +
+            : '<div style="padding:30px 0 4px; text-align:center; font-size:13px; font-weight:700; color:var(--text-sub); line-height:1.7;">' +
                   '아직 담긴 사진이 없어요<br>배냇함에 한 장 담으면 엽서가 돼요' +
-              '</div>';
+              '</div>' +
+              /* ⚠️ '배냇함에 한 장 담으면' 이라고만 하고 담을 곳이 없었다 (막다른 창). 홈 배냇함 카드의 '+ 오늘' 과 같은 곳에 바로 담는다 */
+              '<div onclick="document.getElementById(\'postcard-picker\').remove(); window.addDayPhoto && window.addDayPhoto(\'' + todayKey() + '\')" ' +
+                  'style="margin:16px auto 0; width:fit-content; padding:12px 22px; border-radius:14px; background:#F0EEFB; color:#6A61CE; font-size:14px; font-weight:800; cursor:pointer;">+ 오늘 사진 담기</div>';
 
         wrap.innerHTML =
         '<div style="width:100%; max-width:520px; max-height:78vh; overflow-y:auto; background:var(--bg-card); border-radius:26px 26px 0 0; padding:24px 20px 34px;">' +
