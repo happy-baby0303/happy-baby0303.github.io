@@ -277,7 +277,7 @@
         /* 지난 문답에서 — 1년 전 · 100일 전 · 한 달 전 오늘 */
         '#home-qa-card .qa-flash{margin-top:12px;padding:12px 14px;border-radius:14px;background:#FFFAF1;border:1px dashed #E3D9CC;cursor:pointer;-webkit-tap-highlight-color:transparent;}' +
         '#home-qa-card .qa-flash-h{font-size:12px;font-weight:800;color:#B98A2E;}' +
-        '#home-qa-card .qa-flash-q{font-family:\'Gowun Batang\',\'Noto Serif KR\',\'Noto Serif CJK KR\',serif;font-size:14.5px;font-weight:700;color:#3B322C;margin-top:5px;line-height:1.6;word-break:keep-all;}';
+        '#home-qa-card .qa-flash-q{font-family:\'Gowun Batang\',\'Noto Serif KR\',\'Noto Serif CJK KR\',serif;font-size:14.5px;font-weight:700;color:#3B322C;margin-top:5px;line-height:1.6;word-break:keep-all;text-wrap:balance;}';
 
     function qaCSS() {
         if (document.getElementById("home-qa-css")) return;

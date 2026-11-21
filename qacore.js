@@ -541,8 +541,10 @@
         '.qa-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}' +
         '.qa-h{font-family:' + T.SERIF + ';font-size:17px;font-weight:700;color:' + T.INK + ';letter-spacing:-0.3px;}' +
         '.qa-meta{font-size:12px;font-weight:600;color:' + T.SUB + ';letter-spacing:-0.2px;}' +
+        /* ⚠️ 질문이 두세 줄로 넘치면 마지막 줄에 '들어요?' · '생각 하나는?' 처럼 한 마디만 떨어졌다.
+              줄 길이를 고르게 나눈다 (text-wrap:balance — 못 알아듣는 폰은 예전처럼 그린다) */
         '.qa-q{font-family:' + T.SERIF + ';font-size:19px;font-weight:700;color:' + T.INK + ';line-height:1.62;' +
-            'word-break:keep-all;overflow-wrap:break-word;letter-spacing:-0.3px;}' +
+            'word-break:keep-all;overflow-wrap:break-word;letter-spacing:-0.3px;text-wrap:balance;}' +
         '.qa-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}' +
         '.qa-pill{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;line-height:1.3;' +
             'border:1px dashed ' + T.DASH + ';color:' + T.MUTE + ';}' +

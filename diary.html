@@ -228,7 +228,7 @@
                     <span class="row-t">책으로 미리보기</span><span class="qa-meta">둘 다 쓴 날이 한 쪽이 돼요 ›</span>
                 </button>
                 <button class="row" onclick="openStoreModal()">
-                    <span class="row-t">표지 고르기</span><span class="qa-meta" id="row-coin">코인 0 ›</span>
+                    <span class="row-t">표지 고르기</span><span class="qa-meta" id="row-coin">모은 코인 0 ›</span>
                 </button>
             </div>
             <h2 class="h2" id="past">지난 문답</h2>
@@ -339,7 +339,7 @@
     <script src="data.js?v=3"></script>
     <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
     <script src="tenmonths.js?v=2"></script>
-    <script src="qacore.js?v=5"></script>
+    <script src="qacore.js?v=6"></script>
 
     <script>
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
@@ -391,7 +391,8 @@
                 var el = document.getElementById(id); if (el) el.textContent = c.toLocaleString('ko-KR');
             });
             var row = document.getElementById('row-coin');
-            if (row) row.textContent = '코인 ' + c.toLocaleString('ko-KR') + ' ›';
+            /* ⚠️ '표지 고르기 · 코인 0 ›' 은 표지 값이 0코인인 것처럼 읽혔다. 모은 코인이라고 적는다 */
+            if (row) row.textContent = '모은 코인 ' + c.toLocaleString('ko-KR') + ' ›';
             /* 내가 고른 질문 — 엄마 · 아빠에게만. 보낸 질문이 아직 열려 있으면 그렇다고 적는다 */
             var ar = document.getElementById('ask-rows');
             if (ar && window.QA && QA.askState) {
