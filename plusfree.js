@@ -24,9 +24,13 @@
 
    ⚠️ 끝나는 날은 서버에서 정한다 (앱을 다시 올리지 않아도 된다).
       파이어베이스 콘솔 → Firestore → app_settings → flags 문서에
-        plusFreeUntil : "2027-01-10"   (문자열, 출시일 + 2달)
+        plusFreeUntil : "2027-06-30"   (문자열)
       을 적으면 다음에 앱을 열 때부터 그 날짜로 바뀐다.
-      적기 전에는 아래 UNTIL_DEFAULT 를 쓴다 (테스트 기간에도 열려 있게 넉넉히).
+      ⚠️ 적기 전에는 끝나는 날이 없다 — '지금은 모두 열려 있어요 · 끝나는 날은 아직 정하지 않았어요'.
+         결제를 붙일 수 있을 때(사업자 · 구글 결제) 날짜를 적는다. 예전에는 2027-01-31 을 기본으로 두어,
+         결제도 없는데 그날 PLUS 가 잠기고 열 길이 없게 될 뻔했다.
+      ⚠️ 날짜를 적으면 폰마다 그 날짜를 처음 본 날부터 최소 30일은 열어 둔다 (약속 1).
+         날짜를 너무 가깝게 적어도, 바꿔 적어도 '30일 전 예고' 는 깨지지 않는다.
       기간이 지나면 자동으로 원래 규칙(결제한 사람만 PLUS)으로 돌아간다.
 
    index.html 에서 premium.js 다음에 로드하세요.
@@ -35,10 +39,9 @@
     'use strict';
 
     /* ---------- 기본값 ----------
-       서버 값(app_settings/flags.plusFreeUntil)을 아직 못 읽었을 때만 쓴다.
-       출시일이 정해지면 서버에 '출시일 + 2달' 을 적는다 (위 설명).
-       ⚠️ 날짜를 못 고치고 지나가도 앱이 알아서 예고하고 닫습니다. 아래 참조. */
-    var UNTIL_DEFAULT = "2027-01-31"; // 서버 값이 없을 때 이 날까지 모두 열림 (이 날 포함)
+       서버 값(app_settings/flags.plusFreeUntil)이 없으면 끝나는 날이 없다 (위 설명).
+       ⚠️ 날짜를 적은 뒤에는 앱이 알아서 30일 전에 예고하고 그날 닫습니다. 아래 참조. */
+    var UNTIL_DEFAULT = "";          // 비어 있으면 끝나는 날 없이 계속 열림
     var SRV_KEY   = "tosil_plusfree_until_srv";
     var ON        = true;            // false 로 두면 무료 개방을 끈다
     var MIN_DAYS  = 14;              // 늦게 깐 사람도 최소 이만큼은 써본다
@@ -46,11 +49,33 @@
     /* --------------------------------------- */
 
     var KEY = "tosil_free_open_until";
+    var SEEN_AT = "tosil_plusfree_date_seen";   // { d: 서버 날짜, at: 이 폰이 그 날짜를 처음 본 때 }
+    var DAY = 86400000;
 
     function until() {
         var v = null;
         try { v = localStorage.getItem(SRV_KEY); } catch (e) {}
         return (v && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : UNTIL_DEFAULT;
+    }
+
+    /* 출시 기념 기간이 실제로 끝나는 때 (ms) · 날짜가 없으면 null = 끝나는 날 없음
+       ⚠️ 이 폰이 그 날짜를 처음 본 날부터 NOTICE 일은 꼭 남긴다 — 30일 전 예고 약속 */
+    function fixedEnd() {
+        var u = until();
+        if (!u) return null;
+        var t = new Date(u + "T23:59:59").getTime();
+        if (isNaN(t)) return null;
+        var seen = null;
+        try { seen = JSON.parse(localStorage.getItem(SEEN_AT) || "null"); } catch (e) {}
+        if (!seen || seen.d !== u || !seen.at) {
+            seen = { d: u, at: Date.now() };
+            try { localStorage.setItem(SEEN_AT, JSON.stringify(seen)); } catch (e) {}
+        }
+        return Math.max(t, seen.at + NOTICE * DAY);
+    }
+    function keyOf(ms) {
+        var d = new Date(ms);
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
     var CARD = "plusfree-card";
     var GOLD = "#B98A2E";
@@ -68,9 +93,10 @@
     }
 
     function endAt() {
-        var fixed = new Date(until() + "T23:59:59").getTime();
-        var mine  = firstRun() + MIN_DAYS * 86400000;
-        return Math.max(isNaN(fixed) ? 0 : fixed, mine);
+        var fixed = fixedEnd();
+        if (fixed === null) return Infinity;          // 끝나는 날을 아직 안 정했다
+        var mine  = firstRun() + MIN_DAYS * DAY;
+        return Math.max(fixed, mine);
     }
 
     function freeOpen() {
@@ -80,21 +106,22 @@
     window.isFreeOpen = freeOpen;
 
     function daysLeft() {
-        return Math.max(0, Math.ceil((endAt() - Date.now()) / 86400000));
+        var e = endAt();
+        if (e === Infinity) return Infinity;
+        return Math.max(0, Math.ceil((e - Date.now()) / DAY));
     }
 
     /* ⚠️ 출시 기념 기간이 끝난 뒤에 처음 깐 사람도 MIN_DAYS 동안은 열린다.
           그런데 화면에는 '출시 기념으로 2027년 1월 10일까지 열려 있어요 · 13일 남음' 처럼
           이미 지난 날짜와 남은 날이 같이 나왔다. 그 사람에게는 '처음 14일 체험' 으로 말한다. */
     function promoOver() {
-        var fixed = new Date(until() + "T23:59:59").getTime();
-        return !isNaN(fixed) && Date.now() > fixed;
+        var fixed = fixedEnd();
+        return fixed !== null && Date.now() > fixed;
     }
     function lateTrial() { return promoOver() && freeOpen(); }
-    function myEndKey() {
-        var d = new Date(endAt());
-        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-    }
+    function openEnded() { return fixedEnd() === null; }
+    function myEndKey() { return keyOf(endAt()); }
+    function promoEndKey() { var f = fixedEnd(); return f === null ? "" : keyOf(f); }
 
     function pretty(k) {
         var p = String(k).split("-");
@@ -105,8 +132,8 @@
     function shareEnd() { try {
         /* ⚠️ 늦게 설치한 사람은 MIN_DAYS 만큼 더 열리는데, 큐레이터에는 UNTIL 만 넘겨서
               본 앱은 열려 있고 큐레이터는 잠기는 날이 생겼다. 이 사람의 실제 종료일을 넘긴다. */
-        var ed = new Date(endAt());
-        if (freeOpen()) localStorage.setItem(KEY, ed.getFullYear() + "-" + String(ed.getMonth() + 1).padStart(2, "0") + "-" + String(ed.getDate()).padStart(2, "0"));
+        // 끝나는 날이 없으면 먼 날짜를 넘긴다 (큐레이터는 날짜만 보고 판단한다 · shared/plusgate.js · plusmark.js)
+        if (freeOpen()) localStorage.setItem(KEY, openEnded() ? "2099-12-31" : myEndKey());
         else localStorage.removeItem(KEY);
     } catch (e) {} }
     shareEnd();
@@ -164,7 +191,7 @@
                 'word-break:keep-all; opacity:0.92;">' +
                 (lateTrial()
                     ? pretty(myEndKey()) + '까지 PLUS 기능을 그냥 쓰실 수 있어요. 끝나기 전에 알려 드릴게요.</div>'
-                    : pretty(until()) + '까지 PLUS 기능을 그냥 쓰실 수 있어요. ' +
+                    : (openEnded() ? 'PLUS 기능을 그냥 쓰실 수 있어요. ' : pretty(promoEndKey()) + '까지 PLUS 기능을 그냥 쓰실 수 있어요. ') +
                       '유료로 바뀔 때는 <b>30일 전에 미리</b> 알려 드릴게요.</div>') +
         '</div>';
     }
@@ -232,7 +259,9 @@
             '<div style="font-size:13px; font-weight:700; color:var(--text-m); line-height:1.7; word-break:keep-all; margin-top:6px;">' +
                 (open ? (lateTrial()
                             ? '처음 ' + MIN_DAYS + '일 체험으로 <b>' + pretty(myEndKey()) + '</b>까지 열려 있어요 · ' + daysLeft() + '일 남음'
-                            : '출시 기념으로 <b>' + pretty(until()) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음')
+                            : openEnded()
+                                ? '출시 기념으로 지금은 <b>모두 열려 있어요</b>. 끝나는 날은 아직 정하지 않았어요.'
+                                : '출시 기념으로 <b>' + pretty(promoEndKey()) + '</b>까지 모두 열려 있어요 · ' + daysLeft() + '일 남음')
                       : 'PLUS 기능과 요금은 준비되는 대로 안내드릴게요.') +
             '</div>' + promise;
     }
@@ -294,7 +323,7 @@
             '<div style="flex:1; min-width:0;">' +
                 '<div style="font-size:13.5px; font-weight:900; color:' + GOLD + '; margin-bottom:3px;">' +
                     (end ? (lateTrial() ? "PLUS 체험이 " : "PLUS 무료 개방이 ") + n + "일 남았어요"
-                         : (endAt() > new Date(until() + "T23:59:59").getTime() ? "PLUS 체험이 끝났어요" : "출시 기념 무료 개방이 끝났어요")) + '</div>' +
+                         : (endAt() > (fixedEnd() || 0) ? "PLUS 체험이 끝났어요" : "출시 기념 무료 개방이 끝났어요")) + '</div>' +
                 '<div style="font-size:12px; font-weight:700; color:' + GOLD + '; line-height:1.7; ' +
                     'word-break:keep-all; opacity:0.92;">' +
                     (end
@@ -317,7 +346,7 @@
         if (!ON) return;
         var n = daysLeft();
         var ended = !freeOpen();
-        if (!ended && n > NOTICE) return;                 // 아직 예고할 때가 아니다
+        if (!ended && n > NOTICE) return;                 // 아직 예고할 때가 아니다 (끝나는 날이 없으면 Infinity)
 
         /* 닫으면 일주일은 안 뜬다. 매일 뜨면 그것도 성가시다. */
         try {
@@ -387,7 +416,8 @@
     /* ---------- 점검용 ---------- */
     window.freeOpenDebug = function () {
         console.log("무료 개방:", freeOpen() ? "켜짐" : "꺼짐");
-        console.log("종료일:", until(), "· 남은 날:", daysLeft() + "일", "· 서버 값:", localStorage.getItem(SRV_KEY) || "없음");
+        console.log("종료일:", until() || "없음 (계속 열림)", "· 이 폰 실제 종료:", openEnded() ? "없음" : myEndKey(),
+                    "· 남은 날:", openEnded() ? "-" : daysLeft() + "일", "· 서버 값:", localStorage.getItem(SRV_KEY) || "없음");
         console.log("이 사람이 실제로 결제했나:",
             (typeof window.isRealPremium === "function") ? window.isRealPremium() : "확인 불가");
         console.log("앱이 PLUS 로 보나:", window.isPremiumUser());
