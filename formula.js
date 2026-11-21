@@ -73,7 +73,7 @@
         if (m != null && m >= 12) return { kind: 'milk', text: '돌이 지나면 분유 대신 생우유로 바꿔 가요', range: [400, 500], src: '흔히 권하는 양' };
         if (m != null && m >= 10) return { kind: 'band', range: [350, 450], about: 400, text: '하루 3번쯤 · 이유식을 세 끼 먹는 때예요', src: '영국 NHS' };
         if (m != null && m >= 7) return { kind: 'band', range: [500, 700], about: 600, text: '이유식을 먹으면서 조금씩 줄어요', src: '영국 NHS' };
-        if (m != null && m >= 6) return { kind: 'band', range: [720, 960], text: '180~240ml 씩 하루 4~5번 · 이유식을 먹으면서 조금씩 줄어요', src: '미국소아과학회' };
+        if (m != null && m >= 6) return { kind: 'band', range: [720, 960], text: '180~240ml씩 하루 4~5번 · 이유식을 먹으면서 조금씩 줄어요', src: '미국소아과학회' };
         if (!(w > 0)) return { kind: 'need-w' };
         var lo = Math.round(w * 150), hi = Math.round(w * 200), capped = hi > CAP;
         return { kind: 'weight', range: [Math.min(lo, CAP), Math.min(hi, CAP)], capped: capped, src: '영국 NHS · 미국소아과학회' };
@@ -197,7 +197,7 @@
         }
         var a = Math.round(num(plan.amount)), nw = Math.round(a * S.r / 10) * 10, od = a - nw;
         return '<div class="fm-big">기존 ' + od + 'ml + 새 ' + nw + 'ml</div>' +
-            '<div class="fm-sub">한 병(' + a + 'ml)에 두 분유를 ' + S.t + ' 로 타요 · 스푼 수는 분유통에 적힌 대로</div>';
+            '<div class="fm-sub">한 병(' + a + 'ml)에 두 분유를 ' + S.t + (/3$/.test(S.t) ? '으로' : '로') + ' 타요 · 스푼 수는 분유통에 적힌 대로</div>';   // 3:1로 · 1:1로 · 1:3으로 (삼 → 으로)
     }
     function paintPlan() {
         var box = $('fm-plan'); if (!box) return;

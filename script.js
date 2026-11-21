@@ -5559,7 +5559,7 @@ window.updateTrackerDashboard = function() {
             
             historyHtml += `
                 ${insight ? '' : `<div style="background:var(--bg-sub); color:var(--text-s); font-size:12px; font-weight:800; padding:10px; border-radius:12px; margin-bottom:12px; text-align:center; border: 1px dashed var(--border);">
-                    리스트를 <span style="color:var(--text-m);">왼쪽으로 밀면</span> 고치거나 지울 수 있어요
+                    기록을 <span style="color:var(--text-m);">왼쪽으로 밀면</span> 고치거나 지울 수 있어요
                 </div>`}
                 <div id="hist-list" style="position:relative;">
             `;
@@ -8505,7 +8505,7 @@ window.renderOpenRecords = function() {
 
             <div style="display:flex; align-items:center; gap:6px; margin-top:10px; padding-left:2px; font-size:11.5px; white-space:nowrap;">
                 <span style="flex-shrink:0; display:inline-flex; align-items:center;">${statusHtml}</span>
-                <span style="color:var(--text-s); font-weight:600; flex-shrink:0;">${r.openDate.substring(5).replace('-', '.')} ${r.type === 'bottle_part' ? '교체' : '오픈'}${r.by === 'mom' ? ' · 엄마' : (r.by === 'dad' ? ' · 아빠' : '')}</span>
+                <span style="color:var(--text-s); font-weight:600; flex-shrink:0;">${r.openDate.substring(5).replace('-', '.')} ${r.type === 'bottle_part' ? '교체' : '뜯음'}${r.by === 'mom' ? ' · 엄마' : (r.by === 'dad' ? ' · 아빠' : '')}</span>
             </div>
 
         </div>`;

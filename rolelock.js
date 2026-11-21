@@ -412,7 +412,7 @@
                 '<span style="font-size:16px;font-weight:900;color:var(--text-m);">우리 가족</span>' +
                 '<span style="font-size:12.5px;font-weight:700;color:var(--text-sub);">' + ids.length + '명</span></div>' + rows +
             (tidy ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);line-height:1.6;margin-top:10px;word-break:keep-all;">' +
-                '\'정리\' 는 예전 로그인으로 남은 줄을 지우는 거예요. 기록은 그대로예요.</div>' : '') +
+                '\'정리\'는 예전 로그인으로 남은 줄을 지우는 거예요. 기록은 그대로예요.</div>' : '') +
             (helpers ? '<div style="font-size:12px;font-weight:600;color:var(--text-sub);line-height:1.6;margin-top:10px;word-break:keep-all;">' +
                 '돌봄이 끝나면 연결을 끊어 주세요. 그 폰에서는 더 이상 기록을 보거나 남길 수 없어요. 엄마 아빠 둘만의 기록(가계부 · 문답 · 편지)은 처음부터 보이지 않아요.</div>' : '');
         card.setAttribute("data-labels", JSON.stringify(labels));

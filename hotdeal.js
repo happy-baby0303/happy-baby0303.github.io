@@ -238,7 +238,7 @@
         if (!bst) {
             v.textContent = '처음 적는 ' + kind + ' 값이에요';
             v.style.cssText = 'background:#F3F1FC; color:#5B52B8;';
-            c.innerHTML = '샀다면 아래 \'샀어요\' 로 남겨 두세요. 다음에 살 때 이 값과 비교해 드릴게요.';
+            c.innerHTML = '샀다면 아래 \'샀어요\'로 남겨 두세요. 다음에 살 때 이 값과 비교해 드릴게요.';
         } else {
             var bp = num(bst.per), d = per - bp, tot = Math.abs(d) * qty / I.per;
             var when = bst.old ? '예전에 적어 둔 값' : dayLabel(bst.ts);
