@@ -11,6 +11,7 @@
      day_N_data = { husbandAns, wifeAns, date,
                     husbandAt, wifeAt,       ← 새 칸: 각자 처음 답한 때 (ISO)
                     sp, cq, cqBy,            ← 특별한 날 이름 · 고른 질문과 고른 사람 (data.js 가 읽는다)
+                    sq, sqBy,                ← 코인으로 바꾼 질문 번호(swapDB)와 바꾼 사람
                     husbandNote, wifeNote }  ← 서로의 답이 열린 뒤 짝꿍 답에 남긴 한마디 (쓴 사람 쪽 칸)
      서버: diary_가족코드/day_N  (칸마다 merge — 둘이 동시에 써도 안 지운다)
 
@@ -86,8 +87,17 @@
         try { return JSON.parse(localStorage.getItem('day_' + day + '_data')) || {}; } catch (e) { return {}; }
     }
     function write(day, d) {
+        var before = null;
+        if (d && d.sq) { try { before = JSON.parse(localStorage.getItem('day_' + day + '_data')) || {}; } catch (e) { before = {}; } }
         try { localStorage.setItem('day_' + day + '_data', JSON.stringify(d)); } catch (e) {}
         bust();
+        /* 짝꿍이 아직 아무도 안 쓴 이 쪽의 질문을 바꿨다 — 옛 질문에 쓰던 글을 새 질문 밑에 두지 않는다 */
+        if (before && !before.sq && (d.sqBy === 'husband' || d.sqBy === 'wife') && d.sqBy !== role() && !d.husbandAns && !d.wifeAns) {
+            setDraft(day, '');
+            var w = word(d.sqBy + 'Ans');
+            toast(w + ig(w) + ' 질문을 바꿨어요');
+            setTimeout(function () { rerender(day, { force: true }); }, 0);
+        }
     }
 
     /* 한 번 훑어서 쓸 것을 다 센다 (2000칸이라 한 번만) */
@@ -145,7 +155,7 @@
 
     /* 칸마다 비어 있지 않은 쪽을 쓴다. 둘 다 있으면 서버가 기준이다.
        단, 아직 못 올린 내 글은 이 폰이 맞다 (서버엔 옛 글이 있을 수 있다). */
-    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp', 'cq', 'cqBy', 'husbandNote', 'wifeNote', 'husbandNoteAt', 'wifeNoteAt'];   // sp = 특별한 날의 질문 · cq/cqBy = 고른 질문과 고른 사람 (data.js)
+    var FIELDS = ['husbandAns', 'wifeAns', 'husbandAt', 'wifeAt', 'date', 'sp', 'cq', 'cqBy', 'sq', 'sqBy', 'husbandNote', 'wifeNote', 'husbandNoteAt', 'wifeNoteAt'];   // sp = 특별한 날의 질문 · cq/cqBy = 고른 질문과 고른 사람 · sq/sqBy = 바꾼 질문과 바꾼 사람 (data.js)
     function mergeDay(day, local, server) {
         var out = Object.assign({}, local || {});
         var mk = isPending(day) ? myKey() : '';
@@ -201,6 +211,7 @@
                 if (d.date) up.date = d.date;
                 if (d.sp) up.sp = d.sp;
                 if (d.cq) { up.cq = d.cq; if (d.cqBy) up.cqBy = d.cqBy; }
+                if (d.sq) { up.sq = d.sq; if (d.sqBy) up.sqBy = d.sqBy; }
                 if (d[noteOf(mk)]) { up[noteOf(mk)] = d[noteOf(mk)]; if (d[noteOf(mk) + 'At']) up[noteOf(mk) + 'At'] = d[noteOf(mk) + 'At']; }
                 return window.setDoc(window.doc(window.db, 'diary_' + c, 'day_' + day), up, { merge: true })
                     .then(function () { markPending(day, false); n++; })
@@ -534,6 +545,111 @@
         }, function () { asking = false; return { ok: false, why: 'offline' }; });
     }
 
+    /* ---------- 다른 질문으로 바꾸기 (코인을 쓰는 세 번째 자리) ----------
+       아직 아무도 안 쓴 쪽의 질문이 마음에 안 들면 100코인으로 바꾼다. 새 질문은 data.js swapDB 에서 꺼낸다
+       (100개 차례와 겹치지 않는 질문들 — 차례에서 꺼내 오면 며칠 뒤 같은 질문을 또 만난다).
+       그 쪽에 sq(번호) · sqBy(바꾼 사람)가 남고 짝꿍 폰에도 같이 간다.
+       ⚠️ 한 쪽에 한 번만. 마음에 드는 질문이 나올 때까지 돌리면 질문을 고르는 놀이가 된다.
+       ⚠️ 누가 한 줄이라도 답한 쪽, 엄마 · 아빠가 고른 질문, 백일 같은 날의 질문은 못 바꾼다.
+       ⚠️ 짝꿍과 이어진 방은 서버에 먼저 놓는다 (sendQuestion 과 같은 까닭 — 짝꿍이 방금 답한 쪽이면 그 답이 새 질문 밑에 붙는다).
+          연결이 안 될 땐 바꾸지 않고 코인도 그대로 둔다. */
+    var SWAP_PRICE = 100, swapping = false;
+    function swapPool() { return window.swapDB || []; }
+    function swapState(day) {
+        day = Number(day);
+        var c = coins(), base = { ok: false, price: SWAP_PRICE, coins: c, day: day };
+        if (!role()) return Object.assign(base, { why: 'norole' });
+        var d = read(day);
+        if (d.husbandAns || d.wifeAns) return Object.assign(base, { why: 'answered' });
+        if (d.cq) return Object.assign(base, { why: 'custom', by: d.cqBy || '' });
+        if (d.sq) return Object.assign(base, { why: 'done' });
+        var sp = (typeof window.diarySpecialOf === 'function') ? window.diarySpecialOf(day) : '';
+        if (sp) return Object.assign(base, { why: 'special', label: sp });
+        if (!swapPool().length) return Object.assign(base, { why: 'nopool' });
+        if (c < SWAP_PRICE) return Object.assign(base, { why: 'short' });
+        return Object.assign(base, { ok: true, why: '' });
+    }
+    function nextSwapId() {     // 가장 덜 꺼낸 것 가운데 앞의 것 (다 쓰면 처음부터 다시)
+        var used = {};
+        for (var i = 1; i <= MAX_DAY; i++) {
+            var raw = null;
+            try { raw = localStorage.getItem('day_' + i + '_data'); } catch (e) {}
+            if (!raw || raw.indexOf('"sq"') < 0) continue;
+            try { var d = JSON.parse(raw) || {}; if (d.sq) used[d.sq] = (used[d.sq] || 0) + 1; } catch (e) {}
+        }
+        var best = 0, bestN = Infinity;
+        swapPool().forEach(function (q) { var n = used[q.id] || 0; if (n < bestN) { best = q.id; bestN = n; } });
+        return best;
+    }
+    function swapQuestion(day) {
+        day = Number(day);
+        var st = swapState(day), me = role();
+        if (!st.ok) return Promise.resolve(st);
+        if (swapping) return Promise.resolve({ ok: false, why: 'busy' });
+        var c = code();
+        if (c && typeof navigator !== 'undefined' && navigator.onLine === false) return Promise.resolve({ ok: false, why: 'offline' });
+        var id = nextSwapId();
+        if (!id) return Promise.resolve({ ok: false, why: 'nopool' });
+        swapping = true;
+
+        function done() {
+            var d = read(day); d.sq = id; d.sqBy = me; write(day, d);
+            setDraft(day, '');      // 옛 질문에 쓰던 글은 새 질문 밑에 두지 않는다
+            try { localStorage.setItem(K.coins, String(Math.max(0, coins() - SWAP_PRICE))); } catch (e) {}
+            try { window.dispatchEvent(new CustomEvent('qa:coins')); } catch (e) {}
+            return { ok: true, day: day, id: id, price: SWAP_PRICE, coins: coins() };
+        }
+        var job;
+        if (!c) job = Promise.resolve(done());
+        else {
+            var work = waitAuth(3000).then(function () {
+                if (!authed() || !canWrite() || typeof window.getDoc !== 'function') throw new Error('offline');
+                var ref = window.doc(window.db, 'diary_' + c, 'day_' + day);
+                return window.getDoc(ref).then(function (snap) {
+                    var sv = (snap && snap.exists()) ? (snap.data() || {}) : {};
+                    if (sv.husbandAns || sv.wifeAns || sv.cq || sv.sq) {    // 짝꿍이 방금 답했거나 바꿨다 — 받아 두고 그만
+                        write(day, mergeDay(day, read(day), sv));
+                        return { ok: false, why: (sv.husbandAns || sv.wifeAns) ? 'answered' : (sv.sq ? 'done' : 'custom'), by: sv.cqBy || '' };
+                    }
+                    return window.setDoc(ref, { sq: id, sqBy: me }, { merge: true })
+                        .then(function () { return window.getDoc(ref); })
+                        .then(function (s2) {
+                            var v = (s2 && s2.exists()) ? (s2.data() || {}) : {};
+                            if (v.sq !== id || v.sqBy !== me) {     // 같은 순간 짝꿍도 바꿨다 — 그 쪽은 짝꿍 것
+                                write(day, mergeDay(day, read(day), v));
+                                return { ok: false, why: 'done' };
+                            }
+                            return done();
+                        });
+                });
+            });
+            var late = new Promise(function (_, rej) { setTimeout(function () { rej(new Error('offline')); }, 12000); });
+            job = Promise.race([work, late]).then(null, function () { return { ok: false, why: 'offline' }; });
+        }
+        return job.then(function (r) {
+            swapping = false;
+            rerender(day, { force: true });
+            return r;
+        }, function () { swapping = false; return { ok: false, why: 'offline' }; });
+    }
+    function swapWhy(r) {
+        var w = r && r.why;
+        if (w === 'short') return '코인이 ' + (r.price - r.coins).toLocaleString('ko-KR') + '개 더 필요해요. 질문 하나에 답하면 100코인이에요';
+        if (w === 'answered') return '누가 먼저 답한 질문은 바꿀 수 없어요';
+        if (w === 'done') return '이 질문은 이미 한 번 바꿨어요';
+        if (w === 'custom') return (r.by === 'husband' || r.by === 'wife' ? word(r.by + 'Ans') + ig(word(r.by + 'Ans')) : '엄마 · 아빠가') + ' 고른 질문은 바꿀 수 없어요';
+        if (w === 'special') return (r.label ? r.label + ' 질문은' : '이 날의 질문은') + ' 그날만 오는 질문이라 바꿀 수 없어요';
+        if (w === 'offline') return '연결이 안 돼서 바꾸지 못했어요. 코인은 그대로예요';
+        if (w === 'norole') return '엄마 · 아빠만 바꿀 수 있어요';
+        return '바꾸지 못했어요. 잠시 뒤 다시 해 주세요';
+    }
+    /* 문답 화면은 qaConfirm, 앱 본체(홈 창)는 showConfirm — 둘 다 우리 화면으로 묻는다 */
+    function confirmBox(title, sub, ok, fn) {
+        if (typeof window.qaConfirm === 'function') return window.qaConfirm(title, sub, ok, fn);
+        if (typeof window.showConfirm === 'function') return window.showConfirm('<b>' + title + '</b>\n<span style="font-weight:600; font-size:13px; color:#8A7F76; line-height:1.6;">' + sub + '</span>', fn, '🔄', ok);
+        fn();
+    }
+
     /* ============================================================
        그리기 — 질문 아래 몸통 (홈 창과 문답 화면이 같이 쓴다)
        ============================================================ */
@@ -682,6 +798,8 @@
                  'oninput="QA.__draft(' + day + ', this.value)">' + esc(getDraft(day) || (editing ? mine : '')) + '</textarea>';
             h += '<button type="button" class="qa-btn solid" id="qa-save" onclick="QA.__save(' + day + ')">' + (editing ? '고친 답 저장' : '저장') + '</button>';
             if (editing) h += '<button type="button" class="qa-link" onclick="QA.__cancel(' + day + ')">그만 고치기</button>';
+            /* 코인이 있을 때만 — 쓸 수 없는 단추는 걸리적거리기만 한다 (어디에 쓰는지는 '책 꾸미기' 에 적혀 있다) */
+            else if (swapState(day).ok) h += '<button type="button" class="qa-link" id="qa-swap" onclick="QA.__swap(' + day + ')">다른 질문으로 바꾸기 · ' + SWAP_PRICE + '코인</button>';
             return h;
         }
 
@@ -728,12 +846,30 @@
         coins: coins, isSeen: isSeen, markSeen: markSeen, recentOpen: recentOpen,
         nudge: nudge, checkPartner: checkPartner, partnerState: partnerState,
         say: say, ASK_PRICE: ASK_PRICE, askState: askState, sendQuestion: sendQuestion, cleanQuestion: cleanQ,
+        SWAP_PRICE: SWAP_PRICE, swapState: swapState, swapQuestion: swapQuestion, swapWhy: swapWhy,
         bodyHTML: bodyHTML, pillsHTML: pillsPart,
         editing: function (day) { return !!edit[day]; },
         setHost: function (h) { host = h; }
     };
 
     QA.__draft = function (day, v) { setDraft(day, v); };
+    QA.__swap = function (day) {
+        day = Number(day);
+        var st = swapState(day);
+        if (!st.ok) { toast(swapWhy(st)); return; }
+        var you = word(otherKey(myKey()));
+        confirmBox('다른 질문으로 바꿀까요?',
+            '지금 질문: 「' + esc(question(day)) + '」<br>' + SWAP_PRICE + '코인을 써요. 남는 코인은 ' + (st.coins - SWAP_PRICE).toLocaleString('ko-KR') + '개예요.' +
+            (code() ? '<br>' + you + '에게도 바뀐 질문이 보여요.' : '') + '<br>한 질문은 한 번만 바꿀 수 있어요.',
+            '바꾸기', function () {
+                var b = document.getElementById('qa-swap');
+                if (b) { b.disabled = true; b.textContent = '바꾸는 중…'; }
+                swapQuestion(day).then(function (r) {
+                    if (r && r.ok) { toast('질문을 바꿨어요 · 남은 코인 ' + r.coins.toLocaleString('ko-KR')); return; }
+                    toast(swapWhy(r));
+                });
+            });
+    };
     QA.__edit = function (day) { edit[day] = true; setDraft(day, ''); rerender(day, { force: true }); focusArea(); };
     QA.__cancel = function (day) { edit[day] = false; setDraft(day, ''); rerender(day, { force: true }); };
     QA.__next = function (day) {

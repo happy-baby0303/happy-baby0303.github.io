@@ -122,6 +122,53 @@ const questionDB = [
    ============================================================ */
 window.questionDB = questionDB;
 
+/* 바꾼 질문 — 코인으로 '다른 질문으로 바꾸기' 를 하면 여기서 꺼낸다 (qacore.js QA.swapQuestion).
+   100개 차례와 겹치지 않게 따로 둔다. 차례 질문에서 꺼내 오면 며칠 뒤 같은 질문을 또 만난다.
+   위와 같은 말투 — 짧게, 하나만 묻는다. 번호는 1001 부터 (차례 질문 번호와 안 섞이게). */
+const swapDB = [
+    { id: 1001, context: "부부", category: "일상", question: "요즘 하루 중에 제일 좋아하는 시간은 언제예요?" },
+    { id: 1002, context: "육아", category: "일상", question: "{babyName}가 요즘 제일 좋아하는 놀이는 뭐예요?" },
+    { id: 1003, context: "부부", category: "추억", question: "처음 만난 날, 서로의 첫인상은 어땠어요?" },
+    { id: 1004, context: "육아", category: "사랑", question: "{babyName}의 어떤 표정을 오래 기억하고 싶어요?" },
+    { id: 1005, context: "부부", category: "감사", question: "이번 주에 짝꿍이 해 준 일 중에 제일 고마웠던 건요?" },
+    { id: 1006, context: "부부", category: "미래", question: "아이가 크면 둘이 다시 가 보고 싶은 곳이 있어요?" },
+    { id: 1007, context: "육아", category: "성장", question: "{babyName}에게 물려주고 싶은 우리 집 습관이 있어요?" },
+    { id: 1008, context: "부부", category: "일상", question: "요즘 제일 먹고 싶은 음식은 뭐예요?" },
+    { id: 1009, context: "육아", category: "추억", question: "{babyName}의 첫 목욕 날, 누가 더 긴장했어요?" },
+    { id: 1010, context: "부부", category: "위로", question: "요즘 마음이 제일 지칠 때는 언제예요?" },
+    { id: 1011, context: "육아", category: "미래", question: "{babyName}가 글자를 읽게 되면 같이 읽고 싶은 책이 있어요?" },
+    { id: 1012, context: "부부", category: "사랑", question: "짝꿍이 제일 크게 웃는 건 어떤 때예요?" },
+    { id: 1013, context: "육아", category: "일상", question: "{babyName}를 재울 때 우리만 아는 방법이 있어요?" },
+    { id: 1014, context: "부부", category: "추억", question: "결혼식 날, 지금도 떠오르는 장면 하나는?" },
+    { id: 1015, context: "육아", category: "감사", question: "{babyName}가 생기고 나서 좋아진 동네 장소가 있어요?" },
+    { id: 1016, context: "부부", category: "미래", question: "10년 뒤 오늘, 우리는 어디서 뭘 하고 있을까요?" },
+    { id: 1017, context: "육아", category: "사랑", question: "{babyName}를 부르는 우리만의 별명이 있어요? 어쩌다 생겼어요?" },
+    { id: 1018, context: "부부", category: "일상", question: "요즘 듣는 노래 중에 짝꿍에게 들려주고 싶은 곡은요?" },
+    { id: 1019, context: "육아", category: "성장", question: "{babyName}가 커서 힘든 일을 만나면, 어떤 말을 해 주고 싶어요?" },
+    { id: 1020, context: "부부", category: "감사", question: "짝꿍이 아니었으면 못 버텼을 것 같은 날이 있어요?" },
+    { id: 1021, context: "육아", category: "일상", question: "{babyName}가 요즘 제일 자주 내는 소리는 뭐예요?" },
+    { id: 1022, context: "부부", category: "추억", question: "둘이 처음 같이 간 여행에서 기억나는 거 하나만 꼽아 볼까요?" },
+    { id: 1023, context: "육아", category: "미래", question: "{babyName}의 첫 용돈, 얼마로 시작할까요?" },
+    { id: 1024, context: "부부", category: "위로", question: "힘든 날엔 옆에 조용히 있어 주는 것과 얘기를 들어 주는 것, 어느 쪽이 좋아요?" },
+    { id: 1025, context: "육아", category: "일상", question: "{babyName}의 물건 중에 제일 귀여운 건 뭐예요?" },
+    { id: 1026, context: "부부", category: "사랑", question: "요즘 짝꿍에게 제일 듣고 싶은 말은요?" },
+    { id: 1027, context: "육아", category: "추억", question: "{babyName}와 처음 밖에 나갔던 날, 기억나요?" },
+    { id: 1028, context: "부부", category: "일상", question: "요즘 우리 집에서 제일 자주 하는 말은 뭐예요?" },
+    { id: 1029, context: "육아", category: "감사", question: "오늘 {babyName}에게 고맙다고 하고 싶은 일이 있어요?" },
+    { id: 1030, context: "육아", category: "성장", question: "{babyName}가 뭘 할 때 제일 신나 보여요?" },
+    { id: 1031, context: "부부", category: "추억", question: "연애할 때 제일 자주 먹었던 음식은 뭐였어요?" },
+    { id: 1032, context: "육아", category: "미래", question: "{babyName}가 사춘기가 오면, 우리는 어떤 부모로 곁에 있을까요?" },
+    { id: 1033, context: "부부", category: "감사", question: "짝꿍한테 배운 것 중에 지금도 쓰는 게 있어요?" },
+    { id: 1034, context: "육아", category: "일상", question: "{babyName}가 제일 좋아하는 노래는 뭐예요? 누가 불러 줄 때 더 좋아해요?" },
+    { id: 1035, context: "부부", category: "사랑", question: "짝꿍을 처음 좋아하게 된 순간, 기억나요?" },
+    { id: 1036, context: "육아", category: "사랑", question: "하루 중에 {babyName}가 제일 예뻐 보이는 때는 언제예요?" },
+    { id: 1037, context: "부부", category: "미래", question: "올해가 가기 전에 둘이 꼭 해 보고 싶은 작은 일 하나는?" },
+    { id: 1038, context: "부부", category: "위로", question: "육아 말고, 요즘 나를 위해 하고 싶은 일이 있어요?" },
+    { id: 1039, context: "부부", category: "일상", question: "오늘 하루를 한 단어로 하면 뭐예요?" },
+    { id: 1040, context: "육아", category: "미래", question: "{babyName}가 처음 자전거를 타는 날, 누가 뒤를 잡아 줄까요?" }
+];
+window.swapDB = swapDB;
+
 (function () {
     function rawName() {
         return (localStorage.getItem("tosil_babyName") || "").trim() || "우리 아기";
@@ -166,14 +213,28 @@ window.questionDB = questionDB;
         return { q: q, by: (d.cqBy === "husband" || d.cqBy === "wife") ? d.cqBy : "" };
     };
 
+    /* ── 바꾼 질문 ──────────────────────────────────────────────
+       그 쪽에 sq(바꾼 질문 번호 · swapDB) · sqBy(바꾼 사람)가 남고 짝꿍 폰에도 같이 간다. 번호로 두는 건
+       {babyName} 을 그때그때 이름으로 바꿔 넣기 위해서다. */
+    window.diarySwapOf = function (day) {
+        day = parseInt(day, 10) || 0;
+        if (day < 1) return null;
+        var d = {}; try { d = JSON.parse(localStorage.getItem("day_" + day + "_data")) || {}; } catch (e) {}
+        var id = parseInt(d.sq, 10) || 0;
+        if (!id) return null;
+        for (var i = 0; i < swapDB.length; i++) if (swapDB[i].id === id) return swapDB[i];
+        return null;
+    };
+
     window.diaryQuestion = function (day) {
         var list = questionDB;
         if (!list || !list.length) return "";
         day = Math.max(1, parseInt(day, 10) || 1);
         var cq = window.diaryCustomOf(day);
         if (cq) return cq.q;
-        var sp = window.diarySpecialOf(day);
-        var it = sp ? { question: specialText(sp) } : list[(day - 1) % list.length];
+        var sw = window.diarySwapOf(day);
+        var sp = sw ? "" : window.diarySpecialOf(day);
+        var it = sw ? sw : (sp ? { question: specialText(sp) } : list[(day - 1) % list.length]);
         if (!it) return "";
         var named = rawName() !== "우리 아기";
         return String(it.question)
@@ -194,6 +255,8 @@ window.questionDB = questionDB;
         if (window.diarySpecialOf(day) || window.diarySpecialOf(day - n)) return 0;
         // 엄마 · 아빠가 고른 질문도 그렇다 — 그 쪽은 100개 차례의 질문이 아니었다
         if (window.diaryCustomOf(day) || window.diaryCustomOf(day - n)) return 0;
+        // 바꾼 질문도 그렇다
+        if (window.diarySwapOf(day) || window.diarySwapOf(day - n)) return 0;
         return day - n;
     };
 
@@ -251,7 +314,7 @@ window.questionDB = questionDB;
         for (var i = 1; i <= 2000; i++) {
             var raw = null; try { raw = localStorage.getItem("day_" + i + "_data"); } catch (e) {}
             if (!raw) continue;
-            try { var d = JSON.parse(raw) || {}; if (d.husbandAns || d.wifeAns) last = i; if (d.sp) used[d.sp] = i; if (d.cq) asked[i] = 1; } catch (e) {}
+            try { var d = JSON.parse(raw) || {}; if (d.husbandAns || d.wifeAns) last = i; if (d.sp) used[d.sp] = i; if (d.cq || d.sq) asked[i] = 1; } catch (e) {}
         }
         // 고른 질문이 먼저 들어가 있는 쪽은 건너뛴다 — 그날의 질문은 그다음 새 쪽에 들어간다
         var fresh = last + 1; while (asked[fresh]) fresh++;
@@ -264,6 +327,7 @@ window.questionDB = questionDB;
         if (day < 1) return "";
         var d = {}; try { d = JSON.parse(localStorage.getItem("day_" + day + "_data")) || {}; } catch (e) {}
         if (d.cq) return "";                                   // 고른 질문이 들어간 쪽
+        if (d.sq) return "";                                   // 바꾼 질문이 들어간 쪽
         if (d.sp) return specialText(d.sp) ? d.sp : "";
         if (d.husbandAns || d.wifeAns) return "";
         var sp = window.diarySpecialToday();

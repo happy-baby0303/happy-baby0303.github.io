@@ -135,6 +135,12 @@
         .use { border: 1px solid var(--line); background: #FFF; color: var(--ink); }
         .using { display: inline-block; font-size: 13px; font-weight: 700; color: var(--gold); padding: 8px 4px; }
         .shop-foot { font-size: 11.5px; color: var(--mute); text-align: center; margin-top: 18px; }
+        .shop-sec { font-size: 12px; font-weight: 800; color: var(--sub); letter-spacing: .5px; margin: 22px 0 2px; }
+        .cover-stage { gap: 22px; }
+        .mini-page { width: 128px; height: 184px; border-radius: 2px 6px 6px 2px; box-shadow: 4px 10px 26px rgba(80,60,40,0.12);
+                     border-left: 3px solid; padding: 20px 14px 14px 16px; text-align: left; transition: background .3s; }
+        .mini-page .l { height: 4px; border-radius: 2px; margin-bottom: 9px; opacity: .55; }
+        .swatch.pg { border-radius: 10px; }
         /* 내가 고른 질문 (ask-modal) */
         .ask-count { font-size: 12px; font-weight: 600; color: var(--mute); text-align: right; margin-top: 8px; }
         #ask-area:disabled { background: transparent; color: var(--mute); }
@@ -182,7 +188,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>홈
             </button>
             <!-- ⚠️ '🪙 0' 만 있어서 무엇인지 알 수 없었다. 코인이라고 적고, 누르면 쓰는 곳(표지)이 열린다 -->
-            <button class="coin" onclick="openStoreModal()" aria-label="모은 코인 · 표지 고르기">
+            <button class="coin" onclick="openStoreModal()" aria-label="모은 코인 · 책 꾸미기">
                 <span class="coin-dot"></span><span id="header-coin-count">0</span><span class="coin-unit">코인</span>
             </button>
         </header>
@@ -228,7 +234,7 @@
                     <span class="row-t">책으로 미리보기</span><span class="qa-meta">둘 다 쓴 날이 한 쪽이 돼요 ›</span>
                 </button>
                 <button class="row" onclick="openStoreModal()">
-                    <span class="row-t">표지 고르기</span><span class="qa-meta" id="row-coin">모은 코인 0 ›</span>
+                    <span class="row-t">책 꾸미기</span><span class="qa-meta" id="row-coin">모은 코인 0 ›</span>
                 </button>
             </div>
             <h2 class="h2" id="past">지난 문답</h2>
@@ -237,11 +243,11 @@
         </section>
     </div>
 
-    <!-- 📚 표지 고르기 -->
+    <!-- 📚 책 꾸미기 (표지 · 속지 무늬) — 코인 쓰는 곳이 다 모여 있다 -->
     <div id="store-modal" class="sheet-wrap" onclick="closeStoreModal(event)">
         <div class="sheet" onclick="event.stopPropagation()">
             <div class="sheet-head">
-                <div class="sheet-title">표지 고르기</div>
+                <div class="sheet-title">책 꾸미기</div>
                 <div style="display:flex; align-items:center; gap:4px;">
                     <span class="coin" style="cursor:default;"><span class="coin-dot"></span><span id="modal-coin-count">0</span><span class="coin-unit">코인</span></span>
                     <button class="x" onclick="closeStoreModalForce()" aria-label="닫기">
@@ -251,12 +257,18 @@
             </div>
             <div class="cover-stage" id="store-preview-area"></div>
             <div class="shop">
-                <div class="shop-note">질문에 답할 때마다 코인이 100개씩 쌓여요. 모은 코인으로 책 표지 색을 바꾸거나, 묻고 싶은 질문을 보낼 수 있어요.</div>
+                <div class="shop-note">질문에 답할 때마다 코인이 100개씩 쌓여요. 모은 코인으로 책 표지와 속지를 꾸미거나, 질문을 바꾸거나 보낼 수 있어요.</div>
                 <!-- 위의 코인 단추를 누르면 여기가 열린다 — 코인을 쓰는 다른 자리로 가는 길도 여기 둔다 -->
                 <button class="row" id="store-ask-row" style="display:none;" onclick="closeStoreModalForce(); setTimeout(openAskModal, 280);">
                     <span class="row-t">내가 고른 질문 보내기</span><span class="qa-meta" id="store-ask-meta">300코인 ›</span>
                 </button>
+                <button class="row" id="store-swap-row" style="display:none;" onclick="swapFromStore()">
+                    <span class="row-t">다른 질문으로 바꾸기</span><span class="qa-meta" id="store-swap-meta">100코인 ›</span>
+                </button>
+                <div class="shop-sec">표지</div>
                 <div id="store-grid-container"></div>
+                <div class="shop-sec">속지 무늬</div>
+                <div id="store-page-container"></div>
                 <div class="shop-foot">* 화면과 실제 종이 색은 조금 다를 수 있어요.</div>
             </div>
         </div>
@@ -336,10 +348,10 @@
     </div>
 
     <script src="anniversaries.js"></script>   <!-- 특별한 날의 질문 (백일 · 생일) 날짜 셈 -->
-    <script src="data.js?v=3"></script>
+    <script src="data.js?v=4"></script>
     <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
     <script src="tenmonths.js?v=2"></script>
-    <script src="qacore.js?v=6"></script>
+    <script src="qacore.js?v=7"></script>
 
     <script>
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
@@ -385,6 +397,57 @@
         function activeTheme() { return localStorage.getItem('tosil_active_theme') || 'theme_beige'; }
         function themeOf(id) { return STORE_DB.filter(function (t) { return t.id === id; })[0] || STORE_DB[0]; }
 
+        /* ---------- 속지 무늬 ----------
+           표지 색은 그대로 두고 안쪽 쪽에만 얹는다. 무늬는 표지의 선 색으로 그려서 어느 표지와도 어울린다.
+           종이 · 쪽수 · 인쇄 방식이 그대로라 종이책으로 만들어도 값이 같다 (그래서 코인으로 고른다).
+           ⚠️ 글 밑에 깔리는 무늬라 아주 옅게.
+           ⚠️ 공책 가로줄은 뺐다. 질문 · 답 글줄 높이가 서로 달라서 줄이 글자 한가운데를 지나갔다.
+              줄은 글이 없는 위아래 여백에만 긋는다 (편지지처럼). */
+        window.PAGE_DB = [
+            { id: 'page_plain',  name: '무늬 없음 (기본)', desc: '종이 그대로',              price: 0 },
+            { id: 'page_dots',   name: '점 모눈',          desc: '작은 점이 고르게',          price: 300 },
+            { id: 'page_rule',   name: '위아래 두 줄',     desc: '편지지처럼 위아래에 가는 줄', price: 300 },
+            { id: 'page_frame',  name: '가는 테두리',      desc: '쪽마다 얇은 두 줄 테두리',  price: 500 },
+            { id: 'page_corner', name: '모서리 꺾쇠',      desc: '네 귀퉁이에 작은 꺾쇠',     price: 500 }
+        ];
+        function activePage() { return localStorage.getItem('tosil_active_page') || 'page_plain'; }
+        function pageItem(id) { return PAGE_DB.filter(function (p) { return p.id === id; })[0] || PAGE_DB[0]; }
+        function rgba(hex, a) {
+            var h = String(hex || '#000').replace('#', '');
+            if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+            var n = parseInt(h, 16) || 0;
+            return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+        }
+        /* 쪽(.page)의 style 뒤에 붙이는 글. s = 크기 (작은 미리보기는 0.5) */
+        window.pageDeco = function (t, pid, s) {
+            s = s || 1;
+            var L = t.line, px = function (n) { return (Math.round(n * s * 10) / 10) + 'px'; };
+            if (pid === 'page_dots') {
+                return 'background-image:radial-gradient(circle, ' + rgba(L, 1) + ' ' + px(1.1) + ', transparent ' + px(1.5) + ');' +
+                       'background-size:' + px(16) + ' ' + px(16) + '; background-position:' + px(8) + ' ' + px(8) + ';';
+            }
+            if (pid === 'page_rule') {
+                var gr = 'linear-gradient(' + L + ',' + L + ')', m = px(24), w = 'calc(100% - ' + px(48) + ') 1px';
+                return 'background-image:' + [gr, gr, gr, gr].join(',') + '; background-repeat:no-repeat; background-size:' + [w, w, w, w].join(',') +
+                       '; background-position:' + [m + ' ' + px(18), m + ' ' + px(22), m + ' calc(100% - ' + px(18) + ')', m + ' calc(100% - ' + px(22) + ')'].join(',') + ';';
+            }
+            if (pid === 'page_frame') {
+                return 'box-shadow:2px 4px 16px rgba(0,0,0,0.07), inset 0 0 0 ' + px(12) + ' ' + t.bg + ', inset 0 0 0 ' + px(13) + ' ' + L +
+                       ', inset 0 0 0 ' + px(16) + ' ' + t.bg + ', inset 0 0 0 ' + px(17) + ' ' + rgba(L, 0.7) + ';';
+            }
+            if (pid === 'page_corner') {
+                var g = 'linear-gradient(' + L + ',' + L + ')', k = px(16), o = px(14), sz = [], pos = [], img = [];
+                [['', ''], ['right ', 'top '], ['left ', 'bottom '], ['right ', 'bottom ']].forEach(function (c) {
+                    var at = c[0] ? (c[0] + o + ' ' + c[1] + o) : (o + ' ' + o);
+                    img.push(g, g); sz.push(k + ' 1px', '1px ' + k); pos.push(at, at);
+                });
+                return 'background-image:' + img.join(',') + '; background-repeat:no-repeat; background-size:' + sz.join(',') +
+                       '; background-position:' + pos.join(',') + ';';
+            }
+            return '';
+        };
+        function ownsPage(id) { return id === 'page_plain' || inventory().indexOf(id) > -1; }
+
         window.updateCoinUI = function () {
             var c = window.QA ? QA.coins() : 0;
             ['header-coin-count', 'modal-coin-count', 'ask-coin-count'].forEach(function (id) {
@@ -402,6 +465,13 @@
                 if (sr) sr.style.display = st.why === 'norole' ? 'none' : '';
                 ['row-ask', 'store-ask-meta'].forEach(function (id) { var el = document.getElementById(id); if (el) el.textContent = meta; });
             }
+            /* 다른 질문으로 바꾸기 — 엄마 · 아빠에게만 */
+            var sw = document.getElementById('store-swap-row');
+            if (sw && window.QA && QA.swapState) {
+                sw.style.display = QA.role() ? '' : 'none';
+                var sm = document.getElementById('store-swap-meta');
+                if (sm) sm.textContent = QA.SWAP_PRICE + '코인 ›';
+            }
         };
 
         window.openStoreModal = function () {
@@ -418,14 +488,23 @@
         };
         window.closeStoreModal = function (e) { if (e.target.id === 'store-modal') window.closeStoreModalForce(); };
 
-        window.renderMiniBookPreview = function (themeId) {
-            var t = themeOf(themeId);
+        /* 표지와 속지를 나란히 — 표지를 바꾸면 속지 무늬 색도 같이 바뀌는 게 보인다 */
+        window.renderMiniBookPreview = function (themeId, pageId) {
+            var t = themeOf(themeId), pid = pageId || activePage();
             var name = QA.esc(localStorage.getItem('tosil_babyName') || '우리 아기');
+            var bars = [74, 92, 60, 0, 88, 70, 82].map(function (w) {
+                return w ? '<div class="l" style="width:' + w + '%; background:' + t.textSub + ';"></div>' : '<div style="height:10px;"></div>';
+            }).join('');
             document.getElementById('store-preview-area').innerHTML =
                 '<div class="mini-book" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + ';">' +
                     '<div style="font-size:8.5px; color:' + t.textSub + '; margin-bottom:14px; letter-spacing:1px; line-height:1.6;">우리가 처음 만난<br>그 해의 기록</div>' +
                     '<div style="font-family:var(--serif); font-size:15px; font-weight:700; color:' + t.textTitle + '; margin-bottom:8px;">' + name + '</div>' +
                     '<div style="width:12px; height:1px; background:' + t.line + ';"></div>' +
+                '</div>' +
+                '<div class="mini-page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + ';' + window.pageDeco(t, pid, 0.5) + '">' +
+                    '<div style="font-size:7px; font-weight:700; color:' + t.textSub + '; letter-spacing:1px; margin-bottom:12px;">' + (QA.nth ? QA.nth(1) : '첫 번째') + ' 질문</div>' +
+                    '<div class="l" style="width:86%; height:5px; background:' + t.textTitle + '; opacity:.7;"></div>' +
+                    '<div class="l" style="width:58%; height:5px; background:' + t.textTitle + '; opacity:.7; margin-bottom:16px;"></div>' + bars +
                 '</div>';
         };
 
@@ -445,6 +524,22 @@
                     '<div class="shop-act">' + act + '</div></div>';
             });
             document.getElementById('store-grid-container').innerHTML = html;
+
+            var t = themeOf(on), pon = activePage(), ph = '';
+            PAGE_DB.forEach(function (it) {
+                var act;
+                if (pon === it.id) act = '<span class="using">쓰는 중</span>';
+                else if (ownsPage(it.id)) act = '<button class="use" onclick="buyOrApplyPage(\'' + it.id + '\')">바꾸기</button>';
+                else act = '<button class="pay' + (coins < it.price ? ' short' : '') + '" onclick="buyOrApplyPage(\'' + it.id + '\')">' +
+                           it.price.toLocaleString('ko-KR') + ' 코인</button>';
+                ph += '<div class="shop-row">' +
+                    /* 동그라미 칸은 작아서 진짜 무늬 색(아주 옅다)으로는 안 보인다 — 칸에서만 글자 색으로 진하게 */
+                    '<div class="swatch pg" style="background:' + t.bg + '; border:1px solid ' + t.line + ';' +
+                        window.pageDeco(Object.assign({}, t, { line: t.textSub }), it.id, 0.6).replace(/box-shadow:2px 4px 16px rgba\(0,0,0,0\.07\), /, 'box-shadow:') + '"></div>' +
+                    '<div><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
+                    '<div class="shop-act">' + act + '</div></div>';
+            });
+            document.getElementById('store-page-container').innerHTML = ph;
         };
 
         /* ⚠️ 표지를 살 때 브라우저 confirm 창이 떴다.
@@ -483,6 +578,40 @@
                     apply();
                     window.showToast('새 표지로 바꿨어요');
                 });
+        };
+
+        window.buyOrApplyPage = function (id) {
+            var it = pageItem(id), coins = QA.coins();
+            function apply() {
+                localStorage.setItem('tosil_active_page', id);
+                window.updateCoinUI();
+                window.renderStore();
+            }
+            if (ownsPage(id)) { apply(); window.showToast(id === 'page_plain' ? '무늬를 뺐어요' : '속지 무늬를 바꿨어요'); return; }
+            if (coins < it.price) {
+                window.showToast((it.price - coins).toLocaleString('ko-KR') + '코인 더 모으면 돼요. 질문 하나에 100코인이에요');
+                return;
+            }
+            window.qaConfirm('「' + it.name + '」 속지로 바꿀까요?',
+                it.price.toLocaleString('ko-KR') + '코인을 써요. 남는 코인은 ' + (coins - it.price).toLocaleString('ko-KR') + '개예요.',
+                '바꾸기', function () {
+                    var inv = inventory();
+                    localStorage.setItem('tosil_coins', String(coins - it.price));
+                    inv.push(id);
+                    localStorage.setItem('tosil_inventory', JSON.stringify(inv));
+                    apply();
+                    window.showToast('새 속지로 바꿨어요');
+                });
+        };
+
+        /* 다른 질문으로 바꾸기 — 지금 쓸 질문(내가 아직 안 쓴 첫 쪽)으로 가서 묻는다 (qacore.js QA.__swap) */
+        window.swapFromStore = function () {
+            window.closeStoreModalForce();
+            var day = QA.scan().firstMine;
+            setTimeout(function () {
+                window.goDiaryDay(day);
+                setTimeout(function () { QA.__swap(day); }, 260);
+            }, 280);
         };
 
         /* ---------- 내가 고른 질문 ----------
@@ -859,7 +988,7 @@
                     var ans = function (s) {
                         return '<div style="font-size:14px; line-height:1.9; color:' + t.textTitle + '; opacity:.88; white-space:pre-wrap; word-break:keep-all;">' + esc(s) + '</div>';
                     };
-                    html += '<div class="page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + '; color:' + t.textTitle + ';">' +
+                    html += '<div class="page" style="background:' + t.bg + '; border-left-color:' + t.borderLeft + '; color:' + t.textTitle + ';' + window.pageDeco(t, activePage()) + '">' +
                         '<div style="display:flex; justify-content:space-between; font-size:11px; font-weight:600; color:' + t.textSub + '; border-bottom:1px solid ' + t.line + '; padding-bottom:14px; margin-bottom:30px;">' +
                             '<span>' + (QA.nth ? QA.nth(day) : day + '번째') + ' 질문' + (QA.spTag ? QA.spTag(day) : '') + '</span><span>' + dot(d.date) + '</span></div>' +
                         '<div style="font-family:var(--serif); font-size:17px; font-weight:700; line-height:1.7; word-break:keep-all; margin-bottom:34px;">' + esc(QA.question(day)) + '</div>' +
