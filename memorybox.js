@@ -755,6 +755,16 @@
             'border-radius:16px; padding:5px 4px; margin-bottom:20px;">' + cells + '</div>';
     }
 
+    /* 달 줄 오른쪽 숫자 — 담긴 날만 센다. 기념일(이백일 · 첫 추석 같은 빈 칸)만 있는 달은 '기념일 N'.
+       ⚠️ 빈 기념일 칸까지 세서, 막 깐 사람도 달마다 '4일 ›' 처럼 무언가 담긴 것처럼 보였다 */
+    function filledDay(d) {
+        return !!(d.milestones.length || d.letter || d.replies.length || d.growth || (d.photos || []).length || d.mine);
+    }
+    function countLabel(days) {
+        var n = days.filter(filledDay).length;
+        return n ? n + '일' : '기념일 ' + days.length;
+    }
+
     function monthRow(year, m, days, isOpen, thumbs) {
         var ym = year + "-" + m;
         var age = monthAgeLabel(days[0].key);
@@ -771,7 +781,7 @@
                 (isOpen ? 'var(--text-m)' : 'var(--text-sub)') + '; letter-spacing:-0.2px;">' +
                 m + '월' + esc(age) + '</span>' +
             '<span style="font-size:11.5px; font-weight:700; color:var(--text-sub);">' +
-                days.length + '일' + (isOpen ? '' : '  ›') + '</span>' +
+                countLabel(days) + (isOpen ? '' : '  ›') + '</span>' +
         '</div>';
     }
 

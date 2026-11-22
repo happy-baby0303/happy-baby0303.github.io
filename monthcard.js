@@ -312,6 +312,12 @@
             var year = Number(ym[0]), month = Number(ym[1]);
             if (!year || !month) continue;
 
+            /* 빈 달엔 붙이지 않는다 — 눌러 봐야 '이 달엔 아직 담긴 게 없어요' 만 떴다.
+               ⚠️ 막 깐 사람은 기념일만 있는 달마다 금색 '한 장으로' 가 여덟 개씩 붙어 있었다.
+                  담으면 배냇함이 다시 그려지면서 새 줄에 다시 묻는다 */
+            var g = gather(year, month);
+            if (!g.photos.length && !g.firsts.length && !g.voices && !g.notes) { row.setAttribute(BTN_MARK, "1"); continue; }
+
             var btn = document.createElement("span");
             // '카드' 두 글자로는 무엇이 되는지 몰랐다 — 백일의 '한 장으로 보기' 와 같은 말로
             btn.textContent = "한 장으로";

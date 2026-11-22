@@ -7998,26 +7998,17 @@ window.finishOnboarding = function(feedingStage) {
             }
         } catch (e) {}
 
-        // 아기 설정 칸도 같이 — 짝꿍 폰은 이 칸(settings_/info)을 듣고 이름 · 생일을 맞춘다
-        try { if (typeof window.syncBabySettingsToFirebase === 'function') await window.syncBabySettingsToFirebase(window.currentBabySuffix || '', true); } catch (e) {}
+        /* 아기 설정 칸(settings_/info) — 짝꿍 폰은 이걸 듣고 이름 · 생일을 맞춘다.
+           첫째면 가족방 문서(families)에도 같이 올린다 (새 폰에서 가족방을 되찾을 때 여기서 받는다).
+           ⚠️ 예전엔 가족방 문서를 따로 await 했다. 파이어베이스는 연결이 없으면 그 약속을 끝내 안 지켜서
+              '꿈이의 배냇함을 만들고 있어요' 에서 멈췄고, 둘째를 넣을 때는 가족방 문서를 둘째 이름 · 생일로 덮어썼다.
+              이 함수는 1.5초까지만 기다리고 (못 보낸 건 폰에 줄 세워 뒀다가 보낸다), 첫째만 가족방 문서에 쓴다. */
+        try { if (typeof window.syncBabySettingsToFirebase === 'function') await window.syncBabySettingsToFirebase(window.currentBabySuffix || ''); } catch (e) {}
 
-        // 서버(families 문서)에 아기 이름/생일 실시간 반영!
-        const code = localStorage.getItem('family_sync_code');
-        if (code && window.db && window.updateDoc) {
-            try {
-                await window.updateDoc(window.doc(window.db, "families", code), {
-                    babyName: name,
-                    babyBirth: date
-                });
-                console.log("✅ 서버에 아기 정보 반영 성공");
-            } catch (e) {
-                console.warn("⚠️ 서버 반영 실패(오프라인일 수 있음):", e);
-            }
-        }
-
-        document.getElementById('onboarding-overlay').style.display = 'none';
-        location.reload(); 
-    }, 900); 
+        /* ⚠️ 새로고침 전에 이 화면을 먼저 닫아서, 새 화면이 뜰 때까지 머리글만 있는 빈 화면이 1 ~ 2초 보였다.
+              새로고침이 이 화면을 걷어 가게 그대로 둔다 */
+        location.reload();
+    }, 900);
 };
 
 // ✏️ 메인화면에서 연필 눌러서 수정할 때 (기존 기능 그대로 유지)
@@ -10183,7 +10174,7 @@ window.alert = function (message) {
 };
 
 /* opts.top — 위쪽에 띄운다. 수유 · 기저귀 · 졸릴 때처럼 폰 알림 대신 뜨는 말은 위에서 내려온다 (폰 알림 자리).
-   ⚠️ 앱을 열자마자 '🍼 슬슬 맘마 시간이에요' 가 아래쪽에 떠서, 홈 '지금 하윤이' 의 맘마 · 기저귀 · 잠 숫자를 3초 넘게 가렸다.
+   ⚠️ 앱을 열자마자 '🍼 슬슬 맘마 시간이에요' 가 아래쪽에 떠서, 홈 '지금 우리 아기' 의 맘마 · 기저귀 · 잠 숫자를 3초 넘게 가렸다.
       앱을 여는 건 그 숫자를 보려고다 */
 window.showToast = function(message, opts) {
     const oldToast = document.getElementById('super-toast-msg');
@@ -12330,7 +12321,7 @@ window.blockUser = function(id, type) {
         if (c) targetName = c.authorName;
     }
 
-    if (!targetName || targetName === '배냇함' || targetName === '육아천재대표님') {
+    if (!targetName || targetName === '배냇함') {
         return window.showToast("🚨 최고 관리자는 차단할 수 없습니다.");
     }
     
