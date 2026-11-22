@@ -7758,11 +7758,44 @@ document.addEventListener("DOMContentLoaded", () => {
         // 2-3. 🚨 다둥이 추가 중인 상황! (이름은 방금 지어줘서 있는데 생일이 없음) -> 로그인 무시하고 무조건 2단계(생일 입력) 직행!
         else {
             const greetingName = document.getElementById('ob-greeting-name');
-            if(greetingName) greetingName.innerHTML = `<span style="color:#7F77DD;">${savedName}</span>의 생일은<br>언제인가요?`;
+            const escN = String(savedName).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+            if(greetingName) greetingName.innerHTML = `<span style="color:#7F77DD;">${escN}</span>의 생일은<br>언제인가요?`;
+            /* 둘째를 넣는 중이면 '이전'(비어 있는 이름 칸으로 간다) 대신 '그만두기'.
+               ⚠️ 돌아갈 길이 없었다. 앱을 껐다 켜도 이 화면이 다시 떠서, 생일을 넣기 전엔 첫째 기록을 못 봤다 */
+            const back = step2 && step2.querySelector('.ob-back');
+            if (back && window.currentBabySuffix) {
+                back.textContent = '그만두기';
+                back.setAttribute('onclick', 'window.cancelAddBaby()');
+            }
             if(step2) step2.style.display = 'flex';
         }
     }
 });
+
+/* 둘째 넣기 그만두기 — 방금 만든 아기 칸을 지우고 첫째로 돌아간다 (생일을 넣기 전이라 기록이 없다) */
+window.cancelAddBaby = function () {
+    const sfx = window.currentBabySuffix || '';
+    if (!sfx) return;
+    try {
+        // 담긴 게 하나라도 있으면 (생일만 빠진 아기) 지우지 않고 첫째로만 돌아간다
+        const filled = ['tosil_tracker_records', 'tosil_day_photos', 'tosil_day_voices', 'tosil_day_notes', 'tosil_sealed',
+            'tosil_growth_records', 'tosil_letters', 'tosil_first_words', 'tosil_milestone_dates', 'tosil_baby_photo'].some(function (k) {
+            const raw = Storage.prototype.getItem.call(localStorage, k + sfx);
+            if (!raw) return false;
+            try { const v = JSON.parse(raw); return Array.isArray(v) ? v.length > 0 : (v && typeof v === 'object' ? Object.keys(v).length > 0 : !!v); }
+            catch (e) { return true; }
+        });
+        if (!filled) {
+            const list = window.getBabyProfiles().filter(p => (p.id || '') !== sfx);
+            Storage.prototype.setItem.call(localStorage, 'tosil_baby_profiles', JSON.stringify(list));
+            BABY_SPECIFIC_KEYS.forEach(function (k) { Storage.prototype.removeItem.call(localStorage, k + sfx); });
+            Storage.prototype.removeItem.call(localStorage, 'tosil_babyName' + sfx);
+        }
+        Storage.prototype.setItem.call(localStorage, 'tosil_active_baby_suffix', '');
+    } catch (e) {}
+    window.currentBabySuffix = '';
+    location.reload();
+};
 
 // 로그인 전용 시작 화면(Step 0)을 화면에 예쁘게 그리는 함수
 window.showForcedLoginStep = function() {
