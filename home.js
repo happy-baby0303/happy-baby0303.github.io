@@ -63,6 +63,30 @@
         return out;
     }
 
+    /* ---------- 이달의 함 한 줄 (boxfill.js) ----------
+       배냇함 탭 맨 위 함을 홈에서도 본다. 칸 하나가 하루 — 담은 날은 금색, 오늘은 테두리.
+       ⚠️ 기록은 대부분 홈에서 한다. 배냇함 탭까지 안 오면 함이 차는 걸 영영 못 봤다.
+       배 속 아기일 땐 함이 없으니 예전 한 줄 그대로. -------- */
+    function monthRow(hint) {
+        var s = null;
+        try { s = (typeof window.boxFillStats === "function") ? window.boxFillStats() : null; } catch (e) {}
+        if (!s) return '<div style="font-size:12.5px; font-weight:700; color:var(--text-sub); letter-spacing:-0.2px;">' + esc(hint) + '</div>';
+        var ticks = s.days.map(function (d) {
+            var bg = d.st === "on" ? "#C9A253" : (d.st === "future" ? "rgba(201,162,83,0.10)" : (d.st === "empty" ? "rgba(201,162,83,0.24)" : "transparent"));
+            return '<i style="flex:1; height:14px; border-radius:3px; background:' + bg + ';' +
+                (d.st === "today" ? ' box-shadow:inset 0 0 0 1.5px #C9A253;' : '') + '"></i>';
+        }).join("");
+        var right = s.todayOn ? (s.streak >= 2 ? s.streak + "일째 이어 담는 중" : "오늘 칸 채웠어요") : "오늘 칸이 비었어요";
+        return '<div onclick="window.goToMemoryBox && window.goToMemoryBox()" role="button" aria-label="' + s.m + '월의 함 보기" style="cursor:pointer;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">' +
+                '<span style="font-size:12.5px; font-weight:800; color:var(--text-m); letter-spacing:-0.2px;">' + s.m + '월의 함 ' +
+                    '<b style="color:#B98A2E; font-weight:900;">' + s.n + '</b><span style="color:var(--text-sub); font-weight:700;">/' + s.last + '</span></span>' +
+                '<span style="font-size:11.5px; font-weight:700; color:' + (s.todayOn ? '#B98A2E' : 'var(--text-sub)') + ';">' + right + '</span>' +
+            '</div>' +
+            '<div style="display:flex; gap:2px;">' + ticks + '</div>' +
+        '</div>';
+    }
+
     /* ---------- 카드 ---------- */
 
     function cardHTML() {
@@ -104,7 +128,7 @@
             '<div style="display:flex; gap:8px; margin-bottom:13px;">' + tiles + addTile +
                 new Array(Math.max(0, 3 - shots.length - 1) + 1).join('<div style="flex:1; aspect-ratio:1/1; border-radius:14px; background:var(--bg-sub); opacity:0.55;"></div>') +
             '</div>' +
-            '<div style="font-size:12.5px; font-weight:700; color:var(--text-sub); letter-spacing:-0.2px;">' + esc(hint) + '</div>' +
+            monthRow(hint) +
         '</div>';
     }
 

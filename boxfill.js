@@ -49,6 +49,13 @@
         return new Date(+p[0], +p[1] - 1, +p[2]);
     }
     function babyName() { return localStorage.getItem('tosil_babyName') || '우리 아기'; }
+    /* 이름 + 조사 — 서준 → '서준이가' · '서준이의' (앱 전체와 같은 셈, data.js babyCall) */
+    function callName(j) {
+        try { if (typeof window.babyCall === 'function') return window.babyCall(j || ''); } catch (e) {}
+        var n = babyName(), c = n.charCodeAt(n.length - 1);
+        var jong = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0;
+        return n + (jong && n !== '우리 아기' ? '이' : '') + (j || '');
+    }
 
     /* ---------- 그날 우리가 담은 것 ---------- */
     function collect() {
@@ -289,10 +296,10 @@
         }
         /* 열두 달이 한 해 책 — 돌이 지나면 두 번째 해 함을 센다 */
         var yearIdx = Math.floor((boxNo - 1) / 12), inYear = (boxNo - 1) % 12 + 1;
-        var yearName = ['첫 해', '두 번째 해', '세 번째 해', '네 번째 해'][yearIdx] || (yearIdx + 1) + '번째 해';
+        var yName = ['첫 해', '두 번째 해', '세 번째 해', '네 번째 해'][yearIdx] || (yearIdx + 1) + '번째 해';
         var dots = '';
         for (var g = 1; g <= 12; g++) dots += '<i' + (g < inYear ? ' class="on"' : (g === inYear ? ' class="on" style="opacity:.55"' : '')) + '></i>';
-        var goal = '<div class="bf-goal">열두 달의 함이 모이면 ' + esc(babyName()) + '의 ' + yearName + ' 책이 돼요 · 지금 ' + inYear + '번째 함' +
+        var goal = '<div class="bf-goal">열두 달의 함이 모이면 ' + esc(callName('의')) + ' ' + yName + ' 책이 돼요 · 지금 ' + inYear + '번째 함' +
                    '<div class="bf-dots">' + dots + '</div></div>';
 
         return '<div class="bf-tray" id="bf">' +
@@ -306,6 +313,194 @@
             shelfHTML + goal +
         '</div>';
     };
+
+    /* ---------- 숫자만 — 홈 카드(home.js)와 달 닫기 장면이 쓴다 ----------
+       y, m 을 안 주면 이번 달. days[i].st = none(태어나기 전) · future · empty · today(비어 있는 오늘) · on */
+    window.boxFillStats = function (y, m) {
+        var b = birth(), today = new Date();
+        if (!b || b > today) return null;
+        var c = collect();
+        y = y || today.getFullYear(); m = m || (today.getMonth() + 1);
+        var last = new Date(y, m, 0).getDate();
+        var isCur = (y === today.getFullYear() && m === today.getMonth() + 1);
+        var upto = isCur ? today.getDate() : last;
+        var bornHere = (b.getFullYear() === y && b.getMonth() + 1 === m);
+        var days = [], n = 0, pics = 0, firstPic = '';
+        for (var d = 1; d <= last; d++) {
+            var key = keyOf(y, m, d), st, it = null;
+            if (bornHere && d < b.getDate()) st = 'none';
+            else if (d > upto) st = 'future';
+            else {
+                it = itemOf(c, key);
+                st = it ? 'on' : ((isCur && d === upto) ? 'today' : 'empty');
+                if (it) { n++; if (it.kind === 'photo' && it.src) { pics++; if (!firstPic) firstPic = it.src; } }
+            }
+            days.push({ d: d, key: key, st: st, kind: it ? it.kind : '', src: it && it.src ? it.src : '' });
+        }
+        var monthsOld = (y - b.getFullYear()) * 12 + (m - 1 - b.getMonth());
+        return {
+            y: y, m: m, last: last, upto: upto, n: n, pics: pics, firstPic: firstPic, days: days,
+            todayOn: isCur ? !!itemOf(c, keyOf(y, m, upto)) : null,
+            streak: isCur ? streak(c, today) : 0,
+            monthsOld: monthsOld, boxNo: monthsOld + 1
+        };
+    };
+
+    /* ---------- 달이 바뀌면 지난달 함을 닫는다 ----------
+       매달 1일 무렵 처음 열 때 한 번. 칸이 찬 함 위로 뚜껑이 내려오고, 리본이 묶이고, 그 달 첫 사진이 봉인 스티커로 붙는다.
+       ⚠️ 빈 달은 닫는 장면 없이 지나간다 (빈 함을 닫는 장면은 슬프기만 하다).
+       ⚠️ 첫 주(1 ~ 7일)에만. 몇 달 만에 열었거나 이 기능이 처음 들어온 날이 달 중간이면 조용히 넘긴다.
+       ⚠️ 다른 창(처음 시작 · 역할 고르기 · 안내)이 떠 있으면 기다렸다가 띄운다. 할머니 · 시터 화면엔 안 띄운다. */
+    var CLOSED = 'tosil_bf_closed';
+    function yearName(boxNo) {
+        var i = Math.floor((boxNo - 1) / 12);
+        return ['첫 해', '두 번째 해', '세 번째 해', '네 번째 해'][i] || (i + 1) + '번째 해';
+    }
+    /* 다른 창이 화면 한가운데를 덮고 있나.
+       ⚠️ 글쓰기 창 · 맘수다 글 화면처럼 늘 깔려 있지만 화면 밖(아래 · 오른쪽)으로 밀어 둔 창이 있다.
+          크기만 보면 늘 '바쁨' 이라 장면이 영영 안 떴다 — 화면 한가운데를 덮는지로 본다. */
+    function busy() {
+        var W = window.innerWidth, H = window.innerHeight, cx = W / 2, cy = H / 2, els = document.querySelectorAll('body *');
+        for (var i = 0; i < els.length; i++) {
+            var e = els[i];
+            if (e.id === 'bf-close') continue;
+            var s = window.getComputedStyle(e);
+            if (s.position !== 'fixed' || s.display === 'none' || s.visibility === 'hidden' || s.pointerEvents === 'none' || Number(s.opacity) < 0.1) continue;
+            var r = e.getBoundingClientRect();
+            if (r.width >= W * 0.6 && r.height >= H * 0.5 && r.left <= cx && r.right >= cx && r.top <= cy && r.bottom >= cy) return true;
+        }
+        return false;
+    }
+    function closeCss() {
+        if (document.getElementById('bf-close-css')) return;
+        var st = document.createElement('style');
+        st.id = 'bf-close-css';
+        st.textContent =
+            '#bf-close{position:fixed;inset:0;z-index:9600;background:rgba(58,44,30,.46);display:flex;align-items:center;justify-content:center;padding:24px;' +
+                'opacity:0;transition:opacity .35s ease;-webkit-tap-highlight-color:transparent;}' +
+            '#bf-close.on{opacity:1;}' +
+            '.bfc-card{width:100%;max-width:340px;background:#FCF8F1;border-radius:26px;padding:26px 22px 20px;text-align:center;' +
+                'box-shadow:0 20px 50px rgba(40,28,16,.28);transform:translateY(14px);transition:transform .45s cubic-bezier(.2,.9,.3,1.1);}' +
+            '#bf-close.on .bfc-card{transform:none;}' +
+            '.bfc-stage{position:relative;width:206px;height:166px;margin:4px auto 20px;}' +
+            '.bfc-tray{position:absolute;left:0;right:0;bottom:0;height:150px;border-radius:16px;background:#E5D3B6;padding:9px;' +
+                'box-shadow:inset 0 2px 5px rgba(110,80,40,.22),0 8px 18px rgba(110,80,40,.16);display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-content:start;}' +
+            '.bfc-c{aspect-ratio:1/1;border-radius:5px;background:#FBF7F0;background-size:cover;background-position:center;}' +
+            '.bfc-c.on{background-color:#F1DDB4;}' +
+            '.bfc-c.k-voice{background-color:#E2E0F8;}.bfc-c.k-qa{background-color:#F6DDE0;}.bfc-c.k-note{background-color:#EEE3CF;}' +
+            '.bfc-c.k-first{background-color:#F6E3B6;}.bfc-c.k-growth{background-color:#DCEDE2;}' +
+            '.bfc-c.none{background:transparent;}' +
+            '.bfc-lid{position:absolute;left:-6px;right:-6px;bottom:0;height:150px;border-radius:17px;' +
+                'background:linear-gradient(180deg,#F7EEDF 0%,#EEDFC6 100%);box-shadow:0 10px 22px rgba(110,80,40,.22),inset 0 2px 0 rgba(255,255,255,.7);' +
+                'transform:translateY(-190px);opacity:0;}' +
+            '.bfc-rib{position:absolute;left:50%;bottom:0;width:18px;height:150px;margin-left:-9px;background:linear-gradient(90deg,#C89B47,#DDB769 50%,#C89B47);' +
+                'transform:scaleY(0);transform-origin:top;opacity:0;}' +
+            '.bfc-rib2{position:absolute;left:-6px;right:-6px;bottom:66px;height:16px;background:linear-gradient(180deg,#C89B47,#DDB769 50%,#C89B47);' +
+                'transform:scaleX(0);opacity:0;}' +
+            '.bfc-seal{position:absolute;left:50%;bottom:52px;width:46px;height:46px;margin-left:-23px;border-radius:50%;border:3px solid #FFF;' +
+                'background:#EFE3CF center/cover;box-shadow:0 3px 8px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;' +
+                'font-family:var(--serif, serif);font-size:17px;font-weight:700;color:#A28457;transform:scale(0);}' +
+            '#bf-close.play .bfc-lid{animation:bfcLid .55s cubic-bezier(.3,.8,.35,1.08) .75s forwards;}' +
+            '#bf-close.play .bfc-rib{animation:bfcRib .35s ease-out 1.35s forwards;}' +
+            '#bf-close.play .bfc-rib2{animation:bfcRib2 .35s ease-out 1.5s forwards;}' +
+            '#bf-close.play .bfc-seal{animation:bfcSeal .45s cubic-bezier(.2,.9,.3,1.4) 1.8s forwards;}' +
+            '@keyframes bfcLid{0%{transform:translateY(-190px);opacity:1;}100%{transform:none;opacity:1;}}' +
+            '@keyframes bfcRib{from{transform:scaleY(0);opacity:1;}to{transform:scaleY(1);opacity:1;}}' +
+            '@keyframes bfcRib2{from{transform:scaleX(0);opacity:1;}to{transform:scaleX(1);opacity:1;}}' +
+            '@keyframes bfcSeal{from{transform:scale(0);}to{transform:scale(1);}}' +
+            '.bfc-txt{opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s ease;}' +
+            '#bf-close.done .bfc-txt{opacity:1;transform:none;}' +
+            '.bfc-t{font-family:var(--serif, serif);font-size:20px;font-weight:700;color:#3F3226;letter-spacing:-.4px;margin-bottom:8px;}' +
+            '.bfc-s{font-size:13px;font-weight:600;color:#8C7860;line-height:1.7;}' +
+            '.bfc-s b{color:#B98A2E;font-weight:800;}' +
+            '.bfc-dots{display:flex;gap:4px;margin:16px 6px 4px;}' +
+            '.bfc-dots i{flex:1;height:4px;border-radius:2px;background:rgba(185,138,46,.18);}' +
+            '.bfc-dots i.on{background:#C9A253;}' +
+            '.bfc-g{font-size:11.5px;font-weight:700;color:#A8957F;margin-top:6px;}' +
+            '.bfc-ok{display:block;width:100%;margin-top:20px;padding:15px 0;border:0;border-radius:15px;background:#4A3B2C;color:#FFF;font-size:15px;font-weight:800;cursor:pointer;}' +
+            '.bfc-see{display:block;width:100%;margin-top:6px;padding:11px 0;border:0;background:none;color:#9A8670;font-size:13px;font-weight:700;cursor:pointer;}' +
+            '#bf-close.leave .bfc-stage{transition:transform .5s cubic-bezier(.5,0,.75,0),opacity .5s ease;transform:translateY(60px) scale(.35);opacity:0;}' +
+            '@media (prefers-reduced-motion: reduce){#bf-close .bfc-lid,#bf-close .bfc-rib,#bf-close .bfc-rib2,#bf-close .bfc-seal{animation:none!important;transform:none!important;opacity:1!important;}}';
+        document.head.appendChild(st);
+    }
+    function showClose(s) {
+        closeCss();
+        var old = document.getElementById('bf-close');
+        if (old) old.parentNode.removeChild(old);
+        var cells = s.days.map(function (d) {
+            if (d.st === 'none') return '<i class="bfc-c none"></i>';
+            if (d.st !== 'on') return '<i class="bfc-c"></i>';
+            if (d.kind === 'photo' && d.src) return '<i class="bfc-c on" style="background-image:url(\'' + esc(d.src) + '\')"></i>';
+            return '<i class="bfc-c on k-' + esc(d.kind) + '"></i>';
+        }).join('');
+        var age = s.monthsOld <= 0 ? '태어난 달' : s.monthsOld + '개월 되던 달';
+        var inYear = (s.boxNo - 1) % 12 + 1, left = 12 - inYear, dots = '';
+        for (var g = 1; g <= 12; g++) dots += '<i' + (g <= inYear ? ' class="on"' : '') + '></i>';
+        var goal = left > 0 ? esc(callName('의')) + ' ' + yearName(s.boxNo) + ' 책까지 함 ' + left + '개 남았어요'
+                            : esc(callName('의')) + ' ' + yearName(s.boxNo) + ' 함 열두 개가 다 모였어요';
+        var w = document.createElement('div');
+        w.id = 'bf-close';
+        w.setAttribute('role', 'dialog');
+        w.setAttribute('aria-label', s.m + '월의 함을 닫았어요');
+        w.innerHTML =
+            '<div class="bfc-card" onclick="event.stopPropagation()">' +
+                '<div class="bfc-stage">' +
+                    '<div class="bfc-tray">' + cells + '</div>' +
+                    '<div class="bfc-lid"></div><div class="bfc-rib"></div><div class="bfc-rib2"></div>' +
+                    '<div class="bfc-seal"' + (s.firstPic ? ' style="background-image:url(\'' + esc(s.firstPic) + '\')"' : '') + '>' + (s.firstPic ? '' : s.m) + '</div>' +
+                '</div>' +
+                '<div class="bfc-txt">' +
+                    '<div class="bfc-t">' + s.m + '월의 함을 닫았어요</div>' +
+                    '<div class="bfc-s">' + esc(callName('가')) + ' ' + age + ' · <b>' + s.n + '일</b>을 담았어요' + (s.pics ? '<br>그중 사진이 있는 날은 ' + s.pics + '일이에요' : '') + '</div>' +
+                    '<div class="bfc-dots">' + dots + '</div>' +
+                    '<div class="bfc-g">' + goal + '</div>' +
+                    '<button type="button" class="bfc-ok" id="bfc-ok">선반에 올리기</button>' +
+                    '<button type="button" class="bfc-see" id="bfc-see">' + s.m + '월 다시 보기</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(w);
+        function leave(after) {
+            if (w.__leaving) return; w.__leaving = 1;
+            w.classList.add('leave');
+            setTimeout(function () { w.classList.remove('on'); }, 380);
+            setTimeout(function () { if (w.parentNode) w.parentNode.removeChild(w); if (after) after(); }, 760);
+        }
+        w.addEventListener('click', function () { leave(); });
+        w.querySelector('#bfc-ok').addEventListener('click', function () { leave(); });
+        w.querySelector('#bfc-see').addEventListener('click', function () {
+            leave(function () {
+                if (typeof window.goToMemoryBox === 'function') window.goToMemoryBox();
+                setTimeout(function () { if (window.mbGoMonth) window.mbGoMonth(s.y + '-' + s.m); }, 350);
+            });
+        });
+        requestAnimationFrame(function () { w.classList.add('on'); setTimeout(function () { w.classList.add('play'); }, 60); });
+        setTimeout(function () { w.classList.add('done'); }, 2050);
+    }
+    var closeTries = 0;
+    window.bfMaybeCloseMonth = function (force) {
+        var role = localStorage.getItem('user_role');
+        if (role !== 'mom' && role !== 'dad') return;
+        var b = birth(), today = new Date();
+        if (!b || b > today) return;
+        var py = today.getFullYear(), pm = today.getMonth();      // 지난달 (getMonth 는 0 부터라 그대로 지난달 번호)
+        if (pm === 0) { py--; pm = 12; }
+        var ym = py + '-' + pm;
+        if (!force && localStorage.getItem(CLOSED) === ym) return;
+        function mark() { try { localStorage.setItem(CLOSED, ym); } catch (e) {} }
+        if (py < b.getFullYear() || (py === b.getFullYear() && pm < b.getMonth() + 1)) { mark(); return; }
+        if (!force && today.getDate() > 7) { mark(); return; }
+        var s = window.boxFillStats(py, pm);
+        if (!s || !s.n) { mark(); return; }
+        if (busy()) {
+            if (++closeTries < 8) setTimeout(function () { window.bfMaybeCloseMonth(force); }, 4500);
+            return;
+        }
+        mark();
+        showClose(s);
+    };
+    function kick() { setTimeout(function () { try { window.bfMaybeCloseMonth(); } catch (e) {} }, 2600); }
+    if (document.readyState === 'complete') kick(); else window.addEventListener('load', kick);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') { closeTries = 0; kick(); } });
 
     /* 오늘 칸 — 사진이 칸을 제일 예쁘게 채운다. 소리 · 한 줄은 바로 아래 '오늘 담기' 에 있다 */
     window.bfFillToday = function () {
