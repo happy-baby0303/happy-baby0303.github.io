@@ -645,7 +645,7 @@
         // 그 자리에서 바로 담을 수 있게
         inner += addRow(d.key);
 
-        return '<div style="position:relative; background:var(--bg-card); border:1px solid var(--border); border-radius:22px; padding:24px 22px; margin-bottom:16px; box-shadow:0 4px 16px rgba(0,0,0,0.03);">' +
+        return '<div data-day="' + d.key + '" style="position:relative; background:var(--bg-card); border:1px solid var(--border); border-radius:22px; padding:24px 22px; margin-bottom:16px; box-shadow:0 4px 16px rgba(0,0,0,0.03);">' +
             '<div style="position:absolute; left:-29px; top:30px; width:11px; height:11px; border-radius:50%; background:#7F77DD; border:3px solid var(--bg-main); box-shadow:0 0 0 1px rgba(127,119,221,0.25);"></div>' +
             '<div style="display:flex; align-items:baseline; gap:8px; margin-bottom:18px;">' +
                 '<span class="serif-display" style="font-size:17px; font-weight:700; color:var(--text-title);">' + (date.getMonth() + 1) + '월 ' + date.getDate() + '일</span>' +
@@ -704,6 +704,31 @@
         window.renderMemoryBox();
         var box = document.getElementById("mb-chronicle");
         if (box && box.scrollIntoView) box.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    /* 이달의 함(boxfill.js)에서 칸을 누르면 — 그 달을 펴고 그날 카드로 간다 */
+    window.mbGoDay = function (key) {
+        var p = String(key).split("-");
+        if (p.length < 3) return;
+        openYear = Number(p[0]);
+        openMonth = openYear + "-" + Number(p[1]);
+        window.renderMemoryBox();
+        setTimeout(function () {
+            var el = document.querySelector('[data-day="' + key + '"]') || document.getElementById("mb-m-" + openMonth);
+            if (!el) return;
+            if (el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.classList.add("mb-flash");
+            setTimeout(function () { el.classList.remove("mb-flash"); }, 1700);
+        }, 60);
+    };
+    /* 선반의 지난 함을 누르면 — 그 달 서랍을 편다 (닫혀 있으면 열고, 열려 있으면 그대로) */
+    window.mbGoMonth = function (ym) {
+        var p = String(ym).split("-");
+        openYear = Number(p[0]);
+        openMonth = openYear + "-" + Number(p[1]);
+        window.renderMemoryBox();
+        var el = document.getElementById("mb-m-" + openMonth);
+        if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
     window.mbToggleMonth = function (ym) {
@@ -1057,12 +1082,19 @@
               '</div>'
             : "";
 
+        /* 이달의 함 (boxfill.js) — 담을수록 칸이 찬다. 담는 단추(오늘 담기)는 그 바로 아래로 */
+        var fill = "";
+        try { fill = (typeof window.renderBoxFill === "function") ? window.renderBoxFill() : ""; } catch (e) { console.warn("[이달의 함]", e); }
+
         box.innerHTML =
         '<div style="padding:0 20px 110px;">' +
             '<div style="padding:26px 0 22px;">' +
                 '<div class="serif-display" style="font-size:25px; font-weight:700; color:var(--text-title); letter-spacing:-0.5px; margin-bottom:8px;">' + esc(name) + '의 배냇함</div>' +
                 '<div style="font-size:13px; font-weight:600; color:var(--text-sub);">' + (filledDays(timeline) ? '간직하고 싶은 순간들을 모아 뒀어요' : '간직하고 싶은 순간을 하나씩 모아 두는 곳이에요') + '</div>' +
             '</div>' +
+
+            fill +
+            todayBar() +
 
             '<div style="display:flex; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:22px 12px; margin-bottom:14px; box-shadow:0 4px 14px rgba(0,0,0,0.03);">' +
                 statBox(s.together, "함께한 날") +
@@ -1075,7 +1107,6 @@
             (typeof window.renderNextAnniversary === "function" ? window.renderNextAnniversary() : "") +
             unsyncedWarning() +
             (typeof window.renderSealedBar === "function" ? window.renderSealedBar() : "") +
-            todayBar() +
 
             boxGrid(s) +
 

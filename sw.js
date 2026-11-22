@@ -96,7 +96,7 @@ messaging.onBackgroundMessage((payload) => {
       이미 처리하고 있다. 우리가 끼어들 자리가 아니다.
    ============================================================ */
 
-const CACHE = 'baenaet-v194';
+const CACHE = 'baenaet-v195';
 
 /* 우리 서버 파일 */
 const ASSETS = [
@@ -160,6 +160,7 @@ const ASSETS = [
     './libraryplus.js',
     './memories.js',
     './memorybox.js',
+    './boxfill.js',
     './milestonebook.js',
     './milestonesync.js',
     './mobile.js',
