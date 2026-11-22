@@ -95,6 +95,8 @@
         { id: "leap-sheet",             close: null },                     // 원더윅스 (홈 사진의 딱지 — growth.js)
         { id: "voice-reel",             close: "closeVoiceReel" },         // 소리 모아듣기
         { id: "navi-nudge",             close: null },                     // 내비 켜기 전 '기저귀 가방' 확인
+        { id: "bf-close",               close: "bfCloseScene" },           // 달이 끝나면 그 달을 배냇함에 담는 장면 (boxfill.js)
+        { id: "bf-pick",                close: null },                     // 함에 붙일 사진 고르기 (boxfill.js)
 
         /* 목록에 없어서 뒤로가기를 누르면 그 밑 화면까지 같이 넘어가던 것들 */
         { id: "duty-sheet",             close: null },          // 오늘 당번

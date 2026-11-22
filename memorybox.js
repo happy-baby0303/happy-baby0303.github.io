@@ -985,6 +985,8 @@
             var strip = isOpen ? "" : monthThumbs(openYear, m, days);
             body += monthRow(openYear, m, days, isOpen, !!strip);
             if (!isOpen) { body += strip; return; }
+            // 그 달 함에 붙일 사진 — 고르는 한 줄 (boxfill.js). 엄마 · 아빠, 사진이 두 장 넘는 달만
+            if (typeof window.bfCoverRow === "function") { try { body += window.bfCoverRow(openYear, m); } catch (e) {} }
 
             // 카드가 많을 때만 주 구분선. 적으면 오히려 방해다.
             var showWeeks = days.length >= 8;

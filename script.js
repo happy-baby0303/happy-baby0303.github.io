@@ -36,6 +36,8 @@ const BABY_SPECIFIC_KEYS = [
         'tosil_parent_notice', 'tosil_baton_records',
     // 이달의 배냇함은 아이마다 따로 도착해야 한다
     'tosil_monthgift_done',
+    // 이달의 함 (boxfill.js) — 새로 찬 칸 · 담는 장면을 본 달 · 함에 붙일 사진. 쌍둥이면 함도 따로다
+    'tosil_bf_seen', 'tosil_bf_closed', 'tosil_box_covers',
     // emotion.js 의 기록 장부 · 편지 가족 보관함 표시도 아이마다 따로
     //   (이게 없어서 다둥이일 때 '모두 N번 안아줬어요' · '지나간 순간' 이 두 아이 기록으로 섞였다)
     'tosil_life_ledger', 'tosil_letters_cloud_v1', 'tosil_letters_pulled_at',

@@ -61,7 +61,8 @@
     function collect() {
         var c = {
             photos: setOf('photoDays'), voices: setOf('voiceDays'), notes: setOf('noteDays'), qa: setOf('diaryDays'),
-            firsts: {}, growth: {}, replies: {}
+            firsts: {}, growth: {}, replies: {},
+            idx: readJSON('tosil_day_photos', {}) || {}         // 사진 목록 — 함 사진 고를 때 달마다 다시 읽지 않게 한 번만
         };
         var ms = readJSON('tosil_milestones', []);
         if (Array.isArray(ms)) ms.forEach(function (a) { var k = a && typeof a === 'object' ? dateKey(a.date) : ''; if (k) c.firsts[k] = 1; });
@@ -133,15 +134,121 @@
     var KIND_BG = { first: '#F8E7BE', voice: '#E4E1F8', qa: '#F7DFE2', note: '#F1E6D2', growth: '#DDEEE3' };
     var KIND_FG = { first: '#C29233', voice: '#7F77DD', qa: '#C98089', note: '#A28457', growth: '#6E9C80' };
 
+    /* ---------- 함에 붙일 사진 ----------
+       그 달 함에 붙는 사진 한 장. 고르지 않으면 저절로 — 처음 해낸 일이 있던 날의 사진, 없으면 그 달 첫 사진.
+       엄마 · 아빠가 고를 수 있다 (배냇함 탭 그 달 서랍 맨 위 · 달을 담는 장면의 '붙인 사진 바꾸기').
+         tosil_box_covers = { '2026-11': { id, d, at } }     id 가 '' 면 '자동으로' 로 되돌린 것
+       ⚠️ 폰에만 두면 엄마 폰과 아빠 폰의 함에 다른 사진이 붙는다. 서버에도 둔다 —
+          settings_{코드}{아기}/box_covers (아기마다 따로). 달마다 더 나중에 고른 쪽을 쓴다.
+       ⚠️ 고른 사진을 지우면 저절로 고르는 쪽으로 돌아간다. */
+    var COV = 'tosil_box_covers';
+    function covers() { var v = readJSON(COV, {}); return (v && typeof v === 'object') ? v : {}; }
+    function ymKey(y, m) { return y + '-' + pad(m); }
+    function srcOf(ph) { try { return (typeof window.photoThumb === 'function') ? (window.photoThumb(ph) || '') : (ph.url || ''); } catch (e) { return ''; } }
+    function monthPhotos(c, y, m) {
+        var out = [], last = new Date(y, m, 0).getDate();
+        for (var d = 1; d <= last; d++) {
+            var key = keyOf(y, m, d), list = c.idx[key];
+            if (Array.isArray(list)) list.forEach(function (ph) { if (ph && ph.id) out.push({ p: ph, d: key }); });
+        }
+        return out;
+    }
+    function coverOf(c, y, m) {
+        var all = monthPhotos(c, y, m);
+        if (!all.length) return null;
+        var pick = covers()[ymKey(y, m)];
+        if (pick && pick.id) {
+            for (var i = 0; i < all.length; i++) if (all[i].p.id === pick.id) return { src: srcOf(all[i].p), id: pick.id, d: all[i].d, how: 'pick', count: all.length };
+        }
+        function dayBest(key, wantMs) {
+            var same = all.filter(function (x) { return x.d === key; });
+            return same.filter(function (x) { return wantMs ? x.p.msId : !x.p.msId; })[0] || same[0];
+        }
+        for (var j = 0; j < all.length; j++) {
+            if (c.firsts[all[j].d]) { var f = dayBest(all[j].d, true); return { src: srcOf(f.p), id: f.p.id, d: f.d, how: 'first', count: all.length }; }
+        }
+        var a = dayBest(all[0].d, false);
+        return { src: srcOf(a.p), id: a.p.id, d: a.d, how: 'auto', count: all.length };
+    }
+    function parentPhone() { var r = localStorage.getItem('user_role'); return r === 'mom' || r === 'dad'; }
+    function covRef() {
+        var code = localStorage.getItem('family_sync_code') || '';
+        return (code && window.db && typeof window.doc === 'function') ? window.doc(window.db, 'settings_' + code + (window.currentBabySuffix || ''), 'box_covers') : null;
+    }
+    function waitAuth(ms) {
+        return new Promise(function (res) {
+            var t0 = Date.now();
+            (function tick() {
+                if (window.auth && window.auth.currentUser) return res(true);
+                if (Date.now() - t0 > ms) return res(false);
+                setTimeout(tick, 200);
+            })();
+        });
+    }
+    function mergeCovers(remote) {
+        if (!remote || typeof remote !== 'object') return false;
+        var loc = covers(), changed = false;
+        Object.keys(remote).forEach(function (ym) {
+            var r = remote[ym], l = loc[ym];
+            if (!/^\d{4}-\d{2}$/.test(ym) || !r || typeof r !== 'object') return;
+            if ((Number(r.at) || 0) > ((l && Number(l.at)) || 0)) { loc[ym] = { id: String(r.id || ''), d: String(r.d || ''), at: Number(r.at) || 0 }; changed = true; }
+        });
+        if (changed) { try { localStorage.setItem(COV, JSON.stringify(loc)); } catch (e) {} }
+        return changed;
+    }
+    var covPulling = null;
+    function covPull() {
+        if (covPulling) return covPulling;
+        if (!parentPhone() && !(typeof window.photoSyncAllowed === 'function' && window.photoSyncAllowed())) return Promise.resolve(false);
+        covPulling = waitAuth(8000).then(function (ok) {
+            var r = covRef();
+            if (!ok || !r || typeof window.getDoc !== 'function') return false;
+            return window.getDoc(r).then(function (snap) {
+                var changed = mergeCovers(snap && snap.exists() ? ((snap.data() || {}).c) : null);
+                if (changed) { try { window.dispatchEvent(new CustomEvent('bf:cover')); } catch (e) {} }
+                return changed;
+            });
+        }).then(function (x) { covPulling = null; return x; }, function () { covPulling = null; return false; });
+        return covPulling;
+    }
+    /* 올리기 전에 한 번 받는다 — 짝꿍이 방금 다른 달을 고른 걸 이 폰의 옛 값이 덮지 않게 */
+    var covTimer = null;
+    function covPush() {
+        clearTimeout(covTimer);
+        covTimer = setTimeout(function () {
+            if (!parentPhone()) return;
+            covPull().then(function () {
+                var r = covRef();
+                if (!r || !(window.auth && window.auth.currentUser) || typeof window.setDoc !== 'function') return;
+                try { window.setDoc(r, { c: covers(), at: Date.now() }, { merge: true }).catch(function () {}); } catch (e) {}
+            });
+        }, 500);
+    }
+    function setCover(y, m, ph, d) {
+        var loc = covers();
+        loc[ymKey(y, m)] = { id: ph ? String(ph.id) : '', d: d || '', at: Date.now() };
+        try { localStorage.setItem(COV, JSON.stringify(loc)); } catch (e) {}
+        covPush();
+        try { window.dispatchEvent(new CustomEvent('bf:cover')); } catch (e) {}
+    }
+    /* 짝꿍이 고른 사진이 오면 — 배냇함 탭이 떠 있을 때만 다시 그린다 */
+    window.addEventListener('bf:cover', function () {
+        if (document.getElementById('bf') && typeof window.renderMemoryBox === 'function') { try { window.renderMemoryBox(); } catch (e) {} }
+    });
+    /* 앱을 열 때 한 번, 다시 돌아올 때는 10분에 한 번만 (돌아올 때마다 서버를 읽지 않게) */
+    var covPulledAt = 0;
+    function covPullSoon() { if (Date.now() - covPulledAt < 600000) return; covPulledAt = Date.now(); covPull(); }
+    setTimeout(covPullSoon, 2000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') covPullSoon(); });
+
     /* ---------- 선반 위 지난 함 ---------- */
     function shelf(c, b, today) {
         var out = [], y = today.getFullYear(), m = today.getMonth() + 1;
         for (var i = 0; i < 36; i++) {
             m--; if (m < 1) { m = 12; y--; }
             if (y < b.getFullYear() || (y === b.getFullYear() && m < b.getMonth() + 1)) break;
-            var n = monthCount(c, y, m), pic = '';
-            for (var d = 1; d <= new Date(y, m, 0).getDate() && !pic; d++) { var k = keyOf(y, m, d); if (c.photos[k]) pic = thumb(k); }
-            out.push({ y: y, m: m, n: n, pic: pic });
+            var cv = coverOf(c, y, m);
+            out.push({ y: y, m: m, n: monthCount(c, y, m), pic: cv ? cv.src : '' });
         }
         return out;
     }
@@ -367,7 +474,8 @@
             y: y, m: m, last: last, upto: upto, n: n, pics: pics, firstPic: firstPic, days: days,
             todayOn: isCur ? !!itemOf(c, keyOf(y, m, upto)) : null,
             streak: isCur ? streak(c, today) : 0,
-            monthsOld: monthsOld, boxNo: monthsOld + 1
+            monthsOld: monthsOld, boxNo: monthsOld + 1,
+            cover: coverOf(c, y, m)            // 함에 붙일 사진 (고른 것 · 처음 해낸 일 날 · 첫 사진)
         };
     };
 
@@ -446,6 +554,11 @@
             '.bfc-g{font-size:11.5px;font-weight:700;color:#A8957F;margin-top:6px;}' +
             '.bfc-ok{display:block;width:100%;margin-top:20px;padding:15px 0;border:0;border-radius:15px;background:#4A3B2C;color:#FFF;font-size:15px;font-weight:800;cursor:pointer;}' +
             '.bfc-see{display:block;width:100%;margin-top:6px;padding:11px 0;border:0;background:none;color:#9A8670;font-size:13px;font-weight:700;cursor:pointer;}' +
+            '.bfc-links{display:flex;justify-content:center;align-items:center;margin-top:6px;}' +
+            '.bfc-links .bfc-see{display:inline-block;width:auto;margin:0;padding:11px 10px;}' +
+            '.bfc-links i{font-style:normal;color:#D5C6B2;font-weight:700;}' +
+            '#bf-close.play .bfc-seal.again{animation:bfcSeal2 .46s cubic-bezier(.2,.9,.3,1.35) 0s both;}' +
+            '@keyframes bfcSeal2{0%{transform:translate(-50%,-50%) scale(0) rotate(-30deg);}100%{transform:translate(-50%,-50%) scale(1) rotate(-8deg);}}' +
             '#bf-close.leave .bfc-stage{transition:transform .5s cubic-bezier(.5,0,.75,0),opacity .5s ease;transform:translateY(60px) scale(.35);opacity:0;}' +
             '@media (prefers-reduced-motion: reduce){#bf-close .bfc-pols,#bf-close .bfc-spark{display:none;}#bf-close .bfc-box{animation:none!important;}' +
                 '#bf-close .bfc-seal{animation:none!important;transform:translate(-50%,-50%) rotate(-8deg)!important;}}';
@@ -500,7 +613,7 @@
         w.innerHTML =
             '<div class="bfc-card" onclick="event.stopPropagation()">' +
                 '<div class="bfc-stage">' +
-                    '<div class="bfc-box"><img src="' + BOX_IMG + '" alt="" width="180" height="140">' + sealHTML('bfc-seal', s.firstPic, s.m + '월') + '</div>' +
+                    '<div class="bfc-box"><img src="' + BOX_IMG + '" alt="" width="180" height="140">' + sealHTML('bfc-seal', s.cover ? s.cover.src : s.firstPic, s.m + '월') + '</div>' +
                     '<div class="bfc-pols" style="-webkit-clip-path:' + clip + ';clip-path:' + clip + '">' + cards + '</div>' + sp +
                 '</div>' +
                 '<div class="bfc-txt">' +
@@ -509,18 +622,33 @@
                     '<div class="bfc-dots">' + dots + '</div>' +
                     '<div class="bfc-g">' + goal + '</div>' +
                     '<button type="button" class="bfc-ok" id="bfc-ok">선반에 올리기</button>' +
-                    '<button type="button" class="bfc-see" id="bfc-see">' + s.m + '월 다시 보기</button>' +
+                    (s.cover && s.cover.count >= 2
+                        ? '<div class="bfc-links"><button type="button" class="bfc-see" id="bfc-pick">붙인 사진 바꾸기</button><i>·</i>' +
+                          '<button type="button" class="bfc-see" id="bfc-see">' + s.m + '월 다시 보기</button></div>'
+                        : '<button type="button" class="bfc-see" id="bfc-see">' + s.m + '월 다시 보기</button>') +
                 '</div>' +
             '</div>';
         document.body.appendChild(w);
         function leave(after) {
             if (w.__leaving) return; w.__leaving = 1;
+            if (window.bfCloseScene === closeScene) window.bfCloseScene = null;
             w.classList.add('leave');
             setTimeout(function () { w.classList.remove('on'); }, 380);
             setTimeout(function () { if (w.parentNode) w.parentNode.removeChild(w); if (after) after(); }, 760);
         }
+        function closeScene() { leave(); }
+        window.bfCloseScene = closeScene;          // 안드로이드 뒤로가기 (backbutton.js)
         w.addEventListener('click', function () { leave(); });
         w.querySelector('#bfc-ok').addEventListener('click', function () { leave(); });
+        var pickBtn = w.querySelector('#bfc-pick');
+        if (pickBtn) pickBtn.addEventListener('click', function () {
+            window.bfPickCover(s.y, s.m, function (cv) {
+                var seal = w.querySelector('.bfc-seal');
+                if (!seal || !cv) return;
+                seal.innerHTML = cv.src ? '<i style="background-image:url(\'' + esc(cv.src) + '\')"></i>' : '<i>' + s.m + '월</i>';
+                seal.classList.remove('again'); void seal.offsetWidth; seal.classList.add('again');
+            });
+        });
         w.querySelector('#bfc-see').addEventListener('click', function () {
             leave(function () {
                 if (typeof window.goToMemoryBox === 'function') window.goToMemoryBox();
@@ -557,6 +685,109 @@
     function kick() { setTimeout(function () { try { window.bfMaybeCloseMonth(); } catch (e) {} }, 2600); }
     if (document.readyState === 'complete') kick(); else window.addEventListener('load', kick);
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') { closeTries = 0; kick(); } });
+
+    /* ---------- 함에 붙일 사진 고르기 ----------
+       배냇함 탭 그 달 서랍 맨 위 한 줄 (memorybox.js 가 window.bfCoverRow 를 부른다) · 달을 담는 장면의 '붙인 사진 바꾸기'.
+       엄마 · 아빠만. 사진이 한 장뿐인 달은 고를 게 없어서 안 띄운다. 고르라고 조르지 않는다 (알림 없음). */
+    function pickCss() {
+        if (document.getElementById('bf-pick-css')) return;
+        var st = document.createElement('style');
+        st.id = 'bf-pick-css';
+        st.textContent =
+            '.bf-cov{display:flex;align-items:center;gap:12px;margin:-4px 0 16px;padding:10px 12px;border-radius:16px;background:var(--bg-card, #FFF);' +
+                'border:1px solid var(--border, #EEE6DA);cursor:pointer;-webkit-tap-highlight-color:transparent;}' +
+            '.bf-cov-pic{position:relative;flex-shrink:0;width:34px;height:40px;box-sizing:border-box;padding:3px 3px 9px;margin:4px 2px 0 4px;background:#FFF;border-radius:2px;' +
+                'box-shadow:0 1px 4px rgba(40,25,10,.24);transform:rotate(-6deg);}' +
+            '.bf-cov-pic i{display:block;width:100%;height:100%;background:#EFE3CF center/cover;}' +
+            '.bf-cov-pic::before{content:"";position:absolute;left:50%;top:-4px;width:18px;height:7px;margin-left:-9px;background:rgba(232,208,150,.88);transform:rotate(5deg);}' +
+            '.bf-cov-t{flex:1;min-width:0;}' +
+            '.bf-cov-t b{display:block;font-size:13px;font-weight:800;color:var(--text-m, #4A3B2C);letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
+            '.bf-cov-t span{display:block;margin-top:2px;font-size:11.5px;font-weight:700;color:var(--text-sub, #9A8670);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}' +
+            '.bf-cov-go{flex-shrink:0;padding:7px 11px;border-radius:10px;background:rgba(201,162,83,.13);font-size:12px;font-weight:800;color:#B98A2E;}' +
+            '#bf-pick{position:fixed;left:0;top:0;right:0;bottom:0;z-index:9700;background:rgba(40,30,20,.45);display:flex;align-items:flex-end;justify-content:center;' +
+                'opacity:0;transition:opacity .25s ease;-webkit-tap-highlight-color:transparent;}' +
+            '#bf-pick.on{opacity:1;}' +
+            '.bfp-sheet{width:100%;max-width:480px;max-height:82vh;display:flex;flex-direction:column;box-sizing:border-box;background:#FCF8F1;border-radius:24px 24px 0 0;' +
+                'padding:10px 16px calc(18px + env(safe-area-inset-bottom));transform:translateY(24px);transition:transform .3s cubic-bezier(.2,.9,.3,1);}' +
+            '#bf-pick.on .bfp-sheet{transform:none;}' +
+            '.bfp-bar{width:38px;height:4px;border-radius:2px;background:#E2D6C4;margin:0 auto 14px;flex-shrink:0;}' +
+            '.bfp-t{font-family:var(--serif, serif);font-size:18px;font-weight:700;color:#3F3226;letter-spacing:-.3px;text-align:center;}' +
+            '.bfp-s{margin:6px 0 14px;font-size:12.5px;font-weight:600;color:#9A8670;text-align:center;}' +
+            '.bfp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:3px;overflow-y:auto;-webkit-overflow-scrolling:touch;}' +
+            '.bfp-c{position:relative;padding-top:100%;border-radius:12px;overflow:hidden;cursor:pointer;background:#EFE3CF;}' +
+            '.bfp-c i{position:absolute;left:0;top:0;width:100%;height:100%;background:center/cover;}' +
+            '.bfp-c span{position:absolute;left:7px;bottom:5px;font-size:11px;font-weight:800;color:#FFF;text-shadow:0 1px 3px rgba(0,0,0,.55);}' +
+            '.bfp-c.on{box-shadow:0 0 0 3px #C9A253;}' +
+            '.bfp-c em{position:absolute;right:5px;top:5px;padding:3px 7px;border-radius:8px;background:#C9A253;font-style:normal;font-size:10.5px;font-weight:800;color:#FFF;}' +
+            '.bfp-auto{display:block;flex-shrink:0;margin:12px auto 0;padding:10px 14px;border:0;background:none;color:#9A8670;font-size:13px;font-weight:700;cursor:pointer;}';
+        document.head.appendChild(st);
+    }
+    function isCurMonth(y, m) { var t = new Date(); return y === t.getFullYear() && m === t.getMonth() + 1; }
+
+    window.bfCoverRow = function (y, m) {
+        y = Number(y); m = Number(m);
+        if (!parentPhone() || !birth()) return '';
+        var cv = coverOf(collect(), y, m);
+        if (!cv || cv.count < 2) return '';
+        pickCss();
+        var cur = isCurMonth(y, m);
+        var how = cv.how === 'pick' ? '직접 고른 사진'
+                : cv.how === 'first' ? '처음 해낸 일이 있던 날 · 자동'
+                : (cur ? '이번 달' : '그 달') + ' 첫 사진 · 자동';
+        return '<div class="bf-cov" onclick="window.bfPickCover(' + y + ',' + m + ')" role="button" aria-label="' + m + '월 함에 붙일 사진 바꾸기">' +
+            '<div class="bf-cov-pic"><i style="background-image:url(\'' + esc(cv.src) + '\')"></i></div>' +
+            '<div class="bf-cov-t"><b>' + (cur ? '이번 달 함에 붙일 사진' : m + '월 함에 붙은 사진') + '</b><span>' + how + '</span></div>' +
+            '<span class="bf-cov-go">바꾸기</span></div>';
+    };
+
+    window.bfPickCover = function (y, m, after) {
+        y = Number(y); m = Number(m);
+        if (!parentPhone()) return;
+        var c = collect(), all = monthPhotos(c, y, m), cv = coverOf(c, y, m);
+        if (all.length < 2) return;
+        pickCss();
+        var old = document.getElementById('bf-pick');
+        if (old) old.parentNode.removeChild(old);
+        var w = document.createElement('div');
+        w.id = 'bf-pick';
+        w.setAttribute('role', 'dialog');
+        w.setAttribute('aria-label', m + '월 함에 붙일 사진 고르기');
+        w.innerHTML =
+            '<div class="bfp-sheet" onclick="event.stopPropagation()">' +
+                '<div class="bfp-bar"></div>' +
+                '<div class="bfp-t">' + (isCurMonth(y, m) ? '이번 달' : m + '월') + ' 함에 붙일 사진</div>' +
+                '<div class="bfp-s">고른 사진이 ' + m + '월 함에 붙어요</div>' +
+                '<div class="bfp-grid">' + all.map(function (x, i) {
+                    var on = cv && x.p.id === cv.id, day = Number(x.d.slice(8));
+                    return '<div class="bfp-c' + (on ? ' on' : '') + '" data-i="' + i + '" role="button" aria-label="' + day + '일 사진' + (on ? ' · 붙은 사진' : '') + '">' +
+                        '<i style="background-image:url(\'' + esc(srcOf(x.p)) + '\')"></i><span>' + day + '일</span>' + (on ? '<em>붙은 사진</em>' : '') + '</div>';
+                }).join('') + '</div>' +
+                (cv && cv.how === 'pick' ? '<button type="button" class="bfp-auto">자동으로 둘래요</button>' : '') +
+            '</div>';
+        document.body.appendChild(w);
+        function close() {
+            if (w.__out) return; w.__out = 1;
+            w.classList.remove('on');
+            setTimeout(function () { if (w.parentNode) w.parentNode.removeChild(w); }, 260);
+        }
+        function done(ph, d) {
+            setCover(y, m, ph, d);
+            close();
+            if (after) after(coverOf(collect(), y, m));
+            if (typeof window.showToast === 'function') window.showToast(ph ? m + '월 함에 붙였어요' : '자동으로 붙게 했어요');
+        }
+        w.addEventListener('click', close);
+        w.querySelector('.bfp-grid').addEventListener('click', function (e) {
+            var t = e.target && e.target.closest ? e.target.closest('.bfp-c') : null;
+            var x = t ? all[Number(t.getAttribute('data-i'))] : null;
+            if (!x) return;
+            if (cv && x.p.id === cv.id && cv.how === 'pick') { close(); return; }      // 이미 붙은 사진
+            done(x.p, x.d);
+        });
+        var auto = w.querySelector('.bfp-auto');
+        if (auto) auto.addEventListener('click', function () { done(null, ''); });
+        requestAnimationFrame(function () { w.classList.add('on'); });
+    };
 
     /* 오늘 칸 — 사진이 칸을 제일 예쁘게 채운다. 소리 · 한 줄은 바로 아래 '오늘 담기' 에 있다 */
     window.bfFillToday = function () {
