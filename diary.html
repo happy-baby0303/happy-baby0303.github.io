@@ -351,7 +351,7 @@
     <script src="data.js?v=4"></script>
     <!-- 「기다리며」 권 — 열 달의 문답 질문을 여기서도 읽는다 -->
     <script src="tenmonths.js?v=2"></script>
-    <script src="qacore.js?v=7"></script>
+    <script src="qacore.js?v=8"></script>
 
     <script>
         /* ⚠️ 역할 설정이 두 군데로 갈라져 있었다.
@@ -477,6 +477,8 @@
         window.openStoreModal = function () {
             window.updateCoinUI();
             window.renderStore();
+            /* 짝꿍이 방금 표지를 바꿨을 수도 있다 — 열 때 한 번 더 받아 온다 */
+            if (window.QA && QA.bookPull) QA.bookPull().then(function (changed) { if (changed) { window.updateCoinUI(); window.renderStore(); } });
             var w = document.getElementById('store-modal');
             w.classList.add('on');
             setTimeout(function () { w.classList.add('show'); }, 10);
@@ -561,6 +563,7 @@
             var it = themeOf(id), inv = inventory(), coins = QA.coins();
             function apply() {
                 localStorage.setItem('tosil_active_theme', id);
+                if (window.QA && QA.bookChanged) QA.bookChanged();     // 짝꿍 폰 책도 같은 표지로 (qacore.js 책 꾸미기 서버)
                 window.updateCoinUI();
                 window.renderStore();
             }
@@ -584,6 +587,7 @@
             var it = pageItem(id), coins = QA.coins();
             function apply() {
                 localStorage.setItem('tosil_active_page', id);
+                if (window.QA && QA.bookChanged) QA.bookChanged();     // 짝꿍 폰 책도 같은 속지로
                 window.updateCoinUI();
                 window.renderStore();
             }
@@ -888,6 +892,12 @@
                 }
             });
             window.addEventListener('qa:coins', function () { window.updateCoinUI(); });
+            /* 서버에서 표지 · 속지 · 산 것이 들어왔다 — 책꾸미기 창이 열려 있으면 다시 그린다 */
+            window.addEventListener('qa:book', function () {
+                window.updateCoinUI();
+                var w = document.getElementById('store-modal');
+                if (w && w.classList.contains('on')) window.renderStore();
+            });
 
             /* ---------- 탭 ---------- */
             window.switchTab = function (name) {

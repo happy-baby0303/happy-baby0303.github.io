@@ -235,6 +235,88 @@
         return 100;
     }
 
+    /* ---------- 코인 · 책 꾸미기를 서버에도 (settings_{코드}/qa_book) ----------
+       ⚠️ 코인과 산 표지 · 속지가 폰에만 있었다. 폰을 바꾸거나 앱을 다시 깔면 문답 답은 서버에서 다 돌아오는데
+          코인은 0 이 되고 산 것도 사라졌다.
+       ⚠️ 책은 부부가 같이 한 권인데 표지 · 속지를 폰마다 따로 골랐다 (엄마 폰은 미드나잇 블루, 아빠 폰은 크림).
+       이렇게 한다
+         · 코인은 사람마다 (자기가 답해서 모은 것) — coins_wife · coins_husband. 이 폰이 정한 값을 올린다.
+           새 폰 · 다시 깐 앱처럼 처음 맞출 때만 서버 값을 받는다 (둘 다 있으면 큰 쪽).
+           ⚠️ 처음 맞추기 전에는 올리지 않는다. 새 폰에서 먼저 하나 답해 100 이 된 걸 올리면 서버의 2,300 이 지워진다.
+         · 표지 · 속지는 집에 한 벌 — 마지막에 고른 사람 것을 두 폰이 같이 쓴다. 산 것(owned)은 합친다 (누가 샀든 같이 쓴다).
+       본 앱과 같은 자리(settings_{코드})라 서버 규칙을 새로 열 필요가 없다 (찜 · 수면 · 기기 목록도 여기 있다). */
+    var BOOK = { theme: 'tosil_active_theme', page: 'tosil_active_page', owned: 'tosil_inventory', at: 'tosil_book_at', synced: 'tosil_qa_book_synced' };
+    var bookServer = null, bookTimer = null, bookPulling = null;
+    function bookRef() { var c = code(); return (c && canWrite()) ? window.doc(window.db, 'settings_' + c, 'qa_book') : null; }
+    function ownedList() { try { var v = JSON.parse(localStorage.getItem(BOOK.owned)); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+    function bookApply(v) {
+        if (!v) return false;
+        var changed = false, me = role();
+        if (Array.isArray(v.owned)) {          // 산 것 — 합친다
+            var list = ownedList(), seen = {}, add = false;
+            list.forEach(function (x) { seen[x] = 1; });
+            v.owned.forEach(function (x) { if (x && !seen[x]) { seen[x] = 1; list.push(x); add = true; } });
+            if (add) { try { localStorage.setItem(BOOK.owned, JSON.stringify(list)); } catch (e) {} changed = true; }
+        }
+        var at = parseInt(localStorage.getItem(BOOK.at), 10) || 0;
+        if (v.at && v.at > at) {               // 표지 · 속지 — 더 나중에 고른 쪽
+            try {
+                if (v.theme) localStorage.setItem(BOOK.theme, v.theme);
+                if (v.page) localStorage.setItem(BOOK.page, v.page);
+                localStorage.setItem(BOOK.at, String(v.at));
+            } catch (e) {}
+            changed = true;
+        }
+        if (me && !localStorage.getItem(BOOK.synced)) {    // 코인 — 처음 맞출 때만 서버 값을 받는다
+            var s = v['coins_' + me];
+            if (typeof s === 'number' && s > coins()) { try { localStorage.setItem(K.coins, String(s)); } catch (e) {} changed = true; }
+        }
+        if (changed) { try { window.dispatchEvent(new CustomEvent('qa:book')); window.dispatchEvent(new CustomEvent('qa:coins')); } catch (e) {} }
+        return changed;
+    }
+    function bookPull() {
+        if (bookPulling) return bookPulling;
+        bookPulling = waitAuth(8000).then(function (ok) {
+            var r = bookRef();
+            if (!ok || !r || typeof window.getDoc !== 'function') return false;
+            return window.getDoc(r).then(function (snap) {
+                bookServer = (snap && snap.exists()) ? (snap.data() || {}) : {};
+                var changed = bookApply(bookServer);
+                if (role() && !localStorage.getItem(BOOK.synced)) {
+                    try {
+                        localStorage.setItem(BOOK.synced, '1');
+                        /* 이 기능 전에 고른 표지 · 속지 — 서버에 아직 아무것도 없으면 지금 고른 것으로 올린다 */
+                        if (!bookServer.at && !localStorage.getItem(BOOK.at) && (localStorage.getItem(BOOK.theme) || localStorage.getItem(BOOK.page)))
+                            localStorage.setItem(BOOK.at, String(Date.now()));
+                    } catch (e) {}
+                    bookPushSoon();            // 이 폰에만 있던 코인 · 산 것을 처음으로 올린다
+                }
+                return changed;
+            });
+        }).then(function (x) { bookPulling = null; return x; }, function () { bookPulling = null; return false; });
+        return bookPulling;
+    }
+    function bookPushSoon() { clearTimeout(bookTimer); bookTimer = setTimeout(bookPush, 700); }
+    function bookPush() {
+        var r = bookRef(), me = role();
+        if (!r || !authed()) return;
+        if (!localStorage.getItem(BOOK.synced)) { bookPull(); return; }     // 처음 맞추기 전엔 올리지 않는다
+        var owned = ownedList(), seen = {};
+        owned.forEach(function (x) { seen[x] = 1; });
+        ((bookServer && bookServer.owned) || []).forEach(function (x) { if (x && !seen[x]) { seen[x] = 1; owned.push(x); } });
+        var body = { owned: owned };
+        var at = parseInt(localStorage.getItem(BOOK.at), 10) || 0;
+        if (at) { body.theme = localStorage.getItem(BOOK.theme) || 'theme_beige'; body.page = localStorage.getItem(BOOK.page) || 'page_plain'; body.at = at; }
+        if (me) body['coins_' + me] = coins();
+        try {
+            window.setDoc(r, body, { merge: true }).then(function () { bookServer = Object.assign(bookServer || {}, body); }, function () {});
+        } catch (e) {}
+    }
+    /* 표지나 속지를 고르면 부른다 (diary.html) — 이 순간을 '마지막에 고른 것' 으로 남긴다 */
+    function bookChanged() { try { localStorage.setItem(BOOK.at, String(Date.now())); } catch (e) {} bookPushSoon(); }
+    window.addEventListener('qa:coins', function () { if (localStorage.getItem(BOOK.synced)) bookPushSoon(); });
+    setTimeout(function () { if (code()) bookPull(); }, 1500);
+
     /* ---------- 쓰다 만 글 ----------
        짝꿍 답이 도착하면 화면이 새로 그려진다. 쓰던 글이 같이 날아가면 안 된다. */
     function drafts() { try { return JSON.parse(localStorage.getItem(K.draft)) || {}; } catch (e) { return {}; } }
@@ -847,6 +929,7 @@
         nudge: nudge, checkPartner: checkPartner, partnerState: partnerState,
         say: say, ASK_PRICE: ASK_PRICE, askState: askState, sendQuestion: sendQuestion, cleanQuestion: cleanQ,
         SWAP_PRICE: SWAP_PRICE, swapState: swapState, swapQuestion: swapQuestion, swapWhy: swapWhy,
+        bookPull: bookPull, bookChanged: bookChanged, bookPush: bookPushSoon,
         bodyHTML: bodyHTML, pillsHTML: pillsPart,
         editing: function (day) { return !!edit[day]; },
         setHost: function (h) { host = h; }
