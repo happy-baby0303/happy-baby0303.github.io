@@ -621,22 +621,21 @@ function generateToyHTML(toy, favs) {
 
     return `
         <div id="toy-card-${toy.id}" class="stroller-card" style="border-top: 4px solid transparent; margin-bottom: 24px; padding: 28px 24px; background:#FFF; border-radius:24px; box-shadow:0 4px 16px rgba(0,0,0,0.04); border:1px solid #F7F3ED;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px; gap: 12px;">
-                <div style="display: flex; gap: 14px; align-items: center; flex: 1; min-width: 0;">
-                    <div class="toy-img-placeholder" style="flex-shrink: 0; font-size: 32px;">${toy.imgIcon}</div>
-                    <div style="flex: 1; min-width: 0;">
-                        <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.4;">${toy.name}</div>
-                        <!-- 태그 하나씩 묶는다 — '#스마트폰도둑 #' 다음 줄에 '안전대체재' 로 '#' 만 떨어져 남았다 -->
-                        <div style="color: #7F77DD; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${String(toy.tags || '').split(/\s+/).filter(Boolean).map(t => `<span style="white-space:nowrap;">${t}</span>`).join(' ')}</div>
-                    </div>
-                </div>
-                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0;">
-<button id="fav-btn-${toy.id}" onclick="toggleFavorite('${toy.id}')" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;">
+            <!-- 위: 장난감 그림 왼쪽, 찜하기 · 보내기 오른쪽에 나란히 / 아래: 이름이 한 줄을 다 쓴다 (유모차 카드와 같은 모양)
+                 ⚠️ 예전엔 이름 오른쪽에 찜하기 · 보내기를 위아래로 쌓아서, 폰에서 이름이 '브이텍 / 기어다니는 / 곰돌이' 세 줄로 깨졌다 -->
+            <div class="toy-head" style="margin-bottom: 16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px;">
+                    <div class="toy-img-placeholder" style="flex-shrink:0; width:46px; height:46px; border-radius:14px; background:#F7F3ED; display:flex; align-items:center; justify-content:center; font-size:27px; line-height:1;">${toy.imgIcon}</div>
+                    <div style="display:flex; gap:6px; flex-shrink:0;">
+                        <button id="fav-btn-${toy.id}" onclick="toggleFavorite('${toy.id}')" style="background:${hBg}; color:${hCol}; border:1px solid ${hBor}; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; white-space:nowrap;">
                     ${hIcon}
                 </button>
-            <!-- 보내기: 찜하기 바로 밑, 같은 모양 (유모차와 같은 방식) -->
-            <button onclick="shareToHusbandToy('${toy.id}')" style="background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>${window.sendLabel ? window.sendLabel() : '보내기'}</button>
-            </div>
+                        <button onclick="shareToHusbandToy('${toy.id}')" style="background:#FFFFFF; color:#7A6F68; border:1px solid #EDE6DE; padding:8px 12px; border-radius:8px; font-weight:800; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>${window.sendLabel ? window.sendLabel() : '보내기'}</button>
+                    </div>
+                </div>
+                <div style="font-size:21px; font-weight:900; letter-spacing:-0.5px; color:#4A413C; word-break:keep-all; line-height:1.35;">${toy.name}</div>
+                <!-- 태그 하나씩 묶는다 — '#스마트폰도둑 #' 다음 줄에 '안전대체재' 로 '#' 만 떨어져 남았다 -->
+                <div style="color: #7F77DD; font-size: 13px; font-weight: 700; margin-top: 6px; word-break:keep-all;">${String(toy.tags || '').split(/\s+/).filter(Boolean).map(t => `<span style="white-space:nowrap;">${t}</span>`).join(' ')}</div>
             </div>
 
             ${chipsHtml}

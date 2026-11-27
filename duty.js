@@ -45,6 +45,7 @@
         var m = Math.max(0, Math.floor((Date.now() - ms) / MIN));
         if (m < 1) return "방금";
         if (m < 60) return m + "분 전";
+        if (m >= 1440) return Math.floor(m / 1440) + "일 전";        // '49시간 전' 대신
         var h = Math.floor(m / 60), r = m % 60;
         return h + "시간" + (r ? " " + r + "분" : "") + " 전";
     }
@@ -123,12 +124,29 @@
         return { feeds: feeds, foods: foods, diapers: diapers, lastFeed: lastFeed, lastDiaper: lastDiaper };
     }
 
+    /* 잠 — 맘마 · 기저귀처럼 늘 보인다.
+       ⚠️ 자는 중인지 · 언제 깼는지를 홈 기록판(script.js)이 아직 안 셌으면 '잠' 줄이 통째로 빠졌다.
+          그때는 기록에서 직접 센다 (기록판과 같은 방식: 끝난 잠의 끝 시각, 그 뒤에 시작한 잠이면 자는 중) */
+    function sleepState() {
+        if (window._activeSleepStart) return { on: true, at: Number(window._activeSleepStart) };
+        if (window._lastWakeTime) return { on: false, at: Number(window._lastWakeTime) };
+        var lastEnd = 0;
+        records().forEach(function (r) {
+            if (!r || r.type !== "sleep" || !(Number(r.amount) > 0)) return;
+            var e = (typeof window.getSleepRange === "function") ? window.getSleepRange(r).end : Number(r.timestamp) + Number(r.amount) * MIN;
+            if (e > lastEnd && e <= Date.now() + 5 * MIN) lastEnd = e;
+        });
+        var st = Number(localStorage.getItem("tosil_sleep_start")) || 0;
+        if (st && st > lastEnd) return { on: true, at: st };
+        return lastEnd ? { on: false, at: lastEnd } : null;
+    }
+
     function awayHTML() {
         var since = Number(localStorage.getItem("tosil_away_since")) || new Date(new Date().setHours(0, 0, 0, 0)).getTime();
         var s = sinceStats(since);
-        var sleepTxt = "";
-        if (window._activeSleepStart) sleepTxt = "지금 자는 중 · " + ago(window._activeSleepStart).replace(" 전", "째");
-        else if (window._lastWakeTime) sleepTxt = "깬 지 " + ago(window._lastWakeTime).replace(" 전", "");
+        var sl = sleepState(), sleepTxt = "", sa = sl ? ago(sl.at) : "";
+        if (sl && sl.on) sleepTxt = sa === "방금" ? "방금 잠들었어요" : "지금 자는 중 · " + sa.replace(" 전", "째");
+        else if (sl) sleepTxt = sa === "방금" ? "방금 깼어요" : "깬 지 " + sa.replace(" 전", "");
         var row = function (label, val, sub) {
             return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-top:1px solid ' + LINE + ';">' +
                 '<span style="font-size:14px;font-weight:700;color:' + SUB + ';">' + label + '</span>' +
@@ -136,22 +154,28 @@
                     (sub ? '<div style="font-size:12px;font-weight:600;color:' + SUB + ';margin-top:2px;">' + sub + '</div>' : '') + '</span></div>';
         };
         var lf = s.lastFeed, ld = s.lastDiaper;
-        /* ⚠️ 그냥 '아직' 이라고만 써서 '아직 안 갈았다' 는 건지 헷갈렸다.
-              앱은 남긴 기록만 안다 (먹였는데 안 남겼을 수도 있다). 그래서 '아직 기록 없어요' 라고 쓰고,
-              마지막이 언제였는지를 아래에 붙인다. */
-        var NONE = "아직 기록 없어요";
+        /* 밖에 있는 사람이 제일 궁금한 건 '마지막으로 먹은 게 언제냐' 다. 그걸 크게 쓰고,
+           내가 나간 뒤로 몇 번이었는지는 있을 때만 작게 붙인다.
+           ⚠️ 예전엔 '나간 뒤로 몇 번' 을 크게 써서, 나간 뒤로 아무도 안 남겼으면 '아직 기록 없어요' 바로 밑에
+              '마지막 1시간 전 · 분유' 가 떴다. 기록이 없다면서 마지막 기록이 있어서 무슨 뜻인지 몰랐다.
+           ⚠️ 그 전엔 '아직' 만 써서 '아직 안 갈았다' 는 건지 헷갈렸다. 앱은 남긴 기록만 안다 —
+              기록이 하나도 없을 때만 '남긴 기록이 없어요' 라고 쓴다. */
+        var NONE = '<span style="font-size:13.5px;font-weight:700;color:' + SUB + ';">남긴 기록이 없어요</span>';
+        function joinSub(a) { return a.filter(Boolean).join(" · "); }
+        var feedWhat = lf ? ((lf.subType || "") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : "ml") : "")).trim() : "";      // '분유 120ml'
+        var dpWhat = ld ? (ld.subType === "소변+대변" ? "소변 · 대변" : (ld.subType || "")) : "";
         /* 받은 부탁 — 아래쪽 바통 카드까지 내려가지 않아도 보이게, 맨 위에서 몇 개인지와 첫 부탁을 */
         var myId = myUid(), bat = [];
         try { bat = (JSON.parse(localStorage.getItem("tosil_baton_records")) || []).filter(function (r) { return (r.status === "requested" || r.status === "accepted") && (!r.by || r.by !== myId); }); } catch (e) {}
         var firstAsk = bat.length ? String(bat[0].task || bat[0].title || bat[0].text || bat[0].mission || "").slice(0, 30) : "";
         return '<div id="duty-away-card" style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:18px 18px 14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.02);">' +
             '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">' +
-                '<span style="font-size:16px;font-weight:900;color:' + INK + ';">내가 나간 뒤로</span>' +
-                '<span style="font-size:12.5px;font-weight:700;color:' + SUB + ';">' + hhmm(since) + '부터</span></div>' +
-            row("맘마", s.feeds.length ? s.feeds.length + "번" : NONE, lf ? "마지막 " + ago(lf.timestamp) + " · " + (lf.subType || "맘마") + (lf.amount ? " " + lf.amount + (lf.subType === "모유" ? "분" : lf.subType === "이유식" ? "g" : "ml") : "") : "") +
-            (s.foods.length ? row("이유식", s.foods.length + "번", "") : "") +
-            row("기저귀", s.diapers.length ? s.diapers.length + "번" : NONE, ld ? "마지막 " + ago(ld.timestamp) + " · " + (ld.subType === "소변+대변" ? "소변 · 대변" : (ld.subType || "기저귀")) : "") +
-            (sleepTxt ? row("잠", sleepTxt, sleepyTxt()) : "") +
+                '<span style="font-size:16px;font-weight:900;color:' + INK + ';">지금 ' + callBaby("") + '</span>' +
+                '<span style="font-size:12.5px;font-weight:700;color:' + SUB + ';">' + hhmm(since) + '에 나왔어요</span></div>' +
+            row("맘마", lf ? ago(lf.timestamp) : NONE, joinSub([feedWhat, s.feeds.length ? "나간 뒤로 " + s.feeds.length + "번" : ""])) +
+            (s.foods.length ? row("이유식", "나간 뒤로 " + s.foods.length + "번", "") : "") +
+            row("기저귀", ld ? ago(ld.timestamp) : NONE, joinSub([dpWhat, s.diapers.length ? "나간 뒤로 " + s.diapers.length + "번" : ""])) +
+            row("잠", sleepTxt || NONE, sl ? sleepyTxt() : "") +
             (bat.length ? '<div onclick="var t=document.getElementById(\'home-dad-baton-list\'); if(t) t.scrollIntoView({behavior:\'smooth\', block:\'center\'});" ' +
                 'style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border-radius:13px;background:rgba(127,119,221,0.08);cursor:pointer;">' +
                 '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:800;color:#5B53B8;">💌 받은 부탁 ' + bat.length + '개' + (firstAsk ? ' · ' + firstAsk.replace(/</g, "&lt;") : '') + '</span>' +
