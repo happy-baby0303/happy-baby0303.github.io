@@ -30,6 +30,38 @@
 
     function babyName() { return localStorage.getItem("tosil_babyName") || "우리 아기"; }
 
+    /* 세 칸의 그림 — 배냇함 그림(box.webp)과 같은 결: 갈색 선 · 크림 · 금색 · 연보라.
+       ⚠️ 예전엔 📷 🎙️ 🕯️ 이모지를 크게 띄웠다. 가입하고 처음 보는 화면인데 어느 앱에나 있는 그림이었고,
+          폰마다 모양도 달랐다 (삼성 · 아이폰 이모지가 다르다).
+       사진은 테이프로 붙인 사진 한 장 (배냇함 탭 '함에 붙일 사진' 과 같은 모양),
+       소리는 카세트테이프 (목소리를 담아 두는 것), 편지는 봉인 도장을 찍은 봉투. */
+    var INK = "#5B4636";
+    var ART = {
+        photo: '<svg viewBox="0 0 120 120" width="96" height="96" aria-hidden="true"><g transform="rotate(-6 60 62)">' +
+            '<rect x="22" y="16" width="76" height="90" rx="4" fill="#FFFFFF" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
+            '<rect x="30" y="24" width="60" height="58" rx="2" fill="#DCD6F7"/>' +
+            '<circle cx="74" cy="40" r="7" fill="#E3BE6A"/>' +
+            '<path d="M30 82 L30 66 Q46 52 60 64 Q72 56 90 66 L90 82 Z" fill="#CFE2C6"/>' +
+            '<rect x="30" y="24" width="60" height="58" rx="2" fill="none" stroke="' + INK + '" stroke-width="3"/>' +
+            '<rect x="45" y="8" width="30" height="13" rx="2" fill="#E3BE6A" fill-opacity=".85" transform="rotate(4 60 14)"/></g></svg>',
+        voice: '<svg viewBox="0 0 120 120" width="96" height="96" aria-hidden="true">' +
+            '<rect x="12" y="28" width="96" height="66" rx="9" fill="#FFF8EA" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
+            '<rect x="24" y="38" width="72" height="28" rx="5" fill="#DCD6F7" stroke="' + INK + '" stroke-width="3"/>' +
+            '<circle cx="44" cy="52" r="8" fill="#FFFFFF" stroke="' + INK + '" stroke-width="3"/>' +
+            '<circle cx="76" cy="52" r="8" fill="#FFFFFF" stroke="' + INK + '" stroke-width="3"/>' +
+            '<path d="M52 52 L68 52" stroke="' + INK + '" stroke-width="3" stroke-linecap="round"/>' +
+            '<path d="M36 94 L42 78 L78 78 L84 94" fill="#E3BE6A" stroke="' + INK + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+            '<path d="M14 20 Q20 14 26 20 M94 20 Q100 14 106 20" fill="none" stroke="#C9A253" stroke-width="3" stroke-linecap="round"/></svg>',
+        seal: '<svg viewBox="0 0 120 120" width="96" height="96" aria-hidden="true">' +
+            '<rect x="12" y="30" width="96" height="66" rx="7" fill="#FFF8EA" stroke="' + INK + '" stroke-width="4" stroke-linejoin="round"/>' +
+            '<path d="M16 34 L60 66 L104 34" fill="none" stroke="' + INK + '" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '<circle cx="60" cy="70" r="15" fill="#D99A3D" stroke="' + INK + '" stroke-width="3.5"/>' +
+            '<path d="M60 77 c-4 -3 -9 -6 -9 -10 c0 -3 3 -5 5 -5 c2 0 3 1 4 3 c1 -2 2 -3 4 -3 c2 0 5 2 5 5 c0 4 -5 7 -9 10 z" fill="#FFF3DA"/>' +
+            '<path d="M92 12 L94 20 L102 22 L94 24 L92 32 L90 24 L82 22 L90 20 Z" fill="#E3BE6A"/></svg>'
+    };
+    /* 끝 화면 칩에 붙는 작은 그림 (위 그림을 16px 로) */
+    function mini(k) { return ART[k].replace('width="96" height="96"', 'width="18" height="18" style="vertical-align:-4px;"'); }
+
     /* ⚠️ 가입하고 제일 먼저 보는 화면인데 "서준를", "서준가 꺼내 볼" 이 나왔다.
           받침이 있으면 '이' 를 붙인다 (data.js 의 babyCall). */
     function callName(j) {
@@ -176,7 +208,7 @@
     function ask(n, icon, title, body, cta, act, skipLabel) {
         return stepMark(n) +
             '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center; padding:24px 0;">' +
-                '<div style="font-size:46px; margin-bottom:22px;">' + icon + '</div>' +
+                '<div style="display:flex; justify-content:center; margin-bottom:22px;">' + icon + '</div>' +
                 '<div class="serif-display" style="font-size:23px; font-weight:700; color:var(--text-title); ' +
                     'letter-spacing:-0.6px; line-height:1.45; word-break:keep-all;">' + title + '</div>' +
                 '<div style="font-size:13.5px; font-weight:600; color:var(--text-sub); line-height:1.85; ' +
@@ -215,7 +247,7 @@
             );
 
         } else if (step === 1) {
-            shell(ask(1, "📷",
+            shell(ask(1, ART.photo,
                 unborn() ? "기다리는 지금을<br>한 장만" : "오늘의 " + esc(callName("를")) + "<br>한 장만",
                 unborn() ? "초음파 사진도, 배 사진도 좋아요.<br>잘 찍을 필요 없어요."
                          : "잘 찍을 필요 없어요.<br>자는 얼굴 한 장이면 충분해요.",
@@ -223,7 +255,7 @@
 
         } else if (step === 2) {
             var g = (typeof window.guideWhat === "function") ? window.guideWhat() : "";
-            shell(ask(2, "🎙️",
+            shell(ask(2, ART.voice,
                 unborn() ? esc(callName("에게")) + " 들려줄<br>목소리를 30초만" : "지금 나는 소리를<br>30초만",
                 unborn() ? "인사 한마디도, 자장가 한 소절도 좋아요."
                          : (g ? esc(g) + "도 좋고, " : "") + "옹알이도, 숨소리도, 하품도 좋아요.<br>두 달 뒤엔 다른 소리를 내요.",
@@ -231,7 +263,7 @@
 
         } else if (step === 3) {
             var left = daysToTwenty();
-            shell(ask(3, "🕯️",
+            shell(ask(3, ART.seal,
                 "스무 살 " + esc(callName("에게")) + "<br>한 줄만 남겨두기",
                 "지금 마음은 지금만 쓸 수 있어요.<br>" +
                 (left ? '<span style="color:' + GOLD + '; font-weight:800;">' + comma(left) + '일</span> 뒤에 ' + esc(callName("가")) + ' 읽게 돼요.'
@@ -241,16 +273,16 @@
         } else {
             var c = counts();
             var got = [];
-            if (c.photo) got.push({ i: "📷", t: "사진 " + c.photo });
-            if (c.voice) got.push({ i: "🎙️", t: "소리 " + c.voice });
-            if (c.seal)  got.push({ i: "🕯️", t: "편지 " + c.seal });
+            if (c.photo) got.push({ i: mini("photo"), t: "사진 " + c.photo });
+            if (c.voice) got.push({ i: mini("voice"), t: "소리 " + c.voice });
+            if (c.seal)  got.push({ i: mini("seal"), t: "편지 " + c.seal });
 
             var chips = got.length
                 ? '<div style="display:flex; gap:8px; justify-content:center; margin-top:26px;">' +
                     got.map(function (x) {
                         return '<div style="padding:11px 15px; background:var(--bg-card); border:1px solid var(--border); ' +
                             'border-radius:14px; font-size:12.5px; font-weight:800; color:var(--text-s);">' +
-                            x.i + ' ' + esc(x.t) + '</div>';
+                            x.i + ' ' + esc(x.t) + '</div>';      // x.i 는 위의 그림 (글자 아님)
                     }).join("") +
                   '</div>'
                 : "";
