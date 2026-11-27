@@ -748,7 +748,7 @@
             const code = syncCode();
             if (!code || !(await authReady)) return;
             /* ⚠️ 로그인하면 이름이 늘 '육아동지' 였다. 그 이름이 여기로 올라가 책 표지에 '엄마 육아동지 · 아빠 육아동지' 가 찍혔다.
-                  진짜 카카오 이름만 올리고, 받을 때도 '육아동지' 는 버린다 (이름이 없으면 표지는 [아빠 이름] 칸). */
+                  진짜 카카오 이름만 올리고, 받을 때도 '육아동지' 는 버린다 (이름이 없으면 표지엔 '아빠' 만 흐리게). */
             const FAKE = "육아동지";
             const rawName = (localStorage.getItem("kakao_nickname") || "").trim();
             const myName = rawName && rawName !== FAKE ? rawName : "";
@@ -924,7 +924,8 @@
                 var rows = '';
                 for (var i = top, n = 0; i >= 1 && n < pastShown; i--, n++) {
                     var d = QA.read(i), m = !!d.wifeAns, f = !!d.husbandAns;
-                    var stt = (m && f) ? '<span class="past-st open">열림</span>'
+                    /* ⚠️ '열림' 이라고 썼는데, 옆 줄의 '아빠만' 과 짝이 안 맞아 무슨 뜻인지 한 번 더 생각해야 했다 */
+                    var stt = (m && f) ? '<span class="past-st open">둘 다</span>'
                             : (m || f) ? '<span class="past-st">' + (m ? '엄마만' : '아빠만') + '</span>'
                             : '<span class="past-st mute">아직</span>';
                     rows += '<button class="past-row" onclick="goDiaryDay(' + i + ')">' +
@@ -968,9 +969,10 @@
                 if (dad === FAKE) dad = '';
                 if (myRole === 'wife' && myName) mom = myName;
                 if (myRole === 'husband' && myName) dad = myName;
+                /* 이름이 아직 없으면 '아빠' 만 흐리게 — ⚠️ 예전엔 '[아빠 이름]' 칸이 그대로 보여서, 팔 책의 표지가 덜 만든 틀처럼 보였다 */
                 function nameLine(role, nm) {
-                    return role + ' ' + (nm ? '<b style="color:' + t.textTitle + ';">' + esc(nm) + '</b>'
-                                            : '<span style="color:' + t.textSub + ';">[' + role + ' 이름]</span>');
+                    return nm ? role + ' <b style="color:' + t.textTitle + ';">' + esc(nm) + '</b>'
+                              : '<span style="color:' + t.textSub + ';">' + role + '</span>';
                 }
 
                 var html =
@@ -982,7 +984,7 @@
                             (bornStr ? '<div style="font-size:12px; font-weight:600; color:' + t.textSub + '; letter-spacing:1.5px; margin-bottom:26px;">' + bornStr + '</div>' : '<div style="height:20px;"></div>') +
                             '<div style="width:20px; height:1px; background:' + t.line + '; margin:0 auto 24px;"></div>' +
                             '<div style="font-size:13.5px; color:' + t.textTitle + '; font-weight:600; line-height:1.9;">' + nameLine('엄마', mom) + '<br>' + nameLine('아빠', dad) + '</div>' +
-                            '<div style="font-size:11px; color:' + t.textSub + '; font-weight:600; margin-top:10px;">* 지금 보이는 이름은 카카오 닉네임이에요</div>' +
+                            '<div style="font-size:11px; color:' + t.textSub + '; font-weight:600; margin-top:10px;">* 이름은 각자의 카카오 닉네임이에요' + (mom && dad ? '' : '<br>짝꿍이 들어오면 이름이 채워져요') + '</div>' +
                         '</div>' +
                     '</div>';
 
